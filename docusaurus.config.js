@@ -13,7 +13,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
   favicon: 'img/favicon.ico',
   organizationName: 'evcc-io', // Usually your GitHub org/user name.
   projectName: 'evcc', // Usually your repo name.
-  trailingSlash: 'false'
+  trailingSlash: 'false',
 
   presets: [
     [
