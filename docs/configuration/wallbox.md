@@ -4,22 +4,43 @@ sidebar_position: 1
 
 # Wallbox
 
-## Overview
-
 There are different interfaces to control a specific charger hardware.
 While EVCC support also generic ways to control a charger it also provides plugins for for many well kown devices.
 
 You can find the most up to date list of charger plugins in the README https://github.com/evcc-io/evcc#charger
 
-
 Below are the setup instructions for charger hardware and which needs special attention or undocumented steps to set up a proper connection to EVCC.
 
+## Easee Home
 
-## Device specific setup
+Cupidatat nulla et occaecat ipsum anim laborum reprehenderit pariatur elit officia cupidatat laboris. Et veniam id adipisicing aliqua.
 
-### Wallbe Eco
+```mermaid
+graph TD;
+    subgraph a [easee load balanding]
+    evccA[evcc]
+    CircuitA{{Circuit / ID: 58123}}
+    evccA-.->CircuitA
+    CircuitA-->EaseeA1[Wallbox 1 / EH100001];
+    CircuitA-->EaseeA2[Wallbox 2 / EH200002];
+    end
 
-#### Hardware preparation
+    subgraph b [evcc load balanding]
+    evccB[evcc]
+    evccB-..->EaseeB1[Wallbox 1 / EH100001];
+    evccB-..->EaseeB2[Wallbox 2 / EH200002];
+    end
+```
+
+Voluptate do laboris mollit aliquip sint consequat aliqua tempor occaecat aliquip.
+
+:::info
+Support for **Easee Home** requires an [evcc Sponsor Token](#).
+:::
+
+## Wallbe Eco
+
+### Hardware preparation
 
 Wallbe chargers are supported out of the box. The Wallbe must be connected using Ethernet. If not configured, the default address `192.168.0.8:502` is used.
 
@@ -48,7 +69,7 @@ chargers:
   uri: 192.168.0.8:502
 ```
 
-### Wallbe pre 2019
+## Wallbe pre 2019
 
 Example configuration:
 
@@ -59,7 +80,7 @@ chargers:
   legacy: true
 ```
 
-### OpenWB
+## OpenWB
 
 Example configuration:
 
@@ -90,7 +111,7 @@ chargers:
     topic: openWB/set/lp1/DirectChargeAmps
 ```
 
-### Phoenix EM-CP-PP-ETH controller
+## Phoenix EM-CP-PP-ETH controller
 
 Hardware setup:
 DIP switch 10 needs to be "on", DIP switch 7 needs to be "off" in order to enable control
@@ -105,7 +126,7 @@ chargers:
   id: 255 # only if different from default 180
 ```
 
-### Phoenix EV-CC-AC1-M controller
+## Phoenix EV-CC-AC1-M controller
 
 Example ModBus configuration if meter is directly connected:
 
@@ -129,7 +150,7 @@ chargers:
   uri: 192.168.0.4:23
 ```
 
-### SimpleEVSE Modbus
+## SimpleEVSE Modbus
 
 Example configuration:
 
@@ -140,7 +161,7 @@ chargers:
   id: 1
 ```
 
-### SimpleEVSE
+## SimpleEVSE
 
 Example configuration:
 
@@ -151,7 +172,7 @@ chargers:
   uri: 192.168.0.4
 ```
 
-### NRGKick Connect
+## NRGKick Connect
 
 Example configuration:
 
@@ -162,7 +183,7 @@ chargers:
   uri: http://192.168.0.4
 ```
 
-### go-eCharger
+## go-eCharger
 
 Example configuration:
 
@@ -173,13 +194,13 @@ chargers:
   uri: http://192.168.0.4
 ```
 
-### KEBA KeContact
+## KEBA KeContact
 
-#### Hardware Preparation
+### Hardware Preparation
 
 Requires enabled UDP function with DIP switch 1.3 = ON, see installation manual.
 
-#### Example configuration:
+### Example configuration:
 **NOTE:** rfid tag and serial tag are optional.
 RFID enables EVCC to start charging even if the Wallbox was not unlocked using the chip/card.
 Serial enables EVCC to communicate with the Wallbox when run in Docker. UDP-Port 7090 must be added to the Docker port settings!
@@ -194,7 +215,7 @@ chargers:
      tag: XXXXXXXX00000000
 ```
 
-### Mobile Charger Connect
+## Mobile Charger Connect
 
 **NOTE:** This charger does **NOT** support enabling or disabling charging. So the only useful modes are _Sofort Laden_ and _Min + PV_!
 
@@ -208,7 +229,7 @@ chargers:
   password: homeuserpassword
 ```
 
-### WARP Charger
+## WARP Charger
 
 Communicating with a WARP Charger requires a MQTT broker. The MQTT connection then has to be configured in the charger's web UI. [(see here for German documentation)](https://www.warp-charger.com/api.html#mqtt)
 
