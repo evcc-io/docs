@@ -6,8 +6,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 (module.exports = {
   title: 'evcc',
   tagline: 'Sonne tanken. Ganz einfach.',
-  url: 'https://evcc.io',
-  baseUrl: '/docs/',
+  url: 'https://docs.evcc.io',
+  baseUrl: '/',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
