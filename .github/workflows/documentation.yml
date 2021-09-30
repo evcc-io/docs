@@ -7,6 +7,25 @@ on:
     branches: [main]
 
 jobs:
+  update-evcc-config:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Update git subtree
+      run: |
+        git config --global user.email "bot@evcc.io"
+        git config --global user.name "evcc-bot"
+        git remote add -f evcc-config https://github.com/evcc-io/config.git
+        git fetch evcc-config master
+        git subtree pull --prefix evcc-config evcc-config master --squash
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
   checks:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
@@ -41,8 +60,8 @@ jobs:
           USE_SSH: true
           GIT_USER: git
         run: |
-          git config --global user.email "michael@geers.tv"
-          git config --global user.name "naltatis"
+          git config --global user.email "bot@evcc.io"
+          git config --global user.name "evcc-bot"
           if [ -e yarn.lock ]; then
             yarn install --frozen-lockfile
           elif [ -e package-lock.json ]; then
