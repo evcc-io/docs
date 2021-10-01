@@ -920,8 +920,9 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ```yaml
 - type: tesla
-  uri: http://192.0.2.2/
+  uri: https://192.0.2.2/
   usage: battery
+  password: *** # for user 'customer'
 ```
 
 <a id="meter-tesla-powerwall-grid-meter"></a>
@@ -929,8 +930,9 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ```yaml
 - type: tesla
-  uri: http://192.0.2.2/
+  uri: https://192.0.2.2/
   usage: grid
+  password: *** # for user 'customer'
 ```
 
 <a id="meter-tesla-powerwall-pv-meter"></a>
@@ -938,8 +940,9 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ```yaml
 - type: tesla
-  uri: http://192.0.2.2/
+  uri: https://192.0.2.2/
   usage: pv
+  password: *** # for user 'customer'
 ```
 
 <a id="meter-varta-energiespeicher-battery-meter"></a>
