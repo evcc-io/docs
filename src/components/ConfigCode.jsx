@@ -4,6 +4,7 @@ import CodeBlock from "@theme/CodeBlock";
 const contexts = {
   chargers: (name = "my_charger") => `chargers:\n  - name: ${name}\n`,
   meters: (name = "my_meter") => `meters:\n  - name: ${name}\n`,
+  vehicles: (name = "my_car") => `vehicles:\n  - name: ${name}\n`,
 };
 
 function indent(code) {
