@@ -9,8 +9,9 @@ func init() {
 		Class:  "meter",
 		Type:   "tesla",
 		Name:   "Tesla Powerwall (Battery Meter)",
-		Sample: `uri: http://192.0.2.2/
-usage: battery`,
+		Sample: `uri: https://192.0.2.2/
+usage: battery
+password: *** # for user 'customer'`,
 	}
 
 	registry.Add(template)
