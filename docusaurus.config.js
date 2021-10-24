@@ -77,19 +77,11 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                   label: "Forum",
                   href: "https://github.com/evcc-io/evcc/discussions",
                 },
-                {
-                  label: "Twitter",
-                  href: "https://twitter.com/docusaurus",
-                },
               ],
             },
             {
               title: "More",
               items: [
-                {
-                  label: "Blog",
-                  to: "/blog",
-                },
                 {
                   label: "Sponsoring",
                   href: "https://github.com/sponsors/andig",

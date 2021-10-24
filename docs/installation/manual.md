@@ -65,9 +65,9 @@ results above into a new issue. Please tell us:
   `sudo cp /usr/local/bin/evcc.dist.yaml /etc/evcc.yaml`
   Now you can start to adapt the configuration file:
   `sudo nano /etc/evcc.yaml`
-  Refer to chapter [Configure Manually](1.3.-Manual-configuration).
+  Refer to chapter [Configure Manually TBA](#).
 - After the successful test of your evcc configuration file, setup autostart for the evcc service daemon
-  Refer to chapter [Setup Autostart on Linux](https://github.com/andig/evcc/wiki/1.1.-Manual-installation#setup-autostart-on-linux)
+  Refer to chapter [Setup Autostart on Linux TBA](#)
 
 ### macOS / Windows installation
 
@@ -81,7 +81,7 @@ results above into a new issue. Please tell us:
 
 ### Configuration
 
-- Now you are ready to configure your setup, for that continue to [Configure Manually](1.3.-Manual-configuration) documentation
+- Now you are ready to configure your setup, for that continue to [Configure Manually TBA](#) documentation
 - Once the configuration is done, open your web browser at [http://127.0.0.1:7070/](http://127.0.0.1:7070/)
 
   **Note:** Replace `127.0.0.1` with the IP of the computer if it is not identical to the one where you run the browser)

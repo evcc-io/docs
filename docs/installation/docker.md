@@ -23,7 +23,7 @@ Follow these steps to install the latest version:
 
   This installs a Docker container for EVCC and runs it once to show the command options
 
-- Now you are ready to configure your setup, for that continue to [Configure Manually](1.3.-Manual-configuration) documentation
+- Now you are ready to configure your setup, for that continue to [Configure Manually](manual) documentation
 - Once the configuration is done, start the container again by using the following command:
 
   ```sh
