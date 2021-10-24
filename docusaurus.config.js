@@ -23,16 +23,16 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           docs: {
             remarkPlugins: [require("mdx-mermaid")],
             sidebarPath: require.resolve("./sidebars.js"),
-            // Please change this to your repo.
-            editUrl:
-              "https://github.com/facebook/docusaurus/edit/main/website/",
+            editUrl: "https://github.com/evcc-io/docs/tree/main",
           },
+          /*
           blog: {
             showReadingTime: true,
             // Please change this to your repo.
             editUrl:
               "https://github.com/facebook/docusaurus/edit/main/website/blog/",
           },
+          */
           theme: {
             customCss: require.resolve("./src/css/custom.css"),
           },
@@ -54,7 +54,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               type: "doc",
               docId: "Home",
               position: "left",
-              label: "Docs",
+              label: "Dokumentation",
             },
             {
               href: "https://github.com/evcc-io/evcc",
@@ -100,11 +100,11 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           darkTheme: darkCodeTheme,
         },
         algolia: {
-          appId: 'BH4D9OD16A',
-          apiKey: 'a8ce38c1da09ca6af96ea43ee47d1fc4',
-          indexName: 'evcc',
-          contextualSearch: false
-        }
+          appId: "BH4D9OD16A",
+          apiKey: "a8ce38c1da09ca6af96ea43ee47d1fc4",
+          indexName: "evcc",
+          contextualSearch: false,
+        },
       }),
   }
 );
