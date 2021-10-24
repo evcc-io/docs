@@ -1290,7 +1290,7 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ```yaml
 - type: shelly
-  uri: http://192.168.xxx.xxx  # shelly device ip address (local)
+  uri: http://192.0.2.2  # shelly device ip address (local)
   channel: 0  # shelly device relay channel 
   standbypower: 15  # treat as charging above this power
 ```
