@@ -9,12 +9,11 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
     tagline: "Sonne tanken. Ganz einfach.",
     url: "https://docs.evcc.io",
     baseUrl: "/",
-    onBrokenLinks: "warn",
-    onBrokenMarkdownLinks: "warn",
+    onBrokenLinks: "throw",
+    onBrokenMarkdownLinks: "throw",
     favicon: "img/favicon.ico",
     organizationName: "evcc-io", // Usually your GitHub org/user name.
     projectName: "docs", // Usually your repo name.
-    trailingSlash: "false",
 
     presets: [
       [
@@ -108,6 +107,12 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           theme: lightCodeTheme,
           darkTheme: darkCodeTheme,
         },
+        algolia: {
+          appId: 'BH4D9OD16A',
+          apiKey: 'a8ce38c1da09ca6af96ea43ee47d1fc4',
+          indexName: 'evcc',
+          contextualSearch: false
+        }
       }),
   }
 );
