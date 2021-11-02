@@ -20,7 +20,7 @@ Dazu wird EVCC auf einem Computer im lokalen Netzwerk installiert, so dass es mi
   - [PV Anlagen und Strommessgeräten](/docs/devices/meters)
   - [Fahrzeugen](/docs/devices/vehicles)
 - [Plugins](/docs/reference/plugins) um nahezu beliebige Wallboxen / Strommmesszähler / Fahrzeuge hinzuzufügen: Modbus (Strommessgeräte und Wechselrichter), HTTP, MQTT, Javascript, WebSockets und shell scripts
-- Status [Benachrichtigungen](/docs/reference/notifications) über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und [viele mehr](https://containrrr.dev/shoutrrr/)
+- Status [Benachrichtigungen](/docs/reference/configuration/notifications) über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und [viele mehr](https://containrrr.dev/shoutrrr/)
 - Datenanalyse mit [InfluxDB](https://www.influxdata.com) und [Grafana](https://grafana.com/grafana/)
 - Granulare Kontroller der Ladeströme bis in mA Schritten mit unterstützen Wallboxen (z.b. bei smartWB als [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) bezeichnet)
 - REST und MQTT [APIs](/docs/reference/api) zur Integration in andere Heimautomationssysteme (z.B. [HomeAssistant](https://github.com/evcc-io/evcc-hassio-addon))
