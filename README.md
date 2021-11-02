@@ -26,7 +26,6 @@ If you want to contribute configurations to this repository please open a Pull R
 - [go-eCharger](#charger-go-echarger)
 - [go-eCharger (Cloud)](#charger-go-echarger-cloud)
 - [Heidelberg Energy Control (Modbus RTU)](#charger-heidelberg-energy-control-modbus-rtu)
-- [Heidelberg Energy Control (MQTT via wbec)](#charger-heidelberg-energy-control-wbec)
 - [i-CHARGE CION (Modbus RTU-over-TCP)](#charger-i-charge-cion-modbus-rtu-over-tcp)
 - [KEBA Connect](#charger-keba-connect)
 - [Mobile Charger Connect (Audi, Bentley, Porsche)](#charger-mobile-charger-connect-audi-bentley-porsche)
@@ -41,6 +40,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [TinkerForge WARP Charger](#charger-tinkerforge-warp-charger)
 - [TP-LINK Smart Plug](#charger-tp-link-smart-plug)
 - [Wallbe (Eco, Pro)](#charger-wallbe-eco-pro)
+- [wbec](#charger-wbec)
 
 ## Meters
 
@@ -56,7 +56,6 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Fronius Symo GEN24 Plus (Grid Meter)](#meter-fronius-symo-gen24-plus-grid-meter)
 - [Fronius Symo GEN24 Plus (PV Meter)](#meter-fronius-symo-gen24-plus-pv-meter)
 - [Generic](#meter-generic)
-- [Heidelberg Energy Control (MQTT via wbec)](#meter-heidelberg-energy-control-wbec)
 - [Huawei SUN2000-8KTL (PV Meter)](#meter-huawei-sun2000-8ktl-pv-meter)
 - [Kostal Energy Meter via inverter (Grid Meter)](#meter-kostal-energy-meter-via-inverter-grid-meter)
 - [Kostal Hybrid Inverter (Battery Meter)](#meter-kostal-hybrid-inverter-battery-meter)
@@ -106,6 +105,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [vzlogger (HTTP)](#meter-vzlogger-http)
 - [vzlogger (Push Server)](#meter-vzlogger-push-server)
 - [vzlogger (split import/export channels)](#meter-vzlogger-split-import-export-channels)
+- [wbec](#meter-wbec)
 
 ## Vehicles
 
@@ -332,27 +332,6 @@ If you want to contribute configurations to this repository please open a Pull R
       # ...
     - source: # L3 plugin type
       # ...
-```
-
-<a id="meter-heidelberg-energy-control-wbec"></a>
-#### Heidelberg Energy Control (MQTT via wbec)
-
-```yaml
-- type: custom
-  power:
-    source: mqtt
-    topic: wbec/lp/1/power
-  energy:
-    source: mqtt
-    topic: wbec/lp/1/energy
-  currents:
-    - source: mqtt
-      topic: wbec/lp/1/currL1
-    - source: mqtt
-      topic: wbec/lp/1/currL2
-    - source: mqtt
-      topic: wbec/lp/1/currL3
-# see also corresponding Charger
 ```
 
 <a id="meter-huawei-sun2000-8ktl-pv-meter"></a>
@@ -1064,6 +1043,26 @@ If you want to contribute configurations to this repository please open a Pull R
       scale: -1 # export must result in negative values
 ```
 
+<a id="meter-wbec"></a>
+#### wbec
+
+```yaml
+- type: custom
+  power:
+    source: mqtt
+    topic: wbec/lp/1/power
+  energy:
+    source: mqtt
+    topic: wbec/lp/1/energy
+  currents:
+    - source: mqtt
+      topic: wbec/lp/1/currL1
+    - source: mqtt
+      topic: wbec/lp/1/currL2
+    - source: mqtt
+      topic: wbec/lp/1/currL3
+```
+
 
 ### Chargers
 
@@ -1181,26 +1180,6 @@ If you want to contribute configurations to this repository please open a Pull R
   baudrate: 19200
   comset: 8E1
   id: 1 # configurable (S2/DIP 1)
-```
-
-<a id="charger-heidelberg-energy-control-wbec"></a>
-#### Heidelberg Energy Control (MQTT via wbec)
-
-```yaml
-- type: custom
-  status:
-    source: mqtt
-    topic: wbec/lp/1/status
-  enabled:
-    source: mqtt
-    topic: wbec/lp/1/enabled
-  enable:
-    source: mqtt
-    topic: wbec/lp/1/enable
-  maxcurrent:
-    source: mqtt
-    topic: wbec/lp/1/maxcurrent
-# see also corresponding Charger
 ```
 
 <a id="charger-i-charge-cion-modbus-rtu-over-tcp"></a>
@@ -1381,6 +1360,25 @@ If you want to contribute configurations to this repository please open a Pull R
     energy: true
     currents: true
     encoding: sdm # add only when SDM meter is connected, see https://github.com/evcc-io/evcc/discussions/1398
+```
+
+<a id="charger-wbec"></a>
+#### wbec
+
+```yaml
+- type: custom
+  status:
+    source: mqtt
+    topic: wbec/lp/1/status
+  enabled:
+    source: mqtt
+    topic: wbec/lp/1/enabled
+  enable:
+    source: mqtt
+    topic: wbec/lp/1/enable
+  maxcurrent:
+    source: mqtt
+    topic: wbec/lp/1/maxcurrent
 ```
 
 
