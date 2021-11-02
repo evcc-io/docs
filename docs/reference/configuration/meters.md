@@ -19,4 +19,4 @@ meters:
     type: ...
 ```
 
-Die weiteren Parameter und Werte sind dann abhängig vom jeweiligen Modell. Die Seite [Geräte - Hausinstallation](devices/meters) enthält weitere Informationen hierzu.
+Die weiteren Parameter und Werte sind dann abhängig vom jeweiligen Modell. Die Seite [Geräte - Hausinstallation](/docs/devices/meters) enthält weitere Informationen hierzu.

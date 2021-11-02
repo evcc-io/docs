@@ -19,12 +19,12 @@ Zur Durchführung dieser initialen Einrichtung empfehlen wir daher:
 3. Öffne `evcc.yaml` im gewählten Text Editor
 4. Bearbeite den Bereich `meters:`:
 
-    - Ersetze den Beispielinhalt mit konkreten Geräten und deren Einstellungen. Eine Auflistung der möglichen Geräte gibt es hier: [Referenz - Geräte - Hausinstallation](../reference/devices/meter)
+    - Ersetze den Beispielinhalt mit konkreten Geräten und deren Einstellungen. Eine Auflistung der möglichen Geräte gibt es hier: [Referenz - Geräte - Hausinstallation](/docs/devices/meter)
     - Gib einen Wert für `name` an, welche später für eine Referenzierung benötigt wird
     - Prüfe ob die Konfiguration funktioniert wie es auf der Seite der Geräteauflistung beschrieben ist
 
-5. Bearbeite den Bereich `charger:` analog zu `meters:`. Eine Auflistung der möglichen Geräte gibt es hier: [Referenz - Geräte - Wallboxen](../devices/charger)
-6. Bearbeite den Bereich `vehicles:` ebenfalls auf die gleiche Weise. Eine Auflistung der möglichen Geräte gibt es hier: [Referenz - Geräte - Fahrzeuge](../devices/vehicle)
+5. Bearbeite den Bereich `charger:` analog zu `meters:`. Eine Auflistung der möglichen Geräte gibt es hier: [Referenz - Geräte - Wallboxen](/docs/devices/charger)
+6. Bearbeite den Bereich `vehicles:` ebenfalls auf die gleiche Weise. Eine Auflistung der möglichen Geräte gibt es hier: [Referenz - Geräte - Fahrzeuge](/docs/devices/vehicle)
 7. Bearbeite den Bereich `site:` und trage die entsprechenden Werte von `name` der einzelnen `meter` ein
 8. Bearbeite den Bereich `loadpoint:` und trage den entsprechenden Wert von `name` der Wallbox ein
 9. Falls notwendig, passe die weitere Konfiguration an, wie z.B. MQTT, Pushnachrichten, Datenbankverbindung und mehr

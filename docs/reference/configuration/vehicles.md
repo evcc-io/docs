@@ -14,4 +14,4 @@ vehicle:
     type: ...
 ```
 
-Die weiteren Parameter und Werte sind dann abhängig vom jeweiligen Modell. Die Seite [Geräte - Fahrzeuge](devices/vehicles) enthält weitere Informationen hierzu.
+Die weiteren Parameter und Werte sind dann abhängig vom jeweiligen Modell. Die Seite [Geräte - Fahrzeuge](/docs/devices/vehicles) enthält weitere Informationen hierzu.
