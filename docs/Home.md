@@ -2,34 +2,43 @@
 sidebar_position: 1
 ---
 
-## Introduction
+# Einführung
 
-EVCC is an extensible EV Charge Controller with PV integration. It allows you to to charge your car with optimal usage of your self generated power.
+EVCC (Electric Vehicle Charge Controller) ermöglich das Laden von EVs zu optimieren. Es kann eine PV Anlage angebunden werden, um so viel selbsterzeugten Strom wie möglich ins EV zu laden, oder es können auch Anbieter mit dynamischen Strompreisen angebunden werden.
 
-Normally to get this feature, the Wallbox needs to be compatible with a smart home manager in your house. Using EVCC you can make this work with a variety of wallboxes and a variety of power meters and PV inverters that are not designed to work together from their manufacturers. In addition it provides an interface to allow other device not directly supported to be included.
+Normalerweise muss die Wallbox dazu mit der bestehenden PV Installation kompatibel sein. EVCC ermöglicht es jedoch dies mit einer Vielzahl von Wallboxen, Strommessgeräten und PV Wechselrichtern, ohne dass diese von Haus aus miteinander kommunizieren könnten.
 
-EVCC runs on a computer connected to your local network and with access to the supported devices. How such a device needs to be accessible depends on the supported device or the how the plugin interface is used to provide the according data.
+Dazu wird EVCC auf einem Computer im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. EVCC selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud Anbindung. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Raspberry Pi (oder ähnliches) völlog ausreichen.
 
-## Getting Started
+![Screenshot](screenshot.png)
 
-- Install EVCC either [manually](installation/manual) or via [Docker](installation/docker)
-- [Create and edit the EVCC configuration](configuration/basics) to tell EVCC about your setup and how to access it. Use a [sample configuration](configuration/basics) of EVCC users for a starting point.
-- Open a web browser and access EVCC to start charging
+## Funktionalitäten
 
-## Requirements
+- Einfaches und klare Benutzeroberfläche
+- Unterstützung von
+  - [Wallboxen](devices/charger)
+  - [PV Anlagen und Strommessgeräten](devices/meter)
+  - [Fahrzeugen](devices/vehicle)
+- [Plugins](reference/plugins) um nahezu beliebige Wallboxen / Strommmesszähler / Fahrzeuge hinzuzufügen: Modbus (Strommessgeräte und Wechselrichter), HTTP, MQTT, Javascript, WebSockets und shell scripts
+- Status [Benachrichtigungen](reference/notifications) über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und [viele mehr](https://containrrr.dev/shoutrrr/)
+- Datenanalyse mit [InfluxDB](https://www.influxdata.com) und [Grafana](https://grafana.com/grafana/)
+- Granulare Kontroller der Ladeströme bis in mA Schritten mit unterstützen Wallboxen (z.b. bei smartWB als [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) bezeichnet)
+- REST und MQTT [APIs](reference/api) zur Integration in andere Heimautomationssysteme (z.B. [HomeAssistant](https://github.com/evcc-io/evcc-hassio-addon))
 
-To run EVCC you must have:
+## Anforderungen
 
-- a supported [wallbox](configuration/chargers)
-- a supported [power meter](configuration/meters) as a Grid meter, or a supported PV inverter, or supported power meter that measures the generated energy by the PV installation.
-- optionally: a supported Battery inverter
-- a supported computer running EVCC
+Um EVCC zu verwenden, wird folgendes benötigt:
+
+- eine unterstützte [Wallbox](configuration/chargers)
+- ein unterstütztes [Strommessgerät](configuration/meters) für den Netzanschluss, oder unterstützte PV Wechselrichter, oder Strommessgeräte welche die PV Leistung messen.
+- optional: einen unterstützten Batteriewechselrichter
+- ein unterstützter Computer auf welchem EVCC läuft
 
 Optional:
 
-- a supported [Vehicle](configuration/vehicles) to get the cars battery current state of charge
+- ein unterstütztes [Fahrzeug](configuration/vehicles) um den momentanen Ladezustand (SoC) zu erhalten
 
-This is how you can talk to us:
+Über diese Wege sind wir zu erreichen:
 
-- Support, Configuration, Device question: https://github.com/andig/evcc/discussions
-- Chat about development related topics: [Slack](https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw).
+- Support, Konfiguration, Fragen zu Geräten: https://github.com/evcc-io/evcc/discussions
+- Chat zu Entwicklungsthemen: [Slack](https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw).

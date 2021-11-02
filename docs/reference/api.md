@@ -4,6 +4,8 @@ sidebar_position: 5
 
 # API
 
+Mit EVCC kann über REST und MQTT APIs interagiert werden.
+
 ## REST API
 
 - `/api/state`: EVCC state (static configuration and dynamic state)
@@ -12,11 +14,13 @@ sidebar_position: 5
 - `/api/loadpoints/<id>/targetsoc`: loadpoint target SoC (writable)
 - `/api/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 
-Note: to modify writable settings perform a `POST` request appending the value as path segment.
+:::note
+Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage mit dem zu ändernden Wert im Pfad Segement gesendet werden.
+:::
 
 ## MQTT API
 
-The MQTT API follows the REST API's structure, with loadpoint ids starting at `0`:
+Die MQTT API folgt der REST API Struktur, mit den Ladepunkt (loadpoint) IDs bei `0` beginnend:
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
@@ -30,4 +34,6 @@ The MQTT API follows the REST API's structure, with loadpoint ids starting at `0
 - `evcc/loadpoints/<id>/targetSoC`: loadpoint target SoC (writable)
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 
-Note: to modify writable settings append `/set` to the topic for writing.
+:::note
+Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden.
+:::
