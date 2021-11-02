@@ -17,7 +17,7 @@ Falls die Wallbox nicht über eine intergrierte Strommesseinheit verfügt, kann 
 - `meters`:
   - `charge`: Referenze auf eine `meter` (Zähler) Konfiguration
 
-Zusätzlich wird beim Ladepunkt auch ein Standard-Lademodus gesetzt, welche beim Start von EVCC aktiv ist. Folgende Modi werden unterstützt:
+Zusätzlich wird beim Ladepunkt auch ein Standard-Lademodus gesetzt, welche beim Start von evcc aktiv ist. Folgende Modi werden unterstützt:
 
 - **Off**: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
 - **Now**: Lade sofort mit der maximalen möglichen Leistung.

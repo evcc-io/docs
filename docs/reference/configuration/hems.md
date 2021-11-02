@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # HEMS
 
-EVCC kann sich mit weiteren Home Energy Management Systemen (HEMS) verbinden. Momentan wird der SMA Home Manager 2.0 (SHM) unterstützt.
+evcc kann sich mit weiteren Home Energy Management Systemen (HEMS) verbinden. Momentan wird der SMA Home Manager 2.0 (SHM) unterstützt.
 
 ### SMA Home Manager 2.0
 

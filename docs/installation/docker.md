@@ -4,14 +4,14 @@ sidebar_position: 3
 
 # Docker, Synology
 
-EVCC can also be installed with a Docker image.
+evcc can also be installed with a Docker image.
 
 **Note:** Currently the Docker image only supports AMD64, armv6 and arm64 CPU architectures.
 
 Follow these steps to install the latest version:
 
 - Log in to your computer running Docker
-- Create a local directory where you want to EVCC configuration file to be
+- Create a local directory where you want to evcc configuration file to be
 - Change to previously created directory
 - Execute the following command:
 
@@ -21,7 +21,7 @@ Follow these steps to install the latest version:
 
   **Note:** On a Linux you might need to add `sudo` before the command!
 
-  This installs a Docker container for EVCC and runs it once to show the command options
+  This installs a Docker container for evcc and runs it once to show the command options
 
 - Now you are ready to configure your setup, for that continue to [Configure Manually](manual) documentation
 - Once the configuration is done, start the container again by using the following command:

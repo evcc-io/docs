@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Chargers
 
-Zur Steuerung der Ladung muss EVCC mit einer Wallbox kommunizieren können.
+Zur Steuerung der Ladung muss evcc mit einer Wallbox kommunizieren können.
 
 In der Konfigurationsdatei gibt es hierzu den folgenden Bereich:
 

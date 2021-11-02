@@ -4,17 +4,17 @@ sidebar_position: 1
 
 # Grundlagen
 
-EVCC benötigt eine Konfigurationsdatei in die Installation beschrieben wird. Ohne diese Datei kann EVCC nicht genutzt werden. Die Datei selbst ist im [YAML](https://de.wikipedia.org/wiki/YAML) Format geschrieben. Dieses Format definiert eine Synthax wodurch eine strukturierte Datenstruktur in Textform erstellt werden kann.
+evcc benötigt eine Konfigurationsdatei in die Installation beschrieben wird. Ohne diese Datei kann evcc nicht genutzt werden. Die Datei selbst ist im [YAML](https://de.wikipedia.org/wiki/YAML) Format geschrieben. Dieses Format definiert eine Synthax wodurch eine strukturierte Datenstruktur in Textform erstellt werden kann.
 
 Zur Bearbeitung bzw. Erstellung der Konfigurationsdatei empfehlen wir einen Texteditor zu verwenden, welcher die YAML Synthax beherrscht und damit Fehler aufzeigen kann, z.B. [VS Code](https://code.visualstudio.com) mit der [YAML Erweiterung](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
 
 Die Konfigurationsdatei hat standardmäßig den Namen `evcc.yaml` und ist entweder im gleichen Verzeichnis wie das Programm selbst abzulegen, oder unter Linux System auch unter `/etc/evcc.yaml` gefunden.
 
-Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Parameter beim Aufruf EVCC übergeben werden: z.B. `evcc -c /home/evcc.yaml`
+Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Parameter beim Aufruf evcc übergeben werden: z.B. `evcc -c /home/evcc.yaml`
 
 ### Struktur
 
-Die Konfigurationsdatei von EVCC besteht auf mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
+Die Konfigurationsdatei von evcc besteht auf mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
 
 ### Site
 
@@ -53,7 +53,7 @@ Um die Ladung auf einen bestimmten Ladestand (SoC) in EVs zu begrenzen, können 
 
 ### HEMS
 
-EVCC kann die Ladepunkte und deren Ladeströme an ein anderes Home Energy Management System (HEMS) weitergeben, damit dieses die Informationen z.b. zur Steuerung der Hausbatterie nutzen kann.
+evcc kann die Ladepunkte und deren Ladeströme an ein anderes Home Energy Management System (HEMS) weitergeben, damit dieses die Informationen z.b. zur Steuerung der Hausbatterie nutzen kann.
 
 [Weiterlesen...](hems)
 

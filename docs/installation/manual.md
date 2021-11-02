@@ -8,7 +8,7 @@ Follow these steps to download and install the latest version:
 
 - Open the release page at [https://github.com/andig/evcc/releases/latest](https://github.com/andig/evcc/releases/latest) to download the latest build version.
 
-EVCC is provided as a single binary executable file for the following operation systems and CPU architectures:
+evcc is provided as a single binary executable file for the following operation systems and CPU architectures:
 
 - Linux
   - 64-Bit for Intel CPU: evcc_X.XX_linux_amd64.tar.gz
@@ -43,8 +43,8 @@ Example commands below are tested on [Raspberry Pi OS (previously called Raspbia
 ```
 Auto detection will now start to scan the network for available devices.
 Scanning focuses on devices that are commonly used that are detectable with reasonable efforts.
-On successful detection, suggestions for EVCC configuration can be made. The suggestions should simplify
-configuring EVCC but are probably not sufficient for fully automatic configuration.
+On successful detection, suggestions for evcc configuration can be made. The suggestions should simplify
+configuring evcc but are probably not sufficient for fully automatic configuration.
 
 +----------------+-----------------------+------+---------+
 |       IP       |       HOSTNAME        | TASK | DETAILS |
@@ -75,7 +75,7 @@ results above into a new issue. Please tell us:
 - Extract the files from the downloaded archive
   - macOS: double-click on the file
 - You will now have a folder containing the `evcc` binary and a sample configuration file `evcc.dist.yaml` that needs to be edited.
-- Copy the file to the computer you wish to run EVCC from
+- Copy the file to the computer you wish to run evcc from
 - Execute `evcc -h` to check that it runs properly and get the help output
   - macOS: depending on the version of macOS, you will have to add `./evcc` to the list of trusted apps in the security center.
 
@@ -88,7 +88,7 @@ results above into a new issue. Please tell us:
 
 ### Setup Autostart on Linux
 
-After configuration is done and testing is successful, you may want to make EVCC run automatically on your chosen computer. Follow these steps to setup EVCC as a system service that automatically starts when launching the computer and automatically restarts in case of a failure. This documentation is assuming your linux distribution supports `systemd`.
+After configuration is done and testing is successful, you may want to make evcc run automatically on your chosen computer. Follow these steps to setup evcc as a system service that automatically starts when launching the computer and automatically restarts in case of a failure. This documentation is assuming your linux distribution supports `systemd`.
 
 - Log in to your Linux computer
 - Open an editor and create the service definition file:
@@ -123,7 +123,7 @@ After configuration is done and testing is successful, you may want to make EVCC
 
   The output should contain `Active: active (running)` on success.
 
-- Configure EVCC to start at boot:
+- Configure evcc to start at boot:
 
   ```sh
   sudo systemctl enable evcc.service

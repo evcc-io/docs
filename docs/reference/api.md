@@ -4,11 +4,11 @@ sidebar_position: 5
 
 # API
 
-Mit EVCC kann über REST und MQTT APIs interagiert werden.
+Mit evcc kann über REST und MQTT APIs interagiert werden.
 
 ## REST API
 
-- `/api/state`: EVCC state (static configuration and dynamic state)
+- `/api/state`: evcc state (static configuration and dynamic state)
 - `/api/loadpoints/<id>/mode`: loadpoint charge mode (writable)
 - `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
 - `/api/loadpoints/<id>/targetsoc`: loadpoint target SoC (writable)

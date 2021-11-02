@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Plugins
 
-Plugins are used to integrate various devices and external data sources with EVCC. Plugins can be used in combination with a `custom` type meter, charger or vehicle.
+Plugins are used to integrate various devices and external data sources with evcc. Plugins can be used in combination with a `custom` type meter, charger or vehicle.
 
 Plugins support both _read_ and _write_ access. When using plugins for _write_ access, the actual data is provided as variable in form of `${var[:format]}`. If `format` is omitted, data is formatted according to the default Go `%v` [format](https://golang.org/pkg/fmt/). The variable is replaced with the actual data before the plugin is executed.
 
@@ -183,7 +183,7 @@ All possible values can be found as const [here](https://gitlab.com/bboehmke/sun
 
 ### Javascript (read/write)
 
-EVCC includes a bundled Javascript interpreter with Underscore.js library installed, which is directly accessible via `_.` e.g. `_.random(0,5)`. The `js` plugin is able to execute Javascript code from the `script` tag. Useful for quick prototyping:
+evcc includes a bundled Javascript interpreter with Underscore.js library installed, which is directly accessible via `_.` e.g. `_.random(0,5)`. The `js` plugin is able to execute Javascript code from the `script` tag. Useful for quick prototyping:
 
 ```yaml
 source: js
@@ -240,7 +240,7 @@ The `calc` plugin is useful e.g. to combine power values if import and export po
 
 ### Combined status (read only)
 
-The `combined` status plugin is used to convert a mixed boolean status of plugged/charging into an EVCC-compatible charger status of A..F. It is typically used together with OpenWB MQTT integration.
+The `combined` status plugin is used to convert a mixed boolean status of plugged/charging into an evcc-compatible charger status of A..F. It is typically used together with OpenWB MQTT integration.
 
 Sample configuration (read only):
 

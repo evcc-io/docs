@@ -4,11 +4,11 @@ sidebar_position: 1
 
 # Einführung
 
-EVCC (Electric Vehicle Charge Controller) ermöglich das Laden von EVs zu optimieren. Es kann eine PV Anlage angebunden werden, um so viel selbsterzeugten Strom wie möglich ins EV zu laden, oder es können auch Anbieter mit dynamischen Strompreisen angebunden werden.
+evcc ermöglich das Laden von EVs zu optimieren. Es kann eine PV Anlage angebunden werden, um so viel selbsterzeugten Strom wie möglich ins EV zu laden, oder es können auch Anbieter mit dynamischen Strompreisen angebunden werden.
 
-Normalerweise muss die Wallbox dazu mit der bestehenden PV Installation kompatibel sein. EVCC ermöglicht es jedoch dies mit einer Vielzahl von Wallboxen, Strommessgeräten und PV Wechselrichtern, ohne dass diese von Haus aus miteinander kommunizieren könnten.
+Normalerweise muss die Wallbox dazu mit der bestehenden PV Installation kompatibel sein. evcc ermöglicht es jedoch dies mit einer Vielzahl von Wallboxen, Strommessgeräten und PV Wechselrichtern, ohne dass diese von Haus aus miteinander kommunizieren könnten.
 
-Dazu wird EVCC auf einem Computer im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. EVCC selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud Anbindung. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Raspberry Pi (oder ähnliches) völlog ausreichen.
+Dazu wird evcc auf einem Computer im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud Anbindung. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Raspberry Pi (oder ähnliches) völlog ausreichen.
 
 ![Screenshot](screenshot.png)
 
@@ -27,12 +27,12 @@ Dazu wird EVCC auf einem Computer im lokalen Netzwerk installiert, so dass es mi
 
 ## Anforderungen
 
-Um EVCC zu verwenden, wird folgendes benötigt:
+Um evcc zu verwenden, wird folgendes benötigt:
 
 - eine unterstützte [Wallbox](/docs/devices/chargers)
 - ein unterstütztes [Strommessgerät](/docs/devices/meters) für den Netzanschluss, oder unterstützte PV Wechselrichter, oder Strommessgeräte welche die PV Leistung messen.
 - optional: einen unterstützten Batteriewechselrichter
-- ein unterstützter Computer auf welchem EVCC läuft
+- ein unterstützter Computer auf welchem evcc läuft
 
 Optional:
 

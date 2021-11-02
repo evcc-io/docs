@@ -20,6 +20,6 @@ Hier wird beschrieben wie man durch ein Plugin ein bisher nicht unterstütztes G
 
 ### API
 
-Hier befindet sich die Dokumentation um auf EVCC von anderen Systemen zuzugreifen und zu steuern.
+Hier befindet sich die Dokumentation um auf evcc von anderen Systemen zuzugreifen und zu steuern.
 
 [Weiterlesen...](api)
