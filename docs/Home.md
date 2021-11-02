@@ -16,9 +16,9 @@ Dazu wird EVCC auf einem Computer im lokalen Netzwerk installiert, so dass es mi
 
 - Einfaches und klare Benutzeroberfläche
 - Unterstützung von
-  - [Wallboxen](/docs/devices/charger)
-  - [PV Anlagen und Strommessgeräten](/docs/devices/meter)
-  - [Fahrzeugen](/docs/devices/vehicle)
+  - [Wallboxen](/docs/devices/chargers)
+  - [PV Anlagen und Strommessgeräten](/docs/devices/meters)
+  - [Fahrzeugen](/docs/devices/vehicles)
 - [Plugins](/docs/reference/plugins) um nahezu beliebige Wallboxen / Strommmesszähler / Fahrzeuge hinzuzufügen: Modbus (Strommessgeräte und Wechselrichter), HTTP, MQTT, Javascript, WebSockets und shell scripts
 - Status [Benachrichtigungen](/docs/reference/notifications) über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und [viele mehr](https://containrrr.dev/shoutrrr/)
 - Datenanalyse mit [InfluxDB](https://www.influxdata.com) und [Grafana](https://grafana.com/grafana/)
@@ -29,16 +29,16 @@ Dazu wird EVCC auf einem Computer im lokalen Netzwerk installiert, so dass es mi
 
 Um EVCC zu verwenden, wird folgendes benötigt:
 
-- eine unterstützte [Wallbox](/docs/configuration/chargers)
-- ein unterstütztes [Strommessgerät](/docs/configuration/meters) für den Netzanschluss, oder unterstützte PV Wechselrichter, oder Strommessgeräte welche die PV Leistung messen.
+- eine unterstützte [Wallbox](/docs/devices/chargers)
+- ein unterstütztes [Strommessgerät](/docs/devices/meters) für den Netzanschluss, oder unterstützte PV Wechselrichter, oder Strommessgeräte welche die PV Leistung messen.
 - optional: einen unterstützten Batteriewechselrichter
 - ein unterstützter Computer auf welchem EVCC läuft
 
 Optional:
 
-- ein unterstütztes [Fahrzeug](/docs/configuration/vehicles) um den momentanen Ladezustand (SoC) zu erhalten
+- ein unterstütztes [Fahrzeug](/docs/devices/vehicles) um den momentanen Ladezustand (SoC) zu erhalten
 
 Über diese Wege sind wir zu erreichen:
 
-- Support, Konfiguration, Fragen zu Geräten: https://github.com/evcc-io/evcc/discussions
+- Support, Konfiguration, Fragen zu Geräten: [Community Support Forum](https://github.com/evcc-io/evcc/discussions)
 - Chat zu Entwicklungsthemen: [Slack](https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw).
