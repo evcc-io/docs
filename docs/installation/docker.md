@@ -4,59 +4,73 @@ sidebar_position: 3
 
 # Docker, Synology
 
-evcc can also be installed with a Docker image.
+evcc kann auch als Docker Image installiert werden.
 
-**Note:** Currently the Docker image only supports AMD64, armv6 and arm64 CPU architectures.
+:::note
+Momentan werden nur die CPU Architekturen AMD64, armv6 und arm64 in Docker Images unterstützt!
+:::
 
-Follow these steps to install the latest version:
+:::warning
+Bevor evcc in Docker installiert wird, sollte die Konfiguration ohne Docker durchgeführt und abgeschlossen werden!
+:::
 
-- Log in to your computer running Docker
-- Create a local directory where you want to evcc configuration file to be
-- Change to previously created directory
-- Execute the following command:
+Folge diesen Schritten um die jeweils aktuellste Version zu installieren:
+
+- Erstelle ein lokales Verzeichnis, in welchem die evcc Konfigurationsdatei abgelegt wird.
+- Wechsel in das erstellte Verzeichnis
+- Führe folgenden Befehl aus:
 
   ```sh
   docker run -v $(pwd)/evcc.yaml:/etc/evcc.yaml -p 7070:7070 andig/evcc -h
   ```
 
-  **Note:** On a Linux you might need to add `sudo` before the command!
+  :::note
+  Unter Linux ist es evtl. notwendig den Befehl mit `sudo ` zu beginnen!
+  :::
 
-  This installs a Docker container for evcc and runs it once to show the command options
+  :::warning
+  Mounte nicht das lokale Verzeichnis `/etc` als Volume in Docker!
+  :::
 
-- Now you are ready to configure your setup, for that continue to [Configure Manually](manual) documentation
-- Once the configuration is done, start the container again by using the following command:
+  Dies installiert einen Docker Container mit evcc und startet ihn einmalig. Dabei werden die möglichen Optionen von evcc angezeigt.
+
+- Wenn die Konfiguration durchgeführt wurde, starte den Container mit folgendem Befehler erneut:
 
   ```sh
   docker run -v $(pwd)/evcc.yaml:/etc/evcc.yaml -p 7070:7070 andig/evcc
   ```
 
-  When using a meter or charger that requires UDP like KEBA, , make sure that the Docker container can receive UDP messages on the relevant ports (`:7090` for KEBA):
+  Falls ein Messgerät oder eine Wallbox verwendet wird, welches UDP benötigt wie z.b. KEBA, stelle sicher dass der Docker Container auc hdie UDP Nachrichten auf den entsprechenden Ports empfangen kann (`:7090` for KEBA):
 
   ```sh
   docker run -v $(pwd)/evcc.yaml:/etc/evcc.yaml -p 7070:7070 -p 7090:7090/udp andig/evcc
   ```
 
-  When using a device that requires multicast UDP like SMA, make sure that the Docker container uses the `network_mode: host` configuration:
+  Falls ein Gerät Multicast UDP Nachrichten empfangen muss, wie z.B. SMA, stelle sicher dass der Docker Container mit der Konfiguraation `network_mode: host` verwendet wird:
 
   ```sh
   docker run -v $(pwd)/evcc.yaml:/etc/evcc.yaml --network host andig/evcc
   ```
 
-  For use with SMA Sunny Home Manager, `evcc` needs to generate a unique device id. On Linux, we're using `machine-id` for this purpose, make sure to mount the host folders into the container:
+  Für die Verwendung des SMA Sunny Home Manger 2.0 muss`evcc` eine eindeutige Geräte-ID erstellen. Unter Linux wird `machine-id` verwendet, und dafür muss es in den Container gemounted werden:
 
   ```sh
   docker run -v /etc/machine-id:/etc/machine-id -v /var/lib/dbus/machine-id:/var/lib/dbus/machine-id --network host andig/evcc ...
   ```
 
-  **Note:** On a Linux you might need to add `sudo` before the command!\
+  :::note
+  Unter Linux ist es evtl. notwendig den Befehl mit `sudo ` zu beginnen!
+  ::: 
 
-- Now open your web browser at [http://127.0.0.1:7070/](http://127.0.0.1:7070/)
+- Öffne nun einen Browser mit der Adresse [http://127.0.0.1:7070/](http://127.0.0.1:7070/)
 
-  **Note:** Replace `127.0.0.1` with the IP of the computer if it is not identical to the one where you run the browser)
+  :::note
+  Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls der Browser nicht auf dem gleichen Computer geöffnet wurde.
+  :::
 
-### Alternative: docker-compose
+## Alternative: docker-compose
 
-Using docker-compose has some advantages over running the command directly, for example if you want to replicate it or use an edge-router like Traefik to route the service. This is a basic example with the config-file (evcc.yaml) stored in ~/evcc
+`docker-compose` hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile, z.B. falls man weitere Programme wie Traefik in Verbindung mit evcc nutzen möchte. Hier ist ein einfaches Beispiel für eine solche Konfiguration
 
 ```sh
 version: "3"
@@ -79,7 +93,7 @@ services:
    ports:
      - 7070:7070/tcp
    volumes:
-     - /home/dockeradmin/evcc/evcc.yaml:/etc/evcc.yaml
+     - /etc/evcc.yaml:/etc/evcc.yaml
    working_dir: /app
 networks: {}
 ```

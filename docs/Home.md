@@ -42,3 +42,7 @@ Optional:
 
 - Support, Konfiguration, Fragen zu Geräten: [Community Support Forum](https://github.com/evcc-io/evcc/discussions)
 - Chat zu Entwicklungsthemen: [Slack](https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw).
+
+:::note
+evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Risiko. Es liegt in deiner Verantwortung dass evcc so läuft wie es beabsichtigt ist.
+:::

@@ -1,0 +1,129 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Linux, MacOS, Windows
+
+evcc wird als einzelne ausführbare Datei zur Verfügung gestellt, welche alles nötige beinhaltet.
+
+## MacOS, Windows
+
+Folge diesen Schritte num die richtige Version von evcc herunterzuladen:
+
+1. Öffne im Browser die Release Webseite unter [https://github.com/evcc-io/evcc/releases/latest](https://github.com/evcc-io/evcc/releases/latest)
+2. Wähle die für dein System passende Version nach dem hier angegebenen Namens-Schema: 
+
+  <Tabs>
+    <TabItem value="linux" label="Linux" default>
+
+      - 64-Bit for Intel CPU: evcc_X.XX_linux_amd64.tar.gz
+      - 64-Bit for ARM CPU: evcc_X.XX_linux_arm64.tar.gz
+      - 32-Bit for ARM CPU (e.g. Raspberry Pi 32-Bit OS): evcc_X.XX_linux_armv6.tar.gz
+    </TabItem>
+    <TabItem value="macos" label="MacOS" default>
+
+      - 64-Bit Intel CPU: evcc_X.XX_macOS_amd64.tar.gz
+      - 64-Bit ARM CPU: evcc_X.XX_macOS_arm64.tar.gz
+    </TabItem>
+    <TabItem value="windows" label="Windows" default>
+
+      - 64-Bit Intel CPU: evcc_X.XX_windows_amd64.zip
+    </TabItem>
+  </Tabs>
+3. Entpacke die heruntergeladene Datei (z.B. per Doppelklick auf die Datei)
+4. Es gibt nun einen neuen Ordner mit der dem Programm `evcc` und einer Beispielkonfiguration `evcc.dist.yaml` welche bearbeitet werden muss.
+4. Führe die [Konfigurationschritte](configuration) aus
+
+## Linux
+
+Die Beispielbefehle sind auf [Raspberry Pi OS (früher Raspbian genannt)](https://www.raspberrypi.org/software/) getestet.
+
+- Auf Linux kann evcc mit `wget` heruntergeladen werden.
+  Benutze folgendes Kommando und ersetze `X.XX` mit der aktuellen Version von der Release Webseite:
+  `cd ~ && wget https://github.com/evcc-io/evcc/releases/download/X.XX/evcc_X.XX_linux_armv6.tar.gz`
+- Installiere evcc nach `/usr/local/bin`:
+  `sudo rm -f /usr/local/bin/evcc* && sudo tar xvfz ./evcc_X.XX_linux_armv6.tar.gz -C /usr/local/bin/`
+- Prüfe ob evcc korrekt installiert wurde:
+  `which evcc`
+  Die Asugabe sollte so aussehen: `/usr/local/bin/evcc`
+- Prüfe ob evcc ausgeführt werden kann:
+  `evcc -v`
+  Die Ausgabe sollte etwa so aussehen: `evcc version 0.50 (57495de)`
+- Lass evcc nach einigen unterstützen Geräten im Netzwerk suchen und führe folgenden Befehl aus:
+  `evcc detect`
+  evcc wird beginnen das lokale Netzwerk zu duchsuchen, das kein etwas dauern.
+  Nach einiger Zeit kommt eine Ausgabe in der folgenden Form:
+
+  ```
+  Auto detection will now start to scan the network for available devices.
+  Scanning focuses on devices that are commonly used that are detectable with reasonable efforts.
+  On successful detection, suggestions for evcc configuration can be made. The suggestions should simplify
+  configuring evcc but are probably not sufficient for fully automatic configuration.
+
+  +----------------+-----------------------+------+---------+
+  |       IP       |       HOSTNAME        | TASK | DETAILS |
+  +----------------+-----------------------+------+---------+
+  | 192.168.XXX.XX | go-eCharger.fritz.box | go-e | {Jq:3}  |
+  +----------------+-----------------------+------+---------+
+
+  Please open https://github.com/evcc-io/evcc/issues/new in your browser and copy the
+  results above into a new issue. Please tell us:
+
+          1. Is the scan result correct?
+          2. If not correct: please describe your hardware setup.
+  ```
+
+- Falls `evcc detect` einen `ping: socket: permission denied` Fehler anzeigt, muss der folgende Befehl durchgeführt werden und dann der vorherige Schritt wiederholt werden:
+  `sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"`
+- Kopiere nun die Beispiel-Konfigurationsdatei in das Verzeichnis `/etc` und bennen die Datei `evcc.yaml`:
+  `sudo cp /usr/local/bin/evcc.dist.yaml /etc/evcc.yaml`
+  Nun kann die Datei bearbeitet werden:
+  `sudo nano /etc/evcc.yaml`
+- Nach dem erfolgreichen Test der Konfigurationsdatei, kann evcc so eingerichtet werden, dass es automatisch startet
+
+### Autostart
+
+Sobald die Konfiguration und das Testen erfolgreich abgeschlossen sind, kann die Installation von evcc nun abgeschlossen werden. Folge diesen Schritten um evcc als Systemdienst einzurichten, welcher dafür sorgt dass evcc beim Start des Computers ausgeführt wird und im Fehlerfall ebenfalls automatisch neu startet. Diese Dokumentation geht davon aus, dass Linux `systemd` unterstützt.
+
+- Führe folgenden Befehl aus um einen Editor mit einer neuen Datei für den Dienst zu erstellen und zu öffnen:
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Kopiere den folgenden Inhalt in die Datei
+
+  ```
+  [Unit]
+  Description=evcc
+  After=syslog.target network-online.target
+  [Service]
+  ExecStart=/usr/local/bin/evcc --log error
+  Restart=always
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Passe den Pfad der `evcc` Datei in `ExecStart` an, falls die Datei in einem anderen Verzeichnis abgelegt ist.
+  Dies geht auch davon aus, dass die Konfigurationsdatei `evcc.yaml` in `/etc/evcc.yaml` zu finden ist. Falls dies nicht der Fall ist, muss in `ExecStart` am Ende der Text `-c /yourpath/evcc.yaml` hinzugefügt werden. Der Text `yourpath` muss mit dem entsprechenden Verzeichnis ersetzt werden.
+
+- Teste den Dienst:
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  Die Asugabe sollte  bei Erfolg folgenden Text beinhalten `Active: active (running)`.
+
+- Konfiguriere den Dienst so, dass er beim Rechnerstart automatisch startet:
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+- Fertig :)
