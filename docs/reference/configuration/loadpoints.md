@@ -248,7 +248,7 @@ Definiere bis zu welchem SOC geladen wird.
 
 ### `onIdentify`
 
-Definiere die Standardwerte für eine Liste von Fahrzeugen, sofern diese identifizeirt wurden. Die Fahrzeuge müssen unter [`vehicle & vehicles`](#vehicle--vehicles) definiert sein und werden durch den jeweiligen Wert von `name` des Fahrzeugs referenziert.
+Definiere die Standardwerte für eine Liste von Fahrzeugen, sofern diese identifizeirt wurden. Die Fahrzeuge müssen unter [`vehicle(s)`](#vehicles) definiert sein und werden durch den jeweiligen Wert von `name` des Fahrzeugs referenziert.
 
 **Beispiel**:
 
