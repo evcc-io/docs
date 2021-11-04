@@ -6,7 +6,7 @@ sidebar_position: 3
 
 _Loadpoints_ (Ladepunkte) ist eine Liste von Ladepunkten und kombiniert für jeden Ladepunkt eine Wallbox, Fahrzeuge und falls notwendig einen Zähler mit weiteren optionalen Parametern. Eine minimale Konfiguration erfordert eine Wallbox.
 
-Beispiel:
+**Beispiel:**
 
 ```yaml
 loadpoints:
@@ -28,7 +28,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 :::caution Erforderlicher Parameter
 :::
 
-**`title`:** Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
+**`title`**: Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
 
 **Beispiel:**
 
@@ -43,7 +43,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 :::caution Erforderlicher Parameter
 :::
 
-**`charger`:** Referenz auf eine `charger` (Wallbox) Konfiguration.
+**`charger`**: Referenz auf eine `charger` (Wallbox) Konfiguration.
 **Beispiel:**
 
 ```yaml
@@ -59,7 +59,7 @@ Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox D
 :::info Optionaler Parameter
 :::
 
-**`meters`:** Referenz auf eine `meter` (Strommessgerät) Konfiguration.
+**`meters`**: Referenz auf eine `meter` (Strommessgerät) Konfiguration.
 
 Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Strommessung durchführt bzw. die Werte der Messung von evcc nicht ausgelesen werden können. Aber selbst dann ist dieser Eintrag optional, denn evcc rechnet nimmt an dass mit der eingestellten maximalen Stromstärke auch geladen wird.
 
@@ -79,7 +79,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 :::info Optionaler Parameter
 :::
 
-**`vehicle`:** Eine Referenz auf eine `vehicle` (Fahrzeug) Konfiguration.
+**`vehicle`**: Eine Referenz auf eine `vehicle` (Fahrzeug) Konfiguration.
 
 **Beispiel:**
 
@@ -89,7 +89,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
 
-**`vehicles`:** Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen)
+**`vehicles`**: Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen)
 
 **Beispiel:**
 
@@ -108,7 +108,7 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 :::info Optionaler Parameter
 :::
 
-**`mode`:** Der Standard Lademodus wenn evcc startet.
+**`mode`**: Der Standard Lademodus wenn evcc startet.
 
 **Mögliche Werte:**
 
@@ -260,7 +260,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 :::info Optionaler Parameter
 :::
 
-**`onIdentify`:** Definiere die Standardwerte für eine Liste von Fahrzeugen, sofern diese identifizeirt wurden. Die Fahrzeuge müssen unter [`vehicle & vehicles`](#vehicle--vehicles) definiert sein und werden durch den jeweiligen Wert von `name` des Fahrzeugs referenziert.
+**`onIdentify`**: Definiere die Standardwerte für eine Liste von Fahrzeugen, sofern diese identifizeirt wurden. Die Fahrzeuge müssen unter [`vehicle & vehicles`](#vehicle--vehicles) definiert sein und werden durch den jeweiligen Wert von `name` des Fahrzeugs referenziert.
 
 **Beispiel:**
 

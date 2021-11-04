@@ -8,7 +8,6 @@ Zur Steuerung der Ladung muss evcc mit einer Wallbox kommunizieren können.
 
 Eine Wallbox hat mindestens folgende Konfiguration:
 
-
 ```yaml
 chargers:
   - name: wallbox1 # reference name
@@ -20,9 +19,12 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ### Name
 
-**`name`:** Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Refernzierung der Wallbox in der Konfiguration des [Ladepunktes](loadpoints#charger) verwendet.
+:::caution Erforderlicher Parameter
+:::
 
-Beispiel:
+**`name`**: Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Refernzierung der Wallbox in der Konfiguration des [Ladepunktes](loadpoints#charger) verwendet.
+
+**Beispiel:**
 
 ```yaml
   name: wallbox1
@@ -30,9 +32,12 @@ Beispiel:
 
 ### Type
 
-**`type`:** Dies ist der evcc spezifische Wallbox Typ anzugeben, mit Hilfe dessen mit der Wallbox kommuniziert werden kann. Die passenden Typ findet man unter [Geräte - Wallboxen](/docs/devices/chargers).
+:::caution Erforderlicher Parameter
+:::
 
-Beispiel:
+**`type`**: Dies ist der evcc spezifische Wallbox Typ, mit Hilfe dessen mit der Wallbox kommuniziert werden kann. Den passenden Typ findet man unter [Geräte - Wallboxen](/docs/devices/chargers).
+
+**Beispiel:**
 
 ```yaml
   type: wallbe

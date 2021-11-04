@@ -18,10 +18,10 @@ messaging:
 
 Die verfügbaren Ereignisse sind:
 
-- `start`: Laden hat begonnen
-- `stop`: Laden wurde beendet
-- `connect`: Fahrzeug angeschlossen
-- `disconnect`: Fahrzeug entfernt
+- **`start`**: Laden hat begonnen
+- **`stop`**: Laden wurde beendet
+- **`connect`**: Fahrzeug angeschlossen
+- **`disconnect`**: Fahrzeug entfernt
 
 Die Konfiguration erfolgt nach dem folgenden Schema am Beispiel des Ereignisses `start`:
 
@@ -35,10 +35,10 @@ Die Konfiguration erfolgt nach dem folgenden Schema am Beispiel des Ereignisses 
 
 Die folgenden Benachrichtigungsdienste können eingestellt werden:
 
-- `pushover`: [Pushover](https://pushover.net/)
-- `telegram`: [Telegram Messenger](https://telegram.org/)
-- `email`: Email (über die [shoutrrr](https://containrrr.dev/shoutrrr) Service URL: `smtp://username:password@host:port/?fromAddress=fromAddress&toAddresses=recipient1[,recipient2,...]`)
-- `shout`: Jeder weitere Dienst der von [shoutrrr](https://containrrr.dev/shoutrrr) unterstützt wird (Beispiel siehe unten)
+- **`pushover`**: [Pushover](https://pushover.net/)
+- **`telegram`**: [Telegram Messenger](https://telegram.org/)
+- **`email`**: Email (über die [shoutrrr](https://containrrr.dev/shoutrrr) Service URL: `smtp://username:password@host:port/?fromAddress=fromAddress&toAddresses=recipient1[,recipient2,...]`)
+- **`shout`**: Jeder weitere Dienst der von [shoutrrr](https://containrrr.dev/shoutrrr) unterstützt wird (Beispiel siehe unten)
 
 Konfigurationsbeispiele sind in der Datei `evcc.dist.yaml` aufgeführt.
 
