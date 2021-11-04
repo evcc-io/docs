@@ -14,7 +14,7 @@ messaging:
     [...]
 ```
 
-### Ereignisse
+## Ereignisse
 
 Die verfügbaren Ereignisse sind:
 
@@ -31,7 +31,7 @@ Die Konfiguration erfolgt nach dem folgenden Schema am Beispiel des Ereignisses 
       msg: Started charging in "${mode}" mode
 ```
 
-### Dienste
+## Dienste
 
 Die folgenden Benachrichtigungsdienste können eingestellt werden:
 

@@ -10,6 +10,8 @@ Wallboxen können intern ein Messgerät eingebaut haben, oder es kann auch exter
 
 evcc benutzt positive (+) Werte für eingehende Ströme (Netzbezug, PV Erzeugung, Hausbatterie-Entladung) und negative (-) Werte für ausgehende Ströme (Netzeinspeisung, PV Wechselrichter Ruhestrombedarf oder Hausbatterie-Ladung). Jeder anderweitiger Strombedarf, inklusive der Wallbox, ist immer ein positiver (+) Wert.
 
+Die `meters` Konfiguration ist eine Liste von verschiedenen vorhandenen Geräten.
+
 **Beispiel:**
 
 ```yaml
@@ -24,6 +26,8 @@ meters:
   type: ...
 ```
 
+Konfigurationen für bekannte Geräte sind unter [Geräte - Hausinstallation](/docs/devices/meters) zu finden.
+
 Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ## Name
@@ -33,7 +37,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 **`name`**: Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenzierung des Gerätes in der Konfiguration der [Site](site) oder des [Ladepunktes](loadpoints#meters) verwendet.
 
-Beispiel:
+**Beispiel:**
 
 ```yaml
   name: wallbox1
@@ -52,11 +56,11 @@ Beispiel:
   type: modbus
 ```
 
-Im folgenden sind die verschiedenen möglichen Typen dokumentiert:
+Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter dokumentiert:
 
 ### Modbus
 
-_`modbus`:_ Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
+_`modbus`_: Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
 
 **Beispiel:**
 
@@ -111,7 +115,7 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
 
 ### LGESS
 
-_`lgess`:_ LG ESS Home 8/10 Geräte.
+_`lgess`_: LG ESS Home 8/10 Geräte.
 
 **Beispiel:**
 
@@ -133,7 +137,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 **`usage`**: Definiert welches Messwerte hier benötigt werden.
 
-**Mögliche Werte:**
+**Mögliche Werte**:
 
 - **`grid`**: Für die Messwerte am Netzanschlusspunkt
 - **`pv`**: Für die Messwerte der PV Erzeugung
@@ -167,7 +171,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 ### OpenWB
 
-_`openwb`:_ Verwendung der Messwerte von der OpenWB Wallbox
+_`openwb`_: Verwendung der Messwerte von der OpenWB Wallbox
 
 **Beispiel:**
 
@@ -188,7 +192,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 **`usage`**: Definiert welches Messwerte hier benötigt werden.
 
-**Mögliche Werte:**
+**Mögliche Werte**:
 
 - **`grid`**: Für die Messwerte am Netzanschlusspunkt
 - **`pv`**: Für die Messwerte der PV Erzeugung
@@ -209,7 +213,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 ### SMA
 
-_`sma`:_ Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SMA Wechselrichters. Die Geräte müssen das Protokoll Speedwire unterstützen.
+_`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SMA Wechselrichters. Die Geräte müssen das Protokoll Speedwire unterstützen.
 
 **Beispiel:**
 
@@ -233,7 +237,7 @@ _`sma`:_ Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder
 
 ### Tesla
 
-_`tesla`:_ Für die Verwendung der Messwerte einer Tesla Powerwall.
+_`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 
 **Beispiel:**
 
@@ -251,7 +255,7 @@ _`tesla`:_ Für die Verwendung der Messwerte einer Tesla Powerwall.
 
 **`usage`**: Definiert welches Messwerte hier benötigt werden.
 
-**Mögliche Werte:**
+**Mögliche Werte**:
 
 - **`grid`**: Für die Messwerte am Netzanschlusspunkt
 - **`pv`**: Für die Messwerte der PV Erzeugung
@@ -285,7 +289,7 @@ _`tesla`:_ Für die Verwendung der Messwerte einer Tesla Powerwall.
 
 ### Custom
 
-_`custom`:_ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/reference/plugins) definiert werden.
+_`custom`_: Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/reference/plugins) definiert werden.
 
 **Beispiel:**
 

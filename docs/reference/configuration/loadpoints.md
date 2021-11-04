@@ -110,7 +110,7 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 
 **`mode`**: Der Standard Lademodus wenn evcc startet.
 
-**Mögliche Werte:**
+**Mögliche Werte**:
 
 - **`off`**: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
 - **`now`**: Lade sofort mit der maximalen möglichen Leistung.
@@ -161,7 +161,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`mode`**: Definiert unter welchen Bedingungen die Daten für da Fahrzeug abgerufen werden
 
-**Mögliche Werte:**
+**Mögliche Werte**:
 
 - **`charging`**: aktualisiere die Daten __NUR__ während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
 - **`connected`**: aktualisiere die Daten wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt), der Parameter `interval` definiert wie oft
@@ -187,7 +187,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`min`**: Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Parameter [`mode`](#mode) (Lademodus) nicht auf `off` steht
 
-**Mögliche Werte:** Der Wert entspricht dem Ziel-SoC (Ladezustand in %) der EV Batterie.
+**Mögliche Werte**: Der Wert entspricht dem Ziel-SoC (Ladezustand in %) der EV Batterie.
 
 **Beispiel:**
 
@@ -209,7 +209,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`estimate`**: Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 
-**Mögliche Werte:**
+**Mögliche Werte**:
 
 - **`true`**: evcc interpoliert die SOC Werte zwischen den Fahrzeug abfragen
 - **`false`**: evcc nutzt nur die SOC Werte welche das Fahrzeug zurückliefert
@@ -233,7 +233,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`mode`**: Der Lademodus wenn ein Fahrzeug von der Wallbox getrennt wird.
 
-**Mögliche Werte:**  Siehe [Mode](#mode)
+**Mögliche Werte**:  Siehe [Mode](#mode)
 
 **Beispiel:**
 
@@ -245,7 +245,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`targetSoC`**: Definiere bis zu welchem SOC geladen wird.
 
-**Mögliche Werte:** Siehe [Target](#target)
+**Mögliche Werte**: Siehe [Target](#target)
 
 **Beispiel:**
 
@@ -274,8 +274,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 ### Mode
 
 **`mode`**: Der Lademodus wenn ein Fahrzeug von der Wallbox getrennt wird.
-
-**Mögliche Werte:** Siehe [Mode](#mode)
+**Mögliche Werte**: Siehe [Mode](#mode)
 
 **Beispiel:**
 
@@ -287,7 +286,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`targetSoC`**: Definiere bis zu welchem SOC geladen wird.
 
-**Mögliche Werte:** Siehe [Target](#target)
+**Mögliche Werte**: Siehe [Target](#target)
 
 **Beispiel:**
 
@@ -316,7 +315,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`threshold`**: Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 
-**Mögliche Werte:** Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
+**Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
 
 **Beispiel:**
 
@@ -357,7 +356,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`threshold`**: Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 
-**Mögliche Werte:** Ein positiver Wert für Netzbezug, ein negativer Wert für Export.
+**Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export.
 
 **Beispiel:**
 
