@@ -12,7 +12,7 @@ evcc benutzt positive (+) Werte für eingehende Ströme (Netzbezug, PV Erzeugung
 
 Die `meters` Konfiguration ist eine Liste von verschiedenen vorhandenen Geräten.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
 meters:
@@ -37,7 +37,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 **`name`**: Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenzierung des Gerätes in der Konfiguration der [Site](site) oder des [Ladepunktes](loadpoints#meters) verwendet.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   name: wallbox1
@@ -50,7 +50,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 **`type`**: Dies ist der evcc spezifische Messgeräte Typ, mit Hilfe dessen mit dem Gerät kommuniziert werden kann. Den passenden Typ für bekannte Geräte findet man unter [Geräte - Hausinstallation](/docs/devices/meters).
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: modbus
@@ -62,7 +62,7 @@ Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter
 
 _`modbus`_: Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: modbus
@@ -81,7 +81,7 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
 
 **`power`**: Definiert den MBMD Messwert welcher die Leistung zurückliefert, typischerweise ist das `Power`.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   power: Power
@@ -94,7 +94,7 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
 
 **`energy`**: Definiert den MBMD Messwert welcher die Energiemenge zurückliefert, typischerweise ist das `Sum`.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   energy: Sum
@@ -107,7 +107,7 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
 
 **`soc`**: Definiert den MBMD Messwert welcher den Ladestand der Batterie zurückliefert, typischerweise ist das `ChargeState`.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   soc: ChargeState
@@ -117,7 +117,7 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
 
 _`lgess`_: LG ESS Home 8/10 Geräte.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: lgess
@@ -150,7 +150,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 **`uri`**: Definiert die URL im Heimnetzwerk des LG ESS Gerätes.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   uri: https://192.0.2.2/
@@ -163,7 +163,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 **`password`**: Hier muss die Registriernummer des LG ESS HOME Wechselrichters eingetragen werden.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   password: "DE200..."
@@ -173,7 +173,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 _`openwb`_: Verwendung der Messwerte von der OpenWB Wallbox
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: openwb
@@ -205,7 +205,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 **`broker`**: Definiert den hostnamen oder die IP Adresse im Heimnetzwerk der OpenWB.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   broker: 192.0.2.2
@@ -215,7 +215,7 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 
 _`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SMA Wechselrichters. Die Geräte müssen das Protokoll Speedwire unterstützen.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: sma
@@ -229,7 +229,7 @@ _`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder
 
 **`uri`**: Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   uri: 192.0.2.2
@@ -239,7 +239,7 @@ _`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder
 
 _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: tesla
@@ -268,7 +268,7 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 
 **`uri`**: Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   uri: 192.0.2.2
@@ -281,7 +281,7 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 
 **`password`**: Hier muss das Password für den Benutzer _customer_ (Kunde) eingetragen werden.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   password: "DasPasswort"
@@ -291,7 +291,7 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 
 _`custom`_: Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/reference/plugins) definiert werden.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: custom

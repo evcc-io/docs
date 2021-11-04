@@ -6,7 +6,7 @@ sidebar_position: 3
 
 _Loadpoints_ (Ladepunkte) ist eine Liste von Ladepunkten und kombiniert für jeden Ladepunkt eine Wallbox, Fahrzeuge und falls notwendig einen Zähler mit weiteren optionalen Parametern. Eine minimale Konfiguration erfordert eine Wallbox.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
 loadpoints:
@@ -30,7 +30,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 **`title`**: Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   title: Garage
@@ -44,7 +44,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 :::
 
 **`charger`**: Referenz auf eine `charger` (Wallbox) Konfiguration.
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   charger: wallbox
@@ -63,7 +63,7 @@ Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox D
 
 Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Strommessung durchführt bzw. die Werte der Messung von evcc nicht ausgelesen werden können. Aber selbst dann ist dieser Eintrag optional, denn evcc rechnet nimmt an dass mit der eingestellten maximalen Stromstärke auch geladen wird.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   meters: 
@@ -81,7 +81,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 **`vehicle`**: Eine Referenz auf eine `vehicle` (Fahrzeug) Konfiguration.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   vehicle: renault
@@ -91,7 +91,7 @@ Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug 
 
 **`vehicles`**: Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen)
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   vehicles:
@@ -121,7 +121,7 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 Im allgemeinen benötigt ein EV mindestens 1,4kW Leistung pro Phase um zu Laden. Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren, wird insgesamt mindestens 1,4kW Leistung benötigt, egal mit wievielen Phasen geladen wird.
 :::
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   mode: pv
@@ -136,7 +136,7 @@ Im allgemeinen benötigt ein EV mindestens 1,4kW Leistung pro Phase um zu Laden.
 
 **`soc`**: Definiere die Standardeinstellungen für den Umgang mit dem SOC eines angeschlossenen Fahrzeugs
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   soc:
@@ -167,7 +167,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 - **`connected`**: aktualisiere die Daten wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt), der Parameter `interval` definiert wie oft
 - **`always`**: aktualisiere die Daten immer auch wenn es nicht mit der Wallbox verbunden ist, der Parameter [`interval`](#interval) definiert wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
       mode: charging
@@ -177,7 +177,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`interval`**: Definiert wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
       interval: 60m
@@ -189,7 +189,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Mögliche Werte**: Der Wert entspricht dem Ziel-SoC (Ladezustand in %) der EV Batterie.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     min: 50 # Lade sofort auf 50% SOC
@@ -199,7 +199,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`target`**: Definiere bis zu welchem SOC geladen wird.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     target: 80 # Lade bis maximal 80% SOC
@@ -214,7 +214,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 - **`true`**: evcc interpoliert die SOC Werte zwischen den Fahrzeug abfragen
 - **`false`**: evcc nutzt nur die SOC Werte welche das Fahrzeug zurückliefert
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     estimate: false # Keine Interpolation
@@ -235,7 +235,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Mögliche Werte**:  Siehe [Mode](#mode)
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     mode: pv
@@ -247,7 +247,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Mögliche Werte**: Siehe [Target](#target)
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     targetSoC: 80 # Lade bis maximal 80% SOC
@@ -262,7 +262,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`onIdentify`**: Definiere die Standardwerte für eine Liste von Fahrzeugen, sofern diese identifizeirt wurden. Die Fahrzeuge müssen unter [`vehicle & vehicles`](#vehicle--vehicles) definiert sein und werden durch den jeweiligen Wert von `name` des Fahrzeugs referenziert.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   onIdentify:
@@ -276,7 +276,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 **`mode`**: Der Lademodus wenn ein Fahrzeug von der Wallbox getrennt wird.
 **Mögliche Werte**: Siehe [Mode](#mode)
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     mode: pv
@@ -288,7 +288,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Mögliche Werte**: Siehe [Target](#target)
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     targetSoC: 80 # Lade bis maximal 80% SOC
@@ -303,7 +303,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`enable`**: Definiert das Verhalten wann im PV Modus das Laden begonnen wird.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   enable:
@@ -317,7 +317,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     threshold: 0
@@ -327,7 +327,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`delay`**: Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     delay: 1m
@@ -344,7 +344,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Standardwert:** `10m`
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   disable:
@@ -358,7 +358,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     threshold: 200 # Ein maximaler Netzbezug von 200W ist erlaubt
@@ -368,7 +368,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **`delay`**: Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     delay: 10m
@@ -385,7 +385,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Standardwert:** `10m`
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   guardduration: 5m
@@ -404,7 +404,7 @@ oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann.
 
 **Standardwert:** `3`
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   phases: 1
@@ -427,7 +427,7 @@ Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren ka
 
 **Standardwert:** `6`
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   mincurrent: 6
@@ -444,7 +444,7 @@ Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren ka
 
 **Standardwert:** `16`
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   maxcurrent: 16

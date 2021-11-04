@@ -18,6 +18,12 @@ Hier wird beschrieben wie man durch ein Plugin ein bisher nicht unterstütztes G
 
 [Weiterlesen...](plugins)
 
+### Modbus
+
+Hier befindet sich die Modbus Dokumentation, welche in verschiedenen Bereichen genutzt werden kann.
+
+[Weiterlesen...](modbus)
+
 ### API
 
 Hier befindet sich die Dokumentation um auf evcc von anderen Systemen zuzugreifen und zu steuern.

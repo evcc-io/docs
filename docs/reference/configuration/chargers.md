@@ -24,7 +24,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 **`name`**: Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Refernzierung der Wallbox in der Konfiguration des [Ladepunktes](loadpoints#charger) verwendet.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   name: wallbox1
@@ -37,7 +37,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 **`type`**: Dies ist der evcc spezifische Wallbox Typ, mit Hilfe dessen mit der Wallbox kommuniziert werden kann. Den passenden Typ findet man unter [Geräte - Wallboxen](/docs/devices/chargers).
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: wallbe

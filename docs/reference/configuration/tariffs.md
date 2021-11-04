@@ -6,7 +6,7 @@ sidebar_position: 8
 
 evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de) oder [Tibber](https://tibber.com). Die Konfiguration erlaubt es "günstige" Preise zu definieren, bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
 tariffs:
@@ -30,7 +30,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 - **`awattar`**: Für den Anbieter Awattar
 - **`tibber`**: Für den Anbieter Tibber
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: awattar
@@ -59,7 +59,7 @@ _`awattar`_: Der Stromanbieter Awattar
 - **`de`**: Deutschland
 - **`at`**: Österreich
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     region: de
@@ -84,7 +84,7 @@ _`tibber`_: Der Stromanbieter Tibber
 
 **`token`**: Das Zugangstoken des Anbieters
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     token: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
@@ -97,7 +97,7 @@ _`tibber`_: Der Stromanbieter Tibber
 
 **`homeid`**: Die ID des Standards, falls es unter dem Account mehrere gibt
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     homeid: "12345678-90ab-cdef-1234-567890abcdef"
@@ -110,7 +110,7 @@ _`tibber`_: Der Stromanbieter Tibber
 
 **`cheap`**: Den Preis in ct/kWh der als günstig gewertet werden soll.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
     cheap: 20

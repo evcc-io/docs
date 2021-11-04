@@ -6,7 +6,7 @@ sidebar_position: 7
 
 evcc kann in bestehende Home Energy Management Systeme (HEMS) integriert werden. Momentan wird der SMA Sunny Home Manager 2.0 (SHM) unterstützt!
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
 hems:
@@ -27,7 +27,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 - **`sma`**: Für den SMA Sunny Home Manager 2.0
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
   type: sma
@@ -41,7 +41,7 @@ _`sma`_: SMA Sunna Home Manager 2.0 (SHM)
 
 Durch die Integration können die [Ladepunkte](loadpoints) dem SHM hinzugefügt werden und somit z.B. für dessen Steuerung berücksichtigt werden.
 
-**Beispiel:**
+**Beispiel**:
 
 ```yaml
 hems:
