@@ -17,6 +17,7 @@ If you want to contribute configurations to this repository please open a Pull R
 ## Chargers
 
 - [ABL eMH / SENEC.Wallbox pro](#charger-abl-emh--senec-wallbox-pro)
+- [cFos PowerBrain](#charger-cfos-powerbrain)
 - [Easee Home (Cloud API)](#charger-easee-home-cloud-api)
 - [EEBUS compatible wallbox (e.g. Mobile Charger Connect)](#charger-eebus-compatible-wallbox-e-g-mobile-charger-connect)
 - [EVSE DIN](#charger-evse-din)
@@ -44,6 +45,7 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ## Meters
 
+- [cFos PowerBrain](#meter-cfos-powerbrain)
 - [Discovergy Metering Service (Cloud)](#meter-discovergy-metering-service-cloud)
 - [E3DC (Battery Meter)](#meter-e3dc-battery-meter)
 - [E3DC (Grid Meter)](#meter-e3dc-grid-meter)
@@ -134,6 +136,16 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ### Meters
 
+
+<a id="meter-cfos-powerbrain"></a>
+#### cFos PowerBrain
+
+```yaml
+- type: cfos
+  uri: 192.0.2.2:502
+  id: 1
+  # an evcc sponsortoken is required for using this charger
+```
 
 <a id="meter-discovergy-metering-service-cloud"></a>
 #### Discovergy Metering Service (Cloud)
@@ -1080,6 +1092,16 @@ If you want to contribute configurations to this repository please open a Pull R
   # or via external TCP-RS485 translator:
   # uri: 192.0.2.2:502
   id: 1 
+  # an evcc sponsortoken is required for using this charger
+```
+
+<a id="charger-cfos-powerbrain"></a>
+#### cFos PowerBrain
+
+```yaml
+- type: cfos
+  uri: 192.0.2.2:502
+  id: 1
   # an evcc sponsortoken is required for using this charger
 ```
 
