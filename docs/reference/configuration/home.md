@@ -16,6 +16,40 @@ Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Paramet
 
 Die Konfigurationsdatei von evcc besteht auf mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
 
+Hier eine Überblick über die Beziehungen der wichtigsten Bestandteile der Konfiguration:
+
+```mermaid
+graph TD;
+    site("site (Zuhause)")
+    subgraph loadpoints
+      loadpointA("Carport (charger: KEBA)")
+      loadpointB("Garage (charger: Wallbe)")
+    end
+    subgraph meters
+      meterGrid("Discovergy")
+      meterPV("SMA Tripower")
+      meterBattery("LG RESU")
+    end
+    subgraph vehicles
+      vehicleA("VW ID.4")
+      vehicleB("Renault Zoe")
+      vehicleC("Tesla Model Y")
+    end
+
+    loadpointA -- loadpoint.1 --> site
+    loadpointB -- loadpoint.2 --> site
+
+    vehicleA --> loadpointA
+    vehicleB --> loadpointA
+    vehicleB --> loadpointB
+    vehicleC --> loadpointB
+
+    meterGrid -- meters.grid --> site
+    meterPV -- meters.pvs --> site
+    meterBattery -- meters.batterys --> site
+
+```
+
 ### Site
 
 Eine _Site_ beschreibt den Standort mit den vorhandenen und benötigten Geräten der Hausinstallation und ist für das Regeln der verfügbaren Leistung zuständig.
