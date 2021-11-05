@@ -57,8 +57,8 @@ evcc kann die Ladepunkte und deren Ladeströme an ein anderes Home Energy Manage
 
 [Weiterlesen...](hems)
 
-### Notifications
+### Messaging
 
 In diesem Bereich können Ereignisse definiert werden, bei welchen man informiert werden will. Zur Informationsübermittlung werden eine Reihe von unterschiedlichen Systemen unterstützt.
 
-[Weiterlesen...](notifications)
+[Weiterlesen...](messaging)

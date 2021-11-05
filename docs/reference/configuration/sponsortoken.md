@@ -2,9 +2,9 @@
 sidebar_position: 16
 ---
 
-# Sponsortoken
+# `sponsortoken`
 
-sponsor token enables optional features (request at https://cloud.evcc.io)
+`sponsortoken` definiert ein Token das auf [https://cloud.evcc.io](https://cloud.evcc.io) vergeben wird.
 
 **Beispiel**:
 

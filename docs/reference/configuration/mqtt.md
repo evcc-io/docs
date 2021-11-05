@@ -2,7 +2,9 @@
 sidebar_position: 14
 ---
 
-# MQTT
+# `mqtt`
+
+Ermöglicht es Daten auf einen MQTT Broker zu schreiben.
 
 **Beispiel**:
 

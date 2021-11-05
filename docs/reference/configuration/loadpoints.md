@@ -71,7 +71,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 ### `vehicle(s)`
 
-**`vehicle`**: Eine Referenz auf eine `vehicle` (Fahrzeug) Konfiguration.
+vehicle`: Eine Referenz auf eine `vehicle` (Fahrzeug) Konfiguration.
 
 **Beispiel**:
 
@@ -81,7 +81,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
 
-**`vehicles`**: Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen)
+`vehicles`: Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen)
 
 **Beispiel**:
 

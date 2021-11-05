@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Meters
+# `meters`
 
 _Meters_ (Strommessgeräte) ist eine Liste von in der Hausinstallation vorhandenen Geräten, welche die Leistung und den Energieverbrauch, die PV Erzeugung oder Hausbatterienutzung zur Verfügung stellen können. Ein `meter` definiert einen Punkt einer Energieleistung und kann ein physikalisches Gerät sein (z.b. ein Messgerät am Netzanschlusspunkt), ein PV Wechselrichter (AC oder auch DC im Falle von Hybrid-Wechselrichtern), oder ein Batterie-Wechselrichter.
 
@@ -30,12 +30,13 @@ Konfigurationen für bekannte Geräte sind unter [Geräte - Hausinstallation](/d
 
 Im folgenden werden nun alle möglichen Parameter erklärt.
 
-## Name
+---
 
-:::caution Erforderlicher Parameter
-:::
+## Erforderliche Parameter
 
-**`name`**: Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenzierung des Gerätes in der Konfiguration der [Site](site) oder des [Ladepunktes](loadpoints#meters) verwendet.
+### `name`
+
+Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenzierung des Gerätes in der Konfiguration der [Site](site) oder des [Ladepunktes](loadpoints#meters) verwendet.
 
 **Beispiel**:
 
@@ -43,12 +44,11 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
   name: wallbox1
 ```
 
-## Type
+---
 
-:::caution Erforderlicher Parameter
-:::
+### `type`
 
-**`type`**: Dies ist der evcc spezifische Messgeräte Typ, mit Hilfe dessen mit dem Gerät kommuniziert werden kann. Den passenden Typ für bekannte Geräte findet man unter [Geräte - Hausinstallation](/docs/devices/meters).
+Dies ist der evcc spezifische Messgeräte Typ, mit Hilfe dessen mit dem Gerät kommuniziert werden kann. Den passenden Typ für bekannte Geräte findet man unter [Geräte - Hausinstallation](/docs/devices/meters).
 
 **Beispiel**:
 
@@ -58,9 +58,13 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter dokumentiert:
 
-### Modbus
+---
 
-_`modbus`_: Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
+## Unterstützte Typen
+
+### `modbus`
+
+Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
 
 **Beispiel**:
 
@@ -72,14 +76,13 @@ _`modbus`_: Geräte welche über die ModBus Schnittstelle angebunden sind und vo
   ...
 ```
 
+#### Erforderliche Parameter
+
 Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig. Diese sind unter in der [Modbus](/docs/reference/modbus) Dokumentation aufgeführt.
 
-#### Power
+##### `power`
 
-:::caution Erforderlicher Parameter
-:::
-
-**`power`**: Definiert den MBMD Messwert welcher die Leistung zurückliefert, typischerweise ist das `Power`.
+Definiert den MBMD Messwert welcher die Leistung zurückliefert, typischerweise ist das `Power`.
 
 **Beispiel**:
 
@@ -87,12 +90,11 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
   power: Power
 ```
 
-#### Energy
+---
 
-:::caution Erforderlicher Parameter
-:::
+##### `energy`
 
-**`energy`**: Definiert den MBMD Messwert welcher die Energiemenge zurückliefert, typischerweise ist das `Sum`.
+Definiert den MBMD Messwert welcher die Energiemenge zurückliefert, typischerweise ist das `Sum`.
 
 **Beispiel**:
 
@@ -100,12 +102,13 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
   energy: Sum
 ```
 
-#### SOC
+---
 
-:::info Optionaler Parameter
-:::
+#### Optionale Parameter
 
-**`soc`**: Definiert den MBMD Messwert welcher den Ladestand der Batterie zurückliefert, typischerweise ist das `ChargeState`.
+##### `soc`
+
+Definiert den MBMD Messwert welcher den Ladestand der Batterie zurückliefert, typischerweise ist das `ChargeState`.
 
 **Beispiel**:
 
@@ -113,9 +116,11 @@ Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig
   soc: ChargeState
 ```
 
-### LGESS
+---
 
-_`lgess`_: LG ESS Home 8/10 Geräte.
+### `lgess`
+
+LG ESS Home 8/10 Geräte.
 
 **Beispiel**:
 
@@ -130,12 +135,11 @@ _`lgess`_: LG ESS Home 8/10 Geräte.
 Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt, falls mehrere konfiguriert werden.
 :::
 
-#### Usage
+#### Erforderliche Parameter
 
-:::caution Erforderlicher Parameter
-:::
+##### `usage`
 
-**`usage`**: Definiert welches Messwerte hier benötigt werden.
+Definiert welches Messwerte hier benötigt werden.
 
 **Mögliche Werte**:
 
@@ -143,12 +147,11 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 - **`pv`**: Für die Messwerte der PV Erzeugung
 - **`battery`**: Für die Messwerte der Hausbatterie
 
-#### URI
+---
 
-:::caution Erforderlicher Parameter
-:::
+##### `uri`
 
-**`uri`**: Definiert die URL im Heimnetzwerk des LG ESS Gerätes.
+Definiert die URL im Heimnetzwerk des LG ESS Gerätes.
 
 **Beispiel**:
 
@@ -156,12 +159,11 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
   uri: https://192.0.2.2/
 ```
 
-#### Password
+---
 
-:::caution Erforderlicher Parameter
-:::
+##### `password`
 
-**`password`**: Hier muss die Registriernummer des LG ESS HOME Wechselrichters eingetragen werden.
+Hier muss die Registriernummer des LG ESS HOME Wechselrichters eingetragen werden.
 
 **Beispiel**:
 
@@ -169,9 +171,11 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
   password: "DE200..."
 ```
 
-### OpenWB
+---
 
-_`openwb`_: Verwendung der Messwerte von der OpenWB Wallbox
+### `openwb`
+
+Verwendung der Messwerte von der OpenWB Wallbox
 
 **Beispiel**:
 
@@ -185,12 +189,13 @@ _`openwb`_: Verwendung der Messwerte von der OpenWB Wallbox
 Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt, falls mehrere konfiguriert werden.
 :::
 
-#### Usage
+---
 
-:::caution Erforderlicher Parameter
-:::
+#### Erforderliche Parameter
 
-**`usage`**: Definiert welches Messwerte hier benötigt werden.
+##### `usage`
+
+Definiert welches Messwerte hier benötigt werden.
 
 **Mögliche Werte**:
 
@@ -198,22 +203,23 @@ Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt
 - **`pv`**: Für die Messwerte der PV Erzeugung
 - **`battery`**: Für die Messwerte der Hausbatterie
 
-#### Broker
+---
 
-:::caution Erforderlicher Parameter
-:::
+##### `broker`
 
-**`broker`**: Definiert den hostnamen oder die IP Adresse im Heimnetzwerk der OpenWB.
+Definiert den hostnamen oder die IP Adresse und die Portadresse im Heimnetzwerk der OpenWB.
 
 **Beispiel**:
 
 ```yaml
-  broker: 192.0.2.2
+  broker: 192.0.2.2:1883
 ```
 
-### SMA
+---
 
-_`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SMA Wechselrichters. Die Geräte müssen das Protokoll Speedwire unterstützen.
+### `sma`
+
+Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SMA Wechselrichters. Die Geräte müssen das Protokoll Speedwire unterstützen.
 
 **Beispiel**:
 
@@ -222,12 +228,13 @@ _`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder
   uri: 192.0.2.2
 ```
 
-#### URI
+---
 
-:::caution Erforderlicher Parameter
-:::
+#### Erforderliche Parameter
 
-**`uri`**: Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
+##### `uri`
+
+Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 
 **Beispiel**:
 
@@ -235,7 +242,9 @@ _`sma`_: Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder
   uri: 192.0.2.2
 ```
 
-### Tesla
+---
+
+### `tesla`
 
 _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 
@@ -248,12 +257,13 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
   password: "***"
 ```
 
-#### Usage
+---
 
-:::caution Erforderlicher Parameter
-:::
+#### Erforderliche Parameter
 
-**`usage`**: Definiert welches Messwerte hier benötigt werden.
+##### `usage`
+
+Definiert welches Messwerte hier benötigt werden.
 
 **Mögliche Werte**:
 
@@ -261,12 +271,11 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 - **`pv`**: Für die Messwerte der PV Erzeugung
 - **`battery`**: Für die Messwerte der Hausbatterie
 
-#### URI
+---
 
-:::caution Erforderlicher Parameter
-:::
+##### `uri`
 
-**`uri`**: Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
+Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 
 **Beispiel**:
 
@@ -274,12 +283,11 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
   uri: 192.0.2.2
 ```
 
-#### Password
+---
 
-:::caution Erforderlicher Parameter
-:::
+##### `password`
 
-**`password`**: Hier muss das Password für den Benutzer _customer_ (Kunde) eingetragen werden.
+Hier muss das Password für den Benutzer _customer_ (Kunde) eingetragen werden.
 
 **Beispiel**:
 
@@ -287,9 +295,11 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
   password: "DasPasswort"
 ```
 
-### Custom
+---
 
-_`custom`_: Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/reference/plugins) definiert werden.
+### `custom`
+
+Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/reference/plugins) definiert werden.
 
 **Beispiel**:
 
@@ -314,31 +324,67 @@ _`custom`_: Standard Implementierung, bei welchem die einzelnen Werte über [Plu
   ...
 ```
 
-#### Power
+---
 
-:::caution Erforderlicher Parameter
-:::
+#### Erforderliche Parameter
 
-**`power`**: Plugin Definition um die Leistung in Watt (W) zurückzugeben.
+##### `power`
 
+Plugin Definition um die Leistung in Watt (W) zurückzugeben.
 
-#### Energy
+**Beispiel**:
 
-:::info Optionaler Parameter
-:::
+```yaml
+  power: ... # Leistung (W)
+    source: # Plugin Typ
+    ...
+```
 
-**`energy`**: Plugin Definition um die geladene Energiemenge in kWh zurückzugeben.
+---
 
-#### SOC
+#### Optionale Parameter
 
-:::info Optionaler Parameter
-:::
+##### `energy`
 
-**`soc`**: Plugin Definiton um den Ladestand SOC in % zurückzugeben
+Plugin Definition um die geladene Energiemenge in kWh zurückzugeben.
 
-#### Currents
+**Beispiel**:
 
-:::info Optionaler Parameter
-:::
+```yaml
+  energy: ... # Energiemenge (kWh)
+    source: # Plugin Typ
+    ...
+```
 
-**`currents`**: Liste von Plugin Definitionen um die Stromstärke in A pro Phase zurückzugeben
+---
+
+#### `soc`
+
+Plugin Definiton um den Ladestand SOC in % zurückzugeben
+
+**Beispiel**:
+
+```yaml
+  soc: ... # Batterie SOC (%)
+    source: # Plugin Typ
+    ...
+```
+
+---
+
+#### `currents`
+
+Eine Liste von Plugin Definitionen um die Stromstärke in A pro Phase zurückzugeben
+
+**Beispiel**:
+
+```yaml
+  currents: # Stromstärke (A) pro Phase
+    - source: # Phase 1 Plugin Typ
+      ...
+    - source: # Phase 2 Plugin Typ
+      ...
+    - source: # Phase 3 Plugin Typ
+      ...
+  ...
+```
