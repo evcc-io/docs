@@ -8,7 +8,7 @@ evcc ermöglich das Laden von EVs zu optimieren. Es kann eine PV Anlage angebund
 
 Normalerweise muss die Wallbox dazu mit der bestehenden PV Installation kompatibel sein. evcc ermöglicht es jedoch dies mit einer Vielzahl von Wallboxen, Strommessgeräten und PV Wechselrichtern, ohne dass diese von Haus aus miteinander kommunizieren könnten.
 
-Dazu wird evcc auf einem Computer im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud Anbindung. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Raspberry Pi (oder ähnliches) völlog ausreichen.
+Dazu wird evcc auf einem Computer im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud Anbindung. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Raspberry Pi (oder ähnliches) völlig ausreichen.
 
 ![Screenshot](screenshot.png)
 
