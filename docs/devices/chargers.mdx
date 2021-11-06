@@ -51,17 +51,25 @@ Erfordert die Einbindung des [`cFos Powertrain`](meters#powerbrain) Strommessger
 
 <Config part="chargers" file="easee" />
 
+:::note
+Die 1P/3P-Phasenumschaltung wird unterstützt.
+:::
+
 <SponsorshipRequired />
 
 ### EVSE-Wifi
 
-auch smartWB 
+Unterstützt z.b. die smartWB Wallbox. 
 
 <Config part="chargers" file="evsewifi" />
 
 ### go-eCharger Home/PRO/V3
 
-Beim Home und Pro ist mindestens Firmware 040.0 oder höher erforderlich.
+Untersützt die Wallboxen go-eCharger Home, go-eCharger PRO und go-eCharger V3.
+
+:::note
+Bei den Modellen Home und Pro ist mindestens Firmware 040.0 oder höher erforderlich.
+:::
 
 <Tabs>
   <TabItem value="local" label="Local API" default>
@@ -72,7 +80,11 @@ Beim Home und Pro ist mindestens Firmware 040.0 oder höher erforderlich.
   </TabItem>
 </Tabs>
 
-#### Für die Unterstützung der 1P/3P Phasenumschaltung des V3-Modells:
+#### go-eCharger V3:
+
+:::note
+Die 1P/3P-Phasenumschaltung wird durch Sponsoring unterstützt.
+:::
 
 <SponsorshipRequired />
 
@@ -86,23 +98,29 @@ Beim Home und Pro ist mindestens Firmware 040.0 oder höher erforderlich.
 
 ### KEBA Connect
 
-KEBA KeContact P20/P30 and BMW chargers
+Diese Konfiguration unterstützt die Wallboxen KEBA KeContact P20/P30 und BMW Wallboxen.
 
-Hardware Preparation
+#### Vorbereitung der Wallbox
 
-Requires enabled UDP function with DIP switch 1.3 = `ON`, see installation manual.
+Es muss eine sogenannte UDP Funktion über den DIP Schalter 1.3 eingeschaltet (`ON`) werden. Die Installationsanleitung der Wallbox hiflt hier weiter.
 
-__NOTE:__ rfid tag and serial tag are optional.
-RFID enables evcc to start charging even if the Wallbox was not unlocked using the chip/card.
-`serial` enables evcc to communicate with the Wallbox when run in Docker. UDP-Port 7090 must be added to the Docker port settings!
+:::note
+Die `rfid:` `tag:` und `serial` sind Optional.
+
+`rfid: tag:` ermöglicht es evcc den Lademodus zu starten, selbst wenn die Wallbox gesperrt ist. Zusätzlich kann man die RFID Karte einem Fahrzeug zuordnen und damit evcc sagen welches Fahrzeug angschlossen ist.
+
+`serial` ermöglicht es evcc auch in einer Docker Installation mit der Wallbox zu kommunizieren. Der UDP-Port 7090 muss dafür in der Docker Konfiguration hinzugefügt werden.
+:::
 
 <Config part="chargers" file="keba" />
 
 ### Mobile Charger Connect
 
-Audi, Bentley, Porsche
+Diese Wallbox gibt es von Audi, Bently und Porsche.
 
-__NOTE:__ This charger does NOT support enabling or disabling charging. So the only useful modes are Sofort Laden and Min + PV!
+:::note
+Diese Konfiguration unterstützt die _PV_ und _Stop_ Modi nicht! D.h. das Laden kann hiermit **nicht** unterbrochen, gestoppt oder nur durch PV Überschuß gesteuert werden.
+:::
 
 <Config part="chargers" file="mcc" />
 
@@ -123,7 +141,9 @@ __NOTE:__ This charger does NOT support enabling or disabling charging. So the o
 
 ### TinkerForge WARP Charger
 
-Communicating with a WARP Charger requires a MQTT broker. The MQTT connection then has to be configured in the charger's web UI. (see here for [German documentation](https://www.warp-charger.com/api.html#mqtt))
+Unterstützt die Wallboxen WARP Charger und WARP Charger Pro.
+
+Um mit dieser Wallbox zu kommunizieren wird ein sogenannter MQTT Broker benötigt, z.b. [Mosquitto](https://mosquitto.org). Die MQTT Verbindung muss nach der [Dokumentation](https://www.warp-charger.com/api.html#mqtt) in der Web UI der Wallbox eingerichtet werden.
 
 <Config part="chargers" file="warp" />
 
@@ -133,25 +153,31 @@ Communicating with a WARP Charger requires a MQTT broker. The MQTT connection th
 
 ### Wallbe Eco/Pro
 
-Hardware preparation
+#### Vorbereitung der Wallbox
 
-Wallbe chargers are supported out of the box. The Wallbe must be connected using Ethernet. If not configured, the default address `192.168.0.8:502` is used. The default password for the Web-UI is `wallbe7213`.
+Die Wallbox muss über ein Netzwerkkabel an das lokale Netzwerk angeschlossen sein. Standardmäßig ist wird Adresse `192.168.0.8` und der Port `502` verwendet, und das Passwort lautet `wallbe7213`.
 
-To allow controlling charge start/stop, the physical configuration must be modified. Once opened, DIP 10 must be set to ON:
+Um evcc zu erlauben das Laden zu unterbrochen und wieder zu starten, muss im Gerät der DIP Schalter 10 auf `ON` gesetzt sein:
 
   ![DIP Switch image](wallbe_eco_dip10.jpeg)
 
-More information on interacting with Wallbe chargers can be found at [GoingElectric](https://www.goingelectric.de/forum/viewtopic.php?p=1212583). Use with care.
+Weitere Informationen wie mit dieser Wallbox umgegangen werden kann, ist im [GoingElectric Forum](https://www.goingelectric.de/forum/viewtopic.php?p=1212583) zu finden.
 
-__NOTE:__ The Wallbe products come in two flavors of the Modbus register layout depeding on the pre-installed firmware. Older models (2017 known to be "old", 2019 known to be "new") do not support some advanced features like current adjustments in 0,1A steps. For such models make sure to set `legacy: true`. You can find you which one you have using [MBMD](https://github.com/evcc-io/evcc/wiki/5):
+:::note
+Die Wallbe Wallboxen kommen mit zwei Varienten des Modbus-Register Layouts, abhängig von der vorinstallierten Firmware. Ältere Modelle (vor 2019) unterstützen einige erweitere Funktionen wie das Regeln der Ladeströme in 0,1A Schritten nicht.
+
+Für solche Modelle muss in der Konfiguration `legacy: true` eingetragen werden. Du kannst mit mit [MBMD](https://github.com/evcc-io/evcc/wiki/5) herausfinden, welches Modell du hast.
 
 ```
 mbmd read -a 192.168.0.8:502 -d 255 -t holding -e int 300 1
 ```
 
-Compare the value to what you see as Actual Charge Current Setting in the Wallbe web UI. If the numbers match, it's an OLD controller firmware, if the reading is factor 10x the UI value then it's a NEW controller firmware.
+Vergleiche die Werte mit denen, welchen in den "Actual Charge Current Setting" in der Web UI angezeigt werden. Falls die Zahlen übereinstimmen, ist es ein äleteres Modell. Falls die Zahlen um den Faktor 10 zum Wert inder UI, ist es ein neueres Modell.
+:::
 
-__NOTE:__ Opening the wall box must only be done by certified professionals. The box must be disconnected from mains before opening.
+:::warning
+Das Öffnen einer Wallbox sollte nur von zertifiziertem Handwerkern erfolgen. Die Wallbox muss vom Strom getrennt sein, bevor sie geöffnet wird.
+:::
 
 <Config part="chargers" file="wallbe" />
 
