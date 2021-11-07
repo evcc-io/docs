@@ -55,6 +55,7 @@ site:
     - sma # pv meter reference
     batterys: 
     - byd # battery meter reference
+  residualPower: 100
 ```
 
 ---
@@ -102,3 +103,23 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatter
     batterys: 
     - byd # battery meter reference
 ```
+
+### `residualPower`
+
+Definiert eine Leistung in Watt (W). Die Verwendung wird in folgenden unterschiedlichen Szenarien verdeutlicht.
+
+**Beispiel**:
+
+```yaml
+  residualPower: 100
+```
+
+#### `grid` `meter` vorhanden
+
+- Positiver Wert: Sicherheitspuffer.
+- Negativer Wert: Laden im PV Modus erlaubt den Wert als Netzanteil.
+
+#### Nur `pv` `meter` vorhanden
+
+- Positiver Wert: Typischer Hausverbrauch, um damit den PV Überschuss abschätzen zu können.
+- Negativer Wert: -
