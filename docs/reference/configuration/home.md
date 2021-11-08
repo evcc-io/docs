@@ -14,7 +14,7 @@ Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Paramet
 
 ### Struktur
 
-Die Konfigurationsdatei von evcc besteht auf mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
+Die Konfigurationsdatei von evcc besteht aus mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
 
 Hier eine Überblick über die Beziehungen der wichtigsten Bestandteile der Konfiguration:
 
