@@ -1,0 +1,91 @@
+---
+sidebar_position: 4
+---
+
+# Fahrzeuge
+
+## Erkennung des Fahrzeugs an der Wallbox
+
+Wenn ein oder mehrere Fahrzeuge konfiguriert sind, muss evcc diese Unterscheiden können und wissen welches der Fahrzeuge an der Wallbox angeschlossen ist. Nur damit ist es möglich das Laden auf einen bestimmten Ladestand (SOC) zu begrenzen.
+
+Hierfür werden gibt es verschiedene Methoden:
+
+1. Es ist ein Fahrzeug konfiguriert: evcc geht dann davon aus dass auch immer dieses Fahrzeug lädt.
+2. Es sind mehrere Fahrzeuge konfiguriert:
+  
+   1. Die Wallbox kann eine Fahrzeugkennung über das Ladekabel ermitteln.
+   2. Die Wallbox verfügbt über die Möglichkeit mit RFID Karten den Ladevorgang freizuschalten
+   3. Über die Internetverbindung des Fahrzeugs kann festgestellt werden, welches gerade mit einem Ladepunkt verbunden ist. Wenn nur eines der Fahrzeuge dies meldet, wird angenommen dass es auch dieses Fahrzeug ist.
+
+:::note
+Die Wallbox muss bereits in evcc eingerichtet und konfiguriert sein
+:::
+
+### Erkennung über das Ladekabel
+
+Hierzu muss die Wallbox den Ladestandard ISO15118 unterstützen. In evcc kann dies momentan nur mit [EEBUS kompatible Wallboxen](/docs/devices/charger#eebus-experimental) möglich.
+
+:::note
+In der Konfiguration der Wallbox, nicht in evcc, muss die sogenannte "PLC Verbindung zum Fahrzeug" aktiviert sein. Dies ist normalerweise die Standardeinstellung.
+:::
+
+**Vorgehen**:
+
+- Das Auto an die Wallbox anschließen
+- evcc beenden (falls noch nicht geschehen)
+- Auf der Kommandozeile `evcc charger` aufrufen
+- Die Ausgabe enthält den Text `Identifier:` und einen Wert, dieser Wert muss kopiert werden
+- Nun die `evcc.yaml` Datei in einem Texteditor öffnen
+- Bei der Konfiguration des entsprechenden Fahrzeugs die folgende Zeile hinzufügen:
+
+  ```yaml
+  identifier: "<kopierte Wert>"
+  ```
+
+  :::note
+  Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine sogenannet MAC Adresse zurück.
+  Manche Hersteller wie VW und Audi ändern diese aber jeden Tag!
+
+  Für diesen Fall kann man eine Wildcard verwenden und den nur sich nicht ändernden Teil angeben:
+  
+  ```yaml
+  vehicles:
+    - name: zoe
+      ...
+      identifier: "01:23:45:*"
+  ```
+
+  Dies funktioniert natürlich nur, wenn dies nicht bei jedem vorhanden Fahrzeug auftritt und der Anfangsteil des Wertes sich unterscheidet.
+  :::
+
+- evcc kann nun wieder gestartet werden und erkennt das Fahrzeug
+
+### Erkennung über RFID Karten
+
+Hierbei ordnet man eine RFID Karte eine bestimmten Fahrzeug zu. D.h. jedes Mal wenn das Fahrzeug an die Wallbox angeschlossen wird, muss der Ladevorgang mit der entsprechenden RFID Karte an der Wallbox freigeschalten werden.
+
+:::note
+Die RFID Karten müssen in der Wallbox bereits registriert sein. Dies wird entweder über eine App der Wallbox oder deren Benutzeroberläche gemacht.
+:::
+
+**Vorgehen**:
+
+- Die RFID Karte an die Wallbox halten bis die Wallbox meldet dass diese erkannt wurde
+- evcc beenden (falls noch nicht geschehen)
+- Auf der Kommandozeile `evcc charger` aufrufen
+- Die Ausgabe enthält den Text `Identifier:` und einen Wert, dieser Wert muss kopiert werden
+- Nun die `evcc.yaml` Datei in einem Texteditor öffnen
+- Bei der Konfiguration des entsprechenden Fahrzeugs die folgende Zeile hinzufügen:
+
+  ```yaml
+  vehicles:
+    - name: zoe
+      ...
+      identifier: "<kopierte Wert>"
+  ```
+- evcc kann nun wieder gestartet werden und erkennt das Fahrzeug
+
+### Erkennung über Internet-Verbindung
+
+Hierbei ruft evcc den Ladestatus des Fahrzeugs über die Hersteller-Schnittstelle ab. Sofern der Hersteller dies anbietet, erhält evcc auch den (hoffentlich) aktuellen Ladestatus, also ob das Fahrzeug an eine Ladesäule angeschlossen ist. 
+Es ist leider nicht möglich festzustellen an welcher Ladesäule das Fahrzeug angeschlossen ist. Daher besteht hier keine 100%ge Sicherheit.
