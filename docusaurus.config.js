@@ -70,12 +70,12 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               title: "Community",
               items: [
                 {
-                  label: "Slack",
-                  href: "https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw",
+                  label: "Anwender Forum",
+                  href: "https://github.com/evcc-io/evcc/discussions",
                 },
                 {
-                  label: "Forum",
-                  href: "https://github.com/evcc-io/evcc/discussions",
+                  label: "Entwickler Slack",
+                  href: "https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw",
                 },
               ],
             },
