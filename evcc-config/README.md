@@ -46,7 +46,8 @@ If you want to contribute configurations to this repository please open a Pull R
 ## Meters
 
 - [cFos PowerBrain](#meter-cfos-powerbrain)
-- [Discovergy Metering Service (Cloud)](#meter-discovergy-metering-service-cloud)
+- [Discovergy Metering Service (Cloud) (Grid)](#meter-discovergy-metering-service-cloud--grid)
+- [Discovergy Metering Service (Cloud) (PV)](#meter-discovergy-metering-service-cloud--pv)
 - [E3DC (Battery Meter)](#meter-e3dc-battery-meter)
 - [E3DC (Grid Meter)](#meter-e3dc-grid-meter)
 - [E3DC (PV Meter)](#meter-e3dc-pv-meter)
@@ -147,14 +148,25 @@ If you want to contribute configurations to this repository please open a Pull R
   # an evcc sponsortoken is required for using this charger
 ```
 
-<a id="meter-discovergy-metering-service-cloud"></a>
-#### Discovergy Metering Service (Cloud)
+<a id="meter-discovergy-metering-service-cloud--grid"></a>
+#### Discovergy Metering Service (Cloud) (Grid)
 
 ```yaml
 - type: discovergy
   user: demo@discovergy.com 
   password: demo # password 
   meter: 1ESY1161229886
+```
+
+<a id="meter-discovergy-metering-service-cloud--pv"></a>
+#### Discovergy Metering Service (Cloud) (PV)
+
+```yaml
+- type: discovergy
+  user: demo@discovergy.com 
+  password: demo # password 
+  meter: 1ESY1161229886
+  scale: -1
 ```
 
 <a id="meter-e3dc-battery-meter"></a>
