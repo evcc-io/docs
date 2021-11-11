@@ -305,13 +305,13 @@ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/
 
 ```yaml
   type: custom
-  power: ... # Leistung (W)
+  power: # Leistung (W)
     source: # Plugin Typ
     ...
-  energy: ... # Energiemenge (kWh)
+  energy: # Energiemenge (kWh)
     source: # Plugin Typ
     ...
-  soc: ... # Batterie SOC (%)
+  soc: # Batterie SOC (%)
     source: # Plugin Typ
     ...
   currents: # Stromstärke (A) pro Phase
