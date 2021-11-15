@@ -13,39 +13,65 @@ import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
 Bei evcc gibt es einen [Community Support](https://github.com/evcc-io/evcc/discussions). Hier helfen sowohl Entwickler als auch Anwender bei verschiedenen Problemen. Es wäre gut dabei möglichst genaue Informationen zu folgenden Bereichen mitzuteilen:
 
 - Welche Geräte (Fahrzeug, Hausinstallation, Wallbox) werden verwendet.
-- Die Konfigurationsdatei `evcc.yaml`, d.h. deren Inhalt (bitte Benutzernamen, Passwörter und ähnliches entfernen)
+- Die Konfigurationsdatei `evcc.yaml`,  
+  d.h. deren Inhalt (*bitte Benutzernamen, Passwörter und ähnliches entfernen*).
 - Eine möglichst genaue Beschreibung was das Problem ist.
 
 Wir versuchen natürlich Probleme so gut es geht zu vermeiden, aber das kann aufgrund der Komplexität leider nicht immer gelingen.
+
+### Wie kann ich ein Logfile zur Fehleranalyse erstellen?
+
+evcc gibt in seiner Standard Konfiguration nur dann Fehlermeldungen aus, wenn ein Fehler auftritt (siehe auch [`log`](/docs/reference/configuration/log#log) Parameter in der `evcc.yaml`). 
+
+Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet.  
+
+Wird evcc als Linux Systemdienst, wie unter [Linux Autostart](/docs/installation/manual#autostart) beschrieben, ausgeführt, können die log-Nachrichten über folgende Befehle verfolgt, bzw. aufgelistet werden:
+- Kontinuierliche Anzeige der evcc log Meldungen  
+  `sudo journalctl -fau evcc`     
+- Anzeige der evcc log Meldungen seit dem letzten Start des evcc Services (Abbruch mit Strg-c)  
+  `sudo journalctl -u evcc -q`  
+  Speichern der Log-Ausgabe oben in eine Datei im Home-Verzeichnis  
+  `sudo journalctl -u evcc -q > ~/evcc.log`
+
+Weiterführende Hilfe: [wiki.ubuntuusers.de/systemd/journalctl](https://wiki.ubuntuusers.de/systemd/journalctl/)  
+
+Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/)
 
 ## Laden
 
 ### Was bedeuten die verschiedenen Lademodi?
 
-- **Stop**: Der Ladevorgang wird beendet bzw. kann nicht beginnen.
-- **Sofort**: Es wird mit der maximal möglichen Leistung geladen.
-- **Min + PV**: Es wird mit der technisch kleinstmöglichen Leistung geladen. Sofern die PV Installation genug Überschuss für eine höhere Leistung hat, wird die Leistung erhöht.
-- **Nur PV**: Es wird mit der von der PV Installation zur Verfügung gestellten Leistung geladen, sofern technisch möglich. Sollte nicht genug Leistung vorhanden sein, wird die Ladung unterbrochen. [Weitere Details](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht)
+| Modus      | Beschreibung |
+| :--------- | :----------- |
+| **Stop**   | Der Ladevorgang wird *sofort* beendet bzw. kann nicht beginnen. |
+| **Sofort** | Es wird *sofort* mit der maximal möglichen Leistung geladen. |
+| **Min+PV** | Es wird *sofort* mit der technisch kleinstmöglichen Leistung geladen. Sofern die PV Installation genug Überschuss für eine höhere Leistung hat, wird die Leistung erhöht. |
+| **Nur PV** | Der Ladevorgang wird *abhängig* von der PV Installation zur Verfügung gestellten Leistung gestartet, sofern technisch möglich. Sollte nicht genug Leistung vorhanden sein, wird die Ladung unterbrochen. [Weitere Details](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht) |
 
-### Ich habe PV Überschuss, aber das Auto lädt nicht
+### Ich habe PV Überschuss, aber das Auto lädt nicht, warum?
 
 Das Laden der Batterie kann leider nicht mit beliebiger Leistung erfolgen. Die zugrundeliegenden Standards geben hier Grenzen vor.
 
-Der Ladestandard IEC 61851 (den muss jedes Elektroauto beherrschen) hat folgende Regel: Pro Phase mindestens 6A und, je nach Anschluss oder Konfiguration in der evcc.yaml, maximal 16A oder 32A. Das bedeutet:
+Der Ladestandard [IEC 61851](https://en.wikipedia.org/wiki/IEC_61851) (den muss jedes Elektroauto beherrschen) hat folgende Regel:  
+Pro Phase mindestens 6 Ampere und, je nach Anschluss oder Konfiguration in der evcc.yaml,  
+maximal 16 oder 32 Ampere.
 
-- **1-phasigem Laden**: 1,4kW bis 3,6kW oder 7,2kW
-- **2-phasigem Laden**: 2,8kW bis 7,2kW oder 14,4kW
-- **3-phasigem Laden**: 4,2kW bis 11kW oder 22kW
+Das bedeutet bei
 
-Der neuere Ladestandard ISO 15118 (wird an DC Ladesäulen verwendet, manche Fahrzeuge und Wallboxen unterstützen diesen auch bei AC Laden): 
+- **1-phasigem Laden** - 1,4 bis 3,6 kW oder 7,2 kW
+- **2-phasigem Laden** - 2,8 bis 7,2 kW oder 14,4 kW
+- **3-phasigem Laden** - 4,2 bis 11 kW oder 22 kW
 
-- Mindestens ~1400W Mindestleistung, unabhängig von der Phasenanzahl.
+Der neuere Ladestandard [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) (wird an DC Ladesäulen verwendet, manche Fahrzeuge und Wallboxen unterstützen diesen auch bei AC Laden) erfordert 
 
-Diese jeweilige Leistung muss als PV Überschuss vorhanden sein, damit der Ladevorgang beginnt. Sollte die Leistung dann eine konfigurierbare Zeit nicht vorhanden sein, wird der Ladevorgang unterbrochen. Ist die Leistung für einen konfigurierbaren Zeitraum vorhanden, wird der Ladevorgang fortgesetzt.
+- mindestens ~1,4 kW Leistung, unabhängig von der Phasenanzahl.
+
+Im evcc Modus **Nur PV** muss die jeweilige Leistung als PV Überschuss vorhanden sein, damit der Ladevorgang beginnt. Sollte die Leistung dann eine konfigurierbare Zeit nicht vorhanden sein, wird der Ladevorgang unterbrochen. Ist die Leistung für einen konfigurierbaren Zeitraum vorhanden, wird der Ladevorgang fortgesetzt.
 
 ### Kann ich mehrere Wallboxen nutzen?
 
-Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden. Es ist jedoch heute noch __kein__ Lastmanagement möglich und es gibt auch keine Möglichkeit die Priorisierung festzulegen. Beides ist auf unserer laaaaaangen Liste für die weitere Entwicklung.
+Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden.  
+Es ist jedoch heute noch __kein__ Lastmanagement möglich und es gibt auch keine Möglichkeit die Priorisierung festzulegen. Beides ist auf unserer laaaaaangen Liste für die weitere Entwicklung.
 
 ## Wallboxen
 
@@ -67,9 +93,10 @@ Bei einigen wenigen Wallboxen wird diese Funktionalität von evcc unterstützt. 
 
 Hoffentlich. Schau einfach mal unter [Geräte - Hausinstallation](/docs/devices/meters) nach ob du deine Geräte findest. Wenn nicht, versuche es mal mit einer Konfiguration von einem anderen der gleichen Marke.
 
-### Ich habe keine PV Anlage
+### Ich habe keine PV Anlage, kann ich evcc trotzdem sinnvoll einsetzen?
 
-Auch hier kann evcc heute bereits verwendet werden, um die Ladung auf einen bestimmten Ladestand (SOC) des Fahrzeugs zu begrenzen. Hierzu muss das Fahrzeug aber auf jeden Fall in die Konfiguration übernommen werden.
+Um die Batterie-Ladung eines Fahrzeugs auf einen bestimmten Ladestand (SOC) zu begrenzen, kann evcc bereits heute schon ohne PV Analage verwendet werden.  
+Hierzu muss das Fahrzeug aber auf jeden Fall in die Konfiguration übernommen werden.
 
 ## Fahrzeuge
 

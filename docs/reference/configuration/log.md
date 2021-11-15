@@ -8,8 +8,6 @@ sidebar_position: 10
 
 Definiert das Niveau der Protokollierung von Informationen auf der Konsole.
 
-Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet. Falls evcc als Linux Systemdienst ausgeführt werden, können die Nachrichten über `sudo journalctl -fau evcc` verfolgt werden. Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/)
-
 **Mögliche Werte**:
 
 - `error`: Nur Nachrichten der Kategorie `error` werden angezeigt. Das sind am wenigesten Nachrichten.
@@ -17,6 +15,10 @@ Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach
 - `info`: Beinhaltet `warning`, zusätzlich Nachrichten der Kategorie `info` angezeigt.
 - `debug`: Beinhaltet `info`, zusätzlich Nachrichten der Kategorie `debug` angezeigt. Dies ist für die Fehleranalyse erforderlich.
 - `trace`: Beinhaltet `debug`, zusätzlich Nachrichten der Kategorie `trace` angezeigt. Dies ist die detaillierteste Kategorie und kann zu sehr großen Logdaten führen. In der Regel wird dies nicht benötigt!
+
+Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet.  
+Falls evcc als Linux Systemdienst ausgeführt werden, können die Nachrichten über `sudo journalctl -fau evcc` verfolgt werdenlassen, siehe [Logfile zur Fehleranalyse](/docs/guides/faq#wie-kann-ich-ein-logfile-zur-fehleranalyse-erstellen).  
+Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/).
 
 **Beispiel**:
 
