@@ -49,6 +49,27 @@ Definiert ob das definierte HEMS die Ladesteuerung von evcc übernehmen soll.
 
 ---
 
+### `vendorid`
+
+Definiert die VendorID die für die Erstellung der Device ID verwendet wird. Wenn in der Konfiguration keine Vendor ID angegeben wird, wird eine fest definierte ID verwendet.
+
+Länge: 8 Zeichen
+
+---
+
+### `deviceid`
+
+Definiert die Geräte ID, die für die Erstellung der Device ID verwendet wird. Wenn keine Geräte ID angegeben wird, generiert evcc eine zufällige Geräte ID in Abhängigkeit auf den aktuellen Computer.
+
+:::info
+Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich auch die zufällig erzeugte Geräte ID. Der SHM wird evcc in diesem Fall als neues Gerät erkennen.
+Um dies zu verhindern, sollte die Geräte ID fest definiert werden.
+:::
+
+Länge: 12 Zeichen
+
+---
+
 ## Unterstützte HEMS
 
 ### `sma`
