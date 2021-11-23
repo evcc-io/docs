@@ -12,7 +12,11 @@ Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus-RTU, M
 Die klassische Variante ist dabei Modbus-RTU über eine serielle RS485-Busschnittstelle wie sie typischerweise z. B. bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise darüber über das Modbus/TCP-Protokoll angesprochen.
 
 Soll ein entferntes RS485-Gerät aber ebenfalls über externe Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich aber regelmäßig ein Modbus-RTU-Protokoll über eine TCP/IP-Verbindung zustande. Das Modbus-RTU-Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Hierbei handelt es sich NICHT um Modbus/TCP. "Modbus (RTU) over TCP" ist etwas anderes als Modbus/TCP!
-Achtung: Es gibt allerdings auch komplexere Umsetzer die zusätzlich das Modbus-Protokoll selbst zwischen Modbus-RTU vs. Modbus/TCP umsetzen können!
+
+:::info
+Achtung: Es gibt allerdings auch komplexere Umsetzer die zusätzlich das Modbus-Protokoll selbst zwischen Modbus-RTU vs. Modbus/TCP umsetzen können! Bei diesen Geräten spricht dann evcc mit dem Konverter Modbus/TCP während der Konverter mit dem seriellen Gerät via Modbus RTU kommuniziert und die Protokolle bidirektional übersetzt.
+Hier muss man ggf. genau auf die Gerätekonfiguration und Spezifikation achten sonst ist keine Kommunikation möglich.
+:::
 
 Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration am Konverter festgelegt und evcc kommuniziert letztendlich via Netzwerk mit dem Konverter. Wie zuvor erwähnt ist dabei jedoch das verwendete Modbus-Protokoll korrekt zu konfigurieren.
 
@@ -58,11 +62,30 @@ rtu: true
 
 ## Vordefinierte Geräte
 
-Die integrierten vordefinierten Gerätemodelle sind identisch zu [MBMD](https://github.com/volkszaehler/mbmd#supported-devices):
+Die integrierten vordefinierten Gerätemodelle `model` sind identisch zu [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
+
+     ABB       ABB A/B-Series meters
+     DDM       DDM18SD
+     DZG       DZG Metering GmbH DVH4013 meters
+     IEM3000   Schneider Electric iEM3000 series
+     INEPRO    Inepro Metering Pro 380
+     JANITZA   Janitza B-Series meters
+     MPM       Bernecker Engineering MPM3PM meters
+     ORNO1P    ORNO WE-514 & WE-515
+     ORNO1P504 ORNO WE-504
+     ORNO3P    ORNO WE-516 & WE-517
+     SBC       Saia Burgess Controls ALE3 meters
+     SDM       Eastron SDM630
+     SDM220    Eastron SDM220
+     SDM230    Eastron SDM230
+     SDM72     Eastron SDM72
+     SEMTR     SolarEdge SE-MTR-3Y
+
+Alle davon abweichenden `model` werden als Gerät vom Typ *SunSpec* behandelt.
 
 Verwende `value` um den Wert der vom Gerät gelesen werden soll zu definieren. Alle unterstützten Werte sind auf [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28) voreingestellt.
 
-Im Falle eines SunSpec-kompatiblen Wechselrichters oder Zählers (`model: sunspec`), werden die zu lesenden Werte in der Form `model:[block:]point` nach der SunSpec-Definition angegeben. Zum Beispiel wird die DC-Leistung auf dem zweiten String eines dreiphasigen PV-Wechselrichters (SunSpec Model 103) so konfiguriert `value: 103:2:W`.
+Im Falle eines *SunSpec*-kompatiblen Wechselrichters oder Zählers werden die zu lesenden Werte in der Form `model:[block:]point` nach der *SunSpec*-Definition angegeben. Zum Beispiel wird die DC-Leistung auf dem zweiten String eines dreiphasigen PV-Wechselrichters (enspricht SunSpec Model 103) wie folgt abgefragt: `value: 103:2:W`.
 
 Das Geräte-`model` und die Slave ID `id` sind immer erforderlich:
 
