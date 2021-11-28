@@ -17,7 +17,7 @@ site:
     grid: sdm630 # grid meter reference
     pvs: 
     - sma # pv meter reference
-    batterys:
+    batteries:
     - byd # battery meter reference
 ```
 
@@ -53,7 +53,7 @@ site:
     grid: sdm630 # grid meter reference
     pvs: 
     - sma # pv meter reference
-    batterys: 
+    batteries: 
     - byd # battery meter reference
   residualPower: 100
 ```
@@ -91,7 +91,7 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die PV Stromerzeugun
 
 ---
 
-### `meters.batterys`
+### `meters.batteries`
 
 Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatterien liefert.
 
@@ -100,7 +100,7 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatter
 **Beispiel**:
 
 ```yaml
-    batterys: 
+    batteries: 
     - byd # battery meter reference
 ```
 
