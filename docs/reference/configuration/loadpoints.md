@@ -95,6 +95,23 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 
 ---
 
+### `resetOnDisconnect`
+
+Definiert ob bei abstecken des Ladekabels vom EV, die Standardeinstellungen für [`mode`](#mode) und [`soc - target`](#target) wieder eingestellt werden sollen.
+
+**Mögliche Werte**:
+
+- `true`: Standardeinstellungen werden eingestellt.
+- `false`: Aktuelle Einstellungen bleiben erhalten.
+
+**Beispiel**:
+
+```yaml
+  resetOnDisconnect: true
+```
+
+---
+
 ### `mode`
 
 Der Standard Lademodus wenn evcc startet.
