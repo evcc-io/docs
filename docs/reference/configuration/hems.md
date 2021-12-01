@@ -48,12 +48,23 @@ Definiert ob das definierte HEMS die Ladesteuerung von evcc übernehmen soll.
 - `false`: Der SHM kann die Lademodi nicht beeinflussen, diese werden nur von evcc gesteuert.
 
 ---
+evcc meldet jeden Ladepunkt an den SHM als eigenständiges Device. Die Device ID wird dabei von evcc generiert. 
+
+Die Device ID ist ein HEX-String und setzt sich wie folgt zusammen
+```
+F-AAAAAAAA-BBBBBBBBBBBB-00
+```
+- F: Vendor ID Type, fest definiert
+- AAAAAAAA: Siehe `vendorid`
+- BBBBBBBBBBBB: Siehe `deviceid`
+- 00: Sub Device ID, fest definiert
+
 
 ### `vendorid`
 
 Definiert die VendorID die für die Erstellung der Device ID verwendet wird. Wenn in der Konfiguration keine Vendor ID angegeben wird, wird eine fest definierte ID verwendet.
 
-Länge: 8 Zeichen
+HEX-String, Länge 8 Zeichen
 
 ---
 
@@ -66,7 +77,7 @@ Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich auch die zufä
 Um dies zu verhindern, sollte die Geräte ID fest definiert werden.
 :::
 
-Länge: 12 Zeichen
+HEX-String, Länge: 12 Zeichen
 
 ---
 
