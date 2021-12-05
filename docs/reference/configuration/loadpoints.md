@@ -97,7 +97,13 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 
 ### `resetOnDisconnect`
 
-Definiert ob bei abstecken des Ladekabels vom EV, die Standardeinstellungen für [`mode`](#mode) und [`soc - target`](#target) wieder eingestellt werden sollen.
+Definiert ob bei Abstecken des Ladekabels vom Fahrzeug, die Standardeinstellungen für folgende Werte wieder hergestellt werden sollen:
+
+* [`mode`](loadpoints#mode)
+* [`soc.min`](loadpoints#min)
+* [`soc.target`](loadpoints#target)
+* [`minCurrent`](loadpoints#mincurrent)
+* [`maxCurrent`](loadpoints#maxcurrent)
 
 **Mögliche Werte**:
 
@@ -225,18 +231,6 @@ Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 
 ---
 
-### `onDisconnect`
-
-Definiert die Standardeinstellungen wenn ein Fahrzeug von der Wallbox getrennt wird.
-
-**Beispiel**:
-
-```yaml
-  onDisconnect:
-    mode: pv
-    targetSoC: 80
-```
-
 #### `mode`
 
 Der Lademodus wenn ein Fahrzeug von der Wallbox getrennt wird.
@@ -262,19 +256,6 @@ Definiere bis zu welchem SOC geladen wird.
 ```
 
 ---
-
-### `onIdentify`
-
-Definiere die Standardwerte für eine Liste von Fahrzeugen, sofern diese identifizeirt wurden. Die Fahrzeuge müssen unter [`vehicle(s)`](#vehicles) definiert sein und werden durch den jeweiligen Wert von `name` des Fahrzeugs referenziert.
-
-**Beispiel**:
-
-```yaml
-  onIdentify:
-    - renault: # Der "name" des Fahrzeugs
-      mode: pv
-      targetSoC: 100
-```
 
 #### `mode`
 
