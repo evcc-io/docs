@@ -76,7 +76,7 @@ Definiert die Geräte ID, die für die Erstellung der Device ID verwendet wird. 
 Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich auch die zufällig erzeugte Geräte ID. Der SHM wird evcc in diesem Fall als neues Gerät erkennen.
 Um dies zu verhindern, sollte die Geräte ID fest definiert werden.
 
-Wenn evcc als Docker Container ausgeführt wird, muss hierfür `machine-id` gemounted werden. Siehe auch [Docker Konfiguration](../../installation/docker.md)
+Wenn evcc als Docker Container ausgeführt wird, muss hierfür `machine-id` gemounted werden. Siehe auch [Docker Konfiguration](../../installation/docker)
 :::
 
 HEX-String, Länge: 12 Zeichen
