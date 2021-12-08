@@ -25,14 +25,16 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
             sidebarPath: require.resolve("./sidebars.js"),
             editUrl: "https://github.com/evcc-io/docs/tree/main",
           },
-          /*
           blog: {
             showReadingTime: true,
-            // Please change this to your repo.
-            editUrl:
-              "https://github.com/facebook/docusaurus/edit/main/website/blog/",
+            blogSidebarTitle: 'Letzte Beiträge',
+            blogSidebarCount: 10,
+            editUrl: "https://github.com/evcc-io/docs/tree/main",
+            feedOptions: {
+              type: 'all',
+              copyright: `Copyright © ${new Date().getFullYear()} evcc.io`,
+            },
           },
-          */
           theme: {
             customCss: require.resolve("./src/css/custom.css"),
           },
@@ -55,6 +57,11 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               docId: "Home",
               position: "left",
               label: "Dokumentation",
+            },
+            {
+              to: "blog",
+              position: "left",
+              label: "Blog",
             },
             {
               href: "https://github.com/evcc-io/evcc",
