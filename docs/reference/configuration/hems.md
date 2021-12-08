@@ -48,17 +48,18 @@ Definiert ob das definierte HEMS die Ladesteuerung von evcc übernehmen soll.
 - `false`: Der SHM kann die Lademodi nicht beeinflussen, diese werden nur von evcc gesteuert.
 
 ---
-evcc meldet jeden Ladepunkt an den SHM als eigenständiges Device. Die Device ID wird dabei von evcc generiert. 
+evcc meldet jeden Ladepunkt an den SHM als eigenständiges Device. Die Device ID wird dabei von evcc generiert.
 
 Die Device ID ist ein HEX-String und setzt sich wie folgt zusammen
-```
+
+```text
 F-AAAAAAAA-BBBBBBBBBBBB-00
 ```
+
 - F: Vendor ID Type, fest definiert
 - AAAAAAAA: Siehe `vendorid`
 - BBBBBBBBBBBB: Siehe `deviceid`
 - 00: Sub Device ID, fest definiert
-
 
 ### `vendorid`
 
