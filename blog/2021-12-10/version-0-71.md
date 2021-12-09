@@ -16,7 +16,7 @@ Hierfür haben wir die Installationsanleitungen nochmals überarbeitet und damit
 
 ## Einfachere Konfiguration
 
-Auch die Einrichtung von **evcc** war bisher noch sehr technisch geprägt. Seien es die Formatierungsvorgaben von [YAML](https://yaml.org), welches die Synthax der Konfigurations vorgibt, oder die Ausgestaltung und Anpassung der Konfiguration der eigenen Geräte in der Konfigurationsdatei. Für den ein oder anderen sind das doch recht hohe Hürden. Aber das Projektk ist noch jung und das Team überschaubar, vor allem wenn man bedenkt dass dies für die Entwickler "nur" ein Hobbie ist.
+Auch die Einrichtung von **evcc** war bisher noch sehr technisch geprägt. Seien es die Formatierungsvorgaben von [YAML](https://yaml.org), welches die Synthax der Konfigurations vorgibt, oder die Ausgestaltung und Anpassung der Konfiguration der eigenen Geräte in der Konfigurationsdatei. Für den ein oder anderen sind das doch recht hohe Hürden. Aber das Projektk ist noch jung und das Team überschaubar, vor allem wenn man bedenkt dass dies für die Entwickler "nur" ein Hobby ist.
 
 Um diese Hürden etwas zu minimieren, führen wir mit dieser neuen Version 0.71 von **evcc** eine neue Funktionalität ein: Die geführte Konfiguration mit `evcc configure`.
 
