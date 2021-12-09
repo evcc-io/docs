@@ -22,7 +22,7 @@ Wir haben folgende Bereiche eingerichtet:
 
 - **Erste Schritte**: Installation und Konfiguration von **evcc** geht.
 - **Anleitungen**: Verschiedene Themen und Häufige Fragen.
-- **Geräte_**: Eine Liste der bekannten, unterstützten Geräte und derer Konfiguration.
+- **Geräte**: Eine Liste der bekannten, unterstützten Geräte und derer Konfiguration.
 - **Referenz**: All die (auch technischen) Details und Konfigurationsmöglichkeiten, für diejenidgen die etwas mehr in die Tiefe gehen wollen.
 
 Wir würden uns freuen wenn ihr uns hierbei unterstützt. Ob es sich um Korrekturen von Rechtschreibfehlern oder neuen besseren Inhalten handelt, die Dokumentation ist ebenfalls auf Github unter [https://github.com/evcc-io/docs](https://github.com/evcc-io/docs) zu finden und wir freuen uns über euer Mitwirken!
