@@ -36,7 +36,7 @@ Neben weiteren unterstützten Wallboxen von Alfen und Daheimladen, gibt es eine 
 
 General:
 
-* macOS ([`homebrew`](brew.sh)) and Linux (`apt`) packages
+* macOS ([`homebrew`](https://brew.sh)) and Linux (`apt`) packages
 * `evcc configure` interactive creation of a evcc.yaml configuration file
 
 Chargers:
