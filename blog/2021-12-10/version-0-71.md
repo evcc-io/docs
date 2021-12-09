@@ -6,7 +6,13 @@ hide_table_of_contents: false
 ---
 Es hat sich in den letzten Wochen viel getan, und darüber möchten wir heute etwas ausführlicher berichten was es alles in Version 0.71 an Neuem zu entdecken gibt.
 
+![evcc configure example](configure.gif)
+
 <!--truncate-->
+
+:::note
+Gleich zu Beginn kommt z.B. die Frage `Was ist die maximale Leistung, welche die Wallbox zur Verfügung stellen kann?`, gemeint ist jedoch `Was möchtest du machen?`. Das ist bereits für das nächste Update korrigiert.
+:::
 
 ## Einfachere Installation
 
@@ -21,12 +27,6 @@ Auch die Einrichtung von **evcc** war bisher noch sehr technisch geprägt. Seien
 Um diese Hürden etwas zu minimieren, führen wir mit dieser neuen Version 0.71 von **evcc** eine neue Funktionalität ein: Die geführte Konfiguration mit `evcc configure`.
 
 Mit diesem Kommando lässt sich interaktiv eine funktionierende Konfigurationsdatei für die eigene Installation erstellen! Es gibt sicher hier und da noch einige Probleme und Fehler, aber wir hoffen es ist ein guter erster Schritt in die richtige Richtung.
-
-![evcc configure example](configure.gif)
-
-:::note
-Gleich zu Beginn kommt z.B. die Frage `Was ist die maximale Leistung, welche die Wallbox zur Verfügung stellen kann?`, gemeint ist jedoch `Was möchtest du machen?`. Das ist bereits für das nächste Update korrigiert.
-:::
 
 ## Weitere Neuigkeiten
 
