@@ -25,7 +25,7 @@ Wir haben folgende Bereiche eingerichtet:
 - **Geräte**: Eine Liste der bekannten, unterstützten Geräte und derer Konfiguration.
 - **Referenz**: All die (auch technischen) Details und Konfigurationsmöglichkeiten, für diejenidgen die etwas mehr in die Tiefe gehen wollen.
 
-Wir würden uns freuen wenn ihr uns hierbei unterstützt. Ob es sich um Korrekturen von Rechtschreibfehlern oder neuen besseren Inhalten handelt, die Dokumentation ist ebenfalls auf Github unter [https://github.com/evcc-io/docs](https://github.com/evcc-io/docs) zu finden und wir freuen uns über euer Mitwirken!
+Wir würden uns freuen wenn ihr uns hierbei unterstützt. Ob es sich um Korrekturen von Rechtschreibfehlern oder neuen besseren Inhalten handelt, die Dokumentation ist ebenfalls auf Github unter [github.com/evcc-io/docs](https://github.com/evcc-io/docs) zu finden und wir freuen uns über euer Mitwirken!
 
 ## Blog
 
