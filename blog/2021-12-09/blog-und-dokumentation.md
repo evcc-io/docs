@@ -29,4 +29,4 @@ Wir würden uns freuen wenn ihr uns hierbei unterstützt. Ob es sich um Korrektu
 
 ## Blog
 
-Zusätzlich eröffnen wir heute dieses Blog. Hier wird es in unregelmäßigen Abständen verschiedene Inhalte rund um **evcc** und Themen rund um das Laden zu Hause geben. Wir haben ein paar Ideen, lasst euch überraschen. Unser Hauptaugenmerkt bleibt jedoch auf der Entwicklung von **evcc** selbst. Aber einen Blick hinter die Kulissen, ist sicher auch immer wieder für den ein oder anderen Interessant :)
+Zusätzlich eröffnen wir heute dieses Blog. Hier wird es in unregelmäßigen Abständen verschiedene Inhalte rund um **evcc** und Themen rund um das Laden zu Hause geben. Wir haben ein paar Ideen, lasst euch überraschen. Unser Hauptaugenmerkt bleibt jedoch auf der Entwicklung von **evcc** selbst. Aber einen Blick hinter die Kulissen, ist sicher auch immer wieder für den ein oder anderen interessant :)
