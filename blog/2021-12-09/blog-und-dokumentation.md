@@ -18,7 +18,7 @@ Auch die Zahl der Anwender wächst, auch wenn wir hier keine genauen Zahlen habe
 
 Um dieser Breite an Personen, vor allem auch hinsichtlich dem jeweiligen technischen Hintergrund, einen besseren Zugang zu **evcc* zu geben, haben wir begonnen eine neue Dokumentation auf [docs.evcc.io](https://docs.evcc.io/docs/Home) auf Basis von dem Open Source Projekt [Docusaurus](https://docusaurus.io) aufzubauen.
 
-Wir haben folgende Bereich eingerichtet:
+Wir haben folgende Bereiche eingerichtet:
 
 - **Erste Schritte**: Installation und Konfiguration von **evcc** geht.
 - **Anleitungen**: Verschiedene Themen und Häufige Fragen.
