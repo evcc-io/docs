@@ -8,10 +8,6 @@ Es hat sich in den letzten Wochen viel getan, und darüber möchten wir heute et
 
 ![evcc configure example](configure.gif)
 
-:::note
-Gleich zu Beginn kommt z.B. die Frage `Was ist die maximale Leistung, welche die Wallbox zur Verfügung stellen kann?`, gemeint ist jedoch `Was möchtest du machen?`. Das ist bereits für das nächste Update korrigiert.
-:::
-
 ## Einfachere Installation
 
 Der Zugang zu **evcc** erforderte bisher doch einige technische Kenntnisse im Umgang mit dem jeweiligen Betriebssystem. Für Linux (Debian, Ubuntu, Raspberry Pi OS) und macOS gibt es nun eine deutlich vereinfachte Installation. So unterstützt **evcc** nun die Installation über die Paketmanager `apt` unter Linux und [`homebrew`](https://brew.sh) unter macOS.
