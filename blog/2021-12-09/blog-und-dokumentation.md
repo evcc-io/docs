@@ -4,7 +4,7 @@ authors: [derandereandi]
 tags: [allgemein]
 hide_table_of_contents: false
 ---
-evcc hat nun eine Dokumentation und dieses Blog und möchten diese euch heute etwas näher vorstellen.
+evcc hat nun eine Dokumentation und dieses Blog und wir möchten euch diese heute etwas näher vorstellen.
 
 <!--truncate-->
 
@@ -20,7 +20,7 @@ Um dieser Breite an Personen, vor allem auch hinsichtlich dem jeweiligen technis
 
 Wir haben folgende Bereiche eingerichtet:
 
-- **Erste Schritte**: Installation und Konfiguration von **evcc** geht.
+- **Erste Schritte**: Installation und Konfiguration von **evcc**.
 - **Anleitungen**: Verschiedene Themen und Häufige Fragen.
 - **Geräte**: Eine Liste der bekannten, unterstützten Geräte und derer Konfiguration.
 - **Referenz**: All die (auch technischen) Details und Konfigurationsmöglichkeiten, für diejenidgen die etwas mehr in die Tiefe gehen wollen.
