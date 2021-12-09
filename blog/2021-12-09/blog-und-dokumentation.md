@@ -12,8 +12,6 @@ Am 6.3.2020 hatte [andig](https://github.com/andig/) **evcc** mit dem [ersten Co
 
 Auch die Zahl der Anwender wächst, auch wenn wir hier keine genauen Zahlen haben (und das muss auch nicht sein). Aber das [Forum](https://github.com/evcc-io/evcc/discussions) zählt auch schon fast 450 Diskussionen mit vielen Teilnehmern. Auch in unserem [Entwickler Slack Channel](https://evccgroup.slack.com/) tummeln sich viele Interessierte.
 
-<!--truncate-->
-
 ## Neue Dokumentation
 
 Um dieser Breite an Personen, vor allem auch hinsichtlich dem jeweiligen technischen Hintergrund, einen besseren Zugang zu **evcc* zu geben, haben wir begonnen eine neue Dokumentation auf [docs.evcc.io](https://docs.evcc.io/docs/Home) auf Basis von dem Open Source Projekt [Docusaurus](https://docusaurus.io) aufzubauen.
