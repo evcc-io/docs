@@ -16,7 +16,7 @@ Auch die Zahl der Anwender wächst, auch wenn wir hier keine genauen Zahlen habe
 
 ## Neue Dokumentation
 
-Um dieser Breite an Personen, vor allem auch hinsichtlich dem jeweiligen technischen Hintergrund, einen besseren Zugang zu **evcc* zu geben, haben wir begonnen eine neue Dokumentation auf [https://docs.evcc.io/docs/](https://docs.evcc.io/docs/) auf Basis von dem Open Source Projekt [Docusaurus](https://docusaurus.io) aufzubauen.
+Um dieser Breite an Personen, vor allem auch hinsichtlich dem jeweiligen technischen Hintergrund, einen besseren Zugang zu **evcc* zu geben, haben wir begonnen eine neue Dokumentation auf [docs.evcc.io](https://docs.evcc.io/docs/Home) auf Basis von dem Open Source Projekt [Docusaurus](https://docusaurus.io) aufzubauen.
 
 Wir haben folgende Bereich eingerichtet:
 
