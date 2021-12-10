@@ -28,7 +28,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           blog: {
             showReadingTime: true,
             blogSidebarTitle: 'Letzte Beiträge',
-            blogSidebarCount: 10,
+            blogSidebarCount: 15,
+            postsPerPage: 5,
             editUrl: "https://github.com/evcc-io/docs/tree/main",
             feedOptions: {
               type: 'all',
