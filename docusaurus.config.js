@@ -5,8 +5,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (
   module.exports = {
-    title: "evcc",
-    tagline: "Sonne tanken. Ganz einfach.",
+    title: "evcc - Sonne tanken ☀️🚘",
+    tagline: "Sonne tanken ☀️🚘",
     url: "https://docs.evcc.io",
     baseUrl: "/",
     onBrokenLinks: "throw",
@@ -53,15 +53,20 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           },
           items: [
             {
-              type: "doc",
-              docId: "Home",
+              href: "https://evcc.io",
               position: "left",
-              label: "Dokumentation",
+              label: "Sonne tanken",
             },
             {
               to: "blog",
-              position: "left",
+              position: "right",
               label: "Blog",
+            },
+            {
+              type: "doc",
+              docId: "Home",
+              position: "right",
+              label: "Dokumentation",
             },
             {
               href: "https://github.com/evcc-io/evcc",
@@ -87,15 +92,28 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               ],
             },
             {
-              title: "More",
+              title: "Contribute",
               items: [
+                {
+                  label: "GitHub",
+                  href: "https://github.com/evcc-io/evcc",
+                },
                 {
                   label: "Sponsoring",
                   href: "https://github.com/sponsors/andig",
                 },
+              ],
+            },
+            {
+              title: "About",
+              items: [
                 {
-                  label: "GitHub",
-                  href: "https://github.com/evcc-io/evcc",
+                  label: "Impressum",
+                  href: "https://evcc.io/impressum/",
+                },
+                {
+                  label: "Datenschutz",
+                  href: "https://evcc.io/datenschutz/",
                 },
               ],
             },
