@@ -29,7 +29,7 @@ sidebar_position: 3
 - Starte den evcc-Server:
 
   ```sh
-  brew start evcc
+  brew services start evcc
   ```
 
 - Prüfe die Installation und öffne einen Browser und gibt die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
