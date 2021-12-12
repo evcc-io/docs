@@ -46,7 +46,7 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ## Meters
 
-- [cFos PowerBrain](#meter-cfos-powerbrain)
+- [cFos PowerBrain Meter](#meter-cfos-powerbrain-meter)
 - [Discovergy Metering Service (Cloud) (Grid)](#meter-discovergy-metering-service-cloud--grid)
 - [Discovergy Metering Service (Cloud) (PV)](#meter-discovergy-metering-service-cloud--pv)
 - [E3DC (Battery Meter)](#meter-e3dc-battery-meter)
@@ -140,13 +140,13 @@ If you want to contribute configurations to this repository please open a Pull R
 ### Meters
 
 
-<a id="meter-cfos-powerbrain"></a>
-#### cFos PowerBrain
+<a id="meter-cfos-powerbrain-meter"></a>
+#### cFos PowerBrain Meter
 
 ```yaml
 - type: cfos
-  uri: 192.0.2.2:502
-  id: 1
+  uri: 192.0.2.2:4702 # 4702 is meter 1, 4703 is meter 2
+  id: 2 # 2 is meter 1, 3 is meter 2
   # an evcc sponsortoken is required for using this charger
 ```
 
@@ -1127,8 +1127,7 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ```yaml
 - type: cfos
-  uri: 192.0.2.2:502
-  id: 1
+  uri: 192.0.2.2
   # an evcc sponsortoken is required for using this charger
 ```
 

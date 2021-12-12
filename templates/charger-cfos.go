@@ -9,8 +9,7 @@ func init() {
 		Class:  "charger",
 		Type:   "cfos",
 		Name:   "cFos PowerBrain",
-		Sample: `uri: 192.0.2.2:502
-id: 1
+		Sample: `uri: 192.0.2.2
 # an evcc sponsortoken is required for using this charger`,
 	}
 
