@@ -53,6 +53,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [E3DC (Grid Meter)](#meter-e3dc-grid-meter)
 - [E3DC (PV Meter)](#meter-e3dc-pv-meter)
 - [Eastron SDM Modbus Meter](#meter-eastron-sdm-modbus-meter)
+- [FritzDECT](#meter-fritzdect)
 - [Fronius Solar API V1 (Battery Meter)](#meter-fronius-solar-api-v1-battery-meter)
 - [Fronius Solar API V1 (Grid Meter)](#meter-fronius-solar-api-v1-grid-meter)
 - [Fronius Solar API V1 (PV Meter)](#meter-fronius-solar-api-v1-pv-meter)
@@ -239,6 +240,18 @@ If you want to contribute configurations to this repository please open a Pull R
   # or via TCP:
   uri: 192.0.2.2:502
   rtu: true # serial modbus rtu (rs485) device connected using simple ethernet adapter
+```
+
+<a id="meter-fritzdect"></a>
+#### FritzDECT
+
+```yaml
+- type: fritzdect
+  uri: https://fritz.box # FRITZ!Box ip address (local)
+  user: xxxxxxxxxx # FRITZ!Box username (Has to have Smart Home privileges!)
+  password: yyyyyyyyyy # FRITZ!Box password
+  ain: '007788992233' # switch actor identification number without blanks (see AIN number on switch sticker)
+  standbypower: 15 # treat as charging above this power
 ```
 
 <a id="meter-fronius-solar-api-v1-battery-meter"></a>
