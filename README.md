@@ -18,6 +18,7 @@ If you want to contribute configurations to this repository please open a Pull R
 
 - [ABL eMH / SENEC.Wallbox pro](#charger-abl-emh--senec-wallbox-pro)
 - [cFos PowerBrain](#charger-cfos-powerbrain)
+- [Daheimladen (Cloud API)](#charger-daheimladen-cloud-api)
 - [Easee Home (Cloud API)](#charger-easee-home-cloud-api)
 - [EEBUS compatible wallbox (e.g. Mobile Charger Connect)](#charger-eebus-compatible-wallbox-e-g-mobile-charger-connect)
 - [EVSE DIN](#charger-evse-din)
@@ -1115,6 +1116,16 @@ If you want to contribute configurations to this repository please open a Pull R
 - type: cfos
   uri: 192.0.2.2:502
   id: 1
+  # an evcc sponsortoken is required for using this charger
+```
+
+<a id="charger-daheimladen-cloud-api"></a>
+#### Daheimladen (Cloud API)
+
+```yaml
+- type: daheimladen
+  token: # Request your access token from Daheimladen support: info@daheimladen.de
+  stationID: xxxxxxxxxxxx990 # "Software Serial Number displayed on the display of the wallbox"
   # an evcc sponsortoken is required for using this charger
 ```
 
