@@ -51,12 +51,14 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
             alt: "evcc Logo",
             src: "img/logo.svg",
             href: "https://evcc.io",
+            target: "_self",
           },
           items: [
             {
               href: "https://evcc.io",
               position: "left",
               label: "Sonne tanken",
+              target: "_self",
             },
             {
               to: "blog",
@@ -73,6 +75,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               href: "https://github.com/evcc-io/evcc",
               label: "GitHub",
               position: "right",
+              target: "_self",
             },
           ],
         },
@@ -85,10 +88,12 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 {
                   label: "Anwender Forum",
                   href: "https://github.com/evcc-io/evcc/discussions",
+                  target: "_self",
                 },
                 {
                   label: "Entwickler Slack",
                   href: "https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw",
+                  target: "_self",
                 },
               ],
             },
@@ -98,6 +103,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 {
                   label: "GitHub",
                   href: "https://github.com/evcc-io/evcc",
+                  target: "_self",
                 },
                 {
                   label: "Sponsoring",
@@ -111,10 +117,12 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 {
                   label: "Impressum",
                   href: "https://evcc.io/impressum/",
+                  target: "_self",
                 },
                 {
                   label: "Datenschutz",
                   href: "https://evcc.io/datenschutz/",
+                  target: "_self",
                 },
               ],
             },
