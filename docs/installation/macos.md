@@ -49,7 +49,7 @@ sidebar_position: 3
 - Start evcc neu:
 
   ```sh
-  brew restart evcc
+  brew services restart evcc
   ```
 
 - Gehe zurück zum Browser und lade die evcc Seite neu. Die Oberfläche sollte nun mit deinen konfigurierten Geräten zu sehen sein.
