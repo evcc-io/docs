@@ -104,6 +104,26 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatter
     - byd # battery meter reference
 ```
 
+### `bufferSoC`
+
+Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen SoC (%) Wert. Ist deaktiviert, wenn kein Wert angegeben wird.
+
+**Beispie**:
+
+```yaml
+    bufferSoC: 50
+```
+
+### `prioritySoC`
+
+Die Hausbatterie bekommt Priorität bis zum angegebenen SoC (%) Wert. Wenn die Hausbatterie oberhalb des Wertes geladen wird, wird diese Leistung für das Laden des EVs miteinberechnet. Ist deaktiviert, wenn kein Wert angegeben wird.
+
+**Beispie**:
+
+```yaml
+    prioritySoC: 50 # Hausbatterie bekommt bis zum SoC 50% Priorität
+```
+
 ### `residualPower`
 
 Definiert eine Leistung in Watt (W). Die Verwendung wird in folgenden unterschiedlichen Szenarien verdeutlicht.
