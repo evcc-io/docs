@@ -14,7 +14,10 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
     favicon: "img/favicon.ico",
     organizationName: "evcc-io", // Usually your GitHub org/user name.
     projectName: "docs", // Usually your repo name.
-
+    i18n: {
+      defaultLocale: 'de',
+      locales: ['de'],
+    },
     presets: [
       [
         "@docusaurus/preset-classic",
