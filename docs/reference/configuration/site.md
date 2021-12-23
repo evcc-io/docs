@@ -106,22 +106,25 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatter
 
 ### `bufferSoC`
 
-Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen SoC (%) Wert. Ist deaktiviert, wenn kein Wert angegeben wird.
+Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen SoC (%) Wert. Genauer: Die Ladung wird im PV-Modus bei zu wenig Überschuss (unterhalb der Mindestladeleistung) nicht unterbrochen wenn sich die Hausbatterie(n) oberhalb dieses Ladezustandes befindet.
+Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen wenn diese entsprechend geladen ist.
+Ist deaktiviert (= 100%), wenn kein Wert angegeben wird.
 
 **Beispie**:
 
 ```yaml
-    bufferSoC: 50
+    bufferSoC: 80 # Hausbatterie wird oberhalb SoC 80% als Puffer genutzt
 ```
 
 ### `prioritySoC`
 
-Die Hausbatterie bekommt Priorität bis zum angegebenen SoC (%) Wert. Wenn die Hausbatterie oberhalb des Wertes geladen wird, wird diese Leistung für das Laden des EVs miteinberechnet. Ist deaktiviert, wenn kein Wert angegeben wird.
+Die Ladung der Hausbatterie hat Priorität vor der Fahrzeugladung bis zum angegebenen SoC (%) Wert. Wenn die Hausbatterie oberhalb des Wertes geladen wird, wird diese Leistung für das Laden des EVs als verfügbare Überschussleistung betrachtet.
+Ist deaktiviert (= 0%), wenn kein Wert angegeben wird.
 
-**Beispie**:
+**Beispiel**:
 
 ```yaml
-    prioritySoC: 50 # Hausbatterie bekommt bis zum SoC 50% Priorität
+    prioritySoC: 50 # Hausbatterie bekommt bis zum SoC 50% Priorität beim laden
 ```
 
 ### `residualPower`
