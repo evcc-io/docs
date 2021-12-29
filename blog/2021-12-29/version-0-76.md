@@ -1,5 +1,5 @@
 ---
-title: Version 0.75
+title: Version 0.76
 authors: [derandereandi]
 tags: [release]
 hide_table_of_contents: false
@@ -22,5 +22,11 @@ Diese Version enthält eine Reihe von Fehlerkorrekturen und vielen kleinen Verbe
 - [Manuell (inkl. Windows)](/docs/installation/manual)
 
 ## Changelog
+
+### Version 0.76
+
+- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.76)
+
+### Version 0.75
 
 - [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.75)
