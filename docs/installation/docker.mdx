@@ -9,17 +9,35 @@ import TabItem from "@theme/TabItem";
 
 evcc kann auch als Docker Image installiert werden.
 
-:::note
-Momentan werden nur die CPU Architekturen AMD64, armv6 und arm64 in Docker Images unterstützt!
+:::important
+Die Verwendung von Docker erfordert fortgeschrittene System (Linux, macOS, Docker) Kenntnisse!
 :::
 
-## Erstinstallation
+:::note
+Momentan werden nur die CPU Architekturen AMD64, armv6 und arm64 in Docker Images unterstützt!
 
-Folge diesen Schritten um die jeweils aktuellste Version zu installieren:
+Diese Dokumentation ist für Docker und Synology. Bei Verwendung anderer System können sich Details unterscheiden.
+:::
 
-1. Erstelle ein lokales Verzeichnis, in welchem die evcc Konfigurationsdatei abgelegt wird.
-2. Wechsel in das erstellte Verzeichnis
-3. Führe folgenden Befehl aus:
+## Konfiguration
+
+1. Es wird eine **funktionierende** evcc Konfiguration benötigt. Für dazu die Schritte auf der folgende Systeme durch:
+   - [Debian, Ubuntu, Raspberry Pi](linux)
+   - [macOS](macos)
+   - [Manuell (inkl. Windows)](manual)
+
+   :::note
+   wir empfehlen das wenn möglich auf dem gleichen System durchzuführen auf welchem **evcc** später auch im Docker Container laufen soll
+   :::
+2. Kopiere die damit erzeugte Datei `evcc.yaml` in das Verzeichnis `/etc` auf dem System auf welchem Docker läuft.
+
+## Docker Installation
+
+Der Docker Container kann entweder manuell über einen Befehl in der Kommandozeile erstellt werden, oder über eine `docker-compose` Datei. Wem letzteres nichts sagt, führt die Schritte unter _Manuell_ aus.
+
+### Manuell
+
+1. Installiere den Docker Container:
 
   <Tabs groupId="docker">
     <TabItem value="default" label="Standard" default>
@@ -53,38 +71,10 @@ Folge diesen Schritten um die jeweils aktuellste Version zu installieren:
   :::
 
   Dies installiert einen Docker Container mit evcc und startet ihn.
-4. Prüfe die Installation und öffne einen Browser (auf dem gleichen Gerät) und gibt die folgende URL ein: `http://127.0.0.1:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
 
-  :::note
-  Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls der Browser nicht auf dem gleichen Computer geöffnet wurde.
-  :::
-
-5. Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
-
-  ```sh
-  docker exec -it evcc evcc configure
-  ```
-
-  Sofern alle Geräte korrekt konfiguriert sind, kannst du mit den nächsten Schritten fortfahren.
-6. Kopiere die erzeugte Konfigurationsdatei auf den Host:
-
-  ```sh
-  sudo docker cp evcc:/app/evcc.yaml /etc/evcc.yaml
-  ```
-
-7. Wenn die Konfiguration durchgeführt wurde, starte den Container mit folgendem Befehler erneut:
-
-  ```sh
-  docker container restart evcc
-  ```
-
-8. Gehe zurück zum Browser und lade die evcc Seite neu. Die Oberfläche sollte nun mit deinen konfigurierten Geräten zu sehen sein.
-
-### Alternative: docker-compose
+### Mit docker-compose
 
 `docker-compose` hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile, z.B. falls man weitere Programme wie Traefik in Verbindung mit evcc nutzen möchte. Hier ist ein einfaches Beispiel für eine solche Konfiguration
-
-Dies erfolgt anstelle von Schritt 3:
 
 <Tabs groupId="docker">
   <TabItem value="default" label="Standard" default>
@@ -133,8 +123,6 @@ Dies erfolgt anstelle von Schritt 3:
           driver: json-file
           options: {}
         network_mode: host
-        ports:
-          - 7070:7070/tcp
         volumes:
           - /etc/evcc.yaml:/etc/evcc.yaml
           - /etc/machine-id:/etc/machine-id
@@ -172,10 +160,16 @@ Dies erfolgt anstelle von Schritt 3:
   </TabItem>
 </Tabs>
 
-Starte den Container:
+Starte den Container mit:
 
 ```sh
 docker-compose up -d
 ```
 
-Fahre mit Schritt 4 oben fort.
+## Testen
+
+Prüfe die Installation und öffne einen Browser und gibt die folgende URL ein: `http://127.0.0.1:7070`.
+
+:::note
+Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls der Browser nicht auf dem gleichen Computer geöffnet wurde.
+:::
