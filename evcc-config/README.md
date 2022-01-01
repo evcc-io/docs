@@ -29,6 +29,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [go-eCharger (Cloud)](#charger-go-echarger-cloud)
 - [Heidelberg Energy Control (Modbus RTU)](#charger-heidelberg-energy-control-modbus-rtu)
 - [i-CHARGE CION (Modbus RTU-over-TCP)](#charger-i-charge-cion-modbus-rtu-over-tcp)
+- [Innogy eBox](#charger-innogy-ebox)
 - [KEBA Connect](#charger-keba-connect)
 - [Mobile Charger Connect (Audi, Bentley, Porsche)](#charger-mobile-charger-connect-audi-bentley-porsche)
 - [NRGKick BT (Bluetooth)](#charger-nrgkick-bt-bluetooth)
@@ -1281,6 +1282,16 @@ If you want to contribute configurations to this repository please open a Pull R
       address: 127 # Strom max
       type: writesingle
       decode: uint16
+```
+
+<a id="charger-innogy-ebox"></a>
+#### Innogy eBox
+
+```yaml
+- type: innogy
+  uri: 192.0.2.2:502
+  id: 1 
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-keba-connect"></a>
