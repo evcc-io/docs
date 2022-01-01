@@ -133,6 +133,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Porsche](#vehicle-porsche)
 - [Renault](#vehicle-renault)
 - [Tesla](#vehicle-tesla)
+- [Tronity Cloud Service](#vehicle-tronity-cloud-service)
 - [VW (e-Up, e-Golf, etc)](#vehicle-vw-e-up-e-golf-etc)
 - [VW ID (ID.3, ID.4, but also e-Golf, e-Up)](#vehicle-vw-id-id-3-id-4-but-also-e-golf-e-up)
 
@@ -1676,6 +1677,23 @@ If you want to contribute configurations to this repository please open a Pull R
     access: ...
     refresh: ...
   vin: # optional
+```
+
+<a id="vehicle-tronity-cloud-service"></a>
+#### Tronity Cloud Service
+
+```yaml
+- type: tronity
+  title: Golf # display name for UI
+  capacity: 10 # kWh
+  credentials:
+    id: # user id
+    secret: # secret
+  tokens:
+    access: # access token
+    refresh: # refresh token
+  vin: W... # VIN
+  cache: 5m # optional
 ```
 
 <a id="vehicle-vw-e-up-e-golf-etc"></a>
