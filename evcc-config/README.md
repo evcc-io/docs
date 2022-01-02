@@ -108,6 +108,9 @@ If you want to contribute configurations to this repository please open a Pull R
 - [VARTA Energiespeicher (Battery Meter)](#meter-varta-energiespeicher-battery-meter)
 - [VARTA Energiespeicher (Grid Meter)](#meter-varta-energiespeicher-grid-meter)
 - [VARTA Energiespeicher (PV Meter)](#meter-varta-energiespeicher-pv-meter)
+- [Victron Energy (Battery Meter)](#meter-victron-energy-battery-meter)
+- [Victron Energy (Grid Meter)](#meter-victron-energy-grid-meter)
+- [Victron Energy (PV Meter)](#meter-victron-energy-pv-meter)
 - [vzlogger (HTTP)](#meter-vzlogger-http)
 - [vzlogger (Push Server)](#meter-vzlogger-push-server)
 - [vzlogger (split import/export channels)](#meter-vzlogger-split-import-export-channels)
@@ -1041,6 +1044,77 @@ If you want to contribute configurations to this repository please open a Pull R
       address: 1102 # PV-sensor power
       type: input
       decode: uint16
+```
+
+<a id="meter-victron-energy-battery-meter"></a>
+#### Victron Energy (Battery Meter)
+
+```yaml
+- type: custom
+  power:
+    source: modbus
+    uri: 192.0.2.2:502
+    id: 100 # com.victronenergy.system
+    register:
+      address: 842 # active DC power
+      type: input
+      decode: int16
+    scale: -1
+  soc:
+    source: modbus
+    uri: 192.0.2.2:502
+    id: 225 # com.victronenergy.battery
+    register:
+      address: 266 # SoC
+      type: input
+      decode: uint16
+    scale: 0.1
+```
+
+<a id="meter-victron-energy-grid-meter"></a>
+#### Victron Energy (Grid Meter)
+
+```yaml
+- type: custom
+  power:
+    source: calc
+    add:
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 50 # com.victronenergy.grid
+      register:
+        address: 2600 # L1 grid power
+        type: input
+        decode: int16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 50 # com.victronenergy.grid
+      register:
+        address: 2601 # L2 grid power
+        type: input
+        decode: int16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 50 # com.victronenergy.grid
+      register:
+        address: 2602 # L3 grid power
+        type: input
+        decode: int16
+```
+
+<a id="meter-victron-energy-pv-meter"></a>
+#### Victron Energy (PV Meter)
+
+```yaml
+- type: custom
+  power:
+    source: modbus
+    uri: 192.0.2.2:502
+    id: 20 # com.victronenergy.pvinverter
+    register:
+      address: 1052 # Total AC Power
+      type: input
+      decode: int32
 ```
 
 <a id="meter-vzlogger-http"></a>
