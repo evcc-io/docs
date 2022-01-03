@@ -1214,7 +1214,6 @@ If you want to contribute configurations to this repository please open a Pull R
 - type: daheimladen
   token: # Request your access token from Daheimladen support: info@daheimladen.de
   stationID: xxxxxxxxxxxx990 # "Software Serial Number displayed on the display of the wallbox"
-  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-easee-home-cloud-api"></a>
