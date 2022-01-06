@@ -257,32 +257,6 @@ Definiere bis zu welchem SOC geladen wird.
 
 ---
 
-#### `mode`
-
-Der Lademodus wenn ein Fahrzeug von der Wallbox getrennt wird.
-
-**Mögliche Werte**: Siehe [Mode](#mode)
-
-**Beispiel**:
-
-```yaml
-    mode: pv
-```
-
-#### `targetSoC`
-
-Definiere bis zu welchem SOC geladen wird.
-
-**Mögliche Werte**: Siehe [Target](#target)
-
-**Beispiel**:
-
-```yaml
-    targetSoC: 80 # Lade bis maximal 80% SOC
-```
-
----
-
 ### `enable`
 
 Definiert das Verhalten wann im PV Modus das Laden begonnen wird.
