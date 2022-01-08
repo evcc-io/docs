@@ -2,11 +2,9 @@
 sidebar_position: 2
 ---
 
-import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
-
 # Konfiguration
 
-### Verwendung ohne Messgerät am Netzanschlusspunkt
+## Verwendung ohne Messgerät am Netzanschlusspunkt
 
 evcc kann auch nur mit den PV Erzeugungsdaten arbeiten. Wir empfehlen dann den Wert [`residualPower`](/docs/reference/configuration/site#residualpower) in der Konfiguration unter [`site`](/docs/reference/configuration/site) mit dem typischen Hausverbrauch zu konfigurieren. So kann auch der tatsächliche PV Überschuss grob abgeschätzt werden.
 
@@ -16,3 +14,64 @@ evcc kann auch nur mit den PV Erzeugungsdaten arbeiten. Wir empfehlen dann den W
 site:
   residualPower: 250 # 250W Hausverbrauch
 ```
+
+## Ersparnisberechnung
+
+In der evcc Oberfläche wird dir unten rechts angezeigt wieviel Prozent deiner geladenen Energie aus eigenem Sonnenstrom stammt (Beispiel: **85% Sonnenenergie**).
+Beim Klick darauf öffnet sich ein Dialog der mehr Details zur Ladenergie und deinen eingesparten Kosten zeigt.
+Damit diese Werte korrekt sind musst du deinen Energie- und Einspeisepreis in der Konfiguration hinterlegen.
+Hier ein Beispiel:
+
+**Beispiel**:
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [currency]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [currency]/kWh
+```
+
+Mehr Details zur Konfiguration findest du in [`tariffs`](../reference/configuration/tariffs).
+
+Für die Berechnung der Einsparungen erfasst evcc grob die Gesamtmenge der geladenen Energie und die verwendeten Energiequellen (Netz, Batterie, PV).
+
+**Was ist Sonnenenergie?**
+
+Die direkte PV-Nutzung und die vom Batteriesystem bereitgestellte Energie werden bei dieser Berechnung gleich behandelt.
+Evcc geht davon aus, dass der Hausspeicher primär zur Speicherung von überschüssigem, selbstproduzierten Sonnenstrom verwendet wird.
+Erfüllt der Speicher auch netzdienliche Leistungen (bspw. Sonnen) oder führt eine Kalibrierung mit Netzstrom durch, ist diese Annahme nicht immer korrekt.
+Batterieverluste durch die Umwandlung werden nicht berücksichtigt.
+
+**Berechnung von Ersparnis und effektivem Energiepreis**
+
+Der Algorithmus unterscheidet zwischen Netzstrom und selbst erzeugter Sonnenenergie (PV, Batterie).
+Der Kostenvorteil deiner Sonnenenergie ergibt sich aus der Differenz zwischen deinem Netzbezugspreis (z.B. 0,294 EUR/kWh) und deinem Einspeisetarif (z.B. 0,08 EUR/kWh).
+Jede geladene kWh selbst produzierter Energie ist in diesem Beispiel 0,214 EUR (0,294 - 0,08 EUR) günstiger als der Netzbezug.
+Hast du 10 kWh eigene Energie geladen entspricht das einer **Ersparnis** von 2,14 EUR.
+
+Würdest du dein Auto zu 100% mit eigener Sonnenenergie laden entspricht der angezeigte **effektive Energiepreis** deiner, nicht eingenommenen, Einspeisevergütung (bspw. 0,08 EUR/kWh).
+Lädst du dein Auto zu 50% aus Sonnenenergie und zu 50% aus Netzstrom passt sich der Energiepreis entsprechend an (bspw. 0,187 EUR/kWh).
+
+Wenn du keine Einspeisevergütung erhälst, kannst du den Einspeisepreis auf 0 setzen.
+Die Sonnenenergie wird dann als kostenlos gerechnet.
+Musst du deine selbstgenutzte Energie versteuern kannst du den Steuersatz auf deine Einspeisevergütung aufschlagen um realistischere Zahlen zu bekommen.
+
+Uns ist klar, dass diese Einsparung nicht allein evcc zuzuschreiben ist.
+Steckst du dein Auto an einem sonnigen Tag an eine Wallbox wird ein Teil der geladenen Energie auch Sonnenstrom sein.
+Evcc hilft dir aber den Anteil der geladenen Sonnenenergie zu maximieren.
+
+**Berechnung des Sonnenenergieanteils**
+
+Wenn du gleichzeitig Energie aus mehreren Quellen beziehst (z.B. 50% Netz, 50% PV), wird der Algorithmus die Energiequellen gleichmäßig verteilen.
+Er geht davon aus, dass dein Hausverbrauch und deine aktiven Lastpunkte jeweils einen Energiemix von 50/50 verwenden.
+Das Laden des Autos wird in diesem Modell genau so behandelt wie das Verwenden der Waschmaschine.
+
+Flexible Preise (Awattar, Tibber) werden für die Ermittlung des effektiven Energiepreises berücksichtigt.
+Der Ersparnisbetrag wird allerdings immer in relation zum aktuell gültigen Energiepreis ermittelt.
+
+Die Energiemengen und Einsparungen sind derzeit nicht persistent und werden nach einem Neustart des Dienstes zurückgesetzt.
