@@ -4,7 +4,7 @@ sidebar_position: 11
 
 # `tariffs`
 
-Hier kannst du deinen Energietarif und ggf. deine Einspeisevergütung angeben. Evcc verwendet diese Werte für eine grobe [Einsparungsberechnung](../../guides/setup#ersparnisberechnung), die in der Web-UI angezeigt wird.
+Hier kannst du deinen Energietarif und ggf. deine Einspeisevergütung angeben. Evcc verwendet diese Werte für eine grobe [Einsparungsberechnung](/docs/guides/setup#ersparnisberechnung), die in der Web-UI angezeigt wird.
 
 **Beispiel: Konstanter Energiepreis**
 
