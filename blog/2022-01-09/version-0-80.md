@@ -28,7 +28,7 @@ Ihr seid die Besten. Danke für euren Support! 💚🥳
 
 ## Docker
 
-Wer Docker verwendet, kann nun über die Tags `release` jeweils die aktuelle Version verwenden. Mit dem Tag `nightly` gibt es dann täglich neue Builds, die aber noch nicht so gut getestet sein können. Weitere Informationen zur Docker Installation sind hier zu finden: [Docker, Synology](/docs/installation/docker)
+Wer Docker verwendet, kann nun über die Tags `latest` jeweils die aktuelle Version verwenden. Mit dem Tag `nightly` gibt es dann täglich neue Builds, die aber noch nicht so gut getestet sein können. Weitere Informationen zur Docker Installation sind hier zu finden: [Docker, Synology](/docs/installation/docker)
 
 ## Fehlerkorrekturen
 
