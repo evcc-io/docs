@@ -1,6 +1,6 @@
 ---
 title: Version 0.80
-authors: [derandereandi, naltaltis]
+authors: [derandereandi, naltatis]
 tags: [release]
 hide_table_of_contents: false
 ---
