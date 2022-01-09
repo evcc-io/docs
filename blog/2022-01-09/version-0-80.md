@@ -4,6 +4,7 @@ authors: [derandereandi]
 tags: [release]
 hide_table_of_contents: false
 ---
+
 Auch dieses Jahr geht es weiter mit weiteren Aktualisierungen :) Zusätzlich zu den kleineren Updates mit 0.78 und 0.79, gibt es nun auch ein paar größere Änderungen mit der Version 0.80.
 
 ## `evcc configure` Verbesserungen
@@ -11,6 +12,19 @@ Auch dieses Jahr geht es weiter mit weiteren Aktualisierungen :) Zusätzlich zu 
 Wenn man eine Konfiguration mit `evcc configure` erstellt, wird zuerst nach dem eigenen Know How gefragt. So können fortgeschrittene Anwender die Konfiguration in technischen Bereichen etwas genauer einstellen. Dieser Modus ist weiterhin auch über `evcc configure --advanced` direkt verfügbar. Einsteiger empfehlen wir diesen Modus jedoch nicht, da mehr Know-How erforderlich ist.
 
 Zustätzlich gibt es weitere Geräte Templates, Korrekturen an bisherigen Templates und weitere Einstellmöglichkeiten.
+
+## Sonnenenergieanteil und Ersparnis
+
+![Ersparnisdialog](ersparnis.png)
+
+Das neue Ersparnisfeature zeigt dir an wie viel deines Ladestroms durch selbsproduzierte Sonnenenergie gedeckt werden konnte.
+Der Prozentwert wird unten rechts in der Ecke angezeigt.
+Beim Klick darauf bekommst du weitere Details in einem Dialog angezeigt.
+Dort siehst du neben der Energiemenge auch deinen effektiven Energiepreis und die Gesamtersparnis gegenüber reinem Netzbezug.
+Hier findest du mehr Informationen zur [Berechnung und Preiskonfiguration](/docs/guides/setup#ersparnisberechnung).
+
+[Sponsoren](/docs/sponsorship) finden in dem neuen Dialog unter dem Dankeschön-Konfetti-Button einen, _\*drumroll\*_, Link um unsere neuen evcc Sticker zu bekommen.
+Ihr seid die Besten. Danke für euren Support! 💚🥳
 
 ## Docker
 
