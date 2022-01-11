@@ -135,6 +135,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Peugeot](#vehicle-peugeot)
 - [Porsche](#vehicle-porsche)
 - [Renault](#vehicle-renault)
+- [Smart EQ](#vehicle-smart-eq)
 - [Tesla](#vehicle-tesla)
 - [Tronity Cloud Service](#vehicle-tronity-cloud-service)
 - [VW (e-Up, e-Golf, etc)](#vehicle-vw-e-up-e-golf-etc)
@@ -1737,6 +1738,18 @@ If you want to contribute configurations to this repository please open a Pull R
   user: # user
   password: # password
   vin: WREN... # optional
+```
+
+<a id="vehicle-smart-eq"></a>
+#### Smart EQ
+
+```yaml
+- type: smart
+  title: Smart EQ # display name for UI
+  capacity: 17.6 # kWh
+  user: # user
+  password: # password
+  vin: W...
 ```
 
 <a id="vehicle-tesla"></a>
