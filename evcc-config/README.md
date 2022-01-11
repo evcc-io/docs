@@ -1610,7 +1610,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - type: custom
   title: Mein Auto # display name for UI
   capacity: 50 # byttery capacity (kWh)
-  charge: # battery soc (%)
+  soc: # battery soc (%)
     source: # plugin type
     # ...
   status: # optional charge status (A..F)

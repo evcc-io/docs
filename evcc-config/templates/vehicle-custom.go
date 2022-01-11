@@ -11,7 +11,7 @@ func init() {
 		Name:   "Generic",
 		Sample: `title: Mein Auto # display name for UI
 capacity: 50 # byttery capacity (kWh)
-charge: # battery soc (%)
+soc: # battery soc (%)
   source: # plugin type
   # ...
 status: # optional charge status (A..F)
