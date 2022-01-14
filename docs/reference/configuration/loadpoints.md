@@ -128,7 +128,7 @@ Der Standard Lademodus wenn evcc startet.
 
 :::note
 Der Wert `"off"` muss hier unbedingt als String in Anführungszeichen gesetzt werden. Andernfalls wird der Wert von YAML als `false` interpretiert, so das der Mode ungültig ist.
-Das Verhalten wird mit erst einer zukünftigen YAML Version geändert. Siehe dazu auch: https://github.com/evcc-io/evcc/issues/2272.
+Das Verhalten wird erst mit einer zukünftigen YAML Version geändert. Siehe dazu auch: https://github.com/evcc-io/evcc/issues/2272.
 :::
 
 - `now`: Lade sofort mit der maximalen möglichen Leistung.
