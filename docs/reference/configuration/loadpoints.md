@@ -124,7 +124,13 @@ Der Standard Lademodus wenn evcc startet.
 
 **Mögliche Werte**:
 
-- `off`: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
+- `"off"`: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
+
+:::note
+Der Wert `"off"` muss hier unbedingt als String in Anführungszeichen gesetzt werden. Andernfalls wird der Wert von YAML als `false` interpretiert, so das der Mode ungültig ist.
+Das Verhalten wird mit erst einer zukünftigen YAML Version geändert. Siehe dazu auch: https://github.com/evcc-io/evcc/issues/2272.
+:::
+
 - `now`: Lade sofort mit der maximalen möglichen Leistung.
 - `minpv`: Lade sofort mit der minimal möglichen Leistung. Falls genug PV Überschuss vorhanden ist, lade schneller.
 - `pv`: Lade nur mit PV Überschuss und pausiere wenn nicht genug Leistung verfügbar ist.
