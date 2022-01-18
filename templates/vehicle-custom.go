@@ -19,8 +19,7 @@ status: # optional charge status (A..F)
   # ...
 range: # optional electric range (km)
   source: # plugin type
-  # ...
-cache: 5m # optional cache duration`,
+  # ...`,
 	}
 
 	registry.Add(template)
