@@ -29,3 +29,9 @@ Hier geht es zur Einrichtung mit Docker (z.b. Synology)
 Hier geht es zur manuellen Einrichtung und Installation, inklusive Windows
 
 [Weiterlesen...](manual)
+
+## Service (Linux & Windows)
+
+Hier geht es zur Einrichtung von EVCC als Service zwecks Autostart
+
+[Weiterlesen...](service)
