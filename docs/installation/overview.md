@@ -32,6 +32,6 @@ Hier geht es zur manuellen Einrichtung und Installation, inklusive Windows
 
 ## Service (Linux & Windows)
 
-Hier geht es zur Einrichtung von EVCC als Service zwecks Autostart
+Hier geht es zur Einrichtung von evcc als Service zwecks Autostart
 
 [Weiterlesen...](service)
