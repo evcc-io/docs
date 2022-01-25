@@ -80,7 +80,12 @@ Definiert die Geräte ID, die für die Erstellung der Device ID verwendet wird. 
 
 :::info
 Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich auch die zufällig erzeugte Geräte ID. Der SHM wird evcc in diesem Fall als neues Gerät erkennen.
-Um dies zu verhindern, sollte die Geräte ID fest definiert werden.
+Um dies zu verhindern, sollte die Geräte ID fest definiert werden. Die aktuell verwendetete Geräte ID kann man so ermitteln:
+**http://ipadr:7070/semp/** im Browser liefert :
+\<Device2EM xmlns="http://www.sma.de/communication/schema/SEMP/v1"\>
+\<DeviceId\>**F-28081973-BBBB4179bf1f-00**\</DeviceId\>
+um die ID dann fest zu definieren in der Konfiguration nachtragen: **deviceid: BBBB4179bf1f**
+Bei mehreren Ladepunkten nur den **niedrigsten** Wert der deviceid eintragen, die anderen werden automatisch erhöht.
 
 Wenn evcc als Docker Container ausgeführt wird, muss hierfür `machine-id` gemounted werden. Siehe auch [Docker Konfiguration](../../installation/docker)
 :::
