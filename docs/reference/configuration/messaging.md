@@ -52,8 +52,8 @@ Die verfügbaren Ereignisse sind:
 `msg` definiert den Text für den Nachrichteninhalt. Im Text können verschiedene Variablen für evcc Informationen verwendet werden.
 
 **Mögliche Variablen**:
-
-- `${loadpoint}`: Text mit dem Wert von [`title`](loadpoints#title) des [`loadpoints`](loadpoints) (Ladepunkt)
+- `${title}`: Text mit dem Wert von [`title`](loadpoints#title) des [`loadpoints`](loadpoints) (Ladepunkt)
+- `${loadpoint}`: Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2...
 - `${mode}`: Text mit dem aktiven Lademodus
 - `${energy:%.1f}`: Geladene Energiemenge in kWh
 - `${duration}`: Dauer der Ladezeit
@@ -61,7 +61,7 @@ Die verfügbaren Ereignisse sind:
 **Beispiel**:
 
 ```yaml
-      msg: Started charging in "${mode}" mode
+      msg: Started "${title}" charging in "${mode}" mode
 ```
 
 ## `services`
@@ -125,7 +125,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - type: telegram
   token: # bot id
   chats:
-  - # list of chat ids
+  - # list of chat ids, die ChatIds müssen mit einem weiteren -Zeichen starten
 ```
 
 ### `email`
