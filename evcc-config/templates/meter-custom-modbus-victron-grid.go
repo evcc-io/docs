@@ -14,23 +14,23 @@ func init() {
   add:
   - source: modbus
     uri: 192.0.2.2:502
-    id: 50 # com.victronenergy.grid
+    id: 100 # com.victronenergy.system
     register:
-      address: 2600 # L1 grid power
+      address: 820 # L1 grid power
       type: input
       decode: int16
   - source: modbus
     uri: 192.0.2.2:502
-    id: 50 # com.victronenergy.grid
+    id: 100 # com.victronenergy.system
     register:
-      address: 2601 # L2 grid power
+      address: 821 # L2 grid power
       type: input
       decode: int16
   - source: modbus
     uri: 192.0.2.2:502
-    id: 50 # com.victronenergy.grid
+    id: 100 # com.victronenergy.system
     register:
-      address: 2602 # L3 grid power
+      address: 822 # L3 grid power
       type: input
       decode: int16`,
 	}
