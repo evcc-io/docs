@@ -10,6 +10,7 @@ func init() {
 		Type:   "simpleevse",
 		Name:   "EVSE DIN",
 		Sample: `# http://evracing.cz/simple-evse-wallbox
+id: 1
 # either locally attached:
 device: /dev/ttyUSB0 # serial RS485 interface
 # or via TCP:

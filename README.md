@@ -1369,6 +1369,7 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: simpleevse
   # http://evracing.cz/simple-evse-wallbox
+  id: 1
   # either locally attached:
   device: /dev/ttyUSB0 # serial RS485 interface
   # or via TCP:
