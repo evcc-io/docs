@@ -47,6 +47,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [TP-LINK Smart Plug](#charger-tp-link-smart-plug)
 - [Vestel EVC04](#charger-vestel-evc04)
 - [Wallbe (Eco, Pro)](#charger-wallbe-eco-pro)
+- [Walther Werke Basic Evo Pro (Modbus RTU)](#charger-walther-werke-basic-evo-pro-modbus-rtu)
 - [wbec](#charger-wbec)
 
 ## Meters
@@ -1663,6 +1664,18 @@ If you want to contribute configurations to this repository please open a Pull R
     power: true
     energy: true
     currents: true
+```
+
+<a id="charger-walther-werke-basic-evo-pro-modbus-rtu"></a>
+#### Walther Werke Basic Evo Pro (Modbus RTU)
+
+```yaml
+- type: heidelberg
+  device: /dev/ttyUSB0
+  baudrate: 19200
+  comset: 8E1
+  id: 1 # configurable (S2/DIP 1)
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-wbec"></a>
