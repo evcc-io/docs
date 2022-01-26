@@ -1177,12 +1177,11 @@ If you want to contribute configurations to this repository please open a Pull R
   soc:
     source: modbus
     uri: 192.0.2.2:502
-    id: 225 # com.victronenergy.battery
+    id: 100 # com.victronenergy.system
     register:
-      address: 266 # SoC
+      address: 843 # SoC
       type: input
       decode: uint16
-    scale: 0.1
 ```
 
 <a id="meter-victron-energy-grid-meter"></a>
@@ -1195,23 +1194,23 @@ If you want to contribute configurations to this repository please open a Pull R
     add:
     - source: modbus
       uri: 192.0.2.2:502
-      id: 50 # com.victronenergy.grid
+      id: 100 # com.victronenergy.system
       register:
-        address: 2600 # L1 grid power
+        address: 820 # L1 grid power
         type: input
         decode: int16
     - source: modbus
       uri: 192.0.2.2:502
-      id: 50 # com.victronenergy.grid
+      id: 100 # com.victronenergy.system
       register:
-        address: 2601 # L2 grid power
+        address: 821 # L2 grid power
         type: input
         decode: int16
     - source: modbus
       uri: 192.0.2.2:502
-      id: 50 # com.victronenergy.grid
+      id: 100 # com.victronenergy.system
       register:
-        address: 2602 # L3 grid power
+        address: 822 # L3 grid power
         type: input
         decode: int16
 ```
@@ -1222,13 +1221,57 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: custom
   power:
-    source: modbus
-    uri: 192.0.2.2:502
-    id: 20 # com.victronenergy.pvinverter
-    register:
-      address: 1052 # Total AC Power
-      type: input
-      decode: int32
+    source: calc
+    add:
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 808 # ACout pv power L1
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 809 # ACout pv power L2
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 810 # ACout pv power L3
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 811 # ACin pv power L1
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 812 # ACin pv power L2
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 813 # ACin pv power L3
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 850 # DC pv power
+        type: input
+        decode: uint16
 ```
 
 <a id="meter-vzlogger-http"></a>

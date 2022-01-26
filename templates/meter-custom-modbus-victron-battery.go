@@ -21,12 +21,11 @@ func init() {
 soc:
   source: modbus
   uri: 192.0.2.2:502
-  id: 225 # com.victronenergy.battery
+  id: 100 # com.victronenergy.system
   register:
-    address: 266 # SoC
+    address: 843 # SoC
     type: input
-    decode: uint16
-  scale: 0.1`,
+    decode: uint16`,
 	}
 
 	registry.Add(template)
