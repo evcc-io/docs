@@ -17,6 +17,7 @@ If you want to contribute configurations to this repository please open a Pull R
 ## Chargers
 
 - [ABL eMH / SENEC.Wallbox pro](#charger-abl-emh--senec-wallbox-pro)
+- [Alfen Eve](#charger-alfen-eve)
 - [Alphatec Wallbox Mini](#charger-alphatec-wallbox-mini)
 - [cFos PowerBrain](#charger-cfos-powerbrain)
 - [Daheimladen (Cloud API)](#charger-daheimladen-cloud-api)
@@ -44,6 +45,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Tasmota](#charger-tasmota)
 - [TinkerForge WARP Charger](#charger-tinkerforge-warp-charger)
 - [TP-LINK Smart Plug](#charger-tp-link-smart-plug)
+- [Vestel EVC04](#charger-vestel-evc04)
 - [Wallbe (Eco, Pro)](#charger-wallbe-eco-pro)
 - [wbec](#charger-wbec)
 
@@ -1309,6 +1311,16 @@ If you want to contribute configurations to this repository please open a Pull R
   # an evcc sponsortoken is required for using this charger
 ```
 
+<a id="charger-alfen-eve"></a>
+#### Alfen Eve
+
+```yaml
+- type: alfen
+  uri: 192.0.2.2:502 # TCP ModBus address
+  id: 1
+  # an evcc sponsortoken is required for using this charger
+```
+
 <a id="charger-alphatec-wallbox-mini"></a>
 #### Alphatec Wallbox Mini
 
@@ -1629,6 +1641,16 @@ If you want to contribute configurations to this repository please open a Pull R
 - type: tplink
   uri: 192.0.2.2 # TP-LINK Smart Plug ip address (local)
   standbypower: 15 # treat as charging above this power
+```
+
+<a id="charger-vestel-evc04"></a>
+#### Vestel EVC04
+
+```yaml
+- type: vestel
+  uri: 192.0.2.2:502 # TCP ModBus address
+  id: 255
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-wallbe-eco-pro"></a>
