@@ -47,6 +47,15 @@ Definiert ob das definierte HEMS die Ladesteuerung von evcc übernehmen soll.
 - `true`: Hiermit kann das Verhältnis von Netzstrom zu PV Leistung für den Modus **Min+PV** im Sunny Portal über den Slider "Optional energy demand" eingestellt werden. Falls die notwendige PV Leistung nicht verfügbar ist, wird das Laden wie im Modus **PV** unterbrochen. Den Slider also ganz nach links zu schieben, bewirkt dass der Modus **Min+PV** wie beschrieben funktioniert. Wenn der Slider ganz nach rechts geschoben wird, verhällt sich der Modus **Min+PV** wie der **PV** Modus.
 - `false`: Der SHM kann die Lademodi nicht beeinflussen, diese werden nur von evcc gesteuert.
 
+**Beispiel**:
+
+```yaml
+hems:
+  type: sma
+  allowcontrol: false
+  ...
+```
+
 ---
 
 ## Optionale SMA Parameter
@@ -72,25 +81,54 @@ Definiert die VendorID die für die Erstellung der Device ID verwendet wird. Wen
 
 HEX-String, Länge 8 Zeichen
 
+**Beispiel**:
+
+```yaml
+hems:
+  type: sma
+  vendorid: AAAAAAAA
+  ...
+```
+
 ---
 
 ### `deviceid`
 
 Definiert die Geräte ID, die für die Erstellung der Device ID verwendet wird. Wenn keine Geräte ID angegeben wird, generiert evcc eine zufällige Geräte ID in Abhängigkeit auf den aktuellen Computer.
 
-:::info
-Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich auch die zufällig erzeugte Geräte ID. Der SHM wird evcc in diesem Fall als neues Gerät erkennen.
-Um dies zu verhindern, sollte die Geräte ID fest definiert werden. Die aktuell verwendetete Geräte ID kann man so ermitteln:
-**http://ipadr:7070/semp/** im Browser liefert :
-\<Device2EM xmlns="http://www.sma.de/communication/schema/SEMP/v1"\>
-\<DeviceId\>**F-28081973-BBBB4179bf1f-00**\</DeviceId\>
-um die ID dann fest zu definieren in der Konfiguration nachtragen: **deviceid: BBBB4179bf1f**
-Bei mehreren Ladepunkten nur den **niedrigsten** Wert der deviceid eintragen, die anderen werden automatisch erhöht.
+HEX-String, Länge: 12 Zeichen
 
+**Beispiel**:
+
+```yaml
+hems:
+  type: sma
+  deviceid: BBBBBBBBBBBB
+  ...
+```
+
+:::info Docker Container
 Wenn evcc als Docker Container ausgeführt wird, muss hierfür `machine-id` gemounted werden. Siehe auch [Docker Konfiguration](../../installation/docker)
 :::
 
-HEX-String, Länge: 12 Zeichen
+#### Bisherige DeviceID herausfinden
+
+Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich auch die zufällig erzeugte Geräte ID. Der SHM wird evcc in diesem Fall als neues Gerät erkannt und die bisherigen Geräte werden im SMA Portal nicht erkannt.
+
+Um dies zu verhindern, sollte die Geräte ID vom bisherigen System übernommen werden:
+
+- Öffne in einem Browser die Adresse `http://IP-ADRESSE-BISHERIGER-EVCC-HOST:7070/semp`
+- Es wird ein Text im XML Format angezeigt. Der Text beginnt in dieser Form:
+
+  ```xml
+  <Device2EM xmlns="http://www.sma.de/communication/schema/SEMP/v1">
+    <DeviceInfo>
+      <Identification>
+        <DeviceId>F-28081973-BBBBBBBBBBBB-00</DeviceId>
+  ```
+
+- Die Zeichenkette an der Stelle von `BBBBBBBBBBBB` entspricht der DeviceID
+- Diese Zeichenkette muss nun in der Konfiguration für `deviceid` im neuen System übernommen werden
 
 ---
 
