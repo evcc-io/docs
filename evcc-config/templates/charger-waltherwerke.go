@@ -8,7 +8,7 @@ func init() {
 	template := registry.Template{
 		Class:  "charger",
 		Type:   "heidelberg",
-		Name:   "Heidelberg Energy Control (Modbus RTU)",
+		Name:   "Walther Werke Basic Evo Pro (Modbus RTU)",
 		Sample: `device: /dev/ttyUSB0
 baudrate: 19200
 comset: 8E1

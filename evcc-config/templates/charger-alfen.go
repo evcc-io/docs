@@ -7,12 +7,10 @@ import (
 func init() {
 	template := registry.Template{
 		Class:  "charger",
-		Type:   "heidelberg",
-		Name:   "Heidelberg Energy Control (Modbus RTU)",
-		Sample: `device: /dev/ttyUSB0
-baudrate: 19200
-comset: 8E1
-id: 1 # configurable (S2/DIP 1)
+		Type:   "alfen",
+		Name:   "Alfen Eve",
+		Sample: `uri: 192.0.2.2:502 # TCP ModBus address
+id: 1
 # an evcc sponsortoken is required for using this charger`,
 	}
 

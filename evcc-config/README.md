@@ -17,6 +17,8 @@ If you want to contribute configurations to this repository please open a Pull R
 ## Chargers
 
 - [ABL eMH / SENEC.Wallbox pro](#charger-abl-emh--senec-wallbox-pro)
+- [Alfen Eve](#charger-alfen-eve)
+- [Alphatec Wallbox Mini](#charger-alphatec-wallbox-mini)
 - [cFos PowerBrain](#charger-cfos-powerbrain)
 - [Daheimladen (Cloud API)](#charger-daheimladen-cloud-api)
 - [Easee Home (Cloud API)](#charger-easee-home-cloud-api)
@@ -35,6 +37,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [NRGKick BT (Bluetooth)](#charger-nrgkick-bt-bluetooth)
 - [NRGKick Connect](#charger-nrgkick-connect)
 - [openWB (MQTT)](#charger-openwb-mqtt)
+- [PC Electric Garo](#charger-pc-electric-garo)
 - [Phoenix EM-CP-PP-ETH Controller (Modbus TCP)](#charger-phoenix-em-cp-pp-eth-controller-modbus-tcp)
 - [Phoenix EV-ETH Controller (Modbus TCP)](#charger-phoenix-ev-eth-controller-modbus-tcp)
 - [Phoenix EV-SER Controller (Modbus RTU)](#charger-phoenix-ev-ser-controller-modbus-rtu)
@@ -42,7 +45,9 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Tasmota](#charger-tasmota)
 - [TinkerForge WARP Charger](#charger-tinkerforge-warp-charger)
 - [TP-LINK Smart Plug](#charger-tp-link-smart-plug)
+- [Vestel EVC04](#charger-vestel-evc04)
 - [Wallbe (Eco, Pro)](#charger-wallbe-eco-pro)
+- [Walther Werke Basic Evo Pro (Modbus RTU)](#charger-walther-werke-basic-evo-pro-modbus-rtu)
 - [wbec](#charger-wbec)
 
 ## Meters
@@ -62,6 +67,9 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Fronius Symo GEN24 Plus (Grid Meter)](#meter-fronius-symo-gen24-plus-grid-meter)
 - [Fronius Symo GEN24 Plus (PV Meter)](#meter-fronius-symo-gen24-plus-pv-meter)
 - [Generic](#meter-generic)
+- [Huawei SUN2000 with Sdongle (PV Meter)](#meter-huawei-sun2000-with-sdongle-pv-meter)
+- [Huawei SUN2000 with Sdongle and power sensor (Battery Meter)](#meter-huawei-sun2000-with-sdongle-and-power-sensor-battery-meter)
+- [Huawei SUN2000 with Sdongle and power sensor (Grid Meter)](#meter-huawei-sun2000-with-sdongle-and-power-sensor-grid-meter)
 - [Huawei SUN2000-8KTL (PV Meter)](#meter-huawei-sun2000-8ktl-pv-meter)
 - [Kostal Energy Meter via inverter (Grid Meter)](#meter-kostal-energy-meter-via-inverter-grid-meter)
 - [Kostal Hybrid Inverter (Battery Meter)](#meter-kostal-hybrid-inverter-battery-meter)
@@ -138,6 +146,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Smart EQ](#vehicle-smart-eq)
 - [Tesla](#vehicle-tesla)
 - [Tronity Cloud Service](#vehicle-tronity-cloud-service)
+- [Volvo](#vehicle-volvo)
 - [VW (e-Up, e-Golf, etc)](#vehicle-vw-e-up-e-golf-etc)
 - [VW ID (ID.3, ID.4, but also e-Golf, e-Up)](#vehicle-vw-id-id-3-id-4-but-also-e-golf-e-up)
 
@@ -376,6 +385,110 @@ If you want to contribute configurations to this repository please open a Pull R
       # ...
     - source: # L3 plugin type
       # ...
+```
+
+<a id="meter-huawei-sun2000-with-sdongle-pv-meter"></a>
+#### Huawei SUN2000 with Sdongle (PV Meter)
+
+```yaml
+- type: custom
+  power:
+    source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    timeout: 30s
+    connectdelay: 5s
+    delay: 2s
+    register:
+      address: 32080 # Active generation power
+      type: holding
+      decode: int32
+```
+
+<a id="meter-huawei-sun2000-with-sdongle-and-power-sensor-battery-meter"></a>
+#### Huawei SUN2000 with Sdongle and power sensor (Battery Meter)
+
+```yaml
+- type: custom
+  power:
+    source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    timeout: 30s
+    connectdelay: 5
+    delay: 2s
+    register:
+      address: 37001
+      type: holding
+      decode: int32
+  soc:
+    source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    timeout: 30s
+    connectdelay: 5
+    delay: 2s
+    register:
+      address: 37004
+      type: holding
+      decode: uint16
+    scale: 0.1
+```
+
+<a id="meter-huawei-sun2000-with-sdongle-and-power-sensor-grid-meter"></a>
+#### Huawei SUN2000 with Sdongle and power sensor (Grid Meter)
+
+```yaml
+- type: custom
+  power:
+    source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    timeout: 30s
+    connectdelay: 5
+    delay: 2s
+    register:
+      address: 37113 # Grid import export power
+      type: holding
+      decode: int32
+    scale: -1
+  energy:
+    source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    timeout: 30s
+    connectdelay: 5
+    delay: 2s
+    register:
+      address: 37121 # Grid active energy
+      type: holding
+      decode: int32
+    scale: 0.01
+  currents:
+  - source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    register:
+      address: 37107 # Huawei phase A grid current
+      type: holding
+      decode: int32
+    scale: -0.01
+  - source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    register:
+      address: 37109 # Huawei phase B grid current
+      type: holding
+      decode: int32
+    scale: -0.01
+  - source: modbus
+    uri: 192.0.2.2:502
+    model: huawei
+    register:
+      address: 37111 # Huawei phase C grid current
+      type: holding
+      decode: int32
+    scale: -0.01
 ```
 
 <a id="meter-huawei-sun2000-8ktl-pv-meter"></a>
@@ -1064,12 +1177,11 @@ If you want to contribute configurations to this repository please open a Pull R
   soc:
     source: modbus
     uri: 192.0.2.2:502
-    id: 225 # com.victronenergy.battery
+    id: 100 # com.victronenergy.system
     register:
-      address: 266 # SoC
+      address: 843 # SoC
       type: input
       decode: uint16
-    scale: 0.1
 ```
 
 <a id="meter-victron-energy-grid-meter"></a>
@@ -1082,23 +1194,23 @@ If you want to contribute configurations to this repository please open a Pull R
     add:
     - source: modbus
       uri: 192.0.2.2:502
-      id: 50 # com.victronenergy.grid
+      id: 100 # com.victronenergy.system
       register:
-        address: 2600 # L1 grid power
+        address: 820 # L1 grid power
         type: input
         decode: int16
     - source: modbus
       uri: 192.0.2.2:502
-      id: 50 # com.victronenergy.grid
+      id: 100 # com.victronenergy.system
       register:
-        address: 2601 # L2 grid power
+        address: 821 # L2 grid power
         type: input
         decode: int16
     - source: modbus
       uri: 192.0.2.2:502
-      id: 50 # com.victronenergy.grid
+      id: 100 # com.victronenergy.system
       register:
-        address: 2602 # L3 grid power
+        address: 822 # L3 grid power
         type: input
         decode: int16
 ```
@@ -1109,13 +1221,57 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: custom
   power:
-    source: modbus
-    uri: 192.0.2.2:502
-    id: 20 # com.victronenergy.pvinverter
-    register:
-      address: 1052 # Total AC Power
-      type: input
-      decode: int32
+    source: calc
+    add:
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 808 # ACout pv power L1
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 809 # ACout pv power L2
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 810 # ACout pv power L3
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 811 # ACin pv power L1
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 812 # ACin pv power L2
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 813 # ACin pv power L3
+        type: input
+        decode: uint16
+    - source: modbus
+      uri: 192.0.2.2:502
+      id: 100 # com.victronenergy.system
+      register:
+        address: 850 # DC pv power
+        type: input
+        decode: uint16
 ```
 
 <a id="meter-vzlogger-http"></a>
@@ -1199,6 +1355,31 @@ If you want to contribute configurations to this repository please open a Pull R
   # an evcc sponsortoken is required for using this charger
 ```
 
+<a id="charger-alfen-eve"></a>
+#### Alfen Eve
+
+```yaml
+- type: alfen
+  uri: 192.0.2.2:502 # TCP ModBus address
+  id: 1
+  # an evcc sponsortoken is required for using this charger
+```
+
+<a id="charger-alphatec-wallbox-mini"></a>
+#### Alphatec Wallbox Mini
+
+```yaml
+- type: alphatec
+  # chose either locally attached on serial port:
+  device: /dev/ttyUSB0
+  baudrate: 9600
+  comset: 8N1
+  # or via external TCP-RS485 translator:
+  # uri: 192.0.2.2:502
+  id: 1 
+  # an evcc sponsortoken is required for using this charger
+```
+
 <a id="charger-cfos-powerbrain"></a>
 #### cFos PowerBrain
 
@@ -1226,6 +1407,7 @@ If you want to contribute configurations to this repository please open a Pull R
   password: *****
   charger: EH______
   cache: 10s
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-eebus-compatible-wallbox-e-g-mobile-charger-connect"></a>
@@ -1243,6 +1425,7 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: simpleevse
   # http://evracing.cz/simple-evse-wallbox
+  id: 1
   # either locally attached:
   device: /dev/ttyUSB0 # serial RS485 interface
   # or via TCP:
@@ -1314,6 +1497,7 @@ If you want to contribute configurations to this repository please open a Pull R
   baudrate: 19200
   comset: 8E1
   id: 1 # configurable (S2/DIP 1)
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-i-charge-cion-modbus-rtu-over-tcp"></a>
@@ -1416,6 +1600,17 @@ If you want to contribute configurations to this repository please open a Pull R
   id: 1 # loadpoint id
 ```
 
+<a id="charger-pc-electric-garo"></a>
+#### PC Electric Garo
+
+```yaml
+- type: garo
+  uri: http://192.0.2.2:8080/servlet
+  meter: <CENTRAL100|CENTRAL101|INTERNAL|EXTERNAL|TWIN> # Value can be found at http://192.0.2.2:8080/servlet/rest/chargebox/status 
+  # Only devices configured as master can be used right now!
+  # an evcc sponsortoken is required for using this charger
+```
+
 <a id="charger-phoenix-em-cp-pp-eth-controller-modbus-tcp"></a>
 #### Phoenix EM-CP-PP-ETH Controller (Modbus TCP)
 
@@ -1492,6 +1687,16 @@ If you want to contribute configurations to this repository please open a Pull R
   standbypower: 15 # treat as charging above this power
 ```
 
+<a id="charger-vestel-evc04"></a>
+#### Vestel EVC04
+
+```yaml
+- type: vestel
+  uri: 192.0.2.2:502 # TCP ModBus address
+  id: 255
+  # an evcc sponsortoken is required for using this charger
+```
+
 <a id="charger-wallbe-eco-pro"></a>
 #### Wallbe (Eco, Pro)
 
@@ -1502,6 +1707,18 @@ If you want to contribute configurations to this repository please open a Pull R
     power: true
     energy: true
     currents: true
+```
+
+<a id="charger-walther-werke-basic-evo-pro-modbus-rtu"></a>
+#### Walther Werke Basic Evo Pro (Modbus RTU)
+
+```yaml
+- type: heidelberg
+  device: /dev/ttyUSB0
+  baudrate: 19200
+  comset: 8E1
+  id: 1 # configurable (S2/DIP 1)
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-wbec"></a>
@@ -1619,7 +1836,6 @@ If you want to contribute configurations to this repository please open a Pull R
   range: # optional electric range (km)
     source: # plugin type
     # ...
-  cache: 5m # optional cache duration
 ```
 
 <a id="vehicle-hyundai"></a>
@@ -1780,6 +1996,18 @@ If you want to contribute configurations to this repository please open a Pull R
     refresh: # refresh token
   vin: W... # VIN
   cache: 5m # optional
+```
+
+<a id="vehicle-volvo"></a>
+#### Volvo
+
+```yaml
+- type: volvo
+  title: Volvo # display name for UI
+  capacity: 50 # kWh
+  user: # user
+  password: # password
+  vin: W... # optional
 ```
 
 <a id="vehicle-vw-e-up-e-golf-etc"></a>

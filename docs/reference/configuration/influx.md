@@ -8,7 +8,11 @@ Definiert die Influx Konfiguration, um Daten in Influx zu schreiben.
 
 ---
 
-## InfluxDB v1.x
+## InfluxDB v1.8.x
+
+:::important
+Erfordert mindestens InfluxDB 1.8.3
+:::
 
 **Beispiel Influx v1**:
 
@@ -27,7 +31,7 @@ influx:
 **Beispiel Influx v2**:
 
 ```yaml
-  url: http://localhost:8086
+  url: http://localhost:9999
   database: evcc
   token: "1234567890abcdef"
   org: "Home"

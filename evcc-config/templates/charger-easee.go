@@ -12,7 +12,8 @@ func init() {
 		Sample: `user: foo@example.org
 password: *****
 charger: EH______
-cache: 10s`,
+cache: 10s
+# an evcc sponsortoken is required for using this charger`,
 	}
 
 	registry.Add(template)
