@@ -123,7 +123,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ```yaml
 - type: telegram
-  token: # bot id
+  token: # bot id : jede laufende Instanz von evcc benötigt eine eigene bot id
   chats:
   - # Liste von Chat oder Group IDs. Jeder Eintrag benötigt ein - Zeichen am Anfang und muss in einer eigenen Zeile sein.
   - -GroupID #Achtung Group IDs in Telegram haben ein -Zeichen 
