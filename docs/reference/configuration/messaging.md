@@ -125,7 +125,9 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - type: telegram
   token: # bot id
   chats:
-  - # list of chat ids, die ChatIds müssen mit einem weiteren -Zeichen starten
+  - # Liste von Chat oder Group IDs. Jeder Eintrag benötigt ein - Zeichen am Anfang und muss in einer eigenen Zeile sein.
+  - -GroupID #Achtung Group IDs in Telegram haben ein -Zeichen 
+  - ChatID
 ```
 
 ### `email`
