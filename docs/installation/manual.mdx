@@ -14,7 +14,7 @@ Diese manuelle Installation erfordert fortgeschrittene PC Kenntnisse, vor allem 
 - Öffne im Browser die Release Webseite unter [https://github.com/evcc-io/evcc/releases/latest](https://github.com/evcc-io/evcc/releases/latest)
 - Wähle die für dein System passende Version nach dem hier angegebenen Namens-Schema: 
 
-  <Tabs>
+  <Tabs groupId="manual">
     <TabItem value="linux" label="Linux" default>
 
       - 64-Bit Intel CPU: evcc_X.XX_linux_amd64.tar.gz
@@ -41,7 +41,7 @@ Diese manuelle Installation erfordert fortgeschrittene PC Kenntnisse, vor allem 
   ```
 
   :::note
-  Fortgeschrittene Anwender (z.B. mit EVCC Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
+  Fortgeschrittene Anwender (z.B. mit evcc Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
   
   ```sh
   evcc configure --advanced
@@ -53,9 +53,15 @@ Diese manuelle Installation erfordert fortgeschrittene PC Kenntnisse, vor allem 
 
 Führe die obigen Schritte aus und ersetze die evcc Programmdatei mit der neuen Version. Die Konfiguration muss nicht erneut durchgeführt werden.
 
-## Linux Autostart
+## evcc als Service
 
-Sobald die Konfiguration und das Testen erfolgreich abgeschlossen sind, kann die Installation von evcc nun abgeschlossen werden. Folge diesen Schritten um evcc als Systemdienst einzurichten, welcher dafür sorgt dass evcc beim Start des Computers ausgeführt wird und im Fehlerfall ebenfalls automatisch neu startet. Diese Dokumentation geht davon aus, dass Linux `systemd` unterstützt.
+Sobald die Konfiguration und das Testen erfolgreich abgeschlossen sind, kann die Installation von evcc nun abgeschlossen werden. Folge diesen Schritten um evcc als Systemdienst einzurichten, welcher dafür sorgt dass evcc beim Start des Computers ausgeführt wird und im Fehlerfall ebenfalls automatisch neu startet.
+
+### Linux
+
+:::note
+Diese Dokumentation geht davon aus, dass Linux `systemd` unterstützt.
+:::
 
 - Führe folgenden Befehl aus um einen Editor mit einer neuen Datei für den Dienst zu erstellen und zu öffnen:
 
@@ -64,7 +70,6 @@ Sobald die Konfiguration und das Testen erfolgreich abgeschlossen sind, kann die
   ```
 
 - Kopiere den folgenden Inhalt in die Datei
-
   ```
   [Unit]
   Description=evcc
@@ -114,3 +119,51 @@ sudo systemctl restart evcc # startet den Dienst neu
 sudo systemctl enable evcc # aktiviert den Dienst
 sudo systemctl disable evcc # deaktiviert den Dienst
 ```
+
+### Windows 10
+
+:::note
+Diese Dokumentation geht davon aus, dass evcc in `c:\evcc` liegt.
+:::
+
+- Beginnt in der Suchleiste von Windows 10 mit der Eingabe des Wortes `Aufgabenplanung`. Bereits nach wenigen Buchstaben sollte diese als Treffer mit der höchsten Übereinstimmung angezeigt werden und kann auf der rechten Seite mit `Als Administrator ausführen` gestartet werden:
+
+![Windows 10 Aufgabenplanung](win10-srv/win10-srv-1.png)
+
+- Nach dem starten der Aufgabenplanung obliegt es Euch, ob Ihr den neuen Service in einem eigenen Ordner oder der allgemeinen Aufgabenplanungsbibliothek anlegt. Für dieses Beispiel wird ein eigener Ordner `evcc` angelegt. Hierzu muss zunächst der Ordner "Aufgabenplanungsbibliothek angewählt werden um dann mit der rechten Maustaste das PopUp Menü zu starten. Hier wählen wir `Neuer Ordner` und benennen diesen evcc:
+
+![Aufgabenplanungsbibliothek](win10-srv/win10-srv-2.png)
+
+- Nun wählen wir den neuen Ordner `evcc oder die allgemeine Aufgabenplanungsbibliothek` aus und öffnen erneut mit der rechten Maustaste das PopUp Menü, dort wählen wir nun `Aufgabe erstellen`:
+
+![Neue Aufgabe erstellen](win10-srv/win10-srv-3.png)
+
+- Als Name `evcc` und zur besseren Zuordnung sollte eine kurze Beschreibung mit angegeben werden. Da wir den Service als Systemdienst laufen lassen, öffnen wir die Userverwaltung über 'Benutzer oder Gruppe ändern' und tippen dort `system`. Nach einem Klick auf `User überprüfen`, sollte der Account angezeigt und der Dialog kann mit OK geschlossen werden:
+
+![Allgemein](win10-srv/win10-srv-4.png)  ![Systemnutzer setzen](win10-srv/win10-srv-5.png)
+
+- Einstellungen des Reiters: `Trigger`
+- Aufgabe starten ändern auf "Beim Start" und prüfen, dass die Aufgabe aktiviert ist:
+
+![Trigger](win10-srv/win10-srv-6.png)
+
+- Einstellungen des Reiters: `Aktionen`
+- "Programm starten" belassen und über Durchsuchen die Datei "evcc.exe" auswählen. Es empfiehlt sich den Pfad zusätzlich in `Starten in` anzugeben, somit wird die dort abgelegte Konfigurationsdatei direkt gefunden:
+
+![Aktionen](win10-srv/win10-srv-7.png)
+
+- Einstellungen des Reiters: `Bedingungen`
+- Diese Einstellungen können im Default belassen werden. Da evcc länger laufen sollte als es der Akkubetrieb gewährleisten würde.
+- `Tipp`: Da z.B. der SMA Home Manager über WLAN Probleme bereiten kann, sollte optional der Haken bei `Netzwerk` gesetzt und eine entsprechende Verbindung ausgewählt werden.
+
+![Bedingungen](win10-srv/win10-srv-8.png)
+
+- Einstellungen des Reiters: `Einstellungen`
+- Den Haken bei `Aufgabe so schnell wie möglich ...` setzen.
+- Unbedingt den Haken bei `Aufgabe beenden, falls Ausführung länger als:` entfernen, sonst wundert ihr Euch, das evcc auf einmal nicht mehr läuft.
+
+![Einstellungen](win10-srv/win10-srv-9.png)
+
+- Fertig :-)
+
+- Die Aufgabe kann nun manuell gestartet oder über einen Reboot getestet werden. Zur Kontrolle mit dem Browser von einem anderen System auf `IP des Windows 10 Rechners:7070` zugreifen.
