@@ -52,7 +52,7 @@ Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox D
 
 ## Optionale Parameter
 
-### `meters`
+### `meter`
 
 Referenz auf eine `meter` (Strommessgerät) Konfiguration.
 
@@ -61,8 +61,7 @@ Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Stro
 **Beispiel**:
 
 ```yaml
-  meters:
-    charge: charge
+  meter: charge
 ```
 
 Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessgeräte Definition](meters#name) entspricht.
