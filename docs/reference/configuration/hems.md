@@ -136,7 +136,7 @@ Um dies zu verhindern, sollte die Geräte ID vom bisherigen System übernommen w
 
 ### `sma`
 
-Bietet Unterstützung für den SMA Sunna Home Manager 2.0 (SHM).
+Bietet Unterstützung für den SMA Sunny Home Manager 2.0 (SHM).
 
 Durch die Integration können die [Ladepunkte](loadpoints) dem SHM hinzugefügt werden und somit z.B. für dessen Steuerung berücksichtigt werden.
 
