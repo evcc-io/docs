@@ -139,20 +139,38 @@ Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 
 ### `residualPower`
 
-Definiert eine Leistung in Watt (W). Die Verwendung wird in folgenden unterschiedlichen Szenarien verdeutlicht.
+Legt den Soll-Arbeitspunkt der Überschussregelung am Netzübergang (Gridmeter) fest. Der Standardwert ist 0 W.
+Negative Werte verschieben den Sollwert in Richtung Netzeinspeisung, positive Werte in Richtung Netzbezug.
+Letztendlich wird mit diesem Wert der durch die Steuerung einzustellende "Ruhezustand" des Regelkreises eingestellt.
 
-**Beispiel**:
-
-```yaml
-  residualPower: 100
-```
+Insbesondere im Zusammenspiel mit weiteren unabhängigen Überschussausregelungen wie z. B. der eines Batteriespeichers ist es obligatorisch diesen Wert anzupassen um ein definiertes Systemverhalten mit klaren Prioritäten zu erzielen.
 
 #### `grid` `meter` vorhanden
 
-- Positiver Wert: Sicherheitspuffer.
-- Negativer Wert: Laden im PV Modus erlaubt den Wert als Netzanteil.
+- Positiver Wert: Verbleibende Netzbezugsleistung
+- Negativer Wert: Verbleibende Netzeinspeiseleistung
 
 #### Nur `pv` `meter` vorhanden
 
-- Positiver Wert: Typischer Hausverbrauch, um damit den PV Überschuss abschätzen zu können.
+- Positiver Wert: Typischer Hausverbrauch, um damit den PV-Überschuss abschätzen zu können.
 - Negativer Wert: -
+
+**Beispiel**:
+
+Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von -100 bis -300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoC`) zu ermöglichen. Andernfalls "sieht" die Regelung des Speichers keinen nutzbaren Überschuss.
+Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Speicher ein kurzzeitiger Netzbezug besser vermeiden.
+
+```yaml
+  residualPower: -100
+```
+
+Soll im PV-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden muss hier eine positive Leistung entsprechend des Maximalanteils des Netzbezugs konfiguriert werden.
+
+**Beispiel**:
+
+Die Ladung soll im PV-Modus mit mindestens 6A (einphasig) auch bereits mit nur 50% PV-Anteil beginnen (Rest Netzbezug)
+Mindestladeleistung: 1 Phase * 6A * 230V = 1380 W, davon 50%: 690 W
+
+```yaml
+  residualPower: 690
+```
