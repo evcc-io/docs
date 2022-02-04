@@ -16,7 +16,7 @@ If you want to contribute configurations to this repository please open a Pull R
 
 ## Chargers
 
-- [ABL eMH / SENEC.Wallbox pro](#charger-abl-emh--senec-wallbox-pro)
+- [ABL eMH](#charger-abl-emh)
 - [Alfen Eve](#charger-alfen-eve)
 - [Alphatec Wallbox Mini](#charger-alphatec-wallbox-mini)
 - [cFos PowerBrain](#charger-cfos-powerbrain)
@@ -33,6 +33,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - [i-CHARGE CION (Modbus RTU-over-TCP)](#charger-i-charge-cion-modbus-rtu-over-tcp)
 - [Innogy eBox](#charger-innogy-ebox)
 - [KEBA Connect](#charger-keba-connect)
+- [Mennekes Amtron XTRA/PREMIUM](#charger-mennekes-amtron-xtra-premium)
 - [Mobile Charger Connect (Audi, Bentley, Porsche)](#charger-mobile-charger-connect-audi-bentley-porsche)
 - [NRGKick BT (Bluetooth)](#charger-nrgkick-bt-bluetooth)
 - [NRGKick Connect](#charger-nrgkick-connect)
@@ -41,6 +42,8 @@ If you want to contribute configurations to this repository please open a Pull R
 - [Phoenix EM-CP-PP-ETH Controller (Modbus TCP)](#charger-phoenix-em-cp-pp-eth-controller-modbus-tcp)
 - [Phoenix EV-ETH Controller (Modbus TCP)](#charger-phoenix-ev-eth-controller-modbus-tcp)
 - [Phoenix EV-SER Controller (Modbus RTU)](#charger-phoenix-ev-ser-controller-modbus-rtu)
+- [SENEC.Wallbox pro](#charger-senec-wallbox-pro)
+- [SENEC.Wallbox pro s](#charger-senec-wallbox-pro-s)
 - [Shelly](#charger-shelly)
 - [Tasmota](#charger-tasmota)
 - [TinkerForge WARP Charger](#charger-tinkerforge-warp-charger)
@@ -1339,8 +1342,8 @@ If you want to contribute configurations to this repository please open a Pull R
 ### Chargers
 
 
-<a id="charger-abl-emh--senec-wallbox-pro"></a>
-#### ABL eMH / SENEC.Wallbox pro
+<a id="charger-abl-emh"></a>
+#### ABL eMH
 
 ```yaml
 - type: abl
@@ -1563,6 +1566,16 @@ If you want to contribute configurations to this repository please open a Pull R
     tag: 765765348 # RFID tag, see `evcc charger` to show tag
 ```
 
+<a id="charger-mennekes-amtron-xtra-premium"></a>
+#### Mennekes Amtron XTRA/PREMIUM
+
+```yaml
+- type: amtron
+  uri: 192.0.2.2:502 # TCP ModBus address
+  id: 1 
+  # an evcc sponsortoken is required for using this charger
+```
+
 <a id="charger-mobile-charger-connect-audi-bentley-porsche"></a>
 #### Mobile Charger Connect (Audi, Bentley, Porsche)
 
@@ -1644,6 +1657,34 @@ If you want to contribute configurations to this repository please open a Pull R
   baudrate: 9600 # configurable (S2/DIP 1)
   comset: 8N1
   id: 1 # configurable (S2/DIP 2–6)
+```
+
+<a id="charger-senec-wallbox-pro"></a>
+#### SENEC.Wallbox pro
+
+```yaml
+- type: abl
+  # chargers based on the ABL EVCC2/3 controller
+  # chose either locally attached on serial port:
+  device: /dev/ttyUSB0
+  baudrate: 38400
+  comset: 8E1
+  # or via external TCP-RS485 translator:
+  # uri: 192.0.2.2:502
+  id: 1 
+  # an evcc sponsortoken is required for using this charger
+```
+
+<a id="charger-senec-wallbox-pro-s"></a>
+#### SENEC.Wallbox pro s
+
+```yaml
+- type: heidelberg
+  device: /dev/ttyUSB0
+  baudrate: 19200
+  comset: 8E1
+  id: 1 # configurable (S2/DIP 1)
+  # an evcc sponsortoken is required for using this charger
 ```
 
 <a id="charger-shelly"></a>
