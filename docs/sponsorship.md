@@ -21,8 +21,18 @@ Folgende Geräte sind nur mit Sponsoring verfügbar:
 
 - Wallboxen:
   - [ABL eMH](/docs/devices/chargers#abl-emh)
+  - [Alfen Eve](/docs/devices/chargers#alfen-eve)
+  - [Alphatec Wallbox Mini](/docs/devices/chargers#alphatec-wallbox-mini)
+  - [cFos PowerBrain](/docs/devices/chargers#cfos-powerbrain)
   - [Easee Home](/docs/devices/chargers#easee-home)
   - [Heidelberg Energy Control](/docs/devices/chargers#heidelberg-energy-control)
+  - [Innogy eBox](/docs/devices/chargers#innogy-ebox)
+  - [Mennekes Amtron XTRA/PREMIUM](/docs/devices/chargers#mennekes-amtron-xtrapremium)
+  - [PC Electric Garo](/docs/devices/chargers#pc-electric-garo)
+  - [SENEC.Wallbox pro](/docs/devices/chargers#senecwallbox-pro)
+  - [SENEC.Wallbox pro s](/docs/devices/chargers#senecwallbox-pro-s)
+  - [Vestel EVC04](/docs/devices/chargers#vestel-evc04)
+  - [Walther Werke Basic Evo Pro](/docs/devices/chargers#walther-werke-basic-evo-pro)
 - Fahrzeug-Schnittstellen:
   - Tronity
 
