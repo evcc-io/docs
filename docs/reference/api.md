@@ -13,6 +13,8 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 - `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
 - `/api/loadpoints/<id>/targetsoc`: loadpoint target SoC (writable)
 - `/api/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
+- `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
+- `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage mit dem zu ändernden Wert im Pfad Segement gesendet werden.
@@ -33,6 +35,8 @@ Die MQTT API folgt der REST API Struktur, mit den Ladepunkt (loadpoint) IDs bei 
 - `evcc/loadpoints/<id>/minSoC`: loadpoint minimum SoC (writable)
 - `evcc/loadpoints/<id>/targetSoC`: loadpoint target SoC (writable)
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
+- `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
+- `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden.
