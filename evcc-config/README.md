@@ -1452,7 +1452,7 @@ If you want to contribute configurations to this repository please open a Pull R
   user: xxxxxxxxxx # FRITZ!Box username (Has to have Smart Home privileges!)
   password: yyyyyyyyyy # FRITZ!Box password
   ain: '007788992233' # switch actor identification number without blanks (see AIN number on switch sticker)
-  standbypower: 15 # treat as charging above this power
+  standbypower: 15 # treat as charging above this power, a negative value activates static switch mode
 ```
 
 <a id="charger-generic"></a>
@@ -1694,7 +1694,7 @@ If you want to contribute configurations to this repository please open a Pull R
 - type: shelly
   uri: http://192.0.2.2  # shelly device ip address (local)
   channel: 0  # shelly device relay channel 
-  standbypower: 15  # treat as charging above this power
+  standbypower: 15  # treat as charging above this power, a negative value activates static switch mode
 ```
 
 <a id="charger-tasmota"></a>
@@ -1705,7 +1705,7 @@ If you want to contribute configurations to this repository please open a Pull R
   uri: http://192.168.xxx.xxx # tasmota device ip address (local)
   # user: xxxx # user, (optional) in case user + password are defined
   # password: xxxxx #  (optional) in case user + password are defined
-  standbypower: 15 # treat as charging above this power
+  standbypower: 15 # treat as charging above this power, a negative value activates static switch mode
 ```
 
 <a id="charger-tinkerforge-warp-charger"></a>
@@ -1725,7 +1725,7 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: tplink
   uri: 192.0.2.2 # TP-LINK Smart Plug ip address (local)
-  standbypower: 15 # treat as charging above this power
+  standbypower: 15 # treat as charging above this power, a negative value activates static switch mode
 ```
 
 <a id="charger-vestel-evc04"></a>
