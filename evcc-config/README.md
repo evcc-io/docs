@@ -1693,7 +1693,9 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: shelly
   uri: http://192.0.2.2  # shelly device ip address (local)
-  channel: 0  # shelly device relay channel 
+  channel: 0  # shelly device relay channel
+  # user: xxxx # user, (optional) in case user + password are defined
+  # password: xxxxx #  (optional) in case user + password are defined   
   standbypower: 15  # treat as charging above this power, a negative value activates static switch mode
 ```
 
@@ -1703,8 +1705,8 @@ If you want to contribute configurations to this repository please open a Pull R
 ```yaml
 - type: tasmota
   uri: http://192.168.xxx.xxx # tasmota device ip address (local)
-  # user: xxxx # user, (optional) in case user + password are defined
-  # password: xxxxx #  (optional) in case user + password are defined
+  # user: xxx  # (optional) in case user + password are defined
+  # password: xxx  #  (optional) in case user + password are defined   
   standbypower: 15 # treat as charging above this power, a negative value activates static switch mode
 ```
 
