@@ -2,15 +2,24 @@
 
 Official documentation repository of [evcc](https://evcc.io).
 
+## General
+
+- The content of the folder `evcc-config` may not be changed. The content is pushed from the [evcc config repository](https://github.com/evcc-io/config)
+- We recommend to test changes locally, use the instructions below to run the documentation page locally as you can see how the changes will look like on the web page while you make changes.
+
+## Local setup
+
+First clone the repository, then follow with the following steps.
+
 ### Installation
 
-```
+```sh
 $ npm ci
 ```
 
 ### Local Development
 
-```
+```sh
 $ npm run start
 ```
 
@@ -18,7 +27,7 @@ This command starts a local development server and opens up a browser window. Mo
 
 ### Build
 
-```
+```sh
 $ npm run build
 ```
 
