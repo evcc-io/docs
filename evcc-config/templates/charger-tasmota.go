@@ -10,8 +10,8 @@ func init() {
 		Type:   "tasmota",
 		Name:   "Tasmota",
 		Sample: `uri: http://192.168.xxx.xxx # tasmota device ip address (local)
-# user: xxxx # user, (optional) in case user + password are defined
-# password: xxxxx #  (optional) in case user + password are defined
+# user: xxx  # (optional) in case user + password are defined
+# password: xxx  #  (optional) in case user + password are defined   
 standbypower: 15 # treat as charging above this power, a negative value activates static switch mode`,
 	}
 
