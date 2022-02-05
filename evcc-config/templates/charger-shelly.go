@@ -11,7 +11,7 @@ func init() {
 		Name:   "Shelly",
 		Sample: `uri: http://192.0.2.2  # shelly device ip address (local)
 channel: 0  # shelly device relay channel 
-standbypower: 15  # treat as charging above this power`,
+standbypower: 15  # treat as charging above this power, a negative value activates static switch mode`,
 	}
 
 	registry.Add(template)

@@ -10,7 +10,7 @@ func init() {
 		Type:   "tplink",
 		Name:   "TP-LINK Smart Plug",
 		Sample: `uri: 192.0.2.2 # TP-LINK Smart Plug ip address (local)
-standbypower: 15 # treat as charging above this power`,
+standbypower: 15 # treat as charging above this power, a negative value activates static switch mode`,
 	}
 
 	registry.Add(template)
