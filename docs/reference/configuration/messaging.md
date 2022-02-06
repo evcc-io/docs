@@ -91,25 +91,22 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
     - [`${prioritySoC}`](site#prioritysoc)
   - Information
     - `${batteryConfigured}`
-    - `${batteryPower}`
-    - `${batterySoC}`
-    - `${homePower}`
+    - `${gridConfigured}`
+    - `${pvConfigured}`
 - Infos zum Stromtarif
   - [`${currency}`](tariffs)
   - [`${tariffFeedIn}`](tariffs#feedin)
   - [`${tariffGrid}`](tariffs#grid)
 - Meter
-  - Konfiguration
-    - `${gridConfigured}`
-    - `${pvConfigured}`
-  - Information
-    - `${gridPower}`
-    - `${pvAction}`
-    - `${pvPower}`
-    - `${pvRemaining}`
+  - `${batteryPower}`
+  - `${batterySoC}`
+  - `${gridPower}`
+  - `${homePower}`
+  - `${pvAction}`
+  - `${pvPower}`
+  - `${pvRemaining}`
 - Ladepunkte (loadpoint)
   - Konfiguration
-    - `${hasVehicle}`
     - `${loadpoint}`
     - `${maxCurrent}`
     - `${minCurrent}`
@@ -129,6 +126,7 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
     - `${charging}`
     - `${climater}`
     - `${enabled}`
+    - `${hasVehicle}`
     - `${targetSoC}`
     - `${targetTime}`
 - Fahrzeuge (vehicles)
