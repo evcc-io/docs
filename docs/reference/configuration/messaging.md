@@ -108,12 +108,12 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 - Ladepunkte (loadpoint)
   - Konfiguration
     - [`${loadpoint}`](loadpoints)
-    - [`${maxCurrent}`](loadpoints/#maxcurrent)
-    - [`${minCurrent}`](loadpoints/#mincurrent)
-    - [`${minSoC}`](vehicles/#onidentify)
+    - [`${maxCurrent}`](loadpoints#maxcurrent)
+    - [`${minCurrent}`](loadpoints#mincurrent)
+    - [`${minSoC}`](loadpoints#min)
     - [`${mode}`](loadpoints/#mode)
     - [`${phases}`](loadpoints/#phases)
-    - [`${targetSoC}`](vehicles/#onidentify)
+    - [`${targetSoC}`](loadpoints#target)
     - [`${title}`](loadpoints/#title)
   - Information
     - `${activePhases}`
