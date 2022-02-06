@@ -49,9 +49,11 @@ Die verfügbaren Ereignisse sind:
 
 ### `msg`
 
-`msg` definiert den Text für den Nachrichteninhalt.
-
-Im Text können verschiedene Variablen für evcc Informationen verwendet werden.
+`msg` definiert den Text für den Nachrichteninhalt.   
+Im Text können verschiedene Variablen im Format `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
+:::note
+Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!.
+:::
 
 **Nützliche Auswahl zur Nutzung in evcc Benachrichtungen**:
 
@@ -80,65 +82,77 @@ Im Text können verschiedene Variablen für evcc Informationen verwendet werden.
   msg: ${vehicleTitle} disconnected of wallbox ${title} after ${connectedDuration}
 
 ```
-:::note
-Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!.
-:::
 
 **Vollständige Liste aller von evcc bereitgestellten Variablen**:
 
-1. `${activePhases}`
-1. `${auth}`
-1. `${batteryConfigured}`
-1. `${batteryPower}`
-1. `${batterySoC}`
-1. `${chargeCurrent}`
-1. `${chargeCurrents}`
-1. `${chargeDuration}`
-1. `${chargePower}`
-1. `${chargeRemainingDuration}`
-1. `${chargeRemainingEnergy}`
-1. `${chargedEnergy}`
-1. `${charging}`
-1. `${climater}`
-1. `${connected}`
-1. `${connectedDuration}`
-1. `${currency}`
-1. `${enabled}`
-1. `${gridConfigured}`
-1. `${gridPower}`
-1. `${hasVehicle}`
-1. `${homePower}`
-1. `${loadpoint}`
-1. `${maxCurrent}`
-1. `${minCurrent}`
-1. `${minSoC}`
-1. `${mode}`
-1. `${phases}`
-1. `${prioritySoC}`
-1. `${pvAction}`
-1. `${pvConfigured}`
-1. `${pvPower}`
-1. `${pvRemaining}`
-1. `${savingsAmount}`
-1. `${savingsEffectivePrice}`
-1. `${savingsGridCharged}`
-1. `${savingsSelfConsumptionCharged}`
-1. `${savingsSelfConsumptionPercent}`
-1. `${savingsSince}`
-1. `${savingsTotalCharged}`
-1. `${siteTitle}`
-1. `${sponsor}`
-1. `${targetSoC}`
-1. `${targetTime}`
-1. `${tariffFeedIn}`
-1. `${tariffGrid}`
-1. `${title}`
-1. `${vehicleCapacity}`
-1. `${vehicleOdometer}`
-1. `${vehiclePresent}`
-1. `${vehicleRange}`
-1. `${vehicleSoC}`
-1. `${vehicleTitle}`
+- Site
+  - Konfiguration
+    - [`${siteTitle}`](site)
+    - `${prioritySoC}`
+    - `${batteryConfigured}`
+    - `${currency}`
+  - Information
+    - `${batteryPower}`
+    - `${batterySoC}`
+    - `${homePower}`
+- Infos zum Stromtarif
+  - `${tariffFeedIn}`
+  - `${tariffGrid}`
+- Meter
+  - Konfiguration
+    - `${gridConfigured}`
+    - `${pvConfigured}`
+  - Information
+    - `${gridPower}`
+    - `${pvAction}`
+    - `${pvPower}`
+    - `${pvRemaining}`
+- Ladepunkte (loadpoint)
+  - Konfiguration
+    - `${hasVehicle}`
+    - `${loadpoint}`
+    - `${maxCurrent}`
+    - `${minCurrent}`
+    - `${minSoC}`
+    - `${mode}`
+    - `${phases}`
+    - `${title}`
+  - Information
+    - `${activePhases}`
+    - `${chargeCurrent}`
+    - `${chargeCurrents}`
+    - `${chargeDuration}`
+    - `${chargePower}`
+    - `${chargeRemainingDuration}`
+    - `${chargeRemainingEnergy}`
+    - `${chargedEnergy}`
+    - `${charging}`
+    - `${climater}`
+    - `${enabled}`
+    - `${targetSoC}`
+    - `${targetTime}`
+- Fahrzeuge (vehicles)
+  - Konfiguration
+    - `${vehicleCapacity}`
+    - `${vehicleTitle}`
+  - Information
+    - `${connected}`
+    - `${connectedDuration}`
+    - `${vehicleOdometer}`
+    - `${vehiclePresent}`
+    - `${vehicleRange}`
+    - `${vehicleSoC}`
+- Infos zur Einsparungseffizienz 
+  - `${savingsAmount}`
+  - `${savingsEffectivePrice}`
+  - `${savingsGridCharged}`
+  - `${savingsSelfConsumptionCharged}`
+  - `${savingsSelfConsumptionPercent}`
+  - `${savingsSince}`
+  - `${savingsTotalCharged}`
+- Sponsor-Information
+  - `${sponsor}`
+  - `${auth}`
 
 ## `services`
 
