@@ -49,20 +49,96 @@ Die verfügbaren Ereignisse sind:
 
 ### `msg`
 
-`msg` definiert den Text für den Nachrichteninhalt. Im Text können verschiedene Variablen für evcc Informationen verwendet werden.
+`msg` definiert den Text für den Nachrichteninhalt.
 
-**Mögliche Variablen**:
-- `${title}`: Text mit dem Wert von [`title`](loadpoints#title) des [`loadpoints`](loadpoints) (Ladepunkt)
-- `${loadpoint}`: Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2...
-- `${mode}`: Text mit dem aktiven Lademodus
-- `${energy:%.1f}`: Geladene Energiemenge in kWh
-- `${duration}`: Dauer der Ladezeit
+Im Text können verschiedene Variablen für evcc Informationen verwendet werden.
 
-**Beispiel**:
+**Nützliche Auswahl zur Nutzung in evcc Benachrichtungen**:
+
+| msg Variable | Beschreibung |
+| --- | --- |
+| `${chargedEnergy:%.1fk}` | Geladene Energiemenge in kWh |
+| `${chargeDuration}` | Dauer der Ladezeit |
+| `${connectedDuration}` | Dauer der Wallbox Verbindung |
+| `${loadpoint}` | Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2... |
+| `${mode}` | Aktiver Lademodus (vgl. [`mode`](loadpoints#mode) des [`loadpoints`](loadpoints)) |
+| `${pvPower:%.1fk}` | Aktuell gemessene PV Leistung in kW |
+| `${title}` | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints#title) Parameters |
+| `${vehicleTitle}` | Fahrzeug: Text des  [`vehicles`](vehicles) [`title`](vehicles#title) Parameters |
+
+**Beispiele**:
 
 ```yaml
-      msg: Started "${title}" charging in "${mode}" mode
+  # Message examples using evcc variables
+  # start
+  msg: Wallbox ${title} started charging ${vehicleTitle} in ${mode} mode
+  # stop
+  msg: Wallbox ${title} finished charging ${vehicleTitle} with ${chargedEnergy:%.1fk}kWh in ${chargeDuration}
+  # connect
+  msg: ${vehicleTitle} connected on wallbox ${title} at ${pvPower:%.1fk}kW PV
+  # disconnect
+  msg: ${vehicleTitle} disconnected of wallbox ${title} after ${connectedDuration}
+
 ```
+:::note
+Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!.
+:::
+
+**Vollständige Liste aller von evcc bereitgestellten Variablen**:
+
+1. `${activePhases}`
+1. `${auth}`
+1. `${batteryConfigured}`
+1. `${batteryPower}`
+1. `${batterySoC}`
+1. `${chargeCurrent}`
+1. `${chargeCurrents}`
+1. `${chargeDuration}`
+1. `${chargePower}`
+1. `${chargeRemainingDuration}`
+1. `${chargeRemainingEnergy}`
+1. `${chargedEnergy}`
+1. `${charging}`
+1. `${climater}`
+1. `${connected}`
+1. `${connectedDuration}`
+1. `${currency}`
+1. `${enabled}`
+1. `${gridConfigured}`
+1. `${gridPower}`
+1. `${hasVehicle}`
+1. `${homePower}`
+1. `${loadpoint}`
+1. `${maxCurrent}`
+1. `${minCurrent}`
+1. `${minSoC}`
+1. `${mode}`
+1. `${phases}`
+1. `${prioritySoC}`
+1. `${pvAction}`
+1. `${pvConfigured}`
+1. `${pvPower}`
+1. `${pvRemaining}`
+1. `${savingsAmount}`
+1. `${savingsEffectivePrice}`
+1. `${savingsGridCharged}`
+1. `${savingsSelfConsumptionCharged}`
+1. `${savingsSelfConsumptionPercent}`
+1. `${savingsSince}`
+1. `${savingsTotalCharged}`
+1. `${siteTitle}`
+1. `${sponsor}`
+1. `${targetSoC}`
+1. `${targetTime}`
+1. `${tariffFeedIn}`
+1. `${tariffGrid}`
+1. `${title}`
+1. `${vehicleCapacity}`
+1. `${vehicleOdometer}`
+1. `${vehiclePresent}`
+1. `${vehicleRange}`
+1. `${vehicleSoC}`
+1. `${vehicleTitle}`
 
 ## `services`
 
