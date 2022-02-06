@@ -52,11 +52,70 @@ Die verfügbaren Ereignisse sind:
 `msg` definiert den Text für den Nachrichteninhalt. Im Text können verschiedene Variablen für evcc Informationen verwendet werden.
 
 **Mögliche Variablen**:
-- `${title}`: Text mit dem Wert von [`title`](loadpoints#title) des [`loadpoints`](loadpoints) (Ladepunkt)
+
+- `${sponsor}`:
+- `${auth}`:
+
+- `${siteTitle}`:
+- `${prioritySoC}`:
+
+- `${gridConfigured}`:
+- `${gridPower}`:
+- `${homePower}`:
+
+- `${pvConfigured}`:
+- `${pvRemaining}`:
+- `${pvPower}`:
+- `${pvAction}`:
+
+- `${batteryConfigured}`:
+- `${batterySoC}`:
+- `${batteryPower}`:
+
 - `${loadpoint}`: Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2...
+- `${title}`: Text mit dem Wert von [`title`](loadpoints#title) des [`loadpoints`](loadpoints) (Ladepunkt)
 - `${mode}`: Text mit dem aktiven Lademodus
-- `${energy:%.1f}`: Geladene Energiemenge in kWh
-- `${duration}`: Dauer der Ladezeit
+- `${charging}`:
+- `${phases}`:
+- `${hasVehicle}`:
+- `${minCurrent}`:
+- `${maxCurrent}`:
+- `${minSoC}`:
+- `${targetSoC}`:
+- `${targetTime}`:
+- `${enabled}`:
+- `${connectedDuration}`:
+- `${connected}`:
+
+- `${chargeCurrent}`:
+- `${chargeCurrents}`:
+- `${chargePower}`:
+- `${chargeRemainingEnergy}`:
+- `${chargeRemainingDuration}`:
+- `${chargeDuration}`: Dauer der Ladezeit
+- `${chargedEnergy:%.1fk}`: Geladene Energiemenge in kWh
+
+- `${activePhases}`:
+
+- `${vehiclePresent}`:
+- `${vehicleTitle}`:
+- `${vehicleRange}`:
+- `${vehicleSoC}`:
+- `${vehicleOdometer}`:
+- `${climater}`:
+- `${vehicleCapacity}`:
+
+- `${savingsSince}`:
+- `${savingsSelfConsumptionPercent}`:
+- `${savingsTotalCharged}`:
+- `${savingsEffectivePrice}`:
+- `${savingsAmount}`:
+- `${savingsGridCharged}`:
+- `${savingsSelfConsumptionCharged}`:
+
+- `${tariffGrid}`:
+- `${tariffFeedIn}`:
+- `${currency}`:
 
 **Beispiel**:
 
