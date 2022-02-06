@@ -88,16 +88,16 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 - Site
   - Konfiguration
     - [`${siteTitle}`](site)
-    - `${prioritySoC}`
-    - `${batteryConfigured}`
-    - `${currency}`
+    - [`${prioritySoC}`](site#prioritysoc)
   - Information
+    - `${batteryConfigured}`
     - `${batteryPower}`
     - `${batterySoC}`
     - `${homePower}`
 - Infos zum Stromtarif
-  - `${tariffFeedIn}`
-  - `${tariffGrid}`
+  - [`${currency}`](tariffs)
+  - [`${tariffFeedIn}`](tariffs#feedin)
+  - [`${tariffGrid}`](tariffs#grid)
 - Meter
   - Konfiguration
     - `${gridConfigured}`
