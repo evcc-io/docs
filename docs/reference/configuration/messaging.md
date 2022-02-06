@@ -63,10 +63,10 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 | `${chargeDuration}` | Dauer der Ladezeit |
 | `${connectedDuration}` | Dauer der Wallbox Verbindung |
 | `${loadpoint}` | Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2... |
-| `${mode}` | Aktiver Lademodus (vgl. [`mode`](loadpoints#mode) des [`loadpoints`](loadpoints)) |
+| `${mode}` | Aktiver Lademodus (vgl. [`mode`](loadpoints/#mode) des [`loadpoints`](loadpoints)) |
 | `${pvPower:%.1fk}` | Aktuell gemessene PV Leistung in kW |
-| `${title}` | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints#title) Parameters |
-| `${vehicleTitle}` | Fahrzeug: Text des  [`vehicles`](vehicles) [`title`](vehicles#title) Parameters |
+| `${title}` | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints/#title) Parameters |
+| `${vehicleTitle}` | Fahrzeug: Text des  [`vehicles`](vehicles) [`title`](vehicles/#title) Parameters |
 
 **Beispiele**:
 
@@ -88,16 +88,16 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 - Site
   - Konfiguration
     - [`${siteTitle}`](site)
-    - [`${prioritySoC}`](site#prioritysoc)
+    - [`${prioritySoC}`](site/#prioritysoc)
   - Information
     - `${batteryConfigured}`
     - `${gridConfigured}`
     - `${pvConfigured}`
 - Infos zum Stromtarif
   - [`${currency}`](tariffs)
-  - [`${tariffFeedIn}`](tariffs#feedin)
-  - [`${tariffGrid}`](tariffs#grid)
-- Meter
+  - [`${tariffFeedIn}`](tariffs/#feedin)
+  - [`${tariffGrid}`](tariffs/#grid)
+- Meter Infos
   - `${batteryPower}`
   - `${batterySoC}`
   - `${gridPower}`
@@ -107,13 +107,14 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
   - `${pvRemaining}`
 - Ladepunkte (loadpoint)
   - Konfiguration
-    - `${loadpoint}`
-    - `${maxCurrent}`
-    - `${minCurrent}`
-    - `${minSoC}`
-    - `${mode}`
-    - `${phases}`
-    - `${title}`
+    - [`${loadpoint}`](loadpoints)
+    - [`${maxCurrent}`](loadpoints/#maxcurrent)
+    - [`${minCurrent}`](loadpoints/#mincurrent)
+    - [`${minSoC}`](vehicles/#onidentify)
+    - [`${mode}`](loadpoints/#mode)
+    - [`${phases}`](loadpoints/#phases)
+    - [`${targetSoC}`](vehicles/#onidentify)
+    - [`${title}`](loadpoints/#title)
   - Information
     - `${activePhases}`
     - `${chargeCurrent}`
@@ -127,12 +128,11 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
     - `${climater}`
     - `${enabled}`
     - `${hasVehicle}`
-    - `${targetSoC}`
     - `${targetTime}`
 - Fahrzeuge (vehicles)
   - Konfiguration
-    - `${vehicleCapacity}`
-    - `${vehicleTitle}`
+    - [`${vehicleCapacity}`](vehicles/#capacity)
+    - [`${vehicleTitle}`](vehicles/#title)
   - Information
     - `${connected}`
     - `${connectedDuration}`
@@ -148,9 +148,11 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
   - `${savingsSelfConsumptionPercent}`
   - `${savingsSince}`
   - `${savingsTotalCharged}`
-- Sponsor-Information
-  - `${sponsor}`
-  - `${auth}`
+- Sponsor
+  - Konfiguration
+    - [`${auth}`](sponsortoken)
+  - Information
+    - `${sponsor}`
 
 ## `services`
 
