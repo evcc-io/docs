@@ -68,10 +68,37 @@ Der neuere Ladestandard [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) (wi
 
 Im evcc Modus **Nur PV** muss die jeweilige Leistung als PV Überschuss vorhanden sein, damit der Ladevorgang beginnt. Sollte die Leistung dann eine konfigurierbare Zeit nicht vorhanden sein, wird der Ladevorgang unterbrochen. Ist die Leistung für einen konfigurierbaren Zeitraum vorhanden, wird der Ladevorgang fortgesetzt.
 
-### Kann ich mehrere Wallboxen nutzen?
+### Ich habe eine Hausbatterie und diese wird entladen, warum?
 
-Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden.  
-Es ist jedoch heute noch __kein__ Lastmanagement möglich und es gibt auch keine Möglichkeit die Priorisierung festzulegen. Beides ist auf unserer laaaaaangen Liste für die weitere Entwicklung.
+Generell kann evcc das Laden und Entladen der Hausbatterie nicht direkt beeinflussen. Das Hausbatteriemanagementsystem (BMS) entscheidet selbst wann es lädt. Hier gibt es üblicherweise folgende Szenarien:
+
+1. **Hausbatterie wird geladen**:
+
+  - Wenn sie nicht voll ist (außer bei Prognosebasiertem Laden) und PV Überschuss besteht
+  - Wenn sie unter einen minimalen Ladestand Gerät fällt
+  - Wenn das BMS andere Logiken eingebaut hat, z.B. um sich zu kalibrieren (z.b. E3/DC)
+  - Und noch weitere
+2. **Hausbatterie wird nicht geladen**:
+
+  - Wenn die Hausbatterie voll ist, wird die Batterie nicht geladen.
+  - Wenn das BMS die Fähigkeit von prognosebasiertem Laden (PV Prognose und ein historischen Verbrauch ist vorhanden um die Zukufnt abzuschätzen) hat, um nicht voll zu laden wenn vorraussichtlich nicht so viel Strom benötigt wird (z.b. SMA Home Manager 2.0)
+  - Und noch weitere
+
+Mit evcc gibt es nun verschiedene Szenarien:
+
+1. **Lademodus `Sofort` und `Min+PV`**
+
+  Die Hausbatterie wird völlig ignoriert, denn das EV soll ja so schnell wie möglich voll (oder zu einem SoC) geladen werden. Egal woher der Strom kommt.
+
+2. **Lademodus `PV`**
+
+  - evcc regelt den Ladestrom je nach verfügbarem PV Überschuss
+  - Der Ladevorgang wird immer nur dann gestartet, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#enable)) der benötigte PV Überschuß vorhanden ist.
+  - Der Ladevorgang wird immer unterbrochen, wenn über deine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#disable)) nicht genügend Strom für eine [Mindestleistung](/docs/guides/faq#ich-habe-pv-überschuss-aber-das-auto-lädt-nicht-warum) vorhanden ist.
+  - Zwischen dem [Invervall des Regelzyklus](/docs/reference/configuration/interval) kann es jedoch zu Schwankungen kommen, so dass weniger Überschuss vorhanden ist als zum Regelzeitpunkt. D.h. falls hier zu wenig PV Überschuss vorhanden ist, muss der "fehlende Strom" irgendwo her kommen. Und wenn die Hausbatterie noch nicht "leer" ist, springt das BMS ein und zieht Strom aus der Hausbatterie um den Netzschluss Punkt auf 0 auszuregeln. Dies kann nicht verhindert werden!
+  - Zum Zeitpunkt der Regelung in evcc, kann mit 
+    - [prioritySoC](/docs/reference/configuration/site#prioritysoc) der Hausbatterie bis zu einem definierten SoC vorrang gegeben werden. Danach wird Ladestrom als verfügbarer PV Überschuss interpretiert.
+    - [bufferSoC](/docs/reference/configuration/site#buffersoc) die Hausbatterie oberhalb diesesdes definierten SoC eine Entladung igoriert und als PV Überschuss interpretiert. 
 
 ## Wallboxen
 
@@ -86,6 +113,11 @@ Die momentan unterstützten Wallboxen findest du unter [Geräte - Wallboxen](/do
 Bei einigen wenigen Wallboxen wird diese Funktionalität von evcc unterstützt. Schau doch in der Liste der unterstützten [Geräte - Wallboxen](/docs/devices/chargers) nach ob deine dabei ist.
 
 <SponsorshipRequired />
+
+### Kann ich mehrere Wallboxen nutzen?
+
+Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden.  
+Es ist jedoch heute noch __kein__ Lastmanagement möglich und es gibt auch keine Möglichkeit die Priorisierung festzulegen. Beides ist auf unserer laaaaaangen Liste für die weitere Entwicklung.
 
 ## Hausinstallation
 
