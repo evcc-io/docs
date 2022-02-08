@@ -68,10 +68,37 @@ Der neuere Ladestandard [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) (wi
 
 Im evcc Modus **Nur PV** muss die jeweilige Leistung als PV Überschuss vorhanden sein, damit der Ladevorgang beginnt. Sollte die Leistung dann eine konfigurierbare Zeit nicht vorhanden sein, wird der Ladevorgang unterbrochen. Ist die Leistung für einen konfigurierbaren Zeitraum vorhanden, wird der Ladevorgang fortgesetzt.
 
-### Kann ich mehrere Wallboxen nutzen?
+### Ich habe eine Hausbatterie und diese wird entladen, warum?
 
-Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden.  
-Es ist jedoch heute noch __kein__ Lastmanagement möglich und es gibt auch keine Möglichkeit die Priorisierung festzulegen. Beides ist auf unserer laaaaaangen Liste für die weitere Entwicklung.
+Generell kann evcc das Laden und Entladen der Hausbatterie nicht direkt beeinflussen. Das Energiemanagementsystem (HEMS) entscheidet selbst wann es lädt. Hier gibt es üblicherweise folgende Szenarien:
+
+1. **Hausbatterie wird geladen**:
+
+  - Wenn sie nicht voll ist (außer bei Prognosebasiertem Laden) und PV Überschuss besteht
+  - Wenn sie unter einen minimalen Ladestand Gerät fällt
+  - Wenn das Batteriemanagementsystem (BMS) andere Logiken eingebaut hat, z.B. um sich zu kalibrieren (z.b. E3/DC)
+  - Und noch weitere
+2. **Hausbatterie wird nicht geladen**:
+
+  - Wenn die Hausbatterie voll ist, wird die Batterie nicht geladen.
+  - Wenn das HEMS die Fähigkeit von prognosebasiertem Laden (PV Prognose und ein historischen Verbrauch ist vorhanden um die Zukunft abzuschätzen) hat, um nicht voll zu laden wenn vorraussichtlich nicht so viel Strom benötigt wird (z.b. SMA Home Manager 2.0)
+  - Und noch weitere
+
+Mit evcc gibt es nun verschiedene Szenarien:
+
+1. **Lademodus `Sofort` und `Min+PV`**
+
+  Die Hausbatterie wird völlig ignoriert, denn das EV soll ja so schnell wie möglich voll (oder zu einem SoC) geladen werden. Egal woher der Strom kommt.
+
+2. **Lademodus `PV`**
+
+  - evcc regelt den Ladestrom je nach verfügbarem PV Überschuss
+  - Der Ladevorgang wird immer nur dann gestartet, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#enable)) der benötigte PV Überschuß vorhanden ist.
+  - Der Ladevorgang wird immer unterbrochen, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#disable)) nicht genügend Strom für eine [Mindestleistung](/docs/guides/faq#ich-habe-pv-überschuss-aber-das-auto-lädt-nicht-warum) vorhanden ist.
+  - Zwischen dem [Invervall des Regelzyklus](/docs/reference/configuration/interval) kann es jedoch zu Schwankungen kommen, so dass weniger Überschuss vorhanden ist als zum Regelzeitpunkt. D.h. falls hier zu wenig PV Überschuss vorhanden ist, muss der "fehlende Strom" irgendwo her kommen. Und wenn die Hausbatterie noch nicht "leer" ist, springt das HEMS ein und zieht Strom aus der Hausbatterie um den Netzschluss Punkt auf 0 auszuregeln. Dies kann nicht verhindert werden!
+  - Zum Zeitpunkt der Regelung in evcc, kann mit 
+    - [prioritySoC](/docs/reference/configuration/site#prioritysoc) der Hausbatterie bis zu einem definierten SoC Vorrang gegeben werden. Danach wird Ladestrom als verfügbarer PV Überschuss interpretiert.
+    - [bufferSoC](/docs/reference/configuration/site#buffersoc) die Hausbatterie oberhalb dieses definierten SoC eine Entladung ignoriert und als PV Überschuss interpretiert. 
 
 ## Wallboxen
 
@@ -87,15 +114,33 @@ Bei einigen wenigen Wallboxen wird diese Funktionalität von evcc unterstützt. 
 
 <SponsorshipRequired />
 
+### Kann ich mehrere Wallboxen nutzen?
+
+Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden.  
+Es ist jedoch heute noch __kein__ Lastmanagement möglich und es gibt auch keine Möglichkeit die Priorisierung festzulegen. Beides ist auf unserer laaaaaangen Liste für die weitere Entwicklung.
+
 ## Hausinstallation
 
 ### Werden meine Geräte unterstützt?
 
 Hoffentlich. Schau einfach mal unter [Geräte - Hausinstallation](/docs/devices/meters) nach ob du deine Geräte findest. Wenn nicht, versuche es mal mit einer Konfiguration von einem anderen der gleichen Marke.
 
+### Ich habe eine PV Anlage aber keinen Netzanschluss-Zähler, kann ich evcc trotzdem nutzen?
+
+In dieser Konstellation kann nicht mit PV Überschuss geladen werden, da der dazu notwendige Zähler fehlt. Statt dessen wird in den Lademodi **PV** und **Min+PV** mit der PV Erzeugungsleistung gearbeitet.
+
+Als Optimierung kann über die Einstellung [`residualPower`](/docs/reference/configuration/site#residualpower) ein typischer mittlerer Hausverbrauch angegeben werden.
+
+**Beispiel**:
+
+```yaml
+site:
+  residualPower: 250 # 250W Hausverbrauch
+```
+
 ### Ich habe keine PV Anlage, kann ich evcc trotzdem sinnvoll einsetzen?
 
-Um die Batterie-Ladung eines Fahrzeugs auf einen bestimmten Ladestand (SOC) zu begrenzen, kann evcc bereits heute schon ohne PV Analage verwendet werden.  
+Um die Batterie-Ladung eines Fahrzeugs auf einen bestimmten Ladestand (SOC) zu begrenzen, kann evcc bereits heute schon ohne PV Analage verwendet werden. 
 Hierzu muss das Fahrzeug aber auf jeden Fall in die Konfiguration übernommen werden.
 
 ## Fahrzeuge
@@ -109,3 +154,19 @@ Dazu muss man meist den Benutzernamen und das Passwort für die Hersteller-App i
 ### Wird mein Auto unterstützt?
 
 Vielleicht. Schau einfach mal unter [Geräte - Fahrzeuge](/docs/devices/vehicles) nach ob du dein Fahrzeug findest. Wenn nicht, versuche es mal mit einer Konfiguration von einem anderen des gleichen Herstellers.
+
+### Wie wird Klimatisierung unterstützt?
+
+Bei manchen Fahrzeugen kann evcc über die Online API erkennen, ob das Fahrzeug gerade eine Klimatisierung aktiviert hat. 
+In diesem Fall wird die technisch an der Wallbox niedrigste mögliche Leistung freigegeben, damit das Fahrzeug mit dem Strom über die Wallbox klimatisieren kann.
+
+Sobald die Klimatisierung als deaktiviert erkannt wird, wird die Wallbox wieder gesperrt so dass das Fahrzeug keinen Strom über die Wallbox beziehen kann.
+
+In diesem Fall kann es vorkommen, dass die Klimatisierung im Fahrzeug weniger Leistung als die freigegebene Leistung benötigt.
+Und damit kann es sein dass das Fahrzeug die restliche verfügbare Leistung verwendet um die Batterie zu laden, auch wenn eine SoC Begrenzung festgelegt wurde.
+
+:::note Anmerkung
+Dies gilt nur für die Kombination von Fahrzeugen und Wallbox, wo diese beiden über den Standard IEC61851 kommunizieren. Dies ist heute in den meisten Fällen die Regel.
+
+Bei Fahrzeugen und Wallboxen die über ISO15118 kommunizieren, bekommt das Fahrzeug genau die Energiemenge welche es direkt an der Wallbox anfrägt.
+:::
