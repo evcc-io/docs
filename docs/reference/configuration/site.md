@@ -157,11 +157,11 @@ Insbesondere im Zusammenspiel mit weiteren unabhängigen Überschussausregelunge
 
 **Beispiel**:
 
-Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von -100 bis -300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoC`) zu ermöglichen. Andernfalls "sieht" die Regelung des Speichers keinen nutzbaren Überschuss.
+Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoC`) zu ermöglichen. Andernfalls "sieht" die Regelung des Speichers keinen nutzbaren Überschuss.
 Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Speicher ein kurzzeitiger Netzbezug besser vermeiden.
 
 ```yaml
-  residualPower: -100
+  residualPower: 100
 ```
 
 Soll im PV-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden muss hier eine positive Leistung entsprechend des Maximalanteils des Netzbezugs konfiguriert werden.
@@ -172,5 +172,5 @@ Die Ladung soll im PV-Modus mit mindestens 6A (einphasig) auch bereits mit nur 5
 Mindestladeleistung: 1 Phase * 6A * 230V = 1380 W, davon 50%: 690 W
 
 ```yaml
-  residualPower: 690
+  residualPower: -690
 ```
