@@ -85,50 +85,52 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 
 **Vollständige Liste aller von evcc bereitgestellten Variablen**:
 
+Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
+
 - Site
   - Konfiguration
-    - [`${siteTitle}`](site)
-    - [`${prioritySoC}`](site/#prioritysoc)
+    - [`siteTitle`](site) - Hauptüberschrift der evcc App (*string*)
+    - [`prioritySoC`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (*integer*)
   - Information
-    - `${batteryConfigured}`
-    - `${gridConfigured}`
-    - `${pvConfigured}`
+    - `batteryConfigured` - Hausbatterie/Powerwall-Meter konfiguriert (*bool*)
+    - `gridConfigured` - Smart/Grid-Meter konfiguriert (*bool*)
+    - `pvConfigured` - Solaranlagen/Photovoltaik-Meter konfiguriert (*bool*)
 - Infos zum Stromtarif
-  - [`${currency}`](tariffs)
-  - [`${tariffFeedIn}`](tariffs/#feedin)
-  - [`${tariffGrid}`](tariffs/#grid)
+  - [`currency`](tariffs) - Tarif-Währung (*string*)
+  - [`tariffFeedIn`](tariffs/#feedin) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
+  - [`tariffGrid`](tariffs/#grid) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
 - Meter Infos
-  - `${batteryPower}`
-  - `${batterySoC}`
-  - `${gridPower}`
-  - `${homePower}`
-  - `${pvAction}`
-  - `${pvPower}`
-  - `${pvRemaining}`
+  - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (*float*)
+  - `batterySoC` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (*integer*)
+  - `gridPower` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (*float*)
+  - `homePower` - Aktuelle Haus-Abnahmeleistung (ohne Wallboxverbrauch) in Watt (*float*)
+  - `pvPower` - Aktuelle Solaranlagen-Leistung in Watt (*float*)
 - Ladepunkte (loadpoint)
   - Konfiguration
-    - [`${loadpoint}`](loadpoints)
-    - [`${maxCurrent}`](loadpoints#maxcurrent)
-    - [`${minCurrent}`](loadpoints#mincurrent)
-    - [`${minSoC}`](loadpoints#min)
-    - [`${mode}`](loadpoints/#mode)
-    - [`${phases}`](loadpoints/#phases)
-    - [`${targetSoC}`](loadpoints#target)
-    - [`${title}`](loadpoints/#title)
+    - [`loadpoint`](loadpoints) - Laufende Nummer des Ladepunktes (*integer*) 
+    - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (*float*)
+    - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (*float*)
+    - [`minSoC`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
+    - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start (*string*)
+    - [`phases`](loadpoints/#phases) - Iitial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (*integer*)
+    - [`targetSoC`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
+    - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (*string*) 
   - Information
-    - `${activePhases}`
-    - `${chargeCurrent}`
-    - `${chargeCurrents}`
-    - `${chargeDuration}`
-    - `${chargePower}`
-    - `${chargeRemainingDuration}`
-    - `${chargeRemainingEnergy}`
-    - `${chargedEnergy}`
-    - `${charging}`
-    - `${climater}`
-    - `${enabled}`
-    - `${hasVehicle}`
-    - `${targetTime}`
+    - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (*integer*)
+    - `chargeCurrent` - Aktuelle Gesamt-Lade-Stromstärke in Ampere (*float*)
+    - `chargeCurrents` - Aktuelle Lade-Stromstärke pro aktiver Stromphase in Ampere (*float*)
+    - `chargeDuration` - Ladedauer in ???? (*????*)
+    - `chargePower`
+    - `chargeRemainingDuration`
+    - `chargeRemainingEnergy`
+    - `chargedEnergy`
+    - `charging`
+    - `climater`
+    - `enabled`
+    - `hasVehicle`
+    - `targetTime`
+    - `pvAction`
+    - `pvRemaining` 
 - Fahrzeuge (vehicles)
   - Konfiguration
     - [`${vehicleCapacity}`](vehicles/#capacity)
