@@ -14,10 +14,7 @@ capacity: 10 # kWh
 credentials:
   id: # user id
   secret: # secret
-tokens:
-  access: # access token
-  refresh: # refresh token
-vin: W... # VIN
+vin: W... # VIN optional
 cache: 5m # optional`,
 	}
 

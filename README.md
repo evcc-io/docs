@@ -2032,10 +2032,7 @@ If you want to contribute configurations to this repository please open a Pull R
   credentials:
     id: # user id
     secret: # secret
-  tokens:
-    access: # access token
-    refresh: # refresh token
-  vin: W... # VIN
+  vin: W... # VIN optional
   cache: 5m # optional
 ```
 
