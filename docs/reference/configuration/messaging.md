@@ -92,9 +92,9 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - [`siteTitle`](site) - Hauptüberschrift der evcc App (*string*)
     - [`prioritySoC`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (*integer*)
   - Information
-    - `batteryConfigured` - Hausbatterie/Powerwall-Meter konfiguriert (*bool*)
-    - `gridConfigured` - Smart/Grid-Meter konfiguriert (*bool*)
-    - `pvConfigured` - Solaranlagen/Photovoltaik-Meter konfiguriert (*bool*)
+    - `batteryConfigured` - Indikator, Hausbatterie/Powerwall-Meter konfiguriert (*bool*)
+    - `gridConfigured` - Indikator, Smart/Grid-Meter konfiguriert (*bool*)
+    - `pvConfigured` - Indikator, Solaranlagen/Photovoltaik-Meter konfiguriert (*bool*)
 - Infos zum Stromtarif
   - [`currency`](tariffs) - Tarif-Währung (*string*)
   - [`tariffFeedIn`](tariffs/#feedin) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
@@ -124,9 +124,9 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - `chargeRemainingDuration` - Ladezeit in Sekunden bis zum Ziel-Füllstand (*integer*)
     - `chargeRemainingEnergy` - Notwendige Energie bis zum Ziel-Füllstand in Wh (*float*)
     - `chargedEnergy` - Bisher geladene Energie in Wh (*float*)
-    - `charging` - Indikator, ob Ladevorgang aktiv (*bool*)
-    - `enabled` - Indikator, ob Beladung freigegeben (*bool*)
-    - `hasVehicle` - Indikator, ob dem Ladepunkt Fahrzeug-Definitionen zugewiesen sind (*bool*)
+    - `charging` - Indikator, Ladevorgang aktiv (*bool*)
+    - `enabled` - Indikator, Beladung freigegeben (*bool*)
+    - `hasVehicle` - Indikator, Fahrzeug-Definitionen sind dem Ladepunkt zugewiesen (*bool*)
     - `targetTime` - Zielladezeit in Sekunden seit seit 1970 UTC (*integer*)
     - `pvAction` - 
     - `pvRemaining` -  
@@ -135,11 +135,11 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (*float*)
     - [`vehicleTitle`](vehicles/#title) - Bezeichnung des Fahrzeugs in der evcc App (*string*)
   - Information
-    - `climater` - Indikator, ob Klimatisierung am Fahrzeug aktiviert (*bool*)
-    - `connected` - Indikator, ob Fahrzeug am Ladepunkt angeschlossen (*bool*)
+    - `climater` - Indikator, Klimatisierung am Fahrzeug aktiviert (*bool*)
+    - `connected` - Indikator, Fahrzeug am Ladepunkt angeschlossen (*bool*)
     - `connectedDuration` - Anschlußdauer des Fahrzeugs in Sekunden (*integer*)
     - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (*float*)
-    - `vehiclePresent` - Indikator, ob evcc auf die Fahrzeugdaten zugreifen kann (*bool*)
+    - `vehiclePresent` - Indikator, evcc auf die Fahrzeugdaten zugreifen kann (*bool*)
     - `vehicleRange` - Aktuelle Reichweite des Fahrzeugs in km (*float*)
     - `vehicleSoC` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (*integer*)
 - Infos zur Einsparungseffizienz 
