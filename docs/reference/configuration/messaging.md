@@ -112,49 +112,49 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (*float*)
     - [`minSoC`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
     - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start (*string*)
-    - [`phases`](loadpoints/#phases) - Iitial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (*integer*)
+    - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (*integer*)
     - [`targetSoC`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
     - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (*string*) 
   - Information
     - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (*integer*)
     - `chargeCurrent` - Aktuelle Gesamt-Lade-Stromstärke in Ampere (*float*)
     - `chargeCurrents` - Aktuelle Lade-Stromstärke pro aktiver Stromphase in Ampere (*float*)
-    - `chargeDuration` - Ladedauer in ???? (*????*)
-    - `chargePower`
-    - `chargeRemainingDuration`
-    - `chargeRemainingEnergy`
-    - `chargedEnergy`
-    - `charging`
-    - `climater`
-    - `enabled`
-    - `hasVehicle`
-    - `targetTime`
-    - `pvAction`
-    - `pvRemaining` 
+    - `chargeDuration` - Ladedauer in Sekunden (*integer*)
+    - `chargePower` - Aktuelle Lade-Leistung in Watt (*float*)
+    - `chargeRemainingDuration` - Ladezeit in Sekunden bis zum Ziel-Füllstand (*integer*)
+    - `chargeRemainingEnergy` - Notwendige Energie bis zum Ziel-Füllstand in Wh (*float*)
+    - `chargedEnergy` - Bisher geladene Energie in Wh (*float*)
+    - `charging` - Indikator, ob Ladevorgang aktiv (*bool*)
+    - `enabled` - Indikator, ob Beladung freigegeben (*bool*)
+    - `hasVehicle` - Indikator, ob dem Ladepunkt Fahrzeug-Definitionen zugewiesen sind (*bool*)
+    - `targetTime` - Zielladezeit in Sekunden seit seit 1970 UTC (*integer*)
+    - `pvAction` - 
+    - `pvRemaining` -  
 - Fahrzeuge (vehicles)
   - Konfiguration
-    - [`${vehicleCapacity}`](vehicles/#capacity)
-    - [`${vehicleTitle}`](vehicles/#title)
+    - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (*float*)
+    - [`vehicleTitle`](vehicles/#title) - Bezeichnung des Fahrzeugs in der evcc App (*string*)
   - Information
-    - `${connected}`
-    - `${connectedDuration}`
-    - `${vehicleOdometer}`
-    - `${vehiclePresent}`
-    - `${vehicleRange}`
-    - `${vehicleSoC}`
+    - `climater` - Indikator, ob Klimatisierung am Fahrzeug aktiviert (*bool*)
+    - `connected` - Indikator, ob Fahrzeug am Ladepunkt angeschlossen (*bool*)
+    - `connectedDuration` - Anschlußdauer des Fahrzeugs in Sekunden (*integer*)
+    - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (*float*)
+    - `vehiclePresent` - Indikator, ob evcc auf die Fahrzeugdaten zugreifen kann (*bool*)
+    - `vehicleRange` - Aktuelle Reichweite des Fahrzeugs in km (*float*)
+    - `vehicleSoC` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (*integer*)
 - Infos zur Einsparungseffizienz 
-  - `${savingsAmount}`
-  - `${savingsEffectivePrice}`
-  - `${savingsGridCharged}`
-  - `${savingsSelfConsumptionCharged}`
-  - `${savingsSelfConsumptionPercent}`
-  - `${savingsSince}`
-  - `${savingsTotalCharged}`
+  - `savingsAmount` - Summe der evcc-Einsparung (*float*)
+  - `savingsEffectivePrice` - Kalkulierter Einsparungs-Preis (*float*)
+  - `savingsGridCharged` - Geladene Netzenergie in Wh (*float*)
+  - `savingsSelfConsumptionCharged` - Geladene Sonnenenergie in Wh (*float*)
+  - `savingsSelfConsumptionPercent` - Anteil der geladenen Sonnenenergie in Wh (*float*)
+  - `savingsSince` - Zeitperiode der Ersparnisberechnung in Sekunden (*integer*)
+  - `savingsTotalCharged` - Geladene Gesamtenergie in Wh (*float*)
 - Sponsor
   - Konfiguration
-    - [`${auth}`](sponsortoken)
+    - [`auth`](sponsortoken) - Authentication Token des evcc-Sponsors (*string*)
   - Information
-    - `${sponsor}`
+    - `sponsor` - Name des evcc-Sponsors (*string*)
 
 ## `services`
 
