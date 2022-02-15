@@ -135,7 +135,7 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (*float*)
     - [`vehicleTitle`](vehicles/#title) - Bezeichnung des Fahrzeugs in der evcc App (*string*)
   - Information
-    - `climater` - Indikator, Klimatisierung am Fahrzeug aktiviert (*bool*)
+    - `climater` - Status der Fahrzeug-Klimatisierung `on`/`off`/`heating`/`cooling` (*string*)
     - `connected` - Indikator, Fahrzeug am Ladepunkt angeschlossen (*bool*)
     - `connectedDuration` - Anschlußdauer des Fahrzeugs in Sekunden (*integer*)
     - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (*float*)
