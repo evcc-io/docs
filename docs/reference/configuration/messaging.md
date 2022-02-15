@@ -111,7 +111,7 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (*float*)
     - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (*float*)
     - [`minSoC`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
-    - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start (*string*)
+    - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (*string*)
     - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (*integer*)
     - [`targetSoC`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
     - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (*string*) 
@@ -128,7 +128,7 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - `enabled` - Indikator, Beladung freigegeben (*bool*)
     - `hasVehicle` - Indikator, Fahrzeug-Definitionen sind dem Ladepunkt zugewiesen (*bool*)
     - `targetTime` - Zielladezeit in Sekunden seit seit 1970 UTC (*integer*)
-    - `pvAction` - Kontrollvariable zur PV-Timer Steuerung (enable,disavle) (*string*)
+    - `pvAction` - Kontrollvariable zur PV-Timer Steuerung `enable`/`disable` (*string*)
     - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Sekunden (*integer*)
 - Fahrzeuge (vehicles)
   - Konfiguration
