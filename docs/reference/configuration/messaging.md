@@ -128,8 +128,8 @@ Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` i
     - `enabled` - Indikator, Beladung freigegeben (*bool*)
     - `hasVehicle` - Indikator, Fahrzeug-Definitionen sind dem Ladepunkt zugewiesen (*bool*)
     - `targetTime` - Zielladezeit in Sekunden seit seit 1970 UTC (*integer*)
-    - `pvAction` - Kontrollvariable zur PV-Timer Steuerung (*string*)
-    - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Sekunden (*float*)
+    - `pvAction` - Kontrollvariable zur PV-Timer Steuerung (enable,disavle) (*string*)
+    - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Sekunden (*integer*)
 - Fahrzeuge (vehicles)
   - Konfiguration
     - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (*float*)
