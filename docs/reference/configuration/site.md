@@ -145,28 +145,30 @@ Letztendlich wird mit diesem Wert der durch die Steuerung einzustellende "Ruhezu
 
 Insbesondere im Zusammenspiel mit weiteren unabhängigen Überschussausregelungen wie z. B. der eines Batteriespeichers ist es obligatorisch diesen Wert anzupassen um ein definiertes Systemverhalten mit klaren Prioritäten zu erzielen.
 
+Soll im PV-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden muss hier eine negative Leistung entsprechend des Maximalanteils des Netzbezugs konfiguriert werden.
+
 #### `grid` `meter` vorhanden
 
-- Positiver Wert: Verbleibende Netzbezugsleistung
-- Negativer Wert: Verbleibende Netzeinspeiseleistung
+- Positiver Wert: Verbleibende Netzeinspeiseleistung
+- Negativer Wert: Verbleibende Netzbezugsleistung
 
 #### Nur `pv` `meter` vorhanden
 
 - Positiver Wert: Typischer Hausverbrauch, um damit den PV-Überschuss abschätzen zu können.
-- Negativer Wert: -
+- Negativer Wert: (ungültig)
 
-**Beispiel**:
-
-Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoC`) zu ermöglichen. Andernfalls "sieht" die Regelung des Speichers keinen nutzbaren Überschuss.
+:::info
+Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoC`) zu ermöglichen. Andernfalls "sieht" die unabhängige Regelung des Speichers keinen nutzbaren Überschuss.
 Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Speicher ein kurzzeitiger Netzbezug besser vermeiden.
+:::
+
+**Beispiel "Batteriespeicher"**:
 
 ```yaml
   residualPower: 100
 ```
 
-Soll im PV-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden muss hier eine positive Leistung entsprechend des Maximalanteils des Netzbezugs konfiguriert werden.
-
-**Beispiel**:
+**Beispiel "Netzbezugsanteil"**:
 
 Die Ladung soll im PV-Modus mit mindestens 6A (einphasig) auch bereits mit nur 50% PV-Anteil beginnen (Rest Netzbezug)
 Mindestladeleistung: 1 Phase * 6A * 230V = 1380 W, davon 50%: 690 W
