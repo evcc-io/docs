@@ -15,8 +15,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
     organizationName: "evcc-io", // Usually your GitHub org/user name.
     projectName: "docs", // Usually your repo name.
     i18n: {
-      defaultLocale: 'de',
-      locales: ['de'],
+      defaultLocale: "de",
+      locales: ["de"],
     },
     presets: [
       [
@@ -30,12 +30,12 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           },
           blog: {
             showReadingTime: true,
-            blogSidebarTitle: 'Letzte Beiträge',
+            blogSidebarTitle: "Letzte Beiträge",
             blogSidebarCount: 15,
             postsPerPage: 5,
             editUrl: "https://github.com/evcc-io/docs/tree/main",
             feedOptions: {
-              type: 'all',
+              type: "all",
               copyright: `Copyright © ${new Date().getFullYear()} evcc.io`,
             },
           },
@@ -95,7 +95,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 },
                 {
                   label: "Entwickler Slack",
-                  href: "https://join.slack.com/t/evccgroup/shared_invite/zt-fw52e6lt-tdazCp1LPdPlYuKz3PvTAw",
+                  href: "https://join.slack.com/t/evccgroup/shared_invite/zt-14yub38w0-7xDdOMo3Wy7AwdrNrAtWsQ",
                   target: "_self",
                 },
               ],
