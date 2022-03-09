@@ -11,8 +11,8 @@ Definiert das Niveau der Protokollierung von Informationen auf der Konsole.
 **Mögliche Werte**:
 
 - `error`: Nur Nachrichten der Kategorie `error` werden angezeigt. Das sind am wenigesten Nachrichten.
-- `warning`: Beinhaltet `error`, zusätzlich Nachrichten der Kategorie `warning` angezeigt.
-- `info`: Beinhaltet `warning`, zusätzlich Nachrichten der Kategorie `info` angezeigt.
+- `warn`: Beinhaltet `error`, zusätzlich Nachrichten der Kategorie `warn` angezeigt.
+- `info`: Beinhaltet `warn`, zusätzlich Nachrichten der Kategorie `info` angezeigt.
 - `debug`: Beinhaltet `info`, zusätzlich Nachrichten der Kategorie `debug` angezeigt. Dies ist für die Fehleranalyse erforderlich.
 - `trace`: Beinhaltet `debug`, zusätzlich Nachrichten der Kategorie `trace` angezeigt. Dies ist die detaillierteste Kategorie und kann zu sehr großen Logdaten führen. In der Regel wird dies nicht benötigt!
 
