@@ -37,33 +37,51 @@ Der Docker Container kann entweder manuell über einen Befehl in der Kommandozei
 
 ### Manuell
 
-Installiere den Docker Container:
+Installiere den Docker Container der zu deiner Komponenten-Konstellation passt mit einem der folgenden Befehle:
 
 <Tabs groupId="docker">
   <TabItem value="default" label="Standard" default>
 
   ```sh
-  docker run -d --name evcc -v $(pwd)/evcc.yaml:/etc/evcc.yaml -p 7070:7070 andig/evcc:latest
+  sudo docker run \
+  -d \
+  --name evcc \
+  -v $(pwd)/evcc.yaml:/etc/evcc.yaml \
+  -p 7070:7070 \
+  andig/evcc:latest
   ```
   </TabItem>
   <TabItem value="sma" label="SMA Geräte">
   Für die Verwendung des SMA Sunny Home Manger 2.0 muss evcc eine eindeutige Geräte-ID erstellen. Unter Linux wird <i>machine-id</i> verwendet, und dafür muss es in den Container gemounted werden:
 
   ```sh
-  docker run -d --name evcc -v $(pwd)/evcc.yaml:/etc/evcc.yaml -v /etc/machine-id:/etc/machine-id -v /var/lib/dbus/machine-id:/var/lib/dbus/machine-id --network host andig/evcc:latest
+  sudo docker run \
+  -d \
+  --name evcc \
+  -v $(pwd)/evcc.yaml:/etc/evcc.yaml \
+  -v /etc/machine-id:/etc/machine-id \
+  -v /var/lib/dbus/machine-id:/var/lib/dbus/machine-id \
+  --network host \
+  andig/evcc:latest
   ```
   </TabItem>
   <TabItem value="udp" label="UDP Geräte (z.b. KEBA)">
   Falls ein Messgerät oder eine Wallbox verwendet wird, welches UDP benötigt wie z.b. KEBA, stelle sicher dass der Docker Container auc hdie UDP Nachrichten auf den entsprechenden Ports empfangen kann (<i>:7090</i> for KEBA):
 
   ```sh
-  docker run -d --name evcc -v $(pwd)/evcc.yaml:/etc/evcc.yaml -p 7070:7070 -p 7090:7090/udp andig/evcc:latest
+  sudo docker run \
+  -d \
+  --name evcc \
+  -v $(pwd)/evcc.yaml:/etc/evcc.yaml \
+  -p 7070:7070 \
+  -p 7090:7090/udp \
+  andig/evcc:latest
   ```
   </TabItem>
 </Tabs>
 
 :::note
-Mit `andig/evcc:latest` bekommt man die jeweils aktuelle Version. (Empfohlen)
+Mit `andig/evcc:latest` bekommt man die jeweils aktuelle Version. (Empfohlen)   
 Mit `andig/evcc:nightly` bekommt man einen täglich aktualisierten Build, der nicht so gut getestet sein kann.
 :::
 
@@ -71,15 +89,19 @@ Mit `andig/evcc:nightly` bekommt man einen täglich aktualisierten Build, der ni
 Unter Linux ist es evtl. notwendig den Befehl mit `sudo` zu beginnen!
 :::
 
+:::note
+Durch die `-d`-Option wird der evcc Container beim Stoppen automatisch gelöscht und muss danach durch einen der `docker run ...` Befehle oben wieder angelegt/gestartet werden.
+:::
+
 :::warning
 Mounte nicht das lokale Verzeichnis `/etc` als Volume in Docker!
 :::
 
-Dies installiert einen Docker Container mit evcc und startet ihn.
+### Mit [docker-compose](https://docs.docker.com/compose)
 
-### Mit docker-compose
-
-`docker-compose` hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile, z.B. falls man weitere Programme wie Traefik in Verbindung mit evcc nutzen möchte. Hier ist ein einfaches Beispiel für eine solche Konfiguration
+[docker-compose](https://docs.docker.com/compose) hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile, z.B. falls man weitere Programme wie Traefik in Verbindung mit evcc nutzen möchte.   
+Im aktiven Verzeichnis legt man dazu einfach eine Konfigurationsdatei mit dem Namen `docker-compose.yml` an.   
+Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgenden Konfigurationen in die `docker-compose.yml` und speichert diese ab:
 
 <Tabs groupId="docker">
   <TabItem value="default" label="Standard" default>
@@ -95,7 +117,7 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
         environment:
           - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           - TZ=Europe/Berlin
-        image: andig/evcc
+        image: andig/evcc:latest
         ipc: private
         logging:
           driver: json-file
@@ -104,8 +126,7 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
           - 7070:7070/tcp
         volumes:
           - /etc/evcc.yaml:/etc/evcc.yaml
-          - /etc/machine-id:/etc/machine-id
-          - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
+        restart: unless-stopped
         working_dir: /app
     networks: {}
   </TabItem>
@@ -122,7 +143,7 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
         environment:
           - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           - TZ=Europe/Berlin
-        image: andig/evcc
+        image: andig/evcc:latest
         ipc: private
         logging:
           driver: json-file
@@ -132,6 +153,7 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
           - /etc/evcc.yaml:/etc/evcc.yaml
           - /etc/machine-id:/etc/machine-id
           - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
+        restart: unless-stopped
         working_dir: /app
     networks: {}
   </TabItem>
@@ -148,7 +170,7 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
         environment:
           - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
           - TZ=Europe/Berlin
-        image: andig/evcc
+        image: andig/evcc:latest
         ipc: private
         logging:
           driver: json-file
@@ -158,8 +180,7 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
           - 7090:7090/udp
         volumes:
           - /etc/evcc.yaml:/etc/evcc.yaml
-          - /etc/machine-id:/etc/machine-id
-          - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
+        restart: unless-stopped
         working_dir: /app
     networks: {}
   </TabItem>
@@ -168,13 +189,75 @@ Dies installiert einen Docker Container mit evcc und startet ihn.
 Starte den Container mit:
 
 ```sh
-docker-compose up -d
+sudo docker-compose up -d
 ```
 
-## Testen
+  
+  ## Testen
 
-Prüfe die Installation und öffne einen Browser und gibt die folgende URL ein: `http://127.0.0.1:7070`.
+Prüfe die Docker Installation
+
+- Zeige die laufenden docker Container an:
+
+  ```sh
+  sudo sudo docker ps -a
+  ```
+
+- Prüfe die log Ausgaben des evcc Containers:
+
+  ```sh
+  sudo docker logs evcc
+  ```
+
+- Prüfe die evcc Meter-Konfiguration des evcc Containers:
+
+  ```sh
+  sudo docker exec evcc evcc -l debug meter
+  ```
+
+- Prüfe die evcc Charger-Konfiguration des evcc Containers:
+
+  ```sh
+  sudo docker exec evcc evcc -l debug charger
+  ```
+
+- Prüfe die evcc Vehicle-Konfiguration des evcc Containers:
+
+  ```sh
+  sudo docker exec evcc evcc -l debug vehicle
+  ```
+
+Öffne einen Browser und gibt die folgende URL ein: `http://127.0.0.1:7070`
 
 :::note
 Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls der Browser nicht auf dem gleichen Computer geöffnet wurde.
 :::
+
+## Aktualisierung
+
+Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte durch:
+- Öffne ein Terminal/Eingabeaufforderung
+
+- Aktualisiere auf das neuste evcc Image:
+
+  ```sh
+  sudo sudo docker pull andig/evcc:latest
+  ```
+
+- Stoppe den evcc Container:
+
+  ```sh
+  sudo docker stop evcc
+  ```
+
+- Lösche den evcc Container:
+
+  ```sh
+  sudo docker rm evcc
+  ```
+
+- Starte den evcc Container mit dem aktualiserten Image:
+
+  ```sh
+  sudo docker-compose up -d
+  ```
