@@ -50,7 +50,7 @@ Die verfügbaren Ereignisse sind:
 ### `msg`
 
 `msg` definiert den Text für den Nachrichteninhalt.   
-Im Text können verschiedene Variablen im Format `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
+Im Text können verschiedene Variablen im regex-Funktionsformat `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
 :::note
 Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!.
 :::
@@ -68,10 +68,10 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 | `${title}` | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints/#title) Parameters |
 | `${vehicleTitle}` | Fahrzeug: Text des  [`vehicles`](vehicles) [`title`](vehicles/#title) Parameters |
 
-**Beispiele**:
+**Beispiel**:
 
 ```yaml
-  # Message examples using evcc variables
+  # Message examples using evcc variables via regex function
   # start
   msg: Wallbox ${title} started charging ${vehicleTitle} in ${mode} mode
   # stop
@@ -80,12 +80,62 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
   msg: ${vehicleTitle} connected on wallbox ${title} at ${pvPower:%.1fk}kW PV
   # disconnect
   msg: ${vehicleTitle} disconnected of wallbox ${title} after ${connectedDuration}
-
 ```
 
-**Vollständige Liste aller von evcc bereitgestellten Variablen**:
+:::note
+Zum Rendern der `msg`-Texte kann auch die [go-Text-Template](https://pkg.go.dev/text/template)-Syntax in Kombination mit [sprig-Funktionen](http://masterminds.github.io/sprig/) genutzt werden.
 
-Die von evcc bereitgestellten Variablen müssen im Format `${<Variablenname>}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
+```yaml
+# Message config using evcc go-text-template rendering, evcc variables and sprig-functions
+messaging:
+  events:
+    start: # charge start event
+      title: Charge of {{.vehicleTitle}} started
+      msg: |
+        Wallbox {{.title}} started charging {{.vehicleTitle}} in {{ toString .mode | upper }} mode.
+        --------------------------
+        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
+        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
+        Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+    stop: # charge stop event
+      title: Charge of {{.vehicleTitle}} finished
+      msg: |
+        Wallbox {{.title}} finished charging {{.vehicleTitle}} 
+        with {{round (divf .chargedEnergy 1000) 2 }} kWh in {{.chargeDuration}}.
+        --------------------------
+        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
+        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
+        Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+    connect: # vehicle connect event
+      title: "{{.vehicleTitle}} connected on wallbox {{.title}}"
+      msg: |
+        {{.vehicleTitle}} connected on wallbox {{.title}} at {{round (divf .pvPower 1000) 2 }} kW PV.
+        --------------------------
+        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
+        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
+        Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+    disconnect: # vehicle connected event
+      title: "{{.vehicleTitle}} disconnected of wallbox {{.title}}"
+      msg: |
+        {{.vehicleTitle}} disconnected of wallbox {{.title}} after {{.connectedDuration}}.
+        --------------------------
+        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
+        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
+        Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+  ```
+:::
+
+**Liste aller von evcc bereitgestellten Variablen**:
+
+Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
 
 - Site
   - Konfiguration
