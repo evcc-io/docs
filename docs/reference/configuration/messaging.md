@@ -50,7 +50,7 @@ Die verfügbaren Ereignisse sind:
 ### `msg`
 
 `msg` definiert den Text für den Nachrichteninhalt.   
-Im Text können verschiedene Variablen im regex-Funktionsformat `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
+Im Text können verschiedene Variablen im Format `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
 :::note
 Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!.
 :::
@@ -71,7 +71,7 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 **Beispiel**:
 
 ```yaml
-  # Message examples using evcc variables via regex function
+  # Message examples using evcc variables
   # start
   msg: Wallbox ${title} started charging ${vehicleTitle} in ${mode} mode
   # stop
