@@ -1409,7 +1409,6 @@ If you want to contribute configurations to this repository please open a Pull R
   user: foo@example.org
   password: *****
   charger: EH______
-  cache: 10s
   # an evcc sponsortoken is required for using this charger
 ```
 
