@@ -1,6 +1,6 @@
 # evcc docs
 
-Official documentation repository of [evcc](https://evcc.io).
+Official (german) documentation repository of [evcc](https://evcc.io).
 
 ## General
 
