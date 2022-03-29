@@ -148,7 +148,7 @@ timeout: 5s
 
 ## Calc (nur lesen)
 
-Das `calc` Plugin erlaubt es die Summe von Werten von anderen Plugins zu berechnen:
+Das `calc` Plugin erlaubt es die mehrere Einzelwerte mathematisch weiterzuverarbeiten:
 
 **Beispiel Lesen**:
 
@@ -161,7 +161,15 @@ add:
   ...
 ```
 
-Das `calc` Plugin ist hilfreich um z.b. Werte von Import und Export Leistung von S0 Zählern zu kombinieren. Mit `scale: -1` bei einem der Werte kann eine Subtraktion durchgeführt werden, mit `scale: 1000` eine Konvertierung von Wh in kWh.
+Als Operanden werden dabei die Grundrechenarten Addition (add) und Multiplikation (mul) unterstützt.
+Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z. B. zur Konvertierung von kWh in Wh.
+
+Das `calc` Plugin ist hilfreich um z.B. 
+- Leistungswerte von einzelnen PV-Strings zu summieren (addieren)
+- Die Leistung aus Spannung und Strom zu berechnen (multiplizieren)
+- Getrennte Leistungswerte für Import und Export zu einem vorzeichenbehafteten Einzelwert zu kombinieren (subtrahieren).
+- Prozentuale Füllstände zu berechnen (dividieren)
+
 
 ## Kombinierter Status (nur lesen)
 
