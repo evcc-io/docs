@@ -8,23 +8,22 @@ jobs:
   gh-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Prepare
+        uses: actions/setup-node@v1
         with:
           node-version: "16.x"
+      - name: Install
+        run: npm ci
       - name: Build
-        run: |
-          npm ci
-          npm run generate
-      - uses: stefanzweifel/git-auto-commit-action@v4
+        run: npm run build
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Generate docs from templates
-      - uses: webfactory/ssh-agent@v0.5.0
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          ssh-private-key: ${{ secrets.GH_PAGES_DEPLOY }}
-      - name: Release to GitHub Pages
-        env:
-          USE_SSH: true
-          GIT_USER: git
-        run: |
-          npm run deploy
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
