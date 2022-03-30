@@ -110,7 +110,7 @@ function generateMarkdown(data, type, target) {
     const nextBrand = dataSorted[i + 1]?.product?.brand;
     let flags = "";
     if (entry.requirements?.includes("sponsorship")) {
-      flags += "💚";
+      flags += " 💚";
     }
 
     if (group !== lastGroup) {
@@ -118,14 +118,14 @@ function generateMarkdown(data, type, target) {
       generated += additionalContent(type, group);
     }
 
-    if (brand !== lastBrand) {
+    if (brand !== "" && brand !== lastBrand) {
       const level = group ? "###" : "##";
       generated += `${level} ${brand}\n\n`;
     }
 
     if (brand !== nextBrand && brand !== lastBrand) {
       generated = generated.slice(0, -2); // remove last newline characters
-      generated += ` ${description} ${flags}\n\n`;
+      generated += ` ${description}${flags}\n\n`;
     } else {
       let level = "##";
       if (group) level += "#";
