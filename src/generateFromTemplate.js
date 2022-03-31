@@ -118,12 +118,12 @@ function generateMarkdown(data, type, target) {
       generated += additionalContent(type, group);
     }
 
-    if (brand !== "" && brand !== lastBrand) {
+    if (brand && brand !== lastBrand) {
       const level = group ? "###" : "##";
       generated += `${level} ${brand}\n\n`;
     }
 
-    if (brand !== nextBrand && brand !== lastBrand) {
+    if (brand && brand !== nextBrand && brand !== lastBrand) {
       generated = generated.slice(0, -2); // remove last newline characters
       generated += ` ${description}${flags}\n\n`;
     } else {
