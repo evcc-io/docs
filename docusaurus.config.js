@@ -95,7 +95,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 },
                 {
                   label: "Entwickler Slack",
-                  href: "https://join.slack.com/t/evccgroup/shared_invite/zt-14yub38w0-7xDdOMo3Wy7AwdrNrAtWsQ",
+                  href: "https://evcc.io/slack",
                   target: "_self",
                 },
               ],
