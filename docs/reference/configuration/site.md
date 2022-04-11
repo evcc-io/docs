@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Beschreibt den Standort mit den vorhandenen und benötigten Geräten der Hausinstallation und ist für das Regeln der verfügbaren Leistung zuständig.
 
-Um das Laden mit PV Überschuss zu regeln, ist ein auslesbarer Zähler direkt hinter dem Netzanschlusspunkt notwendig. Zusätzlich können auch Geräte für die PV Leistung und Hausbatterie angegeben werden.
+Um das Laden mit PV-Überschuss zu regeln, ist ein auslesbarer Zähler direkt hinter dem Netzanschlusspunkt notwendig. Zusätzlich können auch Geräte für die PV-Leistung und Hausbatterie(n) angegeben werden. Mehrere Geräte werden dabei in der Leistung intern automatisch addiert bzw. wird bei Batteriespeichern der Mittelwert des Ladezustands gebildet.
 
 **Beispiel**:
 
@@ -14,11 +14,13 @@ Um das Laden mit PV Überschuss zu regeln, ist ein auslesbarer Zähler direkt hi
 site:
 - title: Zuhause # display name for UI
   meters:
-    grid: sdm630 # grid meter reference
+    grid: mygridmeter # grid meter reference
     pvs: 
-    - sma # pv meter reference
+    - mypv1 # first pv meter reference
+    - mypv9 # second pv meter reference
     batteries:
-    - byd # battery meter reference
+    - mybat5 # first battery meter reference
+    - mybat7 # second battery meter reference
 ```
 
 ---
@@ -27,7 +29,7 @@ site:
 
 ### `title`
 
-Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
+Die angezeigte Beschreibung des Ladepunktes, wird in der UI angezeigt.
 
 **Beispiel**:
 
@@ -39,10 +41,13 @@ Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
 
 ### `meters`
 
-Definiert welche [`meter`](meters) (Strommessgeräte) welche Art von Daten zur Verfügung stellen.
+Definiert welche konfigurierten [`meter`](meters) (Strommessgeräte) als welche Art Messpunkt verwendet werden soll.
+Hier erfolgt somit die logische Verknüpfung der Gerätedefiniton mit dem Verwendungsweck.
+Ein zunächst universeller Zähler bekommt somit entsprechend seines Einbauortes in der Hausinstallation einen Zweck zugewiesen.
 
 :::note
 Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pvs` Elementes notwendig!
+Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 :::
 
 **Beispiel**:
@@ -50,12 +55,14 @@ Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pvs` Ele
 ```yaml
 site:
   meters:
-    grid: sdm630 # grid meter reference
+    grid: mygridmeter # grid meter reference
     pvs: 
-    - sma # pv meter reference
+    - mypv1 # pv meter reference
     batteries: 
-    - byd # battery meter reference
+    - mybat2 # battery meter reference
   residualPower: 100
+  bufferSoC: 80
+  prioritySoC: 66
 ```
 
 ---
@@ -64,21 +71,22 @@ site:
 
 ### `meters.grid`
 
-Definiert das [`meter`](meters) (Strommessgeräte), welches die Werte des Netzanschlusspunktes liefert.
+Definiert das [`meter`](meters) (Strommessgeräte), welches die Messwerte des Netzanschlusspunktes liefert.
 
 **Mögliche Werte**: Wert eines `name` Parameters in der [`meters`](#meters) Konfiguration.
 
 **Beispiel**:
 
 ```yaml
-    grid: sdm630 # grid meter reference
+    grid: mygridmeter # grid meter reference
 ```
 
 ---
 
 ### `meters.pvs`
 
-Definiert die [`meter`](meters) (Strommessgeräte), welches die PV Stromerzeugungswerte liefert.
+Definiert die [`meter`](meters) (Strommessgeräte), welches die PV-Erzeugungswerte liefert.
+Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
 
 **Mögliche Werte**: Eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration.
 
@@ -86,14 +94,16 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die PV Stromerzeugun
 
 ```yaml
     pvs: 
-    - sma # pv meter reference
+    - myoldpv # first pv meter reference
+    - mynewestpv # second pv meter reference
 ```
 
 ---
 
 ### `meters.batteries`
 
-Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatterien liefert.
+Definiert die [`meter`](meters) (Strommessgeräte), welches die Messdaten des/der Batteriespeicher(s) liefert.
+Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Speicherfüllständen ein Mittelwert gebildet.
 
 **Mögliche Werte**: Eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration.
 
@@ -101,7 +111,8 @@ Definiert die [`meter`](meters) (Strommessgeräte), welches die Werte Hausbatter
 
 ```yaml
     batteries: 
-    - byd # battery meter reference
+    - mysmallbat # first battery meter reference
+    - myhugebat # seconds battery meter reference
 ```
 
 ### `bufferSoC`
