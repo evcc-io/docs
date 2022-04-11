@@ -20,7 +20,9 @@ site:
     - mypv9 # second pv meter reference
     batteries:
     - mybat5 # first battery meter reference
-    - mybat7 # second battery meter reference
+  residualPower: 100
+  bufferSoC: 80
+  prioritySoC: 66    
 ```
 
 ---
@@ -60,9 +62,6 @@ site:
     - mypv1 # pv meter reference
     batteries: 
     - mybat2 # battery meter reference
-  residualPower: 100
-  bufferSoC: 80
-  prioritySoC: 66
 ```
 
 ---
