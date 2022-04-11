@@ -19,7 +19,7 @@ site:
     - mypv1 # first pv meter reference
     - mypv9 # second pv meter reference
     batteries:
-    - mybat5 # first battery meter reference
+    - mybat5 # battery meter reference
   residualPower: 100
   bufferSoC: 80
   prioritySoC: 66    
