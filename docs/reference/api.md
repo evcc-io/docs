@@ -9,6 +9,9 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 ## REST API
 
 - `/api/state`: evcc state (static configuration and dynamic state)
+
+Um einzelne Werte zu erhalten, muß diese URI ausgelesen und das JSON geparsed werden.
+
 - `/api/loadpoints/<id>/mode`: loadpoint charge mode (writable)
 - `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
 - `/api/loadpoints/<id>/targetsoc`: loadpoint target SoC (writable)
@@ -17,7 +20,8 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 - `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
 
 :::note
-Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage mit dem zu ändernden Wert im Pfad Segement gesendet werden.
+Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment angehängt werden,
+also beispielsweise `url -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus auf `pv` zu stellen.
 :::
 
 ## MQTT API
