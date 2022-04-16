@@ -21,7 +21,7 @@ Um einzelne Werte zu erhalten, muß diese URI ausgelesen und das JSON geparsed w
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment angehängt werden,
-also beispielsweise `url -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus auf `pv` zu stellen.
+also beispielsweise `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus auf `pv` zu stellen.
 :::
 
 ## MQTT API
