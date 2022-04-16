@@ -26,7 +26,7 @@ also beispielsweise `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um 
 
 ## MQTT API
 
-Die MQTT API folgt der REST API Struktur, mit den Ladepunkt (loadpoint) IDs bei `0` beginnend:
+Die MQTT API folgt der REST API Struktur, mit den Ladepunkt (loadpoint) IDs bei `1` beginnend:
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
