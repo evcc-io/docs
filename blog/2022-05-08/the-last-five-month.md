@@ -88,7 +88,7 @@ Zusätzlich erhalten Templates auch eine strukturierte Beschreibung aller erford
 
 [Seit März](https://github.com/evcc-io/docs/pull/92) haben wir die [Gerätedokumentation unter docs.evcc.io](/docs/devices/chargers) auf Templates umgestellt. Die bisherigen Schreibweisen funktionieren natürlich weiterhin. Da zukünftige Feature wie die webbasierte Einrichtung (ja, das wird kommen 😄) auf `type: template` aufbauen werden empfehlen wir, dass ihr eure bestehenden Konfigurationen bereits jetzt auf das neue Format umschreibt.
 
-## Neue Lokalisierung: Litauische 🇱🇹
+## Neue Lokalisierung: Litauisch 🇱🇹
 
 Mit v0.91 haben wir eine neue Lokalisation erhalten. Die evcc UI ist nun auch auf lithauisch verfügbar. Das ist neben Deutsch, Englisch und Italiänisch nun die vierte Sprache. Vielen Dank [RTTTC](https://github.com/RTTTC) 💚.
 
