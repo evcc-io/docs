@@ -15,7 +15,7 @@ Die Liste der von evcc unterstützten Hardware wächst fleißig weiter.
 
 Wir haben einige Wallbox-Anbindungen hinzugefügt. Da evcc nun auch den sehr verbreiteten [Bender Controller unterstützt](https://github.com/evcc-io/evcc/pull/3103) konnten wir unsere Unterstützung deutlich verbreitern.
 
-Hier die Hersteller, die seit Anfang des Jahres neu dazu gekommen sind: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, TP-Link, Ubitricity Vestel, Webasto. [(Alle Wallboxen)](/docs/devices/chargers)
+Hier die Hersteller, die seit Anfang des Jahres neu dazu gekommen sind: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity Vestel, Webasto. [(Alle Wallboxen)](/docs/devices/chargers)
 
 ### Fahrzeuge 🚗 🛵
 
