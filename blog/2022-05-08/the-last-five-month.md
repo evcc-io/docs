@@ -21,9 +21,13 @@ Hier die Hersteller, die seit Anfang des Jahres neu dazu gekommen sind: Alphatec
 
 Audi (e-tron), Cupra, Jaguar, Landrover, Mercedes, Silence S01, Smart. [(Alle Fahrzeuge)](/docs/devices/vehicles)
 
-### Messgeräte ☀️ 🔋 ⚡️
+### Wechselrichter ☀️ 🔋
 
-Carlo Gavazzi, SMA (Smart Energy Hybrid, Data Manager), Huawei, Shelly, Siemens, Solarwatt, Solax, OpenEMS, TQ, Varta. [(Alle Messgeräte)](/docs/devices/meters)
+SMA (Smart Energy Hybrid), Huawei (SUN2000), Solarwatt, Solax, Varta. [(Alle Wechselrichter)](/docs/devices/meters)
+
+### Netzzähler 📟
+
+SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [(Alle Messgeräte)](/docs/devices/meters)
 
 ### RFID Support 🪪
 
