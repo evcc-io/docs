@@ -1,5 +1,5 @@
 ---
-title: Neuerungen seit Jahresbeginn
+title: Phasenhandling, Templates und Lithauisch
 authors: [naltatis]
 tags: [release]
 hide_table_of_contents: false
