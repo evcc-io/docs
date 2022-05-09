@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkevcc_docs=self.webpackChunkevcc_docs||[]).push([[1713],{53457:function(e){e.exports=JSON.parse('{"release":{"allTagsPath":"/blog/tags","name":"release","count":7,"permalink":"/blog/tags/release"},"allgemein":{"allTagsPath":"/blog/tags","name":"allgemein","count":1,"permalink":"/blog/tags/allgemein"}}')}}]);
