@@ -245,6 +245,9 @@ Definiert das Verhalten wann im PV Modus das Laden begonnen wird.
 #### `threshold`
 
 Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
+Wobei hierbei ein Wert bei "residualpower" in site berücksichtigt werden muss. 
+Wenn z. B. bei residualpower 200 eingetragen ist (lässt also 200 W Einspeisung übrig), dann führt ein enable Wert von 100 nicht dazu, dass 100 W Bezug eingestellt sind, sondern dass sich die verbleibende Einspeisung um 100 W reduziert. 
+
 
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
 
@@ -269,6 +272,7 @@ Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 ### `disable`
 
 Definiert das Verhalten wann im PV Modus das Laden unterbrochen wird.
+(siehe residualpower Hinweis bei enable)
 
 **Standardwert:** `10m`
 
