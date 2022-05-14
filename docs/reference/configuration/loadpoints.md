@@ -334,6 +334,10 @@ Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
   phases: 1
 ```
 
+:::info
+Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link etc.) zugewiesen, **muss** `phases` auf zwingend **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.  
+:::
+
 ---
 
 ### `minCurrent`
