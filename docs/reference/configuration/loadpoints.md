@@ -245,8 +245,16 @@ Definiert das Verhalten wann im PV Modus das Laden begonnen wird.
 #### `threshold`
 
 Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
-Wobei hierbei ein Wert bei "residualpower" in site berücksichtigt werden muss. 
-Wenn z. B. bei residualpower 200 eingetragen ist (lässt also 200 W Einspeisung übrig), dann führt ein enable Wert von 100 nicht dazu, dass 100 W Bezug eingestellt sind, sondern dass sich die verbleibende Einspeisung um 100 W reduziert. 
+
+:::info
+
+Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
+
+Ist bspw. `residualpower` auf 200 gesetzt (die evcc Regelung setzt den Soll-Arbeitspunkt auf 200W Einspeisung), dann führt ein `enable` `threshold` Wert von 100 nicht dazu, dass ab 100W Netzbezug der Ladepunkt das Laden startet, sondern dass sich die verbleibende Einspeisung um 100W reduziert und somit ab 100W Einspeisung die Ladung startet.
+
+Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` Wert auf 300 gesetzt werden.
+
+:::
 
 
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
@@ -272,7 +280,7 @@ Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 ### `disable`
 
 Definiert das Verhalten wann im PV Modus das Laden unterbrochen wird.
-(siehe residualpower Hinweis bei enable)
+   (siehe `residualpower` Hinweis bei `enable`)
 
 **Standardwert:** `10m`
 
