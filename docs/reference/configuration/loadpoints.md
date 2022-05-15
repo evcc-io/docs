@@ -246,17 +246,6 @@ Definiert das Verhalten wann im PV Modus das Laden begonnen wird.
 
 Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 
-:::info
-
-Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
-
-Ist bspw. `residualpower` auf 200 gesetzt (die evcc Regelung setzt den Soll-Arbeitspunkt auf 200W Einspeisung), dann führt ein `enable` `threshold` Wert von 100 nicht dazu, dass ab 100W Netzbezug der Ladepunkt das Laden startet, sondern dass sich die verbleibende Einspeisung um 100W reduziert und somit ab 100W Einspeisung die Ladung startet.
-
-Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` Wert auf 300 gesetzt werden.
-
-:::
-
-
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
 
 **Beispiel**:
@@ -264,6 +253,14 @@ Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` 
 ```yaml
     threshold: 0
 ```
+
+:::info
+Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
+
+Ist bspw. `residualPower` auf 200 gesetzt (die evcc Regelung setzt den Soll-Arbeitspunkt auf 200W Einspeisung), dann führt ein `enable` `threshold` Wert von 100 nicht dazu, dass ab 100W Netzbezug der Ladepunkt das Laden startet, sondern dass sich die verbleibende Einspeisung um 100W reduziert und somit ab 100W Einspeisung die Ladung startet.
+
+Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` Wert auf 300 gesetzt werden.
+:::
 
 #### `delay`
 
@@ -280,7 +277,6 @@ Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 ### `disable`
 
 Definiert das Verhalten wann im PV Modus das Laden unterbrochen wird.
-   (siehe `residualpower` Hinweis bei `enable`)
 
 **Standardwert:** `10m`
 
@@ -303,6 +299,12 @@ Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 ```yaml
     threshold: 200 # Ein maximaler Netzbezug von 200W ist erlaubt
 ```
+
+:::info
+Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
+
+Vergleiche dazu auch das Beispiel in der Info zu [`enable`](#enable) `threshold`.
+:::
 
 #### `delay`
 
