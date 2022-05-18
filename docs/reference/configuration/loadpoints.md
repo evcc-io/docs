@@ -347,6 +347,9 @@ Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
 ```yaml
   phases: 1
 ```
+Hinweis: Der Wert bei `phases` ist massgeblich verantwortlich für die Berechnung der Ein-/Abschaltschwelle. Ist die Wallbox zwar 3-phasig angeschlossen, soll aber aufgrund geringer PV-Gesamtleistung im Überschussbetrieb nur 1-phasig betrieben werden (2 Phasen werden "abgeschaltet") dann ist hier ebenfalls der Wert `1` empfehlenswert.
+Diese Einstellung hat keinen Einfluss auf den Modus "sofort" laden.
+
 
 :::info
 Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link etc.) zugewiesen, **muss** `phases` auf zwingend **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.  
