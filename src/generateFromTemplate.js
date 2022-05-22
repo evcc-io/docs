@@ -113,6 +113,8 @@ function generateMarkdown(data, type, target) {
       flags += " 💚";
     }
 
+    generated += `<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/${type}  -->\n\n`;
+
     if (group !== lastGroup) {
       generated += `## ${group}\n\n`;
       generated += additionalContent(type, group);
