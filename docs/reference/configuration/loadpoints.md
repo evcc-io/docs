@@ -56,7 +56,7 @@ Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox D
 
 Referenz auf eine `meter` (Strommessgerät) Konfiguration.
 
-Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Strommessung durchführt bzw. die Werte der Messung von evcc nicht ausgelesen werden können. Aber selbst dann ist dieser Eintrag optional, denn evcc rechnet nimmt an dass mit der eingestellten maximalen Stromstärke auch geladen wird.
+Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Strommessung durchführt bzw. die Werte der Messung von evcc nicht ausgelesen werden können. Aber selbst dann ist dieser Eintrag optional, denn evcc nimmt an, dass mit der eingestellten maximalen Stromstärke auch geladen wird.
 
 **Beispiel**:
 
@@ -96,7 +96,7 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 
 ### `resetOnDisconnect`
 
-Definiert ob bei Abstecken des Ladekabels vom Fahrzeug, die Standardeinstellungen für folgende Werte wieder hergestellt werden sollen:
+Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellungen für folgende Werte wiederhergestellt werden sollen:
 
 * [`mode`](loadpoints#mode)
 * [`soc.min`](loadpoints#min)
@@ -124,12 +124,12 @@ Der Standard Lademodus wenn evcc startet.
 **Mögliche Werte**:
 
 - `off`: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
-- `now`: Lade sofort mit der maximalen möglichen Leistung.
-- `minpv`: Lade sofort mit der minimal möglichen Leistung. Falls genug PV Überschuss vorhanden ist, lade schneller.
-- `pv`: Lade nur mit PV Überschuss und pausiere wenn nicht genug Leistung verfügbar ist.
+- `now`: Lade sofort mit der maximal möglichen Leistung.
+- `minpv`: Lade sofort mit der minimal möglichen Leistung. Falls genug PV-Überschuss vorhanden ist, lade schneller.
+- `pv`: Lade nur mit PV-Überschuss und pausiere wenn nicht genug Leistung verfügbar ist.
 
 :::info
-Im allgemeinen benötigt ein EV mindestens 1,4kW Leistung pro Phase um zu Laden. Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren, wird insgesamt mindestens 1,4kW Leistung benötigt, egal mit wievielen Phasen geladen wird.
+Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren, wird insgesamt mindestens 1,4kW Leistung benötigt, egal mit wievielen Phasen geladen wird.
 :::
 
 **Beispiel**:
@@ -158,22 +158,22 @@ Definiere die Standardeinstellungen für den Umgang mit dem SOC eines angeschlos
 
 #### `poll`
 
-Definiert wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
+Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
 
 :::warning
-Es ist __NICHT__ empfehlen die Standardeinstellungen zu ändern. Denn dies könnte dazu führen dass die Fahrzeugbatterie entleert wird
-oder dass der Fahrzeughersteller aktiv verhindern würde das evcc benutzen kann. __AUF EIGENES RISIKO.__
+Es wird __NICHT__ empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen dass die Fahrzeugbatterie entleert wird
+oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. __AUF EIGENES RISIKO.__
 :::
 
 #### `poll.mode`
 
-Definiert unter welchen Bedingungen die Daten für da Fahrzeug abgerufen werden
+Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werden
 
 **Mögliche Werte**:
 
 - `charging`: aktualisiere die Daten __NUR__ während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
-- `connected`: aktualisiere die Daten wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt), der Parameter `interval` definiert wie oft
-- `always`: aktualisiere die Daten immer auch wenn es nicht mit der Wallbox verbunden ist, der Parameter [`interval`](#interval) definiert wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
+- `connected`: aktualisiere die Daten wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
+- `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#interval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
 **Beispiel**:
 
@@ -183,7 +183,7 @@ Definiert unter welchen Bedingungen die Daten für da Fahrzeug abgerufen werden
 
 #### `poll.Interval`
 
-Definiert wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
+Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
 
 **Beispiel**:
 
@@ -205,7 +205,7 @@ Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Par
 
 #### `target`
 
-Definiere bis zu welchem SOC geladen wird.
+Definiere, bis zu welchem SOC geladen wird.
 
 **Beispiel**:
 
@@ -219,7 +219,7 @@ Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 
 **Mögliche Werte**:
 
-- `true`: evcc interpoliert die SOC Werte zwischen den Fahrzeug abfragen
+- `true`: evcc interpoliert die SOC Werte zwischen den Fahrzeugabfragen
 - `false`: evcc nutzt nur die SOC Werte welche das Fahrzeug zurückliefert
 
 **Beispiel**:
@@ -264,7 +264,7 @@ Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` 
 
 #### `delay`
 
-Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
+Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
 **Beispiel**:
 
@@ -349,7 +349,7 @@ Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
 ```
 
 :::info
-Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link etc.) zugewiesen, **muss** `phases` auf zwingend **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.  
+Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link etc.) zugewiesen, **muss** `phases` zwingend auf **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.  
 :::
 
 ---
@@ -359,9 +359,9 @@ Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Ste
 Definiert die minimale Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
 
 :::info
-Im allgemeinen benötigt ein EV mindestens eine Stromstärke 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird auch eine höhere Stromstärke benötigt!
+Im Allgemeinen benötigt ein EV mindestens eine Stromstärke 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird auch eine höhere Stromstärke benötigt!
 
-Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren kann unter umständen auch mit einer geringeren Stromstärke pro Phase geladen werden, wenn die Gesamtleistung trotzdem mindestens etwa 1,4kW beträgt.
+Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren kann unter Umständen auch mit einer geringeren Stromstärke pro Phase geladen werden, wenn die Gesamtleistung trotzdem mindestens etwa 1,4kW beträgt.
 :::
 
 **Standardwert:** `6`
