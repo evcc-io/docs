@@ -8,7 +8,7 @@ evcc benötigt eine Konfigurationsdatei in der die Installation beschrieben wird
 
 Zur Bearbeitung bzw. Erstellung der Konfigurationsdatei empfehlen wir einen Texteditor zu verwenden, welcher die YAML Synthax beherrscht und damit Fehler aufzeigen kann, z.B. [VS Code](https://code.visualstudio.com) mit der [YAML Erweiterung](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
 
-Die Konfigurationsdatei hat standardmäßig den Namen `evcc.yaml` und ist entweder im gleichen Verzeichnis wie das Programm selbst abzulegen, oder unter Linux-System auch unter `/etc/evcc.yaml`.
+Die Konfigurationsdatei hat standardmäßig den Namen `evcc.yaml` und ist entweder im gleichen Verzeichnis wie das Programm selbst abzulegen, oder bei Linux-Systemen unter `/etc/evcc.yaml`.
 
 Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Parameter beim Aufruf evcc übergeben werden: z.B. `evcc -c /home/evcc.yaml`
 
