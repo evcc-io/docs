@@ -232,7 +232,7 @@ Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 
 ### `enable`
 
-Definiert das Verhalten wann im PV Modus das Laden begonnen wird.
+Definiert das Verhalten wann im PV Modus das Laden begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.  
 
 **Beispiel**:
 
@@ -276,7 +276,7 @@ Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
 ### `disable`
 
-Definiert das Verhalten wann im PV Modus das Laden unterbrochen wird.
+Definiert das Verhalten wann im PV Modus das Laden unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
 
 **Standardwert:** `10m`
 
