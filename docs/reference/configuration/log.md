@@ -39,7 +39,7 @@ Definiert Niveaus der Protokollierung für verschiedene evcc Komponenten
 - `core`: Die zentrale evcc Komponente (Regelung, Berechnungen, ...)
 - `lp-X`: Der jeweilige Ladepunkt, wobei `X` in der Reihenfolge der Konfiguration der [`loadpoints`](loadpoints) (Ladepunkte) durchnummeriert ist, beginnend bei `1`
 - `sma`: Die SMA HEMS Komponente, falls der SMA Sunnay Home Manager 2.0 per [`hems`](hems) eingebunden ist
-- _`fahrzeugname`_: Jedes definierte [`vehicle`](vehicles) (Fahrzeug), hier ist der jeweilige Wert des Parameters [`name`](vehicles#name) anzugeben
+- _`fahrzeugname`_: Jedes definierte [`vehicle`](vehicles) (Fahrzeug), hier ist der jeweilige Wert des Parameters [`type`](vehicles#type) anzugeben. Bei `type: template` ist der Name des Templates zu nutzen. 
 
 **Mögliche Werte jede Komponente**: Identisch zu den Werten von [`log`](#log)
 
