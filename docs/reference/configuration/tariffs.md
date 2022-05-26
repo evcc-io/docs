@@ -138,7 +138,7 @@ Die ID des Standards, falls es unter dem Account mehrere gibt
 
 ## `feedin`
 
-Vergütung für eingespeisten Strom
+Vergütung für eingespeisten Strom. Bei Alt-Anlagen (vor 1.4.2012) ist hier die Differenz zwischen der Einspeise- und der Selbstverbrauchsvergütung einzutragen. 
 
 **Mögliche Werte** `fixed`
 
