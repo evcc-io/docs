@@ -10,7 +10,7 @@ Definiert den Detailgrad der Protokollierung von Informationen auf der Konsole.
 
 **Mögliche Werte**:
 
-- `error`: Nur Nachrichten der Kategorie `error` werden angezeigt. Das sind am wenigesten Nachrichten.
+- `error`: Nur Nachrichten der Kategorie `error` werden angezeigt. Das sind die wenigesten Nachrichten.
 - `warn`: Beinhaltet `error`, zusätzlich werden Nachrichten der Kategorie `warn` angezeigt.
 - `info`: Beinhaltet `warn`, zusätzlich werden Nachrichten der Kategorie `info` angezeigt.
 - `debug`: Beinhaltet `info`, zusätzlich werden Nachrichten der Kategorie `debug` angezeigt. Dies ist für die Fehleranalyse erforderlich.
@@ -30,7 +30,7 @@ log: error
 
 ## `levels`
 
-Ermöglicht es, für verschiedene Komponenten von evcc das Protokollierung unterschiedlich einzustellen.
+Ermöglicht es, für verschiedene Komponenten von evcc die Protokollierung unterschiedlich einzustellen.
 
 Definiert den Detailgrad der Protokollierung für verschiedene evcc Komponenten
 
