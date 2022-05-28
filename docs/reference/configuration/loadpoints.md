@@ -161,7 +161,7 @@ Definiere die Standardeinstellungen für den Umgang mit dem SOC eines angeschlos
 Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
 
 :::warning
-Es wird __NICHT__ empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen dass die Fahrzeugbatterie entleert wird
+Es wird __NICHT__ empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
 oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. __AUF EIGENES RISIKO.__
 :::
 
@@ -172,7 +172,7 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 **Mögliche Werte**:
 
 - `charging`: aktualisiere die Daten __NUR__ während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
-- `connected`: aktualisiere die Daten wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
+- `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
 - `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#interval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
 **Beispiel**:
@@ -220,7 +220,7 @@ Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 **Mögliche Werte**:
 
 - `true`: evcc interpoliert die SOC Werte zwischen den Fahrzeugabfragen
-- `false`: evcc nutzt nur die SOC Werte welche das Fahrzeug zurückliefert
+- `false`: evcc nutzt nur die SOC Werte, welche das Fahrzeug zurückliefert
 
 **Beispiel**:
 
@@ -232,7 +232,7 @@ Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 
 ### `enable`
 
-Definiert das Verhalten wann im PV Modus das Laden begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.  
+Definiert das Verhalten, wann im PV Modus das Laden begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.  
 
 **Beispiel**:
 
@@ -276,7 +276,7 @@ Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
 ### `disable`
 
-Definiert das Verhalten wann im PV Modus das Laden unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
+Definiert das Verhalten, wann im PV Modus das Laden unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
 
 **Standardwert:** `10m`
 
@@ -337,6 +337,12 @@ Mindestens 15 Minuten Abstand zwischen dem An-/Ausschalten des Ladevorgangs.
 ### `phases`
 
 Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
+
+Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern dient lediglich dazu, im PV-Modus (in Verbindung mit `minCurrent`) die minimale Startleistung für die Ladung zu ermitteln.
+
+Wenn ein bekanntes Fahrzeug angeschlossen ist, wird der kleinere Wert aus `vehicle: phases` und `loadpoint: phases` zur Berechnung herangezogen. Bei unbekannten Fahrzeugen wirkt immer `loadpoint: phases` alleine.
+
+Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der Ladeleistung genutzt. Das funktioniert allerdings nur zum downsizing von `phases: 3` und nicht zum upsizing von `phases: 1`.  
 
 **Standardwert:** `3`
 
