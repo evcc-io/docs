@@ -109,6 +109,8 @@ Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellung
 - `true`: Standardeinstellungen werden eingestellt.
 - `false`: Aktuelle Einstellungen bleiben erhalten.
 
+**Standardwert:** `true`
+
 **Beispiel**:
 
 ```yaml
@@ -127,6 +129,8 @@ Der Standard Lademodus wenn evcc startet.
 - `now`: Lade sofort mit der maximal möglichen Leistung.
 - `minpv`: Lade sofort mit der minimal möglichen Leistung. Falls genug PV-Überschuss vorhanden ist, lade schneller.
 - `pv`: Lade nur mit PV-Überschuss und pausiere wenn nicht genug Leistung verfügbar ist.
+
+**Standardwert:** `pv`
 
 :::info
 Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren, wird insgesamt mindestens 1,4kW Leistung benötigt, egal mit wievielen Phasen geladen wird.
@@ -175,6 +179,8 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 - `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
 - `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#interval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
+**Standardwert:** `charging`
+
 **Beispiel**:
 
 ```yaml
@@ -184,6 +190,8 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 #### `poll.Interval`
 
 Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
+
+**Standardwert:** `60m`
 
 **Beispiel**:
 
@@ -197,6 +205,8 @@ Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Par
 
 **Mögliche Werte**: Der Wert entspricht dem Ziel-SoC (Ladezustand in %) der EV Batterie.
 
+**Standardwert:** `0`
+
 **Beispiel**:
 
 ```yaml
@@ -206,6 +216,8 @@ Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Par
 #### `target`
 
 Definiere, bis zu welchem SOC geladen wird.
+
+**Standardwert:** `100`
 
 **Beispiel**:
 
@@ -221,6 +233,8 @@ Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
 
 - `true`: evcc interpoliert die SOC Werte zwischen den Fahrzeugabfragen
 - `false`: evcc nutzt nur die SOC Werte, welche das Fahrzeug zurückliefert
+
+**Standardwert:** `false`
 
 **Beispiel**:
 
@@ -248,6 +262,8 @@ Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
 
+**Standardwert:** `0`
+
 **Beispiel**:
 
 ```yaml
@@ -266,6 +282,8 @@ Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` 
 
 Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
+**Standardwert:** `1m`
+
 **Beispiel**:
 
 ```yaml
@@ -277,8 +295,6 @@ Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 ### `disable`
 
 Definiert das Verhalten, wann im PV Modus das Laden unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
-
-**Standardwert:** `10m`
 
 **Beispiel**:
 
@@ -293,6 +309,8 @@ Definiert das Verhalten, wann im PV Modus das Laden unterbrochen wird. Darüberh
 Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 
 **Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export.
+
+**Standardwert:** `0`
 
 **Beispiel**:
 
@@ -310,6 +328,8 @@ Vergleiche dazu auch das Beispiel in der Info zu [`enable`](#enable) `threshold`
 
 Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
+**Standardwert:** `3m`
+
 **Beispiel**:
 
 ```yaml
@@ -322,7 +342,7 @@ Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 
 Definiert den zeitlichen Mindestabstand in welchem der Strom gesperrt oder wieder freigegeben werden darf.
 
-**Standardwert:** `10m`
+**Standardwert:** `5m`
 
 **Beispiel**:
 
