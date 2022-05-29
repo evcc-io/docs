@@ -43,12 +43,12 @@ Die angezeigte Beschreibung des Ladepunktes, wird in der UI angezeigt.
 
 ### `meters`
 
-Definiert welche konfigurierten [`meter`](meters) (Strommessgeräte) als welche Art Messpunkt verwendet werden soll.
+Definiert welche konfigurierten [`meter`](meters) (Strommessgeräte) als welche Art Messpunkt verwendet werden sollen.
 Hier erfolgt somit die logische Verknüpfung der Gerätedefiniton mit dem Verwendungsweck.
 Ein zunächst universeller Zähler bekommt somit entsprechend seines Einbauortes in der Hausinstallation einen Zweck zugewiesen.
 
 :::note
-Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pvs` Elementes notwendig!
+Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pv(s)` Elementes notwendig!
 Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 :::
 
@@ -70,7 +70,7 @@ site:
 
 ### `meters.grid`
 
-Definiert das [`meter`](meters) (Strommessgeräte), welches die Messwerte des Netzanschlusspunktes liefert.
+Definiert das [`meter`](meters) (Strommessgerät), welches die Messwerte des Netzanschlusspunktes liefert.
 
 **Mögliche Werte**: Wert eines `name` Parameters in der [`meters`](#meters) Konfiguration.
 
@@ -82,14 +82,19 @@ Definiert das [`meter`](meters) (Strommessgeräte), welches die Messwerte des Ne
 
 ---
 
-### `meters.pvs`
+### `meters.pv(s)`
 
-Definiert die [`meter`](meters) (Strommessgeräte), welches die PV-Erzeugungswerte liefert.
+Definiert die [`meter`](meters) (Strommessgeräte), welches die PV-Erzeugungswerte liefern.
 Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
 
-**Mögliche Werte**: Eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration.
+**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
 
 **Beispiel**:
+
+```yaml
+    pv: myonlypv # singele pv meter reference
+```
+oder 
 
 ```yaml
     pvs: 
@@ -99,14 +104,19 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 
 ---
 
-### `meters.batteries`
+### `meters.battery(ies)`
 
-Definiert die [`meter`](meters) (Strommessgeräte), welches die Messdaten des/der Batteriespeicher(s) liefert.
-Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Speicherfüllständen ein Mittelwert gebildet.
+Definiert die [`meter`](meters) (Strommessgeräte), welche die Messdaten des/der Batteriespeicher(s) liefern.
+Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Speicherfüllständen wird ein Mittelwert gebildet.
 
-**Mögliche Werte**: Eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration.
+**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
 
 **Beispiel**:
+
+```yaml
+    battery: myonlybat # singel battery meter reference
+```
+oder
 
 ```yaml
     batteries: 
@@ -117,7 +127,7 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 ### `bufferSoC`
 
 Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen SoC (%) Wert.
-Die Ladung wird im PV-Modus bei zu wenig Überschuss (unterhalb der Mindestladeleistung) nicht unterbrochen wenn sich die Hausbatterie(n) oberhalb dieses Ladezustandes befindet. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen wenn diese entsprechend geladen ist.
+Die Ladung wird im PV-Modus bei zu wenig Überschuss (unterhalb der Mindestladeleistung) nicht unterbrochen, wenn sich die Hausbatterie(n) oberhalb dieses Ladezustandes befindet. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen, wenn diese entsprechend geladen ist.
 Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 
 :::note
@@ -132,8 +142,8 @@ Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 
 ### `prioritySoC`
 
-Die Ladung der Hausbatterie hat Priorität vor der Fahrzeugladung unterhalb des angegebenen SoC (%) Werts.
-Steht unterhalb dieses Wertes mehr Erzeugungsleistung zur Verfügung wie der Batteriespeicher aufnimmt kann dieser Überschuss trotzdem nachrangig zur Fahrzeugladung verwendet werden.
+Die Ladung der Hausbatterie hat unterhalb des angegebenen SoC (%) Wertes Priorität gegenüber der Fahrzeugladung.
+Steht unterhalb dieses Wertes mehr Erzeugungsleistung zur Verfügung als der Batteriespeicher aufnimmt, kann dieser Überschuss trotzdem nachrangig zur Fahrzeugladung verwendet werden.
 Wenn die Hausbatterie oberhalb des Wertes geladen wird, wird die Batterieladeleistung für das Laden des EVs als verfügbare Überschussleistung betrachtet. Somit hat dann die Fahrzeugladung Priorität bei der Verwendung der Überschussleistung.
 Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 
