@@ -342,6 +342,8 @@ Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern
 
 Wenn ein bekanntes Fahrzeug angeschlossen ist, wird der kleinere Wert aus `vehicle: phases` und `loadpoint: phases` zur Berechnung herangezogen. Bei unbekannten Fahrzeugen wirkt immer `loadpoint: phases` alleine.
 
+Bei Wallboxen mit unterstützter Phasenumschaltung 1p/3p wird der Parameter `loadpoint: phases` ignoriert.
+
 Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der Ladeleistung genutzt. Das funktioniert allerdings nur zum downsizing von `phases: 3` und nicht zum upsizing von `phases: 1`.  
 
 **Standardwert:** `3`
