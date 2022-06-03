@@ -22,8 +22,8 @@ Hier geht es um Fahrzeug Themen
 
 [Weiterlesen...](vehicles)
 
-## Häufige Fragen und Themen
+## Wallbox und Hausinstallation
 
-Hier geht es um verschiedenste typische Fragen und Themen in Kurzform.
+Hier geht es um die Themen Wallbox und Hausinstallation.
 
 [Weiterlesen...](faq)
