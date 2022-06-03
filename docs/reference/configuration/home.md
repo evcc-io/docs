@@ -16,6 +16,8 @@ Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Paramet
 
 Die Konfigurationsdatei von evcc besteht aus mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
 
+Eine Beispieldatei mit vielen Parametern findet man hier: https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml
+
 Hier ein Überblick über die Beziehungen der wichtigsten Bestandteile der Konfiguration:
 
 ```mermaid
