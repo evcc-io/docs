@@ -10,7 +10,10 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 
 - `/api/state`: evcc state (static configuration and dynamic state)
 
+- `/api/health`: evcc health check
+
 Um einzelne Werte zu erhalten, muß diese URI ausgelesen und das JSON geparsed werden.
+Die Loadpoint IDs beginnen bei `0`.
 
 - `/api/loadpoints/<id>/mode`: loadpoint charge mode (writable)
 - `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
