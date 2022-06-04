@@ -62,6 +62,28 @@ Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter
 
 ## Unterstützte Typen
 
+### `movingaverage`
+
+Mit dieser Meter-Type kann man schwankende Meter-Messwerte "glätten". Nutzbar ist es bei allen Meter-Anwendungen (`usage`). Der Parameter `decay` gibt dabei an, mit wieviel Prozent der neue Wert in die Berechnung übernommen werden soll.
+
+**Beispiel**
+
+```yaml
+meters:
+- name: grid
+  type: movingaverage
+  decay: 0.1
+  meter:
+    type: template
+    template: solarlog
+    usage: grid
+    host: 192.0.2.2
+    ...
+```
+In diesen Beispiel werden 10% vom neuen Wert übernommen. Nach 10 Regelungszyklen fällt der älteste Wert aus der Berechnung raus. Wie lange das dauert hängt vom `interval` ab. 
+
+
+---
 ### `modbus`
 
 Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
