@@ -114,14 +114,14 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 **Beispiel**:
 
 ```yaml
-    battery: myonlybat # singel battery meter reference
+    battery: myonlybat # single battery meter reference
 ```
 oder
 
 ```yaml
     batteries: 
     - mysmallbat # first battery meter reference
-    - myhugebat # seconds battery meter reference
+    - myhugebat # second battery meter reference
 ```
 
 ### `bufferSoC`
@@ -200,16 +200,16 @@ Mindestladeleistung: 1 Phase * 6A * 230V = 1380 W, davon 50%: 690 W
 
 ### `maxGridSupplyWhileBatteryCharging`
 
-Dieser Parameter ist nur notwendig bei Hybrid-Wechselrichter Systemen, bei denen die DC-Erzeugungsleistung größer ist als die AC-Ausgabeleistung des Wechselrichters. Hier kann es unter gewissen Umständen während der Fahrzeugladung zu Netzbezug kommen, obwohl gleichzeitig die Batterie geladen wird.
+Dieser Parameter ist (nur) hilfreich bei Hybrid-Wechselrichter-Systemen, bei denen die DC-Erzeugungsleistung in Verbindung mit einem direkt angebundenen Speichersystem größer sein kann als die AC-Ausgabeleistung des Wechselrichters. Hierbei kann es während der Fahrzeugladung zu Netzbezug kommen, obwohl gleichzeitig die Batterie geladen wird.
 
-Beispiel:
-15kW PV-Erzeugungsleistung, aber nur 10kW AC-Ausgabeleistung des WR = 5kW Batterieladeleistung auf DC-Ebene.
+Beispielszenario:
+10 kW maximale AC-Ausgabeleistung des Hybrid-WR. Aktuelle PV-Erzeugungsleistung 15 kW, dabei gehen 5 kW in die direkt angeschlossene Batterie, da der AC-Pfad des Hybrid-WR bereits mit 10 kW voll ausgelastet ist.
 
-Wenn `prioritySoC` erreicht ist, wird die gesamte Batterieladeleistung als zusätzlich verfügbare Fahrzeugladeleistung betrachtet. In dem obigen Beispiel käme es dann zu Netzbezug, weil EVCC die 5kW Batterieladung zur verfügbaren Fahrzeugladeleistung addieren würde, obwohl diese vom Wechselrichter dem Netz (und somit den Fahrzeug) gar nicht zur Verfügung gestellt werden kann.
+Normalerweise wird die momentane Ladeleistung der Hausbatterie als zusätzlich verfügbare Fahrzeugladeleistung betrachtet (falls `prioritySoC` schon erreicht wurde). In dem obigen Beispiel käme es dann jedoch zu Netzbezug in Höhe der momentanen Batterieladeleistung da diese vom Wechselrichter dem Netz (und somit dem Fahrzeug) technisch nicht zur Verfügung gestellt werden kann. Der ausgelastete AC-Pfad des Hybrid-WR bildet hierbei einen für die Standard-Regelung unerwarteten Engpass.
 
-Mit diesem Parameter kann ein Schwellenwert für den Netzbezug gesetzt werden, der bewirkt, dass diese Batterieladeleistung nicht als zusätzlich verfügbare Fahrzeugladeleistung angesehen wird.
+Mit diesem Parameter kann ein Schwellenwert für den Netzbezug gesetzt werden, der bewirkt, dass in diesem Fall die Batterieladeleistung nicht als verfügbare Fahrzeugladeleistung einberechnet wird. Somit bleibt dann die maximale Überschussladeleistung auf die maximale AC-Ausgangsleistung des/der Wechselrichter zuzügliches dieses Wertes begrenzt.
 
-Empfohlen wird ein Wert von mindestens 50. Je nach Trägheit der betroffenen Regelungssysteme kann er auch höher sein.
+Empfohlen wird ein Wert von mindestens 50 (Watt). Je nach Trägheit der beteiligten Regelungssysteme kann er auch höher gewählt werden müssen.
 
 ```yaml
   maxGridSupplyWhileBatteryCharging: 50
