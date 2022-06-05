@@ -40,7 +40,7 @@ payload: ${var:%d}
 
 ## HTTP (lesen/schreiben)
 
-Das `http` Plugin HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen für REST APIs zu lesen oder zu parsen.
+Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen für REST APIs zu lesen oder zu parsen. Darüberhinaus wird auch der Parameter `regex` unterstützt, mit dem bestimmte Werte aus Abfragen extrahiert werden können.
 
 **Beispiel Lesen**:
 
