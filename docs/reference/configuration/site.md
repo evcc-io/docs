@@ -212,6 +212,6 @@ Mit diesem Parameter kann ein Schwellenwert für den Netzbezug gesetzt werden, d
 Empfohlen wird ein Wert von mindestens 50. Je nach Trägheit der betroffenen Regelungssysteme kann er auch höher sein.
 
 ```yaml
-  maxGirdSupplyWhileBatteryCharging: 50
+  maxGridSupplyWhileBatteryCharging: 50
 ```
 
