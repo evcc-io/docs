@@ -40,11 +40,16 @@ payload: ${var:%d}
 
 ## HTTP (lesen/schreiben)
 
-Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen für REST APIs zu lesen oder zu parsen. 
+Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder zu parsen. 
 
-XML-Dokumente werden automatisch in JSON-Form überführt, welche dann mit JQ und Regex weiter gefiltert werden können.
+:::important
+XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden kann.
+:::
 
-Für den Test von JQ-Queries bietet sich das Online-Tool https://www.jsonquerytool.com/ und für Regex-Tests das Online-Tool https://regex101.com/ an.
+:::tip
+Für den Test von jq-Abfragen bietet sich z. B. das Online-Tool https://www.jsonquerytool.com/ und für Regex-Tests z. B. das Online-Tool https://regex101.com/ an.
+:::
+
 
 **Beispiel Lesen**:
 
@@ -152,7 +157,7 @@ timeout: 5s
 
 ## Calc (nur lesen)
 
-Das `calc` Plugin erlaubt es die mehrere Einzelwerte mathematisch weiterzuverarbeiten:
+Das `calc` Plugin erlaubt es mehrere Einzelwerte mathematisch weiterzuverarbeiten:
 
 **Beispiel Lesen**:
 
