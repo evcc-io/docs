@@ -40,7 +40,11 @@ payload: ${var:%d}
 
 ## HTTP (lesen/schreiben)
 
-Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen für REST APIs zu lesen oder zu parsen. Darüberhinaus wird auch der Parameter `regex` unterstützt, mit dem bestimmte Werte aus Abfragen extrahiert werden können.
+Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen für REST APIs zu lesen oder zu parsen. 
+
+XML-Dokumente werden automatisch in JSON-Form überführt, welche dann mit JQ und Regex weiter gefiltert werden können.
+
+Für den Test von JQ-Queries bietet sich das Online-Tool https://www.jsonquerytool.com/ und für Regex-Tests das Online-Tool https://regex101.com/ an.
 
 **Beispiel Lesen**:
 
