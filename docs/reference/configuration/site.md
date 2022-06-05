@@ -196,3 +196,22 @@ Mindestladeleistung: 1 Phase * 6A * 230V = 1380 W, davon 50%: 690 W
 ```yaml
   residualPower: -690
 ```
+
+
+### `maxGridSupplyWhileBatteryCharging`
+
+Dieser Parameter ist nur notwendig bei Hybrid-Wechselrichter Systemen, bei denen die DC-Erzeugungsleistung größer ist als die AC-Ausgabeleistung des Wechselrichters. Hier kann es unter gewissen Umständen während der Fahrzeugladung zu Netzbezug kommen, obwohl gleichzeitig die Batterie geladen wird.
+
+Beispiel:
+15kW PV-Erzeugungsleistung, aber nur 10kW AC-Ausgabeleistung des WR = 5kW Batterieladeleistung auf DC-Ebene.
+
+Wenn `prioritySoC` erreicht ist, wird die gesamte Batterieladeleistung als zusätzlich verfügbare Fahrzeugladeleistung betrachtet. In dem obigen Beispiel käme es dann zu Netzbezug, weil EVCC die 5kW Batterieladung zur verfügbaren Fahrzeugladeleistung addieren würde, obwohl diese vom Wechselrichter dem Netz (und somit den Fahrzeug) gar nicht zur Verfügung gestellt werden kann.
+
+Mit diesem Parameter kann ein Schwellenwert für den Netzbezug gesetzt werden, der bewirkt, dass diese Batterieladeleistung nicht als zusätzlich verfügbare Fahrzeugladeleistung angesehen wird.
+
+Empfohlen wird ein Wert von mindestens 50. Je nach Trägheit der betroffenen Regelungssysteme kann er auch höher sein.
+
+```yaml
+  maxGirdSupplyWhileBatteryCharging: 50
+```
+
