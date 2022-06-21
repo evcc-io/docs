@@ -22,8 +22,14 @@ Hier geht es um Fahrzeug Themen
 
 [Weiterlesen...](vehicles)
 
-## Wallbox und Hausinstallation
+## Hausinstallation
 
-Hier geht es um die Themen Wallbox und Hausinstallation.
+Hier geht es um Themen der Hausinstallation
 
-[Weiterlesen...](faq)
+[Weiterlesen...](meters)
+
+## Wallboxen
+
+Hier geht es um die Wallbox Themen
+
+[Weiterlesen...](wallbox)
