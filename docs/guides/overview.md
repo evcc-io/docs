@@ -33,3 +33,10 @@ Hier geht es um Themen der Hausinstallation
 Hier geht es um die Wallbox Themen
 
 [Weiterlesen...](wallbox)
+
+## Sonstiges
+
+Hier geht es um sonstige Themen
+
+[Weiterlesen...](faq)
+
