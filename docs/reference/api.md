@@ -26,8 +26,8 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 Die Loadpoint IDs beginnen bei `0`.
 
 :::note
-Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden,
-also beispielsweise `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus auf `pv` zu stellen.
+Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden.
+Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
 :::
 
 ## MQTT API
@@ -54,4 +54,5 @@ Die MQTT API folgt der REST API Struktur, jedoch mit den Ladepunkt (loadpoint) I
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
+Beispiel: `mosquitto_pub -t "evcc/loadpoints/1/phases/set" -m "3"` um die Anzahl der netzseitigen Phasen am 1. Ladepunkt auf `3` festzulegen.
 :::
