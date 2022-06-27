@@ -8,12 +8,13 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 
 ## REST API
 
-- `/api/state`: evcc state (static configuration and dynamic state)
+- `/api/state`: evcc state (static configuration and dynamic state as JSON object)
 
 - `/api/health`: evcc health check
 
-Um einzelne Werte zu erhalten, muß diese URI ausgelesen und das JSON geparsed werden.
-Die Loadpoint IDs beginnen bei `0`.
+- `/api/buffersoc`: battery buffer SoC (writable)
+- `/api/prioritysoc`: battery priority SoC (writable)
+- `/api/residualpower`: grid residual power (writable)
 
 - `/api/loadpoints/<id>/mode`: loadpoint charge mode (writable)
 - `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
@@ -22,20 +23,26 @@ Die Loadpoint IDs beginnen bei `0`.
 - `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
 - `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
 
+Die Loadpoint IDs beginnen bei `0`.
+
 :::note
-Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment angehängt werden,
+Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden,
 also beispielsweise `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus auf `pv` zu stellen.
 :::
 
 ## MQTT API
 
-Die MQTT API folgt der REST API Struktur, mit den Ladepunkt (loadpoint) IDs bei `1` beginnend:
+Die MQTT API folgt der REST API Struktur, jedoch mit den Ladepunkt (loadpoint) IDs bei `1` beginnend:
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
 - `evcc/updated`: timestamp of last update
+
 - `evcc/site`: site dynamic state
+- `evcc/site/bufferSoC`: battery buffer SoC (writable)
 - `evcc/site/prioritySoC`: battery priority SoC (writable)
+- `evcc/site/residualPower`: grid residual power (writable)
+
 - `evcc/loadpoints`: number of available loadpoints
 - `evcc/loadpoints/<id>`: loadpoint dynamic state
 - `evcc/loadpoints/<id>/mode`: loadpoint charge mode (writable)
@@ -46,5 +53,5 @@ Die MQTT API folgt der REST API Struktur, mit den Ladepunkt (loadpoint) IDs bei 
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
 
 :::note
-Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden.
+Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
 :::
