@@ -366,9 +366,17 @@ Wenn ein bekanntes Fahrzeug angeschlossen ist, wird der kleinere Wert aus `vehic
 
 Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der Ladeleistung genutzt. Das funktioniert allerdings nur zum downsizing von `phases: 3` und nicht zum upsizing von `phases: 1`.  
 
+**Standardwert:** `3`
 
+**Mögliche Werte:** `1|3`
 
-**Wallbox mit automatische Phasenumschaltung**:
+**Beispiel**:
+
+```yaml
+  phases: 1
+```
+
+**Wallbox mit automatischer Phasenumschaltung**:
 
 Über den Wert kann die Automatik ein- bzw. ausgeschaltet werden.
 
@@ -380,12 +388,12 @@ Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme li
 
 **Standardwert:** `3`
 
-**Mögliche Werte:** `0|1|2|3`
+**Mögliche Werte:** `0|1|3`
 
 **Beispiel**:
 
 ```yaml
-  phases: 1
+  phases: 0
 ```
 
 :::info
