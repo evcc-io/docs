@@ -12,9 +12,8 @@ Das persönliche _Contributor's & Sponsor-Token_ erfordert ein [Github-Sponsorin
 
 Folgende Funktionalitäten sind nur mit Sponsoring verfügbar:
 
-- Nutzung einer 1P/3P Umschaltungfunktion von unterstützen Wallboxen
+- Nutzung der 1P/3P Umschaltfunktion von unterstützen Wallboxen
   - [Easee Home](/docs/devices/chargers#easee-home)
-  - [OpenWB](/docs/devices/chargers#openwb)
   - [go-eCharger V3](/docs/devices/chargers#go-echarger-homeprov3)
 
 Folgende Geräte sind nur mit Sponsoring verfügbar:
