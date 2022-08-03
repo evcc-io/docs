@@ -12,8 +12,7 @@ sidebar_position: 3
 loadpoints:
 - title: Garage # display name for UI
   charger: wallbox # Wallbox Referenz
-  vehicles:
-    - audi # Fahreug Referenz
+  vehicle: audi # Referenz auf Standardfahrzeug
   mode: pv # charge mode (off, now, minpv, pv)
 ```
 
@@ -70,7 +69,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 ### `vehicle(s)`
 
-`vehicle`: Referenz auf eine `vehicle` (Fahrzeug) Konfiguration.
+`vehicle`: Referenz auf eine `vehicle` Konfiguration die dem Ladepunkt als Standardfahrzeug zugewiesen wird. Beim Anschluss eines Fahrzeugs an den Ladepunkt wird damit immer davon ausgegangen dass dieses Fahrzeug angeschlossen ist. Die automatische Fahrzeugerkennung wird umgangen. Ein anderes Fahrzeug (z.B. Gastfahrzeug) lässt sich dann nur im Anschluss manuell zuweisen.
 
 **Beispiel**:
 
@@ -80,7 +79,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
 
-`vehicles`: Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen)
+`vehicles`: (VERALTET) Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen) die zum Laden an diesem Ladepunkt zugelassen sind.
 
 **Beispiel**:
 
