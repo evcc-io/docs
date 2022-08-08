@@ -405,6 +405,10 @@ Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Ste
 
 Definiert die minimale Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
 
+Wie bereits bei `phases` beschrieben, wird über diesen Wert die Mindestladeleistung festgelegt.
+
+Bei Wallboxen mit automatischer Phasenumschaltung wird in 3p solange geladen, bis dieser Wert erreicht ist. Erst dann wird auf 1p umgeschaltet.
+
 :::info
 Im Allgemeinen benötigt ein EV mindestens eine Stromstärke 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird auch eine höhere Stromstärke benötigt!
 
@@ -424,6 +428,8 @@ Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren ka
 ### `maxCurrent`
 
 Definiert die maximale Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
+
+Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bis dieser Wert erreicht ist. Erst dann wird auf 3p umgeschaltet.
 
 **Standardwert:** `16`
 
