@@ -36,7 +36,7 @@ Definiert den Detailgrad der Protokollierung für verschiedene evcc Komponenten
 
 **Mögliche Komponenten**:
 
-- `core`: Die zentrale evcc Komponente (Regelung, Berechnungen, ...)
+- `site`: Die zentrale evcc Komponente (Regelung, Berechnungen, ...)
 - `lp-X`: Der jeweilige Ladepunkt, wobei `X` in der Reihenfolge der Konfiguration der [`loadpoints`](loadpoints) (Ladepunkte) durchnummeriert ist, beginnend bei `1`
 - `sma`: Die SMA HEMS Komponente, falls der SMA Sunnay Home Manager 2.0 per [`hems`](hems) eingebunden ist
 - _`fahrzeugname`_: Jedes definierte [`vehicle`](vehicles) (Fahrzeug), hier ist der jeweilige Wert des Parameters [`type`](vehicles#type) anzugeben. 
@@ -47,7 +47,7 @@ Definiert den Detailgrad der Protokollierung für verschiedene evcc Komponenten
 
 ```yaml
 levels:
-  core: debug
+  site: debug
   lp-1: debug
   lp-2: debug
 ```
