@@ -31,8 +31,9 @@ influx:
 **Beispiel Influx v2**:
 
 ```yaml
-  url: http://localhost:9999
-  database: evcc
-  token: "1234567890abcdef"
-  org: "Home"
+influx:
+  url: http://localhost:8086
+  database: evcc # InfluxDB v2.x uses term `bucket` but for compatibility still named `database` here
+  token: 1234567890abcdef
+  org: home
 ```
