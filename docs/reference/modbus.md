@@ -110,10 +110,10 @@ source: modbus
 ...
 register:
   address: 40070
-  source: holding # holding or input
+  type: holding # holding or input
   decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
 scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 2000 # ms
+timeout: 2s # timeout, without unit in ns
 ```
 
 Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z.B. bei E3/DC Geräten nützlich.
