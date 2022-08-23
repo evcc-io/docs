@@ -79,18 +79,6 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
 
-`vehicles`: (VERALTET) Eine Liste von Referenzen auf Konfigurationen von `vehicles` (Fahrzeugen) die zum Laden an diesem Ladepunkt zugelassen sind.
-
-**Beispiel**:
-
-```yaml
-  vehicles:
-  - renault
-  - vw
-```
-
-Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
-
 ---
 
 ### `resetOnDisconnect`
@@ -98,8 +86,8 @@ Wobei hier der Wert `renault` und `vw` dem Wert eines `name` Parameters in der [
 Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellungen für folgende Werte wiederhergestellt werden sollen:
 
 * [`mode`](loadpoints#mode)
-* [`soc.min`](loadpoints#min)
-* [`soc.target`](loadpoints#target)
+* [`SoC.min`](loadpoints#min) (veraltet)
+* [`SoC.target`](loadpoints#target) (veraltet)
 * [`minCurrent`](loadpoints#mincurrent)
 * [`maxCurrent`](loadpoints#maxcurrent)
 
@@ -120,7 +108,7 @@ Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellung
 
 ### `mode`
 
-Der Standard Lademodus wenn evcc startet.
+Der Standard-Lademodus wenn evcc startet bzw. nach dem Abstecken des Fahrzeugs wenn `resetOnDisconnect: true` gesetzt wurde.
 
 **Mögliche Werte**:
 
@@ -145,7 +133,7 @@ Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. B
 
 ### `soc`
 
-Definiere die Standardeinstellungen für den Umgang mit dem SOC eines angeschlossenen Fahrzeugs
+Definiere die Standardeinstellungen für den Umgang mit dem SoC eines angeschlossenen Fahrzeugs
 
 **Beispiel**:
 
@@ -154,9 +142,7 @@ Definiere die Standardeinstellungen für den Umgang mit dem SOC eines angeschlos
     poll:
       mode: charging
       interval: 60m
-    min: 0
-    target: 100
-    estimate: false
+    estimate: true
 ```
 
 #### `poll`
@@ -200,7 +186,7 @@ Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT
 
 #### `min`
 
-Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Parameter [`mode`](#mode) (Lademodus) nicht auf `off` steht
+VERALTET Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Parameter [`mode`](#mode) (Lademodus) nicht auf `off` steht
 
 **Mögliche Werte**: Der Wert entspricht dem Ziel-SoC (Ladezustand in %) der EV Batterie.
 
@@ -209,29 +195,29 @@ Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Par
 **Beispiel**:
 
 ```yaml
-    min: 50 # Lade sofort auf 50% SOC
+    min: 50 # Lade sofort auf 50% SoC
 ```
 
 #### `target`
 
-Definiere, bis zu welchem SOC geladen wird.
+VERALTET Definiere, bis zu welchem SoC geladen wird.
 
 **Standardwert:** `100`
 
 **Beispiel**:
 
 ```yaml
-    target: 80 # Lade bis maximal 80% SOC
+    target: 80 # Lade bis maximal 80% SoC
 ```
 
 #### `estimate`
 
-Berechne (interpoliere) den aktuellen SOC zwischen den Abfragen an das Fahrzeug.
+Berechne (interpoliere) den aktuellen SoC zwischen den Abfragen an das Fahrzeug.
 
 **Mögliche Werte**:
 
-- `true`: evcc interpoliert die SOC Werte zwischen den Fahrzeugabfragen
-- `false`: evcc nutzt nur die SOC Werte, welche das Fahrzeug zurückliefert
+- `true`: evcc interpoliert die SoC Werte zwischen den Fahrzeugabfragen (empfohlen)
+- `false`: evcc nutzt nur die SoC Werte, welche das Fahrzeug zurückliefert
 
 **Standardwert:** `false`
 
@@ -363,7 +349,7 @@ Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern
 
 Wenn ein bekanntes Fahrzeug angeschlossen ist, wird der kleinere Wert aus `vehicle: phases` und `loadpoint: phases` zur Berechnung herangezogen. Bei unbekannten Fahrzeugen wirkt immer `loadpoint: phases` alleine.
 
-Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der Ladeleistung genutzt. Das funktioniert allerdings nur zum downsizing von `phases: 3` und nicht zum upsizing von `phases: 1`.  
+Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der tatsächlichen Schaltschwellen genutzt. Das funktioniert allerdings prinzipbedingt nur bei dreiphasigen Ladepunkten.
 
 **Standardwert:** `3`
 
@@ -403,14 +389,14 @@ Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Ste
 
 ### `minCurrent`
 
-Definiert die minimale Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
+Definiert die minimal genutzte Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
 
 Wie bereits bei `phases` beschrieben, wird über diesen Wert die Mindestladeleistung festgelegt.
 
-Bei Wallboxen mit automatischer Phasenumschaltung wird in 3p solange geladen, bis dieser Wert erreicht ist. Erst dann wird auf 1p umgeschaltet.
+Bei Wallboxen mit automatischer Phasenumschaltung wird in 3p solange geladen, bis dieser Wert (von oben) erreicht ist. Erst dann wird auf 1p umgeschaltet.
 
 :::info
-Im Allgemeinen benötigt ein EV mindestens eine Stromstärke 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird auch eine höhere Stromstärke benötigt!
+Im Allgemeinen benötigt ein Elektrofahrzeug mindestens eine Stromstärke von 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird jedoch auch eine höhere Mindeststromstärke benötigt!
 
 Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren kann unter Umständen auch mit einer geringeren Stromstärke pro Phase geladen werden, wenn die Gesamtleistung trotzdem mindestens etwa 1,4kW beträgt.
 :::
@@ -427,9 +413,9 @@ Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren ka
 
 ### `maxCurrent`
 
-Definiert die maximale Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
+Definiert die maximal zulässige Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
 
-Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bis dieser Wert erreicht ist. Erst dann wird auf 3p umgeschaltet.
+Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bis dieser Wert (von unten) erreicht ist. Erst dann wird auf 3p umgeschaltet.
 
 **Standardwert:** `16`
 
