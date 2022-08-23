@@ -4,8 +4,7 @@ Official (german) documentation repository of [evcc](https://evcc.io).
 
 ## General
 
-- The content of the folder `evcc-config` may not be changed. The content is pushed from the [evcc config repository](https://github.com/evcc-io/config)
-- The content of the folder `templates` is currently not used and may also not be changed. This will replace the folder `evcc-config` in the future and it's source is the `templates/docs` folder in the [evcc repository](https://github.com/evcc-io/evcc)
+- The source content of the folder `templates` is the `templates/docs` folder in the [evcc repository](https://github.com/evcc-io/evcc)
 - We recommend to test changes locally, use the instructions below to run the documentation page locally as you can see how the changes will look like on the web page while you make changes.
 
 ## Local setup
