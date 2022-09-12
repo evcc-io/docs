@@ -28,6 +28,8 @@ Die verfügbaren Ereignisse sind:
 - `stop`: Laden wurde beendet
 - `connect`: Fahrzeug angeschlossen
 - `disconnect`: Fahrzeug entfernt
+- `soc`: Fahrzeug Akku-Ladestandsänderung
+- `guest`: Unbekanntes Fahrzeug erkannt
 
 **Beispiel**:
 
