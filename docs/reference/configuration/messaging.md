@@ -28,6 +28,8 @@ Die verfügbaren Ereignisse sind:
 - `stop`: Laden wurde beendet
 - `connect`: Fahrzeug angeschlossen
 - `disconnect`: Fahrzeug entfernt
+- `soc`: Fahrzeug Akku-Ladestandsänderung
+- `guest`: Unbekanntes Fahrzeug erkannt
 
 **Beispiel**:
 
@@ -232,6 +234,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - `telegram`: [Telegram Messenger](https://telegram.org/). Siehe [`telegram`](#telegram) Definition
 - `email`: Email.  Siehe [`email`](#email) Definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
+- `script`: Kann externe Skripte zum Versenden von Nachrichten starten. Es ist auch hilfreich, um jede Art von externer Funktionalität einzubinden. Siehe [`script`](#script) Definition
 
 **Beispiel**:
 
@@ -306,3 +309,17 @@ Die Konfiguration wird im folgenden Beispiel anhand von [Gotify](https://gotify.
 ```
 
 Weitere Informationen sind in der [shoutrrr](https://containrrr.dev/shoutrrr) Dokumentation zu den [unterstützten Diensten](https://containrrr.dev/shoutrrr/v0.5/services/overview/) zu finden.
+
+### `script`
+
+`script` startet Shellscripte oder andere Kommandos um Nachrichten zu versenden oder beliebige Aktionen anhand der [Ereignisse](#events) zu starten.
+
+Der Pfad zum Script muß in `cmdline` angegeben werden. Ebenso sollte ein `timeout` gesetzt werden. Der `timeout` gibt an, nach welcher Zeit das Script abgebrochen wird.
+
+**Beispiel**:
+
+```yaml
+  - type: script
+    cmdline: /home/pi/sendSignalMessage.sh
+    timeout: 50s
+```
