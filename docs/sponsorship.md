@@ -13,8 +13,8 @@ Das persönliche _Contributor's & Sponsor-Token_ erfordert ein [Github-Sponsorin
 Folgende Funktionalitäten sind nur mit Sponsoring verfügbar:
 
 - Nutzung der 1P/3P Umschaltfunktion von unterstützen Wallboxen
-  - [Easee Home](/docs/devices/chargers#easee-home)
-  - [go-eCharger V3](/docs/devices/chargers#go-echarger-homeprov3)
+  - [Easee Home](/docs/devices/chargers#easee-home-)
+  - [go-eCharger V3](/docs/devices/chargers#home-homefix-v3)
 
 Folgende Geräte sind nur mit Sponsoring verfügbar:
 
@@ -31,8 +31,8 @@ Folgende Geräte sind nur mit Sponsoring verfügbar:
   - [Etrel INCH](/docs/devices/chargers#etrel-inch-)
   - [Garo GLB, GLB+, LS4, LS4 compact](/docs/devices/chargers#garo-glb-glb-ls4-ls4-compact-)
   - [go-eCharger Gemini](/docs/devices/chargers#gemini--)
-  - [Hardy Barth cPH1](/docs/devices/chargers#cph1-ecb1-controller--)
-  - [Hardy Barth cPH2](/docs/devices/chargers#cph2-salia-plcc-controller--)
+  - [echarge Hardy Barth cPH1](/docs/devices/chargers#cph1--)
+  - [echarge Hardy Barth cPH2, CPμ2 Pro](/docs/devices/chargers#cph2-cpμ2--)
   - [Heidelberg Energy Control](/docs/devices/chargers#heidelberg-energy-control-)
   - [Innogy eBox](/docs/devices/chargers#innogy-ebox-)
   - [Juice Charger Me](/docs/devices/chargers#juice-charger-me-)
