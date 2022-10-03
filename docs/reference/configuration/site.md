@@ -149,7 +149,7 @@ Auch wenn der Modus `PV` aktiviert ist, startet die Ladung immer dann, wenn der 
 Die Ladung der Hausbatterie hat unterhalb des angegebenen SoC (%) Wertes Priorität gegenüber der Fahrzeugladung.
 Steht unterhalb dieses Wertes mehr Erzeugungsleistung zur Verfügung als der Batteriespeicher aufnimmt, kann dieser Überschuss trotzdem nachrangig zur Fahrzeugladung verwendet werden.
 Wenn die Hausbatterie oberhalb des Wertes geladen wird, wird die Batterieladeleistung für das Laden des EVs als verfügbare Überschussleistung betrachtet. Somit hat dann die Fahrzeugladung Priorität bei der Verwendung der Überschussleistung.
-Wird kein Wert angegeben, bleibt die Batterie unberücksichtigt (entspricht >100%).
+Wird kein Wert angegeben, hat die Fahrzeugladung Priorität (entspricht <0%).
 
 :::note
 `prioritySoC` muss einen kleineren Wert als `bufferSoC` haben.
