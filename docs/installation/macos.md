@@ -33,6 +33,11 @@ sidebar_position: 3
   ```
 
 - Prüfe die Installation und öffne einen Browser und gibt die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
+- Stoppe den evcc-Server:
+
+  ```sh
+  brew services stop evcc
+  ```
 - Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
 
   ```sh
@@ -50,6 +55,16 @@ sidebar_position: 3
 
   Dieser Modus bietet weitere (technisch fortgeschrittene) Einstellmöglichkeiten.
   :::
+- Teste ob die Konfiguration funktioniert:
+
+  ```sh
+  evcc -c evcc.yaml
+  ```
+  
+  Öffne einen Browser und gibt die folgende URL ein: http://localhost:7070. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
+
+- Wenn alles funktioniert beende evcc durch drücken der Tastenkombination `CTRL-C`.
+
 - Verschiebe die erstellte Konfigurationsdatei in den Zielordner:
 
   ```sh
@@ -59,7 +74,7 @@ sidebar_position: 3
 - Start evcc neu:
 
   ```sh
-  brew services restart evcc
+  brew services start evcc
   ```
 
 - Gehe zurück zum Browser und lade die evcc Seite neu. Die Oberfläche sollte nun mit deinen konfigurierten Geräten zu sehen sein.
