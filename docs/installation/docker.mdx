@@ -31,6 +31,7 @@ Diese Dokumentation ist für Docker und Synology. Bei Verwendung anderer System 
 ## Konfiguration
 
 1. Es wird eine **funktionierende** evcc Konfiguration benötigt. Für dazu die Schritte auf der folgende Systeme durch:
+
    - [Debian, Ubuntu, Raspberry Pi](linux)
    - [macOS](macos)
    - [Manuell (inkl. Windows)](manual)
@@ -38,7 +39,9 @@ Diese Dokumentation ist für Docker und Synology. Bei Verwendung anderer System 
    :::note
    wir empfehlen das wenn möglich auf dem gleichen System durchzuführen auf welchem **evcc** später auch im Docker Container laufen soll
    :::
+
 2. Kopiere die damit erzeugte Datei `evcc.yaml` in das Verzeichnis `/etc` auf dem System auf welchem Docker läuft.
+3. Erstelle ein lokales Verzeichnis (bspw. `~/.evcc`) in dem evcc's interne SQLite Datenbank `/root/.evcc` abgelegt werden kann.
 
 ## Docker Installation
 
@@ -51,46 +54,52 @@ Installiere den Docker Container der zu deiner Komponenten-Konstellation passt m
 <Tabs groupId="docker">
   <TabItem value="default" label="Standard" default>
 
-  ```sh
-  sudo docker run \
-  -d \
-  --name evcc \
-  -v $(pwd)/evcc.yaml:/etc/evcc.yaml \
-  -p 7070:7070 \
-  andig/evcc:latest
-  ```
+```sh
+sudo docker run \
+-d \
+--name evcc \
+-v $(pwd)/evcc.yaml:/etc/evcc.yaml \
+-v $(pwd)/.evcc:/root/.evcc \
+-p 7070:7070 \
+andig/evcc:latest
+```
+
   </TabItem>
   <TabItem value="sma" label="SMA Geräte">
   Für die Verwendung des SMA Sunny Home Manger 2.0 muss evcc eine eindeutige Geräte-ID erstellen. Unter Linux wird <i>machine-id</i> verwendet, und dafür muss es in den Container gemounted werden:
 
-  ```sh
-  sudo docker run \
-  -d \
-  --name evcc \
-  -v $(pwd)/evcc.yaml:/etc/evcc.yaml \
-  -v /etc/machine-id:/etc/machine-id \
-  -v /var/lib/dbus/machine-id:/var/lib/dbus/machine-id \
-  --network host \
-  andig/evcc:latest
-  ```
+```sh
+sudo docker run \
+-d \
+--name evcc \
+-v $(pwd)/evcc.yaml:/etc/evcc.yaml \
+-v $(pwd)/.evcc:/root/.evcc \
+-v /etc/machine-id:/etc/machine-id \
+-v /var/lib/dbus/machine-id:/var/lib/dbus/machine-id \
+--network host \
+andig/evcc:latest
+```
+
   </TabItem>
   <TabItem value="udp" label="UDP Geräte (z.b. KEBA)">
   Falls ein Messgerät oder eine Wallbox verwendet wird, welches UDP benötigt wie z.b. KEBA, stelle sicher dass der Docker Container auch die UDP Nachrichten auf den entsprechenden Ports empfangen kann (<i>:7090</i> for KEBA):
 
-  ```sh
-  sudo docker run \
-  -d \
-  --name evcc \
-  -v $(pwd)/evcc.yaml:/etc/evcc.yaml \
-  -p 7070:7070 \
-  -p 7090:7090/udp \
-  andig/evcc:latest
-  ```
+```sh
+sudo docker run \
+-d \
+--name evcc \
+-v $(pwd)/evcc.yaml:/etc/evcc.yaml \
+-v $(pwd)/.evcc:/root/.evcc \
+-p 7070:7070 \
+-p 7090:7090/udp \
+andig/evcc:latest
+```
+
   </TabItem>
 </Tabs>
 
 :::note
-Mit `andig/evcc:latest` bekommt man die jeweils aktuelle Version. (Empfohlen)   
+Mit `andig/evcc:latest` bekommt man die jeweils aktuelle Version. (Empfohlen)  
 Mit `andig/evcc:nightly` bekommt man einen täglich aktualisierten Build, der nicht so gut getestet sein kann.
 :::
 
@@ -108,8 +117,8 @@ Mounte nicht das lokale Verzeichnis `/etc` als Volume in Docker!
 
 ### Mit [docker-compose](https://docs.docker.com/compose)
 
-[docker-compose](https://docs.docker.com/compose) hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile, z.B. falls man weitere Programme wie Traefik in Verbindung mit evcc nutzen möchte.   
-Im aktiven Verzeichnis legt man dazu einfach eine Konfigurationsdatei mit dem Namen `docker-compose.yml` an.   
+[docker-compose](https://docs.docker.com/compose) hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile, z.B. falls man weitere Programme wie Traefik in Verbindung mit evcc nutzen möchte.  
+Im aktiven Verzeichnis legt man dazu einfach eine Konfigurationsdatei mit dem Namen `docker-compose.yml` an.  
 Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgenden Konfigurationen in die `docker-compose.yml` und speichert diese ab:
 
 <Tabs groupId="docker">
@@ -134,10 +143,12 @@ Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgen
         ports:
           - 7070:7070/tcp
         volumes:
-          - /etc/evcc.yaml:/etc/evcc.yaml
+          - /lokaler/pfad/evcc.yaml:/etc/evcc.yaml
+          - /lokaler/pfad/.evcc:/root/.evcc
         restart: unless-stopped
         working_dir: /app
     networks: {}
+
   </TabItem>
   <TabItem value="sma" label="SMA Geräte">
 
@@ -159,12 +170,14 @@ Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgen
           options: {}
         network_mode: host
         volumes:
-          - /etc/evcc.yaml:/etc/evcc.yaml
+          - /lokaler/pfad/evcc.yaml:/etc/evcc.yaml
+          - /lokaler/pfad/.evcc:/root/.evcc
           - /etc/machine-id:/etc/machine-id
           - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
         restart: unless-stopped
         working_dir: /app
     networks: {}
+
   </TabItem>
   <TabItem value="udp" label="UDP Geräte (z.b. KEBA)">
 
@@ -188,10 +201,12 @@ Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgen
           - 7070:7070/tcp
           - 7090:7090/udp
         volumes:
-          - /etc/evcc.yaml:/etc/evcc.yaml
+          - /lokaler/pfad/evcc.yaml:/etc/evcc.yaml
+          - /lokaler/pfad/.evcc:/root/.evcc
         restart: unless-stopped
         working_dir: /app
     networks: {}
+
   </TabItem>
 </Tabs>
 
@@ -201,8 +216,7 @@ Starte den Container mit:
 sudo docker-compose up -d
 ```
 
-  
-  ## Testen
+## Testen
 
 Prüfe die Docker Installation
 
@@ -245,6 +259,7 @@ Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls d
 ## Aktualisierung
 
 Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte durch:
+
 - Öffne ein Terminal/Eingabeaufforderung
 
 - Aktualisiere auf das neuste evcc Image:
