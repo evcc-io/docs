@@ -4,6 +4,10 @@ sidebar_position: 3
 
 # macOS
 
+:::note
+  Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von macOS werden nicht unterstützt.
+:::
+
 ## Erstinstallation
 
 - Öffne ein Terminal Fenster
