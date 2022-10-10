@@ -3,8 +3,11 @@ sidebar_position: 16
 ---
 
 import SponsorshipRequired from "/docs/\_sponsorship_required.mdx";
+import SinceVersion from "/docs/\_since_version.jsx";
 
 # `telemetry`
+
+<SinceVersion version="0.105" />
 
 <SponsorshipRequired />
 
