@@ -7,7 +7,7 @@ import SinceVersion from "/docs/\_since_version.jsx";
 
 # `telemetry`
 
-<SinceVersion version="0.105" />
+<SinceVersion version="0.103" />
 
 <SponsorshipRequired />
 
