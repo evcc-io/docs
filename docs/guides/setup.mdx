@@ -12,82 +12,114 @@ Bei evcc gibt es einen [Community Support](https://github.com/evcc-io/evcc/discu
 
 - Welche Geräte (Fahrzeug, Hausinstallation, Wallbox) werden verwendet.
 
-- Die Konfigurationsdatei `evcc.yaml`,  
-    <details>
-      <summary>d.h. deren Inhalt (*bitte Benutzernamen, Passwörter und ähnliches entfernen*).</summary>
- 
+- Die Konfigurationsdatei `evcc.yaml`,
+
+      <details>
+
+  <summary>
+    d.h. deren Inhalt (*bitte Benutzernamen, Passwörter und ähnliches
+    entfernen*).
+  </summary>
+
   `egrep -v '^#|^\s+#' evcc.yaml |grep . |sed -E 's/(password|user|token|url|host|broker).*/\1: *****/'`
-    </details>
+
+      </details>
 
 - Eine möglichst genaue Beschreibung was das Problem ist.
 
 **Erste Hilfe**
 
-Zur Erleichterung wurde eine Erste-Hilfe Funktionalität entwickelt. Durch Eingabe von `evcc discuss` auf der Kommandozeile wird ein neuer Diskussionsbeitrag in der Rubrik "Erste Hilfe" erstellt. Dieser Beitrag beinhaltet automatisch die Fehlermeldung(en) und die anonymisierte Konfigurationsdatei. Ergänzt werden muss nur noch ein aussagekräftiger Titel und eine Problembeschreibung. 
+Zur Erleichterung wurde eine Erste-Hilfe Funktionalität entwickelt. Durch Eingabe von `evcc discuss` auf der Kommandozeile wird ein neuer Diskussionsbeitrag in der Rubrik "Erste Hilfe" erstellt. Dieser Beitrag beinhaltet automatisch die Fehlermeldung(en) und die anonymisierte Konfigurationsdatei. Ergänzt werden muss nur noch ein aussagekräftiger Titel und eine Problembeschreibung.
 Diese Erste-Hilfe ist jeweils nur für die Erst-Erstellung eines Diskussionsbeitrages nutzbar. Sind im Zuge der Lösungsfindung weitere Informationen notwendig, müssen diese händisch erstellt werden.
 
 Wir versuchen natürlich Probleme so gut es geht zu vermeiden, aber das kann aufgrund der Komplexität leider nicht immer gelingen.
 
-
 ### Wie kann ich ein Logfile zur Fehleranalyse erstellen?
 
-evcc gibt in seiner Standard Konfiguration nur dann Fehlermeldungen aus, wenn ein Fehler auftritt (siehe auch [`log`](/docs/reference/configuration/log#log) Parameter in der `evcc.yaml`). 
+evcc gibt in seiner Standard Konfiguration nur dann Fehlermeldungen aus, wenn ein Fehler auftritt (siehe auch [`log`](/docs/reference/configuration/log#log) Parameter in der `evcc.yaml`).
 
-Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet. 
+Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet.
 
 Mittels `evcc charger` oder `evcc meter` oder `evcc vehicle` können auf der Kommandozeile die verschiedenen Gerätetype getestet werden. Dabei kommt der in `evcc.yaml` konfigurierte Log-Parameter (siehe oben) zum Einsatz. Will man davon abweichende Tests durchführen, kann der Log-Parameter beim Aufruf entsprechend ergänzt werden.
 
 `Beispiel: evcc -l debug meter`
 
 Wird evcc als Linux Systemdienst, wie unter [Linux Autostart](/docs/installation/manual#autostart) beschrieben, ausgeführt, können die log-Nachrichten über folgende Befehle verfolgt, bzw. aufgelistet werden:
+
 - Kontinuierliche Anzeige der evcc log Meldungen  
-  `sudo journalctl -fau evcc`     
+  `sudo journalctl -fau evcc`
 - Anzeige der evcc log Meldungen seit dem letzten Start des evcc Services (Abbruch mit Strg-c)  
   `sudo journalctl -u evcc -q`  
   Speichern der Log-Ausgabe oben in eine Datei im Home-Verzeichnis  
   `sudo journalctl -u evcc -q > ~/evcc.log`
 
-Weiterführende Hilfe: [wiki.ubuntuusers.de/systemd/journalctl](https://wiki.ubuntuusers.de/systemd/journalctl/)  
+Weiterführende Hilfe: [wiki.ubuntuusers.de/systemd/journalctl](https://wiki.ubuntuusers.de/systemd/journalctl/)
 
 Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/)
-
 
 ### Fehler: evcc UI ist nicht erreichbar (Demo Modus funktioniert aber)
 
 Es kommt immer wieder vor, dass Fehler in der Konfiguration übersehen werden und der Service gestartet wird. Dabei wird der Start von evcc abgebrochen, ohne das es dafür einen Hinweis gibt. Ergebnis ist, dass das UI nicht erreichbar ist.
 
-In dem Fall sollte man evcc durch Eingabe von `evcc` auf der Kommandozeile starten. Dort werden dann auch Fehlerhinweise gegeben, die den Start des Service verhindert haben. 
+In dem Fall sollte man evcc durch Eingabe von `evcc` auf der Kommandozeile starten. Dort werden dann auch Fehlerhinweise gegeben, die den Start des Service verhindert haben.
 
 Mittels der oben genannten Tests kann man diesen Fehlern auf den Grund gehen und beheben. Erst wenn alles fehlerfrei ist, sollte der Service gestartet werden.
 
-
 ### Fehler: connection refused
 
-Die IP-Verbindung zum betreffenden Gerät ist prinzipiell vorhanden, jedoch wird der Verbindungsaufbau von diesem Gerät zum angegebenen Port abgewiesen. 
+Die IP-Verbindung zum betreffenden Gerät ist prinzipiell vorhanden, jedoch wird der Verbindungsaufbau von diesem Gerät zum angegebenen Port abgewiesen.
 
 Die Gründe dafür können vielfältig sein. Typisch sind:
--	Der am Gerät offene Port stimmt nicht mit dem in der evcc-Konfiguration angegebenen Zielport überein.
--	Der externe Zugriff auf das Gerät ist nicht aktiviert (z.B. bei Solaredge-Wechselrichtern im Auslieferungszustand).
--	Die maximal mögliche Anzahl an parallelen Verbindungen die das Zielgerät verwalten kann ist erschöpft. Andere Verbindungen z. B. von Hausautomationen, Scripten oder weiteren Instanzen von evcc müssen ggf. zunächst beendet werden bevor eine neue Verbindung möglich ist. Im ungünstigsten Fall lässt das Zielsystem nur eine einzige Verbindung zu.
--	Blockade durch eine Firewall
 
+- Der am Gerät offene Port stimmt nicht mit dem in der evcc-Konfiguration angegebenen Zielport überein.
+- Der externe Zugriff auf das Gerät ist nicht aktiviert (z.B. bei Solaredge-Wechselrichtern im Auslieferungszustand).
+- Die maximal mögliche Anzahl an parallelen Verbindungen die das Zielgerät verwalten kann ist erschöpft. Andere Verbindungen z. B. von Hausautomationen, Scripten oder weiteren Instanzen von evcc müssen ggf. zunächst beendet werden bevor eine neue Verbindung möglich ist. Im ungünstigsten Fall lässt das Zielsystem nur eine einzige Verbindung zu.
+- Blockade durch eine Firewall
 
 ### Fehler: i/o timeout
 
 Hier ist eine Verbindung zum Gerät ggf. vorhanden, jedoch antwortet das Zielsystem nicht innerhalb der vorgesehenen Zeit. Entweder kommt die Anfrage gar nicht beim Zielsystem an, geht auf dem Rückweg verloren oder die Antwort dauert zu lange.
 
 Typische Gründe sind:
--	Langsame oder schlechte Netzwerkverbindung (insbesondere bei Verbindungen über WiFi oder PowerLAN)
--	Fehlerhafte oder ungeeignete Verkabelung oder (bei RS485) falsche Terminierung
--	Das Zielgerät ist überlastet oder ausgefallen
--	Bestimmte Funktionen des Geräts sind nicht wie von evcc erwartet verfügbar (z. B. durch veraltete Firmware oder abweichende Konfigurationseinstellungen)
--	Zu kurze Timeout- oder Abfragezykluszeiten seitens evcc
 
+- Langsame oder schlechte Netzwerkverbindung (insbesondere bei Verbindungen über WiFi oder PowerLAN)
+- Fehlerhafte oder ungeeignete Verkabelung oder (bei RS485) falsche Terminierung
+- Das Zielgerät ist überlastet oder ausgefallen
+- Bestimmte Funktionen des Geräts sind nicht wie von evcc erwartet verfügbar (z. B. durch veraltete Firmware oder abweichende Konfigurationseinstellungen)
+- Zu kurze Timeout- oder Abfragezykluszeiten seitens evcc
 
 ### Fehler: remove /tmp/evcc: operation not permitted
 
 Diese Fehlermeldung erscheint, wenn z B. evcc bereits als Dienst läuft und evcc zusätzlich ein weiteres mal auf der Kommandozeile (durch Eingabe `evcc`) gestartet wird, ggf. auch noch mit unterschiedlichen Benutzerberechtigungen. Das darf immer nur eine einzige Instanz von evcc zur gleichen Zeit laufen.
 
+### Telemetry & Community Daten
+
+Auf der [evcc Webseite](https://evcc.io/#live) und im "Auswertung Ladeenergie" Dialog der evcc UI zeigen wir aggreggierte Live-Ladedaten unserer Nutzer an. Wir sammeln diese Daten auf unserer zentralen api.evcc.io Instanz. Die Teilnahme daran ist natürlich freiwillig.
+
+**Wie kann ich teilnehmen?**
+
+Im "Auswertung Ladeenergie" Dialog kannst du unter "Live-Community" deine Daten teilen. Bislang konnte die Funktion auch über [`telemetry: true`](/docs/reference/configuration/telemetry/) aktiviert werden. Dieser Weg ist nun allerdings deprecated.
+
+Für die Teilnahme ist aktuell ein 💚 Sponsor Token erforderlich. Der Hauptgrund dafür ist die Datenqualität hoch zu halten und Fake-Daten zu minimieren.
+
+**Was wird aktuell übertragen?**
+
+- aktuelle Ladeleistung
+- aktueller Anteil an Sonnenstrom
+- geladene Energiemenge
+- geladener Anteil an Sonnenenergie
+
+Möglicherweise werden wir zukünftig noch weitere Daten hinzufügen. Dies werden aber auf keinen Fall personenbezogene Daten oder private Installationsdaten (Adresse, Zugänge) sein. Eure Privatsphäre ist uns wichtig!
+
+**Was passiert mit den Daten?**
+
+Wir speichern die Energiemengen aggregiert pro evcc Instanz. Wir bilden keine Nutzerprofile über Zeit und haben auch kein Interesse daran dies zukünftig zu tun.
+
+Unser Ziel ist es durch diese Daten mehr neue Nutzer für evcc zu begeistern und selbst mehr über das Nutzungsverhalten von evcc zu erfahren.
+
+Die aggregierten Gesamtdaten können auch frei über https://api.evcc.io/v1/total abgerufen werden. Wenn ihr also Ideen für eigene kreative Visualisierungen habt, baut gerne was und erzählt uns davon.
+
+Mehr Informationen findest du auch auf unserer [Datenschutzseite](https://cloud.evcc.io/privacy).
 
 ### Ersparnisberechnung
 
