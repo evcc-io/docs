@@ -170,14 +170,31 @@ add:
   ...
 ```
 
+```yaml
+source: calc
+mul:
+- source: calc
+  sign:
+    source: ... (power)
+  ...
+- source: ... (current)
+  ...
+```
+
+
 Als Operanden werden dabei die Grundrechenarten Addition (add) und Multiplikation (mul) unterstützt.
+
 Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z. B. zur Konvertierung von kWh in Wh.
+
+Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 bleibt 0) können (in Verbindung mit `mul`) Vorzeichen auf andere Werte übertragen werden. Z.B. um bei Zählern die „Richtung“ der Leistung (Einspeisung oder Bezug) auf die gemessenen Ströme zu übertragen.
+
 
 Das `calc` Plugin ist hilfreich um z.B. 
 - Leistungswerte von einzelnen PV-Strings zu summieren (addieren)
 - Die Leistung aus Spannung und Strom zu berechnen (multiplizieren)
 - Getrennte Leistungswerte für Import und Export zu einem vorzeichenbehafteten Einzelwert zu kombinieren (subtrahieren).
 - Prozentuale Füllstände zu berechnen (dividieren)
+- Die richtige Richtung des Stromflusses festlegen (sign)
 
 
 ## Kombinierter Status (nur lesen)
