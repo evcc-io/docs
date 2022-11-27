@@ -110,7 +110,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
                 },
                 {
                   label: "Sponsoring",
-                  href: "https://github.com/sponsors/andig",
+                  href: "https://github.com/sponsors/evcc-io",
                 },
               ],
             },
