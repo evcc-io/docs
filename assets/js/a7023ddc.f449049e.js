@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkevcc_docs=self.webpackChunkevcc_docs||[]).push([[1713],{53457:function(e){e.exports=JSON.parse('[{"label":"release","permalink":"/blog/tags/release","count":7},{"label":"allgemein","permalink":"/blog/tags/allgemein","count":1}]')}}]);
