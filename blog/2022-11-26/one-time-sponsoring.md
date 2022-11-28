@@ -55,7 +55,7 @@ Aktuell läuft das GitHub Sponsoring über den Account von [@andig](https://gith
 
 ## 🐳 Docker Image zieht um
 
-Im gleichen Zug ziehen wir auch unsere Docker Images um. Bislang wurden die Pakete unter `evcc/evcc` veröffentlicht. Nun findet ihr die offiziellen Versionen unter `evcc/evcc`.
+Im gleichen Zug ziehen wir auch unsere Docker Images um. Bislang wurden die Pakete unter `andig/evcc` veröffentlicht. Nun findet ihr die offiziellen Versionen unter `evcc/evcc`.
 
 An dieser Stelle noch einmal Danke an das Docker Team, die evcc als [Docker-Sponsored Open-Source-Projekt](https://www.docker.com/community/open-source/application/) qualifiziert haben. Dadurch bekommen wir kostenfreien Zugang zu Team-Funktionen von Docker Hub.
 
@@ -64,5 +64,5 @@ An dieser Stelle noch einmal Danke an das Docker Team, die evcc als [Docker-Spon
 ---
 
 **Danke für eure Unterstützung!**
-evcc Core Team
+evcc Core Team<br />
 [@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) und [@naltatis](https://github.com/naltatis)
