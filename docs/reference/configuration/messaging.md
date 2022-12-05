@@ -4,9 +4,9 @@ sidebar_position: 12
 
 # `messaging`
 
-evcc unterstützt die Übermittlung von Status-Informationen über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und viele weitere Dienste über das System [shoutrrr](https://containrrr.dev/shoutrrr/). Die Konfiguration ermöglich es eigene Nachrichten für bestimmte Ereignisse und Systeme zu definieren.
+evcc unterstützt die Übermittlung von Status-Informationen über [Telegram](https://telegram.org), [PushOver](https://pushover.net), [ntfy](https://ntfy.sh) und viele weitere Dienste über das System [shoutrrr](https://containrrr.dev/shoutrrr/). Die Konfiguration ermöglich es eigene Nachrichten für bestimmte Ereignisse und Systeme zu definieren.
 
-`messging` definiert in Subelementen was und wie es verschickt wird. Unter `events` müssen die Ereignisse definiert werden, für welche Nachrichten verschickt werden sollen. Und unter `services` die Dienste über welche die Nachrichten verschickt werden sollen.
+`messaging` definiert in Subelementen was und wie es verschickt wird. Unter `events` müssen die Ereignisse definiert werden, für welche Nachrichten verschickt werden sollen. Und unter `services` die Dienste über welche die Nachrichten verschickt werden sollen.
 
 **Beispiel**:
 
@@ -20,7 +20,7 @@ messaging:
 
 ## `events`
 
-`events` definiert für verschiedene vordefinierte Ereignisse, den Nachrichteninhalt.
+`events` definiert den Nachrichteninhalt für verschiedene vordefinierte Ereignisse.
 
 Die verfügbaren Ereignisse sind:
 
@@ -41,7 +41,7 @@ Die verfügbaren Ereignisse sind:
 
 ### `title`
 
-`title` definiert den Text für den Nachrichtentitel
+`title` definiert den Text für den Nachrichtentitel.
 
 **Beispiel**:
 
@@ -54,7 +54,7 @@ Die verfügbaren Ereignisse sind:
 `msg` definiert den Text für den Nachrichteninhalt.   
 Im Text können verschiedene Variablen im Format `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
 :::note
-Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!.
+Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!
 :::
 
 **Nützliche Auswahl zur Nutzung in evcc Benachrichtungen**:
@@ -210,7 +210,7 @@ Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablen
 
 ## `services`
 
-`services` definiert eine Liste von zu verwendeten Nachrichtendienste.
+`services` definiert eine Liste von zu verwendeten Nachrichtendiensten.
 
 **Beispiel**:
 
@@ -226,7 +226,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ### `type`
 
-`type` definiert den Nachrichtendienst der verwendet werden soll
+`type` definiert den Nachrichtendienst der verwendet werden soll.
 
 **Mögliche Werte**:
 
@@ -249,7 +249,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ### `pushover`
 
-`pushover` verwendet den Dienst [Pushover](https://pushover.net/)
+`pushover` verwendet den Dienst [Pushover](https://pushover.net/).
 
 **Beispiel**:
 
@@ -262,7 +262,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ### `telegram`
 
-`telegram` verwendet den Dienst [Telegram Messenger](https://telegram.org/)
+`telegram` verwendet den Dienst [Telegram Messenger](https://telegram.org/).
 
 **Beispiel**:
 
@@ -277,7 +277,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ### `email`
 
-`email` verwendet den Dienst [shoutrrr](https://containrrr.dev/shoutrrr)
+`email` verwendet den Dienst [shoutrrr](https://containrrr.dev/shoutrrr).
 
 Hier wird der Parameter `uri` mit dem Wert `smtp://<user>:<password>@<host>:<port>/?fromAddress=<from>&toAddresses=<to>` erwartet. Die Platzhalter sind wie folgt zu ersetzen:
 
@@ -297,7 +297,7 @@ Hier wird der Parameter `uri` mit dem Wert `smtp://<user>:<password>@<host>:<por
 
 ### `shout`
 
-`shout` verwendet den Dienst [shoutrrr](https://containrrr.dev/shoutrrr) unter unterstütz alle seine Dienste.
+`shout` verwendet den Dienst [shoutrrr](https://containrrr.dev/shoutrrr) und unterstützt alle seine Dienste.
 
 Die Konfiguration wird im folgenden Beispiel anhand von [Gotify](https://gotify.net/) gezeigt und funktioniert bei den anderen Möglichkeiten über den gleichen Weg.
 
@@ -309,6 +309,28 @@ Die Konfiguration wird im folgenden Beispiel anhand von [Gotify](https://gotify.
 ```
 
 Weitere Informationen sind in der [shoutrrr](https://containrrr.dev/shoutrrr) Dokumentation zu den [unterstützten Diensten](https://containrrr.dev/shoutrrr/v0.5/services/overview/) zu finden.
+
+### `ntfy`
+
+`ntfy` verwendet den Dienst [ntfy](https://ntfy.sh).
+
+Hier wird der Parameter `uri` mit dem Wert `https://<host>/<topics>` erwartet. Die Platzhalter sind wie folgt zu ersetzen:
+
+- `<host>`: Adresse (hostname oder IP Adresse) des ntfy Servers
+- `<topics>`: Abonniertes Thema oder abonnierte Themen
+
+Optionale Parameter sind `priority` und `tags`. Alle Parameter werden als Strings übergeben.
+
+**Beispiel**:
+
+```yaml
+  - type: ntfy
+    uri: https://ntfy.sh/evcctestalerts
+    priority: normal
+    tags: electric_plug,blue_car
+```
+
+Weitere Informationen sind in der [ntfy Dokumentation](https://docs.ntfy.sh) zu finden.
 
 ### `script`
 
