@@ -219,7 +219,7 @@ Berechne (interpoliere) den aktuellen SoC zwischen den Abfragen an das Fahrzeug.
 - `true`: evcc interpoliert die SoC Werte zwischen den Fahrzeugabfragen (empfohlen)
 - `false`: evcc nutzt nur die SoC Werte, welche das Fahrzeug zurückliefert
 
-**Standardwert:** `false`
+**Standardwert:** `true`
 
 **Beispiel**:
 
