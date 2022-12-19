@@ -248,11 +248,17 @@ Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SM
 ```yaml
   type: sma
   uri: 192.0.2.2
+  serial: 12345678
+  interface: eth0
 ```
 
 ---
 
 #### Erforderliche Parameter
+
+:::note
+Es ist ausreichend nur einen der Parameter (`uri` oder `serial`) zu definieren. 
+:::
 
 ##### `uri`
 
@@ -262,6 +268,30 @@ Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 
 ```yaml
   uri: 192.0.2.2
+```
+
+##### `serial`
+
+Definiert die Seriennummer des Gerätes von dem Messwerte empfangen werden sollen.
+
+**Beispiel**:
+
+```yaml
+  serial: 12345678
+```
+
+#### Optionale Parameter
+
+##### `interface`
+
+Multicast Botschaften können nur auf einem bestimmten Netzwerkinterface empfangen werden. 
+Üblicherweise das erste Interace im System. 
+Falls das nicht das Interface ist, das mit dem Meter verbunden ist, muss das Interface explizit angegeben werden.
+
+**Beispiel**:
+
+```yaml
+  interface: eth0
 ```
 
 ---
