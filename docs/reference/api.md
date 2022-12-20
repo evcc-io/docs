@@ -22,6 +22,8 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 - `/api/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
 - `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
+- `/api/loadpoints/<id>/enablethreshold`: loadpoint enable threshold value (writable)
+- `/api/loadpoints/<id>/disablethreshold`: loadpoint disable threshold value (writable)
 
 Die Loadpoint IDs beginnen bei `0`.
 
