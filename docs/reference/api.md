@@ -6,7 +6,7 @@ sidebar_position: 5
 
 Mit evcc kann über REST und MQTT APIs interagiert werden.
 
-Alle API IDs (z.B: die Loadpoint ID) beginnen bei `1`.
+Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 
 ## REST API
 
