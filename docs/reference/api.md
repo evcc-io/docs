@@ -27,7 +27,7 @@ Alle API IDs (z.B: die Loadpoint ID) beginnen bei `1`.
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden.
-Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
+Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
 :::
 
 ## MQTT API
