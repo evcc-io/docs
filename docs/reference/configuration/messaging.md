@@ -255,9 +255,9 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ```yaml
 - type: pushover
-  app: # app id
+  app: # API Token/Key der in Pushover angelegten Aplication
   recipients:
-  - # list of recipient ids
+  - # Liste der Empfänger: entweder User Key or Delivery Group. In Pushover angelegte Gruppen können auf bestimmte Geräte eingeschränkt werden.
 ```
 
 ### `telegram`
