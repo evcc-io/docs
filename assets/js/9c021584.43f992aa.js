@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkevcc_docs=self.webpackChunkevcc_docs||[]).push([[7438],{8055:e=>{e.exports=JSON.parse('{"permalink":"/blog/tags/release","page":1,"postsPerPage":5,"totalPages":2,"totalCount":7,"nextPage":"/blog/tags/release/page/2","blogDescription":"Blog","blogTitle":"Blog"}')}}]);
