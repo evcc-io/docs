@@ -89,6 +89,9 @@ function additionalContent(type, name) {
 }
 
 function generateMarkdown(data, type, target) {
+  let brandCounter = 0;
+  let productCounter = 0;
+
   // fill missing data
   data.forEach((x) => {
     x.product.group = x.product.group || "";
@@ -123,6 +126,7 @@ function generateMarkdown(data, type, target) {
     if (brand && brand !== lastBrand) {
       const level = group ? "###" : "##";
       generated += `${level} ${brand}\n\n`;
+      brandCounter++;
     }
 
     if (brand && brand !== nextBrand && brand !== lastBrand) {
@@ -134,6 +138,7 @@ function generateMarkdown(data, type, target) {
       if (brand) level += "#";
       generated += `${level} ${description} ${flags}\n\n`;
     }
+    productCounter++;
 
     generated += `${templateContent(entry, type)}`;
 
@@ -147,6 +152,7 @@ function generateMarkdown(data, type, target) {
       new RegExp(`${escapeRegExp(AUTOGEN_MARKER)}(.|\n)*`, "gm"),
       `${AUTOGEN_MARKER}\n\n${generated}`
     );
+  console.log(`${type}: ${brandCounter} brands, ${productCounter} products`);
   fs.writeFileSync(target, content, "utf-8");
 }
 

@@ -37,7 +37,7 @@ Wir haben schon mehrfach das Feedback bekommen, dass Nutzer Bauchschmerzen mit m
 - **☀️ $150 - Friends & Family**<br />Du bekommst **drei unbefristete Sponsortoken**. Eins für dich und zwei weitere, die du an Freunde oder Familie weitergeben kannst. Du wirst als Sponsor auf [evcc.io](https://evcc.io) erwähnt.
 - **🚛 $1.000 - Multiplikator**<br />Für Elektriker und Solarteure. Du bekommst **zehn unbefristete Sponsortoken**, die du für deine Kundenprojekte einsetzen kannst.
 
-Die Ausstellung für die unbefristeten Sponsortoken funktioniert genauso wie der aktuelle Prozess über [cloud.evcc.io](https://cloud.evcc.io). Einziger Unterschied ist, dass das Token nicht abläuft.
+Die Ausstellung für die unbefristeten Sponsortoken funktioniert genauso wie der aktuelle Prozess über [sponsor.evcc.io](https://sponsor.evcc.io). Einziger Unterschied ist, dass das Token nicht abläuft.
 
 _Hinweis: Momentan wird nur das erste Token pro Benutzer automatisch ausgestellt. Wählst du die **Friends & Family** oder **Multiplikator** Stufe, stellen wir dir deine weiteren Token manuell aus. Schreib dazu einfach [info@evcc.io](mailto:info@evcc.io) an._
 
