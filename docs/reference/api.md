@@ -6,6 +6,8 @@ sidebar_position: 5
 
 Mit evcc kann über REST und MQTT APIs interagiert werden.
 
+Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
+
 ## REST API
 
 - `/api/state`: evcc state (static configuration and dynamic state as JSON object)
@@ -23,16 +25,14 @@ Mit evcc kann über REST und MQTT APIs interagiert werden.
 - `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
 - `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
 
-Die Loadpoint IDs beginnen bei `0`.
-
 :::note
 Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden.
-Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/0/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
+Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
 :::
 
 ## MQTT API
 
-Die MQTT API folgt der REST API Struktur, jedoch mit den Ladepunkt (loadpoint) IDs bei `1` beginnend:
+Die MQTT API folgt der REST API Struktur:
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
