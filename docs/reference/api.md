@@ -10,25 +10,30 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 
 ## REST API
 
-- `/api/state`: evcc state (static configuration and dynamic state as JSON object)
+- `GET  /api/state`: evcc state (static configuration and dynamic state as JSON object)
+- `GET  /api/health`: evcc health check
+- `POST /api/buffersoc/<soc>`: battery buffer SoC in %
+- `POST /api/prioritysoc/<soc>`: battery priority SoC in %
+- `POST /api/residualpower/<power>`: grid residual power in W
+- `GET  /api/tariff/<type>`: list of prices (grid/feedin/planner)
+- `GET  /api/sessions[?format=csv&lang=<lang>]`: charging sessions
+- `GET  /api/telemetry`: telemetry enabled status
+- `POST /api/telemetry/<status>`: enable/disable telemetry (true/false)
 
-- `/api/health`: evcc health check
+### Loadpoint
 
-- `/api/buffersoc`: battery buffer SoC (writable)
-- `/api/prioritysoc`: battery priority SoC (writable)
-- `/api/residualpower`: grid residual power (writable)
-
-- `/api/loadpoints/<id>/mode`: loadpoint charge mode (writable)
-- `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
-- `/api/loadpoints/<id>/targetsoc`: loadpoint target SoC (writable)
-- `/api/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
-- `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
-- `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
-- `/api/loadpoints/<id>/enablethreshold`: loadpoint enable threshold value (writable)
-- `/api/loadpoints/<id>/disablethreshold`: loadpoint disable threshold value (writable)
+- `POST   /api/loadpoints/<id>/mode/<mode>`: charge mode (off/pv/minpv/now)
+- `POST   /api/loadpoints/<id>/minsoc/<soc>`: minimum SoC in %
+- `POST   /api/loadpoints/<id>/target/soc/<soc>`: target SoC in %
+- `POST   /api/loadpoints/<id>/target/energy/<energy>`: target energy in kWh
+- `POST   /api/loadpoints/<id>/target/time/<time>`: target time in RFC3339 / ISO format
+- `DELETE /api/loadpoints/<id>/target/time`: disable target charging
+- `GET    /api/loadpoints/<id>/target/plan[?targetTime=<time>]`: charging plan details
+- `POST   /api/loadpoints/<id>/phases/<phases>`: enabled phases (0=auto/1=1p/3=3p)
+- `POST   /api/loadpoints/<id>/mincurrent/<current>`: current minCurrent value in A
+- `POST   /api/loadpoints/<id>/maxcurrent/<current>`: current maxCurrent value in A
 
 :::note
-Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden.
 Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
 :::
 
@@ -49,7 +54,9 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/loadpoints/<id>`: loadpoint dynamic state
 - `evcc/loadpoints/<id>/mode`: loadpoint charge mode (writable)
 - `evcc/loadpoints/<id>/minSoC`: loadpoint minimum SoC (writable)
-- `evcc/loadpoints/<id>/targetSoC`: loadpoint target SoC (writable)
+- `evcc/loadpoints/<id>/target/soc/<soc>`: loadpoint target SoC in % (writable)
+- `evcc/loadpoints/<id>/target/energy/<energy>`: loadpoint target energy in kWh (writable)
+- `evcc/loadpoints/<id>/target/time/<time>`: loadpoint target time in RFC3339 / ISO format (writable)
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
