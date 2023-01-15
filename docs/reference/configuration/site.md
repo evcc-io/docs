@@ -21,8 +21,8 @@ site:
     batteries:
     - mybat5 # battery meter reference
   residualPower: 100
-  bufferSoC: 80
-  prioritySoC: 66    
+  bufferSoc: 80
+  prioritySoc: 66    
 ```
 
 ---
@@ -124,41 +124,41 @@ oder
     - myhugebat # second battery meter reference
 ```
 
-### `bufferSoC`
+### `bufferSoc`
 
-Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen SoC (%) Wert.
+Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen Soc (%) Wert.
 Die Ladung wird im PV-Modus bei zu wenig Überschuss (unterhalb der Mindestladeleistung) nicht unterbrochen, wenn sich die Hausbatterie(n) oberhalb dieses Ladezustandes befindet. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen, wenn diese entsprechend geladen ist. Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
 Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 
 :::Hinweis
-Auch wenn der Modus `PV` aktiviert ist, startet die Ladung immer dann, wenn der SoC der Hausbatterie größer als der eingestellte `bufferSoC` ist.
+Auch wenn der Modus `PV` aktiviert ist, startet die Ladung immer dann, wenn der Soc der Hausbatterie größer als der eingestellte `bufferSoc` ist.
 :::
 
 :::note
-`bufferSoC` muss einen größeren Wert als `prioritySoC` haben.
+`bufferSoc` muss einen größeren Wert als `prioritySoc` haben.
 :::
 
 **Beispiel**:
 
 ```yaml
-    bufferSoC: 80 # Hausbatterie wird oberhalb SoC 80% als Puffer genutzt
+    bufferSoc: 80 # Hausbatterie wird oberhalb Soc 80% als Puffer genutzt
 ```
 
-### `prioritySoC`
+### `prioritySoc`
 
-Die Ladung der Hausbatterie hat unterhalb des angegebenen SoC (%) Wertes Priorität gegenüber der Fahrzeugladung.
+Die Ladung der Hausbatterie hat unterhalb des angegebenen Soc (%) Wertes Priorität gegenüber der Fahrzeugladung.
 Steht unterhalb dieses Wertes mehr Erzeugungsleistung zur Verfügung als der Batteriespeicher aufnimmt, kann dieser Überschuss trotzdem nachrangig zur Fahrzeugladung verwendet werden.
 Wenn die Hausbatterie oberhalb des Wertes geladen wird, wird die Batterieladeleistung für das Laden des EVs als verfügbare Überschussleistung betrachtet. Somit hat dann die Fahrzeugladung Priorität bei der Verwendung der Überschussleistung.
 Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 
 :::note
-`prioritySoC` muss einen kleineren Wert als `bufferSoC` haben.
+`prioritySoc` muss einen kleineren Wert als `bufferSoc` haben.
 :::
 
 **Beispiel**:
 
 ```yaml
-    prioritySoC: 50 # Hausbatterie bekommt bis zum SoC 50% Priorität beim laden
+    prioritySoc: 50 # Hausbatterie bekommt bis zum Soc 50% Priorität beim laden
 ```
 
 ### `residualPower`
@@ -182,7 +182,7 @@ Soll im PV-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden muss hie
 - Negativer Wert: (ungültig)
 
 :::info
-Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoC`) zu ermöglichen. Andernfalls "sieht" die unabhängige Regelung des Speichers keinen nutzbaren Überschuss.
+Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 W einzutragen um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoc`) zu ermöglichen. Andernfalls "sieht" die unabhängige Regelung des Speichers keinen nutzbaren Überschuss.
 Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Speicher ein kurzzeitiger Netzbezug besser vermeiden.
 :::
 
@@ -209,7 +209,7 @@ Dieser Parameter ist (nur) hilfreich bei Hybrid-Wechselrichter-Systemen, bei den
 Beispielszenario:
 10 kW maximale AC-Ausgabeleistung des Hybrid-WR. Aktuelle PV-Erzeugungsleistung 15 kW, dabei gehen 5 kW in die direkt angeschlossene Batterie, da der AC-Pfad des Hybrid-WR bereits mit 10 kW voll ausgelastet ist.
 
-Normalerweise wird die momentane Ladeleistung der Hausbatterie als zusätzlich verfügbare Fahrzeugladeleistung betrachtet (falls `prioritySoC` schon erreicht wurde). In dem obigen Beispiel käme es dann jedoch zu Netzbezug in Höhe der momentanen Batterieladeleistung da diese vom Wechselrichter dem Netz (und somit dem Fahrzeug) technisch nicht zur Verfügung gestellt werden kann. Der ausgelastete AC-Pfad des Hybrid-WR bildet hierbei einen für die Standard-Regelung unerwarteten Engpass.
+Normalerweise wird die momentane Ladeleistung der Hausbatterie als zusätzlich verfügbare Fahrzeugladeleistung betrachtet (falls `prioritySoc` schon erreicht wurde). In dem obigen Beispiel käme es dann jedoch zu Netzbezug in Höhe der momentanen Batterieladeleistung da diese vom Wechselrichter dem Netz (und somit dem Fahrzeug) technisch nicht zur Verfügung gestellt werden kann. Der ausgelastete AC-Pfad des Hybrid-WR bildet hierbei einen für die Standard-Regelung unerwarteten Engpass.
 
 Mit diesem Parameter kann ein Schwellenwert für den Netzbezug gesetzt werden, der bewirkt, dass in diesem Fall die Batterieladeleistung nicht als verfügbare Fahrzeugladeleistung einberechnet wird. Somit bleibt dann die maximale Überschussladeleistung auf die maximale AC-Ausgangsleistung des/der Wechselrichter zuzügliches dieses Wertes begrenzt.
 
