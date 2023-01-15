@@ -14,13 +14,13 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 
 - `/api/health`: evcc health check
 
-- `/api/buffersoc`: battery buffer SoC (writable)
-- `/api/prioritysoc`: battery priority SoC (writable)
+- `/api/buffersoc`: battery buffer Soc (writable)
+- `/api/prioritysoc`: battery priority Soc (writable)
 - `/api/residualpower`: grid residual power (writable)
 
 - `/api/loadpoints/<id>/mode`: loadpoint charge mode (writable)
-- `/api/loadpoints/<id>/minsoc`: loadpoint minimum SoC (writable)
-- `/api/loadpoints/<id>/targetsoc`: loadpoint target SoC (writable)
+- `/api/loadpoints/<id>/minsoc`: loadpoint minimum Soc (writable)
+- `/api/loadpoints/<id>/targetsoc`: loadpoint target Soc (writable)
 - `/api/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
 - `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
@@ -41,15 +41,15 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/updated`: timestamp of last update
 
 - `evcc/site`: site dynamic state
-- `evcc/site/bufferSoC`: battery buffer SoC (writable)
-- `evcc/site/prioritySoC`: battery priority SoC (writable)
+- `evcc/site/bufferSoc`: battery buffer Soc (writable)
+- `evcc/site/prioritySoc`: battery priority Soc (writable)
 - `evcc/site/residualPower`: grid residual power (writable)
 
 - `evcc/loadpoints`: number of available loadpoints
 - `evcc/loadpoints/<id>`: loadpoint dynamic state
 - `evcc/loadpoints/<id>/mode`: loadpoint charge mode (writable)
-- `evcc/loadpoints/<id>/minSoC`: loadpoint minimum SoC (writable)
-- `evcc/loadpoints/<id>/targetSoC`: loadpoint target SoC (writable)
+- `evcc/loadpoints/<id>/minSoc`: loadpoint minimum Soc (writable)
+- `evcc/loadpoints/<id>/targetSoc`: loadpoint target Soc (writable)
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
