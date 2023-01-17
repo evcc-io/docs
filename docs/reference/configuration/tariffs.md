@@ -22,7 +22,7 @@ tariffs:
     price: 0.08 # [currency]/kWh
 ```
 
-evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de) oder [Tibber](https://tibber.com). Die Konfiguration erlaubt es "günstige" Preise zu definieren, bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
+evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de), [Tibber](https://tibber.com), oder [Octopus Energy](https://octopus.energy). Die Konfiguration erlaubt es "günstige" Preise zu definieren, bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
 
 **Beispiel: Flexibler Energiepreis**
 
@@ -51,7 +51,7 @@ Währung in der Energiepreise dargestellt und berechnet werden.
 
 **Standardwert:** `EUR`
 
-**Mögliche Werte:** `EUR|CHF|USD|NOK|...` Währungskürzel nach [ISO 4217](https://de.wikipedia.org/wiki/ISO_4217)
+**Mögliche Werte:** `EUR|CHF|USD|NOK|GBP|...` Währungskürzel nach [ISO 4217](https://de.wikipedia.org/wiki/ISO_4217)
 
 ---
 
@@ -59,7 +59,7 @@ Währung in der Energiepreise dargestellt und berechnet werden.
 
 Folgende Tariftypen (`type`) werden unterstützt:
 
-**Mögliche Werte** `fixed|awattar|tibber`
+**Mögliche Werte** `fixed|awattar|tibber|octopusenergy`
 
 ---
 
@@ -136,11 +136,54 @@ Die ID des Standards, falls es unter dem Account mehrere gibt
 
 ---
 
+### `type:` **`octopusenergy`**
+
+Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten Königreich.
+
+:::tip Tarif- und Regionalcodes
+Das Ermitteln des Tarif- und Regionalcodes ist nicht Gegenstand dieser Dokumentation.
+:::
+
+**Beispiel**:
+
+```yaml
+type: octopusenergy
+tariff: AGILE-FLEX-22-11-25 # Tariff code
+region: A # optional
+```
+
+#### `tariff`
+
+Der Tarifcode für Ihren Energievertrag.
+
+#### `region`
+
+Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.energy-stats.uk/dno-region-codes-explained/)
+
+**Mögliche Werte**:
+
+- **`A`**: Eastern England
+- **`B`**: East Midlands
+- **`C`**: London
+- **`D`**: Merseyside and Northern Wales
+- **`E`**: West Midlands
+- **`F`**: North Eastern England
+- **`G`**: North Western England
+- **`H`**: Southern England
+- **`J`**: South Eastern England
+- **`K`**: Southern Wales
+- **`L`**: South Western England
+- **`M`**: Yorkshire
+- **`N`**: Southern Scotland
+- **`P`**: Northern Scotland
+
+---
+
 ## `feedin`
 
 Vergütung für eingespeisten Strom. Bei Alt-Anlagen (vor 1.4.2012) ist hier die Differenz zwischen der Einspeise- und der Selbstverbrauchsvergütung einzutragen. 
 
-**Mögliche Werte** `fixed`
+**Mögliche Werte** `fixed|octopusenergy`
 
 ### `type:` **`fixed`**
 
@@ -158,3 +201,46 @@ price: 0.12 # 0,12 [currency]/kWh
 Den Preis in [currency]/kWh den du vom Netzbetreiber bekommst. Wird für die Ersparnisberechnung verwendet.
 
 **Standardwert:** `0.08`
+
+---
+
+## `type:` **`octopusenergy`**
+
+Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten Königreich.
+
+:::tip Tarif- und Regionalcodes
+Das Ermitteln des Tarif- und Regionalcodes ist nicht Gegenstand dieser Dokumentation.
+:::
+
+**Beispiel**:
+
+```yaml
+type: octopusenergy
+tariff: AGILE-FLEX-22-11-25 # Tariff code
+region: A # optional
+```
+
+#### `tariff`
+
+Der Tarifcode für Ihren Energievertrag. Stellen Sie sicher, dass dies auf Ihren **Importtarifcode** eingestellt ist!
+
+#### `region`
+
+Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.energy-stats.uk/dno-region-codes-explained/)
+
+**Mögliche Werte**:
+
+- **`A`**: Eastern England
+- **`B`**: East Midlands
+- **`C`**: London
+- **`D`**: Merseyside and Northern Wales
+- **`E`**: West Midlands
+- **`F`**: North Eastern England
+- **`G`**: North Western England
+- **`H`**: Southern England
+- **`J`**: South Eastern England
+- **`K`**: Southern Wales
+- **`L`**: South Western England
+- **`M`**: Yorkshire
+- **`N`**: Southern Scotland
+- **`P`**: Northern Scotland
