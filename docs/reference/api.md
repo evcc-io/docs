@@ -24,8 +24,6 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `/api/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `/api/loadpoints/<id>/mincurrent`: loadpoint current minCurrent value (writable)
 - `/api/loadpoints/<id>/maxcurrent`: loadpoint current maxCurrent value (writable)
-- `/api/loadpoints/<id>/enablethreshold`: loadpoint enable threshold value (writable)
-- `/api/loadpoints/<id>/disablethreshold`: loadpoint disable threshold value (writable)
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss eine `POST` HTTP Anfrage gesendet und der zu ändernde Wert dabei als Segment an die URI angehängt werden.
