@@ -119,3 +119,19 @@ timeout: 2s # timeout, without unit in ns
 Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z.B. bei E3/DC Geräten nützlich.
 
 Um ein Regsiter zu schreiben wird `type: writesingle` verwendet, welches ein einzelnes 16bit Register (entweder `int` oder `bool`) schreibt. Die Kodierung ist hier immer `uint16`.
+
+## Modbus für Geräte die nur 1 Verbindung erlauben
+
+Einige Geräte lassen nur einen Modbus Client zu, z.B. SolarEdge. Mit Hilfe von `modbusproxy` ist es möglich, evcc als Modbus Proxy einzurichten. Damit spricht evcc mit dem Gerät, weitere Gerät mit evcc, welches die Anfragen dann durchreicht.
+
+Wichtig: als Proxy erlaubt evcc nur Verbindungen mittels Modbus TCP, KEIN Modbus RTU. Clientseitig wird entsprechend Konfiguration übersetzt.
+
+**Beispiel**:
+
+```yaml
+modbusproxy:
+   - port: 5200
+     uri: 192.0.2.2:502 # IP und Port des Gerätes, das abgefragt werden soll
+     # rtu: true
+     # readonly: true
+```

@@ -21,6 +21,22 @@ tariffs:
     type: fixed
     price: 0.08 # [currency]/kWh
 ```
+**Beispiel: Konstanter Energiepreis mit zeitabhängigen Tarifen**
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    # static grid price with price zones)
+    type: fixed
+    price: 0.294 # EUR/kWh
+    zones:
+      - days: Mo-Fr
+        hours: 2-5
+        price: 0.2 # EUR/kWh
+      - days: Sa,So
+        price: 0.15 # EUR/kWh
+```
 
 evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de), [Tibber](https://tibber.com), oder [Octopus Energy](https://octopus.energy). Die Konfiguration erlaubt es "günstige" Preise zu definieren, bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
 
@@ -204,6 +220,7 @@ Den Preis in [currency]/kWh den du vom Netzbetreiber bekommst. Wird für die Ers
 
 ---
 
+<<<<<<< HEAD
 ## `type:` **`octopusenergy`**
 
 Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten Königreich.
@@ -211,10 +228,16 @@ Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten König
 :::tip Tarif- und Regionalcodes
 Das Ermitteln des Tarif- und Regionalcodes ist nicht Gegenstand dieser Dokumentation.
 :::
+=======
+## `planner`
+
+Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
+>>>>>>> main
 
 **Beispiel**:
 
 ```yaml
+<<<<<<< HEAD
 type: octopusenergy
 tariff: AGILE-FLEX-22-11-25 # Tariff code
 region: A # optional
@@ -244,3 +267,18 @@ Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.ene
 - **`M`**: Yorkshire
 - **`N`**: Southern Scotland
 - **`P`**: Northern Scotland
+=======
+planner:
+  type: grünstromindex
+  zip: meine PLZ  # PLZ mit führender Null mit in "" setzen
+```
+
+```yaml
+planner:
+  type: electricitymaps
+  uri: <uri>
+  token: <token>
+  zone: DE
+```
+
+>>>>>>> main
