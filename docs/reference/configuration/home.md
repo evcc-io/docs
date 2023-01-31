@@ -70,8 +70,8 @@ Beispiel: `phases: 1` und `minCurrent: 8`
 
 Normalerweise entspricht die Überschussleistung der verfügbaren Ladeleistung. Die verfügbare Ladeleistung kann jedoch individuell durch mehrere Parameter verändert werden. Diese sind:
 -	Site: `residualpower` 
--	Site: `prioritySoC`
--	Site: `bufferSoC`
+-	Site: `prioritySoc`
+-	Site: `bufferSoc`
 -	Loadpoint: `enable: threshold`
 -	Loadpoint: `disable: threshold`
 
@@ -112,7 +112,7 @@ _Meters_ (Hausinstallation) ist eine Liste von Geräten welche verschiedene Stro
 
 ### Vehicles
 
-Um die Ladung auf einen bestimmten Ladestand (SoC) in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.
+Um die Ladung auf einen bestimmten Ladestand (Soc) in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.
 
 [Weiterlesen...](vehicles)
 
