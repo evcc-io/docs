@@ -174,3 +174,26 @@ price: 0.12 # 0,12 [currency]/kWh
 Den Preis in [currency]/kWh den du vom Netzbetreiber bekommst. Wird für die Ersparnisberechnung verwendet.
 
 **Standardwert:** `0.08`
+
+---
+
+## `planner`
+
+Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
+
+**Beispiel**:
+
+```yaml
+planner:
+  type: grünstromindex
+  zip: meine PLZ  # PLZ mit führender Null mit in "" setzen
+```
+
+```yaml
+planner:
+  type: electricitymaps
+  uri: <uri>
+  token: <token>
+  zone: DE
+```
+
