@@ -137,7 +137,7 @@ messaging:
 
 **Liste aller von evcc bereitgestellten Variablen**:
 
-Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
+Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
 
 - Site
   - Konfiguration
