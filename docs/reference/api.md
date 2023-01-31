@@ -53,7 +53,7 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/loadpoints`: number of available loadpoints
 - `evcc/loadpoints/<id>`: loadpoint dynamic state
 - `evcc/loadpoints/<id>/mode`: loadpoint charge mode (writable)
-- `evcc/loadpoints/<id>/minSoC`: loadpoint minimum SoC (writable)
+- `evcc/loadpoints/<id>/minSoc`: loadpoint minimum SoC (writable)
 - `evcc/loadpoints/<id>/target/soc/<soc>`: loadpoint target SoC in % (writable)
 - `evcc/loadpoints/<id>/target/energy/<energy>`: loadpoint target energy in kWh (writable)
 - `evcc/loadpoints/<id>/target/time/<time>`: loadpoint target time in RFC3339 / ISO format (writable)
