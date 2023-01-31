@@ -220,7 +220,6 @@ Den Preis in [currency]/kWh den du vom Netzbetreiber bekommst. Wird für die Ers
 
 ---
 
-<<<<<<< HEAD
 ## `type:` **`octopusenergy`**
 
 Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten Königreich.
@@ -228,16 +227,10 @@ Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten König
 :::tip Tarif- und Regionalcodes
 Das Ermitteln des Tarif- und Regionalcodes ist nicht Gegenstand dieser Dokumentation.
 :::
-=======
-## `planner`
-
-Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
->>>>>>> main
 
 **Beispiel**:
 
 ```yaml
-<<<<<<< HEAD
 type: octopusenergy
 tariff: AGILE-FLEX-22-11-25 # Tariff code
 region: A # optional
@@ -267,7 +260,16 @@ Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.ene
 - **`M`**: Yorkshire
 - **`N`**: Southern Scotland
 - **`P`**: Northern Scotland
-=======
+
+---
+
+## `planner`
+
+Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
+
+**Beispiel**:
+
+```yaml
 planner:
   type: grünstromindex
   zip: meine PLZ  # PLZ mit führender Null mit in "" setzen
@@ -281,4 +283,3 @@ planner:
   zone: DE
 ```
 
->>>>>>> main
