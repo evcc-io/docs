@@ -154,11 +154,11 @@ region: A # optional
 
 #### `tariff`
 
-Der Tarifcode für Ihren Energievertrag.
+Der Tarifcode für deinen Energievertrag.
 
 #### `region`
 
-Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.energy-stats.uk/dno-region-codes-explained/)
+Die DNO Region in der du dich befindest: [Weitere Informationen](https://www.energy-stats.uk/dno-region-codes-explained/)
 
 **Mögliche Werte**:
 
@@ -181,7 +181,7 @@ Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.ene
 
 ## `feedin`
 
-Vergütung für eingespeisten Strom. Bei Alt-Anlagen (vor 1.4.2012) ist hier die Differenz zwischen der Einspeise- und der Selbstverbrauchsvergütung einzutragen. 
+Vergütung für eingespeisten Strom. Bei Alt-Anlagen (vor 1.4.2012) ist hier die Differenz zwischen der Einspeise- und der Selbstverbrauchsvergütung einzutragen.
 
 **Mögliche Werte** `fixed|octopusenergy`
 
@@ -222,7 +222,7 @@ region: A # optional
 
 #### `tariff`
 
-Der Tarifcode für Ihren Energievertrag. Stellen Sie sicher, dass dies auf Ihren **Importtarifcode** eingestellt ist!
+Der Tarifcode für Ihren Energievertrag. Stelle sicher, dass dies auf Ihren **Importtarifcode** eingestellt ist.
 
 #### `region`
 
