@@ -100,7 +100,7 @@ messaging:
         Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
     stop: # charge stop event
       title: Charge of {{.vehicleTitle}} finished
       msg: |
@@ -111,7 +111,7 @@ messaging:
         Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
     connect: # vehicle connect event
       title: "{{.vehicleTitle}} connected on wallbox {{.title}}"
       msg: |
@@ -121,7 +121,7 @@ messaging:
         Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
     disconnect: # vehicle connected event
       title: "{{.vehicleTitle}} disconnected of wallbox {{.title}}"
       msg: |
@@ -131,18 +131,18 @@ messaging:
         Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoC }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
   ```
 :::
 
 **Liste aller von evcc bereitgestellten Variablen**:
 
-Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
+Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
 
 - Site
   - Konfiguration
     - [`siteTitle`](site) - Hauptüberschrift der evcc App (*string*)
-    - [`prioritySoC`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (*integer*)
+    - [`prioritySoc`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (*integer*)
   - Information
     - `batteryConfigured` - Indikator, Hausbatterie/Powerwall-Meter konfiguriert (*bool*)
     - `gridConfigured` - Indikator, Smart/Grid-Meter konfiguriert (*bool*)
@@ -153,7 +153,7 @@ Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablen
   - [`tariffGrid`](tariffs/#grid) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
 - Meter Infos
   - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (*float*)
-  - `batterySoC` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (*integer*)
+  - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (*integer*)
   - `gridPower` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (*float*)
   - `homePower` - Aktuelle Haus-Abnahmeleistung (ohne Wallboxverbrauch) in Watt (*float*)
   - `pvPower` - Aktuelle Solaranlagen-Leistung in Watt (*float*)
@@ -162,10 +162,10 @@ Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablen
     - [`loadpoint`](loadpoints) - Laufende Nummer des Ladepunktes (*integer*) 
     - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (*float*)
     - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (*float*)
-    - [`minSoC`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
+    - [`minSoc`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
     - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (*string*)
     - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (*integer*)
-    - [`targetSoC`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
+    - [`targetSoc`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
     - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (*string*) 
   - Information
     - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (*integer*)
@@ -193,7 +193,7 @@ Die von evcc bereitgestellten Variablen müssen als regex-Funktion `${<Variablen
     - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (*float*)
     - `vehiclePresent` - Indikator, evcc auf die Fahrzeugdaten zugreifen kann (*bool*)
     - `vehicleRange` - Aktuelle Reichweite des Fahrzeugs in km (*float*)
-    - `vehicleSoC` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (*integer*)
+    - `vehicleSoc` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (*integer*)
 - Infos zur Einsparungseffizienz 
   - `savingsAmount` - Summe der evcc-Einsparung (*float*)
   - `savingsEffectivePrice` - Kalkulierter Einsparungs-Preis (*float*)

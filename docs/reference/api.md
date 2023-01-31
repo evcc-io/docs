@@ -46,8 +46,8 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/updated`: timestamp of last update
 
 - `evcc/site`: site dynamic state
-- `evcc/site/bufferSoC`: battery buffer SoC (writable)
-- `evcc/site/prioritySoC`: battery priority SoC (writable)
+- `evcc/site/bufferSoc`: battery buffer SoC (writable)
+- `evcc/site/prioritySoc`: battery priority SoC (writable)
 - `evcc/site/residualPower`: grid residual power (writable)
 
 - `evcc/loadpoints`: number of available loadpoints
