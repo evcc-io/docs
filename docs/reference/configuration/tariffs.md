@@ -220,7 +220,7 @@ Den Preis in [currency]/kWh den du vom Netzbetreiber bekommst. Wird für die Ers
 
 ---
 
-## `type:` **`octopusenergy`**
+### `type:` **`octopusenergy`**
 
 Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten Königreich.
 
