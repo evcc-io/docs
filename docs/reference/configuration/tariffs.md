@@ -21,6 +21,22 @@ tariffs:
     type: fixed
     price: 0.08 # [currency]/kWh
 ```
+**Beispiel: Konstanter Energiepreis mit zeitabhängigen Tarifen**
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    # static grid price with price zones)
+    type: fixed
+    price: 0.294 # EUR/kWh
+    zones:
+      - days: Mo-Fr
+        hours: 2-5
+        price: 0.2 # EUR/kWh
+      - days: Sa,So
+        price: 0.15 # EUR/kWh
+```
 
 evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de) oder [Tibber](https://tibber.com). Die Konfiguration erlaubt es "günstige" Preise zu definieren, bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
 
