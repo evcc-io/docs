@@ -220,6 +220,7 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     app: 12345
     recipients:
     - 234567
+     
 ```
 
 Im folgenden werden nun alle erforderlichen Parameter erklärt.
@@ -249,7 +250,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 ### `pushover`
 
-`pushover` verwendet den Dienst [Pushover](https://pushover.net/).
+`pushover` verwendet den Dienst [Pushover](https://pushover.net/). Details siehe [Pushover API](https://https://pushover.net/api).
 
 **Beispiel**:
 
@@ -258,6 +259,9 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
   app: # API Token/Key der in Pushover angelegten Aplication
   recipients:
   - # Liste der Empfänger: entweder User Key or Delivery Group. In Pushover angelegte Gruppen können auf bestimmte Geräte eingeschränkt werden.
+  devices:
+  - Johns phone
+  - Mias ticker
 ```
 
 ### `telegram`
