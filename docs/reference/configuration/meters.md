@@ -366,6 +366,7 @@ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/
   soc: # Batterie SOC (%)
     source: # Plugin Typ
     ...
+  capacity: # optional Batterie Kapazität (kWh)  
   currents: # Stromstärke (A) pro Phase
     - source: # Phase 1 Plugin Typ
       ...
@@ -421,6 +422,14 @@ Plugin Definiton um den Ladestand SOC in % zurückzugeben
     source: # Plugin Typ
     ...
 ```
+
+---
+
+#### `capacity`
+
+Angabe der Batterie Kapazität. Nur nützlich, wenn mehrere Batterien vorhanden sind
+
+Dient dazu, den Gesamt-SOC zu ermittlen.
 
 ---
 
