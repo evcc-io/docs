@@ -267,6 +267,8 @@ Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.ene
 
 Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
 
+### `type:` **`grünstromindex`**
+
 **Beispiel**:
 
 ```yaml
@@ -274,6 +276,10 @@ planner:
   type: grünstromindex
   zip: meine PLZ  # PLZ mit führender Null mit in "" setzen
 ```
+
+### `type:` **`electricitymaps`**
+
+**Beispiel**:
 
 ```yaml
 planner:
