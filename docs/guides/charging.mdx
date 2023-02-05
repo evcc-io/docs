@@ -104,9 +104,11 @@ Abhilfe schafft ein größeres `interval`.
 
 ### PV Erzeugung im Winter nutzen
 
-In den Wintermonaten ist die PV Erzeugung meisst unterhalb oder im Bereich der [Mindestleistung](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht). Um dennoch möglichst viel eigenen Strom ins Fahrzeug zu laden, kann man folgenden Trick anwenden:
+In den Wintermonaten ist die PV Erzeugung meisst unterhalb oder im Bereich der [Mindestleistung](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht). Um dennoch möglichst viel eigenen Strom ins Fahrzeug zu laden, kann man folgende "Tricks" anwenden:
 
-In der Konfiguration unter [`site`](/docs/reference/configuration/site) setzt man [`residualPower`](/docs/reference/configuration/site#residualpower) auf einen negativen Wert. Dieser bestimmt dann wieviel Netzbezug im PV Modus noch erlaubt ist.
+#### mittels `residualpower`
+
+In der Konfiguration unter [`site`](/docs/reference/configuration/site) setzt man [`residualPower`](/docs/reference/configuration/site#residualpower) auf einen negativen Wert. Dieser bestimmt dann wieviel Netzbezug im PV Modus noch erlaubt ist. Eine Änderung ist per API möglich.
 
 **Beispiel**:
 
@@ -114,3 +116,28 @@ In der Konfiguration unter [`site`](/docs/reference/configuration/site) setzt ma
 site:
   residualPower: -1000 # 1000W Netzbezug im PV Modus erlaubt
 ```
+"Nachteil" dieser Lösung ist, dass auch bei ausreichendem Überschuss dieser erlaubte Netzbezug ausgenutzt wird.
+
+#### mittels `enable/disable`
+
+In der Konfiguration unter  [`loadpoints`](/docs/reference/configuration/loadpoints) stellt man bei `enable`und `disable` das gewünschte Verhalten ein.
+
+**Beispiel**:
+
+```yaml
+loadpoints:
+  enable:
+      delay: 1m 
+      threshold: -200 # es wird eingeschaltet, wenn 1 Minute lang 200 W Einspeisung vorhanden sind
+    disable:
+      delay: 30m 
+      threshold: 1200 # es wird ausgeschaltet, wenn 30 Minuten lang mehr als 1200 W Netzstrom bezogen wurde
+```
+"Nachteil" dieser Lösung ist, dass diese Werte nicht per API geändert werden können, sondern nur in der Konfig, was jedesmal einen Neustart von evcc benötigt.
+
+
+
+
+
+
+
