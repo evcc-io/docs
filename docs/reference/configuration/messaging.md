@@ -330,7 +330,7 @@ Optionale Parameter sind `priority` und `tags`. Alle Parameter werden als String
 ```yaml
   - type: ntfy
     uri: https://ntfy.sh/evcctestalerts
-    priority: normal
+    priority: default
     tags: electric_plug,blue_car
 ```
 
