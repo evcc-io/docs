@@ -32,6 +32,8 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST   /api/loadpoints/<id>/phases/<phases>`: enabled phases (0=auto/1=1p/3=3p)
 - `POST   /api/loadpoints/<id>/mincurrent/<current>`: current minCurrent value in A
 - `POST   /api/loadpoints/<id>/maxcurrent/<current>`: current maxCurrent value in A
+- `POST   /api/loadpoints/<id>/enable/threshold/<threshold>`: threshold value in W
+- `POST   /api/loadpoints/<id>/disable/threshold/<threshold>`: threshold value in W
 
 :::note
 Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
@@ -60,6 +62,8 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
+- `evcc/loadpoints/<id>/enable/threshold`: loadpoint threshold value (writable)
+- `evcc/loadpoints/<id>/disable/threshold`: loadpoint threshold value (writable)
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
