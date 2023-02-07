@@ -184,30 +184,6 @@ Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT
       interval: 60m
 ```
 
-#### `min`
-
-VERALTET Lade sofort bis zu dem angegebenen Wert mit der höchsten Leistung, wenn der Parameter [`mode`](#mode) (Lademodus) nicht auf `off` steht
-
-**Mögliche Werte**: Der Wert entspricht dem Ziel-SoC (Ladezustand in %) der EV Batterie.
-
-**Standardwert:** `0`
-
-**Beispiel**:
-
-```yaml
-    min: 50 # Lade sofort auf 50% SoC
-```
-
-#### `target`
-
-VERALTET Definiere, bis zu welchem SoC geladen wird.
-
-**Standardwert:** `100`
-
-**Beispiel**:
-
-```yaml
-    target: 80 # Lade bis maximal 80% SoC
 ```
 
 #### `estimate`
