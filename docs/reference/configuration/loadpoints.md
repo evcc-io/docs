@@ -347,6 +347,12 @@ Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
 
 Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern dient lediglich dazu, im PV-Modus (in Verbindung mit `minCurrent`) die minimale Startleistung für die Ladung zu ermitteln.
 
+Seit kurzem werden die anliegenden Spannungen ausgewertet, wenn der Zähler der Wallbox diese liefert. Anhand der Spannungen wird der `phases` Wert „automatisch“ per API geändert. In den Fällen in denen die Wallbox per „Lasttrennschalter“ auf 1p oder 3p eingestellt wird, ist somit keine manuelle Änderung des `phases` Wertes mehr notwendig.
+
+In den Fällen, in denen das 1p/3p Laden nicht per Lasttrennschalter, sondern mittels entsprechendem Ladekabel realisiert wird, führt diese "Automatik" zu Problemen. Hier muss der `phases` Wert beim `vehicle`entsprechend angepasst werden. Da dieser nicht per API änderbar ist, gibt es folgende Workaround:
+
+Man konfiguriert das Fahrzeug zweimal. Zum einen mit `phases: 1` und ein weiters mal mit `phases: 3`. Je nach gewünschter Ladeart, wählt man dann im UI das entsprechende Fahrzeug aus.
+
 Wenn ein bekanntes Fahrzeug angeschlossen ist, wird der kleinere Wert aus `vehicle: phases` und `loadpoint: phases` zur Berechnung herangezogen. Bei unbekannten Fahrzeugen wirkt immer `loadpoint: phases` alleine.
 
 Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der tatsächlichen Schaltschwellen genutzt. Das funktioniert allerdings prinzipbedingt nur bei dreiphasigen Ladepunkten.
