@@ -62,8 +62,8 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
-- `evcc/loadpoints/<id>/enable/threshold`: loadpoint threshold value (writable)
-- `evcc/loadpoints/<id>/disable/threshold`: loadpoint threshold value (writable)
+- `evcc/loadpoints/<id>/enableThreshold`: loadpoint threshold value (writable)
+- `evcc/loadpoints/<id>/disableThreshold`: loadpoint threshold value (writable)
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
