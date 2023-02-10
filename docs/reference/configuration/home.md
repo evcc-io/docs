@@ -72,6 +72,7 @@ Normalerweise entspricht die Überschussleistung der verfügbaren Ladeleistung. 
 -	Site: `residualpower` 
 -	Site: `prioritySoc`
 -	Site: `bufferSoc`
+-	Site: `aux`
 -	Loadpoint: `enable: threshold`
 -	Loadpoint: `disable: threshold`
 
