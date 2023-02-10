@@ -15,10 +15,10 @@ site:
 - title: Zuhause # display name for UI
   meters:
     grid: mygridmeter # grid meter reference
-    pvs: 
+    pv: 
     - mypv1 # first pv meter reference
     - mypv9 # second pv meter reference
-    batteries:
+    battery:
     - mybat5 # battery meter reference
     aux:
     - myaux1
@@ -50,7 +50,7 @@ Hier erfolgt somit die logische Verknüpfung der Gerätedefiniton mit dem Verwen
 Ein zunächst universeller Zähler bekommt somit entsprechend seines Einbauortes in der Hausinstallation einen Zweck zugewiesen.
 
 :::note
-Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pv(s)` Elementes notwendig!
+Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pv` Elementes notwendig!
 Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 :::
 
@@ -60,10 +60,8 @@ Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 site:
   meters:
     grid: mygridmeter # grid meter reference
-    pvs: 
-    - mypv1 # pv meter reference
-    batteries: 
-    - mybat2 # battery meter reference
+    pv: mypv1 # pv meter reference
+    battery: mybat2 # battery meter reference
     aux: myaux1
 ```
 
@@ -85,7 +83,7 @@ Definiert das [`meter`](meters) (Strommessgerät), welches die Messwerte des Net
 
 ---
 
-### `meters.pv(s)`
+### `meters.pv`
 
 Definiert die [`meter`](meters) (Strommessgeräte), welches die PV-Erzeugungswerte liefern.
 Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
@@ -100,14 +98,14 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 oder 
 
 ```yaml
-    pvs: 
+    pv: 
     - myoldpv # first pv meter reference
     - mynewestpv # second pv meter reference
 ```
 
 ---
 
-### `meters.battery(ies)`
+### `meters.battery`
 
 Definiert die [`meter`](meters) (Strommessgeräte), welche die Messdaten des/der Batteriespeicher(s) liefern.
 Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Speicherfüllständen wird ein Mittelwert gebildet.
@@ -122,7 +120,7 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 oder
 
 ```yaml
-    batteries: 
+    battery: 
     - mysmallbat # first battery meter reference
     - myhugebat # second battery meter reference
 ```
@@ -144,6 +142,20 @@ Beispiele:
     - Positiver Wert und Soc < prioritySoc : Fahrzeugladeleistung steigt, BMS reduziert die Batterieladeleistung.
     - Negativer Wert und Soc > prioritySoc: Fahrzeugladeleistung nutzt den Überschuss nicht komplett aus, BMS nutzt den verbleibenden Überschuss und erhöht die Batterieladeleistung.
 
+**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+
+**Beispiel**:
+
+```yaml
+    aux: myaux # single aux meter reference
+```
+oder
+
+```yaml
+    aux: 
+    - myaux1 # first aux meter reference
+    - myaux2 # second aux meter reference
+```
 
 
 ### `bufferSoc`
