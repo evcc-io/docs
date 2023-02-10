@@ -20,6 +20,8 @@ site:
     - mypv9 # second pv meter reference
     batteries:
     - mybat5 # battery meter reference
+    aux:
+    - myaux1
   residualPower: 100
   bufferSoc: 80
   prioritySoc: 66    
@@ -62,6 +64,7 @@ site:
     - mypv1 # pv meter reference
     batteries: 
     - mybat2 # battery meter reference
+    aux: myaux1
 ```
 
 ---
@@ -123,6 +126,25 @@ oder
     - mysmallbat # first battery meter reference
     - myhugebat # second battery meter reference
 ```
+
+### `meters.aux
+
+Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die nicht durch evcc gesteuert werden können. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
+
+In evcc fließt diese Leistung in die Berechnung der zur Verfügung stehenden Fahrzeugladeleistung ein.
+
+Positiver Wert: steht dem Fahrzeug zur Verfügung
+
+Negativer Wert: steht dem Fahrzeug nicht zur Verfügung 
+
+Beispiele: 
+
+-	Ein Heizstab, der autark auf Basis des PV-Überschuss geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux` eingerichtet wird, steht die Leistung der Fahrzeugladung zur Verfügung. Greift das Fahrzeug darauf zu, sorgt die autarke Regelung des Heizstabes dafür, dass dessen Leistung entsprechend reduziert wird.
+-	Eine Hausbatterie regelt ihre Lade-/Entladeleistung selbstständig (BMS). Mittels `aux` könnte man die zur Verfügung stehende Fahrzeugladeleistung beeinflussen, um damit (i.V.m. prioritySoc) indirekt die Ladeleistung der Hausbatterie zu steuern. 
+    - Positiver Wert und Soc < prioritySoc : Fahrzeugladeleistung steigt, BMS reduziert die Batterieladeleistung.
+    - Negativer Wert und Soc > prioritySoc: Fahrzeugladeleistung nutzt den Überschuss nicht komplett aus, BMS nutzt den verbleibenden Überschuss und erhöht die Batterieladeleistung.
+
+
 
 ### `bufferSoc`
 
