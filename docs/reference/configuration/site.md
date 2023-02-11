@@ -15,10 +15,10 @@ site:
 - title: Zuhause # display name for UI
   meters:
     grid: mygridmeter # grid meter reference
-    pv: 
+    pv: # (pvs = veraltet)
     - mypv1 # first pv meter reference
     - mypv9 # second pv meter reference
-    battery:
+    battery: # (batteries = veraltet)
     - mybat5 # battery meter reference
     aux:
     - myaux1
@@ -98,7 +98,7 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 oder 
 
 ```yaml
-    pv: 
+    pv: # (pvs = veraltet)
     - myoldpv # first pv meter reference
     - mynewestpv # second pv meter reference
 ```
@@ -120,7 +120,7 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 oder
 
 ```yaml
-    battery: 
+    battery: # (batteries = veraltet)
     - mysmallbat # first battery meter reference
     - myhugebat # second battery meter reference
 ```
