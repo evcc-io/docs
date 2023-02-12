@@ -138,9 +138,6 @@ Negativer Wert: steht dem Fahrzeug nicht zur Verfügung
 Beispiele: 
 
 -	Ein Heizstab, der autark auf Basis des PV-Überschuss geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux` eingerichtet wird, steht die Leistung der Fahrzeugladung zur Verfügung. Greift das Fahrzeug darauf zu, sorgt die autarke Regelung des Heizstabes dafür, dass dessen Leistung entsprechend reduziert wird.
--	Eine Hausbatterie regelt ihre Lade-/Entladeleistung selbstständig (BMS). Mittels `aux` könnte man die zur Verfügung stehende Fahrzeugladeleistung beeinflussen, um damit (i.V.m. prioritySoc) indirekt die Ladeleistung der Hausbatterie zu steuern. 
-    - Positiver Wert und Soc < prioritySoc : Fahrzeugladeleistung steigt, BMS reduziert die Batterieladeleistung.
-    - Negativer Wert und Soc > prioritySoc: Fahrzeugladeleistung nutzt den Überschuss nicht komplett aus, BMS nutzt den verbleibenden Überschuss und erhöht die Batterieladeleistung.
 
 **Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
 
