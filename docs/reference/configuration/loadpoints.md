@@ -149,6 +149,8 @@ Definiere die Standardeinstellungen für den Umgang mit dem SoC eines angeschlos
 
 Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
 
+Während des __Ladevorgangs__ wird das Fahrzeug im Interval [`cache`](vehicles#cache) des `vehicle`-Eintrags nach neuen Daten abgefragt (Standardwert: `15m`). 
+
 :::warning
 Es wird __NICHT__ empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
 oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. __AUF EIGENES RISIKO.__
@@ -156,13 +158,13 @@ oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu ste
 
 #### `poll.mode`
 
-Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werden
+Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werden, wenn es __NICHT__ lädt.
 
 **Mögliche Werte**:
 
-- `charging`: aktualisiere die Daten __NUR__ während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
-- `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
-- `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#interval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
+- `charging`: aktualisiere die Daten wenn das Fahrzeug mit der Wallbox verbunden ist und solange das Ladeziel (`targetSOC`) nicht erreicht ist (dies ist die empfohlene Standardeinstellung)
+- `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist auch wenn das Ladeziel (`targetSOC`) erreicht ist
+- `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
 **Standardwert:** `charging`
 
@@ -174,7 +176,8 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 
 #### `poll.Interval`
 
-Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
+Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt und die gewählte Bedingung unter [`mode`](#pollmode) erfüllt ist.
+Sollte nicht kürzer sein als das Interval [`cache`](vehicles#cache) des `vehicle`-Eintrags (Standardwert: `15m`).
 
 **Standardwert:** `60m`
 
