@@ -128,11 +128,10 @@ oder
 
 Ignoriere das Entladen einer Hausbatterie oberhalb dem angegebenen Soc (%) Wert.
 Die Ladung wird im PV-Modus bei zu wenig Überschuss (unterhalb der Mindestladeleistung) nicht unterbrochen, wenn sich die Hausbatterie(n) oberhalb dieses Ladezustandes befindet. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen, wenn diese entsprechend geladen ist. Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
-Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 
-:::note
-Im Modus `PV` startet die Ladung immer dann, wenn der Soc der Hausbatterie größer als der eingestellte `bufferSoc` ist und die Hausbatterie nicht geladen wird.
-:::
+Darüberhinaus wird im Modus `PV` die Ladung auch neu gestartet, wenn die Hausbatterie nicht mehr geladen wird und deren Soc größer als der eingestellte `bufferSoc` ist.
+
+Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 
 :::note
 `bufferSoc` muss einen größeren Wert als `prioritySoc` haben.
