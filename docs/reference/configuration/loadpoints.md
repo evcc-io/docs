@@ -413,9 +413,6 @@ Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bi
 
 Dient der Priorisierung von Loadpoints untereinander.
 
-Je höher der Wert, desto größer die Priorität.
-Loadpoints ohne Eintrag haben `priority: 0`
-
 Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringer priorisierten Loadpoints zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist. 
 
 Je höher der Wert, desto größer die Priorität.
