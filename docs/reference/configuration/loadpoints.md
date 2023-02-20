@@ -406,3 +406,29 @@ Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bi
 ```yaml
   maxcurrent: 16
 ```
+
+---
+
+### `priority`
+
+Dient der Priorisierung von Loadpoints untereinander.
+
+Je höher der Wert, desto größer die Priorität.
+Loadpoints ohne Eintrag haben `priority: 0`
+
+Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringer priorisierten Loadpoints zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist. 
+
+Je höher der Wert, desto größer die Priorität.
+Loadpoints ohne Eintrag haben `priority: 0`
+
+Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
+
+**Standartwert:** `0`
+
+**Beispiel**:
+
+```yaml
+  priority: 2
+```
+
+---
