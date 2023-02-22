@@ -184,8 +184,6 @@ Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT
       interval: 60m
 ```
 
-```
-
 #### `estimate`
 
 Berechne (interpoliere) den aktuellen SoC zwischen den Abfragen an das Fahrzeug.
