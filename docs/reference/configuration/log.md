@@ -10,6 +10,7 @@ Definiert den Detailgrad der Protokollierung von Informationen auf der Konsole.
 
 **Mögliche Werte**:
 
+- `fatal`: Nur Nachrichten der Kategorie `fatal` werden angezeigt. Das sind Fehler, die die Systemausführung verhindern.
 - `error`: Nur Nachrichten der Kategorie `error` werden angezeigt. Das sind die wenigsten Nachrichten.
 - `warn`: Beinhaltet `error`, zusätzlich werden Nachrichten der Kategorie `warn` angezeigt.
 - `info`: Beinhaltet `warn`, zusätzlich werden Nachrichten der Kategorie `info` angezeigt.
