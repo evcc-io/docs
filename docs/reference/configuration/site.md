@@ -15,11 +15,13 @@ site:
 - title: Zuhause # display name for UI
   meters:
     grid: mygridmeter # grid meter reference
-    pvs: 
+    pv: # (pvs = veraltet)
     - mypv1 # first pv meter reference
     - mypv9 # second pv meter reference
-    batteries:
+    battery: # (batteries = veraltet)
     - mybat5 # battery meter reference
+    aux:
+    - myaux1
   residualPower: 100
   bufferSoc: 80
   prioritySoc: 66    
@@ -48,7 +50,7 @@ Hier erfolgt somit die logische Verknüpfung der Gerätedefiniton mit dem Verwen
 Ein zunächst universeller Zähler bekommt somit entsprechend seines Einbauortes in der Hausinstallation einen Zweck zugewiesen.
 
 :::note
-Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pv(s)` Elementes notwendig!
+Es ist mindestens die Konfiguration eines `grid` oder mindestens eines `pv` Elementes notwendig!
 Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 :::
 
@@ -58,10 +60,9 @@ Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 site:
   meters:
     grid: mygridmeter # grid meter reference
-    pvs: 
-    - mypv1 # pv meter reference
-    batteries: 
-    - mybat2 # battery meter reference
+    pv: mypv1 # pv meter reference
+    battery: mybat2 # battery meter reference
+    aux: myaux1
 ```
 
 ---
@@ -82,7 +83,7 @@ Definiert das [`meter`](meters) (Strommessgerät), welches die Messwerte des Net
 
 ---
 
-### `meters.pv(s)`
+### `meters.pv`
 
 Definiert die [`meter`](meters) (Strommessgeräte), welches die PV-Erzeugungswerte liefern.
 Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
@@ -97,14 +98,14 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 oder 
 
 ```yaml
-    pvs: 
+    pv: # (pvs = veraltet)
     - myoldpv # first pv meter reference
     - mynewestpv # second pv meter reference
 ```
 
 ---
 
-### `meters.battery(ies)`
+### `meters.battery`
 
 Definiert die [`meter`](meters) (Strommessgeräte), welche die Messdaten des/der Batteriespeicher(s) liefern.
 Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Speicherfüllständen wird ein Mittelwert gebildet.
@@ -119,10 +120,40 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 oder
 
 ```yaml
-    batteries: 
+    battery: # (batteries = veraltet)
     - mysmallbat # first battery meter reference
     - myhugebat # second battery meter reference
 ```
+
+### `meters.aux
+
+Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die nicht durch evcc gesteuert werden können. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
+
+In evcc fließt diese Leistung in die Berechnung der zur Verfügung stehenden Fahrzeugladeleistung ein.
+
+Positiver Wert: steht dem Fahrzeug zur Verfügung
+
+Negativer Wert: steht dem Fahrzeug nicht zur Verfügung 
+
+Beispiele: 
+
+-	Ein Heizstab, der autark auf Basis des PV-Überschuss geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux` eingerichtet wird, steht die Leistung der Fahrzeugladung zur Verfügung. Greift das Fahrzeug darauf zu, sorgt die autarke Regelung des Heizstabes dafür, dass dessen Leistung entsprechend reduziert wird.
+
+**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+
+**Beispiel**:
+
+```yaml
+    aux: myaux # single aux meter reference
+```
+oder
+
+```yaml
+    aux: 
+    - myaux1 # first aux meter reference
+    - myaux2 # second aux meter reference
+```
+
 
 ### `bufferSoc`
 
