@@ -114,7 +114,7 @@ function generateMarkdown(data, type, target) {
     const nextBrand = dataSorted[i + 1]?.product?.brand;
     let flags = "";
     if (entry.requirements?.includes("sponsorship")) {
-      flags += "💚";
+      flags += " 💚";
     }
 
     generated += `<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/${type}  -->\n\n`;
@@ -137,7 +137,7 @@ function generateMarkdown(data, type, target) {
       let level = "##";
       if (group) level += "#";
       if (brand) level += "#";
-      generated += `${level} ${description} ${flags}\n\n`;
+      generated += `${level} ${description}${flags}\n\n`;
     }
     productCounter++;
 
