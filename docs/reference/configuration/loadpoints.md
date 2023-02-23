@@ -172,7 +172,7 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
       mode: charging
 ```
 
-#### `poll.Interval`
+#### `poll.interval`
 
 Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
 
