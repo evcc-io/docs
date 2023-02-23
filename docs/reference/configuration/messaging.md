@@ -12,10 +12,8 @@ evcc unterstützt die Übermittlung von Status-Informationen über [Telegram](ht
 
 ```yaml
 messaging:
-  events:
-    ...
-  services:
-    ...
+  events: ...
+  services: ...
 ```
 
 ## `events`
@@ -34,9 +32,9 @@ Die verfügbaren Ereignisse sind:
 **Beispiel**:
 
 ```yaml
-    start: # charge start event
-      title: Charge started
-      msg: Started charging in "${mode}" mode
+start: # charge start event
+  title: Charge started
+  msg: Started charging in "${mode}" mode
 ```
 
 ### `title`
@@ -46,12 +44,12 @@ Die verfügbaren Ereignisse sind:
 **Beispiel**:
 
 ```yaml
-      title: Charge started
+title: Charge started
 ```
 
 ### `msg`
 
-`msg` definiert den Text für den Nachrichteninhalt.   
+`msg` definiert den Text für den Nachrichteninhalt.  
 Im Text können verschiedene Variablen im Format `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
 :::note
 Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!
@@ -59,16 +57,16 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 
 **Nützliche Auswahl zur Nutzung in evcc Benachrichtungen**:
 
-| msg Variable | Beschreibung |
-| --- | --- |
-| `${chargedEnergy:%.1fk}` | Geladene Energiemenge in kWh |
-| `${chargeDuration}` | Dauer der Ladezeit |
-| `${connectedDuration}` | Dauer der Wallbox Verbindung |
-| `${loadpoint}` | Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2... |
-| `${mode}` | Aktiver Lademodus (vgl. [`mode`](loadpoints/#mode) des [`loadpoints`](loadpoints)) |
-| `${pvPower:%.1fk}` | Aktuell gemessene PV Leistung in kW |
-| `${title}` | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints/#title) Parameters |
-| `${vehicleTitle}` | Fahrzeug: Text des  [`vehicles`](vehicles) [`title`](vehicles/#title) Parameters |
+| msg Variable             | Beschreibung                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `${chargedEnergy:%.1fk}` | Geladene Energiemenge in kWh                                                           |
+| `${chargeDuration}`      | Dauer der Ladezeit                                                                     |
+| `${connectedDuration}`   | Dauer der Wallbox Verbindung                                                           |
+| `${loadpoint}`           | Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2...                               |
+| `${mode}`                | Aktiver Lademodus (vgl. [`mode`](loadpoints/#mode) des [`loadpoints`](loadpoints))     |
+| `${pvPower:%.1fk}`       | Aktuell gemessene PV Leistung in kW                                                    |
+| `${title}`               | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints/#title) Parameters |
+| `${vehicleTitle}`        | Fahrzeug: Text des [`vehicles`](vehicles) [`title`](vehicles/#title) Parameters        |
 
 **Beispiel**:
 
@@ -132,81 +130,82 @@ messaging:
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
         {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
-  ```
+```
+
 :::
 
 **Liste aller von evcc bereitgestellten Variablen**:
 
-Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.    
+Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als regex-Funktion `${<Variablenname>}` oder im go-Template-Format `{{<Variablenname>}}` im Text der Meldung definiert werden. Mehrere Variablen im Meldungstext sind möglich.
 
 - Site
   - Konfiguration
-    - [`siteTitle`](site) - Hauptüberschrift der evcc App (*string*)
-    - [`prioritySoc`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (*integer*)
+    - [`siteTitle`](site) - Hauptüberschrift der evcc App (_string_)
+    - [`prioritySoc`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (_integer_)
   - Information
-    - `batteryConfigured` - Indikator, Hausbatterie/Powerwall-Meter konfiguriert (*bool*)
-    - `gridConfigured` - Indikator, Smart/Grid-Meter konfiguriert (*bool*)
-    - `pvConfigured` - Indikator, Solaranlagen/Photovoltaik-Meter konfiguriert (*bool*)
+    - `batteryConfigured` - Indikator, Hausbatterie/Powerwall-Meter konfiguriert (_bool_)
+    - `gridConfigured` - Indikator, Smart/Grid-Meter konfiguriert (_bool_)
+    - `pvConfigured` - Indikator, Solaranlagen/Photovoltaik-Meter konfiguriert (_bool_)
 - Infos zum Stromtarif
-  - [`currency`](tariffs) - Tarif-Währung (*string*)
+  - [`currency`](tariffs) - Tarif-Währung (_string_)
   - [`tariffFeedIn`](tariffs/#feedin) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
   - [`tariffGrid`](tariffs/#grid) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
 - Meter Infos
-  - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (*float*)
-  - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (*integer*)
-  - `gridPower` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (*float*)
-  - `homePower` - Aktuelle Haus-Abnahmeleistung (ohne Wallboxverbrauch) in Watt (*float*)
-  - `pvPower` - Aktuelle Solaranlagen-Leistung in Watt (*float*)
+  - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (_float_)
+  - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (_integer_)
+  - `gridPower` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (_float_)
+  - `homePower` - Aktuelle Haus-Abnahmeleistung (ohne Wallboxverbrauch) in Watt (_float_)
+  - `pvPower` - Aktuelle Solaranlagen-Leistung in Watt (_float_)
 - Ladepunkte (loadpoint)
   - Konfiguration
-    - [`loadpoint`](loadpoints) - Laufende Nummer des Ladepunktes (*integer*) 
-    - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (*float*)
-    - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (*float*)
-    - [`minSoc`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
-    - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (*string*)
-    - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (*integer*)
-    - [`targetSoc`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (*integer*)
-    - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (*string*) 
+    - [`loadpoint`](loadpoints) - Laufende Nummer des Ladepunktes (_integer_)
+    - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (_float_)
+    - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (_float_)
+    - [`minSoc`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (_integer_)
+    - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (_string_)
+    - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (_integer_)
+    - [`targetSoc`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (_integer_)
+    - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (_string_)
   - Information
-    - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (*integer*)
-    - `chargeCurrent` - Aktuelle Gesamt-Lade-Stromstärke in Ampere (*float*)
-    - `chargeCurrents` - Aktuelle Lade-Stromstärke pro aktiver Stromphase in Ampere (*float*)
-    - `chargeDuration` - Ladedauer in Nanosekunden (*integer*)
-    - `chargePower` - Aktuelle Lade-Leistung in Watt (*float*)
-    - `chargeRemainingDuration` - Ladezeit in Nanosekunden bis zum Ziel-Füllstand (*integer*)
-    - `chargeRemainingEnergy` - Notwendige Energie bis zum Ziel-Füllstand in Wh (*float*)
-    - `chargedEnergy` - Bisher geladene Energie in Wh (*float*)
-    - `charging` - Indikator, Ladevorgang aktiv (*bool*)
-    - `enabled` - Indikator, Beladung freigegeben (*bool*)
-    - `hasVehicle` - Indikator, Fahrzeug-Definitionen sind dem Ladepunkt zugewiesen (*bool*)
-    - `targetTime` - Zielladezeit in Nanosekunden seit 1970 UTC (*integer*)
-    - `pvAction` - Kontrollvariable zur PV-Timer Steuerung `enable`/`disable` (*string*)
-    - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Nanosekunden (*integer*)
+    - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (_integer_)
+    - `chargeCurrent` - Aktuelle Gesamt-Lade-Stromstärke in Ampere (_float_)
+    - `chargeCurrents` - Aktuelle Lade-Stromstärke pro aktiver Stromphase in Ampere (_float_)
+    - `chargeDuration` - Ladedauer in Nanosekunden (_integer_)
+    - `chargePower` - Aktuelle Lade-Leistung in Watt (_float_)
+    - `chargeRemainingDuration` - Ladezeit in Nanosekunden bis zum Ziel-Füllstand (_integer_)
+    - `chargeRemainingEnergy` - Notwendige Energie bis zum Ziel-Füllstand in Wh (_float_)
+    - `chargedEnergy` - Bisher geladene Energie in Wh (_float_)
+    - `charging` - Indikator, Ladevorgang aktiv (_bool_)
+    - `enabled` - Indikator, Beladung freigegeben (_bool_)
+    - `hasVehicle` - Indikator, Fahrzeug-Definitionen sind dem Ladepunkt zugewiesen (_bool_)
+    - `targetTime` - Zielladezeit in Nanosekunden seit 1970 UTC (_integer_)
+    - `pvAction` - Kontrollvariable zur PV-Timer Steuerung `enable`/`disable` (_string_)
+    - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Nanosekunden (_integer_)
 - Fahrzeuge (vehicles)
   - Konfiguration
-    - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (*float*)
-    - [`vehicleTitle`](vehicles/#title) - Bezeichnung des Fahrzeugs in der evcc App (*string*)
+    - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (_float_)
+    - [`vehicleTitle`](vehicles/#title) - Bezeichnung des Fahrzeugs in der evcc App (_string_)
   - Information
-    - `climater` - Status der Fahrzeug-Klimatisierung `on`/`off`/`heating`/`cooling` (*string*)
-    - `connected` - Indikator, Fahrzeug am Ladepunkt angeschlossen (*bool*)
-    - `connectedDuration` - Anschlußdauer des Fahrzeugs in Nanosekunden (*integer*)
-    - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (*float*)
-    - `vehiclePresent` - Indikator, evcc auf die Fahrzeugdaten zugreifen kann (*bool*)
-    - `vehicleRange` - Aktuelle Reichweite des Fahrzeugs in km (*float*)
-    - `vehicleSoc` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (*integer*)
-- Infos zur Einsparungseffizienz 
-  - `savingsAmount` - Summe der evcc-Einsparung (*float*)
-  - `savingsEffectivePrice` - Kalkulierter Einsparungs-Preis (*float*)
-  - `savingsGridCharged` - Geladene Netzenergie in Wh (*float*)
-  - `savingsSelfConsumptionCharged` - Geladene Sonnenenergie in Wh (*float*)
-  - `savingsSelfConsumptionPercent` - Anteil der geladenen Sonnenenergie in Wh (*float*)
-  - `savingsSince` - Zeitperiode der Ersparnisberechnung in Nanosekunden (*integer*)
-  - `savingsTotalCharged` - Geladene Gesamtenergie in Wh (*float*)
+    - `climater` - Status der Fahrzeug-Klimatisierung `on`/`off`/`heating`/`cooling` (_string_)
+    - `connected` - Indikator, Fahrzeug am Ladepunkt angeschlossen (_bool_)
+    - `connectedDuration` - Anschlußdauer des Fahrzeugs in Nanosekunden (_integer_)
+    - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (_float_)
+    - `vehiclePresent` - Indikator, evcc auf die Fahrzeugdaten zugreifen kann (_bool_)
+    - `vehicleRange` - Aktuelle Reichweite des Fahrzeugs in km (_float_)
+    - `vehicleSoc` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (_integer_)
+- Infos zur Einsparungseffizienz
+  - `savingsAmount` - Summe der evcc-Einsparung (_float_)
+  - `savingsEffectivePrice` - Kalkulierter Einsparungs-Preis (_float_)
+  - `savingsGridCharged` - Geladene Netzenergie in Wh (_float_)
+  - `savingsSelfConsumptionCharged` - Geladene Sonnenenergie in Wh (_float_)
+  - `savingsSelfConsumptionPercent` - Anteil der geladenen Sonnenenergie in Wh (_float_)
+  - `savingsSince` - Zeitperiode der Ersparnisberechnung in Nanosekunden (_integer_)
+  - `savingsTotalCharged` - Geladene Gesamtenergie in Wh (_float_)
 - Sponsor
   - Konfiguration
-    - [`auth`](sponsortoken) - Authentication Token des evcc-Sponsors (*string*)
+    - [`auth`](sponsortoken) - Authentication Token des evcc-Sponsors (_string_)
   - Information
-    - `sponsor` - Name des evcc-Sponsors (*string*)
+    - `sponsor` - Name des evcc-Sponsors (_string_)
 
 ## `services`
 
@@ -215,12 +214,11 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
 **Beispiel**:
 
 ```yaml
-  services:
+services:
   - type: pushover
     app: 12345
     recipients:
-    - 234567
-     
+      - 234567
 ```
 
 Im folgenden werden nun alle erforderlichen Parameter erklärt.
@@ -233,14 +231,14 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 
 - `pushover`: [Pushover](https://pushover.net/). Siehe [`pushover`](#pushover) Definition
 - `telegram`: [Telegram Messenger](https://telegram.org/). Siehe [`telegram`](#telegram) Definition
-- `email`: Email.  Siehe [`email`](#email) Definition
+- `email`: Email. Siehe [`email`](#email) Definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
 - `script`: Kann externe Skripte zum Versenden von Nachrichten starten. Es ist auch hilfreich, um jede Art von externer Funktionalität einzubinden. Siehe [`script`](#script) Definition
 
 **Beispiel**:
 
 ```yaml
-  services:
+services:
   - type: pushover
 ```
 
@@ -258,10 +256,10 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - type: pushover
   app: # API Token/Key der in Pushover angelegten Aplication
   recipients:
-  - # Liste der Empfänger: entweder User Key or Delivery Group. In Pushover angelegte Gruppen können auf bestimmte Geräte eingeschränkt werden.
+    -  # Liste der Empfänger: entweder User Key or Delivery Group. In Pushover angelegte Gruppen können auf bestimmte Geräte eingeschränkt werden.
   devices:
-  - Johns phone
-  - Mias ticker
+    - Johns phone
+    - Mias ticker
 ```
 
 ### `telegram`
@@ -274,9 +272,9 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - type: telegram
   token: # bot id : jede laufende Instanz von evcc benötigt eine eigene bot id
   chats:
-  - # Liste von Chat oder Group IDs. Jeder Eintrag benötigt ein - Zeichen am Anfang und muss in einer eigenen Zeile sein.
-  - -GroupID #Achtung Group IDs in Telegram haben ein -Zeichen 
-  - ChatID
+    -  # Liste von Chat oder Group IDs. Jeder Eintrag benötigt ein - Zeichen am Anfang und muss in einer eigenen Zeile sein.
+    - -GroupID #Achtung Group IDs in Telegram haben ein -Zeichen
+    - ChatID
 ```
 
 ### `email`
@@ -308,8 +306,8 @@ Die Konfiguration wird im folgenden Beispiel anhand von [Gotify](https://gotify.
 **Beispiel**:
 
 ```yaml
-  - type: shout
-    uri: gotify://gotify.example.com:443/AzyoeNS.D4iJLVa/?priority=1
+- type: shout
+  uri: gotify://gotify.example.com:443/AzyoeNS.D4iJLVa/?priority=1
 ```
 
 Weitere Informationen sind in der [shoutrrr](https://containrrr.dev/shoutrrr) Dokumentation zu den [unterstützten Diensten](https://containrrr.dev/shoutrrr/v0.5/services/overview/) zu finden.
@@ -328,10 +326,10 @@ Optionale Parameter sind `priority` und `tags`. Alle Parameter werden als String
 **Beispiel**:
 
 ```yaml
-  - type: ntfy
-    uri: https://ntfy.sh/evcctestalerts
-    priority: default
-    tags: electric_plug,blue_car
+- type: ntfy
+  uri: https://ntfy.sh/evcctestalerts
+  priority: default
+  tags: electric_plug,blue_car
 ```
 
 Weitere Informationen sind in der [ntfy Dokumentation](https://docs.ntfy.sh) zu finden.
@@ -345,7 +343,7 @@ Der Pfad zum Script muß in `cmdline` angegeben werden. Ebenso sollte ein `timeo
 **Beispiel**:
 
 ```yaml
-  - type: script
-    cmdline: /home/pi/sendSignalMessage.sh
-    timeout: 50s
+- type: script
+  cmdline: /home/pi/sendSignalMessage.sh
+  timeout: 50s
 ```

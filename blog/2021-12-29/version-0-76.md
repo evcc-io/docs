@@ -4,6 +4,7 @@ authors: [derandereandi]
 tags: [release]
 hide_table_of_contents: false
 ---
+
 Heute gibt es zum Jahresende nochmals eine Aktualisierung mit einigen Neuerungen.
 
 ## Weitere Fahrzeuge und Wallbox

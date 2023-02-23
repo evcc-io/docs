@@ -14,7 +14,7 @@ EEBUS Unterstützung ist noch im experimentellen Stadium. Es wird hier sicher zu
 eebus:
   shipid: EVCC-1234567890abcdef
   interfaces:
-  - eth0
+    - eth0
   certificate:
     public: |
       -----BEGIN CERTIFICATE-----
@@ -39,15 +39,15 @@ Dieses kann über `evcc eebus-cert` erstellt werden.
 **Beispiel**:
 
 ```yaml
-  certificate:
-    public: |
-      -----BEGIN CERTIFICATE-----
-      1234567890abcdef==
-      -----END CERTIFICATE-----
-    private: |
-      -----BEGIN EC PRIVATE KEY-----
-      1234567890abcdef
-      -----END EC PRIVATE KEY-----
+certificate:
+  public: |
+    -----BEGIN CERTIFICATE-----
+    1234567890abcdef==
+    -----END CERTIFICATE-----
+  private: |
+    -----BEGIN EC PRIVATE KEY-----
+    1234567890abcdef
+    -----END EC PRIVATE KEY-----
 ```
 
 ---
@@ -59,10 +59,10 @@ Das öffentliche Zertifikat
 **Beispiel**:
 
 ```yaml
-    public: |
-      -----BEGIN CERTIFICATE-----
-      1234567890abcdef==
-      -----END CERTIFICATE-----
+public: |
+  -----BEGIN CERTIFICATE-----
+  1234567890abcdef==
+  -----END CERTIFICATE-----
 ```
 
 ---
@@ -74,11 +74,11 @@ Der private Schlüssel des Zertifikats
 **Beispiel**:
 
 ```yaml
-    private: |
-      -----BEGIN EC PRIVATE KEY-----
-      1234567890abcdef
-      -----END EC PRIVATE KEY-----
-````
+private: |
+  -----BEGIN EC PRIVATE KEY-----
+  1234567890abcdef
+  -----END EC PRIVATE KEY-----
+```
 
 ---
 
@@ -91,7 +91,7 @@ Definiert eine Liste von Netzwerkschnittstellen, über welche EEBUS kommuniziere
 **Beispiel**:
 
 ```yaml
-  interfaces:
+interfaces:
   - eth0
 ```
 
@@ -102,5 +102,5 @@ Hiermit kann die zu verwendende Geräte-ID (SKI) definiert werden.
 **Beispiel**:
 
 ```yaml
-  shipid: EVCC-1234567890abcdef
+shipid: EVCC-1234567890abcdef
 ```

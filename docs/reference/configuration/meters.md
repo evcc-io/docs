@@ -16,16 +16,16 @@ Die `meters` Konfiguration ist eine Liste von verschiedenen vorhandenen Geräten
 
 ```yaml
 meters:
-- name: grid
-  type: ...
-- name: pv
-  type: ...
-- name: battery
-  type: ...
-- name: charge
-  type: ...
-- name: aux
-  type: ...
+  - name: grid
+    type: ...
+  - name: pv
+    type: ...
+  - name: battery
+    type: ...
+  - name: charge
+    type: ...
+  - name: aux
+    type: ...
 ```
 
 Konfigurationen für bekannte Geräte sind unter [Geräte - Hausinstallation](/docs/devices/meters) zu finden.
@@ -43,7 +43,7 @@ Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenz
 **Beispiel**:
 
 ```yaml
-  name: wallbox1
+name: wallbox1
 ```
 
 ---
@@ -55,7 +55,7 @@ Dies ist der evcc spezifische Messgeräte Typ, mit Hilfe dessen mit dem Gerät k
 **Beispiel**:
 
 ```yaml
-  type: modbus
+type: modbus
 ```
 
 Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter dokumentiert:
@@ -82,10 +82,11 @@ meters:
     host: 192.0.2.2
     ...
 ```
-In diesen Beispiel werden 10% vom neuen Wert übernommen. Nach 10 Regelungszyklen fällt der älteste Wert aus der Berechnung raus. Wie lange das dauert hängt vom `interval` ab. 
 
+In diesen Beispiel werden 10% vom neuen Wert übernommen. Nach 10 Regelungszyklen fällt der älteste Wert aus der Berechnung raus. Wie lange das dauert hängt vom `interval` ab.
 
 ---
+
 ### `modbus`
 
 Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
@@ -111,7 +112,7 @@ Definiert den MBMD Messwert welcher die Leistung zurückliefert, typischerweise 
 **Beispiel**:
 
 ```yaml
-  power: Power
+power: Power
 ```
 
 ---
@@ -123,7 +124,7 @@ Definiert den MBMD Messwert welcher die Energiemenge zurückliefert, typischerwe
 **Beispiel**:
 
 ```yaml
-  energy: Sum
+energy: Sum
 ```
 
 ---
@@ -137,7 +138,7 @@ Definiert den MBMD Messwert welcher den Ladestand der Batterie zurückliefert, t
 **Beispiel**:
 
 ```yaml
-  soc: ChargeState
+soc: ChargeState
 ```
 
 ---
@@ -149,10 +150,10 @@ LG ESS Home 8/10 Geräte.
 **Beispiel**:
 
 ```yaml
-  type: lgess
-  usage: grid
-  uri: https://192.0.2.2/
-  password: "DE200..."
+type: lgess
+usage: grid
+uri: https://192.0.2.2/
+password: "DE200..."
 ```
 
 :::note
@@ -180,7 +181,7 @@ Definiert die URL im Heimnetzwerk des LG ESS Gerätes.
 **Beispiel**:
 
 ```yaml
-  uri: https://192.0.2.2/
+uri: https://192.0.2.2/
 ```
 
 ---
@@ -192,7 +193,7 @@ Hier muss die Registriernummer des LG ESS HOME Wechselrichters eingetragen werde
 **Beispiel**:
 
 ```yaml
-  password: "DE200..."
+password: "DE200..."
 ```
 
 ---
@@ -204,9 +205,9 @@ Verwendung der Messwerte von der OpenWB Wallbox
 **Beispiel**:
 
 ```yaml
-  type: openwb
-  usage: grid
-  broker: 192.0.2.2
+type: openwb
+usage: grid
+broker: 192.0.2.2
 ```
 
 :::note
@@ -236,7 +237,7 @@ Definiert den hostnamen oder die IP Adresse und die Portadresse im Heimnetzwerk 
 **Beispiel**:
 
 ```yaml
-  broker: 192.0.2.2:1883
+broker: 192.0.2.2:1883
 ```
 
 ---
@@ -248,10 +249,10 @@ Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SM
 **Beispiel**:
 
 ```yaml
-  type: sma
-  uri: 192.0.2.2
-  serial: 12345678
-  interface: eth0
+type: sma
+uri: 192.0.2.2
+serial: 12345678
+interface: eth0
 ```
 
 ---
@@ -259,7 +260,7 @@ Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SM
 #### Erforderliche Parameter
 
 :::note
-Es ist ausreichend nur einen der Parameter (`uri` oder `serial`) zu definieren. 
+Es ist ausreichend nur einen der Parameter (`uri` oder `serial`) zu definieren.
 :::
 
 ##### `uri`
@@ -269,7 +270,7 @@ Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 **Beispiel**:
 
 ```yaml
-  uri: 192.0.2.2
+uri: 192.0.2.2
 ```
 
 ##### `serial`
@@ -279,21 +280,21 @@ Definiert die Seriennummer des Gerätes von dem Messwerte empfangen werden solle
 **Beispiel**:
 
 ```yaml
-  serial: 12345678
+serial: 12345678
 ```
 
 #### Optionale Parameter
 
 ##### `interface`
 
-Multicast Botschaften können nur auf einem bestimmten Netzwerkinterface empfangen werden. 
-Üblicherweise das erste Interace im System. 
+Multicast Botschaften können nur auf einem bestimmten Netzwerkinterface empfangen werden.
+Üblicherweise das erste Interace im System.
 Falls das nicht das Interface ist, das mit dem Meter verbunden ist, muss das Interface explizit angegeben werden.
 
 **Beispiel**:
 
 ```yaml
-  interface: eth0
+interface: eth0
 ```
 
 ---
@@ -305,10 +306,10 @@ _`tesla`_: Für die Verwendung der Messwerte einer Tesla Powerwall.
 **Beispiel**:
 
 ```yaml
-  type: tesla
-  usage: grid
-  uri: https://192.0.2.2/
-  password: "***"
+type: tesla
+usage: grid
+uri: https://192.0.2.2/
+password: "***"
 ```
 
 ---
@@ -334,7 +335,7 @@ Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
 **Beispiel**:
 
 ```yaml
-  uri: 192.0.2.2
+uri: 192.0.2.2
 ```
 
 ---
@@ -346,7 +347,7 @@ Hier muss das Password für den Benutzer _customer_ (Kunde) eingetragen werden.
 **Beispiel**:
 
 ```yaml
-  password: "DasPasswort"
+password: "DasPasswort"
 ```
 
 ---
@@ -368,7 +369,7 @@ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/
   soc: # Batterie SOC (%)
     source: # Plugin Typ
     ...
-  capacity: # optional Batterie Kapazität (kWh)  
+  capacity: # optional Batterie Kapazität (kWh)
   currents: # Stromstärke (A) pro Phase
     - source: # Phase 1 Plugin Typ
       ...

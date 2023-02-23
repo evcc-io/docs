@@ -5,7 +5,7 @@ sidebar_position: 3
 # macOS
 
 :::note
-  Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von macOS werden nicht unterstützt.
+Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von macOS werden nicht unterstützt.
 :::
 
 ## Erstinstallation
@@ -42,6 +42,7 @@ sidebar_position: 3
   ```sh
   brew services stop evcc
   ```
+
 - Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
 
   ```sh
@@ -52,19 +53,20 @@ sidebar_position: 3
 
   :::note
   Fortgeschrittene Anwender (z.B. mit EVCC Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
-  
+
   ```sh
   evcc configure --advanced
   ```
 
   Dieser Modus bietet weitere (technisch fortgeschrittene) Einstellmöglichkeiten.
   :::
+
 - Teste ob die Konfiguration funktioniert:
 
   ```sh
   evcc -c evcc.yaml
   ```
-  
+
   Öffne einen Browser und gibt die folgende URL ein: http://localhost:7070. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
 
 - Wenn alles funktioniert beende evcc durch drücken der Tastenkombination `CTRL-C`.

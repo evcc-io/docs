@@ -60,6 +60,7 @@ ${codeBlocks
     }"${i === 0 ? " default" : ""}>
 
 ${block.code}
+
 </TabItem>`
   )
   .join("\n")}
@@ -113,7 +114,7 @@ function generateMarkdown(data, type, target) {
     const nextBrand = dataSorted[i + 1]?.product?.brand;
     let flags = "";
     if (entry.requirements?.includes("sponsorship")) {
-      flags += " 💚";
+      flags += "💚";
     }
 
     generated += `<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/${type}  -->\n\n`;

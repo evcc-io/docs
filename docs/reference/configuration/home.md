@@ -53,8 +53,9 @@ graph TD;
 ```
 
 ### Wie funktioniert EVCC? (Ein Blick ins Innere)
-Wichtig für die Funktionalität ist ein Netzanschlusszähler (grid-meter). Dieser ermittelt die aktuelle Überschussleistung. 
-Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss. 
+
+Wichtig für die Funktionalität ist ein Netzanschlusszähler (grid-meter). Dieser ermittelt die aktuelle Überschussleistung.
+Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss.
 Ausnahme: https://docs.evcc.io/docs/guides/meters#ich-habe-eine-pv-anlage-aber-keinen-netzanschluss-z%C3%A4hler-kann-ich-evcc-trotzdem-nutzen
 
 Die Überschussleistung wird mit der Mindestladeleistung verglichen. Ist diese erreicht, startet die Ladung.
@@ -65,22 +66,20 @@ Beispiel: `phases: 1` und `minCurrent: 8`
 
 1 (phases) x 8A (minCurrent) x 230V (Netzspannung) = 1840W (Mindestladeleistung)
 
-
 #### Manipulationsmöglichkeiten
 
 Normalerweise entspricht die Überschussleistung der verfügbaren Ladeleistung. Die verfügbare Ladeleistung kann jedoch individuell durch mehrere Parameter verändert werden. Diese sind:
--	Site: `residualpower` 
--	Site: `prioritySoc`
--	Site: `bufferSoc`
--	Site: `aux`
--	Loadpoint: `enable: threshold`
--	Loadpoint: `disable: threshold`
+
+- Site: `residualpower`
+- Site: `prioritySoc`
+- Site: `bufferSoc`
+- Site: `aux`
+- Loadpoint: `enable: threshold`
+- Loadpoint: `disable: threshold`
 
 Die Einstellmöglichkeiten bitte der Beschreibung der jeweiligen Parameter entnehmen.
 
 https://docs.evcc.io/docs/reference/configuration/site und https://docs.evcc.io/docs/reference/configuration/loadpoints
-
-
 
 ### Site
 

@@ -31,7 +31,7 @@ Definiert das HEMS System.
 **Beispiel**:
 
 ```yaml
-  type: sma
+type: sma
 ```
 
 ---

@@ -21,6 +21,7 @@ tariffs:
     type: fixed
     price: 0.08 # [currency]/kWh
 ```
+
 **Beispiel: Konstanter Energiepreis mit zeitabhängigen Tarifen**
 
 ```yaml
@@ -274,7 +275,7 @@ Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen K
 ```yaml
 planner:
   type: grünstromindex
-  zip: meine PLZ  # PLZ mit führender Null mit in "" setzen
+  zip: meine PLZ # PLZ mit führender Null mit in "" setzen
 ```
 
 ### `type:` **`electricitymaps`**
@@ -288,4 +289,3 @@ planner:
   token: <token>
   zone: DE
 ```
-

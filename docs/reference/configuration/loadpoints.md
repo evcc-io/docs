@@ -10,10 +10,10 @@ sidebar_position: 3
 
 ```yaml
 loadpoints:
-- title: Garage # display name for UI
-  charger: wallbox # Wallbox Referenz
-  vehicle: audi # Referenz auf Standardfahrzeug
-  mode: pv # charge mode (off, now, minpv, pv)
+  - title: Garage # display name for UI
+    charger: wallbox # Wallbox Referenz
+    vehicle: audi # Referenz auf Standardfahrzeug
+    mode: pv # charge mode (off, now, minpv, pv)
 ```
 
 Referenzen sind hierbei immer die Werte des Parameters `name` (z.B. `wallbox`) in der jeweiligen Gerätekonfiguration.
@@ -31,7 +31,7 @@ Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
 **Beispiel**:
 
 ```yaml
-  title: Garage
+title: Garage
 ```
 
 ---
@@ -42,7 +42,7 @@ Referenz auf eine `charger` (Wallbox) Konfiguration.
 **Beispiel**:
 
 ```yaml
-  charger: wallbox
+charger: wallbox
 ```
 
 Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox Definition](chargers#name) entspricht.
@@ -60,7 +60,7 @@ Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Stro
 **Beispiel**:
 
 ```yaml
-  meter: charge
+meter: charge
 ```
 
 Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessgeräte Definition](meters#name) entspricht.
@@ -74,7 +74,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 **Beispiel**:
 
 ```yaml
-  vehicle: renault
+vehicle: renault
 ```
 
 Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
@@ -85,11 +85,11 @@ Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug 
 
 Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellungen für folgende Werte wiederhergestellt werden sollen:
 
-* [`mode`](loadpoints#mode)
-* [`SoC.min`](loadpoints#min) (veraltet)
-* [`SoC.target`](loadpoints#target) (veraltet)
-* [`minCurrent`](loadpoints#mincurrent)
-* [`maxCurrent`](loadpoints#maxcurrent)
+- [`mode`](loadpoints#mode)
+- [`SoC.min`](loadpoints#min) (veraltet)
+- [`SoC.target`](loadpoints#target) (veraltet)
+- [`minCurrent`](loadpoints#mincurrent)
+- [`maxCurrent`](loadpoints#maxcurrent)
 
 **Mögliche Werte**:
 
@@ -101,7 +101,7 @@ Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellung
 **Beispiel**:
 
 ```yaml
-  resetOnDisconnect: true
+resetOnDisconnect: true
 ```
 
 ---
@@ -126,7 +126,7 @@ Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. B
 **Beispiel**:
 
 ```yaml
-  mode: pv
+mode: pv
 ```
 
 ---
@@ -138,11 +138,11 @@ Definiere die Standardeinstellungen für den Umgang mit dem SoC eines angeschlos
 **Beispiel**:
 
 ```yaml
-  soc:
-    poll:
-      mode: charging
-      interval: 60m
-    estimate: true
+soc:
+  poll:
+    mode: charging
+    interval: 60m
+  estimate: true
 ```
 
 #### `poll`
@@ -150,8 +150,8 @@ Definiere die Standardeinstellungen für den Umgang mit dem SoC eines angeschlos
 Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
 
 :::warning
-Es wird __NICHT__ empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
-oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. __AUF EIGENES RISIKO.__
+Es wird **NICHT** empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
+oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. **AUF EIGENES RISIKO.**
 :::
 
 #### `poll.mode`
@@ -160,7 +160,7 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 
 **Mögliche Werte**:
 
-- `charging`: aktualisiere die Daten __NUR__ während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
+- `charging`: aktualisiere die Daten **NUR** während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
 - `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
 - `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#interval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
@@ -169,19 +169,19 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 **Beispiel**:
 
 ```yaml
-      mode: charging
+mode: charging
 ```
 
 #### `poll.interval`
 
-Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es __NICHT__ lädt.
+Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es **NICHT** lädt.
 
 **Standardwert:** `60m`
 
 **Beispiel**:
 
 ```yaml
-      interval: 60m
+interval: 60m
 ```
 
 #### `estimate`
@@ -198,21 +198,21 @@ Berechne (interpoliere) den aktuellen SoC zwischen den Abfragen an das Fahrzeug.
 **Beispiel**:
 
 ```yaml
-    estimate: false # Keine Interpolation
+estimate: false # Keine Interpolation
 ```
 
 ---
 
 ### `enable`
 
-Definiert das Verhalten, wann im PV Modus das Laden begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.  
+Definiert das Verhalten, wann im PV Modus das Laden begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.
 
 **Beispiel**:
 
 ```yaml
-  enable:
-    threshold: 0
-    delay: 1m
+enable:
+  threshold: 0
+  delay: 1m
 ```
 
 #### `threshold`
@@ -226,7 +226,7 @@ Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 **Beispiel**:
 
 ```yaml
-    threshold: 0
+threshold: 0
 ```
 
 :::info
@@ -246,7 +246,7 @@ Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 **Beispiel**:
 
 ```yaml
-    delay: 1m
+delay: 1m
 ```
 
 ---
@@ -258,9 +258,9 @@ Definiert das Verhalten, wann im PV Modus das Laden unterbrochen wird. Darüberh
 **Beispiel**:
 
 ```yaml
-  disable:
-    threshold: 200 # maximum import power (W)
-    delay: 10m
+disable:
+  threshold: 200 # maximum import power (W)
+  delay: 10m
 ```
 
 #### `threshold`
@@ -274,7 +274,7 @@ Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 **Beispiel**:
 
 ```yaml
-    threshold: 200 # Ein maximaler Netzbezug von 200W ist erlaubt
+threshold: 200 # Ein maximaler Netzbezug von 200W ist erlaubt
 ```
 
 :::info
@@ -292,7 +292,7 @@ Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
 **Beispiel**:
 
 ```yaml
-    delay: 10m
+delay: 10m
 ```
 
 ---
@@ -308,7 +308,7 @@ Definiert den zeitlichen Mindestabstand in welchem der Strom gesperrt oder wiede
 Mindestens 15 Minuten Abstand zwischen dem An-/Ausschalten des Ladevorgangs.
 
 ```yaml
-  guardduration: 15m
+guardduration: 15m
 ```
 
 ---
@@ -338,7 +338,7 @@ Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme li
 **Beispiel**:
 
 ```yaml
-  phases: 1
+phases: 1
 ```
 
 **Wallbox mit automatischer Phasenumschaltung**:
@@ -349,8 +349,6 @@ Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme li
 
 `phases: 1 oder 3` = Automatik aus und der gesetzte Wert ist fix
 
-
-
 **Standardwert:** `3`
 
 **Mögliche Werte:** `0|1|3`
@@ -358,7 +356,7 @@ Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme li
 **Beispiel**:
 
 ```yaml
-  phases: 0
+phases: 0
 ```
 
 :::info
@@ -386,7 +384,7 @@ Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren ka
 **Beispiel**:
 
 ```yaml
-  mincurrent: 6
+mincurrent: 6
 ```
 
 ---
@@ -402,7 +400,7 @@ Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bi
 **Beispiel**:
 
 ```yaml
-  maxcurrent: 16
+maxcurrent: 16
 ```
 
 ---
@@ -411,7 +409,7 @@ Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bi
 
 Dient der Priorisierung von Loadpoints untereinander.
 
-Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringer priorisierten Loadpoints zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist. 
+Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringer priorisierten Loadpoints zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist.
 
 Je höher der Wert, desto größer die Priorität.
 Loadpoints ohne Eintrag haben `priority: 0`
@@ -423,7 +421,7 @@ Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladun
 **Beispiel**:
 
 ```yaml
-  priority: 2
+priority: 2
 ```
 
 ---

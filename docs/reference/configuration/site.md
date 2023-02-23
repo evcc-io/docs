@@ -12,19 +12,19 @@ Um das Laden mit PV-Überschuss zu regeln, ist ein auslesbarer Zähler direkt hi
 
 ```yaml
 site:
-- title: Zuhause # display name for UI
-  meters:
-    grid: mygridmeter # grid meter reference
-    pv: # (pvs = veraltet)
-    - mypv1 # first pv meter reference
-    - mypv9 # second pv meter reference
-    battery: # (batteries = veraltet)
-    - mybat5 # battery meter reference
-    aux:
-    - myaux1
-  residualPower: 100
-  bufferSoc: 80
-  prioritySoc: 66    
+  - title: Zuhause # display name for UI
+    meters:
+      grid: mygridmeter # grid meter reference
+      pv: # (pvs = veraltet)
+        - mypv1 # first pv meter reference
+        - mypv9 # second pv meter reference
+      battery: # (batteries = veraltet)
+        - mybat5 # battery meter reference
+      aux:
+        - myaux1
+    residualPower: 100
+    bufferSoc: 80
+    prioritySoc: 66
 ```
 
 ---
@@ -38,7 +38,7 @@ Die angezeigte Beschreibung des Ladepunktes, wird in der UI angezeigt.
 **Beispiel**:
 
 ```yaml
-  title: Zuhause
+title: Zuhause
 ```
 
 ---
@@ -78,7 +78,7 @@ Definiert das [`meter`](meters) (Strommessgerät), welches die Messwerte des Net
 **Beispiel**:
 
 ```yaml
-    grid: mygridmeter # grid meter reference
+grid: mygridmeter # grid meter reference
 ```
 
 ---
@@ -93,14 +93,15 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 **Beispiel**:
 
 ```yaml
-    pv: myonlypv # singele pv meter reference
+pv: myonlypv # singele pv meter reference
 ```
-oder 
+
+oder
 
 ```yaml
-    pv: # (pvs = veraltet)
-    - myoldpv # first pv meter reference
-    - mynewestpv # second pv meter reference
+pv: # (pvs = veraltet)
+  - myoldpv # first pv meter reference
+  - mynewestpv # second pv meter reference
 ```
 
 ---
@@ -115,14 +116,15 @@ Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatis
 **Beispiel**:
 
 ```yaml
-    battery: myonlybat # single battery meter reference
+battery: myonlybat # single battery meter reference
 ```
+
 oder
 
 ```yaml
-    battery: # (batteries = veraltet)
-    - mysmallbat # first battery meter reference
-    - myhugebat # second battery meter reference
+battery: # (batteries = veraltet)
+  - mysmallbat # first battery meter reference
+  - myhugebat # second battery meter reference
 ```
 
 ### `meters.aux
@@ -133,27 +135,27 @@ In evcc fließt diese Leistung in die Berechnung der zur Verfügung stehenden Fa
 
 Positiver Wert: steht dem Fahrzeug zur Verfügung
 
-Negativer Wert: steht dem Fahrzeug nicht zur Verfügung 
+Negativer Wert: steht dem Fahrzeug nicht zur Verfügung
 
-Beispiele: 
+Beispiele:
 
--	Ein Heizstab, der autark auf Basis des PV-Überschuss geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux` eingerichtet wird, steht die Leistung der Fahrzeugladung zur Verfügung. Greift das Fahrzeug darauf zu, sorgt die autarke Regelung des Heizstabes dafür, dass dessen Leistung entsprechend reduziert wird.
+- Ein Heizstab, der autark auf Basis des PV-Überschuss geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux` eingerichtet wird, steht die Leistung der Fahrzeugladung zur Verfügung. Greift das Fahrzeug darauf zu, sorgt die autarke Regelung des Heizstabes dafür, dass dessen Leistung entsprechend reduziert wird.
 
 **Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
 
 **Beispiel**:
 
 ```yaml
-    aux: myaux # single aux meter reference
+aux: myaux # single aux meter reference
 ```
+
 oder
 
 ```yaml
-    aux: 
-    - myaux1 # first aux meter reference
-    - myaux2 # second aux meter reference
+aux:
+  - myaux1 # first aux meter reference
+  - myaux2 # second aux meter reference
 ```
-
 
 ### `bufferSoc`
 
@@ -171,7 +173,7 @@ Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 **Beispiel**:
 
 ```yaml
-    bufferSoc: 80 # Hausbatterie wird oberhalb Soc 80% als Puffer genutzt
+bufferSoc: 80 # Hausbatterie wird oberhalb Soc 80% als Puffer genutzt
 ```
 
 ### `prioritySoc`
@@ -188,7 +190,7 @@ Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 **Beispiel**:
 
 ```yaml
-    prioritySoc: 50 # Hausbatterie bekommt bis zum Soc 50% Priorität beim laden
+prioritySoc: 50 # Hausbatterie bekommt bis zum Soc 50% Priorität beim laden
 ```
 
 ### `residualPower`
@@ -219,18 +221,17 @@ Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Sp
 **Beispiel "Batteriespeicher"**:
 
 ```yaml
-  residualPower: 100
+residualPower: 100
 ```
 
 **Beispiel "Netzbezugsanteil"**:
 
 Die Ladung soll im PV-Modus mit mindestens 6A (einphasig) auch bereits mit nur 50% PV-Anteil beginnen (Rest Netzbezug)
-Mindestladeleistung: 1 Phase * 6A * 230V = 1380 W, davon 50%: 690 W
+Mindestladeleistung: 1 Phase _ 6A _ 230V = 1380 W, davon 50%: 690 W
 
 ```yaml
-  residualPower: -690
+residualPower: -690
 ```
-
 
 ### `maxGridSupplyWhileBatteryCharging`
 
@@ -246,6 +247,5 @@ Mit diesem Parameter kann ein Schwellenwert für den Netzbezug gesetzt werden, d
 Empfohlen wird ein Wert von mindestens 50 (Watt). Je nach Trägheit der beteiligten Regelungssysteme kann er auch höher gewählt werden müssen.
 
 ```yaml
-  maxGridSupplyWhileBatteryCharging: 50
+maxGridSupplyWhileBatteryCharging: 50
 ```
-

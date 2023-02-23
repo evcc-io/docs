@@ -8,12 +8,12 @@ import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
 
 ### Was bedeuten die verschiedenen Lademodi?
 
-| Modus      | Beschreibung |
-| :--------- | :----------- |
-| **Stop**   | Der Ladevorgang wird *sofort* beendet bzw. kann nicht beginnen. |
-| **Schnell** | Es wird *sofort* mit der maximal möglichen Leistung geladen. |
-| **Min+PV** | Es wird *sofort* mit der technisch kleinstmöglichen Leistung geladen. Sofern die PV Installation genug Überschuss für eine höhere Leistung hat, wird die Leistung erhöht. |
-| **Nur PV** | Der Ladevorgang wird *abhängig* von der PV Installation zur Verfügung gestellten Leistung gestartet, sofern technisch möglich. Sollte nicht genug Leistung vorhanden sein, wird die Ladung unterbrochen. [Weitere Details](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht) |
+| Modus       | Beschreibung                                                                                                                                                                                                                                                                |
+| :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Stop**    | Der Ladevorgang wird _sofort_ beendet bzw. kann nicht beginnen.                                                                                                                                                                                                             |
+| **Schnell** | Es wird _sofort_ mit der maximal möglichen Leistung geladen.                                                                                                                                                                                                                |
+| **Min+PV**  | Es wird _sofort_ mit der technisch kleinstmöglichen Leistung geladen. Sofern die PV Installation genug Überschuss für eine höhere Leistung hat, wird die Leistung erhöht.                                                                                                   |
+| **Nur PV**  | Der Ladevorgang wird _abhängig_ von der PV Installation zur Verfügung gestellten Leistung gestartet, sofern technisch möglich. Sollte nicht genug Leistung vorhanden sein, wird die Ladung unterbrochen. [Weitere Details](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht) |
 
 ### Ich habe PV Überschuss, aber das Auto lädt nicht, warum?
 
@@ -29,7 +29,7 @@ Das bedeutet bei
 - **2-phasigem Laden** - 2,8 bis 7,2 kW oder 14,4 kW
 - **3-phasigem Laden** - 4,2 bis 11 kW oder 22 kW
 
-Der neuere Ladestandard [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) (wird an DC Ladesäulen verwendet, manche Fahrzeuge und Wallboxen unterstützen diesen auch bei AC Laden) erfordert 
+Der neuere Ladestandard [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) (wird an DC Ladesäulen verwendet, manche Fahrzeuge und Wallboxen unterstützen diesen auch bei AC Laden) erfordert
 
 - mindestens ~1,4 kW Leistung, unabhängig von der Phasenanzahl.
 
@@ -43,39 +43,38 @@ Generell kann evcc das Laden und Entladen der Hausbatterie nicht direkt beeinflu
 
 1. **Hausbatterie wird geladen**:
 
-  - Wenn sie nicht voll ist (außer bei Prognosebasiertem Laden) und PV Überschuss besteht
-  - Wenn sie unter einen minimalen Ladestand Gerät fällt
-  - Wenn das Batteriemanagementsystem (BMS) andere Logiken eingebaut hat, z.B. um sich zu kalibrieren (z.b. E3/DC)
-  - Und noch weitere
+- Wenn sie nicht voll ist (außer bei Prognosebasiertem Laden) und PV Überschuss besteht
+- Wenn sie unter einen minimalen Ladestand Gerät fällt
+- Wenn das Batteriemanagementsystem (BMS) andere Logiken eingebaut hat, z.B. um sich zu kalibrieren (z.b. E3/DC)
+- Und noch weitere
+
 2. **Hausbatterie wird nicht geladen**:
 
-  - Wenn die Hausbatterie voll ist, wird die Batterie nicht geladen.
-  - Wenn das HEMS die Fähigkeit von prognosebasiertem Laden (PV Prognose und ein historischen Verbrauch ist vorhanden um die Zukunft abzuschätzen) hat, um nicht voll zu laden wenn vorraussichtlich nicht so viel Strom benötigt wird (z.b. SMA Home Manager 2.0)
-  - Und noch weitere
+- Wenn die Hausbatterie voll ist, wird die Batterie nicht geladen.
+- Wenn das HEMS die Fähigkeit von prognosebasiertem Laden (PV Prognose und ein historischen Verbrauch ist vorhanden um die Zukunft abzuschätzen) hat, um nicht voll zu laden wenn vorraussichtlich nicht so viel Strom benötigt wird (z.b. SMA Home Manager 2.0)
+- Und noch weitere
 
 Mit evcc gibt es nun verschiedene Szenarien:
 
 1. **Lademodus `Schnell` und `Min+PV`**
 
-  Die Hausbatterie wird völlig ignoriert, denn das EV soll ja so schnell wie möglich voll (oder zu einem SoC) geladen werden. Egal woher der Strom kommt.
+Die Hausbatterie wird völlig ignoriert, denn das EV soll ja so schnell wie möglich voll (oder zu einem SoC) geladen werden. Egal woher der Strom kommt.
 
 2. **Lademodus `PV`**
 
-  - evcc regelt den Ladestrom je nach verfügbarem PV Überschuss
-  - Der Ladevorgang wird immer nur dann gestartet, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#enable)) der benötigte PV Überschuß vorhanden ist.
-  - Der Ladevorgang wird immer unterbrochen, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#disable)) nicht genügend Strom für eine [Mindestleistung](#ich-habe-pv-überschuss-aber-das-auto-lädt-nicht-warum) vorhanden ist.
-  - Zwischen dem [Invervall des Regelzyklus](/docs/reference/configuration/interval) kann es jedoch zu Schwankungen kommen, so dass weniger Überschuss vorhanden ist als zum Regelzeitpunkt. D.h. falls hier zu wenig PV Überschuss vorhanden ist, muss der "fehlende Strom" irgendwo her kommen. Und wenn die Hausbatterie noch nicht "leer" ist, springt das HEMS ein und zieht Strom aus der Hausbatterie um den Netzschluss Punkt auf 0 auszuregeln. Dies kann nicht verhindert werden!
-  - Zum Zeitpunkt der Regelung in evcc, kann mit 
-    - [prioritySoC](/docs/reference/configuration/site#prioritysoc) der Hausbatterie bis zu einem definierten SoC Vorrang gegeben werden. Danach wird Ladestrom als verfügbarer PV Überschuss interpretiert.
-    - [bufferSoC](/docs/reference/configuration/site#buffersoc) die Hausbatterie oberhalb dieses definierten SoC eine Entladung ignoriert und als PV Überschuss interpretiert. 
-
+- evcc regelt den Ladestrom je nach verfügbarem PV Überschuss
+- Der Ladevorgang wird immer nur dann gestartet, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#enable)) der benötigte PV Überschuß vorhanden ist.
+- Der Ladevorgang wird immer unterbrochen, wenn über eine definierte Dauer ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#disable)) nicht genügend Strom für eine [Mindestleistung](#ich-habe-pv-überschuss-aber-das-auto-lädt-nicht-warum) vorhanden ist.
+- Zwischen dem [Invervall des Regelzyklus](/docs/reference/configuration/interval) kann es jedoch zu Schwankungen kommen, so dass weniger Überschuss vorhanden ist als zum Regelzeitpunkt. D.h. falls hier zu wenig PV Überschuss vorhanden ist, muss der "fehlende Strom" irgendwo her kommen. Und wenn die Hausbatterie noch nicht "leer" ist, springt das HEMS ein und zieht Strom aus der Hausbatterie um den Netzschluss Punkt auf 0 auszuregeln. Dies kann nicht verhindert werden!
+- Zum Zeitpunkt der Regelung in evcc, kann mit
+  - [prioritySoC](/docs/reference/configuration/site#prioritysoc) der Hausbatterie bis zu einem definierten SoC Vorrang gegeben werden. Danach wird Ladestrom als verfügbarer PV Überschuss interpretiert.
+  - [bufferSoC](/docs/reference/configuration/site#buffersoc) die Hausbatterie oberhalb dieses definierten SoC eine Entladung ignoriert und als PV Überschuss interpretiert.
 
 ### Trotz Überschuss stoppt die Ladung, bevor das eingestellte Ladeziel erreicht ist.
 
-Das passiert, wenn im Auto ein Ladeziel eingestellt ist, das kleiner oder gleich dem evcc-Ladeziel ist. 
+Das passiert, wenn im Auto ein Ladeziel eingestellt ist, das kleiner oder gleich dem evcc-Ladeziel ist.
 
 Da diesbezüglich kein Datenabgleich zwischen Fahrzeug und evcc stattfindet, lässt sich das nur verhindern, indem das Limit im Auto größer als das evcc-Ladeziel einstellt ist.
-
 
 ### Warum wird mit voller Leistung geladen, wenn der Soc des Fahrzeug nicht erkannt wird?
 
@@ -83,24 +82,19 @@ Das kann verhindert werden, indem Minimum-Soc auf 0 gesetzt oder gar nicht defin
 
 Es ist ein Feature, dass mit voller Leistung bis zum Minimum-Soc geladen wird, wenn der Fahrzeug-Soc kleiner als der definierte Minimum-Soc ist.
 
-Wird der Fahrzeug-Soc nicht erkannt (= 0) und ist ein Minimum-Soc > 0 definiert, startet die Ladung. 
+Wird der Fahrzeug-Soc nicht erkannt (= 0) und ist ein Minimum-Soc > 0 definiert, startet die Ladung.
 
 Die Ladung ist in dem Fall allerdings auf die Lademenge beschränkt, die sich aus Minimun-Soc und Fahrzeugkapazität ergibt.
-
-
-
 
 ### Fehler: Charger out of sync: expected disabled, got enabled // Charger logic error: disabled but charging
 
 evcc erwartet nach einem Intervallzyklus bereits den neuen korrekten Status.
 
-Wenn manche Geräte etwas zu langsam auf Anweisungen reagieren, kommt es kurzzeitig zu einem undefinierten Zustand, der mit diesen Fehlern quittiert wird. 
+Wenn manche Geräte etwas zu langsam auf Anweisungen reagieren, kommt es kurzzeitig zu einem undefinierten Zustand, der mit diesen Fehlern quittiert wird.
 
-Sollten ansonsten keine Probleme auftreten, kann das ignoriert werden. 
+Sollten ansonsten keine Probleme auftreten, kann das ignoriert werden.
 
 Abhilfe schafft ein größeres `interval`.
-
-
 
 ### PV Erzeugung im Winter nutzen
 
@@ -116,20 +110,21 @@ In der Konfiguration unter [`site`](/docs/reference/configuration/site) setzt ma
 site:
   residualPower: -1000 # 1000W Netzbezug im PV Modus erlaubt
 ```
+
 "Nachteil" dieser Lösung ist, dass auch bei ausreichendem Überschuss dieser erlaubte Netzbezug ausgenutzt wird.
 
 #### mittels `enable/disable`
 
-In der Konfiguration unter  [`loadpoints`](/docs/reference/configuration/loadpoints) stellt man bei `enable`und `disable` das gewünschte Verhalten ein. Eine Änderung der `threshold` Werte ist per API möglich.
+In der Konfiguration unter [`loadpoints`](/docs/reference/configuration/loadpoints) stellt man bei `enable`und `disable` das gewünschte Verhalten ein. Eine Änderung der `threshold` Werte ist per API möglich.
 
 **Beispiel**:
 
 ```yaml
 loadpoints:
   enable:
-      delay: 1m 
+      delay: 1m
       threshold: -200 # es wird eingeschaltet, wenn 1 Minute lang 200 W Einspeisung vorhanden sind
     disable:
-      delay: 30m 
+      delay: 30m
       threshold: 1200 # es wird ausgeschaltet, wenn 30 Minuten lang mehr als 1200 W Netzstrom bezogen wurde
 ```
