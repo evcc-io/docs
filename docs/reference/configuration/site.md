@@ -127,7 +127,7 @@ battery: # (batteries = veraltet)
   - myhugebat # second battery meter reference
 ```
 
-### `meters.aux
+### `meters.aux`
 
 Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die nicht durch evcc gesteuert werden können. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
 
