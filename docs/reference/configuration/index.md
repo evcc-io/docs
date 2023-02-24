@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Grundlagen
+# evcc.yaml
 
 evcc benötigt eine Konfigurationsdatei in der die Installation beschrieben wird. Ohne diese Datei kann evcc nicht genutzt werden. Die Datei selbst ist im [YAML](https://de.wikipedia.org/wiki/YAML) Format geschrieben. Dieses Format definiert eine Syntax wodurch eine strukturierte Datenstruktur in Textform erstellt werden kann.
 
@@ -52,7 +52,7 @@ graph TD;
 
 ```
 
-### Wie funktioniert EVCC? (Ein Blick ins Innere)
+### Wie funktioniert evcc? (Ein Blick ins Innere)
 
 Wichtig für die Funktionalität ist ein Netzanschlusszähler (grid-meter). Dieser ermittelt die aktuelle Überschussleistung.
 Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss.

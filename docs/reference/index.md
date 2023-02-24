@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Übersicht
+# Referenz
 
 In diesem Bereich sind die verschiedenen technischen Dokumentationen zu finden.
 
