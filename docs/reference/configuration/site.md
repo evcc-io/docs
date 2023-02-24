@@ -129,7 +129,7 @@ battery: # (batteries = veraltet)
 
 ### `meters.aux`
 
-Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die nicht durch evcc gesteuert werden können. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
+Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die über eine eigene Regelung verfügen und nicht durch evcc gesteuert werden können. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
 
 In evcc fließt diese Leistung in die Berechnung der zur Verfügung stehenden Fahrzeugladeleistung ein.
 
