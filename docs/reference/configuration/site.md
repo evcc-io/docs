@@ -129,17 +129,18 @@ battery: # (batteries = veraltet)
 
 ### `meters.aux`
 
-Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die über eine eigene Regelung verfügen und nicht durch evcc gesteuert werden können. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
+Definiert die meter (Strommessgeräte), welche die Messdaten externer Geräte liefern, die über eine eigene Überschussregelung verfügen aber nicht direkt durch evcc gesteuert werden. Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
 
-In evcc fließt diese Leistung in die Berechnung der zur Verfügung stehenden Fahrzeugladeleistung ein.
+In evcc fließt diese Leistung in die Berechnung der prinzipiell zur Verfügung stehenden Überschussleistung zur Fahrzeugladung ein.
+Es wird davon ausgegangen, dass die hier mittels der Aux-Meter gemessenen Geräte ihren Leistungsbedarf selbstständig und zeitnah reduzieren bzw. vollständig unterbrechen wenn die gemessene Aux-Leistung durch evcc der Fahrzeugladung zugeschlagen wird.
 
-Positiver Wert: steht dem Fahrzeug zur Verfügung
+Positiver Wert: zusätzliche verfügbare Überschussleistung (steht der Fahrzeugladung zur Verfügung)
 
-Negativer Wert: steht dem Fahrzeug nicht zur Verfügung
+Negativer Wert: fehlende Überschussleistung (steht der Fahrzeugladung nicht zur Verfügung)
 
 Beispiele:
 
-- Ein Heizstab, der autark auf Basis des PV-Überschuss geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux` eingerichtet wird, steht die Leistung der Fahrzeugladung zur Verfügung. Greift das Fahrzeug darauf zu, sorgt die autarke Regelung des Heizstabes dafür, dass dessen Leistung entsprechend reduziert wird.
+- Ein Heizstab für die Warmwasserbereitung welcher autark auf Basis des PV-Überschuss am Netzübergang geregelt wird. Wenn die Leistungsmessung dieses Heizstabes als `aux`-Meter gemessen und eingerichtet wird, steht die gesamte Überschussleistung (Leistung des Heizstabs plus ggf. verbleibende Netzeinspeisung) jederzeit bevorzugt der Fahrzeugladung zur Verfügung. Greift die Fahrzeugladung darauf zu, sorgt die autarke Regelung des Heizstabes selbstständig dafür, dass dessen Leistung entsprechend reduziert wird.
 
 **Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
 
