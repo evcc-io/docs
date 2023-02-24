@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Übersicht
+# Tipps und FAQ
 
 ## Konfiguration
 

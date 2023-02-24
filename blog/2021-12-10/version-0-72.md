@@ -13,7 +13,7 @@ Es hat sich in den letzten Wochen viel getan, und darüber möchten wir heute et
 
 Der Zugang zu **evcc** erforderte bisher doch einige technische Kenntnisse im Umgang mit dem jeweiligen Betriebssystem. Für Linux (Debian, Ubuntu, Raspberry Pi OS) und macOS gibt es nun eine deutlich vereinfachte Installation. So unterstützt **evcc** nun die Installation über die Paketmanager `apt` unter Linux und [`homebrew`](https://brew.sh) unter macOS.
 
-Hierfür haben wir die Installationsanleitungen nochmals überarbeitet und damit die Installation weiter vereinfacht. Schaut doch mal in der [dazugehörigen Dokumentation](/docs/installation/overview) vorbei.
+Hierfür haben wir die Installationsanleitungen nochmals überarbeitet und damit die Installation weiter vereinfacht. Schaut doch mal in der [dazugehörigen Dokumentation](/docs/installation) vorbei.
 
 ## Einfachere Konfiguration
 

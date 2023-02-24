@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Übersicht
+# Referenz
 
 In diesem Bereich sind die verschiedenen technischen Dokumentationen zu finden.
 
@@ -10,7 +10,7 @@ In diesem Bereich sind die verschiedenen technischen Dokumentationen zu finden.
 
 Hier werden die verschiedenen möglichen Einstellungen erklärt.
 
-[Weiterlesen...](configuration/home)
+[Weiterlesen...](configuration)
 
 ### Plugins
 

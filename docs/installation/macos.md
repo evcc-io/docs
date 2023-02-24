@@ -52,7 +52,7 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
   Sofern alle Geräte korrekt konfiguriert sind, kannst du mit den nächsten Schritten fortfahren.
 
   :::note
-  Fortgeschrittene Anwender (z.B. mit EVCC Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
+  Fortgeschrittene Anwender (z.B. mit evcc Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
 
   ```sh
   evcc configure --advanced
