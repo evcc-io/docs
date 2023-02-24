@@ -40,7 +40,7 @@ payload: ${var:%d}
 
 ## HTTP (lesen/schreiben)
 
-Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder zu parsen. 
+Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder zu parsen.
 
 :::important
 XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden kann.
@@ -50,7 +50,6 @@ XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mi
 Für den Test von jq-Abfragen bietet sich z. B. das Online-Tool https://www.jsonquerytool.com/ und für Regex-Tests z. B. das Online-Tool https://regex101.com/ an.
 :::
 
-
 **Beispiel Lesen**:
 
 ```yaml
@@ -58,7 +57,7 @@ source: http
 uri: https://volkszaehler/api/data/<uuid>.json?from=now
 method: GET # default HTTP method
 headers:
-- content-type: application/json
+  - content-type: application/json
 auth: # basic authorization
   type: basic
   user: foo
@@ -128,11 +127,11 @@ Wenn das `js` Plugin zum schreiben verwendet wird, wird der zu schreibenede Wert
 
 ```yaml
 charger:
-- type: custom
-  maxcurrent:
-    source: js
-    script: |
-      console.log(maxcurrent);
+  - type: custom
+    maxcurrent:
+      source: js
+      script: |
+        console.log(maxcurrent);
 ```
 
 ## Shell Script (lesen/schreiben)
@@ -181,21 +180,19 @@ mul:
   ...
 ```
 
-
 Als Operanden werden dabei die Grundrechenarten Addition (add) und Multiplikation (mul) unterstützt.
 
 Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z. B. zur Konvertierung von kWh in Wh.
 
 Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 bleibt 0) können (in Verbindung mit `mul`) Vorzeichen auf andere Werte übertragen werden. Z.B. um bei Zählern die „Richtung“ der Leistung (Einspeisung oder Bezug) auf die gemessenen Ströme zu übertragen.
 
+Das `calc` Plugin ist hilfreich um z.B.
 
-Das `calc` Plugin ist hilfreich um z.B. 
 - Leistungswerte von einzelnen PV-Strings zu summieren (addieren)
 - Die Leistung aus Spannung und Strom zu berechnen (multiplizieren)
 - Getrennte Leistungswerte für Import und Export zu einem vorzeichenbehafteten Einzelwert zu kombinieren (subtrahieren).
 - Prozentuale Füllstände zu berechnen (dividieren)
 - Die richtige Richtung des Stromflusses festlegen (sign)
-
 
 ## Kombinierter Status (nur lesen)
 

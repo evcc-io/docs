@@ -10,6 +10,7 @@ Definiert den Detailgrad der Protokollierung von Informationen auf der Konsole.
 
 **Mögliche Werte**:
 
+- `fatal`: Nur Nachrichten der Kategorie `fatal` werden angezeigt. Das sind Fehler, die die Systemausführung verhindern.
 - `error`: Nur Nachrichten der Kategorie `error` werden angezeigt. Das sind die wenigsten Nachrichten.
 - `warn`: Beinhaltet `error`, zusätzlich werden Nachrichten der Kategorie `warn` angezeigt.
 - `info`: Beinhaltet `warn`, zusätzlich werden Nachrichten der Kategorie `info` angezeigt.
@@ -40,7 +41,7 @@ Definiert den Detailgrad der Protokollierung für verschiedene evcc Komponenten
 - `lp-X`: Der jeweilige Ladepunkt, wobei `X` in der Reihenfolge der Konfiguration der [`loadpoints`](loadpoints) (Ladepunkte) durchnummeriert ist, beginnend bei `1`
 - `sma`: Die SMA HEMS Komponente, falls der SMA Sunnay Home Manager 2.0 per [`hems`](hems) eingebunden ist
 - _`fahrzeug`_: Jedes definierte [`vehicle`](vehicles) (Fahrzeug), hier ist der jeweilige Wert des Parameters [`type`](vehicles#type) (bzw. des templates) anzugeben.
--  Darüber hinaus können je nach Anwendungsfall noch weitere Komponenten spezifiziert werden (z.B. `cache`, `db`, `influx`, `mqtt`, ...)
+- Darüber hinaus können je nach Anwendungsfall noch weitere Komponenten spezifiziert werden (z.B. `cache`, `db`, `influx`, `mqtt`, ...)
 
 **Mögliche Werte jede Komponente**: Identisch zu den Werten von [`log`](#log)
 

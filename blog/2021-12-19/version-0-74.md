@@ -4,6 +4,7 @@ authors: [derandereandi]
 tags: [release]
 hide_table_of_contents: false
 ---
+
 Heute gibt es ein kleines Update hauptsächlich mit einigen Fehlerkorrekturen und weiteren Verbesserungen.
 
 ## Timer in der UI

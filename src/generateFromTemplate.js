@@ -60,6 +60,7 @@ ${codeBlocks
     }"${i === 0 ? " default" : ""}>
 
 ${block.code}
+
 </TabItem>`
   )
   .join("\n")}
@@ -136,7 +137,7 @@ function generateMarkdown(data, type, target) {
       let level = "##";
       if (group) level += "#";
       if (brand) level += "#";
-      generated += `${level} ${description} ${flags}\n\n`;
+      generated += `${level} ${description}${flags}\n\n`;
     }
     productCounter++;
 

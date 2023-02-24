@@ -20,8 +20,6 @@ Hier muss man ggf. genau auf die Gerätekonfiguration und Spezifikation achten s
 
 Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration am Konverter festgelegt und evcc kommuniziert letztendlich via Netzwerk mit dem Konverter. Wie zuvor erwähnt ist dabei jedoch das verwendete Modbus-Protokoll korrekt zu konfigurieren.
 
-
-
 ## Physikalische Verbindung
 
 Wenn das Gerät seriell über einen seriellen RS485-Adapter verbunden ist, muss `device` und die seriellen Kommunikationsparameter `baudrate`, `comset` entsprechend der Gerätekonfiguration angegeben werden. Alle Geräte am Bus müssen identische Kommunikationsparameter verwenden. Dazu bitte die jeweilige Betriebanleitung, Datenblätter oder Systemeinstellungen vergleichen.
@@ -43,7 +41,6 @@ Wenn das Gerät über eine Netzwerkverbindung (TCP/IP) angebunden ist, muss eine
 source: modbus
 uri: 192.168.0.11:502
 id: 1 # modbus slave id
-...
 ```
 
 Seriellen Schnittstellen verwenden standardmäßig das Modbus-RTU-Protokoll, Netzwerkziele werden standardmäßig via Modbus/TCP angesprochen. Dieses Verhalten kann mittels `rtu: true/false` ggf. überschrieben werden.
@@ -56,9 +53,7 @@ source: modbus
 uri: 192.168.0.10:502
 id: 3 # modbus slave id
 rtu: true
-...
 ```
-
 
 ## Vordefinierte Geräte
 
@@ -81,11 +76,11 @@ Die integrierten vordefinierten Gerätemodelle `model` sind identisch zu [MBMD](
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Alle davon abweichenden `model` werden als Gerät vom Typ *SunSpec* behandelt.
+Alle davon abweichenden `model` werden als Gerät vom Typ _SunSpec_ behandelt.
 
 Verwende `value` um den Wert der vom Gerät gelesen werden soll zu definieren. Alle unterstützten Werte sind auf [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28) voreingestellt.
 
-Im Falle eines *SunSpec*-kompatiblen Wechselrichters oder Zählers werden die zu lesenden Werte in der Form `model:[block:]point` nach der *SunSpec*-Definition angegeben. Zum Beispiel wird die DC-Leistung auf dem zweiten String eines dreiphasigen PV-Wechselrichters (enspricht SunSpec Model 103) wie folgt abgefragt: `value: 103:2:W`.
+Im Falle eines _SunSpec_-kompatiblen Wechselrichters oder Zählers werden die zu lesenden Werte in der Form `model:[block:]point` nach der _SunSpec_-Definition angegeben. Zum Beispiel wird die DC-Leistung auf dem zweiten String eines dreiphasigen PV-Wechselrichters (enspricht SunSpec Model 103) wie folgt abgefragt: `value: 103:2:W`.
 
 Das Geräte-`model` und die Slave ID `id` sind immer erforderlich:
 
@@ -93,7 +88,7 @@ Das Geräte-`model` und die Slave ID `id` sind immer erforderlich:
 
 ```yaml
 source: modbus
-...
+---
 model: sdm
 value: Power
 scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
@@ -107,7 +102,6 @@ Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefiniert
 
 ```yaml
 source: modbus
-...
 register:
   address: 40070
   type: holding # holding or input
@@ -130,8 +124,8 @@ Wichtig: als Proxy erlaubt evcc nur Verbindungen mittels Modbus TCP, KEIN Modbus
 
 ```yaml
 modbusproxy:
-   - port: 5200
-     uri: 192.0.2.2:502 # IP und Port des Gerätes, das abgefragt werden soll
-     # rtu: true
-     # readonly: true
+  - port: 5200
+    uri: 192.0.2.2:502 # IP und Port des Gerätes, das abgefragt werden soll
+    # rtu: true
+    # readonly: true
 ```

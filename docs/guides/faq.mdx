@@ -6,8 +6,84 @@ import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
 
 # Sonstiges
 
+### Beispiel Konfiguration mit Shelly
 
-### noch unbesetzt
+In dem Beispiel wird der SG-Ready Kontakt einer Trinkwasserwärmepunpe gesteuert.
 
+"Vehicle-Soc" dient dabei als Anzeige für die Temperatur.
 
+- Shelly 3EM als Grid-Meter
+- Shelly EM (Stromzange) als Charge-Meter
+- Shelly 1 als Charger (öffnet/schließt den SG-Ready Kontakt)
 
+```yaml
+network:
+  schema: http
+  host: evcc.local
+  port: 7070
+
+interval: 10s
+
+log: info
+
+meters:
+  - name: grid
+    type: template
+    template: shelly-3em # Shelly 3EM als Grid-Meter
+    usage: grid
+    host: 192.168.178.28
+
+  - name: WP_Pwr
+    type: template
+    template: shelly-1pm # Shelly EM Stromzange 2
+    #usage: charge
+    host: 192.168.178.21
+    channel: 1
+
+chargers:
+  - name: WP_SG
+    type: template
+    template: shelly # Shelly 1 für SG-Kontakt
+    host: 192.168.178.29
+    standbypower: -1
+
+vehicles:
+  - name: WP
+    type: custom
+    title: Wärmepumpe
+    icon: waterheater
+    phases: 1
+    onIdentify:
+      mode: pv
+      minsoc: 40
+      targetsoc: 60
+    soc:
+      source: mqtt
+      topic: Haus/Wasser_Temp
+
+loadpoints:
+  - title: Warmwasser
+    charger: WP_SG
+    meter: WP_Pwr
+    vehicle: WP
+    mode: pv
+    phases: 1
+    mincurrent: 2 #Verbrauch ca. 500W
+    maxcurrent: 3
+    enable:
+      threshold: 0
+      delay: 1m
+    disable:
+      threshold: 0
+      delay: 15m # Laufzeit mindestens 15 Minuten
+    guardduration: 15m # Pause mindestens 15 Minunten
+
+site:
+  - title: Wasser
+    meters:
+      grid: grid
+
+mqtt:
+  broker: raspberrypi:1883
+  topic: evcc
+```

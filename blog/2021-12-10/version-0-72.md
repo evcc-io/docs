@@ -4,6 +4,7 @@ authors: [derandereandi]
 tags: [release]
 hide_table_of_contents: false
 ---
+
 Es hat sich in den letzten Wochen viel getan, und darüber möchten wir heute etwas ausführlicher berichten was es alles in Version 0.72 an Neuem zu entdecken gibt.
 
 ![evcc configure example](configure.gif)
