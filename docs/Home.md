@@ -10,7 +10,7 @@ Normalerweise muss die Wallbox dazu mit der bestehenden PV-Installation kompatib
 
 Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud-Anbindung wenn keine der angebundenen Komponenten dies erfordert. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Kleinstcomputersystem wie z. B. ein Raspberry Pi (oder ähnliches) völlig ausreichen.
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.webp)
 
 ## Funktionalitäten
 
@@ -47,3 +47,17 @@ Optional:
 :::note
 evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Risiko. Es liegt in deiner Verantwortung dass evcc so läuft wie es beabsichtigt ist.
 :::
+
+## Einführungsvideos
+
+### verdrahtet: PV Überschussladen mit evcc
+
+Behandelt die Themen evcc Einrichtung und Grundlagen, Intragtion mit ioBroker und die Einbindung eines Homematic Schalters.
+
+[![YouTube verdrahtet](youtube_verdrahtet.jpg)](https://youtu.be/6JxktkEaZ2o)
+
+### haus-automatisierung.com: PV-Überschuss ins E-Auto laden
+
+Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung über MQTT und ioBroker, unterschiedliche Installationsmöglichkeiten.
+
+[![YouTube Haus Automatisierung](youtube_hausautomatisierung.jpg)](https://youtu.be/93C47QUjomQ)
