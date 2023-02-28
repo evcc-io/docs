@@ -4,6 +4,12 @@ sidebar_position: 1
 
 # Tipps und FAQ
 
+## Grundlagen
+
+Hier gehts um die grundlegende Arbeitsweise von EVCC.
+
+[Weiterlesen...](basics)
+
 ## Konfiguration
 
 Hier gehts um Themen der Einrichtung.
