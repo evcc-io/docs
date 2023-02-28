@@ -416,6 +416,12 @@ Loadpoints ohne Eintrag haben `priority: 0`
 
 Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
 
+:::info
+
+Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist. 
+
+:::
+
 **Standartwert:** `0`
 
 **Beispiel**:
