@@ -32,27 +32,39 @@ Bei Fahrzeugen und Wallboxen die über ISO15118 kommunizieren, bekommt das Fahrz
 
 ## Erkennung des Fahrzeugs an der Wallbox
 
-Wenn ein oder mehrere Fahrzeuge konfiguriert sind, muss evcc diese unterscheiden können und wissen welches der Fahrzeuge an der Wallbox angeschlossen ist. Nur damit ist es möglich das Laden auf einen bestimmten Ladestand (SOC) zu begrenzen.
+Wenn ein oder mehrere Fahrzeuge konfiguriert sind, muss evcc diese unterscheiden können und wissen welches der Fahrzeuge an welcher Wallbox angeschlossen ist. Nur damit ist es möglich die Live-Daten des Fahrzeugs richtig zuzuordnen und anzuzeigen und damit z. B. das Laden auf einen bestimmten Ladestand (SoC) zu begrenzen.
 
 Hierfür gibt es verschiedene Methoden:
 
-1. Es ist ein Fahrzeug konfiguriert und einem Loadpoint als Standardfahrzeug zugewiesen, dann findet keine automatische Erkennung statt. evcc geht dann davon aus dass auch immer dieses Fahrzeug lädt.
-2. Es sind ein oder mehrere Fahrzeuge konfiguriert und keinem Loadpoint zugewiesen
+1. Es ist ein Fahrzeug konfiguriert und einem Ladepunkt fest als Standardfahrzeug zugewiesen, dann findet keine automatische Erkennung statt. evcc geht dann immer zunächst davon aus dass dieses Fahrzeug dort angeschlossen ist.
+2. Es sind ein oder mehrere Fahrzeuge konfiguriert und keinem festem Ladepunkt zugewiesen
 
-   1. Die Wallbox kann eine Fahrzeugkennung über das Ladekabel ermitteln.
-   2. Die Wallbox verfügbt über die Möglichkeit mit RFID Karten den Ladevorgang freizuschalten
-   3. Über die Internetverbindung des Fahrzeugs kann festgestellt werden, welches gerade mit einem Ladepunkt verbunden ist. Wenn nur eines der Fahrzeuge dies meldet, wird angenommen dass es auch dieses Fahrzeug ist.
+   1. Erkennung über das Ladekabel (Plug & Charge).
+   2. Erkennung über RFID-Karten (und andere Token)
+   3. Erkennung über den Ladestatus
+
+Ist keine dieser Varianten verfügbar oder sinnvoll anwendbar erfolgt die Zuordnung eines Fahrzeugs zu einem Ladepunkt manuell über die evcc-Benutzeroberfläche (oder via API). Dort lassen sich auch bei Bedarf Korrekturen vornehmen.
+
+Fahrzeuge die nicht erkannt wurden werden als "Gastfahrzeug" behandelt.
 
 :::note
 Die Wallbox muss bereits in evcc eingerichtet und konfiguriert sein
 :::
 
+:::tip
+In einfachen Fällen ist es empfehlenswert immer eine direkte Zuordnung von Ladepunkt zu einem Standardfahrzeug vorzunehmen.
+:::
+
+:::tip
+Für jedes Fahrzeug können individuelle Standardeinstellungen wie z. B. Lademodus, Ladestrombeschränkungen, Ziel-SoC usw. in der evcc-Konfiguration hinterlegt werden (siehe [onIdentify](reference/configuration/vehicles/#onidentify)). Diese werden jeweils automatisch angewendet wenn das Fahrzeug an einem Ladepunkt erkannt bzw. zugeordnet wird.
+:::
+
 ### Erkennung über das Ladekabel
 
-Hierzu muss die Wallbox den Ladestandard ISO15118 unterstützen. In evcc kann dies momentan nur mit [EEBUS kompatible Wallboxen](/docs/devices/chargers#eebus-experimental) möglich.
+Voraussetzung: Die Wallbox und das Fahrzeug müssen den Ladestandard ISO15118 unterstützen. In der Praxis ist dies nur mit sehr wenigen Wallbox- und Fahrzeugkombinationen überhaupt möglich.
 
 :::note
-In der Konfiguration der Wallbox, nicht in evcc, muss die sogenannte "PLC Verbindung zum Fahrzeug" aktiviert sein. Dies ist normalerweise die Standardeinstellung.
+In der Konfiguration der Wallbox, nicht in evcc, muss die sogenannte "PLC-Verbindung zum Fahrzeug" aktiviert sein.
 :::
 
 **Vorgehen**:
@@ -65,59 +77,78 @@ In der Konfiguration der Wallbox, nicht in evcc, muss die sogenannte "PLC Verbin
 - Bei der Konfiguration des entsprechenden Fahrzeugs die folgende Zeilen hinzufügen (identifiers ist eine Liste, mehrere Einträge sind möglich):
 
   ```yaml
-  identifiers: -"<kopierter Wert>"
+  identifiers:
+    - <kopierter Wert>
   ```
-
   :::note
-  Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine sogenannet MAC Adresse zurück.
-  Manche Hersteller wie VW und Audi ändern diese aber jeden Tag!
+  Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine sogenannet MAC-Adresse zurück.
+  Manche Hersteller wie VW und Audi ändern diese aber jeden Tag auf einen anderen Zufallswert!
 
-  Für diesen Fall kann man eine Wildcard verwenden und den nur sich nicht ändernden Teil angeben:
+  Für diesen Fall kann man eine Wildcard verwenden und nur den sich nicht ändernden Teil angeben:
 
   ```yaml
   vehicles:
-    - name: zoe
+    - name: Auto
       ...
       identifiers:
-        -"01:23:45:*"
+        - 01:23:45:*
   ```
 
-  Dies funktioniert natürlich nur, wenn dies nicht bei jedem vorhanden Fahrzeug auftritt und der Anfangsteil des Wertes sich unterscheidet.
+  Dies funktioniert natürlich nur, wenn dies nicht bei mehreren vorhandenen Fahrzeugen auftritt und sich der angegebene Anfangsteil des Wertes jeweils unterscheidet.
   :::
 
 - evcc kann nun wieder gestartet werden und erkennt das Fahrzeug
 
-### Erkennung über RFID Karten
+### Erkennung über RFID-Karten (und andere Token)
 
-Hierbei ordnet man eine RFID Karte eine bestimmten Fahrzeug zu. D.h. jedes Mal wenn das Fahrzeug an die Wallbox angeschlossen wird, muss der Ladevorgang mit der entsprechenden RFID Karte an der Wallbox freigeschalten werden.
+Voraussetzung: Die Wallbox verfügt über einen RFID-Kartenleser einzulesen.
+
+Hierbei ordnet man eine (oder mehrere) RFID-Karten eine bestimmten Fahrzeug zu. D.h. jedes Mal wenn das Fahrzeug wieder an die Wallbox angeschlossen wird, muss der Ladevorgang zunächst mit der entsprechenden RFID-Karte an der Wallbox freigeschaltet werden.
+
+Die Wallbox teilt evcc dann die zur Freischaltung verwendete Kartenkennung mit.
+Oft wird dabei allerdings nicht direkt die Kartennummer selbst von der Wallbox an evcc übermittelt sondern z. B. ein vom Benutzer hinterlegter Aliasname oder auch nur eine Zeilennummer der Tabelle der zugelassenen Karten. Dies funktioniert leider bei jedem Wallboxtyp ein bisschen anders so dass man die ggf. ausprobieren muss.
 
 :::note
-Die RFID Karten müssen in der Wallbox bereits registriert sein. Dies wird entweder über eine App der Wallbox oder deren Benutzeroberläche gemacht.
+Die erlaubten RFID-Karten müssen in der Regel zusätzlich in der Wallbox registriert sein. Dies wird entweder über eine Konfigurations-App der Wallbox oder deren Benutzeroberläche gemacht.
+:::
+
+:::tip
+Mit mehreren Token pro Fahrzeug lassen sich verschiedene Fahrer differenzieren oder unterschiedliche Ladestrategien mit vordefinierten Standardwerten aufrufen. Ein Fahrzeug kann dazu mit unterschiedlichen Namen auch mehrfach in der evcc-Konfiguration angelegt werden.
 :::
 
 **Vorgehen**:
 
-- Die RFID Karte an die Wallbox halten bis die Wallbox meldet dass diese erkannt wurde
+- Die (ggf. bereits registrierte) RFID-Karte an die Wallbox halten bis die Wallbox meldet dass diese erkannt wurde
 - evcc beenden (falls noch nicht geschehen)
 - Auf der Kommandozeile `evcc charger` aufrufen
-- Die Ausgabe enthält den Text `Identifier:` und einen Wert, dieser Wert muss kopiert werden
+- Die Ausgabe enthält u. a. den Text `Identifier:` und einen Wert, dieser Wert muss kopiert werden
 - Nun die `evcc.yaml` Datei in einem Texteditor öffnen
 - Bei der Konfiguration des entsprechenden Fahrzeugs die folgenden Zeilen hinzufügen (identifiers ist eine Liste, mehrere Einträge sind möglich):
 
   ```yaml
   vehicles:
-    - name: zoe
+    - name: Auto
       ...
       identifiers:
-        -"<kopierter Wert>"
+        - <kopierter Wert>
   ```
 
 - evcc kann nun wieder gestartet werden und erkennt das Fahrzeug
 
-### Erkennung über Internet-Verbindung
+:::tip
+Der grundsätzliche Aufbau der tatsächlich von einer Wallbox übermittelten Identifier kann oft schon beim ersten Durchgang erkannt und dann für weitere Karten abgeleitet werden ohne dass diese vollständige Prozedur für jede Karte erforderlich ist.
+:::
 
-Hierbei ruft evcc den Ladestatus des Fahrzeugs über die Hersteller-Schnittstelle ab. Sofern der Hersteller dies anbietet, erhält evcc auch den (hoffentlich) aktuellen Ladestatus, also ob das Fahrzeug an eine Ladesäule angeschlossen ist.
-Es ist leider nicht möglich festzustellen an welcher Ladesäule das Fahrzeug angeschlossen ist. Daher besteht hier keine 100%ge Sicherheit.
+:::caution
+Eine RFID-Karte kann an unterschiedlichen Wallboxen u.U. unterschiedliche Identifier haben!
+:::
+
+### Erkennung über den Ladestatus
+
+Hierbei ruft evcc den Ladestatus aller eingebundenen Fahrzeuge über die Hersteller-Schnittstelle ab. Sofern der Hersteller dies anbietet, erhält evcc auch den (hoffentlich) aktuellen Ladestatus der Fahrzeuge, also ob ein Fahrzeug an eine Ladesäule angeschlossen ist und ob es derzeit lädt.
+Über den Abgleich dieser Daten mit dem Status der Ladepunkte und bereits zugeordneten Fahrzeugen versucht evcc herauszufinden welches Fahrzeug neu angeschlossen wurde.
+Dies ist ein heuristisches Verfahren und es besteht daher keine hunderprozentige Sicherheit eine automatische Zuordnung immer zu gewährleisten.
+Die Geschwindigkeit und Zuverlässigkeit dieses Verfahrens ist stark von der Geschwindigkeit und Zuverlässigkeit der Live-Datenschnittstellen der jeweiligen Fahrzeughersteller und dem Mobilfunkempfang der Fahrzeuge an den Ladepunkten abhängig.
 
 ## Hersteller-spezifische Besonderheiten
 
