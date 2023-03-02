@@ -6,9 +6,9 @@ sidebar_position: 4
 
 ### Wozu muss ich mein Auto eintragen?
 
-evcc kann das Laden auf einen selbst gewählten Batterieladestand (SOC) begrenzen, dazu muss es aber den aktuellen Ladestand kennen. Leider können viele Autos und Wallboxen diese Information noch nicht austauschen. Viele Hersteller bieten jedoch eine App an, welche diese Information dem Benutzer bereitstellt. evcc kann nun bei vielen Fahrzeugen den gleichen Weg nutzen.
+evcc kann das Laden auf einen selbst gewählten Batterieladestand (SoC) begrenzen, dazu muss es aber den aktuellen Ladestand kennen. Leider können die meisten Autos und Wallboxen diese Information noch nicht direkt austauschen. Viele Fahrzeughersteller bieten jedoch eine App an, welche diese Information dem Benutzer bereitstellt. evcc kann bei vielen Fahrzeugen den gleichen Weg nutzen und die benötigten Daten regelmäßig darüber abrufen.
 
-Dazu muss man meist den Benutzernamen und das Passwort für die Hersteller-App in die evcc Konfiguration eintragen. Damit kann evcc dann den Ladestand über die Online-Verbindung das Fahrzeugs auslesen.
+Dazu muss man meist den Benutzernamen und das Passwort für die Hersteller-App in die evcc Konfiguration eintragen. Damit kann evcc dann u.a. den Ladezustand über die Online-Verbindung das Fahrzeugs auslesen.
 
 ### Wird mein Auto unterstützt?
 
@@ -16,16 +16,16 @@ Vielleicht. Schau einfach mal unter [Geräte - Fahrzeuge](/docs/devices/vehicles
 
 ### Wie wird Klimatisierung unterstützt?
 
-Bei manchen Fahrzeugen kann evcc über die Online API erkennen, ob das Fahrzeug gerade eine Klimatisierung aktiviert hat.
+Bei manchen Fahrzeugen kann evcc über die Online-Verbindung ebenfalls erkennen, ob das Fahrzeug gerade ein Vorklimatisierung durchführt.
 In diesem Fall wird die technisch an der Wallbox niedrigste mögliche Leistung freigegeben, damit das Fahrzeug mit dem Strom über die Wallbox klimatisieren kann.
 
-Sobald die Klimatisierung als deaktiviert erkannt wird, wird die Wallbox wieder gesperrt so dass das Fahrzeug keinen Strom über die Wallbox beziehen kann.
-
 In diesem Fall kann es vorkommen, dass die Klimatisierung im Fahrzeug weniger Leistung als die freigegebene Leistung benötigt.
-Und damit kann es sein dass das Fahrzeug die restliche verfügbare Leistung verwendet um die Batterie zu laden, auch wenn eine SoC Begrenzung festgelegt wurde.
+Und damit kann es sein, dass das Fahrzeug die restliche verfügbare Leistung verwendet um die Batterie weiter zu laden, auch wenn eine festgelegte Begrenzung des Ladezustandes bereits erreicht wurde.
+
+Sobald die Klimatisierung als beendet erkannt wird, wird die Wallbox wieder gesperrt, so dass das Fahrzeug keinen weiteren Strom über die Wallbox beziehen kann falls nicht ohnehin gerade geladen wird.
 
 :::note Anmerkung
-Dies gilt nur für die Kombination von Fahrzeugen und Wallbox, wo diese beiden über den Standard IEC61851 kommunizieren. Dies ist heute in den meisten Fällen die Regel.
+Dies gilt nur für die Kombination von Fahrzeugen und Wallbox, wo diese beiden über den Standard IEC61851 kommunizieren. Dies ist heute die Regel.
 
 Bei Fahrzeugen und Wallboxen die über ISO15118 kommunizieren, bekommt das Fahrzeug genau die Energiemenge welche es direkt an der Wallbox anfrägt.
 :::
@@ -41,6 +41,8 @@ Hierfür gibt es verschiedene Methoden:
    1. Erkennung über das Ladekabel (Plug & Charge)
    2. Erkennung über RFID-Karten (und andere Token)
    3. Erkennung über den Ladestatus
+
+Die einzelnen Methoden werden nachfolgend näher beschrieben.
 
 Ist keine dieser Varianten verfügbar oder sinnvoll anwendbar erfolgt die Zuordnung eines Fahrzeugs zu einem Ladepunkt manuell über die evcc-Benutzeroberfläche (oder via API). Dort lassen sich auch bei Bedarf Korrekturen vornehmen.
 
@@ -80,8 +82,9 @@ In der Konfiguration der Wallbox, nicht in evcc, muss die sogenannte "PLC-Verbin
   identifiers:
     - <kopierter Wert>
   ```
+  
   :::note
-  Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine sogenannet MAC-Adresse zurück.
+  Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine eigentlich eindeutige Hardware-Adresse (MAC-Adresse) zurück.
   Manche Hersteller wie VW und Audi ändern diese aber jeden Tag auf einen anderen Zufallswert!
 
   Für diesen Fall kann man eine Wildcard verwenden und nur den sich nicht ändernden Teil angeben:
@@ -101,19 +104,16 @@ In der Konfiguration der Wallbox, nicht in evcc, muss die sogenannte "PLC-Verbin
 
 ### Erkennung über RFID-Karten (und andere Token)
 
-Voraussetzung: Die Wallbox verfügt über einen RFID-Kartenleser einzulesen.
+Voraussetzung: Die Wallbox verfügt über einen RFID-Kartenleser.
 
-Hierbei ordnet man eine (oder mehrere) RFID-Karten eine bestimmten Fahrzeug zu. D.h. jedes Mal wenn das Fahrzeug wieder an die Wallbox angeschlossen wird, muss der Ladevorgang zunächst mit der entsprechenden RFID-Karte an der Wallbox freigeschaltet werden.
+Hierbei ordnet man eine (oder mehrere) RFID-Karten einem bestimmten Fahrzeug zu. D.h. jedes Mal wenn das Fahrzeug wieder an die Wallbox angeschlossen wird, muss der Ladevorgang zunächst mit der entsprechenden RFID-Karte an der Wallbox freigeschaltet werden.
 
 Die Wallbox teilt evcc dann die zur Freischaltung verwendete Kartenkennung mit.
-Oft wird dabei allerdings nicht direkt die Kartennummer selbst von der Wallbox an evcc übermittelt sondern z. B. ein vom Benutzer hinterlegter Aliasname oder auch nur eine Zeilennummer der Tabelle der zugelassenen Karten. Dies funktioniert leider bei jedem Wallboxtyp ein bisschen anders so dass man die ggf. ausprobieren muss.
+Oft wird dabei allerdings nicht direkt die Kartennummer selbst von der Wallbox an evcc übermittelt sondern z. B. ein vom Benutzer in der Konfiguration der Wallbox hinterlegter Aliasname oder auch nur eine Zeilennummer der Tabelle der zugelassenen Karten.
+Dies funktioniert leider bei jedem Wallboxtyp im Detail ein bisschen anders. Hier führt daher oft nur Ausprobieren zum Ziel.
 
 :::note
 Die erlaubten RFID-Karten müssen in der Regel zusätzlich in der Wallbox registriert sein. Dies wird entweder über eine Konfigurations-App der Wallbox oder deren Benutzeroberläche gemacht.
-:::
-
-:::tip
-Mit mehreren Token pro Fahrzeug lassen sich verschiedene Fahrer differenzieren oder unterschiedliche Ladestrategien mit vordefinierten Standardwerten aufrufen. Ein Fahrzeug kann dazu mit unterschiedlichen Namen auch mehrfach in der evcc-Konfiguration angelegt werden.
 :::
 
 **Vorgehen**:
@@ -136,17 +136,21 @@ Mit mehreren Token pro Fahrzeug lassen sich verschiedene Fahrer differenzieren o
 - evcc kann nun wieder gestartet werden und erkennt das Fahrzeug
 
 :::tip
-Der grundsätzliche Aufbau der tatsächlich von einer Wallbox übermittelten Identifier kann oft schon beim ersten Durchgang erkannt und dann für weitere Karten abgeleitet werden ohne dass diese vollständige Prozedur für jede Karte erforderlich ist.
+Der grundsätzliche Aufbau der tatsächlich von einer Wallbox übermittelten Identifier kann oft schon beim ersten Durchgang erkannt und dann für weitere Karten abgeleitet werden ohne dass diese vollständige Prozedur für jede Karte erforderlich ist. Im Zweifelsfall ist es aber sinnvoll die mittels `evcc charger` tatsächlich übermittelten Identifier zu verifizieren.
 :::
 
 :::caution
 Eine RFID-Karte kann an unterschiedlichen Wallboxen u.U. unterschiedliche Identifier haben!
 :::
 
+:::tip
+Mit mehreren Token pro Fahrzeug lassen sich z. B. auch verschiedene Fahrer differenzieren oder unterschiedliche Ladestrategien mit vordefinierten Standardwerten aufrufen. Ein Fahrzeug kann dazu mit unterschiedlichen Namen auch mehrfach in der evcc-Konfiguration angelegt werden.
+:::
+
 ### Erkennung über den Ladestatus
 
-Hierbei ruft evcc den Ladestatus aller eingebundenen Fahrzeuge über die Hersteller-Schnittstelle ab. Sofern der Hersteller dies anbietet, erhält evcc automatisch den (hoffentlich) aktuellen Ladestatus der Fahrzeuge, also ob ein Fahrzeug an eine Ladesäule angeschlossen ist und ob es derzeit lädt.
-Über den Abgleich dieser Daten mit dem Status der Ladepunkte und bereits zugeordneten Fahrzeugen versucht evcc herauszufinden welches Fahrzeug neu angeschlossen wurde.
+Hierbei ruft evcc den Ladestatus aller eingebundenen Fahrzeuge über die Online-Schnittstelle ab. Sofern der Hersteller dies anbietet und das Fahrzeug es übermittelt, erhält evcc automatisch den (hoffentlich) aktuellen Ladestatus der Fahrzeuge, also ob ein Fahrzeug an eine Ladesäule angeschlossen ist und ob es derzeit lädt.
+Über den Abgleich dieses Zustands mit dem Zustand der Ladepunkte und bereits zugeordneten Fahrzeugen versucht evcc herauszufinden welches Fahrzeug neu angeschlossen wurde.
 Dies ist ein heuristisches Verfahren und es besteht daher keine hunderprozentige Sicherheit eine automatische Zuordnung immer zu gewährleisten.
 Die Geschwindigkeit und Zuverlässigkeit dieses Verfahrens ist stark von der Geschwindigkeit und Zuverlässigkeit der Live-Datenschnittstellen der jeweiligen Fahrzeughersteller und dem Mobilfunkempfang der Fahrzeuge an den Ladepunkten abhängig.
 
