@@ -67,9 +67,13 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 ---
 
-### `vehicle(s)`
+### `vehicle`
 
-`vehicle`: Referenz auf eine `vehicle` Konfiguration die dem Ladepunkt als Standardfahrzeug zugewiesen wird. Beim Anschluss eines Fahrzeugs an den Ladepunkt wird damit immer davon ausgegangen dass dieses Fahrzeug angeschlossen ist. Die automatische Fahrzeugerkennung wird umgangen. Ein anderes Fahrzeug (z.B. Gastfahrzeug) lässt sich dann nur im Anschluss manuell zuweisen.
+`vehicle`: Referenz auf eine `vehicle` Konfiguration die dem Ladepunkt als Standardfahrzeug zugewiesen wird.
+
+Beim Anschluss eines Fahrzeugs an den Ladepunkt wird damit immer davon ausgegangen dass dieses Fahrzeug angeschlossen wurde.
+Die automatische Fahrzeugerkennung wird umgangen.
+Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z.B. Gastfahrzeug) lässt sich dies im Anschluss manuell zuweisen.
 
 **Beispiel**:
 
