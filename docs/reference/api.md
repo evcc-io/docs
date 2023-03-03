@@ -26,7 +26,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST   /api/loadpoints/<id>/minsoc/<soc>`: minimum SoC in %
 - `POST   /api/loadpoints/<id>/target/soc/<soc>`: target SoC in %
 - `POST   /api/loadpoints/<id>/target/energy/<energy>`: target energy in kWh
-- `POST   /api/loadpoints/<id>/target/time/<time>`: target time in RFC3339 / ISO format
+- `POST   /api/loadpoints/<id>/target/time/<time>`: target time in RFC3339 / ISO format **
 - `DELETE /api/loadpoints/<id>/target/time`: disable target charging
 - `GET    /api/loadpoints/<id>/target/plan[?targetTime=<time>]`: charging plan details
 - `POST   /api/loadpoints/<id>/phases/<phases>`: enabled phases (0=auto/1=1p/3=3p)
@@ -58,7 +58,7 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/loadpoints/<id>/minSoc`: loadpoint minimum SoC (writable)
 - `evcc/loadpoints/<id>/targetSoc`: loadpoint target SoC in % (writable)
 - `evcc/loadpoints/<id>/targetEnergy`: loadpoint target energy in kWh (writable)
-- `evcc/loadpoints/<id>/targetTime`: loadpoint target time in RFC3339 / ISO format (writable)
+- `evcc/loadpoints/<id>/targetTime`: loadpoint target time in RFC3339 / ISO format (writable) **
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
@@ -68,4 +68,14 @@ Die MQTT API folgt der REST API Struktur:
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
 Beispiel: `mosquitto_pub -t "evcc/loadpoints/1/phases/set" -m "3"` um die Anzahl der netzseitigen Phasen am 1. Ladepunkt auf `3` festzulegen.
+:::
+
+:::info
+** Zeitangabe efolgt in UTC im Format `yyyy-mm-ddThh:mm:ssZ`
+
+Beispiele:
+
+`2023-03-05T07:00:00Z` = 5. März 2023 um 8:00 Uhr MEZ
+
+`2023-08-17T19:30:00Z` = 17. August 2023 um 21:30 Uhr MESZ
 :::
