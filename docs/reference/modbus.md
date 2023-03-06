@@ -8,14 +8,14 @@ Einige Geräte, wie z.b. Zähler ([`meters`](/docs/reference/configuration/meter
 
 Die `meter` Konfiguration besteht hierbei aus der Art der pysikalischen Verbindung (Schnittstelle), ggf. den technischen Schnittstellenparametern, dem verwendeten Modbus-Protokoll, der eindeutigen Modbus-ID des Gerätes auf dem Bus und der Nummer und Art des Registers welches letztendlich gelesen oder geschrieben werden soll.
 
-Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus-RTU, Modbus ASCII und Modbus/TCP. Diese können technisch auch über unterschiedliche Schnittstellentypen übertragen werden können.
-Die klassische Variante ist dabei Modbus-RTU über eine serielle RS485-Busschnittstelle wie sie typischerweise z. B. bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise darüber über das Modbus/TCP-Protokoll angesprochen.
+Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus RTU, Modbus ASCII und Modbus TCP. Diese können technisch auch über unterschiedliche Schnittstellentypen übertragen werden können.
+Die klassische Variante ist dabei Modbus RTU über eine serielle RS485-Busschnittstelle wie sie typischerweise z. B. bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise über das Modbus TCP-Protokoll angesprochen.
 
-Soll ein entferntes RS485-Gerät aber ebenfalls über externe Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich aber regelmäßig ein Modbus-RTU-Protokoll über eine TCP/IP-Verbindung zustande. Das Modbus-RTU-Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Hierbei handelt es sich NICHT um Modbus/TCP. "Modbus (RTU) over TCP" ist etwas anderes als Modbus/TCP!
+Soll ein entferntes RS485-Gerät aber ebenfalls über einfachte, transparente Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich ein Modbus-RTU-Protokoll über eine TCP/IP-Verbindung zustande. Das Modbus-RTU-Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Hierbei handelt es sich NICHT um Modbus TCP. Hierbei muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
 
 :::info
-Achtung: Es gibt allerdings auch komplexere Umsetzer die zusätzlich das Modbus-Protokoll selbst zwischen Modbus-RTU vs. Modbus/TCP umsetzen können! Bei diesen Geräten spricht dann evcc mit dem Konverter Modbus/TCP während der Konverter mit dem seriellen Gerät via Modbus RTU kommuniziert und die Protokolle bidirektional übersetzt.
-Hier muss man ggf. genau auf die Gerätekonfiguration und Spezifikation achten sonst ist keine Kommunikation möglich.
+Achtung: Es gibt auch komplexere Umsetzer die zusätzlich das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP umsetzen können! Bei diesen Geräten spricht dann evcc mit dem Konverter tatsächlich Modbus TCP während der Konverter mit dem seriellen Gerät via Modbus RTU kommuniziert und die Protokolle bidirektional übersetzt.
+Hier muss man ggf. genau auf die Gerätekonfiguration und Spezifikation achten sonst ist keine Kommunikation möglich!
 :::
 
 Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration am Konverter festgelegt und evcc kommuniziert letztendlich via Netzwerk mit dem Konverter. Wie zuvor erwähnt ist dabei jedoch das verwendete Modbus-Protokoll korrekt zu konfigurieren.
@@ -40,7 +40,6 @@ Wenn das Gerät über eine Netzwerkverbindung (TCP/IP) angebunden ist, muss eine
 ```yaml
 source: modbus
 uri: 192.168.0.11:502
-id: 1 # modbus slave id
 ```
 
 Serielle Schnittstellen verwenden standardmäßig das Modbus-RTU-Protokoll, Netzwerkziele werden standardmäßig via Modbus/TCP angesprochen. Für TCP-Ziele kann dieses Verhalten kann mittels `rtu: true` ggf. überschrieben werden (Modbus RTU over TCP).
@@ -51,8 +50,7 @@ Wenn es sich um ein Modbus-RTU-Gerät handelt welches, das über einen einfachen
 ```yaml
 source: modbus
 uri: 192.168.0.10:502
-id: 3 # modbus slave id
-rtu: true
+rtu: true # Modbus RTU over TCP
 ```
 
 ## Vordefinierte Geräte
@@ -113,41 +111,3 @@ timeout: 2s # timeout, without unit in ns
 Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z.B. bei E3/DC Geräten nützlich.
 
 Um ein Regsiter zu schreiben wird `type: writesingle` verwendet, welches ein einzelnes 16bit Register (entweder `int` oder `bool`) schreibt. Die Kodierung ist hier immer `uint16`.
-
-## Modbus für Geräte die nur 1 Verbindung erlauben
-
-Einige Geräte lassen nur einen (oder sehr wenige) Modbus TCP Clients zu, z.B. SolarEdge-Wechselrichter. Bei seriellen Modbus RTU RS485-Bussystemen ist ohnehin nur ein Master erlaubt. Mit Hilfe von `modbusproxy` ist es möglich, evcc als Modbus-Proxy einzurichten. Damit kommuniziert evcc direkt mit dem Gerät, weitere Systeme aber stattdessen mit evcc, welches die Kommunikationverbindungen dann bündelt und an das eigentliche Gerät stellvertretend durchreicht.
-
-:::info
-Der Modbus Proxy unterstützt *eingehend* (von Drittsystemen wie z.B. Hausautomation, Logger) ausschließlich Modbus TCP!
-
-*Ausgehend* in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
-:::
-
-Im Fall von Verbindungen über TCP/IP kann bei Bedarf mittels `rtu: true` auf Modbus RTU over TCP umgeschaltet werden.
-
-Durch `readonly: true` lassen sich Modbus-Schreibzugriffe durch Drittsysteme pauschal unterbinden.
-
-:::info
-Intern teilen sich die definierten Geräte automatisch den Kommunikationskanal wenn die Verbindungsparameter übereinstimmen.
-:::
-
-**Beispiel**:
-
-```yaml
-modbusproxy:
-  - port: 5021 # Lokaler Modbus TCP Server Port
-    uri: 192.0.2.2:502 # IP und Port des Gerätes, das abgefragt werden soll
-    # rtu: true # Modbus RTU over TCP statt Modbus TCP
-    # readonly: true # Schreibzugriffe werden unterbunden
-```
-
-**Beispiel**:
-
-```yaml
-modbusproxy:
-  - port: 5022 # Lokaler Modbus TCP Server Port für eingehende Verbindungen
-    device: /dev/ttyUSB0
-    baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
-    comset: "8N1" # Kommunikationsparameter für den Adapter
-```
