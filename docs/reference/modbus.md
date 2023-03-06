@@ -15,7 +15,7 @@ Soll ein serielles Modbus-Gerät über einen Schnittstellenkonverter via Netzwer
 Das Modbus RTU Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Auch wenn der Transportweg (TCP/IP) hierbei identisch ist handelt es sich vom Protokoll dennoch NICHT um Modbus TCP!
 Hierbei muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
 
-:::attention
+:::warning
 Achtung: Es gibt auch komplexere Schnittstellenkonverter die optional das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP übersetzen können!
 Ist diese Funktion aktiv muss evcc mit dem Konverter mittels Modbus TCP kommunizieren während der Konverter auf der anderen Seite mit dem seriellen Gerät via Modbus RTU kommuniziert und die beiden Protokolle bidirektional übersetzt.
 Hier muss man ggf. genau auf die Gerätespezifikation und Konfiguration achten sonst ist keine Kommunikation möglich!
@@ -36,7 +36,7 @@ An einem seriellen RS485-Bus lassen sich mehrere Geräte mit identischen Kommuni
 Lassen sich nicht alle Geräte an einem Bus auf einen einheitliche Kommunikationseinstellungen und unterschiedliche IDs konfigurieren ist eine Aufteilung auf mehrere voneinander unabhängige Bussysteme erforderlich.
 :::
 
-:::attention
+:::warning
 Das Mischen von Geräten mit voneinander abweichenden seriellen Kommunikationsparametern an einem Bus ist nicht möglich und führt zu unvorhersehbaren Kommunikationsfehlern.
 :::
 
