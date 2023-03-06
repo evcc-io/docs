@@ -43,8 +43,8 @@ uri: 192.168.0.11:502
 id: 1 # modbus slave id
 ```
 
-Seriellen Schnittstellen verwenden standardmäßig das Modbus-RTU-Protokoll, Netzwerkziele werden standardmäßig via Modbus/TCP angesprochen. Dieses Verhalten kann mittels `rtu: true/false` ggf. überschrieben werden.
-Wenn es sich um ein Modbus-RTU-Gerät handelt welches, das über einen RS485/Ethernet-Konverter angebunden ist, muss zusätzlich also `rtu: true` gesetzt werden. Die serielle Konfiguration wird dann direkt im Adapter eingestellt (siehe oben).
+Serielle Schnittstellen verwenden standardmäßig das Modbus-RTU-Protokoll, Netzwerkziele werden standardmäßig via Modbus/TCP angesprochen. Für TCP-Ziele kann dieses Verhalten kann mittels `rtu: true` ggf. überschrieben werden (Modbus RTU over TCP).
+Wenn es sich um ein Modbus-RTU-Gerät handelt welches, das über einen einfachen, transparenten RS485/TCP-Konverter (d.h. ohne Protokollübersetzung) angebunden ist, muss zusätzlich also `rtu: true` gesetzt werden. Die serielle Konfiguration wird dann direkt im Adapter eingestellt (siehe oben).
 
 **Beispiel**:
 
@@ -116,16 +116,38 @@ Um ein Regsiter zu schreiben wird `type: writesingle` verwendet, welches ein ein
 
 ## Modbus für Geräte die nur 1 Verbindung erlauben
 
-Einige Geräte lassen nur einen Modbus Client zu, z.B. SolarEdge. Mit Hilfe von `modbusproxy` ist es möglich, evcc als Modbus Proxy einzurichten. Damit spricht evcc mit dem Gerät, weitere Gerät mit evcc, welches die Anfragen dann durchreicht.
+Einige Geräte lassen nur einen (oder sehr wenige) Modbus TCP Clients zu, z.B. SolarEdge-Wechselrichter. Bei seriellen Modbus RTU RS485-Bussystemen ist ohnehin nur ein Master erlaubt. Mit Hilfe von `modbusproxy` ist es möglich, evcc als Modbus-Proxy einzurichten. Damit kommuniziert evcc direkt mit dem Gerät, weitere Systeme aber stattdessen mit evcc, welches die Kommunikationverbindungen dann bündelt und an das eigentliche Gerät stellvertretend durchreicht.
 
-Wichtig: als Proxy erlaubt evcc nur Verbindungen mittels Modbus TCP, KEIN Modbus RTU. Clientseitig wird entsprechend Konfiguration übersetzt.
+:::info
+Der Modbus Proxy unterstützt *eingehend* (von Drittsystemen wie z.B. Hausautomation, Logger) ausschließlich Modbus TCP!
+
+*Ausgehend* in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
+:::
+
+Im Fall von Verbindungen über TCP/IP kann bei Bedarf mittels `rtu: true` auf Modbus RTU over TCP umgeschaltet werden.
+
+Durch `readonly: true` lassen sich Modbus-Schreibzugriffe durch Drittsysteme pauschal unterbinden.
+
+:::info
+Intern teilen sich die definierten Geräte automatisch den Kommunikationskanal wenn die Verbindungsparameter übereinstimmen.
+:::
 
 **Beispiel**:
 
 ```yaml
 modbusproxy:
-  - port: 5200
+  - port: 5021 # Lokaler Modbus TCP Server Port
     uri: 192.0.2.2:502 # IP und Port des Gerätes, das abgefragt werden soll
-    # rtu: true
-    # readonly: true
+    # rtu: true # Modbus RTU over TCP statt Modbus TCP
+    # readonly: true # Schreibzugriffe werden unterbunden
+```
+
+**Beispiel**:
+
+```yaml
+modbusproxy:
+  - port: 5022 # Lokaler Modbus TCP Server Port für eingehende Verbindungen
+    device: /dev/ttyUSB0
+    baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+    comset: "8N1" # Kommunikationsparameter für den Adapter
 ```
