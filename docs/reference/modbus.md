@@ -9,18 +9,20 @@ Einige Geräte, wie z.b. Zähler ([`meters`](/docs/reference/configuration/meter
 Die `meter` Konfiguration besteht hierbei aus der Art der pysikalischen Verbindung (Schnittstelle), ggf. den technischen Schnittstellenparametern, dem verwendeten Modbus-Protokoll, der eindeutigen Modbus-ID des Gerätes auf dem Bus und der Nummer und Art des Registers welches letztendlich gelesen oder geschrieben werden soll.
 
 Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus RTU, Modbus ASCII und Modbus TCP. Diese können technisch auch über unterschiedliche Schnittstellentypen übertragen werden können.
-Die klassische Variante ist dabei Modbus RTU über eine serielle RS485-Busschnittstelle wie sie typischerweise z. B. bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise über das Modbus TCP-Protokoll angesprochen.
+Die klassische Variante ist dabei Modbus RTU über eine serielle RS485-Busschnittstelle wie sie bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer nativen Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise über das Modbus TCP-Protokoll angesprochen.
 
-Soll ein entferntes RS485-Gerät aber ebenfalls über einfachte, transparente Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich ein Modbus RTU Protokoll über eine TCP/IP-Verbindung zustande.
-Das Modbus RTU Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Auch wenn der Transportweg (TCP/IP) hierbei identisch ist handelt es sich dennoch NICHT um Modbus TCP!
-Hier muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
+Soll ein serielles Modbus-Gerät über einen Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich ein Modbus RTU Protokoll über eine TCP/IP-Verbindung zustande.
+Das Modbus RTU Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Auch wenn der Transportweg (TCP/IP) hierbei identisch ist handelt es sich vom Protokoll dennoch NICHT um Modbus TCP!
+Hierbei muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
 
-:::info
-Achtung: Es gibt auch komplexere Umsetzer die zusätzlich das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP umsetzen können! Bei diesen Geräten spricht dann evcc mit dem Konverter tatsächlich Modbus TCP während der Konverter mit dem seriellen Gerät via Modbus RTU kommuniziert und die Protokolle bidirektional übersetzt.
+:::attention
+Achtung: Es gibt auch komplexere Schnittstellenkonverter die optional das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP übersetzen können!
+Ist diese Funktion aktiv muss evcc mit dem Konverter mittels Modbus TCP kommunizieren während der Konverter auf der anderen Seite mit dem seriellen Gerät via Modbus RTU kommuniziert und die beiden Protokolle bidirektional übersetzt.
 Hier muss man ggf. genau auf die Gerätespezifikation und Konfiguration achten sonst ist keine Kommunikation möglich!
 :::
 
-Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration am Konverter festgelegt und evcc kommuniziert letztendlich via Netzwerk mit dem Konverter. Wie zuvor erwähnt ist dabei jedoch das verwendete Modbus-Protokoll korrekt zu konfigurieren.
+Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration nur am Konverter festgelegt.
+Die evcc-Konfiguration betrifft dann nur den Abschnitt zum Konverter.
 
 ## Physikalische Verbindung
 
