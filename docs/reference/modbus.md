@@ -11,44 +11,64 @@ Die `meter` Konfiguration besteht hierbei aus der Art der pysikalischen Verbindu
 Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus RTU, Modbus ASCII und Modbus TCP. Diese können technisch auch über unterschiedliche Schnittstellentypen übertragen werden können.
 Die klassische Variante ist dabei Modbus RTU über eine serielle RS485-Busschnittstelle wie sie typischerweise z. B. bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise über das Modbus TCP-Protokoll angesprochen.
 
-Soll ein entferntes RS485-Gerät aber ebenfalls über einfachte, transparente Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich ein Modbus-RTU-Protokoll über eine TCP/IP-Verbindung zustande. Das Modbus-RTU-Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Hierbei handelt es sich NICHT um Modbus TCP. Hierbei muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
+Soll ein entferntes RS485-Gerät aber ebenfalls über einfachte, transparente Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich ein Modbus RTU Protokoll über eine TCP/IP-Verbindung zustande.
+Das Modbus RTU Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Auch wenn der Transportweg (TCP/IP) hierbei identisch ist handelt es sich dennoch NICHT um Modbus TCP!
+Hier muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
 
 :::info
 Achtung: Es gibt auch komplexere Umsetzer die zusätzlich das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP umsetzen können! Bei diesen Geräten spricht dann evcc mit dem Konverter tatsächlich Modbus TCP während der Konverter mit dem seriellen Gerät via Modbus RTU kommuniziert und die Protokolle bidirektional übersetzt.
-Hier muss man ggf. genau auf die Gerätekonfiguration und Spezifikation achten sonst ist keine Kommunikation möglich!
+Hier muss man ggf. genau auf die Gerätespezifikation und Konfiguration achten sonst ist keine Kommunikation möglich!
 :::
 
 Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration am Konverter festgelegt und evcc kommuniziert letztendlich via Netzwerk mit dem Konverter. Wie zuvor erwähnt ist dabei jedoch das verwendete Modbus-Protokoll korrekt zu konfigurieren.
 
 ## Physikalische Verbindung
 
-Wenn das Gerät seriell über einen seriellen RS485-Adapter verbunden ist, muss `device` und die seriellen Kommunikationsparameter `baudrate`, `comset` entsprechend der Gerätekonfiguration angegeben werden. Alle Geräte am Bus müssen identische Kommunikationsparameter verwenden. Dazu bitte die jeweilige Betriebanleitung, Datenblätter oder Systemeinstellungen vergleichen.
+### Serielle Verbindung (RS485)
+
+Wenn das Gerät direkt über einen RS485-Adapter verbunden ist (Modbus RTU), muss `device` und die seriellen Kommunikationsparameter `baudrate`, `comset` entsprechend der Gerätekonfiguration angegeben werden.
+Dazu bitte die jeweilige Betriebanleitung, Datenblätter oder Systemeinstellungen vergleichen.
+
+:::info
+An einem seriellen RS485-Bus lassen sich mehrere Geräte mit identischen Kommunikationsparameter betreiben wenn jedes Gerät eine eigene Modbus ID zugewiesen bekommen hat.
+Lassen sich nicht alle Geräte an einem Bus auf einen einheitliche Kommunikationseinstellungen und unterschiedliche IDs konfigurieren ist eine Aufteilung auf mehrere voneinander unabhängige Bussysteme erforderlich.
+:::
+
+:::attention
+Das Mischen von Geräten mit voneinander abweichenden seriellen Kommunikationsparametern an einem Bus ist nicht möglich und führt zu unvorhersehbaren Kommunikationsfehlern.
+:::
 
 **Beispiel**:
 
 ```yaml
 source: modbus
+id: 1
 device: /dev/ttyUSB0
-baudrate: 9600
-comset: "8N1"
+baudrate: 38400
+comset: "8E1"
 ```
 
-Wenn das Gerät über eine Netzwerkverbindung (TCP/IP) angebunden ist, muss eine `uri` bestehend aus HOSTNAME:PORT oder IP:PORT angegeben werden:
+### Direkte Netzwerkverbindung
+
+Wenn das Gerät direkt über eine native Netzwerkverbindung (Modbus TCP) angebunden ist, muss eine `uri` bestehend aus HOSTNAME:PORT oder IP:PORT angegeben werden:
 
 **Beispiel**:
 
 ```yaml
 source: modbus
+id: 1
 uri: 192.168.0.11:502
 ```
 
-Serielle Schnittstellen verwenden standardmäßig das Modbus-RTU-Protokoll, Netzwerkziele werden standardmäßig via Modbus/TCP angesprochen. Für TCP-Ziele kann dieses Verhalten kann mittels `rtu: true` ggf. überschrieben werden (Modbus RTU over TCP).
-Wenn es sich um ein Modbus-RTU-Gerät handelt welches, das über einen einfachen, transparenten RS485/TCP-Konverter (d.h. ohne Protokollübersetzung) angebunden ist, muss zusätzlich also `rtu: true` gesetzt werden. Die serielle Konfiguration wird dann direkt im Adapter eingestellt (siehe oben).
+### Serielles Gerät über Netzwerkverbindung (mit Schnittstellenkonverter)
+
+Wird ein serielles Gerät über einen zwischengeschalteten transparenten RS485-IP-Schnittstellenkonverter (ohne Protokollübersetzung) angeschlossen muss das Protokoll über die TCP/IP-Verbindung zusätzlich mittels `rtu: true` auf Modbus RTU umgestellt werden.
 
 **Beispiel**:
 
 ```yaml
 source: modbus
+id: 1
 uri: 192.168.0.10:502
 rtu: true # Modbus RTU over TCP
 ```
@@ -62,13 +82,13 @@ Die integrierten vordefinierten Gerätemodelle `model` sind identisch zu [MBMD](
      DZG       DZG Metering GmbH DVH4013 meters
      IEM3000   Schneider Electric iEM3000 series
      INEPRO    Inepro Metering Pro 380
-     JANITZA   Janitza B-Series meters
+     JANITZA   Janitza meters
      MPM       Bernecker Engineering MPM3PM meters
      ORNO1P    ORNO WE-514 & WE-515
      ORNO1P504 ORNO WE-504
      ORNO3P    ORNO WE-516 & WE-517
      SBC       Saia Burgess Controls ALE3 meters
-     SDM       Eastron SDM630
+     SDM       Eastron SDM630/120/72DMv2
      SDM220    Eastron SDM220
      SDM230    Eastron SDM230
      SDM72     Eastron SDM72
@@ -86,7 +106,7 @@ Das Geräte-`model` und die Slave ID `id` sind immer erforderlich:
 
 ```yaml
 source: modbus
----
+...
 model: sdm
 value: Power
 scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
@@ -100,6 +120,7 @@ Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefiniert
 
 ```yaml
 source: modbus
+...
 register:
   address: 40070
   type: holding # holding or input

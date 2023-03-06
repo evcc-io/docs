@@ -47,9 +47,9 @@ Der lokale TCP/IP-Port unter dem eine Verbindung als Proxyserver bereitstellt wi
 port: 5021
 ```
 
-#### Optionale Parameter
+## Optionale Parameter
 
-##### `rtu`
+### `rtu`
 
 Zu Netzwerkzielen wird üblicherweise mit Modbus TCP kommuniziert.
 Bei Bedarf kann mit der Angabe von `rtu: true` auf Modbus RTU over TCP statt Modbus TCP umgeschaltet werden.
@@ -62,7 +62,7 @@ Muss mit der Gerätekonfiguration übereinstimmen. Wird bei seriellen Zielsystem
 rtu: true
 ```
 
-##### `readonly`
+### `readonly`
 
 Durch `readonly: true` lassen sich Modbus-Schreibzugriffe durch Drittsysteme pauschal unterbinden.
 
