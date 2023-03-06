@@ -411,7 +411,7 @@ maxcurrent: 16
 
 ### `priority`
 
-Dient der Priorisierung von Loadpoints untereinander.
+Dient während der Ladung der Priorisierung von Loadpoints untereinander. Hat keinen Einfluss auf den Start der Ladung.
 
 Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringer priorisierten Loadpoints zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist.
 
