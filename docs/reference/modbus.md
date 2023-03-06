@@ -33,7 +33,7 @@ Dazu bitte die jeweilige Betriebanleitung, Datenblätter oder Systemeinstellunge
 
 :::info
 An einem seriellen RS485-Bus lassen sich mehrere Geräte mit identischen Kommunikationsparameter betreiben wenn jedes Gerät eine eigene Modbus ID zugewiesen bekommen hat.
-Lassen sich nicht alle Geräte an einem Bus auf einen einheitliche Kommunikationseinstellungen und unterschiedliche IDs konfigurieren ist eine Aufteilung auf mehrere voneinander unabhängige Bussysteme erforderlich.
+Lassen sich nicht alle Geräte an einem Bus auf einheitliche Kommunikationseinstellungen (aber unterschiedliche IDs) konfigurieren ist eine Aufteilung auf mehrere voneinander unabhängige Bussysteme erforderlich.
 :::
 
 :::caution
