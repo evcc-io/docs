@@ -6,7 +6,7 @@ sidebar_position: 1
 
 ## Grundlagen
 
-Hier gehts um die grundlegende Arbeitsweise von EVCC.
+Hier gehts um die grundlegende Arbeitsweise von evcc.
 
 [Weiterlesen...](basics)
 
