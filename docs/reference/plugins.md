@@ -154,6 +154,17 @@ cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
 
+## Const (nur lesen)
+
+Das `const` Plugin gibt einen konstanten Wert zurück. Es eignet sich z. B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
+
+**Beispiel Lesen**:
+
+```yaml
+source: const
+value: -16247
+```
+
 ## Calc (nur lesen)
 
 Das `calc` Plugin erlaubt es mehrere Einzelwerte mathematisch weiterzuverarbeiten:
@@ -189,10 +200,15 @@ Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 ble
 Das `calc` Plugin ist hilfreich um z.B.
 
 - Leistungswerte von einzelnen PV-Strings zu summieren (addieren)
-- Die Leistung aus Spannung und Strom zu berechnen (multiplizieren)
+- Die Scheinleistung aus Spannung und Strom zu berechnen (multiplizieren)
 - Getrennte Leistungswerte für Import und Export zu einem vorzeichenbehafteten Einzelwert zu kombinieren (subtrahieren).
 - Prozentuale Füllstände zu berechnen (dividieren)
 - Die richtige Richtung des Stromflusses festlegen (sign)
+- Bekannte Offsets zu eliminieren (addieren mit `const` Plugin)
+
+:::tip
+Konstante Hilfswerte (z. B. für Offsets) lassen sich mit Hilfe des `const` Plugins als Operand erzeugen.
+:::
 
 ## Kombinierter Status (nur lesen)
 
