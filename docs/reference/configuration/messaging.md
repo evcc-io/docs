@@ -190,7 +190,7 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     - `connected` - Indikator, Fahrzeug am Ladepunkt angeschlossen (_bool_)
     - `connectedDuration` - Anschlußdauer des Fahrzeugs in Nanosekunden (_integer_)
     - `vehicleOdometer` - Aktueller Kilometerstand des Fahrzeugs in km (_float_)
-    - `vehiclePresent` - Indikator, evcc auf die Fahrzeugdaten zugreifen kann (_bool_)
+    - `vehiclePresent` - Indikator, evcc kann auf die Fahrzeugdaten zugreifen (_bool_)
     - `vehicleRange` - Aktuelle Reichweite des Fahrzeugs in km (_float_)
     - `vehicleSoc` - Aktueller Füllstand der Fahrzeugbatterie in Prozent (_integer_)
 - Infos zur Einsparungseffizienz
