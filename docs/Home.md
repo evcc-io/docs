@@ -61,3 +61,10 @@ Behandelt die Themen evcc Einrichtung und Grundlagen, Intragtion mit ioBroker un
 Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung über MQTT und ioBroker, unterschiedliche Installationsmöglichkeiten.
 
 [![YouTube Haus Automatisierung](youtube_hausautomatisierung.jpg)](https://youtu.be/93C47QUjomQ)
+
+## Blogartikel
+
+### hobbyblogging.de
+
+- Einführung in die Grundkonzepte: [evcc - Was soll das sein?](https://hobbyblogging.de/evcc-was-soll-das-sein)
+- Einrichtung mit Balkonsolar und smarten Steckdosen [evcc installieren – So einfach geht’s!](https://hobbyblogging.de/evcc-installieren)
