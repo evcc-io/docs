@@ -15,6 +15,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST /api/buffersoc/<soc>`: battery buffer SoC in %
 - `POST /api/prioritysoc/<soc>`: battery priority SoC in %
 - `POST /api/residualpower/<power>`: grid residual power in W
+- `POST /api/smartcostlimit/<cost>`: smart charging cost limit (previously known as "cheap" tariff)
 - `GET  /api/tariff/<type>`: list of prices (grid/feedin/planner)
 - `GET  /api/sessions[?format=csv&lang=<lang>]`: charging sessions
 - `GET  /api/telemetry`: telemetry enabled status
