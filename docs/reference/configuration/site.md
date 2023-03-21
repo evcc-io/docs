@@ -247,7 +247,7 @@ smartCostlimit: 0.20  # 20 ct
 Beispiel gCO2e Obergrenze (bei Nutzung z.B. Grünstromindex)
 
 ```yaml
-smartCosLimit: 550  # 550 gCO2 equivalent
+smartCostLimit: 550  # 550 gCO2 equivalent
 ```
 
 ### `maxGridSupplyWhileBatteryCharging`
