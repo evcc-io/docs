@@ -236,7 +236,7 @@ residualPower: -690
 
 ### `smartCostLimit` (ehemals `cheap`)
 
-Mit diesem Parameter kann eine Preis- oder gCO2equivalent-Grenze festgelegt werden, die von Planner beim Zielladen entsprechend berücksichtigt wird. 
+Mit diesem Parameter kann eine Preis- oder gCO2equivalent-Grenze festgelegt werden. Im PV-Modus startet die Ladung beim Unterschreiten dieser Grenze. 
 
 Beispiel Preisobergrenze (bei variablen Tarifen)
 
