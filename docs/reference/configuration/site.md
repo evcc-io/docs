@@ -234,6 +234,22 @@ Mindestladeleistung: 1 Phase _ 6A _ 230V = 1380 W, davon 50%: 690 W
 residualPower: -690
 ```
 
+### `smartCostLimit` (ehemals `cheap`)
+
+Mit diesem Parameter kann eine Preis- oder gCO2equivalent-Grenze festgelegt werden. Im PV-Modus startet die Ladung beim Unterschreiten dieser Grenze. 
+
+Beispiel Preisobergrenze (bei variablen Tarifen)
+
+```yaml
+smartCostlimit: 0.20  # 20 ct
+```
+
+Beispiel gCO2e Obergrenze (bei Nutzung z.B. Grünstromindex)
+
+```yaml
+smartCostLimit: 550  # 550 gCO2 equivalent
+```
+
 ### `maxGridSupplyWhileBatteryCharging`
 
 Dieser Parameter ist (nur) hilfreich bei Hybrid-Wechselrichter-Systemen, bei denen die DC-Erzeugungsleistung in Verbindung mit einem direkt angebundenen Speichersystem größer sein kann als die AC-Ausgabeleistung des Wechselrichters. Hierbei kann es während der Fahrzeugladung zu Netzbezug kommen, obwohl gleichzeitig die Batterie geladen wird.
