@@ -39,7 +39,7 @@ tariffs:
         price: 0.15 # EUR/kWh
 ```
 
-evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de), [Tibber](https://tibber.com), oder [Octopus Energy](https://octopus.energy). Die Konfiguration erlaubt es "günstige" Preise zu definieren, bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
+evcc unterstützt die Verwendung von flexiblen Stromtarifen von [Awattar](https://www.awattar.de), [Tibber](https://tibber.com), oder [Octopus Energy](https://octopus.energy). Die Konfiguration erlaubt es "günstige" Preise zu definieren (siehe `smartCostLimit` in site), bei welchen das Laden vom Netz mit der maximal möglichen Leistung aktiviert wird, selbst wenn nicht genug PV Leistung zur Verfügung steht.
 
 **Beispiel: Flexibler Energiepreis**
 
@@ -48,13 +48,11 @@ tariffs:
   grid:
     # either
     type: tibber
-    cheap: 0.2 # [currency]/kWh
     token: "476c477d8a039529478ebd690d35ddd80e3308ffc49b59c65b142321aee963a4" # access token
     homeid: "cc83e83e-8cbf-4595-9bf7-c3cf192f7d9c" # optional if multiple homes associated to account
 
     # or
     type: awattar
-    cheap: 0.2 # [currency]/kWh
     region: de # optional, choose at for Austria
 ```
 
@@ -107,13 +105,8 @@ Der Stromanbieter [Awattar](https://www.awattar.de)
 
 ```yaml
 type: awattar
-cheap: 0.2 # [currency]/kWh
 region: de # optional
 ```
-
-#### `cheap`
-
-Energiepreis pro kWh der als günstig gewertet werden soll.
 
 #### `region`
 
@@ -134,14 +127,10 @@ Der Stromanbieter [Tibber](https://www.tibber.com)
 
 ```yaml
 type: tibber
-cheap: 0.2 # [currency]/kWh
 token: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 homeid: "12345678-90ab-cdef-1234-567890abcdef" # optional
 ```
 
-#### `cheap`
-
-Energiepreis pro kWh der als günstig gewertet werden soll.
 
 #### `token`
 
