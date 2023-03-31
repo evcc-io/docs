@@ -12,7 +12,7 @@ Das persönliche _Contributor's & Sponsor-Token_ erfordert ein [Github-Sponsorin
 
 :::info
 
-Dadurch, dass Github die Bezahlmöglichkeiten für das Sponsoring geändert hat, ist leider kein Paypal mehr möglich. 
+Dadurch, dass Github die Bezahlmöglichkeiten für das Sponsoring geändert hat, ist leider kein Paypal mehr möglich.
 
 Wer keine Kredit-/Debitkarte verwenden möchte, kann sich diesbezüglich per Mail an info@evcc.io wenden.
 

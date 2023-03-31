@@ -236,18 +236,18 @@ residualPower: -690
 
 ### `smartCostLimit` (ehemals `cheap`)
 
-Mit diesem Parameter kann eine Preis- oder gCO2equivalent-Grenze festgelegt werden. Im PV-Modus startet die Ladung beim Unterschreiten dieser Grenze. 
+Mit diesem Parameter kann eine Preis- oder gCO2equivalent-Grenze festgelegt werden. Im PV-Modus startet die Ladung beim Unterschreiten dieser Grenze.
 
 Beispiel Preisobergrenze (bei variablen Tarifen)
 
 ```yaml
-smartCostlimit: 0.20  # 20 ct
+smartCostlimit: 0.20 # 20 ct
 ```
 
 Beispiel gCO2e Obergrenze (bei Nutzung z.B. Grünstromindex)
 
 ```yaml
-smartCostLimit: 550  # 550 gCO2 equivalent
+smartCostLimit: 550 # 550 gCO2 equivalent
 ```
 
 ### `maxGridSupplyWhileBatteryCharging`

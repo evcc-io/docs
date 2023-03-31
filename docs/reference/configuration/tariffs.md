@@ -131,7 +131,6 @@ token: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
 homeid: "12345678-90ab-cdef-1234-567890abcdef" # optional
 ```
 
-
 #### `token`
 
 Das Zugangstoken des Anbieters

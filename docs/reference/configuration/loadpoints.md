@@ -422,7 +422,7 @@ Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladun
 
 :::info
 
-Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist. 
+Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist.
 
 :::
 

@@ -28,9 +28,9 @@ modbusproxy:
 ```
 
 :::info
-Die Proxy-Funktion unterstützt *eingehend* (d.h. von Drittsystemen wie z.B. Hausautomation, Logger) ausschließlich Modbus TCP.
+Die Proxy-Funktion unterstützt _eingehend_ (d.h. von Drittsystemen wie z.B. Hausautomation, Logger) ausschließlich Modbus TCP.
 
-*Ausgehend* in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
+_Ausgehend_ in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
 :::
 
 ---

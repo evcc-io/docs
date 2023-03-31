@@ -108,7 +108,7 @@ Das Geräte-`model` und die Slave ID `id` sind immer erforderlich:
 
 ```yaml
 source: modbus
-...
+---
 model: sdm
 value: Power
 scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
@@ -122,7 +122,7 @@ Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefiniert
 
 ```yaml
 source: modbus
-...
+---
 register:
   address: 40070
   type: holding # holding or input
