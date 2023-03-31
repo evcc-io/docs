@@ -10,6 +10,14 @@ evcc ist zwar Open Source, aber wir möchten auch die Hersteller ermutigen, Open
 
 Das persönliche _Contributor's & Sponsor-Token_ erfordert ein [Github-Sponsoring](https://github.com/sponsors/evcc-io). Wir haben diesen Weg gewählt, weil es einfach zu integrieren ist und keine Kommission beinhaltet. Unter [sponsor.evcc.io](https://sponsor.evcc.io) kann das _Contributor's & Sponsor-Token_ beantragt werden. Ein Sponsor-Token so lange gültig wie die Patenschaft aktiv ist und kann jederzeit neu ausgestellt werden. Es kann für beliebig viele Geräte verwendet werden. Trage das Token in deine `evcc.yaml` ein um die damit verbundenen Geräteimplementierungen und das Supporter-Konfetti freizuschalten. Danke für die Unterstützung! 💚 🎉
 
+:::info
+
+Dadurch, dass Github die Bezahlmöglichkeiten für das Sponsoring geändert hat, ist leider kein Paypal mehr möglich. 
+
+Wer keine Kredit-/Debitkarte verwenden möchte, kann sich diesbezüglich per Mail an info@evcc.io wenden.
+
+:::
+
 Folgende Funktionalitäten sind nur mit Sponsoring verfügbar:
 
 - Nutzung der 1P/3P Umschaltfunktion von unterstützen Wallboxen
