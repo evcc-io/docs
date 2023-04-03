@@ -1,0 +1,62 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Vorüberlegungen
+
+Du bist fachlich bewandert und weist auf welcher Hardware evcc installiert und welche Wallbox, Solaranlage und ggf. Batterie eingebunden werden soll? Dann überspringe diese Seite und gehe direkt zur Installation.
+
+Wenn das Laden mit Solarstrom noch neu für dich ist, findest du im Folgenden einige Hinweise wie der Start mit evcc aussehen könnte.
+
+## Ausgangslage
+
+Ist evcc die richtige Lösung zum Überschussladen für mich? Ich habe eine Solaranlage und ein E-Auto und möchte das mal probieren. Wo fange ich an?
+
+Eine Solaranlage ist besonderes wirtschaftlich, wenn ich den selbst erzeugten Strom auch selbst verbrauche. Dazu muss der Strom genau dann verbraucht werden, wenn er erzeugt wird, also die Sonne scheint. Die einfachste Lösung: Ich schließe das Auto immer dann zum Laden an, wenn die Sonne scheint und keine Wolke in Sicht ist. Leider haben wir Wolken oder wir verbrauchen den Strom der Solaranlage gerade für die Waschmaschine. Wir müssen die Ladesteuerung daher automatisieren - und genau das macht evcc.
+
+Für die Automatisierung müssen wir wissen, wie hoch der aktuelle Stromüberschuss ist, den wir nicht selber verbrauchen und daher in das Stromnetz (engl. Grid) einspeisen. Diese Information bekommen wir vom Stromzähler (engl. Meter). Das kann der Stromzähler des Energieversorgers (z.B. Stadtwerke) sein oder mit der Solaranlage wurde ein entsprechender zusätzlicher Zähler verbaut. Letzteres ist meist dann der Fall, wenn die Solaranlage mit einem Speicher ausgestattet ist. 
+
+Der Zähler muss sich elektronisch auslesen lassen. Schau einfach mal unter [Geräte > Hausinstallation](/docs/devices/meters) nach, ob du deine Geräte findest. Wenn nicht, sind unter [Tipps und FAQ > Hausinstallation](/docs/guides/meters) weitere Hinweise.
+
+Eine weitere Voraussetzung für das Automatisieren des Überschussladens ist eine steuerbare Wallbox. Die unterstützten Geräte sind unter [Geräte > Wallboxen](/docs/devices/chargers) gelistet. Habe ich (noch) keine Wallbox, empfiehlt sich testweise eine schaltbare Steckdose mit Verbrauchsmessung (z.B. TP-Link Tapo P110), die es schon für unter 20 EUR gibt. Sie kann dann später zum Schalten des Ladegerätes für E-Roller oder E-Bike verwendet werden. Für das Elektroauto ist das keine dauerhafte Lösung, da zum einem die Ladeleistung nicht geregelt d.h. an den aktuellen Stromertrag der Solaranlage und den Eigenverbrauch angepasst werden kann. Zum anderen besteht keine Kommunikation mit dem Elektroauto, so dass das Schalten unter voller Last erfolgt, was langfristig die schaltbare Steckdose nicht überlebt. Bei Wallboxen kommuniziert Wallbox und Auto, so dass vor dem Abschalten durch die Wallbox das Auto bereits das Laden eingestellt hat. 
+
+## Hardware für die evcc Installation
+
+Evcc ist eine Open Source Software, die von Freiwilligen entwickelt wird. Es gibt also keine Garantie auf die Funktion. Dafür zahlst du auch keinen Kaufpreis. Das Open Source Software sehr gut funktionieren kann, siehst du z.B. an Linux, dass seit vielen Jahren nach diesem Modell entwickelt wird. Dafür bedarf es aber einer aktiven Community. Sie beantwortet z.B. [Fragen der Anfänger](https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe) oder entwickelt die Software weiter. Solltest dazu nichts beitragen können, kannst du das Projekt durch [Sponsoring](/docs/sponsorship) unterstützen. Für bestimmte kommerzielle Wallboxen ist ein Sponsoring notwendig.
+
+Wenn ich evcc erstmal nur probieren will, brauche ich keinen Raspberry Pi kaufen, sondern kann mit einem alten ausrangierten PC oder Laptop starten. Hier sollten alle Geräte der letzten 10 Jahre mit Intel-kompatibler 64bit CPU und einer Netzwerkkarte (oder WLAN) funktionieren. Langfristig sprechen der höhere Stromverbrauch und der größere Platzbedarf gegen einen PC oder Laptop. Des Weiteren kann es gerade mit Laptops Probleme mit dem Stromsparmodus geben. Alternativen zur Installation auf einem Raspberry Pi wären bereits in Heimnetzwerk vorhandene Geräte. Dies könnte z.B. ein Netzwerkspeicher (NAS) oder eine Heimzentrale von Homeatic sein. Hier ist die Installation anspruchsvoller, da evcc dann auf eine virtuelle Maschine oder als Container laufen muss.  
+
+Wie auf einem Rechner ein Debian oder Ubuntu Betriebssystem installiert wird, kann in [Youtube-Videos](https://www.youtube.com/results?search_query=debian+installieren+deutsch) oder Anleitungen im Netz nachgeschaut werden. Eine graphische Benutzeroberfläche benötigen wir nicht zwingend - die Kommandozeile reicht aus. 
+Schon bei der Installation sollte ein Netzwerkkabel den Rechner mit dem Heimnetz verbinden. Das Netzwerkkabel wird dabei am DSL- oder Kabel-Router (z.B. Fritzbox) oder einem Switch angeschlossen. Alternativ kann die Verbindung auch über WLAN hergestellt werden. WLAN Verbindungen sind aber nicht so zuverlässig, so dass später bevorzugt auf eine Kabelverbindung umgestellt werden sollte.
+
+Bevor dem Start der Installation von evcc unter Debian oder Ubuntu gemäß der [Anleitung](/docs/installation/linux), sollten alle benötigten IP-Adressen von Zählern, Solaranlagen, Speichern und Wallboxen bereit liegen. Meist finden sich die IP-Adressen aller Geräte im Webinterface der DSL- oder Kabel-Router (z.B. Fritzbox) aufgelistet. Hilfreich ist es, diese Adressen dauerhaft zuzuweisen, damit sie sich auch über lange Zeit nicht verändern. In Fritzboxen gibt es dafür unter "Heimnetz>Netzwerk>Details für <Gerät>" die Option "Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen".
+
+## Wallboxen
+
+Wallboxen kommen in verschiedenen Varianten daher. Im Folgenden werden die typischen Eigenschaften bzw. Funktionen der Wallboxen dargestellt. Damit sollte die Entscheidung für oder gegen eine Wallbox etwas erleichtert werden.
+
+### Ladeleistung
+
+Eine erste Entscheidung betrifft die maximale Ladeleistung der Wallbox. Gängig sind vor allem die 11kW und 22kW Wallboxen. Wobei die 11kW Variante die am Häufigsten gewählte Variante sein sollte. Dies hat vor allem zwei Gründe: Zum einen können viele Fahrzeuge maximal mit 11kW Wechselspannung laden und zum anderen können 11kW Wallboxen mit einer einfachen Anmeldung (Mitteilung) beim Netzbetreiber in Betrieb genommen werden. Die 22kW Wallboxen sind genehmigungspflichtig durch den Versorger. Diese wird ggf. nur unter Auflagen erteilt. So kann der Versorger fordern, dass die Ladung bei Energiemangellage durch Steuersignal abgeschaltet werden kann. Dies kann die Installationskosten nach oben treiben. Sollte der Hausanschluss mit 22kW Wallbox eine Anschlussleistung von 30kW überschreiten, kann der Versorger für die 30kW überschreitende Anschlussleistung einen Netzausbaubeitrag erheben. 
+Die maximale Ladeleistung bzw. der maximale Strom lässt sich in den Wallboxen über Schalter konfigurieren. Der Installateur muss dies entsprechend der genehmigten Maximalleistung (Energieversorger), der Installation (Leitungsschutzschalter, FI-Schutz, Leitungsquerschnitt, Kabellänge, etc.) und dem verbauten CSS-Ladekabel korrekt einstellen. Fehler können hier schnell zu Ausfällen oder Kabelbränden führen. Im Schadensfall fragt die Versicherung nach dem Installationsprotokoll bzw. der Rechnung des vom Versorger zugelassenen Installateurs. 
+
+### Basis: Ohne Kommunikationsschnittstelle zur Steuerung des Ladevorgangs
+
+  Diese Wallboxen sind aufgrund der fehlenden Schnittstelle zur Steuerung des Ladevorgangs für das Überschussladen ungeeignet. Hier hilft nur, eine neue smarte oder professionelle Wallbox zu kaufen. In sehr, sehr seltenen Fällen können die Wallboxen mit einer Schnittstelle nachgerüstet werden (z.B. WARP2 Charger Basic auf WARP2 Charger Smart).
+
+### Smart: Mit Kommunikationsschnittstelle zur Steuerung des Ladevorgangs
+
+  Diese Wallboxen sind geeignet, sofern die [Schnittstelle von evcc unterstützt](/docs/devices/chargers) wird. Ein Indiz für eine Schnittstelle ist, wenn im Internet die Wallbox als förderfähig beworben wird. Als physische Schnittstelle kommt z.B. Ethernet, WLAN, LTE oder Modbus in Frage. Oftmals sind auch mehrere Schnittstellen gleichzeitig vorhanden. Zur Steuerung des Ladevorgangs bedarf es eines geeigneten Protokolls zwischen der Wallbox und evcc. Ein offener Standard, der sich mittlerweile weltweit etabliert hat, ist [OCPP (Open Charge Point Protocol)](https://de.wikipedia.org/wiki/OCPP). Sie sollten ggf. auf Unterstützung von OCPP Version 1.6 oder besser achten.
+
+  Neben der Kommunikation zwischen Wallbox und evcc ist die Kommunikation der Wallbox mit dem Fahrzeug relevant. Im einfachsten Fall kann die Wallbox nur den Ladestrom zwischen 6A und 32A signalisieren. Ja nachdem, ob die Wallbox mit einer oder mit drei Phasen an das Stromnetz angeschlossen wurde, lädt das Fahrzeug dann mindestens mit 1,38kW oder 4,14kW. Bei 11kW Wallboxen ist das Maximum bei einphasigem Anschluss dann bei 3,68kW erreicht. Um geringe Solarstromüberschüsse genauso wie größere Überschüsse laden zu können, empfiehlt sich eine automatische 1p/3p Umschaltung. Wallboxen, welche diese Funktion unterstützen sind in der [Aufstellung](/docs/devices/chargers) entsprechend vermerkt. Sollte die Wallbox eine automatische Umschaltung nicht unterstützen, könnte im Winterhalbjahr am vorgeschalteten Leitungsschutzschalter die Phase 2 und 3 ggf. händisch ausgeschaltet werden (sofern die Phasen überhaupt mechanisch einzeln zu schalten gehen und der FI-Schutzschalter mit nur einer Phase funktioniert).
+
+  Bei der obigen minimalen Kommunikation zwischen Wallbox und Fahrzeug ist es der Wallbox nicht möglich, das angeschlossene Fahrzeug zu identifizieren oder den aktuellen Ladestand (SoC) abzufragen. Um diese Informationen zu bekommen geht evcc den Weg über Schnittstellen (APIs) des Fahrzeugherstellers. Der Umfang der dort bereitgestellten Informationen ist unterschiedlich und können z.B. auch die Klimatisierung oder die Position des Fahrzeugs umfassen. Teilweise ist die Nutzung dieser APIs kostenpflichtig. 
+
+  Einige Wallboxen implementieren bereits das relativ neues Protokoll [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) (Hardware- und Softwareerweiterungen nötig), welches bei öffentlichen Schnelladesäulen für Plug and Charge und Autocharge verwendet wird. Damit ist es z.B. möglich die Identität des angeschlossenen Fahrzeugs und den SoC zu ermitteln und die Ladeleistung für jede Phase einzeln vorzugeben. Voraussetzung ist, dass auch das Fahrzeug die jeweilige Funktion unterstützt. Es ist nicht zu erwarten, dass ältere Fahrzeuge noch mit einer Unterstützung für ISO 15118 nachgerüstet werden. Gleiches gilt für Wallboxen. Sofern die Hardware für die Kommunikation nach ISO 15118 nicht verbaut ist, braucht man sich keine Hoffnungen machen. Welches Fahrzeug an welcher Wallbox, welche Attribute unterstützt, ist auch wegen der Abhängigkeit von den Softwareständen hier nicht zu dokumentieren. 
+
+### Professional: Mit Kommunikationsschnittstelle und geeichtem Zähler
+
+  Gerade für Dienstwagenfahrer und Privatpersonen, die Fahrkosten dem Finanzamt gegenüber nachweisen wollen, ist ein geeichter Zähler interessant. Einige Hersteller bieten ihre Wallbox daher auch in einer Variante mit geeichtem Stromzähler an. Damit kann für jeden Ladevorgang die jeweils geladene Energiemenge dokumentiert werden. Auch abseits des Finanzamtes ist der Zähler von Interesse, da damit die Ladeverluste genau ermittelt werden können. Ladegeräte arbeiten bei maximaler Ladeleistung oftmals am Effizientesten. Bei geringen Ladeströmen kommt es hingegen oft zu erhöhten Ladeverlusten. Mit einem Zähler können wir diese Verluste bestimmen und ggf. in evcc die minimale Ladeleistung nach oben anpassen.
