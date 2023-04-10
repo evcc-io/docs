@@ -35,6 +35,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST   /api/loadpoints/<id>/maxcurrent/<current>`: current maxCurrent value in A
 - `POST   /api/loadpoints/<id>/enable/threshold/<threshold>`: threshold value in W
 - `POST   /api/loadpoints/<id>/disable/threshold/<threshold>`: threshold value in W
+- `POST   /api/loadpoints/<id>/vechicle/<nameVehilce>`: set currently selected vehicle
 
 :::note
 Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
