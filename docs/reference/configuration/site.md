@@ -241,7 +241,7 @@ Mit diesem Parameter kann eine Preis- oder gCO2equivalent-Grenze festgelegt werd
 Beispiel Preisobergrenze (bei variablen Tarifen)
 
 ```yaml
-smartCostlimit: 0.20 # 20 ct
+smartCostLimit: 0.20 # 20 ct
 ```
 
 Beispiel gCO2e Obergrenze (bei Nutzung z.B. Grünstromindex)
