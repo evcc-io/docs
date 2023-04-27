@@ -39,13 +39,11 @@ Wir haben schon mehrfach das Feedback bekommen, dass Nutzer Bauchschmerzen mit m
 
 Die Ausstellung für die unbefristeten Sponsortoken funktioniert genauso wie der aktuelle Prozess über [sponsor.evcc.io](https://sponsor.evcc.io). Einziger Unterschied ist, dass das Token nicht abläuft.
 
-_Hinweis: Momentan wird nur das erste Token pro Benutzer automatisch ausgestellt. Wählst du die **Friends & Family** oder **Multiplikator** Stufe, stellen wir dir deine weiteren Token manuell aus. Schreib dazu einfach [info@evcc.io](mailto:info@evcc.io) an._
-
 ## 🎟️ Contributor-Token
 
 Community-Mitglieder, die über GitHub PRs zu substanziell zu evcc beigetragen haben, können auch ein freies Token erhalten. Wir sind immer froh über Bugfixes, brauchen aber auch dringend Unterstützung im Bereich Dokumentation und [Übersetzung](https://github.com/evcc-io/evcc/discussions/5218).
 
-Was genau eine substantielle Contribution ist, haben wir nicht klar geregelt. Einen Kommafehler rausmachen qualifiziert noch nicht, das Beheben eines fiesen Bugs reicht aber definitiv. Schreib uns einfach eine Mail mit Verweis auf deinen GitHub Nutzernamen.
+Was genau eine substantielle Contribution ist, haben wir nicht klar geregelt. Einen Kommafehler rausmachen qualifiziert noch nicht, das Beheben eines fiesen Bugs reicht aber definitiv. Schreib uns einfach eine Mail an [info@evcc.io](mailto:info@evcc.io) mit Verweis auf deinen GitHub Nutzernamen.
 
 ## 🚚 GitHub Sponsoring zieht um
 
