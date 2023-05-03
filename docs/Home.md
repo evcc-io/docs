@@ -68,3 +68,7 @@ Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung 
 
 - Einführung in die Grundkonzepte: [evcc - Was soll das sein?](https://hobbyblogging.de/evcc-was-soll-das-sein)
 - Einrichtung mit Balkonsolar und smarten Steckdosen [evcc installieren – So einfach geht’s!](https://hobbyblogging.de/evcc-installieren)
+
+### elefacts.de
+
+- Einführung in die Grundlagen, Detaillierte Anleitung für Raspberry Installation und Fernzugriff via Fritz!Box und DynDNS [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
