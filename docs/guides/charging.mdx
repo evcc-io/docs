@@ -86,6 +86,25 @@ Wird der Fahrzeug-Soc nicht erkannt (= 0) und ist ein Minimum-Soc > 0 definiert,
 
 Die Ladung ist in dem Fall allerdings auf die Lademenge beschränkt, die sich aus Minimun-Soc und Fahrzeugkapazität ergibt.
 
+### "Probleme" i.V.m. Gastfahrzeug
+
+Da man bei einem Gastfahrzeug keine Einstellungen definieren kann, gelten immer die Einstellungen vom Loadpoint.
+
+Dies kann zu ungünstigem Ladeverhalten (z.B. unnötige Einspeisung) führen.
+
+Beispiele:
+
+- Am Loadpoint ist `phases: 3` definiert ist. Das Gastfahrzeug kann aber nur 1-phasig laden. Dann startet die Ladung im PV-Modus trotzdem erst ab 4,2kW Überschuss.
+- Am Loadpoint mit automatischer Phasenumschaltung ist `maxcurrent: 32` definiert. Das Gastfahrzeug kann aber nur maximal mit 16A (3,7kW@1p) laden. Dann findet die Phasenumschaltung von 1p auf 3p erst bei 7,4kW Überschuss statt.
+
+Abhilfe schafft hier die Definition eines (oder mehrerer) Offline-Vehicle. Bei diesen können die entsprechenden Parameter (`phases`, `mincurrent`, `maxcurrent`) definiert werden.
+
+### Hinweis zur RFID-Nutzung
+
+Wird die Wallbox über RFID freigeschaltet, dann kann es (je nach Wallbox) vorkommen, dass das Laden sofort gestartet wird unabhängig davon, welcher Modus in evcc eingestellt ist. Hierbei kann es dann auch zu Netzbezug kommen. 
+
+Die Wallbox startet das Laden eigenmächtig. Nach kurzer Zeit wird evcc das Laden unterbrechen bzw. entsprechend runterregeln.
+
 ### Fehler: Charger out of sync: expected disabled, got enabled // Charger logic error: disabled but charging
 
 evcc erwartet nach einem Intervallzyklus bereits den neuen korrekten Status.
