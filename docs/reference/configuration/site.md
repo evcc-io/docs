@@ -212,7 +212,7 @@ Soll im PV-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden muss hie
 #### Nur `pv` `meter` vorhanden
 
 - Positiver Wert: Typischer Hausverbrauch, um damit den PV-Überschuss abschätzen zu können.
-- Negativer Wert: (ungültig)
+- Negativer Wert: angegebene Leistung wird zur PV-Leistung addiert und erhöht die zur Verfügung stehende Ladeleistung (Achtung: Netzbezug)
 
 :::info
 Bei Existenz eines Batteriespeichers wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 W einzutragen, um damit eine Speicherladung gemäß der konfigurierten Prioritäten (siehe `prioritySoc`) zu ermöglichen. Andernfalls "sieht" die unabhängige Regelung des Speichers keinen nutzbaren Überschuss.
