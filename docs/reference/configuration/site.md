@@ -162,7 +162,7 @@ aux:
 
 Erlaubt das Entladen einer Hausbatterie oberhalb dem angegebenen Soc (%) Wert, wenn zu wenig Solarüberschuss (unterhalb der Mindestladeleistung) zur Verfügung steht. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen. Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
 
-Es wird im Modus `PV` automatisch ein Ladevorgang gestartet, sobald genug Solarüberschuss vorhanden ist, und nicht (mehr), wenn ausschließlich der Soc der Hausbatterie größer als der eingestellte `bufferSoc` ist.
+Es wird im Modus `PV` automatisch ein Ladevorgang gestartet, sobald genug Solarüberschuss vorhanden ist.
 
 Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 
