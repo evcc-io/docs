@@ -121,7 +121,7 @@ script: |
   2 * res; // returns 1000
 ```
 
-Wenn das `js` Plugin zum schreiben verwendet wird, wird der zu schreibenede Wert dem Script als Variable übergeben:
+Wenn das `js` Plugin zum schreiben verwendet wird, wird der zu schreibende Wert dem Script als Variable übergeben:
 
 **Beispiel Schreiben**:
 
