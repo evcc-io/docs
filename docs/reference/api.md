@@ -12,8 +12,9 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 
 - `GET  /api/state`: evcc state (static configuration and dynamic state as JSON object)
 - `GET  /api/health`: evcc health check
-- `POST /api/buffersoc/<soc>`: battery buffer SoC in %
 - `POST /api/prioritysoc/<soc>`: battery priority SoC in %
+- `POST /api/buffersoc/<soc>`: battery buffer SoC in %
+- `POST /api/bufferstartsoc/<soc>`: battery buffer start SoC in %
 - `POST /api/residualpower/<power>`: grid residual power in W
 - `POST /api/smartcostlimit/<cost>`: smart charging cost limit (previously known as "cheap" tariff)
 - `GET  /api/tariff/<type>`: list of prices (grid/feedin/planner)
@@ -50,8 +51,9 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/updated`: timestamp of last update
 
 - `evcc/site`: site dynamic state
-- `evcc/site/bufferSoc`: battery buffer SoC (writable)
 - `evcc/site/prioritySoc`: battery priority SoC (writable)
+- `evcc/site/bufferSoc`: battery buffer SoC (writable)
+- `evcc/site/bufferStartSoc`: battery buffer start SoC (writable)
 - `evcc/site/residualPower`: grid residual power (writable)
 - `evcc/site/smartcostlimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
 
