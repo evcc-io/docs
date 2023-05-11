@@ -158,25 +158,8 @@ aux:
   - myaux2 # second aux meter reference
 ```
 
-### `bufferSoc`
-
-Erlaubt das Entladen einer Hausbatterie oberhalb dem angegebenen Soc (%) Wert, wenn zu wenig Solarüberschuss (unterhalb der Mindestladeleistung) zur Verfügung steht. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen. Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
-
-Es wird im Modus `PV` automatisch ein Ladevorgang gestartet, sobald genug Solarüberschuss vorhanden ist.
-
-Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
-
-:::note
-`bufferSoc` muss einen größeren Wert als `prioritySoc` haben.
-:::
-
-**Beispiel**:
-
-```yaml
-bufferSoc: 80 # Hausbatterie wird oberhalb Soc 80% als Puffer genutzt
-```
-
-### `prioritySoc`
+### `prioritySoc` 
+#### (im Batterie-UI Grenze zwischen Haus und Fahrzeug)
 
 Die Ladung der Hausbatterie hat unterhalb des angegebenen Soc (%) Wertes Priorität gegenüber der Fahrzeugladung.
 Steht unterhalb dieses Wertes mehr Erzeugungsleistung zur Verfügung als der Batteriespeicher aufnimmt, kann dieser Überschuss trotzdem nachrangig zur Fahrzeugladung verwendet werden.
@@ -192,6 +175,45 @@ Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 ```yaml
 prioritySoc: 50 # Hausbatterie bekommt bis zum Soc 50% Priorität beim laden
 ```
+
+### `bufferSoc` 
+#### (im Batterie-UI Grenze zwischen Fahrzeug und batterieunterstützem Laden)
+
+Erlaubt das Entladen einer Hausbatterie oberhalb des angegebenen Soc (%) Wertes, wenn zu wenig Solarüberschuss (unterhalb der Mindestladeleistung) zur Verfügung steht. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen. Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
+
+Es wird im Modus `PV` automatisch ein Ladevorgang gestartet, sobald genug Solarüberschuss vorhanden ist.
+
+Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
+
+:::note
+`bufferSoc` muss einen größeren Wert als `prioritySoc` haben.
+:::
+
+**Beispiel**:
+
+```yaml
+bufferSoc: 80 # Hausbatterie wird oberhalb Soc 80% als Puffer genutzt
+```
+
+### `bufferStartSoc` 
+#### (im Batterie-UI Grenze im Bereich batterieunterstützes Laden)
+
+Erlaubt im Modus `PV` den Start eines Ladevorgangs oberhalb des angegebenen Soc (%) Wertes, auch wenn nicht genug Solarüberschuss vorhanden ist.
+
+Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
+
+Ist deaktiviert (entspricht >100%) wenn kein Werz angegeben wird.
+
+:::note
+`bufferStartSoc` muss einen größeren Wert als `bufferSoc` haben.
+:::
+
+**Beispiel**:
+
+```yaml
+bufferStartSoc: 90 # hat die Hausbatterie Soc 90& erreicht startet der ladevorgang
+```
+
 
 ### `residualPower`
 
