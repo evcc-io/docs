@@ -71,4 +71,5 @@ Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung 
 
 ### elefacts.de
 
-- Einführung in die Grundlagen, Detaillierte Anleitung für Raspberry Installation und Fernzugriff via Fritz!Box und DynDNS [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
+- Grundlagen, Detaillierte Anleitung für Raspberry Pi Installation, Fernzugriff via Fritz!Box & DynDNS [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
+- InfluxDB & Grafana [Von evcc erfasste Daten langfristig speichern und aufbereiten](https://www.elefacts.de/test-208-von_evcc_erfasste_daten_langfristig_speichern_und_aufbereiten)
