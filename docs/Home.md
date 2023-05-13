@@ -48,7 +48,13 @@ Optional:
 evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Risiko. Es liegt in deiner Verantwortung dass evcc so läuft wie es beabsichtigt ist.
 :::
 
-## Einführungsvideos
+## Videos
+
+### Vortrag Augsburger Linux Infotag 2023
+
+[Michael](https://github.com/naltatis) stellt das Projekt vor, erzählt was zum Arbeitsalltag und zur Finanzierung des Projekts.
+
+[![YouTube LIT2023](youtube_linux_infotag.png)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
 ### verdrahtet: PV Überschussladen mit evcc
 
