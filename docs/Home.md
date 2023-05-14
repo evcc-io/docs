@@ -54,19 +54,19 @@ evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Ri
 
 [Michael](https://github.com/naltatis) stellt das Projekt vor, erzählt was zum Arbeitsalltag und zur Finanzierung des Projekts.
 
-[![YouTube LIT2023](youtube_linux_infotag.png)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
+[![YouTube LIT2023](youtube_linux_infotag.webp)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
 ### verdrahtet: PV Überschussladen mit evcc
 
 Behandelt die Themen evcc Einrichtung und Grundlagen, Intragtion mit ioBroker und die Einbindung eines Homematic Schalters.
 
-[![YouTube verdrahtet](youtube_verdrahtet.jpg)](https://youtu.be/6JxktkEaZ2o)
+[![YouTube verdrahtet](youtube_verdrahtet.webp)](https://youtu.be/6JxktkEaZ2o)
 
 ### haus-automatisierung.com: PV-Überschuss ins E-Auto laden
 
 Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung über MQTT und ioBroker, unterschiedliche Installationsmöglichkeiten.
 
-[![YouTube Haus Automatisierung](youtube_hausautomatisierung.jpg)](https://youtu.be/93C47QUjomQ)
+[![YouTube Haus Automatisierung](youtube_hausautomatisierung.webp)](https://youtu.be/93C47QUjomQ)
 
 ## Blogartikel
 
