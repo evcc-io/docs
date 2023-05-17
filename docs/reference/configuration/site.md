@@ -177,7 +177,7 @@ prioritySoc: 50 # Hausbatterie bekommt bis zum Soc 50% Priorität beim laden
 ```
 
 ### `bufferSoc` 
-#### (im Batterie-UI Grenze zwischen Fahrzeug und batterieunterstützem Laden)
+#### (im Batterie-UI Grenze zwischen Fahrzeug und batterieunterstütztem Laden)
 
 Erlaubt das Entladen einer Hausbatterie oberhalb des angegebenen Soc (%) Wertes, wenn zu wenig Solarüberschuss (unterhalb der Mindestladeleistung) zur Verfügung steht. Somit werden Schwankungen in der Erzeugung oder beim Verbrauch primär von der Hausbatterie ausgeglichen. Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
 
@@ -202,7 +202,7 @@ Erlaubt im Modus `PV` den Start eines Ladevorgangs oberhalb des angegebenen Soc 
 
 Reicht die Entladeleistung der Hausbatterie nicht aus um die Mindestladeleistung des Fahrzeugs zu liefern, wird der Rest aus dem Netz bezogen.
 
-Ist deaktiviert (entspricht >100%) wenn kein Werz angegeben wird.
+Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 
 :::note
 `bufferStartSoc` muss einen größeren Wert als `bufferSoc` haben.
