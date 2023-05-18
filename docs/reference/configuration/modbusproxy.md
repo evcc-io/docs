@@ -33,6 +33,10 @@ Die Proxy-Funktion unterstützt _eingehend_ (d.h. von Drittsystemen wie z.B. Hau
 _Ausgehend_ in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
 :::
 
+:::note
+Sponsortoken erforderlich. Weitere Informationen zum evcc Sponsorship gibt es hier: https://docs.evcc.io/docs/sponsorship
+:::
+
 ---
 
 ## Erforderliche Parameter
