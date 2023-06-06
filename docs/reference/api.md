@@ -55,7 +55,7 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/site/bufferSoc`: battery buffer SoC (writable)
 - `evcc/site/bufferStartSoc`: battery buffer start SoC (writable)
 - `evcc/site/residualPower`: grid residual power (writable)
-- `evcc/site/smartcostlimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
+- `evcc/site/smartCostLimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
 
 - `evcc/loadpoints`: number of available loadpoints
 - `evcc/loadpoints/<id>`: loadpoint dynamic state
