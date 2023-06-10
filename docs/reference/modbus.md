@@ -133,4 +133,17 @@ timeout: 2s # timeout, without unit in ns
 
 Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z.B. bei E3/DC Geräten nützlich.
 
-Um ein Regsiter zu schreiben wird `type: writesingle` verwendet, welches ein einzelnes 16bit Register (entweder `int` oder `bool`) schreibt. Die Kodierung ist hier immer `uint16`.
+### Schreiben von Registern
+Es können sowohl Holding-Register als auch Coils beschrieben werden. Dazu muss entweder `type: writeholding` für Holding-Register oder `type: writecoil` für Coils angegeben werden.
+`type: writeholding` schreibt immer ein 16Bit Register (int oder bool16). Die Kodierung ist hier immer `uint16`.
+`type: writecoil` schreibt ein Coil. Dabei wird als Kodierung immer `bool8` verwendet.
+
+**Beispiel**:
+
+```yaml
+source: modbus
+---
+register:
+  address: 40070
+  type: writeholding # writeholding oder writecoil
+```
