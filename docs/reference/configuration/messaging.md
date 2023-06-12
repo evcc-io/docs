@@ -201,6 +201,11 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
   - `savingsSelfConsumptionPercent` - Anteil der geladenen Sonnenenergie in Wh (_float_)
   - `savingsSince` - Zeitperiode der Ersparnisberechnung in Nanosekunden (_integer_)
   - `savingsTotalCharged` - Geladene Gesamtenergie in Wh (_float_)
+- Infos zur Ladesitzung
+  - `sessionSolarPercentage` - Sonnenanteil der Sitzung
+  - `sessionPrice` - Preis des geladenen Stroms der Sitzung
+  - `sessionPricePerKWh` - Durchschnittlicher Preis des Stroms pro kWh der Sitzung
+  - `sessionCo2PerKWh` - Durchschnittliche CO2 pro kWh
 - Sponsor
   - Konfiguration
     - [`auth`](sponsortoken) - Authentication Token des evcc-Sponsors (_string_)
