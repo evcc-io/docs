@@ -6,9 +6,9 @@ sidebar_position: 1
 
 evcc ermöglicht das Laden von Elektrofahrzeugen (EV) bedarfsgerecht zu steuern und den dazu benötigten Energiebezug zu optimieren. Es kann eine Photovoltaikanlage (PV) angebunden werden, um so viel selbsterzeugte Energie wie möglich ins EV zu laden, oder es können auch Anbieter mit dynamischen Strompreisen angebunden werden.
 
-Normalerweise muss die Wallbox dazu mit der bestehenden PV-Installation kompatibel, oft sogar vom selben Hersteller sein. evcc ermöglicht dies jedoch herstellerübergreifend und mit einer Vielzahl von Wallboxen, Strommessgeräten und PV-Wechselrichtern ohne dass diese speziell dazu vorgesehen sein müssen.
+Normalerweise muss die Wallbox dazu mit der bestehenden PV-Installation kompatibel, oft sogar vom selben Hersteller sein. evcc ermöglicht dies jedoch herstellerübergreifend und mit einer Vielzahl von Wallboxen, Strommessgeräten und PV-Wechselrichtern, ohne dass diese speziell dazu vorgesehen sein müssen.
 
-Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud-Anbindung wenn keine der angebundenen Komponenten dies erfordert. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Kleinstcomputersystem wie z. B. ein Raspberry Pi (oder ähnliches) völlig ausreichen.
+Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud-Anbindung, wenn keine der angebundenen Komponenten dies erfordert. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Kleinstcomputersystem wie z. B. ein Raspberry Pi (oder ähnliches) völlig ausreichen.
 
 ![Screenshot](screenshot.webp)
 
@@ -27,15 +27,15 @@ Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit 
 
 ## Anforderungen
 
-Um evcc zu verwenden wird mindestens folgendes benötigt:
+Um evcc zu verwenden, wird mindestens folgendes benötigt:
 
 - eine unterstützte [Wallbox oder schaltbare Steckdose](/docs/devices/chargers)
-- ein unterstütztes [Messgerät](/docs/devices/meters) am Hausanschluss, oder alternativ ein unterstützter PV-Wechselrichter bzw. anderes Messgerät welches die aktuelle Erzeugungsleistung misst
+- ein unterstütztes [Messgerät](/docs/devices/meters) am Hausanschluss, oder alternativ ein unterstützter PV-Wechselrichter bzw. anderes Messgerät, welches die aktuelle Erzeugungsleistung misst
 - ein unterstütztes System auf welchem evcc läuft
 
 Optional:
 
-- ein oder mehrere unterstützte [Fahrzeuge](/docs/devices/vehicles) deren Ladezustand abgerufen wird
+- ein oder mehrere unterstützte [Fahrzeuge](/docs/devices/vehicles), deren Ladezustand abgerufen wird
 - weitere unterstützte Wallboxen, schaltbare Steckdosen, PV-Erzeugungs- und Batteriespeichersysteme
 - ein unterstütztes [Energiemanagementsystem](/docs/reference/configuration/hems) (wie z. B. SMA Sunny Home Manager) oder ein dynamischer Stromtarif
 
@@ -45,7 +45,7 @@ Optional:
 - Chat zu Entwicklungsthemen: [Slack](https://evcc.io/slack).
 
 :::note
-evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Risiko. Es liegt in deiner Verantwortung dass evcc so läuft wie es beabsichtigt ist.
+evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Risiko. Es liegt in deiner Verantwortung, dass evcc so läuft wie es beabsichtigt ist.
 :::
 
 ## Videos
@@ -58,7 +58,7 @@ evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Ri
 
 ### verdrahtet: PV Überschussladen mit evcc
 
-Behandelt die Themen evcc Einrichtung und Grundlagen, Intragtion mit ioBroker und die Einbindung eines Homematic Schalters.
+Behandelt die Themen evcc Einrichtung und Grundlagen, Integration mit ioBroker und die Einbindung eines Homematic Schalters.
 
 [![YouTube verdrahtet](youtube_verdrahtet.webp)](https://youtu.be/6JxktkEaZ2o)
 
@@ -73,9 +73,9 @@ Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung 
 ### hobbyblogging.de
 
 - Einführung in die Grundkonzepte: [evcc - Was soll das sein?](https://hobbyblogging.de/evcc-was-soll-das-sein)
-- Einrichtung mit Balkonsolar und smarten Steckdosen [evcc installieren – So einfach geht’s!](https://hobbyblogging.de/evcc-installieren)
+- Einrichtung mit Balkonsolar und smarten Steckdosen: [evcc installieren – So einfach geht’s!](https://hobbyblogging.de/evcc-installieren)
 
 ### elefacts.de
 
-- Grundlagen, Detaillierte Anleitung für Raspberry Pi Installation, Fernzugriff via Fritz!Box & DynDNS [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
-- InfluxDB & Grafana [Von evcc erfasste Daten langfristig speichern und aufbereiten](https://www.elefacts.de/test-208-von_evcc_erfasste_daten_langfristig_speichern_und_aufbereiten)
+- Grundlagen, Detaillierte Anleitung für Raspberry Pi Installation, Fernzugriff via Fritz!Box & DynDNS: [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
+- InfluxDB & Grafana: [Von evcc erfasste Daten langfristig speichern und aufbereiten](https://www.elefacts.de/test-208-von_evcc_erfasste_daten_langfristig_speichern_und_aufbereiten)

@@ -6,6 +6,20 @@ sidebar_position: 11
 
 Hier kannst du deinen Energietarif und ggf. deine Einspeisevergütung angeben. Evcc verwendet diese Werte für eine grobe [Einsparungsberechnung](/docs/guides/setup#ersparnisberechnung), die in der Web-UI angezeigt wird.
 
+Desweiteren nutzt der Planner diese Einstellungen für Preis- bzw. CO2-optimiertes Zielladen. Dabei werden die Einstellungen in der folgenden Reihenfolge berücksichtigt: "flexibler Grid-Tarif" vor "CO2 Tarif" vor "konstantem Grid-Tarif".
+
+**Struktur**
+
+```yaml
+tariffs:
+  grid:
+    type: ...
+  feedin:
+    type: ...
+  co2:
+    type: ...
+```    
+
 **Beispiel: Konstanter Energiepreis**
 
 ```yaml
@@ -252,7 +266,7 @@ Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.ene
 
 ---
 
-## `planner`
+## `co2`
 
 Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
 
@@ -261,7 +275,7 @@ Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen K
 **Beispiel**:
 
 ```yaml
-planner:
+co2:
   type: grünstromindex
   zip: meine PLZ # PLZ mit führender Null mit in "" setzen
 ```
@@ -271,7 +285,7 @@ planner:
 **Beispiel**:
 
 ```yaml
-planner:
+co2:
   type: electricitymaps
   uri: <uri>
   token: <token>
