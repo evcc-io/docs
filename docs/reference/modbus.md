@@ -135,8 +135,8 @@ Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und s
 
 ### Schreiben von Registern
 Es können sowohl Holding-Register als auch Coils beschrieben werden. Dazu muss entweder `type: writeholding` für Holding-Register oder `type: writecoil` für Coils angegeben werden.
-`type: writeholding` schreibt immer ein 16Bit Register (int oder bool16). Die Kodierung ist hier immer `uint16`.
-`type: writecoil` schreibt ein Coil. Dabei wird als Kodierung immer `bool8` verwendet.
+`type: writeholding` schreibt immer ein 16Bit Register (int oder bool16). Für `decode` muss hier daher immer `uint16` angegeben werden.
+`type: writecoil` schreibt ein Coil. Angaben für `decode` werden ignoriert.
 
 **Beispiel**:
 
