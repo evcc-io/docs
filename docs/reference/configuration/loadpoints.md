@@ -418,7 +418,7 @@ Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringe
 Je höher der Wert, desto größer die Priorität.
 Loadpoints ohne Eintrag haben `priority: 0`
 
-Hat bei mehreren Loadpoints keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Loadpoint, wird ein höher priorisierter eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird. 
+Hat bei mehreren Loadpoints keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Loadpoint, wird ein höher priorisierter unter Umständen eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird. 
 
 Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
 
