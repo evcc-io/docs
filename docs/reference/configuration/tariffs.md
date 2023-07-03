@@ -151,7 +151,7 @@ Das Zugangstoken des Anbieters
 
 #### `homeid`
 
-Die ID des Standards, falls es unter dem Account mehrere gibt
+Die ID des Standortes, falls es unter dem Account mehrere gibt
 
 ---
 
