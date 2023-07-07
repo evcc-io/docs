@@ -68,6 +68,8 @@ tariffs:
     # or
     type: awattar
     region: de # optional, choose at for Austria
+    charges: 0 # optional, additional charges per kWh
+    tax: 0 # optional, additional tax (0.1 for 10%)
 ```
 
 Im Folgenden werden nun alle möglichen Parameter erklärt.
