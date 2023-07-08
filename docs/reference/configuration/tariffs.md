@@ -198,6 +198,36 @@ Die DNO Region in der du dich befindest: [Weitere Informationen](https://www.ene
 
 ---
 
+### `type:` **`elering`**
+
+Der Stromanbieter [Nordpool Estonia](https://elering.ee) in Estland.
+
+**Beispiel**:
+
+```yaml
+type: elering # Nordpool
+region: ee # or lt, lv, fi
+charges: # optional, additional charges per kWh
+tax: # optional, additional tax (0.1 for 10%)
+```
+
+---
+
+### `type:` **`energinet`**
+
+Der Stromanbieter  [Energinet](https://energinat.dk) in Dänemark.
+
+**Beispiel**:
+
+```yaml
+type: energinet # Energinet using the price in DKK
+region: dk1 # or dk2
+charges: # optional, additional charges per kWh
+tax: # optional, additional tax (0.1 for 10%)
+```
+
+---
+
 ## `feedin`
 
 Vergütung für eingespeisten Strom. Bei Alt-Anlagen (vor 1.4.2012) ist hier die Differenz zwischen der Einspeise- und der Selbstverbrauchsvergütung einzutragen.
