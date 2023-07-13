@@ -13,3 +13,7 @@ Definiert das zeitliche Interval, in welchem neue Werte von allen Messgeräten g
 ```yaml
 interval: 10s # alle 10 Sekunden
 ```
+
+:::caution
+Ein zu kurzes Interval ( < 10s ) kann zu unerwünschtem Verhalten führen, da die beteiligten Komponenten dann nicht genug Reaktionszeit haben, bevor der nächste Regelzyklus beginnt.
+:::
