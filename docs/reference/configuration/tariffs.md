@@ -122,6 +122,8 @@ Der Stromanbieter [Awattar](https://www.awattar.de)
 ```yaml
 type: awattar
 region: de # optional
+charges: 0 # optional, additional charges per kWh
+tax: 0 # optional, additional tax (0.1 for 10%)
 ```
 
 #### `region`
