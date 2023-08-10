@@ -4,12 +4,12 @@ sidebar_position: 1
 
 # Introduction
 
-EVCC controls Electric Vehicle (EV) charging as required to optimise for the current energy situation.
+evcc controls Electric Vehicle (EV) charging as required to optimise for the current energy situation.
 A Photovoltaic (PV) system can be connected in order to charge the EV with as much self-produced energy as possible, and/or grid providers can be connected to allow for exploitation of dynamic electricity prices.
 
-Normally, the wallbox must be compatible with the existing PV installation, often requiring equipment from the same manufacturer. However, EVCC works across manufacturers and with a wide variety of wallboxes, electricity measuring devices, and PV inverters, without requiring specific manufacturer compatibility between them.
+Normally, the wallbox must be compatible with the existing PV installation, often requiring equipment from the same manufacturer. However, evcc works across manufacturers and with a wide variety of wallboxes, electricity measuring devices, and PV inverters, without requiring specific manufacturer compatibility between them.
 
-EVCC is installed onto a system in the local network, so that it can communicate properly with all the necessary devices. It does this completely locally, and without any reliance on cloud connectivity (though connected components may have their own requirements). The software itself is very lean, and something like a NAS (network attached storage) or a Raspberry Pi (or similar) is completely sufficient to achieve full functionality.
+evcc is installed onto a system in the local network, so that it can communicate properly with all the necessary devices. It does this completely locally, and without any reliance on cloud connectivity (though connected components may have their own requirements). The software itself is very lean, and something like a NAS (network attached storage) or a Raspberry Pi (or similar) is completely sufficient to achieve full functionality.
 
 ![Screenshot](screenshot.webp)
 
@@ -28,11 +28,11 @@ EVCC is installed onto a system in the local network, so that it can communicate
 
 ## Requirements
 
-EVCC requires at least the following:
+evcc requires at least the following:
 
 - a supported [Wallbox or Switchable Socket](/docs/devices/chargers)
 - a supported [Energy Meter](/docs/devices/meters) at the house connection, or alternatively a supported PV inverter / other metering device that can measure current energy production
-- a supported system to run EVCC on!
+- a supported system to run evcc on!
 
 Optionally:
 
@@ -45,7 +45,7 @@ Optionally:
 
 
 :::note
-EVCC comes without any kind of guarantee, and you use the software at your own risk. It is your responsibility to use EVCC responsibly - it's your house fire!
+evcc comes without any kind of guarantee, and you use the software at your own risk. It is your responsibility to use evcc responsibly - it's your house fire!
 :::
 
 ## Contact
@@ -64,15 +64,15 @@ Currently DE only (but please do suggest other languages!)
 
 [![YouTube LIT2023](youtube_linux_infotag.webp)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
-### verdrahtet: PV surplus with EVCC
+### verdrahtet: PV surplus with evcc
 
-Tackles EVCC basics, integration with ioBroker, and integrating a homematic switch.
+Tackles evcc basics, integration with ioBroker, and integrating a homematic switch.
 
 [![YouTube verdrahtet](youtube_verdrahtet.webp)](https://youtu.be/6JxktkEaZ2o)
 
 ### haus-automatisierung.com: Charging an Electric Vehicle with PV Surplus
 
-Tackles EVCC basics, custom plugins, control via MQTT and ioBroker, as well as different installation options.
+Tackles evcc basics, custom plugins, control via MQTT and ioBroker, as well as different installation options.
 
 [![YouTube Haus Automatisierung](youtube_hausautomatisierung.webp)](https://youtu.be/93C47QUjomQ)
 
