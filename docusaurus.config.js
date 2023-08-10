@@ -16,7 +16,12 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
     projectName: "docs", // Usually your repo name.
     i18n: {
       defaultLocale: "de",
-      locales: ["de"],
+      locales: ["de", "en"],
+      localeConfigs: {
+        en: {
+          htmlLang: "en-GB",
+        },
+      },
     },
     presets: [
       [
@@ -79,6 +84,10 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               label: "GitHub",
               position: "right",
               target: "_self",
+            },
+            {
+              type: 'localeDropdown',
+              position: 'right',
             },
           ],
         },
