@@ -2,6 +2,12 @@
 sidebar_position: 1
 ---
 
+:::cautionwork in progress 🚧
+
+We're still working on the English translation. Some content will still be shown in German.
+
+:::
+
 # Introduction
 
 evcc controls Electric Vehicle (EV) charging as required to optimise for the current energy situation.
@@ -43,12 +49,12 @@ Optionally:
 - a supported [Energy Management System](/docs/reference/configuration/hems) (such as SMA Sunny Home Manager)
 - information on a dynamic electricity tariff
 
-
 :::note
 evcc comes without any kind of guarantee, and you use the software at your own risk. It is your responsibility to use evcc responsibly - it's your house fire!
 :::
 
 ## Contact
+
 - Support, configurations, questions about devices, and general discussion can be found in our [Community Support Forum](https://github.com/evcc-io/evcc/discussions).
 - We also have a [Slack](https://evcc.io/slack) for development discussion.
 
