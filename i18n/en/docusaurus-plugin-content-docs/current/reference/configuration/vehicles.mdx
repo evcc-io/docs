@@ -1,0 +1,237 @@
+---
+sidebar_position: 6
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
+
+# `vehicles`
+
+A vehicle represents a specific electric vehicle (EV) with its battery. When a vehicle is configured and assigned to a [charger](loadpoints#vehicle--vehicles), the user interface can display the charging status, state of charge (SoC), remaining charging time, and other data automatically retrieved and processed from the vehicle.
+
+It is also possible to limit the charge to a specific state of charge (SoC). Since most chargers cannot be aware of this (it is only transmitted in very specific charger combinations), evcc can communicate directly with the vehicle through the online interface (API) of the vehicle manufacturer using this configuration.
+
+The `vehicles` configuration is a list of different vehicles.
+
+**For example**:
+
+```yaml
+vehicles:
+  - name: Zoe
+    type: ...
+    ...
+```
+
+Configurations for known vehicles can be found under [Devices - Vehicles](/docs/devices/vehicles).
+
+Below, the various parameters are explained.
+
+---
+
+## Required Parameters
+
+### `name`
+
+A short designation of the configured vehicle. The value is used when referencing the vehicle in the configuration of the [charger](loadpoints#vehicle--vehicles).
+
+**For example**:
+
+```yaml
+name: zoe
+```
+
+---
+
+### `title`
+
+A description of the vehicle that will be displayed in the user interface.
+
+**For example**:
+
+```yaml
+title: Zoe
+```
+
+---
+
+### `type`
+
+This is the evcc interface type that allows communication with the vehicle. Known vehicles can be integrated using the `template` type. The appropriate (template) type for known vehicles and instructions for manual configuration `custom` can be found under [Devices - Vehicles](/docs/devices/vehicles).
+
+---
+
+## Optional Parameters
+
+### `capacity`
+
+The capacity of the vehicle's battery in kilowatt-hours (kWh).
+
+**For example**:
+
+```yaml
+capacity: 50 # kWh
+```
+
+---
+
+### `phases`
+
+The _maximum_ number of phases this vehicle can use (possibly including the charging cable). The default internal value is 3. Possible values are 1, 2, or 3.
+
+Some vehicles, especially plug-in hybrids, do not use the maximum possible 3 phases for charging. While `evcc` can determine the actually used phases at the start of a charging process, if a charge meter is installed, this information is not available before charging starts. By configuring the `phases` parameter on the vehicle, `evcc` can start the charging process with a lower available power in PV mode.
+
+**For example**:
+
+```yaml
+phases: 2
+```
+
+---
+
+### `cache`
+
+The retention time and suppression duration of external requests to the vehicle data interface (API).
+
+:::info
+The value must be specified with the attached time unit (see example). `m` stands for minutes.
+:::
+
+:::warning
+It is **NOT** recommended to change the default settings, as this could lead to the vehicle manufacturer actively preventing charging control via evcc. **AT YOUR OWN RISK.**
+:::
+
+To determine current status data from the vehicle (e.g., state of charge SoC of the traction battery), the manufacturer's interface is regularly queried online. However, to avoid overwhelming the vehicle manufacturer's servers with constant requests (which could result in account suspension), a cache is implemented that intercepts these requests and responds with the recently retrieved data up to the maximum age indicated here. Since most vehicles update the data only during a running charging process at very large intervals (10 to 30 minutes are common), more frequent requests don't provide added value.
+
+**Default Value:** `15m`
+
+**For example**:
+
+```yaml
+cache: 5m
+```
+
+---
+
+### `onIdentify`
+
+Default values to be applied when the vehicle is identified:
+
+**Possible Values**:
+
+- [`mode`](loadpoints#mode)
+- [`minCurrent`](loadpoints#mincurrent)
+- [`maxCurrent`](loadpoints#maxcurrent)
+- `minSoc` charge at the highest possible power until the specified SoC is reached, if the mode is not set to `off`
+- `targetSoc` stop charging when this SoC is reached
+- [`priority`](https://docs.evcc.io/docs/reference/configuration/loadpoints/#priority)
+
+**For example**:
+
+<Tabs groupId="config-type">
+  <TabItem value="Template" label="Template" default>
+  When vehicles are integrated into the configuration using the <i>type=templates</i>, e.g., when using <i>evcc configure</i>.
+
+    mode: pv
+    mincurrent: 8
+    maxcurrent: 20
+    minSoc: 40
+    targetSoc: 80
+    priority: 5
+
+  </TabItem>
+  <TabItem value="Native" label="Native">
+  When vehicles are integrated using their native type, e.g., <i>type=audi</i>, in the configuration.
+
+    onIdentify: # set defaults when vehicle is identified
+      mode: pv
+      mincurrent: 8
+      maxcurrent: 20
+      minSoc: 40
+      targetSoc: 80
+      priority: 5
+
+  </TabItem>
+</Tabs>
+
+---
+
+### `identifiers`
+
+A list of one or more identifiers to identify the vehicle. If the vehicle needs to be identified at different chargers, multiple identifiers might be necessary. Identification can be achieved using the following mechanisms:
+
+#### RFID
+
+If the charger has an RFID interface, an RFID card can be assigned to a vehicle for identification. In this case, the `RFID Token ID` is required.
+
+**For example**:
+
+```yaml
+identifiers:
+  - 12345ABC # RFID token ID
+```
+
+#### Vehicle Identifier
+
+If the charger supports it, it receives a vehicle identifier from the vehicle. This can be either the MAC address of the onboard charger or an identifier of a permanently installed Plug & Charge certificate (a different certificate than for DC charging!).
+
+**For example**:
+
+```yaml
+identifiers:
+  - 01:23:45:67:89:0A # MAC address
+```
+
+Some vehicles generate a new MAC address every day. In this case, wildcards can be used if the existing vehicles differ in the non-changing part of the MAC address.
+
+```yaml
+identifiers:
+  - 01:23:45:*
+```
+
+---
+
+### `features: ["coarsecurrent"]`
+
+Indicates that a vehicle cannot be regulated with continuous current limitation.
+
+This setting should be used for the following combination:
+
+- Vehicle can only regulate in whole ampere steps
+- charger can process finer-grained charging current specifications (e.g., 1 mA)
+
+In this combination, it can happen that changes of a few mA in current result in an unexpected change of the phase current by 1A for regulation. The regulation may then start to oscillate. This feature also limits the regulation to coarse 1A steps.
+
+It CANNOT be used in conjunction with a vehicle template. To use it, the vehicle must be configured as a native type.
+
+**For example**:
+
+```yaml
+features: ["coarsecurrent"]
+```
+
+---
+
+### `icon`
+
+Vehicles can be displayed with different icons in the UI. The available options are:
+- car
+- bike
+- scooter
+- moped
+- motorcycle
+- van
+- bus
+- tractor
+- generic
+- heater
+- cooler
+- waterheater
+
+**For example**:
+
+```yaml
+icon: heater
+```
+
+---
