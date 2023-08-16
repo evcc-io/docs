@@ -86,8 +86,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
               target: "_self",
             },
             {
-              type: 'localeDropdown',
-              position: 'right',
+              type: "localeDropdown",
+              position: "right",
             },
           ],
         },
@@ -149,7 +149,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
           appId: "4D0L431W8V",
           apiKey: "0652a7b2c47e97f00cb0f3e305ba741a",
           indexName: "evcc",
-          contextualSearch: false,
+          contextualSearch: true,
         },
       }),
   }
