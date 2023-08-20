@@ -1,0 +1,198 @@
+---
+sidebar_position: 4
+---
+
+# Vehicles
+
+### Why would I want to add my car to evcc?
+
+evcc can limit charging to a chosen State of Charge (SoC), but to do this, it must know the current SoC of the vehicle involved.
+
+Unfortunately, most cars and Chargers cannot exchange this information directly. The good news is that many vehicle manufacturers offer some kind of app or online service that provides this information to the user. evcc can, therefore, access this data itself on a regular basis through these online services.
+
+To do this, you usually need to enter the username and password for the manufacturer app in the evcc configuration - evcc will then be able to read out the charging status.
+
+### Is my car supported?
+
+Quite possibly! Take a look in [Devices - Vehicles](/docs/devices/vehicles) - if you can't find your vehicle there, try a similar configuration from the same manufacturer (or family of manufacturers).
+
+### What's this about Air Conditioning / pre-climatisation?
+
+With some vehicles, evcc can also recognise via the online connection whether the vehicle is carrying out pre-climatisation (pre-conditioning).
+If it detects this, evcc will then ensure that the Charger is providing at least the minimum possible power to the vehicle, so that pre-conditioning therefore happens without discharging the vehicle's onboard battery.
+
+In some cases, the vehicle may need less power to perform pre-climatisation than the minimum supplied by the Charger.
+If this is the case, the vehicle will usually charge the onboard battery with any remaining power - please note that this will happen even if a pre-defined SoC limit has been reached.
+
+:::note ISO15118
+The above applies to most configurations of vehicle and Charger (IEC61851).
+
+In the case of vehicles and chargers that communicate using ISO15118, the vehicle will get exactly the amount of power it requests from the Charger (which is usually just pre-conditioning).
+:::
+
+## Determining which Vehicle is at which Charger
+
+If one or more Vehicles are configured, evcc must be able to distinguish them, and know which vehicle is connected to which Charger. This is in order to ensure that live data is correct for each Charger, and thus limit charging to a given State of Charge.
+
+There are a few different ways to go about this:
+
+1. A Charger is directly assigned to a Vehicle - there is no need for detection at all, and evcc presumes that the vehicle connected to the given Charger is the configured one.
+2. In the case of many Vehicles that may move between Chargers:
+   1. Detection via Charging Cable (aka Plug & Charge)
+   2. Detection via RFID / NFC card / token
+   3. Recognition based on charging status
+
+The individual methods are described in more detail below.
+
+If none of these options are possible or sensible, Vehicles should be assigned to Chargers manually via the evcc user interface (or via the API) - corrections can also be made there if necessary.
+
+Vehicles that are not yet recognised are treated as "guest vehicles".
+
+:::note
+The Charger must already be set up and configured in evcc.
+:::
+
+:::tip
+For most simple installations, we advise making a direct assignment between a Charger and a Vehicle.
+(See [Vehicle](/docs/reference/configuration/loadpoints/#vehicles) for more information)
+:::
+
+:::tip
+For each Vehicle, individual base settings such as charging status, charging current restrictions, target SoC, etc. can be set in evcc.yaml (see [onIdentify](/docs/reference/configuration/vehicles/#onidentify)).
+These are then used automatically if the vehicle is recognised or assigned to a Charger.
+:::
+
+### Detection via Charging Cable
+
+**Prerequisite**: Both the Charger and the Vehicle must support ISO15118 (Plug & Charge). In practice, this is only possible with a few Charger and Vehicle combinations. _Please ensure both support this functionality before proceeding!_
+
+:::note
+Please ensure that any relevant "Plug & Charge" settings are enabled on your Charger.
+:::
+
+**Procedure**:
+
+- Connect the Vehicle to the Charger
+- Stop evcc (if it's already running)
+- Issue the command `evcc charger` on the command line
+  - The output will contain the line `identifier:` and then a value - make a note of this value
+- Now open `evcc.yaml` in your favorite editor
+- Add the following to your configuration against the corresponding vehicle (identifiers are a list, so several entries are possible if needed):
+
+  ```yaml
+  identifiers:
+    - <identifier>
+  ```
+
+  :::note
+  If the Vehicle does not properly support Plug & Charge, the vehicle may deliver its hardware address (MAC address).
+  Some Vehicles (such as older Volkswagen & Audi models) change them routinely to random values!
+
+  In these cases, you might find it possible to identify a vehicle using a wildcard, specifying only the part of the address that remains static:
+
+  ```yaml
+  vehicles:
+    - name: BeepBoop
+      ...
+      identifiers:
+        - 01:23:45:*
+  ```
+
+  Of course, this only works if you haven't got multiple vehicles with the same behavior, and so long as the first part of the address remains static.
+  :::
+
+- You can now restart evcc, which will hopefully recognise the vehicle!
+
+### Detection via RFID / NFC
+
+**Prerequisite:** The Charger must have an RFID / NFC reader.
+
+With this option, you assign one or more RFID cards to a specific vehicle. When you connect a vehicle to a Charger, you start the charging process using its corresponding RFID card.
+The Wallbox will then announce which card was used for detection, which is processed by evcc.
+
+Sometimes, a Charger will not announce exactly what card number / RFID identifier was used for identification, instead opting only to send an alias name or similar configured on the Charger itself.
+This works a little differently on a charger-by-charger basis, so it's worth following this guide to make sure yours works as expected.
+
+:::note
+The RFID cards permitted usually have to be registered at the Charger, usually via a configuration application or its user interface.
+
+This can sometimes take the form of a "Allow External Cards" toggle.
+:::
+
+**Procedure**:
+
+- Hold the RFID / NFC card / token up to your Charger until it reports that it has been recognised in some way 
+- Stop evcc (if it's already running)
+- Issue the command `evcc charger` on the command line
+  - The output will contain the line `identifier:` and then a value - make a note of this value
+- Now open `evcc.yaml` in your favorite editor
+- Add the following to your configuration against the corresponding vehicle (identifiers are a list, so several entries are possible if needed):
+
+  ```yaml
+  vehicles:
+    - name: BeepBoop
+      ...
+      identifiers:
+        - <identifier>
+  ```
+
+- You can now restart evcc, which will hopefully recognise the vehicle!
+
+:::tip
+The structure of the identifier transmitted by a Charger sometimes varies after the first use. If you're having issues, verify the identifer is as expected using `evcc charger`.
+:::
+
+:::caution
+A RFID card can have different identifiers on different Chargers - test against all of your Chargers!
+:::
+
+### Recognition based on Charging Status
+
+With this method, evcc regularly checks the charging status of all configured Vehicles over the internet.
+By comparing this state with the current condition of the Chargers, evcc tries to figure out which vehicle has just been connected to a Charger.
+
+This is a heuristic procedure, and there is therefore no 100% guarantee of accuracy.
+The speed and reliability of this procedure depends heavily on the speed and reliability of the live data from the vehicle, which may be inhibited by things such as manufacturer servers, cell service, etc.
+
+:::info
+Detection via online services can fail for a number of reasons, including:
+- the vehicle is temporarily unavailable (out of service)
+- the vehicle manufacturer's server is temporarily unavailable
+- new terms and conditions need to be agreed to (on the website / in the app / in the vehicle)
+- there was a change to the online service by the manufacturer, rendering evcc unable to interpret data from it
+:::
+
+## Manufacturer-Specific Special Stuff
+
+### PSA (Peugeot / Citroën / Vauxhall / Opel): Charging status is only updated when I use the app
+
+This is unfortunately a restriction of the manufacturer's online service - PSA delivers outdated values until they are renewed by opening the mobile app.
+
+Sadly, no workaround to this issue has been found.
+
+### Mercedes: Special instructions for finding `clientId` and `clientSecret`
+
+Mercedes vehicles require two IDs to be generated and stored in evcc.yaml. To do this:
+
+1. Create a Mercedes Developer account.
+2. Log in, and select "Create a New Project"
+3. Click "Add Product"
+4. Ensure "Electric Vehicle Status" is selected
+5. Purchase model -> Get For Free -> Package BYOCAR -> Confirm -> Subscribe
+6. Go to Project Page -> Generate Credentials
+7. **Make a note of Client ID and Client Secret somewhere safe - you won't be able to get these again!**
+8. In Project credentials, set the following Redirect URL:
+   `http://EVCC_IP:7070/oauth/vehicles/1/callback` (where `EVCC_IP` corresponds to the address which you usually access evcc)
+   This applies even if evcc is running purely inside your local area network.
+   Please note that port 7070 must be forwarded in your router's interface.
+   **Important**: evcc does not have any kind of authentication, so anyone will be able to access your evcc installation unless you mitigate somehow - this is up to you to configure!
+9. Set the corresponding identifiers in your evcc.yaml:
+  ```
+  - name: merc
+    type: mercedes
+    title: MyReallyCoolMerc
+    capacity: 80 # battery capacity kWh
+    clientId: xxx
+    clientSecret: xxx
+    vin: xxxxx # vin number
+  ```
