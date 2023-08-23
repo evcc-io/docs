@@ -1,0 +1,200 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Linux (Debian, Ubuntu, Raspberry Pi)
+
+:::caution
+This guide is aimed specifically at APT-based distributions. For distributions using other package managers, please install using [Docker](docker) or [Manual Installation](manual).
+:::
+
+## Installation Guide
+
+:::note
+The "evcc" user is created during installation - please make sure this user doesn't already exist!
+:::
+
+- Open a terminal
+- Install required dependencies:
+
+  ```sh
+  sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+  ```
+
+- Add the evcc APT repository:
+
+<Tabs groupId="release-type">
+  <TabItem value="Release" label="Release" default>
+  Current stable release
+
+```sh
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/evcc/stable/setup.deb.sh' \
+  | sudo -E bash
+```
+
+  </TabItem>
+  <TabItem value="Nightly" label="Nightly">
+  Nightly release, with the latest (potentially unstable!) code
+
+```sh
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/evcc/unstable/setup.deb.sh' \
+  | sudo -E bash
+```
+
+  </TabItem>
+</Tabs>
+
+:::note
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat-square)](https://cloudsmith.com)
+
+We would like to thank [Cloudsmith](https://cloudsmith.com) for hosting the repository!
+Cloudsmith provides services to support the development of free software and platforms.
+:::
+
+- Update the package list:
+
+  ```sh
+  sudo apt update
+  ```
+
+- Install evcc:
+
+  ```sh
+  sudo apt install -y evcc
+  ```
+
+- Start the evcc server:
+
+  ```sh
+  sudo systemctl start evcc
+  ```
+
+- Now check the installation by opening a browser to `http://localhost:7070`. You should see the evcc web interface in demo mode.
+
+- Stop the server:
+
+  ```sh
+  sudo systemctl stop evcc
+  ```
+
+- You can now start the configuration wizard - simply follow the prompts in your terminal!
+
+  ```sh
+  evcc configure
+  ```
+
+  Once all devices are configured, you can continue on.
+
+  :::tip
+  The Configuration wizard is not available under the Home Assistant environment.
+  You may find it easier to install evcc on another Windows or Linux system, use `evcc configure` there, and then copy the generated _evcc.yaml_ to the desired system.
+  :::
+
+  :::note
+  Advanced users (those with evcc experience & some technical know-how) might want to use the advanced configurator:
+
+  ```sh
+  evcc configure --advanced
+  ```
+
+  This mode offers some further, more technically-involved options.
+  :::
+
+- Test to make sure your new configuration works:
+
+  ```sh
+  evcc -c evcc.yaml
+  ```
+
+  Open a browser and head to `http://localhost:7070`: the evcc interface should now show your own devices.
+
+- If everything's working, press `CTRL+C` to stop the server.
+
+- Move the generated configuration to its home:
+
+  ```sh
+  sudo mv evcc.yaml /etc
+  ```
+
+- Start evcc:
+
+  ```sh
+  sudo systemctl start evcc
+  ```
+
+- Go back to your browser and refresh to make sure everything's working as it should be!
+
+## Upgrades
+
+To update to the latest version of evcc, follow this guide:
+
+- Open a terminal
+- Update the package list:
+
+  ```sh
+  sudo apt update
+  ```
+
+- Upgrade evcc:
+
+  ```sh
+  sudo apt --only-upgrade install -y evcc
+  ```
+
+## Downgrade
+
+If you need to go backwards for any reason, you can do so with this command:
+
+```sh
+  sudo apt install evcc=x.xxx.x # Version Number
+```
+
+## Managing the Service
+
+evcc runs as a background system service. Here's some useful commands to control it:
+
+```sh
+sudo systemctl status evcc # shows status
+sudo systemctl start evcc # start the service, if it isn't already running
+sudo systemctl stop evcc # stops the service
+sudo systemctl restart evcc # restart the service
+sudo systemctl enable evcc # sets the service to run at boot
+sudo systemctl disable evcc # stops the service running at boot
+```
+
+## Useful Commands
+
+- Show the service status:
+
+  ```sh
+  sudo systemctl status evcc
+  ```
+
+- Show all log entries since yesterday:
+
+  ```sh
+  sudo journalctl -u evcc --since "yesterday"
+  ```
+
+- Validate the meter configuration:
+
+  ```sh
+  sudo evcc -l debug meter
+  ```
+
+- Validate the charger configuration:
+
+  ```sh
+  sudo evcc -l debug charger
+  ```
+
+- Validate the vehicle configuration:
+
+  ```sh
+  sudo evcc -l debug vehicle
+  ```
