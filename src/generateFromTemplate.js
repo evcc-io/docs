@@ -29,7 +29,7 @@ function readYamlDataFromDir(dir) {
   const path = `./templates/${dir}`;
   const files = fs.readdirSync(path);
   return files.map((file) =>
-    yaml.load(fs.readFileSync(`${path}/${file}`, "utf8"))
+    yaml.load(fs.readFileSync(`${path}/${file}`, "utf8")),
   );
 }
 
@@ -61,7 +61,7 @@ ${codeBlocks
 
 ${block.code}
 
-</TabItem>`
+</TabItem>`,
   )
   .join("\n")}
 </Tabs>\n\n`;
@@ -151,7 +151,7 @@ function generateMarkdown(data, type, target) {
     .readFileSync(target, "utf-8")
     .replace(
       new RegExp(`${escapeRegExp(AUTOGEN_MARKER)}(.|\n)*`, "gm"),
-      `${AUTOGEN_MARKER}\n\n${generated}`
+      `${AUTOGEN_MARKER}\n\n${generated}`,
     );
   console.log(`${type}: ${brandCounter} brands, ${productCounter} products`);
   fs.writeFileSync(target, content, "utf-8");

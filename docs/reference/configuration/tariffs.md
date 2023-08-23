@@ -18,7 +18,7 @@ tariffs:
     type: ...
   co2:
     type: ...
-```    
+```
 
 **Beispiel: Konstanter Energiepreis**
 
@@ -219,7 +219,7 @@ tax: # optional, additional tax (0.1 for 10%)
 
 ### `type:` **`energinet`**
 
-Der Stromanbieter  [Energinet](https://energinat.dk) in Dänemark.
+Der Stromanbieter [Energinet](https://energinat.dk) in Dänemark.
 
 **Beispiel**:
 
