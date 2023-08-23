@@ -1,0 +1,82 @@
+---
+sidebar_position: 5
+---
+
+import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
+
+# Meters / Site
+
+### Are my metering devices supported?
+
+Hopefully (and relatively likely!). Have a look in [Devices - Meters](/docs/devices/meters) to see if your device is listed.
+If it isn't, try a configuration using a generic interface, or a similar device from the same brand.
+
+Many Inverters are Sunspec-compatible (even if it sometimes needs to be enabled), so it's worth trying to find out whether yours supports either this or another generic communication standard.
+
+### I have a solar installation, but I don't have a (readable) grid connection meter - can I still use evcc?
+
+Sure! But please note that you won't be able to charge using Solar Excess energy only, as the calculations required for this are only possible when Grid Power is known.
+When configured like this, evcc will charge the vehicle using the current power coming from Solar Generation.
+
+A typical, medium-sized house's consumption can be specified to attempt to leave some energy for your house - you can do us this using the
+[`residualPower`](/docs/reference/configuration/site#residualpower) config flag.
+
+**Example**:
+
+```yaml
+site:
+  residualPower: 250 # 250W house consumption
+```
+
+### I don't have Solar panels - can I still get use out of evcc?
+
+Possibly! evcc has plenty of uses beyond pure Solar diversion. **Please note that all of these use cases require a Grid connection meter.**
+
+Here's some ideas:
+
+- Automatically charge a vehicle depending on the current price of energy using a variable rate electricity tariff (such as Octopus Energy, Nachtstrom, Twibber, Awatter, etc.) - see [Configuration - Tariffs](/docs/reference/configuration/tariffs)
+- Remotely start / stop your charger - especially useful on those Chargers that don't have any other remote control interface
+- Limit charging your vehicle to a certain State of Charge - but please note that having your Vehicle configured is essential.
+
+### I don't yet have a inverter / Charger, can I try evcc out?
+
+Sure! We have a selection of "dummy" components that can help fill in gaps. Refer to [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml) for some ideas.
+
+Here's an example using the `const` plugin:
+
+```yaml
+meters:
+  - name: dummymeter
+    type: custom
+    power:
+      source: const
+      value: 700 # 700W
+```
+
+And another one using the `script` plugin:
+
+```yaml
+chargers:
+  - name: my_charger
+    type: custom
+    status: # charger status A..F
+      source: script
+      cmd: /bin/sh -c 'echo b'
+    enabled: # charger enabled state (true/false or 0/1)
+      source: script
+      cmd: /bin/sh -c 'echo false'
+    enable: # set charger enabled state (true/false or 0/1)
+      source: script
+      cmd: /bin/sh -c 'echo false'
+    maxcurrent: # set charger max current (A)
+      source: script
+      cmd: /bin/sh -c 'echo 10'
+```
+
+### I have a Grid meter, but my Solar Inverter is very old and doesn't offer a usable data interface. Can I still use evcc sensibly?
+
+Yes! If there's a Grid meter and a controllable charger, then you can use all of evcc's essential functionality - including Solar Excess charging.
+Please note that you will be lacking a few visualizations and statistics, including the calculation of solar charging percentage.
+
+Do consider that if you install a retrofitted meter of some kind (such as a Shelly EM) onto your inverter's output cable, you'll get all of the same functionality that you would
+if you could talk directly to the inverter.
