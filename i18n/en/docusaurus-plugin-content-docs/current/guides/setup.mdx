@@ -1,0 +1,214 @@
+---
+sidebar_position: 2
+---
+
+# Setup & Configuration
+
+## Configuration
+
+### A note on individual tastes
+
+:::caution
+evcc has a lot of settings, knobs, and dials. The default parameters are based on lots of experience from many users, and most of the time, the default should work well for you.
+:::
+
+:::danger
+If you start making changes, remember the golden rule:
+
+Since parameters sometimes influence each other, **it is STRONGLY encouraged to only make one change at a time**, and test the effects of each change before making further modifications.
+:::
+
+### Syntax Error in evcc.yaml
+
+Yaml is very sensitive to syntax - and errors don't always catch the eye straight away. Linters such as (https://onlineyamltools.com/validate-yaml) can be super useful, and are worth checking to find simple mistakes.
+
+## Common Problems
+
+### Something's not working. What now?
+
+We have a [Community Support](https://github.com/evcc-io/evcc/discussions) forum, with developers and users standing by to help solve common issues.
+
+When making a post, it would be super useful to give as much information as possible on the following:
+
+- As precise an explanation as possible as to what your problem is
+
+- Which devices (vehicles, meters, chargers) are in use?
+
+- Your full, sanitised `evcc.yaml`
+
+<details>
+<summary>
+   Helper comamnd (*please make sure all usernames, passwords, and other secrets are removed!*).
+</summary>
+
+`egrep -v '^#|^\s+#' evcc.yaml |grep . |sed -E 's/(password|user|token|url|host|broker).*/\1: *****/'`
+
+</details>
+
+- Alternatively, you can use `evcc dump --cfg >~/config.txt` to create an anonymized configuration file at `~/config.txt`.
+
+**⛑️ First Aid**
+
+We've added a useful helper utility to evcc to help with the above. By entering `evcc discuss` in your terminal, our helper wizard will help you create a new discussion topic in our "Erste Hilfe" (first aid) section.
+This discussion will automatically include any relevant error messages, and the anonymized configuration file - you only need to supply a meaningful title and a description of your problem.
+
+This First Aid utility can only be use for the initial creation of a discussion thread. If you need to supply further information to a topic already in progress, you'll need to do this manually.
+
+### How do I create a log file for error analysis?
+
+In its standard configuration, evcc only issues log messages if an _error_ occurs (see also the [`log`](docs/reference/configuration/log#log) configuration key).
+
+When evcc is started directly from the console, log messages are printed directly to the screen (`STDOUT`).
+
+You can test out different parts of your installation using `evcc charger`, `evcc meter`, and `evcc vehicle`. Note that the log level defined in your `evcc.yaml` is used with these commands, but you can override it if necessary:
+
+Example: `evcc -l debug meter`
+
+If evcc is started as a Linux system service (as per [Linux Autostart](/docs/installation/manual#autostart)), you should be able to find your logs using the following commands:
+
+- Follow the log in real time
+  - `sudo journalctl -fau evcc`
+- Show the log since the last start of the evcc service (exit with Ctrl+C)
+  - `sudo journalctl -u evcc -q`
+- Save the above log to a file in the home directory
+  - `sudo journalctl -u evcc -q > ~/evcc.log`
+- You can also define a Start (`-s`) and End (`-e`) timestamp:
+  - `sudo journalctl -u evcc -S "2023-03-21 07:00:00" -U "2023-03-21 08:00:00" -q > ~/evcc.log`
+
+You might find more useful commands here: [wiki.archlinux.org/title/Systemd/Journal](https://wiki.archlinux.org/title/Systemd/Journal#Filtering_output)
+
+If you're using Docker, you should be able to use `docker logs`. See the [Docker documentation](https://docs.docker.com/config/containers/logging/) for more details.
+
+### More thoughts on device detection
+
+`evcc detect` is a special command that attempts to find compatible hardware on your network.
+In particular, it can sometimes help find "new" Sunspec-compatible modbus devices - however, it is more of a developer / support tool for diagnostic purposes, and can't provide detailed results.
+
+## Common Errors
+
+### The evcc UI isn't accessible, but I can access it when in Demo Mode.
+
+It's not uncommon for errors to be overlooked in the configuration, saved, and then evcc restarted to have any changes take effect. When this happens, evcc will fail to launch, and the UI won't be accessible.
+
+To help diagnose the problem, run `evcc` directly from the terminal - this should hopefully give you a better idea of what's going on.
+
+### `connection refused`
+
+This means that the device could be contacted at its given IP address or hostname, but that the device refused to talk to us.
+
+There's a number of possible reasons for this. These ones regularly come up:
+
+- Make sure the target port is set properly in your `evcc.yaml`.
+- Does the target device have external access enabled? (For example, Solaredge inverters come with modbus disabled from factory)
+- The device may have reached the maximum number of simultaneous connections. Other connections (for example, from other home automation systems, or from other instances of evcc) might need to be stopped in order to get evcc connected. We are aware of some devices that only accept a single connection at a time.
+- Make sure there's no firewall between you and the target device, and if there is, that it is configured appropriately to allow traffic
+
+### `i/o timeout`
+
+This means the target system didn't respond quickly enough to our request.
+
+Typically this is due to:
+
+- A slow or poor quality network connection (especially when using wireless or Homeplug-style networks)
+- Incorrect or poor quality cabling or termination (especially with RS485)
+- The target device may be overloaded
+- Certain functions requested by evcc from the device may be unavailable (sometimes this is due to outdated firmware or improperly set configuration on the target)
+- evcc's timeout or query `interval` is set too short
+
+### `/tmp/evcc: operation not permitted` and/or `bind: address already in use`
+
+This error happens if evcc is already running (for example, as a service) and you attempt to launch it again. **Only one instance of evcc should be running at a time.**
+
+You can use a program such as `htop` to help you diagnose whether another instance of evcc is running in the background.
+
+If you do have a reason to use evcc at the terminal, make sure to stop the service (for example, with `systemctl stop evcc`) beforehand.
+
+## Telemetry & Community Data
+
+The [evcc Website](https://evcc.io/#live) (and the "Charge Energy Overview" dialog in the evcc UI) shows aggregated live charging data from evcc installations. We collect this data on our central _api.evcc.io_ server - participation is completely voluntary.
+
+### How do I participate?
+
+Simply turn on the toggle in the "Charge Energy Overview" dialog in the evcc UI.
+
+You can also activate this using the [`telemetry: true`](/docs/reference/configuration/telemetry/) key in the configuration, but this is a deprecated method and may be removed at a later date.
+
+**A 💚 Sponsor Token is currently required to participate in Community Data**. This helps ensure that our data quality stays high, and poor / fake data stays out.
+
+### What data is currently being collected?
+
+We currently collect the following:
+
+- current charging power
+- current proportion of charging power supplied by solar
+- total charged energy
+- total proportion of energy supplied by solar
+
+We may collect more data in the future, but this will **never** be personal data or private information (such as location). Your privacy is really important to us!
+
+### What happens to the data?
+
+We save the amount of energy aggregated per evcc instance. We **do not form user profiles over time**, and have no interest in doing this in the future.
+
+Our goal is to inspire more users to use evcc, learn more about how users use evcc, and above all, visualise the potential of renewable solar energy being used by evcc.
+
+The data shown can be called up by anyone using our API (https://api.evcc.io/v1/total). If you've got some awesome idea for a creative visualisation, please build something and let us know about it!
+
+You can find more information on how we use data at our [Privacy Policy](https://sponsor.evcc.io/privacy) (DE).
+
+## Savings Calculation
+
+In the bottom right of the evcc interface, you'll find the percentage of energy used to charge your vehicle(s) that has come from Solar power (for example, _85% solar energy_).
+
+If you click on it, you'll get a dialog showing more details, including on total calculated savings versus grid.
+
+To make sure that these figures are accurate, please make sure your `evcc.yaml` includes the appropriate `tariffs` configuration.
+
+**Example**:
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [currency]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [currency]/kWh
+```
+
+More details, including on how to use variable rate tariffs (such as those from Octopus Energy) can be found in [Configuration - Tariffs](/docs/reference/configuration/tariffs).
+
+_Please note that these statistics are rough and shouldn't be treated as perfectly accurate._
+
+When calculating savings, evcc uses the total amount of charged energy, and the energy sources used during charging (grid, house battery, solar).
+
+**What is Solar Energy?**
+
+Solar Energy is energy used directly from the Solar installation, and energy provided by any installed house battery.
+evcc assumes that the house battery is primarily used to store excess, self-produced solar power.
+If the house battery also discharges to satisfy other loads, or charges from grid supply, this assumption isn't always correct.
+Battery losses from inversion / rectification are also not taken into account.
+
+**Calculation of savings / effective price**
+
+The algorithm distinguishes between grid supply and self-generated solar energy (solar and house battery).
+
+The cost advantage of your solar energy is calculated from the difference between your grid import rate (e.g €0.294/kWh) and your feed-in tariff (e.g €0.08/kWh).
+In this example, each unit of produced energy is €0.214 (0.294 - 0.08) cheaper than the grid import rate.
+If you charged a vehicle with 10 kWh of your own energy, this would then correspond to an effective saving of €2.14.
+
+If you charged 100% with your own solar energy, the displayed _effective energy price_ would be the cost of not exporting to the grid, i.e the feed-in tariff (€0.08/kWh).
+If you charge with 50% solar energy and 50% grid power, the _effective energy price_ adapts accordingly (e.g €0.187/kWh).
+
+If you don't receive a feed-in tariff for exporting power to the grid, you can set the feed-in price to 0 - the solar energy is then treated as being free of charge.
+If you have to pay tax on self-used energy, you can set the rate on your feed-in rate to get more realistic numbers.
+
+**Calculation of the solar energy share**
+
+If you get energy from more than one source at the same time (e.g 50% grid, 50% solar), the algorithm will distribute the sources evenly across all configured Chargers.
+This assumes that your home consumption and your active Charge Points use an energy mix of 50/50.
+With this model, charging the car is treated exactly the same as using your washing machine.
+
+Flexible pricing (Octopus Energy, Awattar, Tibber, etc) is taken into account when determining the effective energy price, however the savings amount is always calculated against the currently valid energy price.
