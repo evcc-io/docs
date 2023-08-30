@@ -32,6 +32,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
             remarkPlugins: [require("mdx-mermaid")],
             sidebarPath: require.resolve("./sidebars.js"),
             editUrl: "https://github.com/evcc-io/docs/tree/main",
+            editLocalizedFiles: true,
           },
           blog: {
             showReadingTime: true,
