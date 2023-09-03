@@ -15,5 +15,5 @@ interval: 30s # alle 30 Sekunden
 ```
 
 :::caution
-Ein zu kurzes Interval ( < 30s ) kann zu unerwünschtem Verhalten (die Regelung schwingt) führen, wenn die beteiligten Komponenten unter Umständen nicht genug Reaktionszeit haben, bevor der nächste Regelzyklus beginnt. Erfahrungsgemäß ist ein Interval von 10s bis 15s möglich, wenn alle Komponenten schnell genug reagieren. Das sollte individuell getestet werden.   
+Ein zu kurzes Interval ( < 30s ) kann zu unerwünschtem Verhalten (die Regelung schwingt) führen, wenn die beteiligten Komponenten unter Umständen nicht genug Reaktionszeit haben, bevor der nächste Regelzyklus beginnt. Erfahrungsgemäß ist ein Interval von 10s bis 15s möglich, wenn alle Komponenten schnell genug reagieren. Das sollte individuell getestet werden.  
 :::

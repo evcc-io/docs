@@ -65,7 +65,6 @@ The following devices are only available with sponsorship:
 - Vehicle Interfaces:
   - [Tronity](/docs/devices/vehicles#tronity--)
 
-
 ## How to Use your Token
 
 Simply add the following line to your `evcc.yaml`:

@@ -25,11 +25,10 @@ function escapeRegExp(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
-function readYamlDataFromDir(dir) {
-  const path = `./templates/${dir}`;
+function readTemplates(path) {
   const files = fs.readdirSync(path);
   return files.map((file) =>
-    yaml.load(fs.readFileSync(`${path}/${file}`, "utf8"))
+    yaml.load(fs.readFileSync(`${path}/${file}`, "utf8")),
   );
 }
 
@@ -61,7 +60,7 @@ ${codeBlocks
 
 ${block.code}
 
-</TabItem>`
+</TabItem>`,
   )
   .join("\n")}
 </Tabs>\n\n`;
@@ -78,10 +77,10 @@ ${block.code}
   return description + code + phaseSwitch + sponsor;
 }
 
-function additionalContent(type, name) {
+function additionalContent(name, target) {
   const filename = name.toLowerCase().replaceAll(" ", "_");
   try {
-    const path = `./docs/devices/${type}s/_${filename}.mdx`;
+    const path = target.replace(/\.mdx$/, `/_${filename}.mdx`);
     const content = fs.readFileSync(path, "utf-8");
     console.log("integrated additional content from ", path);
     return content + "\n";
@@ -121,7 +120,7 @@ function generateMarkdown(data, type, target) {
 
     if (group !== lastGroup) {
       generated += `## ${group}\n\n`;
-      generated += additionalContent(type, group);
+      generated += additionalContent(group, target);
     }
 
     if (brand && brand !== lastBrand) {
@@ -151,13 +150,22 @@ function generateMarkdown(data, type, target) {
     .readFileSync(target, "utf-8")
     .replace(
       new RegExp(`${escapeRegExp(AUTOGEN_MARKER)}(.|\n)*`, "gm"),
-      `${AUTOGEN_MARKER}\n\n${generated}`
+      `${AUTOGEN_MARKER}\n\n${generated}`,
     );
   console.log(`${type}: ${brandCounter} brands, ${productCounter} products`);
   fs.writeFileSync(target, content, "utf-8");
 }
 
 ["vehicle", "meter", "charger"].forEach((type) => {
-  const data = readYamlDataFromDir(type);
-  generateMarkdown(data, type, `./docs/devices/${type}s.mdx`);
+  // German
+  const templatesDe = readTemplates(`./templates/de/${type}`);
+  generateMarkdown(templatesDe, type, `./docs/devices/${type}s.mdx`);
+
+  // English
+  const templatesEn = readTemplates(`./templates/en/${type}`);
+  generateMarkdown(
+    templatesEn,
+    type,
+    `./i18n/en/docusaurus-plugin-content-docs/current/devices/${type}s.mdx`,
+  );
 });
