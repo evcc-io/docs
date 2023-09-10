@@ -325,3 +325,21 @@ co2:
   token: <token>
   zone: DE
 ```
+
+### `type:` **`ngeso`**
+
+Der National Grid Electricity Supply Operator (ESO) im Vereinigten Königreich.
+
+Stellt standardmäßig nationale Daten bereit, kann jedoch durch die Angabe **entweder** einer [Regions-ID](https://api.carbonintensity.org.uk/) oder einer Postleitzahl genauer gemacht werden. **Geben Sie nicht beides an!**
+
+**Beispiel**:
+
+```yaml
+co2:
+  type: ngeso
+  
+  # Optionally either
+  region: 1
+  # OR
+  postcode: SW1A1AA
+```
