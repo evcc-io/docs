@@ -70,14 +70,14 @@ In order for the system to function, an electricity meter is important. This
 allows us to calculate at any point in time the surplus power. Measuring the
 generated power is interesting, but has no effect on the function, with the
 this exception:
-https://docs.evcc.io/docs/guides/meters#ich-habe-eine-pv-anlage-aber-keinen-netzanschluss-z%C3%A4hler-kann-ich-evcc-trotzdem-nutzen
+https://docs.evcc.io/en/docs/guides/meters#i-have-a-solar-installation-but-i-dont-have-a-readable-grid-connection-meter---can-i-still-use-evcc
 
 The surplus power is compared with the minimum power required to charge. If
 this is sufficient, the charging process is started.
 
 The minimum power required to charge is calculated from the values `minCurrent`
 and `phases`, defined per `loadpoint` (a group of colocated chargers)
-See https://docs.evcc.io/docs/reference/configuration/loadpoints for more
+See https://docs.evcc.io/en/docs/reference/configuration/loadpoints for more
 information.
 
 For example: `phases: 1` und `minCurrent: 8`
@@ -100,8 +100,8 @@ several parameters. These are:
 Please refer to the description of each respective parameter for the available
 settings.
 
-- [Site Configuration Parameters](https://docs.evcc.io/docs/reference/configuration/site)
-- [Loadpoint Configuration Parameters](https://docs.evcc.io/docs/reference/configuration/loadpoints)
+- [Site Configuration Parameters](https://docs.evcc.io/en/docs/reference/configuration/site)
+- [Loadpoint Configuration Parameters](https://docs.evcc.io/en/docs/reference/configuration/loadpoints)
 
 ### Site
 
