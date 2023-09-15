@@ -158,7 +158,7 @@ aux:
   - myaux2 # second aux meter reference
 ```
 
-### `prioritySoc`
+### `prioritySoc` (VERALTET; wird im Batterie-UI eingestellt und dauerhaft gespeichert)
 
 #### (im Batterie-UI Grenze zwischen Haus und Fahrzeug)
 
@@ -177,7 +177,7 @@ Ist deaktiviert (entspricht 0%) wenn kein Wert angegeben wird.
 prioritySoc: 50 # Hausbatterie bekommt bis zum Soc 50% Priorität beim laden
 ```
 
-### `bufferSoc`
+### `bufferSoc` (VERALTET; wird im Batterie-UI eingestellt und dauerhaft gespeichert)
 
 #### (im Batterie-UI Grenze zwischen Fahrzeug und batterieunterstütztem Laden)
 
@@ -197,7 +197,7 @@ Ist deaktiviert (entspricht >100%) wenn kein Wert angegeben wird.
 bufferSoc: 80 # Hausbatterie wird oberhalb Soc 80% als Puffer genutzt
 ```
 
-### `bufferStartSoc`
+### `bufferStartSoc` (VERALTET; wird im Batterie-UI eingestellt und dauerhaft gespeichert)
 
 #### (im Batterie-UI Grenze im Bereich batterieunterstützes Laden)
 
