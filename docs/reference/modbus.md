@@ -116,7 +116,17 @@ scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 
 ## Manuelle Konfiguration
 
-Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden:
+Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden.
+Dazu bedarf es neben der allgemeinen 'modbus' Einstellungen (siehe oben) auch der Definition eines `registers` an Stelle eines `value`, wie bei vordefinierten Geräten. Es ist nicht zulässig, sowohl `value` als uach `register` anzugeben.
+Die Definition eines Registers besteht benötigt folgende Patameter:
+- `address`: die Registeradresse
+- `type`: Der Registertyp, zulässig sind `coil`, `input`, `holding`
+- `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden.
+Weitere zulässige Parameter einer manuellen Konfiguration sind:
+- `scale`: Fließkommezahl, die zur Konvertierung von gelesenen Werten (z.B. W in kW oder umgekehrt) verwendet werden kann.
+- `timeout`: modbus timeout.
+
+
 
 **Beispiel**:
 
@@ -125,7 +135,7 @@ source: modbus
 ---
 register:
   address: 40070
-  type: holding # holding or input
+  type: holding # coil, holding or input
   decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
 scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
 timeout: 2s # timeout, without unit in ns
@@ -147,4 +157,56 @@ source: modbus
 register:
   address: 40070
   type: writeholding # writeholding oder writecoil
+```
+
+### Gesamtbeispiel
+
+Ein vollständiges Beispiel für einen custom Charger mit modbus Interface (hier ein Phoenix EM-CP-PP-ETH mit der IP-Adresse 192.168.1.10) könnte z.B. so aussehen:
+
+**Beispiel**:
+
+```yaml
+chargers:
+- type: custom
+  name: CustomCharger
+  status:
+    # Read the status of the charger
+    # Either A,B,C or F
+    source: modbus
+    id: 180
+    uri: 192.168.1.10:502
+    timeout: 3s
+    register:
+      address: 100
+      type: input # Read an input register
+      decode: int16
+  enabled:
+    # Is the charger enabled (1) or not (0)
+    source: modbus
+    id: 180
+    uri: 192.168.1.10:502
+    register:
+      address: 400
+      type: coil # Read a coil
+      decode: uint8 # Doesn't matter but required
+  enable:
+    # Enable the charger
+    source: modbus
+    id: 180
+    uri: 192.168.1.10:502
+    register:
+      address: 400
+      type: writecoil # Write a coil
+      decode: uint8 # Doesn't matter but required
+  maxcurrent:
+    # Set the maximum current
+    source: modbus
+    id: 180
+    uri: 192.168.1.10:502
+    register:
+      address: 300
+      type: writeholding # Write a holding register
+      decode: uint16
+
+
 ```
