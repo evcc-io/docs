@@ -4,10 +4,10 @@ sidebar_position: 1
 
 # evcc.yaml
 
-evcc requires a configuration file in which the system is described. Without
-this file, evcc cannot be used. The file itself is written in
-[YAML](https://en.wikipedia.org/wiki/YAML). This format defines a syntax with
-which data can be structured in plain text.
+evcc requires a configuration file to describe the system and cannot be used
+without it. The file itself is written in
+[YAML](https://en.wikipedia.org/wiki/YAML), which is a structured,
+human-readable, plain text format.
 
 To create or edit the configuration file, we recommend using a text editor that
 understands YAML and thus helps with the formatting and shows any errors, e.g.
