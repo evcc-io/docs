@@ -118,7 +118,7 @@ scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 
 Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden.
 Dazu bedarf es neben den allgemeinen 'modbus' Einstellungen (siehe oben) auch der Definition eines `registers` an Stelle eines `value`, wie bei vordefinierten Geräten. Es ist nicht zulässig, sowohl `value` als auch `register` anzugeben.
-Die Definition eines Registers besteht benötigt folgende Patameter:
+Die Definition eines Registers benötigt folgende Parameter:
 - `address`: die Registeradresse
 - `type`: Der Registertyp, zulässig sind `coil`, `input`, `holding`
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden.
