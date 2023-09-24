@@ -66,15 +66,34 @@ ${block.code}
 </Tabs>\n\n`;
   }
 
-  const phaseSwitch = entry.capabilities?.includes("1p3p")
-    ? `<PhaseSwitchSupported />\n\n`
-    : "";
-
   const sponsor = entry.requirements?.includes("sponsorship")
     ? `<SponsorshipRequired />\n\n`
     : "";
 
-  return description + code + phaseSwitch + sponsor;
+  const features = [
+    ...(entry.capabilities || []),
+    ...(entry.requirements || []),
+  ];
+
+  // use sponsorfree instead of sponsorship
+  const index = features.indexOf("sponsorship");
+  if (index > -1) {
+    features.splice(index, 1);
+  } else {
+    features.push("sponsorfree");
+  }
+
+  // remove eebus
+  const eebus = features.indexOf("eebus");
+  if (eebus > -1) {
+    features.splice(eebus, 1);
+  }
+
+  const deviceFeatures = `<DeviceFeatures features="${features.join(
+    ",",
+  )}" />\n\n`;
+
+  return deviceFeatures + description + code + sponsor;
 }
 
 function additionalContent(name, target) {
@@ -111,10 +130,6 @@ function generateMarkdown(data, type, target) {
     const entry = dataSorted[i];
     const { group, description, brand } = entry.product;
     const nextBrand = dataSorted[i + 1]?.product?.brand;
-    let flags = "";
-    if (entry.requirements?.includes("sponsorship")) {
-      flags += " 💚";
-    }
 
     generated += `<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/${type}  -->\n\n`;
 
@@ -131,12 +146,12 @@ function generateMarkdown(data, type, target) {
 
     if (brand && brand !== nextBrand && brand !== lastBrand) {
       generated = generated.slice(0, -2); // remove last newline characters
-      generated += ` ${description}${flags}\n\n`;
+      generated += ` ${description}\n\n`;
     } else {
       let level = "##";
       if (group) level += "#";
       if (brand) level += "#";
-      generated += `${level} ${description}${flags}\n\n`;
+      generated += `${level} ${description}\n\n`;
     }
     productCounter++;
 
