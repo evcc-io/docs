@@ -4,10 +4,10 @@ sidebar_position: 1
 
 # evcc.yaml
 
-evcc requires a configuration file in which the system is described. Without
-this file, evcc cannot be used. The file itself is written in
-[YAML](https://en.wikipedia.org/wiki/YAML). This format defines a syntax with
-which data can be structured in plain text.
+evcc requires a configuration file to describe the system and cannot be used
+without it. The file itself is written in
+[YAML](https://en.wikipedia.org/wiki/YAML), which is a structured,
+human-readable, plain text format.
 
 To create or edit the configuration file, we recommend using a text editor that
 understands YAML and thus helps with the formatting and shows any errors, e.g.
@@ -68,16 +68,15 @@ graph TD;
 
 In order for the system to function, an electricity meter is important. This
 allows us to calculate at any point in time the surplus power. Measuring the
-generated power is interesting, but has no effect on the function, with the
-this exception:
-https://docs.evcc.io/docs/guides/meters#ich-habe-eine-pv-anlage-aber-keinen-netzanschluss-z%C3%A4hler-kann-ich-evcc-trotzdem-nutzen
+generated power is interesting, but has no effect on the function, with
+[this exception](../../guides/meters#i-have-a-solar-installation-but-i-dont-have-a-readable-grid-connection-meter---can-i-still-use-evcc)
 
 The surplus power is compared with the minimum power required to charge. If
 this is sufficient, the charging process is started.
 
 The minimum power required to charge is calculated from the values `minCurrent`
 and `phases`, defined per `loadpoint` (a group of colocated chargers)
-See https://docs.evcc.io/docs/reference/configuration/loadpoints for more
+See [`loadpoints`](./loadpoints) for more
 information.
 
 For example: `phases: 1` und `minCurrent: 8`
@@ -100,8 +99,8 @@ several parameters. These are:
 Please refer to the description of each respective parameter for the available
 settings.
 
-- [Site Configuration Parameters](https://docs.evcc.io/docs/reference/configuration/site)
-- [Loadpoint Configuration Parameters](https://docs.evcc.io/docs/reference/configuration/loadpoints)
+- [Site Configuration Parameters](./site)
+- [Loadpoint Configuration Parameters](./loadpoints)
 
 ### Site
 
