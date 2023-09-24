@@ -70,9 +70,28 @@ ${block.code}
     ? `<SponsorshipRequired />\n\n`
     : "";
 
-  const capabilities = entry.capabilities ? entry.capabilities.join(",") : "";
-  const requirements = entry.requirements ? entry.requirements.join(",") : "";
-  const deviceFeatures = `<DeviceFeatures capabilities="${capabilities}" requirements="${requirements}" />\n\n`;
+  const features = [
+    ...(entry.capabilities || []),
+    ...(entry.requirements || []),
+  ];
+
+  // use sponsorfree instead of sponsorship
+  const index = features.indexOf("sponsorship");
+  if (index > -1) {
+    features.splice(index, 1);
+  } else {
+    features.push("sponsorfree");
+  }
+
+  // remove eebus
+  const eebus = features.indexOf("eebus");
+  if (eebus > -1) {
+    features.splice(eebus, 1);
+  }
+
+  const deviceFeatures = `<DeviceFeatures features="${features.join(
+    ",",
+  )}" />\n\n`;
 
   return deviceFeatures + description + code + sponsor;
 }
