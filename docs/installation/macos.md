@@ -36,7 +36,7 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
   brew services start evcc
   ```
 
-- Prüfe die Installation und öffne einen Browser und gibt die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
+- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
 - Stoppe den evcc-Server:
 
   ```sh
@@ -67,9 +67,9 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
   evcc -c evcc.yaml
   ```
 
-  Öffne einen Browser und gibt die folgende URL ein: http://localhost:7070. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
+  Öffne einen Browser und gib die folgende URL ein: http://localhost:7070. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
 
-- Wenn alles funktioniert beende evcc durch drücken der Tastenkombination `CTRL-C`.
+- Wenn alles funktioniert, beende evcc durch drücken der Tastenkombination `CTRL-C`.
 
 - Verschiebe die erstellte Konfigurationsdatei in den Zielordner:
 
@@ -77,7 +77,7 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
   sudo mv evcc.yaml /etc
   ```
 
-- Start evcc neu:
+- Starte evcc neu:
 
   ```sh
   brew services start evcc
