@@ -188,7 +188,7 @@ chargers:
     register:
       address: 400
       type: coil # Read a coil
-      decode: uint8 # Doesn't matter but required
+      decode: bool16 # Doesn't matter but required
   enable:
     # Enable the charger
     source: modbus
