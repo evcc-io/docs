@@ -124,7 +124,7 @@ Die Definition eines Registers benötigt folgende Parameter:
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden.
 Weitere zulässige Parameter einer manuellen Konfiguration sind:
 - `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z.B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
-- `timeout`: modbus timeout.
+- `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z.B. 10s für 10 Sekunden.
 
 
 
