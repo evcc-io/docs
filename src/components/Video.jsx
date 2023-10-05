@@ -13,7 +13,7 @@ export default ({ src, poster }) => {
       }}
       poster={poster}
     >
-      <source src={src} type="video/webm" />
+      <source src={src} type="video/mp4" />
       Your browser does not support the video tag.
     </video>
   );
