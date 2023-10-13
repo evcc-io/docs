@@ -151,6 +151,8 @@ soc:
 
 Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
 
+Ist beim Charger `integrateddevice: true` konfiguriert, werden die Daten fortlaufend abgerufen. Dann sind keine `poll` Einstellungen notwendig, bzw. diese werden ignoriert.
+
 :::warning
 Es wird **NICHT** empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
 oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. **AUF EIGENES RISIKO.**
