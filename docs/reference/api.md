@@ -11,7 +11,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 ## REST API
 
 - `GET  /api/state`: evcc state (static configuration and dynamic state as JSON object)
-- (can also be used with filtering. e.g.: `/api/state?jq=.statistics."30d".avgPrice`)
+- (can also be used with filtering. e.g.: `/api/state?jq=.statistics["30d"].avgPrice`)
 - `GET  /api/health`: evcc health check
 - `POST /api/prioritysoc/<soc>`: battery priority SoC in %
 - `POST /api/buffersoc/<soc>`: battery buffer SoC in %
