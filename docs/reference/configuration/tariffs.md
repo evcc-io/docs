@@ -236,7 +236,7 @@ tax: # optional, additional tax (0.1 for 10%)
 
 ### `type:` **`energinet`**
 
-Der Stromanbieter [Energinet](https://energinat.dk) in Dänemark.
+Der Stromanbieter [Energinet](https://energinet.dk) in Dänemark.
 
 **Beispiel**:
 
