@@ -96,7 +96,9 @@ several parameters. These are:
 - Loadpoint: `enable: threshold`
 - Loadpoint: `disable: threshold`
 
-![available charging power diagram](/img/available_charging_power_en.png)
+The diagram below shows how evcc uses these parameters and various inputs to decide when charging is started or stopped and how much charging power is available.
+
+![available charging power diagram](img/available_charging_power_en.png)
 
 Please refer to the description of each respective parameter for the available
 settings.
