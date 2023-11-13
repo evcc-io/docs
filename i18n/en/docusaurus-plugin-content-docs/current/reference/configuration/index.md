@@ -96,6 +96,8 @@ several parameters. These are:
 - Loadpoint: `enable: threshold`
 - Loadpoint: `disable: threshold`
 
+![available charging power diagram](/img/available_charging_power_en.png)
+
 Please refer to the description of each respective parameter for the available
 settings.
 
