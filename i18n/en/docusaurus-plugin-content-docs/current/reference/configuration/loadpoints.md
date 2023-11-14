@@ -217,7 +217,7 @@ enable:
 
 #### `threshold`
 
-Defines the power threshold at the grid connection point in watts (W).
+Defines the power threshold for starting charging in watts (W). Charging is started once the available charging power exceeds this threshold. Available charging power is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. Check the [Manipulations Options](index.md#manipulation-options) section for more information on how these inputs and configuration parameters work together.
 
 **Possible values**: A positive value for grid consumption, a negative value for grid export. When set to `0`, export must reach the minimum charging power.
 
