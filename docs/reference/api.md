@@ -19,8 +19,8 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST /api/smartcostlimit/<cost>`: smart charging cost limit (previously known as "cheap" tariff)
 - `GET  /api/tariff/<type>`: list of prices (grid/feedin/planner)
 - `GET  /api/sessions[?format=csv&lang=<lang>]`: charging sessions
-- `GET  /api/telemetry`: telemetry enabled status
-- `POST /api/telemetry/<status>`: enable/disable telemetry (true/false)
+- `GET  /api/settings/telemetry`: telemetry enabled status
+- `POST /api/settings/telemetry/<status>`: enable/disable telemetry (true/false)
 
 ### Loadpoint
 
