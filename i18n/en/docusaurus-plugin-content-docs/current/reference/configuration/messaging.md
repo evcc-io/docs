@@ -256,7 +256,7 @@ services:
 
 ### `pushover`
 
-`pushover` uses the [Pushover](https://pushover.net/) service. Details can be found at [Pushover API](https://https://pushover.net/api).
+`pushover` uses the [Pushover](https://pushover.net/) service. Details can be found at [Pushover API](https://pushover.net/api).
 
 **For example**:
 
