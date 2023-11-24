@@ -11,6 +11,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 ## REST API
 
 - `GET  /api/state`: evcc state (static configuration and dynamic state as JSON object)
+- (can also be used with filtering. e.g.: `/api/state?jq=.statistics["30d"].avgPrice`)
 - `GET  /api/health`: evcc health check
 - `POST /api/prioritysoc/<soc>`: battery priority SoC in %
 - `POST /api/buffersoc/<soc>`: battery buffer SoC in %
@@ -19,8 +20,8 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST /api/smartcostlimit/<cost>`: smart charging cost limit (previously known as "cheap" tariff)
 - `GET  /api/tariff/<type>`: list of prices (grid/feedin/planner)
 - `GET  /api/sessions[?format=csv&lang=<lang>]`: charging sessions
-- `GET  /api/telemetry`: telemetry enabled status
-- `POST /api/telemetry/<status>`: enable/disable telemetry (true/false)
+- `GET  /api/settings/telemetry`: telemetry enabled status
+- `POST /api/settings/telemetry/<status>`: enable/disable telemetry (true/false)
 
 ### Loadpoint
 

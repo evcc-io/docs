@@ -38,6 +38,11 @@ tariffs:
 
 **Beispiel: Konstanter Energiepreis mit zeitabhängigen Tarifen**
 
+::: info
+Tagesübergreifende Zeitbereiche müssen um Mitternacht (= 0) geteilt werden.
+Es sind zwei Einträge (z.B. 20-0 und 0-5) notwendig.
+:::
+
 ```yaml
 tariffs:
   currency: EUR # (default EUR)
@@ -47,7 +52,7 @@ tariffs:
     price: 0.294 # EUR/kWh
     zones:
       - days: Mo-Fr
-        hours: 2-5
+        hours: 20-0
         price: 0.2 # EUR/kWh
       - days: Sa,So
         price: 0.15 # EUR/kWh
@@ -90,7 +95,7 @@ Währung in der Energiepreise dargestellt und berechnet werden.
 
 Folgende Tariftypen (`type`) werden unterstützt:
 
-**Mögliche Werte** `fixed|awattar|tibber|octopusenergy`
+**Mögliche Werte** `fixed|custom|awattar|tibber|octopusenergy`
 
 ---
 
@@ -103,6 +108,18 @@ Fester Energiepreis für Netzbezug.
 ```yaml
 type: fixed
 price: 0.297 # 0,297 [currency]/kWh
+```
+
+### `type:` **`custom`**
+
+Fester Energiepreis für Netzbezug, der per Plugin gesetzt werden kann
+
+**Beispiel**:
+
+```yaml
+type: custom
+price:
+  source: ...
 ```
 
 #### `price`
@@ -219,7 +236,7 @@ tax: # optional, additional tax (0.1 for 10%)
 
 ### `type:` **`energinet`**
 
-Der Stromanbieter [Energinet](https://energinat.dk) in Dänemark.
+Der Stromanbieter [Energinet](https://energinet.dk) in Dänemark.
 
 **Beispiel**:
 
@@ -247,6 +264,16 @@ Feste Einspeisevergütung
 ```yaml
 type: fixed
 price: 0.12 # 0,12 [currency]/kWh
+```
+
+### `type:` **`custom`**
+
+Feste Einspeisevergütung, die per Plugin gesetzt werden kann
+
+```yaml
+type: custom
+price:
+  source: ...
 ```
 
 #### `price`

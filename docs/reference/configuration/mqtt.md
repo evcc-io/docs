@@ -8,12 +8,32 @@ Stellt die Konnektivität mit einem MQTT-Broker her.
 Bei bestehender Verbindung pusht evcc automatisch alle internen Werte via MQTT-Broker auf das angegebene Topic und empfängt dort auch Änderungen.
 Siehe dazu auch die Dokumentation zur [`MQTT API`](/docs/reference/api/#mqtt-api).
 
+---
+
+## MQTT ohne Verschlüsselung
+
 **Beispiel**:
 
 ```yaml
 # mqtt message broker
 mqtt:
   broker: localhost:1883
+  topic: evcc # root topic for publishing, set empty to disable publishing
+  # clientid: foo
+  # user:
+  # password:
+```
+
+---
+
+## MQTT mit TLS-Verschlüsselung
+
+Beispiel:
+
+```yaml
+# mqtt message broker
+mqtt:
+  broker: tls://localhost:8883
   topic: evcc # root topic for publishing, set empty to disable publishing
   # clientid: foo
   # user:
