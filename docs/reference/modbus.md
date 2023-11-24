@@ -122,6 +122,7 @@ Die Definition eines Registers benötigt folgende Parameter:
 - `address`: die Registeradresse
 - `type`: Der Registertyp, zulässig sind `coil`, `input`, `holding`
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden.
+- `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen UND verknüpft, um so einzelne Bits extrahieren zu können.
 Weitere zulässige Parameter einer manuellen Konfiguration sind:
 - `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z.B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
 - `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z.B. 10s für 10 Sekunden.
@@ -137,6 +138,7 @@ register:
   address: 40070
   type: holding # coil, holding or input
   decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
+  bitmask: 2 # Optional: a bitmask that is applied to the read value. Here the mask is 0000000000000010b, ignored if value is 0
 scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
 timeout: 2s # timeout, without unit in ns
 ```
