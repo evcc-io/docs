@@ -79,16 +79,17 @@ For example: `phases: 1` und `minCurrent: 8`
 
 #### Manipulation Options
 
-The calculation of the available charging power as well as thresholds for starting or stopping can be individually adjusted using
-several parameters. These are:
+The calculation of the available charging power as well as thresholds for starting or stopping can be individually adjusted using several parameters. These are:
 
 - Site: `residualpower`
 - Site: `prioritySoc`
 - Site: `bufferSoc`
 - Site: `bufferStartSoc`
+- Site: `maxGridSupplyWhileBatteryCharging`
 - Site: `aux`
 - Loadpoint: `enable: threshold`
 - Loadpoint: `disable: threshold`
+- Loadpoint: `priority`
 
 The first of the two diagrams below shows how evcc obtains the inputs and above-mentioned parameters, the second how they influence when and with how much power the vehicle is charged:
 
