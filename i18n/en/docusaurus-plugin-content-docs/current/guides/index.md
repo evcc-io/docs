@@ -12,7 +12,7 @@ For general guidance and troubleshooting.
 
 Guidance on each of the charge modes and everything else to do with the charging process.
 
-### [How does Solar mode work - a look into the innards](solar-mode-innards)
+#### [How does Solar mode work - a look into the innards](solar-mode-innards)
 
 For us tech-nerds: an in-depth look at how charging in Solar mode works.
 
