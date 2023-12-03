@@ -36,12 +36,12 @@ Also important is the integration with your [vehicle](../reference/configuration
 
 And last but not least there are different configuration parameters available for customizing the Solar mode:
 
-- The power level set for [site.residualPower](../reference/configuration/site/#residualpower) is incorporated into the available charging power.
-- [loadpoint.enable](../reference/configuration/loadpoints#enable)/[disable](../reference/configuration/loadpoints#disable) thresholds control when charging is started and stopped.
-- [loadpoint.phases](../reference/configuration/loadpoints#phases)/[minCurrent](../reference/configuration/loadpoints#mincurrent)/[maxCurrent](../reference/configuration/loadpoints#maxcurrent) define the minimum and maximum charging power.
-- [site.prioritySoc](../reference/configuration/site/#prioritysoc)/[bufferSoc](../reference/configuration/site/#buffersoc)/[bufferStartSoc](../reference/configuration/site/#bufferstartsoc) define priorities between battery and vehicle charging.
-- [loadpoint.priority](../reference/configuration/loadpoints/#priority) defines priorities between multiple chargers.
-- [site.maxGridSupplyWhileBatteryCharging](../reference/configuration/site/#maxgridsupplywhilebatterycharging) deals with situations where vehicle charging is prioritized over battery charging but measured battery power cannot be fully diverted due to limits in the DC/AC interface of the inverter.
+- The power level set for [`site.residualPower`](../reference/configuration/site/#residualpower) is incorporated into the available charging power.
+- [`loadpoint.enable`](../reference/configuration/loadpoints#enable)/[`disable`](../reference/configuration/loadpoints#disable) thresholds control when charging is started and stopped.
+- [`loadpoint.phases`](../reference/configuration/loadpoints#phases)/[`minCurrent`](../reference/configuration/loadpoints#mincurrent)/[`maxCurrent`](../reference/configuration/loadpoints#maxcurrent) define the minimum and maximum charging power.
+- [`site.prioritySoc`](../reference/configuration/site/#prioritysoc)/[`bufferSoc`](../reference/configuration/site/#buffersoc)/[`bufferStartSoc`](../reference/configuration/site/#bufferstartsoc) define priorities between battery and vehicle charging.
+- [`loadpoint.priority`](../reference/configuration/loadpoints/#priority) defines priorities between multiple chargers.
+- [`site.maxGridSupplyWhileBatteryCharging`](../reference/configuration/site/#maxgridsupplywhilebatterycharging) deals with situations where vehicle charging is prioritized over battery charging but measured battery power cannot be fully diverted due to limits in the DC/AC interface of the inverter.
 
 The following diagram shows in detail how all these variables are factored into the calculation of `available charging power` and starting and stopping the charging process. Its main focus lies on Solar mode in combination with a battery system, but it also covers how systems without battery work as well as the Min+Solar mode. The formulas are not necessarily those programmed into evcc, but rather provide a mathematical model that helps understanding how the software works: 
 
@@ -57,7 +57,7 @@ Note that the `minCurrent` and `maxCurrent` settings apply to both 1-phase and 3
 
 ## Timing: `interval` and delays
 
-The calculation of available charging power and resulting actions and adjustments are executed in the [interval](../reference/configuration/interval/) defined in the configuration file. Therefore evcc does not react to any change in the inputs but only to the state detected at each interval, as the next diagram illustrates:
+The calculation of available charging power and resulting actions and adjustments are executed in the [`interval`](../reference/configuration/interval/) defined in the configuration file. Therefore evcc does not react to any change in the inputs but only to the state detected at each interval, as the next diagram illustrates:
 
 ![interval](img/evcc-innards-interval.png)
 
@@ -65,9 +65,9 @@ The time in between the `intervals` gives the charger or other device represente
 
 To avoid vehicle charging being started and stopped in the typically relatively short `intervals`, several delays are applied:
 
-- [loadpoint.enable:delay](../reference/configuration/loadpoints/#delay) defines the time the enable threshold must be met before charging is started. Also applies to switching from 1-phase to 3-phase charging.
-- [loadpoint.disable:delay](../reference/configuration/loadpoints/#delay-1) defines the time the disable threshold must be met before charging is stopped. Also applies to switching from 3-phase to 1-phase charging.
-- [loadpoint.guardduration](../reference/configuration/loadpoints/#guardduration) defines the time that after starting charging must pass before charging can be stopped again, and vice versa the time that must pass after stopping before charging can start again.
+- [`loadpoint.enable:delay`](../reference/configuration/loadpoints/#delay) defines the time the enable threshold must be met before charging is started. Also applies to switching from 1-phase to 3-phase charging.
+- [`loadpoint.disable:delay`](../reference/configuration/loadpoints/#delay-1) defines the time the disable threshold must be met before charging is stopped. Also applies to switching from 3-phase to 1-phase charging.
+- [`loadpoint.guardduration`](../reference/configuration/loadpoints/#guardduration) defines the time that after starting charging must pass before charging can be stopped again, and vice versa the time that must pass after stopping before charging can start again.
 
 The next diagram shows the application of those settings and their relationship with the control cycle `interval`:
 
@@ -75,144 +75,14 @@ The next diagram shows the application of those settings and their relationship 
 
 ## Timing: multiple `loadpoints`
 
-If you have two or more `loadpoints`, at each `interval` only one will be calculated and adjusted. This way each `loadpoint` represents its own independent control circuit. The control circuit of each `loadpoint` only takes into account the measurement inputs from the devices represented by the other loadpoints, but is not aware of their ongoing adjustments or delay timers. The next diagram shows these independent control circuits for two `loadpoints`. As example, we have Loadpoint A with lower priority grabbing surplus first but then releasing it again, after Loadpoint B with higher priority also starts charging:
+If you have two or more `loadpoints`, at each `interval` only one will be calculated and adjusted. This way each `loadpoint` represents its own independent control circuit. The control circuit of each `loadpoint` only takes into account the measurement inputs from the devices represented by the other loadpoints, but is not aware of their ongoing adjustments or delay timers. The next diagram shows these independent control circuits for two `loadpoints`. As example, we have Loadpoint A with lower `priority` grabbing surplus first but then releasing it again, after Loadpoint B with higher `priority` also starts charging:
 
-![interval](img/evcc-innards-delays.png)
+![multiple loadpoints 1](img/evcc-innards-2-loadpoints-1.png)
 
+Note that this back-and-forth can be avoided by setting a longer `enable:delay` for the `loadpoint` with lower `priority`:
 
-### What do the different Charge Modes do?
+![multiple loadpoints 1](img/evcc-innards-2-loadpoints-2.png)
 
-| Mode            | Description                                                                                                                                                                                            |
-| :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Stop**        | No charging occurs - if a session was in progress, it is stopped immediately.                                                                                                                          |
-| **Fast**        | Charging proceeds at the maximum rate possible.                                                                                                                                                        |
-| **Min + Solar** | Charging proceeds at the _slowest_ rate possible. If enough excess solar is available to increase performance, this is made available to the Charger.                                                  |
-| **Solar**       | Charging proceeds _utilising only excess solar power_. If excess solar does not exceed the minimum charge rate, charging stops. [More Details](#i-have-solar-excess-but-the-vehicle-doesnt-charge-why) |
+## Conclusion
 
-### I have Solar excess, but the vehicle doesn't charge. Why?
-
-Unfortunately, vehicles cannot be charged with any amount of power desired - there are minimum and maximum rates. These are defined by various standards:
-
-[IEC 61851](https://en.wikipedia.org/wiki/IEC_61851) (vehicle charging systems) defines a minimum charge speed of 6 Amps per phase,
-and depending on the configuration in `evcc.yaml`, a maximum of 16 or 32 amps.
-
-That means:
-
-- **Single-Phase Charging** - 1.4kW minimum, up to 3.6kW (16A) or 7.2kW (32A)
-- **Two-Phase Charging** - 2.8kW minimum, up to 7.2kW (16A) or 14.4kW (32A)
-- **Three-Phase Charging** - 4.2kW minimum, up to 11kW (16A) or 22kW (32A)
-
-The newer standard [ISO 15118](https://de.wikipedia.org/wiki/ISO_15118) is supported on DC Chargers, along with a small number of Vehicles and AC Charge Points (this probably doesn't apply to you). This supports a ~1.4kW minimum, regardless of the number of phases.
-
-When using the Charge Mode **Solar**, a Solar Excess greater than the minimum relevant value must be available before charging begins. If this Excess is not available, then after a configurable length of time, charging is stopped.
-
-Solar Excess is calculated by monitoring the feed-in power delivered back to the Grid. Excess calculation (and, indeed, the Solar Charge Mode) therefore does not function if this is not available.
-
-### I have a house battery, and it's being discharged to charge my vehicle. Help!
-
-In general, evcc cannot directly influence charging and discharging of the house battery - the energy management system of that battery is responsible for that.
-
-House Batteries generally play by a few sets of rules:
-
-1. **House battery charges**:
-
-- If it's not full (excluding prognosis-based charging) and Solar Surplus is available
-- If the battery's State of Charge is below a defined minimum level
-- If the Battery Management System (BMS) determines that some kind of charging is required, e.g for cell balancing
-- and many, many more other arcane scenarios
-
-2. **House battery does not charge**:
-
-- If it's full
-- If the battery's Energy Management System determines using prognosis-based charging (sometimes using Solar Forecasting and historical consumption) that waiting to charge until later in the day would be a better idea
-- and many, many more other arcane scenarios
-
-With evcc in the mix, there are more possible scenarios:
-
-1. **`Fast` and `Min + Solar`**
-
-The House Battery is ignored, because the focus is on charging the vehicle as quickly as possible - regardless of where that energy comes from.
-
-2. **`Solar`**
-
-- evcc regulates the charging power depending on the available Solar Excess.
-- Charging only starts if the Solar Excess exceeds the minimum required for a configured duration ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#enable)).
-- Charging stops if the Solar Excess falls below this minimum for a configured duration ([Standard: 1 Minute](/docs/reference/configuration/loadpoints#disable)).
-- However, there may be fluctuations in energy production / consumption that fall outside the configured [Update Interval](/docs/reference/configuration/interval). This means that if there is too little Solar Excess, the "missing energy" has to come from somewhere, which usually means that the battery's Energy Management System jumps in and supplies energy to ensure that energy is not imported from the grid. This cannot usually be prevented.
-- evcc does have some options to help regulate the battery. These include
-  - [prioritySoC](/docs/reference/configuration/site#prioritysoc) will prioritise charging the House Battery up until it reaches a defined State of Charge. Once that occurs, battery charging power is interpreted as available Solar Excess (_Vehicle First, Home Second_)
-  - [bufferSoC](/docs/reference/configuration/site#buffersoc) will discharge the House Battery so long as it is above the defined State of Charge (_Battery Supported Charging_).
-
-### There's Solar Excess available, but charging has stopped before the vehicle's target State of Charge has been reached.
-
-This usually happens when a target State of Charge is set and reached _on the vehicle itself_. Try setting the vehicle's target State of Charge higher than evcc's.
-
-### Why is charging proceeding at full power when the vehicle is not recognised?
-
-This happens when evcc's Minimum State of Charge is set to something greater than 0.
-
-The Minimum State of Charge feature supplies full power to the Vehicle if its State of Charge is lower than a defined minimum, in order to ensure that some kind of range is always available to use.
-
-If the vehicle's State of Charge cannot be determined for some reason, charging starts to ensure that range is always available.
-
-### "Probleme" i.V.m. Gastfahrzeug
-
-:::note
-This section is not translated due to unclear German origins. Please contribute an English translation!
-:::
-
-Da man bei einem Gastfahrzeug keine Einstellungen definieren kann, gelten immer die Einstellungen vom Loadpoint.
-
-Dies kann zu ungünstigem Ladeverhalten (z.B. unnötige Einspeisung) führen.
-
-Beispiele:
-
-- Am Loadpoint ist `phases: 3` definiert ist. Das Gastfahrzeug kann aber nur 1-phasig laden. Dann startet die Ladung im PV-Modus trotzdem erst ab 4,2kW Überschuss.
-- Am Loadpoint mit automatischer Phasenumschaltung ist `maxcurrent: 32` definiert. Das Gastfahrzeug kann aber nur maximal mit 16A (3,7kW@1p) laden. Dann findet die Phasenumschaltung von 1p auf 3p erst bei 7,4kW Überschuss statt.
-
-Abhilfe schafft hier die Definition eines (oder mehrerer) Offline-Vehicle. Bei diesen können die entsprechenden Parameter (`phases`, `mincurrent`, `maxcurrent`) definiert werden.
-
-### Notes on RFID
-
-Some Chargers start charging as soon as a valid RFID card is presented. evcc should either interrupt charging or throttle it as required after a short delay.
-
-### Error: Charger out of sync: expected disabled, got enabled // Charger logic error: disabled but charging
-
-evcc expects chargers to have switched to their new state before the next check cycle (after the configured `interval`).
-
-Some devices can sometimes react a little slowly to commands - if this happens, that desynchronisation of state is flagged with these error messages.
-
-If you're not experiencing any other issues, these can safely be ignored, or you can try increasing the `interval`.
-
-### Solar Production in Winter
-
-In the Winter months, Solar production is often regularly below the configured [Minimum](#i-have-solar-excess-but-the-vehicle-doesnt-charge-why). In order to get as much energy into the Vehicle as possible, you can try some of the following tips and tricks:
-
-#### Using `residualpower`
-
-In the configuration under the [`site`](/docs/reference/configuration/site) flag, set [`residualPower`](/docs/reference/configuration/site#residualpower) to a **negative** value. This determines how much power the grid can supply to nudge your solar production up enough to cover the minimum. Changes are possible via the API.
-
-**Exmaple**:
-
-```yaml
-site:
-  residualPower: -1000 # 1000W grid cover in Solar mode
-```
-
-The disadvantage of this solution is that the grid power is used even when sufficient excess is available.
-
-#### With `enable/disable`
-
-In the configuration under the [`loadpoints`](/docs/reference/configuration/loadpoints) flag, you can tweak the `enable` and `disable` logic to suit. Changes to the `threshold` value are possible via the API.
-
-**Example**:
-
-```yaml
-loadpoints:
-  enable:
-      delay: 1m
-      threshold: -200 # Charging starts when 200w of feed-in occurs for 1 minute.
-    disable:
-      delay: 30m
-      threshold: 1200 # Charging stops when the grid supplies 1.2kW of energy for more than 30 minutes.
-```
+We hope this page succeeded in providing you a comprehensible overview of the intricate but powerful Solar mode of evcc. While the dependencies between the different settings are not always easy to understand, they allow the system to adapt to many situations - the right setup is always a balance between many factors, among them: the output of your PV system, the consumption of your house and vehicle, the presence of batteries or other surplus controlled devices and the rates that apply to feeding power into the grid or drawing from it. With evcc you have a powerful tool at hand to accommodate these factors and optimize solar-charging of your vehicle based on your individual needs.
