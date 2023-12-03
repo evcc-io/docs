@@ -73,6 +73,12 @@ The next diagram shows the application of those settings and their relationship 
 
 ![interval](img/evcc-innards-delays.png)
 
+## Timing: multiple `loadpoints`
+
+If you have two or more `loadpoints`, at each `interval` only one will be calculated and adjusted. This way each `loadpoint` represents its own independent control circuit. The control circuit of each `loadpoint` only takes into account the measurement inputs from the devices represented by the other loadpoints, but is not aware of their ongoing adjustments or delay timers. The next diagram shows these independent control circuits for two `loadpoints`. As example, we have Loadpoint A with lower priority grabbing surplus first but then releasing it again, after Loadpoint B with higher priority also starts charging:
+
+![interval](img/evcc-innards-delays.png)
+
 
 ### What do the different Charge Modes do?
 
