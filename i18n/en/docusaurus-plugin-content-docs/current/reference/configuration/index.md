@@ -91,16 +91,7 @@ The calculation of the available charging power as well as thresholds for starti
 - Loadpoint: `disable: threshold`
 - Loadpoint: `priority`
 
-The first of the two diagrams below shows how evcc obtains the inputs and above-mentioned parameters, the second how they influence when and with how much power the vehicle is charged:
-
-![inputs outputs diagram](img/inputs_outputs_en.png)
-
-![available charging power diagram](img/available_charging_power_en.png)
-
-Please refer to the description of each respective parameter for the available settings.
-
-- [Site Configuration Parameters](./site)
-- [Loadpoint Configuration Parameters](./loadpoints)
+Have a look at the [How does Solar mode work - a look into the innards](../../guides/solar-mode-innards) guide for an in-depth explanation of how solar mode works and how the parameters listed above define its behavior.
 
 ### Site
 
