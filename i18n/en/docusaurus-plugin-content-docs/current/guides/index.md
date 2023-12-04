@@ -14,7 +14,7 @@ Guidance on each of the charge modes and everything else to do with the charging
 
 ### [How does Solar mode work - a look into the innards](solar-mode-innards)
 
-For us tech-nerds: an in-depth look at how charging in Solar mode works.
+For us tech-nerds: an in-depth look at how charging in Solar mode works and the configuration parameters that define its behavior.
 
 ## [Vehicles](vehicles)
 
