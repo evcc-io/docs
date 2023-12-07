@@ -79,3 +79,10 @@ Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung 
 
 - Grundlagen, detaillierte Anleitung für Raspberry Pi Installation, Fernzugriff via Fritz!Box & DynDNS: [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
 - InfluxDB & Grafana: [Von evcc erfasste Daten langfristig speichern und aufbereiten](https://www.elefacts.de/test-208-von_evcc_erfasste_daten_langfristig_speichern_und_aufbereiten)
+
+### the-ninth.com
+
+- [A closer look at the inner workings of evcc](https://www.the-ninth.com/blog/comparing-evcc-go-e-controller)
+- [Running evcc in our second home with Fronius](https://www.the-ninth.com/blog/running-evcc-synology-huawei-go-e-vw)
+- [Running evcc on Synology with Huawei, go-e and VW](https://www.the-ninth.com/blog/running-evcc-in-our-second-home-with-fronius)
+- [Comparing evcc and the go-e Controller for solar charging](https://www.the-ninth.com/blog/a-closer-look-at-the-inner-workings-of-evcc)
