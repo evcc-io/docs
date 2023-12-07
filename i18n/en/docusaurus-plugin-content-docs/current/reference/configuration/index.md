@@ -91,7 +91,7 @@ The calculation of the available charging power as well as thresholds for starti
 - Loadpoint: `disable: threshold`
 - Loadpoint: `priority`
 
-Have a look at the [How does Solar mode work - a look into the innards](../../guides/solar-mode-innards) guide for an in-depth explanation of how solar mode works and how the parameters listed above define its behavior.
+Have a look at the [How does Solar mode work - a look into the innards](../../guides/solar-mode) guide for an in-depth explanation of how solar mode works and how the parameters listed above define its behavior.
 
 ### Site
 
