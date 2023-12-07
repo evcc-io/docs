@@ -96,7 +96,7 @@ Tackles evcc basics, custom plugins, control via MQTT and ioBroker, as well as d
 
 ### the-ninth.com
 
-- [A closer look at the inner workings of evcc](https://www.the-ninth.com/blog/comparing-evcc-go-e-controller)
-- [Running evcc in our second home with Fronius](https://www.the-ninth.com/blog/running-evcc-synology-huawei-go-e-vw)
-- [Running evcc on Synology with Huawei, go-e and VW](https://www.the-ninth.com/blog/running-evcc-in-our-second-home-with-fronius)
-- [Comparing evcc and the go-e Controller for solar charging](https://www.the-ninth.com/blog/a-closer-look-at-the-inner-workings-of-evcc)
+- [A closer look at the inner workings of evcc](https://www.the-ninth.com/blog/a-closer-look-at-the-inner-workings-of-evcc)
+- [Running evcc in our second home with Fronius](https://www.the-ninth.com/blog/running-evcc-in-our-second-home-with-fronius)
+- [Running evcc on Synology with Huawei, go-e and VW](https://www.the-ninth.com/blog/running-evcc-synology-huawei-go-e-vw)
+- [Comparing evcc and the go-e Controller for solar charging](https://www.the-ninth.com/blog/comparing-evcc-go-e-controller)
