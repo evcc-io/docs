@@ -9,7 +9,7 @@ The magic of evcc happens in the `Solar` mode, where the vehicle is charged with
 
 The system constantly monitors the `available charging power` and starts the charging process if it exceeds the minimum power required for the vehicle (`minimum charging power`). If the `available charging power` changes, evcc adapts the charging power or stops charging accordingly.
 
-The `Solar` mode is highly customizable, and can therefore adapt to many different setups and requirements. Before you read this page, make sure you are familiar with the [structure of the configuration](../reference/configuration/). On this page, we will leave aside the details of how devices are integrated with evcc but will focus on how different inputs and settings define the `Solar` mode' control of your vehicle’s charging. The following diagram shows these, with blue being settings that define inputs and green other configuration parameters:
+The `Solar` mode is highly customizable, and can therefore adapt to many different setups and requirements. Before you read this page, make sure you are familiar with the [structure of the configuration](../reference/configuration/). On this page, we will leave aside the details of how devices are integrated with evcc but will focus on how different inputs and settings define the `Solar` mode's control of your vehicle’s charging. The following diagram shows these, with blue being settings that define inputs and green other configuration parameters:
 
 ![relevant configuration](img/evcc-innards-er.png)
 
