@@ -23,6 +23,9 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
         },
       },
     },
+    plugins: [
+      ['drawio', {}],
+    ],
     presets: [
       [
         "@docusaurus/preset-classic",

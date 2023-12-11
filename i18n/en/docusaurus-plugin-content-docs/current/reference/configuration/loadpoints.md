@@ -217,7 +217,7 @@ enable:
 
 #### `threshold`
 
-Defines the power threshold for starting charging in watts (W). Charging is started once the available charging power exceeds this threshold. Available charging power is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. Check the [Manipulations Options](index.md#manipulation-options) section for more information on how these inputs and configuration parameters work together. The default threshold is the minimum charging power. Setting a lower value will start charging even if not enough surplus is available and draw the additionally needed power from grid or if available a battery.
+Defines the power threshold for starting charging in watts (W). Charging is started once the [`available charging power`](/docs/inner-workings/solar-mode#calculation-of-available-charging-power) exceeds this threshold. `Available charging power` is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. The default threshold is the [`minimum charging power`](/docs/inner-workings/minmaxphases). Setting a lower value will start charging even if not enough surplus is available and draw the additionally needed power from grid or if available a battery.
 
 **Possible values**: A positive value for grid consumption, a negative value for grid export. When set to `0`, export must reach the minimum charging power.
 
@@ -232,12 +232,12 @@ threshold: 0
 :::info
 If a residual power offset for the desired operating point of the surplus regulation is defined for the evcc site using the `residualPower` parameter, this value must be considered when setting the `threshold` value.
 
-The `residualPower` is included in the [calculation of available charging power](../../guides/solar-mode#calculation-of-available-charging-power) and a positive value for `residualPower` will reduce the available charging power. So for example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W feed-in) and 2,000W surplus is available, the available charging power is only 1,800kW. The remaining 200W will remain available for grid or battery feed-in. In other words, when `residualPower` is 200W and the `enable:threshold` is set to -1,800W, then charging will be started when 2,000W surplus is available.
+The `residualPower` is included in the [calculation of `available charging power`](/docs/inner-workings/solar-mode#calculation-of-available-charging-power) and a positive value for `residualPower` will reduce the available charging power. So for example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W feed-in) and 2,000W surplus is available, the `available charging power` is only 1,800kW. The remaining 200W will remain available for grid or battery feed-in. In other words, when `residualPower` is 200W and the `enable:threshold` is set to -1,800W, then charging will be started when 2,000W surplus is available.
 :::
 
 #### `delay`
 
-Defines how long the available charging power must exceed the `threshold` before charging is started. Also defines how long sufficient power for 3-phase charging must be available, before the system automatically switches from 1-phase to 3-phase.
+Defines how long the `available charging power` must exceed the `threshold` before charging is started. Also defines how long sufficient power for 3-phase charging must be available, before the system automatically switches from 1-phase to 3-phase.
 
 **Default value:** `1m`
 
@@ -247,7 +247,7 @@ Defines how long the available charging power must exceed the `threshold` before
 delay: 1m
 ```
 
-See also [the guide on solar mode](../../guides/solar-mode#timing-interval-and-delays) for more information how the delay is applied.
+See also [this section](/docs/inner-workings/timing-interval) for more information how the delay is applied.
 
 ---
 
@@ -265,7 +265,7 @@ disable:
 
 #### `threshold`
 
-Defines the power threshold for stopping charging in watts (W). Charging is stopped once the available charging power is less than this threshold. Available charging power is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. Check the [solar mode guide](../../guides/solar-mode#calculation-of-available-charging-power) for more information on how these inputs and configuration parameters work together. The default threshold is the minimum charging power. Setting a lower value will continue charging even if not enough surplus is available and draw the additionally needed power from grid or if available a battery.
+Defines the power threshold for stopping charging in watts (W). Charging is stopped once the [`available charging power`](/docs/inner-workings/solar-mode#calculation-of-available-charging-power) is less than this threshold. `Available charging power` is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. The default threshold is the [`minimum charging power`](/docs/inner-workings/minmaxphases). Setting a lower value will continue charging even if not enough surplus is available and draw the additionally needed power from grid or if available a battery.
 
 **Possible values**: A positive value for grid consumption, a negative value for grid export.
 
@@ -283,7 +283,7 @@ If a residual power offset for the desired operating point of the surplus regula
 
 #### `delay`
 
-Defines how long available charging power must fall under the `threshold` before charging is stopped. Also defines how long available charging power must be lower than power required for 3-phase charging before the system switches from 3-phase to 1-phase.
+Defines how long the `available charging power` must fall under `threshold` before charging is stopped. Also defines how long power must fall under the `minimum charging power` for 3-phase charging, before the system automatically switches from 3-phase to 1-phase.
 
 **Default value:** `3m`
 
@@ -293,7 +293,7 @@ Defines how long available charging power must fall under the `threshold` before
 delay: 10m
 ```
 
-See also [the guide on solar mode](../../guides/solar-mode#timing-interval-and-delays) for more information how the delay is applied.
+See also [this section](/docs/inner-workings/timing-interval) for more information how the delay is applied.
 
 ---
 
@@ -311,7 +311,7 @@ At least 15 minutes interval between turning on and off the charging process.
 guardduration: 15m
 ```
 
-See also [the guide on solar mode](../../guides/solar-mode#timing-interval-and-delays) for more information how the `guardduration` is applied.
+See also [this section](/docs/inner-workings/timing-interval) for more information how the `guardduration` is applied.
 
 ---
 

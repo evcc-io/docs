@@ -79,7 +79,7 @@ For example: `phases: 1` und `minCurrent: 8`
 
 #### Manipulation Options
 
-The calculation of the available charging power as well as thresholds for starting or stopping can be individually adjusted using several parameters. These are:
+The calculation of the `available charging power` as well as thresholds for starting or stopping can be individually adjusted using several parameters. These are:
 
 - Site: `residualpower`
 - Site: `prioritySoc`
@@ -91,7 +91,7 @@ The calculation of the available charging power as well as thresholds for starti
 - Loadpoint: `disable: threshold`
 - Loadpoint: `priority`
 
-Have a look at the [How does Solar mode work - a look into the innards](../../guides/solar-mode) guide for an in-depth explanation of how solar mode works and how the parameters listed above define its behavior.
+Have a look at the [inner-workings section](../inner-workings/) for an in-depth explanation of how `Solar` and `Min+Solar` modes work and the parameters defining their behavior.
 
 ### Site
 
