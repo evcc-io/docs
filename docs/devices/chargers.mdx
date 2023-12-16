@@ -7509,6 +7509,251 @@ chargers:
 
 
 
+```yaml
+chargers:
+  - name: my_charger
+    type: custom
+    status: # charger status A..F
+      source: ...
+      # ...
+    enabled: # charger enabled state (true/false or 0/1)
+      source: ...
+      # ...
+    enable: # set charger enabled state (true/false or 0/1)
+      source: ...
+      # ...
+    maxcurrent: # set charger max current (A)
+      source: ...
+      # ...
+```
+
+- Dokumentation der Werte für `status A..F`: https://evsim.gonium.net/#der-control-pilot-cp
+
+### EEBUS kompatible Wallbox
+
+<DeviceFeatures features="mA,sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: eebus
+    ski: # Die SKI der Wallbox, üblicherweise im Web Interface der Wallbox zu finden
+    ip: 192.0.2.2 # IP-Adresse (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### OCPP 1.6J kompatible Wallbox mit Smart Charging Profil
+
+<DeviceFeatures features="sponsorfree" />
+
+Bei OCPP verbindet sich die Wallbox (Client) zu evcc (Server).
+Die Wallbox muss daher evcc via Hostname (funktionierende DNS-Auflösung erforderlich!) oder über die IP-Adresse auf Port 8887 erreichen können.
+Standardmäßig wird die erste eingehende Verbindung mit einer beliebigen Ladepunktkennung verwendet.
+Um mehrere Ladepunkte eindeutig zuordnen zu können müssen die jeweilige Stationskennung (`stationid: `) und Anschlussnummer (`connector: `) hinterlegt werden.
+Viele Wallboxen fügen die `stationid` automatisch der Backend-URL hinzu, bei manchen muss dies händisch geschehen `ws://<evcc>:8887/<stationid>`.
+Gegebenenfalls benötigt der Ladepunkt eine vorkonfigurierte (virtuelle) Token-ID/RFID-Kennung (`idtag: `) mit der die Ladevorgänge ohne Authentifizierung gestartet werden können.
+Für Zählermesswerte sollte in der Wallbox ein kurzes Zeitintervall konfiguriert werden.
+
+Voraussetzungen:
+* Ggf. zuvor konfigurierte OCPP-Profile (z.B. durch eine andere Backend-Anbindung) in der Wallboxkonfiguration entfernen
+* Backend-URL (Central System) in der Wallboxkonfiguration: `ws://[evcc-adresse]:8887/` (evtl noch um `stationid` erweitern)
+* Protokoll: OCPP-J v1.6, ocpp16j, JSON, Websocket, ws:// o.ä.
+* Keine Verschlüsselung, keine Authentifizierung, kein Passwort
+* Verbindung über das lokale Netzwerk
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: ocpp
+    timeout: 2m # optional 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+## Schaltbare Steckdosen
+
+Die von evcc unterstützten schaltbaren Steckdosen und SmartHome Schalter, können in zwei Modi betrieben werden:
+
+- Charger Modus (Standard)
+- Static-Switch Modus
+
+Der _Charger Modus_ erlaubt die Nutzung der schaltbaren Steckdose als Ladesteuerung von Akku betriebenen Geräten (E-Motorrad, E-Bikes ...).
+Dabei wird der Ladestrom gemessen und von evcc angezeigt, sowie beim Erreichen des Erhaltungsladungsstroms ( < `standbypower`) des Akkus der Status geladen ausgegeben.
+
+Demgegenüber dient der _Static-Switch_ Modus zum einfachen Schalten von Verbrauchern, wie Wärmepumpen, Klimaanlagen etc.
+Der von der Steckdose gelieferte Status hängt dabei direkt vom Schaltzustand der Steckdose ab (An=Lade, Aus=Geladen).
+
+:::note
+Um im _Static-Switch_ Modus eine aussagefähige Leistungsinformation anzuzeigen, empfiehlt es sich ein separates Custom-Meter zu definieren.
+:::
+
+Bei allen schaltbaren Steckdosen wird der Modus über den Parameter `standbypower` eingestellt.
+
+Ist der Wert größer oder gleich 0, ist der _Charger Modus_ aktiviert. Der eingestellte Wert dient als Schwellwert in Watt.
+Solange die durch die Steckdose gemessene Leistung sich über diesem Schellwert befindet, wird der Ladevorgang gemeldet,
+fällt die Leistung unter diesen Schwellwert, ist der Erhaltungsladebereich bei vollem Akku erreicht und es wird der Ladevorgang als abgeschlossen gemeldet.
+
+Setzt man `standbypower` auf einen negativen Wert, arbeitet die schaltbare Steckdose im _Static-Switch_ Modus.
+
+:::info
+Der Ladepunkt-Parameter `phases` **muss** bei Nutzung einer schaltbaren Steckdose zwingend auf **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.  
+Beispiel:
+
+```yaml
+# loadpoint describes the charger, charge meter and connected vehicle
+loadpoints:
+  - title: Shelly # display name for UI
+    charger: my_charger # charger
+    vehicle: audi
+    mode: pv
+---
+mincurrent: 9 # 9A*220V=1980W minimum charge current (default 6A)
+maxcurrent: 10 # 10A*220V=2200W maximum charge current (default 16A)
+phases: 1 # ev phases (default 3)
+```
+
+:::
+
+### AVM FritzDECT
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: fritzdect
+    uri: https://fritz.box # HTTP(S) Adresse (optional)
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+    ain: 307788992233 # Die AIN ist auf dem Typenschild auf der Geräterückseite aufgedruckt. Bei führenden Nullen bitte in doppelte Hochkommata setzen.
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Homematic / Homematic IP 
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: homematic
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    port: 2010 # Port (optional)
+    device: '0001EE89AAD848' # Homematic Geräte Id, wie im CCU Webfrontend angezeigt.
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### HomeWizard 
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: homewizard
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### myStrom Switch
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: mystrom
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Shelly 
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: shelly
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+    channel: 0 # optional
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Tasmota (1 Phase Charger) 
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: tasmota
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    user: # Standard-User ist admin (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+    channel: 1 # Schaltkanal (1-8)
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### TP-Link
+
+#### H-Series Smart Plug
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: tplink
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+#### Tapo P-Series Smart Plug
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: tapo
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional) 
+```
+
+
+
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
 ## ABB Terra AC
