@@ -1,0 +1,68 @@
+---
+sidebar_position: 6
+---
+
+import Drawio from '@theme/Drawio'
+import diagrams from '!!raw-loader!./img/diagrams.drawio';
+
+# Starting and stopping charging
+
+---
+**What you'll learn**: when evcc starts or stops charging your vehicle, and how in `Solar` mode this can be customized using `enable` and `disable` thresholds.
+
+---
+
+Let's start with the basic conditions under which charging is started and stopped:
+
+- In `Fast` and `Min+Solar` mode, charging is started immediately when a vehicle is connected and the mode is activated.
+
+- Charging plans in `Solar` and `Min+Solar` enable charging independent of surplus. A `departure` plan enables `Fast` charging as late as possible to reach the target `battery state-of-charge` at a set time. An `arrival` plan activates `Fast` charging immediately when a vehicle is connected, charges it to a set `battery state-of-charge` and then switches to surplus charging.
+
+- In `Solar` mode, charging is started and stopped depending on battery settings and `available charging power`.
+
+- In all modes charging is stopped when the target `battery state-of-charge` is reached or the vehicle is disconnected.
+
+## Starting and stopping in Solar mode
+
+In `Solar` mode, [`loadpoint.enable`](../reference/configuration/loadpoints#enable) and [`disable`](../reference/configuration/loadpoints#disable) sets thresholds in Watt that start and stop charging based on `available charging power`. 
+
+Both thresholds default to [`minimum charging power`](./minmaxphases), i.e. charging is started if `available charging power` exceeds `minimum charging power` and stopped if it falls below.
+
+Note that the values for `minimum charging power` and `available charging power` as defined in the previous chapters are positive, while for the enable threshold a negative value indicates surplus. Therefore mathematically the thresholds actually default to a negated `minimum charging power` and are checked against a negated `available charging power`.
+
+### Equations without a battery
+
+The following diagram shows the equations checking the thresholds against `available charging power`:
+
+<Drawio content={diagrams} zoom={0.7} pageId={"enable-disable-eq"} toolbar={"lightbox"} /><br/>
+
+### Equations with a battery
+
+If evcc is integrated with a battery, you can also use [`site.bufferSoc`](../reference/configuration/site/#buffersoc) and [`bufferStartSoc`](../reference/configuration/site/#bufferstartsoc) to control charging based on the charge level of the battery:
+
+- Below `bufferSoc`, charging is started and stopped based on `available charging power`.
+
+- Between 'bufferSoc' and `bufferStartSoc` charging is started based on `available charging power` but continues regardless of surplus.
+
+- Above `bufferStartSoc` additionally charging is started immediately, regardless of surplus.
+
+Effectively, above `bufferSoc`, this leads to battery-supported charging: if surplus drops below `minimum charging power`, charging continues with `minimum charging power` and the missing power is drawn from the battery.
+
+The following diagram visualizes these rules:
+
+<Drawio content={diagrams} zoom={0.7} pageId={"enable-disable-eq-battery"} toolbar={"lightbox"} /><br/>
+
+### Making adjustments
+
+As mentioned before, both thresholds default to a negated `minimum charging power`, but you adjust them depending on the behavior you'd like to achieve:
+
+<Drawio content={diagrams} zoom={0.7} pageId={"enable-disable-effect"} toolbar={"lightbox"} /><br/>
+
+Setting the thresholds lower will charge the vehicle only when higher amounts of surplus are available, for example to avoid the proportionally higher vehicle charging losses at lower powers and charge a house battery instead. 
+
+To give an instance: with minCurrent set to 6A your `minimum charging power` with one phase is 1 x 6A x 230V = 1380W and the default for enable/disable thresholds is -1380W. Setting enable/disable tresholds to -2300W will charge the vehicle only if enough surplus for charging with 10A (1 x 10A x 230V = 2300W) is available. Especially with automatic phase switching it is better to use the tresholds for this, since raising `minCurrent` would also [increase the gap between 1-phase and 3-phase charging power](./minmaxphases).
+
+Setting the thresholds higher will charge the vehicle even if not enough surplus is available and supplement the surplus with power from grid or battery. Note that evcc cannot enforce power being drawn from the grid instead of a battery, so this would override the other battery settings and draw power from the battery even if the `battery state-of-charge` is lower than `bufferSoc`.
+
+To give an instance: with minCurrent set to 6A your `minimum charging power` with one phase is 1 x 6A x 230V = 1380W and the default for enable/disable thresholds is -1380W. Setting enable/disable tresholds to -690W will charge the vehicle if at least 690W of surplus are available and thus at least 50% of the power comes from the solar panels. A remaining max of 690W will be drawn from grid or battery.
+

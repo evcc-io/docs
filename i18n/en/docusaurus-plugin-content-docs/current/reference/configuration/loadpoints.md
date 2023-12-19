@@ -205,7 +205,7 @@ estimate: false # No interpolation
 
 ### `enable`
 
-Defines the behaviour of starting charging in PV mode. Additionally, it defines the behaviour during automatic phase switching from 1p to 3p.
+Defines the behaviour of starting charging in PV mode. Additionally, the delay defined for `enable` is also used for automatic phase switching from 1-phase to 3-phase.
 
 **For example**:
 
@@ -217,11 +217,11 @@ enable:
 
 #### `threshold`
 
-Defines the power threshold at the grid connection point in watts (W).
+Defines the power threshold for starting charging in watts (W). Charging is started once the [`available charging power`](/docs/inner-workings/solar-mode#calculation-of-available-charging-power) exceeds this threshold. `Available charging power` is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. The default threshold is the [`minimum charging power`](/docs/inner-workings/minmaxphases). Setting a lower value will start charging even if not enough surplus is available and draw the additionally needed power from grid or if available a battery.
 
 **Possible values**: A positive value for grid consumption, a negative value for grid export. When set to `0`, export must reach the minimum charging power.
 
-**Default value:** `0`
+**Default value:** `0` (the system will use minimum charging power)
 
 **For example**:
 
@@ -232,14 +232,12 @@ threshold: 0
 :::info
 If a residual power offset for the desired operating point of the surplus regulation is defined for the evcc site using the `residualPower` parameter, this value must be considered when setting the `threshold` value.
 
-For example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W feed-in), then setting an `enable` `threshold` value of 100 doesn't mean that charging will start at 100W grid consumption. Instead, the remaining feed-in power will be reduced by 100W, starting the charging at 100W feed-in.
-
-To start charging at 100W grid consumption in this case, the `threshold` value should be set to 300.
+The `residualPower` is included in the [calculation of `available charging power`](/docs/inner-workings/solar-mode#calculation-of-available-charging-power) and a positive value for `residualPower` will reduce the available charging power. So for example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W feed-in) and 2,000W surplus is available, the `available charging power` is only 1,800kW. The remaining 200W will remain available for grid or battery feed-in. In other words, when `residualPower` is 200W and the `enable:threshold` is set to -1,800W, then charging will be started when 2,000W surplus is available.
 :::
 
 #### `delay`
 
-Defines how long the `threshold` must be met.
+Defines how long the `available charging power` must exceed the `threshold` before charging is started. Also defines how long sufficient power for 3-phase charging must be available, before the system automatically switches from 1-phase to 3-phase.
 
 **Default value:** `1m`
 
@@ -249,11 +247,13 @@ Defines how long the `threshold` must be met.
 delay: 1m
 ```
 
+See also [this section](/docs/inner-workings/timing-interval) for more information how the delay is applied.
+
 ---
 
 ### `disable`
 
-Defines the behaviour of stopping charging in PV mode. Additionally, it defines the behaviour during automatic phase switching from 3p to 1p.
+Defines the behaviour of stopping charging in PV mode. Additionally, the delay defined for `disable` is also used for automatic phase switching from 3-phase to 1-phase.
 
 **For example**:
 
@@ -265,11 +265,11 @@ disable:
 
 #### `threshold`
 
-Defines the power threshold at the grid connection point in watts (W).
+Defines the power threshold for stopping charging in watts (W). Charging is stopped once the [`available charging power`](/docs/inner-workings/solar-mode#calculation-of-available-charging-power) is less than this threshold. `Available charging power` is calculated based on power readings from the grid connection point, aux devices and battery power, depending on your battery settings. The default threshold is the [`minimum charging power`](/docs/inner-workings/minmaxphases). Setting a lower value will continue charging even if not enough surplus is available and draw the additionally needed power from grid or if available a battery.
 
 **Possible values**: A positive value for grid consumption, a negative value for grid export.
 
-**Default value:** `0`
+**Default value:** `0`  (the system will use minimum charging power)
 
 **For example**:
 
@@ -283,7 +283,7 @@ If a residual power offset for the desired operating point of the surplus regula
 
 #### `delay`
 
-Defines how long the `threshold` must be met.
+Defines how long the `available charging power` must fall under `threshold` before charging is stopped. Also defines how long power must fall under the `minimum charging power` for 3-phase charging, before the system automatically switches from 3-phase to 1-phase.
 
 **Default value:** `3m`
 
@@ -292,6 +292,8 @@ Defines how long the `threshold` must be met.
 ```yaml
 delay: 10m
 ```
+
+See also [this section](/docs/inner-workings/timing-interval) for more information how the delay is applied.
 
 ---
 
@@ -308,6 +310,8 @@ At least 15 minutes interval between turning on and off the charging process.
 ```yaml
 guardduration: 15m
 ```
+
+See also [this section](/docs/inner-workings/timing-interval) for more information how the `guardduration` is applied.
 
 ---
 
