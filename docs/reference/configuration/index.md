@@ -56,11 +56,11 @@ graph TD;
 
 Wichtig für die Funktionalität ist ein Netzanschlusszähler (grid-meter). Dieser ermittelt die aktuelle Überschussleistung.
 Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss.
-Ausnahme: https://docs.evcc.io/docs/guides/meters#ich-habe-eine-pv-anlage-aber-keinen-netzanschluss-z%C3%A4hler-kann-ich-evcc-trotzdem-nutzen
+Ein Betrieb ist aber auch ohne Netzanschlusszähler möglich. Mehr dazu findest du [hier](/docs/guides/meters#ich-habe-eine-pv-anlage-aber-keinen-netzanschluss-z%C3%A4hler-kann-ich-evcc-trotzdem-nutzen).
 
 Die Überschussleistung wird mit der Mindestladeleistung verglichen. Ist diese erreicht, startet die Ladung.
 
-Die Mindestladeleistung ergibt sich aus den im Loadpoint definierten Werten `minCurrent` und `phases` (https://docs.evcc.io/docs/reference/configuration/loadpoints
+Die Mindestladeleistung ergibt sich aus den im Loadpoint definierten Werten [`minCurrent`](/docs/reference/configuration/loadpoints) und [`phases`](/docs/reference/configuration/loadpoints).
 
 Beispiel: `phases: 1` und `minCurrent: 8`
 

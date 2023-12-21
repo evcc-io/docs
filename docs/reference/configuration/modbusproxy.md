@@ -35,7 +35,7 @@ _Ausgehend_ in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energi
 
 :::tip Sponsortoken erforderlich
 
-Weitere Informationen zum evcc Sponsorship gibt es hier: https://docs.evcc.io/docs/sponsorship
+Hier findest du weitere Informationen zum [evcc Sponsorship](/docs/sponsorship).
 
 :::
 
