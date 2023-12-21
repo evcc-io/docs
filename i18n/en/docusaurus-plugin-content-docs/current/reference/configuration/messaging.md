@@ -56,16 +56,16 @@ When using variables, make sure to use the correct capitalisation (uppercase/low
 
 **Useful messages for use in evcc notifications**:
 
-| msg Variable             | Description                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| `${chargedEnergy:%.1fk}` | Energy amount charged in kWh                                                 |
-| `${chargeDuration}`      | Charging duration                                                              |
-| `${connectedDuration}`   | Charger connection duration                                                   |
-| `${loadpoint}`           | Number of [`loadpoints`](loadpoints) (charging point) 1,2...                  |
-| `${mode}`                | Active charging mode (see [`mode`](loadpoints/#mode) of [`loadpoints`](loadpoints)) |
-| `${pvPower:%.1fk}`       | Currently measured PV power in kW                                            |
+| msg Variable             | Description                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `${chargedEnergy:%.1fk}` | Energy amount charged in kWh                                                                |
+| `${chargeDuration}`      | Charging duration                                                                           |
+| `${connectedDuration}`   | Charger connection duration                                                                 |
+| `${loadpoint}`           | Number of [`loadpoints`](loadpoints) (charging point) 1,2...                                |
+| `${mode}`                | Active charging mode (see [`mode`](loadpoints/#mode) of [`loadpoints`](loadpoints))         |
+| `${pvPower:%.1fk}`       | Currently measured PV power in kW                                                           |
 | `${title}`               | Charging point: Text from [`loadpoints`](loadpoints) [`title`](loadpoints/#title) parameter |
-| `${vehicleTitle}`        | Vehicle: Text from [`vehicles`](vehicles) [`title`](vehicles/#title) parameter |
+| `${vehicleTitle}`        | Vehicle: Text from [`vehicles`](vehicles) [`title`](vehicles/#title) parameter              |
 
 **For example**:
 
@@ -241,6 +241,7 @@ The following sections will now explain all the required parameters.
 - `shout`: [shoutrrr](https://contain
 
 rrr.dev/shoutrrr). See [`shout`](#shout) definition
+
 - `script`: Can initiate external scripts to send messages. It's also useful to include any kind of external functionality. See [`script`](#script) definition
 
 **For example**:

@@ -89,9 +89,10 @@ ${block.code}
     features.splice(eebus, 1);
   }
 
-  const deviceFeatures = `<DeviceFeatures features="${features.join(
-    ",",
-  )}" />\n\n`;
+  const deviceFeatures =
+    type === "charger"
+      ? `<DeviceFeatures features="${features.join(",")}" />\n\n`
+      : "";
 
   return deviceFeatures + description + code + sponsor;
 }

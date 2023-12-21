@@ -109,12 +109,10 @@ function toggleFilter(feature) {
   } else {
     currentFilters.splice(index, 1);
   }
-  console.log({ currentFilters });
   filterByFeatures(currentFilters);
 }
 
 export default () => {
-  console.log({ chargerFeatures });
   const features = Object.keys(chargerFeatures);
 
   return (
