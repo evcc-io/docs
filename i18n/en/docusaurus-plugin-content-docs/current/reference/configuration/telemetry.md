@@ -2,8 +2,8 @@
 sidebar_position: 16
 ---
 
-import SponsorshipRequired from "/docs/\_sponsorship_required.mdx";
-import SinceVersion from "/docs/\_since_version.jsx";
+import SponsorshipRequired from "../../\_sponsorship_required.mdx";
+import SinceVersion from "../../\_since_version.jsx";
 
 # `telemetry`
 
