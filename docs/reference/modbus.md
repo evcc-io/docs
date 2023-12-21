@@ -118,16 +118,18 @@ scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 
 Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden.
 Dazu bedarf es neben den allgemeinen 'modbus' Einstellungen (siehe oben) auch der Definition eines `registers` an Stelle eines `value`, wie bei vordefinierten Geräten. Es ist nicht zulässig, sowohl `value` als auch `register` anzugeben.
+
 Die Definition eines Registers benötigt folgende Parameter:
+
 - `address`: die Registeradresse
 - `type`: Der Registertyp, zulässig sind `coil`, `input`, `holding`
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden.
 - `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen UND verknüpft, um so einzelne Bits extrahieren zu können.
+
 Weitere zulässige Parameter einer manuellen Konfiguration sind:
+
 - `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z.B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
 - `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z.B. 10s für 10 Sekunden.
-
-
 
 **Beispiel**:
 
@@ -169,46 +171,44 @@ Ein vollständiges Beispiel für einen custom Charger mit modbus Interface (hier
 
 ```yaml
 chargers:
-- type: custom
-  name: CustomCharger
-  status:
-    # Read the status of the charger
-    # Either A,B,C or F
-    source: modbus
-    id: 180
-    uri: 192.168.1.10:502
-    timeout: 3s
-    register:
-      address: 100
-      type: input # Read an input register
-      decode: int16
-  enabled:
-    # Is the charger enabled (1) or not (0)
-    source: modbus
-    id: 180
-    uri: 192.168.1.10:502
-    register:
-      address: 400
-      type: coil # Read a coil
-      decode: bool16 # Doesn't matter but required
-  enable:
-    # Enable the charger
-    source: modbus
-    id: 180
-    uri: 192.168.1.10:502
-    register:
-      address: 400
-      type: writecoil # Write a coil
-      decode: uint8 # Doesn't matter but required
-  maxcurrent:
-    # Set the maximum current
-    source: modbus
-    id: 180
-    uri: 192.168.1.10:502
-    register:
-      address: 300
-      type: writeholding # Write a holding register
-      decode: uint16
-
-
+  - type: custom
+    name: CustomCharger
+    status:
+      # Read the status of the charger
+      # Either A,B,C or F
+      source: modbus
+      id: 180
+      uri: 192.168.1.10:502
+      timeout: 3s
+      register:
+        address: 100
+        type: input # Read an input register
+        decode: int16
+    enabled:
+      # Is the charger enabled (1) or not (0)
+      source: modbus
+      id: 180
+      uri: 192.168.1.10:502
+      register:
+        address: 400
+        type: coil # Read a coil
+        decode: bool16 # Doesn't matter but required
+    enable:
+      # Enable the charger
+      source: modbus
+      id: 180
+      uri: 192.168.1.10:502
+      register:
+        address: 400
+        type: writecoil # Write a coil
+        decode: uint8 # Doesn't matter but required
+    maxcurrent:
+      # Set the maximum current
+      source: modbus
+      id: 180
+      uri: 192.168.1.10:502
+      register:
+        address: 300
+        type: writeholding # Write a holding register
+        decode: uint16
 ```
