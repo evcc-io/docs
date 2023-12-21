@@ -139,7 +139,7 @@ Defines under what conditions the vehicle data is retrieved.
 
 - `charging`: Update data **ONLY** during a charging session (recommended default).
 - `connected`: Update data when the vehicle is connected to the charger (not just when charging); the `interval` parameter defines the frequency.
-- `always`: Update data always, even when the vehicle is not connected to the charger; the [`interval`](#interval) parameter defines the frequency (only supported for one vehicle per charging point).
+- `always`: Update data always, even when the vehicle is not connected to the charger; the [`interval`](#pollinterval) parameter defines the frequency (only supported for one vehicle per charging point).
 
 **Default value:** `charging`
 

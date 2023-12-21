@@ -3,7 +3,7 @@ import { chargerFeatures } from "./features";
 
 function link(feature) {
   if (feature === "sponsorfree") {
-    return "../sponsorship";
+    return "../../sponsorship";
   }
   return "#features";
 }
