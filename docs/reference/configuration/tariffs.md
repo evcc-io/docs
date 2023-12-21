@@ -364,7 +364,7 @@ Stellt standardmäßig nationale Daten bereit, kann jedoch durch die Angabe **en
 ```yaml
 co2:
   type: ngeso
-  
+
   # Optionally either
   region: 1
   # OR

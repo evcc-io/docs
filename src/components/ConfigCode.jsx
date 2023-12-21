@@ -18,7 +18,9 @@ function addContext(code, type, part, name) {
 
 export default ({ file, part, name }) => {
   try {
-    const code = require(`js-yaml-loader!/evcc-config/yaml/${part}/${file}.yaml`);
+    const code = require(
+      `js-yaml-loader!/evcc-config/yaml/${part}/${file}.yaml`,
+    );
     const codesample = addContext(code.sample, code.type, part, name).trim();
     return <CodeBlock className="language-yaml">{codesample}</CodeBlock>;
   } catch (e) {

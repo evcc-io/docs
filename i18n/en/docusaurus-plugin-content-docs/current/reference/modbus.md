@@ -92,7 +92,7 @@ The integrated predefined device models `model` are identical to [MBMD](https://
 
 Any `model` that deviates from these is
 
- treated as a _SunSpec_ device type.
+treated as a _SunSpec_ device type.
 
 Use `value` to define the value to be read from the device. All supported values are predefined in [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
 
@@ -130,6 +130,7 @@ timeout: 2s # timeout, without unit in ns
 For the `int32s/uint32s` decodings, the byte order is swapped, which is useful for E3/DC devices.
 
 ### Writing Registers
+
 Both holding registers and coils can be written. For this, either `type: writeholding` for holding registers or `type: writecoil` for coils must be specified.
 `type: writeholding` always writes a 16-bit register (int or bool16). Therefore, for `decode`, `uint16` must always be specified.
 `type: writecoil` writes a coil. Specifications for `decode` are ignored.
