@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkevcc_docs=self.webpackChunkevcc_docs||[]).push([[4760],{7459:s=>{s.exports=JSON.parse('{"label":"sponsoring","permalink":"/en/blog/tags/sponsoring","allTagsPath":"/en/blog/tags","count":1,"unlisted":false}')}}]);
