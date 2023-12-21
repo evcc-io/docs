@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-:::cautionwork in progress 🚧
+:::caution work in progress 🚧
 
 We're still working on the English translation. Some content will still be shown in German.
 
