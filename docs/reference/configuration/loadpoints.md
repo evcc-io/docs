@@ -85,32 +85,9 @@ Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug 
 
 ---
 
-### `resetOnDisconnect`
-
-Definiert, ob beim Abstecken des Ladekabels vom Fahrzeug die Standardeinstellungen für folgende Werte wiederhergestellt werden sollen:
-
-- [`mode`](#mode)
-- [`minCurrent`](#mincurrent)
-- [`maxCurrent`](#maxcurrent)
-
-**Mögliche Werte**:
-
-- `true`: Standardeinstellungen werden eingestellt.
-- `false`: Aktuelle Einstellungen bleiben erhalten.
-
-**Standardwert:** `true`
-
-**Beispiel**:
-
-```yaml
-resetOnDisconnect: true
-```
-
----
-
 ### `mode`
 
-Der Standard-Lademodus wenn evcc startet bzw. nach dem Abstecken des Fahrzeugs wenn `resetOnDisconnect: true` gesetzt wurde.
+Der Standard-Lademodus wenn evcc startet bzw. nach dem Anstecken des Fahrzeugs.
 
 **Mögliche Werte**:
 

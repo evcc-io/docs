@@ -84,32 +84,9 @@ Where the value `renault` corresponds to the value of the `name` parameter in th
 
 ---
 
-### `resetOnDisconnect`
-
-Defines whether the default settings for the following values should be restored when the charging cable is unplugged from the vehicle:
-
-- [`mode`](#mode)
-- [`minCurrent`](#mincurrent)
-- [`maxCurrent`](#maxcurrent)
-
-**Possible values**:
-
-- `true`: Restore default settings.
-- `false`: Keep current settings.
-
-**Default value:** `true`
-
-**For example**:
-
-```yaml
-resetOnDisconnect: true
-```
-
----
-
 ### `mode`
 
-The default charging mode when evcc starts or after the vehicle is unplugged when `resetOnDisconnect: true` is set.
+The default charging mode when evcc starts or after the vehicle is connected to the loadpoint.
 
 **Possible values**:
 
