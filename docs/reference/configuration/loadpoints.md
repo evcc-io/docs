@@ -26,7 +26,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ### `title`
 
-Eine Beschreibung des Ladepunktes, wird in der UI angezeigt.
+Titel des Ladepunktes, wird in der UI angezeigt.
 
 **Beispiel**:
 
@@ -87,7 +87,7 @@ Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug 
 
 ### `mode`
 
-Der Standard-Lademodus wenn evcc startet bzw. nach dem Anstecken des Fahrzeugs.
+Der Standard-Lademodus wenn evcc startet bzw. nach dem Abstecken des Fahrzeugs.
 
 **Mögliche Werte**:
 
