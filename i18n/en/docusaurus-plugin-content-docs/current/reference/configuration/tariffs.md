@@ -4,7 +4,7 @@ sidebar_position: 11
 
 # `tariffs`
 
-Here you can specify your energy tariff and, if applicable, your feed-in remuneration. Evcc uses these values for a rough [Einsparungsberechnung](/docs/guides/setup#savings-calculation) displayed in the web UI.
+Here you can specify your energy tariff and, if applicable, your feed-in remuneration. Evcc uses these values for a rough [Einsparungsberechnung](/docs/guides/setup#ersparnisberechnung) displayed in the web UI.
 
 Furthermore, the planner uses these settings for price- or CO<sub>2</sub>-optimised target charging. These settings are taken into account in the following order: "flexible grid tariff" before "CO<sub>2</sub> tariff" before "constant grid tariff".
 

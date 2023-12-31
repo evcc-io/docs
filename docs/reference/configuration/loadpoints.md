@@ -143,7 +143,7 @@ Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werde
 
 - `charging`: aktualisiere die Daten **NUR** während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
 - `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
-- `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#pollinterval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
+- `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#interval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
 
 **Standardwert:** `charging`
 

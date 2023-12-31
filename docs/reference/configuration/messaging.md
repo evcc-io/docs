@@ -161,9 +161,11 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     - [`loadpoint`](loadpoints) - Laufende Nummer des Ladepunktes (_integer_)
     - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (_float_)
     - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (_float_)
-    - [`mode`](loadpoints#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (_string_)
+    - [`minSoc`](loadpoints#min) - Mindest-Füllstand der Fahrzeugbatterie in Prozent (_integer_)
+    - [`mode`](loadpoints/#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (_string_)
     - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (_integer_)
-    - [`title`](loadpoints#title) - Bezeichnung des Ladepunktes in der evcc App (_string_)
+    - [`targetSoc`](loadpoints#target) - Ziel-Füllstand der Fahrzeugbatterie in Prozent (_integer_)
+    - [`title`](loadpoints/#title) - Bezeichnung des Ladepunktes in der evcc App (_string_)
   - Information
     - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (_integer_)
     - `chargeCurrent` - Aktuelle Gesamt-Lade-Stromstärke in Ampere (_float_)

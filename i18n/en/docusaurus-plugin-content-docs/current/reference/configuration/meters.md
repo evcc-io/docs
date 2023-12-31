@@ -6,7 +6,7 @@ sidebar_position: 5
 
 _Meters_ (current measurement devices) is a list of devices in the house that can measure power and energy consumption, PV generation, or house battery usage. A `meter` defines a point of energy measurement and can be a physical device (e.g., a meter at the grid connection point), a PV inverter (AC or DC in the case of hybrid inverters), or a battery inverter.
 
-Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meters`](loadpoints#meter) in the charging point configuration, or assume that the charging power set is actually being used.
+Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meters`](loadpoints#meters) in the charging point configuration, or assume that the charging power set is actually being used.
 
 evcc uses positive (+) values for incoming currents (grid consumption, PV generation, house battery discharge) and negative (-) values for outgoing currents (grid feed-in, PV inverter standby consumption, or house battery charging). Any other current consumption, including from the charger, is always a positive (+) value.
 
@@ -38,7 +38,7 @@ Below, the various parameters are explained.
 
 ### `name`
 
-A short designation of the meter. The value is used when referencing the device in the configuration of the [site](site) or the [charger](loadpoints#meter).
+A short designation of the meter. The value is used when referencing the device in the configuration of the [site](site) or the [charger](loadpoints#meters).
 
 **For example**:
 
