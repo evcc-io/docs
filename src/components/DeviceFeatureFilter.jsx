@@ -1,5 +1,5 @@
 import React from "react";
-import { chargerFeatures } from "./features";
+import { chargerFeatures, meterFeatures } from "./features";
 
 function showEverything() {
   // remove all hidden-by-feature-filter classes
@@ -112,19 +112,20 @@ function toggleFilter(feature) {
   filterByFeatures(currentFilters);
 }
 
-export default () => {
-  const features = Object.keys(chargerFeatures);
+export default ({ device }) => {
+  const features = device === "charger" ? chargerFeatures : meterFeatures;
+  const featureKeys = Object.keys(features);
 
   return (
     <div className="features">
-      {features.map((f) => (
+      {featureKeys.map((f) => (
         <button
           className={`feature filter-${f}`}
           key={f}
           type="button"
           onClick={() => toggleFilter(f)}
         >
-          {chargerFeatures[f]}
+          {features[f]}
         </button>
       ))}
     </div>
