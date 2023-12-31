@@ -86,7 +86,8 @@ Where the value `renault` corresponds to the value of the `name` parameter in th
 
 ### `mode`
 
-The default charging mode when evcc starts or after the vehicle is connected to the loadpoint.
+evcc rememerbers the last used charging mode.
+With the `mode` parameter, you can specify the charging mode that should be used after the vehicle is disconnected.
 
 **Possible values**:
 

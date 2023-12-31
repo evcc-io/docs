@@ -87,8 +87,8 @@ Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug 
 
 ### `mode`
 
-Per default wird der zuletzt eingestellte Modus gespeichert. 
-Mit dem Parameter `mode` kann der Lademodus eingestellt werden, der nach dem Abstecken des Fahrzeugs gültig sein soll.
+evcc merkt sich den zuletzt genutzten Lademodus.
+Mit dem optionalen Parameter `mode` kann der Lademodus eingestellt werden, der nach dem Abstecken des Fahrzeugs gültig sein soll.
 
 **Mögliche Werte**:
 
