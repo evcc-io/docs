@@ -8,3 +8,7 @@ export const chargerFeatures = {
   iso151182: <Translate>ISO 15118</Translate>,
   sponsorfree: <Translate>ohne Sponsoring</Translate>,
 };
+
+export const meterFeatures = {
+  "battery-control": <Translate>aktive Batteriesteuerung</Translate>,
+};

@@ -1,5 +1,7 @@
 import React from "react";
-import { chargerFeatures } from "./features";
+import { chargerFeatures, meterFeatures } from "./features";
+
+const allFeatures = { ...chargerFeatures, ...meterFeatures };
 
 function link(feature) {
   if (feature === "sponsorfree") {
@@ -11,15 +13,17 @@ function link(feature) {
 export default ({ features }) => {
   const featureList = features ? features.split(",") : [];
 
+  const validFeatures = featureList.filter((f) => allFeatures[f]);
+
   let classes = "features";
-  featureList.forEach((f) => {
+  validFeatures.forEach((f) => {
     classes += ` feature-${f}`;
   });
   return (
     <div className={classes}>
-      {featureList.map((f) => (
+      {validFeatures.map((f) => (
         <a href={link(f)} className="feature" key={f}>
-          {chargerFeatures[f] || f}
+          {allFeatures[f] || f}
         </a>
       ))}
     </div>

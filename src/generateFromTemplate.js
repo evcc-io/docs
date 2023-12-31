@@ -76,11 +76,13 @@ ${block.code}
   ];
 
   // use sponsorfree instead of sponsorship
-  const index = features.indexOf("sponsorship");
-  if (index > -1) {
-    features.splice(index, 1);
-  } else {
-    features.push("sponsorfree");
+  if (type === "charger") {
+    const index = features.indexOf("sponsorship");
+    if (index > -1) {
+      features.splice(index, 1);
+    } else {
+      features.push("sponsorfree");
+    }
   }
 
   // remove eebus
@@ -90,7 +92,7 @@ ${block.code}
   }
 
   const deviceFeatures =
-    type === "charger"
+    type === "charger" || type === "meter"
       ? `<DeviceFeatures features="${features.join(",")}" />\n\n`
       : "";
 
@@ -121,7 +123,13 @@ function generateMarkdown(data, type, target) {
   // sort
   const dataSorted = _.orderBy(data, [
     (x) => x.product.group.toLowerCase(),
-    (x) => (x.product.brand + x.product.description).toLowerCase(),
+    (x) => {
+      const { brand, description } = x.product;
+      if (brand) {
+        return `${brand} ${description}`.toLocaleLowerCase();
+      }
+      return description.toLowerCase();
+    },
   ]);
 
   let generated = "";
