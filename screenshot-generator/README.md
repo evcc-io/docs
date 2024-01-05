@@ -18,10 +18,16 @@ Copy the `evcc` binary file into this directory. You may want to build it first.
 cp /path/to/evcc ./
 ```
 
-Generate the screenshots:
+Generate all screenshots:
 
 ```bash
-npm run playwright
+npm run start
+```
+
+Generate selective screenshots via Playwright UI:
+
+```bash
+npm run dev
 ```
 
 This launches Playwright UI. Run the tasks you want to execute from there. Playwright will write the screenshots to the correct locations.
