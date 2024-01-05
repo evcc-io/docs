@@ -9,9 +9,9 @@ export default ({ name, caption, area = "docs" }) => {
   let prefix = "";
   if (area === "docs") {
     prefix =
-      currentLanguage === "en"
+      currentLanguage === "de"
         ? "docs/"
-        : `i18n/en/docusaurus-plugin-content-docs/current/`;
+        : `i18n/${currentLanguage}/docusaurus-plugin-content-docs/current/`;
   }
 
   const path = `${prefix}${name}`;
@@ -41,6 +41,10 @@ export default ({ name, caption, area = "docs" }) => {
             alt={caption}
             className={className}
             loading="lazy"
+            style={{
+              border: "1px solid var(--ifm-color-emphasis-300)",
+              borderRadius: "var(--ifm-pagination-nav-border-radius)",
+            }}
           />
         )}
       </ThemedComponent>

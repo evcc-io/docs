@@ -24,22 +24,21 @@ async function convertToWebp(pngPath) {
 export function loop(body) {
   ["light", "dark"].forEach((theme) => {
     ["en", "de"].forEach((lang) => {
-      async function screenshot(
-        page,
-        name,
-        element,
-        xPadding = 20,
-        yPadding = 20,
-      ) {
+      async function screenshot(page, name, element, padding = {}) {
+        const paddingLeft = padding.left ?? padding.x ?? padding.all ?? 20;
+        const paddingRight = padding.right ?? padding.x ?? padding.all ?? 20;
+        const paddingTop = padding.top ?? padding.y ?? padding.all ?? 20;
+        const paddingBottom = padding.bottom ?? padding.y ?? padding.all ?? 20;
+
         let clip;
         if (element) {
           const el = await page.$(element);
           const boundingBox = await el.boundingBox();
           clip = {
-            x: boundingBox.x - xPadding,
-            y: boundingBox.y - yPadding,
-            width: boundingBox.width + xPadding * 2,
-            height: boundingBox.height + yPadding * 2,
+            x: boundingBox.x - paddingLeft,
+            y: boundingBox.y - paddingTop,
+            width: boundingBox.width + paddingLeft + paddingRight,
+            height: boundingBox.height + paddingTop + paddingBottom,
           };
         }
         const path = `${screenshotBase[lang]}/${name}-${theme}.png`;
