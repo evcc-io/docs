@@ -178,8 +178,49 @@ Die ID des Standortes, falls es unter dem Account mehrere gibt
 
 ### `type:` **`octopusenergy`**
 
+:::info Dieser Abschnitt muss übersetzt werden
+Wenn Sie können, leisten Sie bitte einen Beitrag zu einer Übersetzung dieses Abschnitts aus der englischen Version. Vielen Dank!
+:::
+
 Der Stromanbieter [Octopus Energy](https://octopus.energy) im Vereinigten Königreich.
 
+This tariff type provides two setup options: API key, and Tariff Code. There are pros and cons to both options:
+
+**API Key**:
+  * Pros:
+    * Automatic detection of appropriate tariff for your account, including tariff changes (set and forget)
+    * Detection of lower rate during Intelligent Octopus charge periods
+  * Cons:
+    * Requires supplying your (rather powerful) Octopus Energy API Key in configuration
+    
+**Tariff Code**:
+  * Pros:
+    * Does not require credentials
+  * Cons:
+    * Can be a little complicated to find your tariff and region code
+    * Cannot determine Intelligent Octopus charge periods, or other user-specific demand flexibility requirements
+
+If in doubt, choose **API Key**. _You cannot use both simultaneously_, or you will receive an error during startup.
+
+#### API Key
+:::tip Finding your API Key
+You can find your API Key here: https://octopus.energy/dashboard/new/accounts/personal-details/api-access
+
+Keep this safe - it provides full access to your account and data! If you think it may have been compromised, reset it immediately.
+:::
+
+**For example**:
+
+```yaml
+type: octopusenergy
+apikey: sk_live_************************
+```
+
+##### `apikey`
+
+The API key for your Octopus account.
+
+#### Tariff Code
 :::tip Tarif- und Regionalcodes
 Das Ermitteln des Tarif- und Regionalcodes ist nicht Gegenstand dieser Dokumentation.
 :::
