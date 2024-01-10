@@ -3,6 +3,7 @@ import waitOn from "wait-on";
 import axios from "axios";
 import { exec, execSync } from "child_process";
 import playwrightConfig from "../../playwright.config";
+import { mergeYaml } from "./yaml";
 
 const BASE_URL = playwrightConfig.use.baseURL;
 
@@ -39,9 +40,14 @@ async function _restoreDatabase(database) {
 }
 
 async function _start(config) {
+  const configPath =
+    typeof config === "string"
+      ? `recipes/${config}`
+      : mergeYaml(`recipes/${config[0]}`, `recipes/${config[1]}`);
+
   console.log("starting evcc", { config });
   const instance = exec(
-    `EVCC_DATABASE_DSN=${DB_PATH} ${BINARY} --config recipes/${config}`,
+    `EVCC_DATABASE_DSN=${DB_PATH} ${BINARY} --config ${configPath}`,
   );
   instance.stdout.pipe(process.stdout);
   instance.stderr.pipe(process.stderr);
