@@ -406,7 +406,7 @@ Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loa
 
 :::
 
-**Standartwert:** `0`
+**Standardwert:** `0`
 
 **Beispiel**:
 
