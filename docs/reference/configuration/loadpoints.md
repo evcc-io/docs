@@ -281,13 +281,13 @@ delay: 10m
 
 ### `guardduration`
 
-Definiert den zeitlichen Mindestabstand in welchem der Strom gesperrt oder wieder freigegeben werden darf.
+Definiert den zeitlichen Mindestabstand in welchem der Strom gesperrt oder wieder freigegeben werden darf. Das beinhaltet sowohl das An-/Ausschalten des Ladevorgangs als auch die Umschaltung zwischen einphasigem und dreiphasigem Laden und soll vermeiden, dass die Schütze in der Wallbox und im Auto zu häufig innerhalb eines gewissen Zeitraums geschaltet werden. 
 
 **Standardwert:** `5m`
 
 **Beispiel**:
 
-Mindestens 15 Minuten Abstand zwischen dem An-/Ausschalten des Ladevorgangs.
+Mindestens 15 Minuten Abstand zwischen dem An-/Aus-/Phasenumschalten des Ladevorgangs. Jeder der vorgenannten Vorgänge kann nur 1x im Zeitraum `guardduration` von evcc ausgelöst werden.
 
 ```yaml
 guardduration: 15m
