@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 import { loop } from "./utils/loop";
-import { CURSOR, ARROW, placeOverlay } from "./utils/overlay";
+import { CURSOR, ARROW, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
@@ -38,6 +38,7 @@ loop((screenshot) => {
         all: 20,
       },
     );
+    await removeOverlays(page);
 
     await page
       .getByTestId("topnavigation-dropdown")

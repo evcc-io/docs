@@ -38,11 +38,19 @@ export async function placeOverlay(
         svg.style.position = "absolute";
         svg.style.left = `${rect.left + rect.width / 2 + xOffset}px`;
         svg.style.top = `${rect.top + rect.height / 2 + yOffset}px`;
-        svg.style.zIndex = "1000";
+        svg.style.zIndex = "1100";
         svg.style.transform = `rotate(${rotate}deg)`;
+        svg.classList.add("screenshot-overlay");
         document.body.appendChild(svg);
       }
     },
     { selector, symbol, xOffset, yOffset, rotate },
   );
+}
+
+export async function removeOverlays(page) {
+  await page.evaluate(() => {
+    const elements = document.querySelectorAll(".screenshot-overlay");
+    elements.forEach((element) => element.remove());
+  });
 }
