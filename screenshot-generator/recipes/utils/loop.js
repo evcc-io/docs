@@ -42,7 +42,12 @@ export function loop(body) {
           };
         }
         const path = `${screenshotBase[lang]}/${name}-${theme}.png`;
-        await page.screenshot({ path, omitBackground: true, clip });
+        await page.screenshot({
+          path,
+          omitBackground: true,
+          clip,
+          animations: "disabled",
+        });
         await convertToWebp(path);
         fs.unlinkSync(path);
         console.log("screenshot created", { name, theme, lang });

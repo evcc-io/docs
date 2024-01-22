@@ -5,14 +5,12 @@ const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
 
-test.beforeAll(async () => {
+test.beforeEach(async () => {
   await start("vehicles.evcc.yaml");
 });
-test.afterAll(async () => {
+test.afterEach(async () => {
   await stop();
 });
-
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 loop((screenshot) => {
   test("min soc / limit soc / limit energy", async ({ page }) => {
@@ -26,7 +24,6 @@ loop((screenshot) => {
     ).toBeVisible();
 
     await page.locator("[data-testid=charging-plan] button").first().click();
-    await wait(300);
     await page
       .locator("#chargingPlanModal_1 .nav-tabs .nav-item")
       .last()
@@ -43,7 +40,7 @@ loop((screenshot) => {
     );
     await removeOverlays(page);
     await page.locator("#chargingPlanModal_1 [aria-label=Close]").click();
-    await wait(500);
+    await expect(page.locator("#chargingPlanModal_1")).not.toBeVisible();
     await screenshot(
       page,
       `${BASE_PATH}/minsoc-loadpoint`,
@@ -54,7 +51,6 @@ loop((screenshot) => {
     );
 
     await page.locator("[data-testid=charging-plan] button").last().click();
-    await wait(300);
     await page
       .locator("#chargingPlanModal_2 .nav-tabs .nav-item")
       .last()
@@ -71,12 +67,12 @@ loop((screenshot) => {
     );
     await removeOverlays(page);
     await page.locator("#chargingPlanModal_2 [aria-label=Close]").click();
+    await expect(page.locator("#chargingPlanModal_2")).not.toBeVisible();
     await page
       .getByTestId("limit-soc")
       .locator("select")
       .last()
       .selectOption("90");
-    await wait(500);
     await placeOverlay(
       page,
       ".container--loadpoint > .carousel > div:nth-child(2) [data-testid=limit-soc] select",
@@ -104,7 +100,6 @@ loop((screenshot) => {
       .locator("select")
       .last()
       .selectOption("30");
-    await wait(500);
     await screenshot(
       page,
       `${BASE_PATH}/limitenergy-loadpoint`,
