@@ -276,12 +276,15 @@ delay: 10m
 ### `guardduration`
 
 Defines the minimum time interval during which the power must be locked or unlocked.
+That includes both turning on and off the charging process and switching phases.
+It is intended to prevent the contactors in the charging station and in the car from switching too frequently within a certain period of time.
 
 **Default value:** `5m`
 
 **For example**:
 
-At least 15 minutes interval between turning on and off the charging process.
+At least 15 minutes interval between turning on and off the charging process as well as phase switching.
+Every one of the above mentioned actions can only be triggered once within the `guardduration` period by evcc.
 
 ```yaml
 guardduration: 15m
