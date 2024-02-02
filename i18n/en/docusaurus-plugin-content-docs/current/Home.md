@@ -64,6 +64,14 @@ evcc comes without any kind of guarantee, and you use the software at your own r
 Currently DE only (but please do suggest other languages!)
 :::
 
+### Night of open Knowledge 2023 in Lübeck Lecture
+
+[Michael](https://github.com/naltatis) gives an overview of the functionality and possibilities of evcc.
+
+Here are [the slides](https://speakerdeck.com/naltatis/evcc-open-source-sonne-tanken).
+
+[![YouTube NooK2023](youtube_nook2023.webp)](https://www.youtube.com/watch?v=NDojtAABuiw)
+
 ### Linux Infotag 2023 Lecture
 
 [Michael](https://github.com/naltatis) introduces the project, talks about everyday work, and financing.

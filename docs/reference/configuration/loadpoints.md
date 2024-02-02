@@ -281,13 +281,13 @@ delay: 10m
 
 ### `guardduration`
 
-Definiert den zeitlichen Mindestabstand in welchem der Strom gesperrt oder wieder freigegeben werden darf.
+Definiert den zeitlichen Mindestabstand in welchem der Strom gesperrt oder wieder freigegeben werden darf. Das beinhaltet sowohl das An-/Ausschalten des Ladevorgangs als auch die Umschaltung zwischen einphasigem und dreiphasigem Laden und soll vermeiden, dass die Schütze in der Wallbox und im Auto zu häufig innerhalb eines gewissen Zeitraums geschaltet werden.
 
 **Standardwert:** `5m`
 
 **Beispiel**:
 
-Mindestens 15 Minuten Abstand zwischen dem An-/Ausschalten des Ladevorgangs.
+Mindestens 15 Minuten Abstand zwischen dem An-/Aus-/Phasenumschalten des Ladevorgangs. Jeder der vorgenannten Vorgänge kann nur 1x im Zeitraum `guardduration` von evcc ausgelöst werden.
 
 ```yaml
 guardduration: 15m
@@ -296,6 +296,10 @@ guardduration: 15m
 ---
 
 ### `phases`
+
+:::note veraltet in yaml
+Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
+:::
 
 **Wallbox ohne automatische Phasenumschaltung**:
 
@@ -349,6 +353,10 @@ Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Ste
 
 ### `minCurrent`
 
+:::note veraltet in yaml
+Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
+:::
+
 Definiert die minimal genutzte Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
 
 Wie bereits bei `phases` beschrieben, wird über diesen Wert die Mindestladeleistung festgelegt.
@@ -372,6 +380,10 @@ mincurrent: 6
 ---
 
 ### `maxCurrent`
+
+:::note veraltet in yaml
+Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
+:::
 
 Definiert die maximal zulässige Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
 
@@ -406,7 +418,7 @@ Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loa
 
 :::
 
-**Standartwert:** `0`
+**Standardwert:** `0`
 
 **Beispiel**:
 

@@ -50,7 +50,15 @@ evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Ri
 
 ## Videos
 
-### Vortrag Augsburger Linux Infotag 2023
+### Night of open Knowledge 2023 in Lübeck
+
+[Michael](https://github.com/naltatis) gibt einen Überblick über den Funktionsumfang und die Möglichkeiten von evcc.
+
+Hier gibts die [Folien zum Vortrag](https://speakerdeck.com/naltatis/evcc-open-source-sonne-tanken).
+
+[![YouTube NooK2023](youtube_nook2023.webp)](https://www.youtube.com/watch?v=NDojtAABuiw)
+
+### Augsburger Linux Infotag 2023
 
 [Michael](https://github.com/naltatis) stellt das Projekt vor, erzählt was zum Arbeitsalltag und zur Finanzierung des Projekts.
 

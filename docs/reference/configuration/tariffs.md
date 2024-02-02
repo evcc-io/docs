@@ -249,6 +249,22 @@ tax: # optional, additional tax (0.1 for 10%)
 
 ---
 
+### `type:` **`ENTSO-E`**
+
+European market date
+
+**Beispiel**:
+
+```yaml
+type: entsoe # Entso-E european market data
+domain: BZN|DE-LU # https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas
+securitytoken: # api token
+charges: # optional, additional charges per kWh
+tax: # optional, additional tax (0.1 for 10%)
+```
+
+---
+
 ## `feedin`
 
 Vergütung für eingespeisten Strom. Bei Alt-Anlagen (vor 1.4.2012) ist hier die Differenz zwischen der Einspeise- und der Selbstverbrauchsvergütung einzutragen.
