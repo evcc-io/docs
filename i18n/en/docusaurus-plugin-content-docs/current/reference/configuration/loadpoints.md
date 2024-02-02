@@ -294,6 +294,10 @@ guardduration: 15m
 
 ### `phases`
 
+:::note deprecated in yaml
+This value can now be set in the charging point settings dialog.
+:::
+
 **charger without automatic phase switching**:
 
 Defines the number of phases with which the charger is connected.
@@ -346,6 +350,10 @@ If the charging point is not assigned a charger but one of the supported control
 
 ### `minCurrent`
 
+:::note deprecated in yaml
+This value can now be set in the charging point settings dialog.
+:::
+
 Defines the minimum used current in amperes (A) per connected phase from the supply to the charger.
 
 As mentioned with `phases`, this value sets the minimum charging power.
@@ -369,6 +377,10 @@ mincurrent: 6
 ---
 
 ### `maxCurrent`
+
+:::note deprecated in yaml
+This value can now be set in the charging point settings dialog.
+:::
 
 Defines the maximum allowable current in amps (A) per connected phase from the supply to the charger.
 
