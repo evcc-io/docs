@@ -12,6 +12,7 @@ const CODE_PREAMBLES = {
   pv: "meters:\n  - name: my_pv",
   battery: "meters:\n  - name: my_battery",
   charge: "meters:\n  - name: my_charger",
+  aux: "meters:\n  - name: my_aux",
 };
 
 const TRANSLATIONS = {
@@ -19,6 +20,7 @@ const TRANSLATIONS = {
   "tab.pv": "PV",
   "tab.battery": "Batterie",
   "tab.charge": "Wallbox",
+  "tab.aux": "AUX",
 };
 
 function escapeRegExp(text) {
