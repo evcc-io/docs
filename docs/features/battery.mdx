@@ -3,3 +3,69 @@ sidebar_position: 6
 ---
 
 # Hausbatterie
+
+Viele Photovoltaiksysteme werden heute mit einer Hausbatterie kombiniert.
+Die Batterie speichert überschüssige Solarenergie und stellt sie bei Bedarf wieder zur Verfügung.
+
+evcc bringt einige Funktionen mit, um das Zusammenspiel zwischen dem Elektroauto und der Hausbatterie zu optimieren.
+Ist der Batterie- bzw. Hybridwechselrichter konfiguriert, kennt evcc den Ladestand der Hausbatterie und kann diesen bei der Laderegelung des Elektroautos berücksichtigen.
+
+## Wohin geht die Sonnenenergie zuerst?
+
+Hausbatterien reagieren sehr schnell auf verfügbaren Überschuss und nehmen diese Energie auf.
+Im Standardfall würde daher erst die Hausbatterie komplett geladen werden, bevor freier Überschuss in das Elektroauto fließt.
+
+Besitzt du einen größeren Speicher, kann es aber auch sinnvoll sein, bereits früher mit der Ladung des Elektroautos zu beginnen.
+Dieses Verhalten kannst du im **Batterieeinstellungen**-Dialog konfigurieren.
+
+Hier kannst du einstellen, welcher Ladestand der Hausbatterie erreicht sein muss, bevor das Elektroauto geladen wird.
+
+>>> Screenshot Priority Soc <<<
+
+Beispiel: Du setzt die Grenze auf 50%. Das bedeutet, dass Sonnenenergie erstmal in die Hausbatterie fließt.
+Erreicht die Batterie einen Ladestand von 50%, werden Ladepunkte, die sich im PV-Modus befinden, freigegeben.
+Die Ladeleistung wird so reguliert, dass die Hausbatterie ihren Ladestand hält.
+Ist kein Fahrzeug angeschlossen, geht überschüssige Sonnenenergie natürlich weiterhin in die Hausbatterie.
+
+## Batterieunterstütztes Laden
+
+Im PV-Modus versucht evcc die Ladung so zu steuern, dass nur Sonnenenergie direkt genutzt wird.
+Ein Entladen der Hausbatterie wird dabei vermieden.
+Mit der Funktion **Batterieunterstütztes Laden** kannst du einen Teil deines Hausspeichers aber explizit für das Laden des Elektroautos freigeben.
+
+>> screenshot Batterieunterstütztes Laden <<
+
+Beispiel: Du gibst den Bereich oberhalb von 75% für Batterieunterstütztes Laden frei.
+Dein Hausspeicher hat sich über den Tag bereits auf 100% gefüllt.
+Du steckst dein Elektroauto im PV-Modus an.
+Zusätzlich zum verfügbaren Überschuss werden jetzt auch die freigegebenen oberen 25% der Hausbatterie genutzt, um das Elektroauto zu laden.
+Ist kein Überschuss mehr verfügbar und der Ladestand des Hausspeichers ist auf 75% gefallen, wird die Ladung gestoppt.
+
+Dieses Feature ist besonders nützlich, wenn du einen Speicher besitzt, dessen Kapazität mehr als deinen üblichen Hausverbrauch abdecken kann.
+Dann ermöglicht er dir, das Auto bspw. in den Abendstunden zu laden, wenn nur noch wenig Sonne scheint.
+
+Effizienz und Wandlungsverluste: Generell ist es empfehlenswert, das Auto möglichst direkt mit Sonnenenergie zu laden.
+Der Umweg über die Hausbatterie bedeutet immer auch Wandlungsverluste, die, je nach System, [5-10%](https://solar.htw-berlin.de/studien/stromspeicher-inspektion-2024/) betragen können.
+
+### Automatischer Start
+
+Im PV-Modus startet der Ladevorgang nur bei verfügbarem Überschuss.
+Steckst du dein Auto an, wenn kein Überschuss verfügbar ist, wird der Ladevorgang nicht gestartet.
+Auch nicht, wenn genügend freigegebene Energie im Hausspeicher vorhanden ist.
+
+Mit der Option "startet automatisch ..." kannst du dieses Verhalten ändern.
+Setzt du hier bspw. den Wert auf "... wenn fast voll" startet der Ladevorgang, wenn der freigegebene Bereich (bspw. 75-100%) fast gefüllt ist.
+Wie auch im vorherigen Beispiel endet die Ladung, wenn der Ladestand des Hausspeichers auf das eingestellte Limit (hier 75%) abgesunken ist.
+
+## Mehrere Batterien
+
+Natürlich kannst du in evcc auch mehrere Batterien konfigurieren.
+In der Benutzeroberfläche wird aus dem jeweiligen Ladestand und der Batteriekapazität ein Durchschnittsladestand berechnet.
+Dieser Wert ist die Basis für die oben beschriebenen Regelungsfunktionen.
+
+Beispiel: Du hast einen 5 kWh Speicher der zu 50% geladen ist. Zusätzlich hast du einen 10 kWh Speicher mit einem Ladestand von 80%.
+Daraus ergibt sich ein Durchschnittswert von 70%, da 10,5 kWh (2,5 kWh + 8 kWh) von 15 kWh (5 kWh + 10 kWh) gefüllt sind.
+
+Die einzelnen Ladestände kannst du im Dialog "Batterieeinstellungen" einsehen.
+
+## Aktive Batteriesteuerung
