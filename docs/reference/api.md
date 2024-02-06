@@ -70,15 +70,15 @@ Die MQTT API folgt der REST API Struktur:
 - `evcc/loadpoints`: number of available loadpoints
 - `evcc/loadpoints/<id>`: loadpoint dynamic state
 - `evcc/loadpoints/<id>/mode`: loadpoint charge mode (writable)
-- `evcc/loadpoints/<id>/minSoc`: loadpoint minimum SoC (writable)
-- `evcc/loadpoints/<id>/targetSoc`: loadpoint target SoC in % (writable)
-- `evcc/loadpoints/<id>/targetEnergy`: loadpoint target energy in kWh (writable)
-- `evcc/loadpoints/<id>/targetTime`: loadpoint target time in RFC3339 / ISO format (writable) \*\*
+- `evcc/loadpoints/<id>/limitSoc`: loadpoint target SoC in % (writable)
+- `evcc/loadpoints/<id>/limitEnergy`: loadpoint target energy in kWh (writable)
+- `evcc/loadpoints/<id>/planEnergy`: loadpoint energy in kWh / target time in RFC3339 / ISO format \*\*
 - `evcc/loadpoints/<id>/phases`: loadpoint enabled phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: loadpoint current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: loadpoint current maxCurrent value (writable)
 - `evcc/loadpoints/<id>/enableThreshold`: loadpoint threshold value (writable)
 - `evcc/loadpoints/<id>/disableThreshold`: loadpoint threshold value (writable)
+- `evcc/loadpoints/<id>/vehicle`: set currently selected vehicle by name, use "-" to delete current vehicle
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
