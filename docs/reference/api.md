@@ -58,7 +58,7 @@ Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademo
 
 ## MQTT API
 
-Die MQTT API folgt der REST API Struktur. For writable APIs append `/set` to the topic.
+Die MQTT API folgt der REST API Struktur.
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
