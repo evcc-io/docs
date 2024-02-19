@@ -57,7 +57,7 @@ export function loop(body) {
         test.beforeEach(async ({ page }) => {
           await page.goto(`/`);
           await page.getByTestId("topnavigation-button").click();
-          await page.getByRole("button", { name: "Settings" }).click();
+          await page.getByTestId("topnavigation-settings").click();
           await page.getByRole("button", { name: theme }).click();
           await page.getByLabel("Language").selectOption({ value: lang });
           await page.getByRole("button", { name: "Close" }).click();
