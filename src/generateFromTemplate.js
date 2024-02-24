@@ -184,11 +184,11 @@ function generateMarkdown(data, type, target) {
 
 ["vehicle", "meter", "charger"].forEach((type) => {
   // German
-  const templatesDe = readTemplates(`./templates/de/${type}`);
+  const templatesDe = readTemplates(`./templates/release/de/${type}`);
   generateMarkdown(templatesDe, type, `./docs/devices/${type}s.mdx`);
 
   // English
-  const templatesEn = readTemplates(`./templates/en/${type}`);
+  const templatesEn = readTemplates(`./templates/release/en/${type}`);
   generateMarkdown(
     templatesEn,
     type,
