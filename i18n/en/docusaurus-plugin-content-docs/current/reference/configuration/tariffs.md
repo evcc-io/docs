@@ -163,6 +163,43 @@ The ID of the location, if there are multiple locations associated with the acco
 
 The electricity provider [Octopus Energy](https://octopus.energy) in the United Kingdom.
 
+This tariff type provides two setup options: API key, and Tariff Code. There are pros and cons to both options:
+
+**API Key**:
+  * Pros:
+    * Automatic detection of appropriate tariff for your account, including tariff changes (set and forget)
+    * Detection of lower rate during Intelligent Octopus charge periods
+  * Cons:
+    * Requires supplying your (rather powerful) Octopus Energy API Key in configuration
+    
+**Tariff Code**:
+  * Pros:
+    * Does not require credentials
+  * Cons:
+    * Can be a little complicated to find your tariff and region code
+    * Cannot determine Intelligent Octopus charge periods, or other user-specific demand flexibility requirements
+
+If in doubt, choose **API Key**. _You cannot use both simultaneously_, or you will receive an error during startup.
+
+#### API Key
+:::tip Finding your API Key
+You can find your API Key here: https://octopus.energy/dashboard/new/accounts/personal-details/api-access
+
+Keep this safe - it provides full access to your account and data! If you think it may have been compromised, reset it immediately.
+:::
+
+**For example**:
+
+```yaml
+type: octopusenergy
+apikey: sk_live_************************
+```
+
+##### `apikey`
+
+The API key for your Octopus account.
+
+#### Tariff Code
 :::tip Tariff and Regional Codes
 Determining the tariff and regional codes is not covered in this documentation.
 :::
@@ -171,15 +208,15 @@ Determining the tariff and regional codes is not covered in this documentation.
 
 ```yaml
 type: octopusenergy
-tariff: AGILE-FLEX-22-11-25 # Tariff code
+tariff: AGILE-FLEX-22-11-25 # Product code
 region: A # optional
 ```
 
-#### `tariff`
+##### `tariff`
 
-The tariff code for your energy contract.
+The product code for your energy contract.
 
-#### `region`
+##### `region`
 
 The DNO region you are in: [More information](https://www.energy-stats.uk/dno-region-codes-explained/)
 
