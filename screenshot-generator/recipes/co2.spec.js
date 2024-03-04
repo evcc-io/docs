@@ -17,44 +17,33 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 loop((screenshot) => {
   test("smart grid charging", async ({ page }) => {
     await page.goto(`/`);
-    await page.getByTestId("topnavigation-button").click();
-    await page
-      .locator(
-        "[data-testid=topnavigation-dropdown] li:nth-child(4) > .dropdown-item",
-      )
-      .hover();
     await placeOverlay(
       page,
-      "[data-testid=topnavigation-dropdown] li:nth-child(4) > .dropdown-item",
+      "[data-testid=loadpoint-settings-button].d-sm-block",
       CURSOR,
-      50,
-      5,
     );
     await screenshot(
       page,
-      `${BASE_PATH}/co2-modal-navigation`,
-      "[data-testid=topnavigation-dropdown]",
+      `${BASE_PATH}/co2-loadpoint-settings`,
+      "[data-testid=loadpoint]:first-child",
       {
         all: 20,
       },
     );
     await removeOverlays(page);
-
-    await page
-      .getByTestId("topnavigation-dropdown")
-      .locator("li:nth-child(4) > .dropdown-item")
-      .click();
+    await page.getByTestId("loadpoint-settings-button").nth(1).click();
     await wait(300);
 
-    await page.locator("#smartCostLimit").selectOption("115");
+    await page.locator("#smartCostLimit-1").selectOption("115");
 
     await screenshot(
       page,
       `${BASE_PATH}/co2-modal`,
-      "#gridSettingsModal .modal-content",
+      "#loadpointSettingsModal_1 .modal-body > .container > div:first-child",
       {
-        all: 20,
-        top: 10,
+        all: 50,
+        top: 110,
+        right: 70,
       },
     );
   });

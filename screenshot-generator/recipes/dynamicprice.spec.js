@@ -17,22 +17,19 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 loop((screenshot) => {
   test("smart grid charging", async ({ page }) => {
     await page.goto(`/`);
-    await page.getByTestId("topnavigation-button").click();
-    await page
-      .getByTestId("topnavigation-dropdown")
-      .locator("li:nth-child(4) > .dropdown-item")
-      .click();
+    await page.getByTestId("loadpoint-settings-button").nth(1).click();
     await wait(300);
 
-    await page.locator("#smartCostLimit").selectOption("0.2");
+    await page.locator("#smartCostLimit-1").selectOption("0.2");
 
     await screenshot(
       page,
       `${BASE_PATH}/dynamicprice-modal`,
-      "#gridSettingsModal .modal-content",
+      "#loadpointSettingsModal_1 .modal-body > .container > div:first-child",
       {
-        all: 20,
-        top: 10,
+        all: 50,
+        top: 110,
+        right: 70,
       },
     );
   });
