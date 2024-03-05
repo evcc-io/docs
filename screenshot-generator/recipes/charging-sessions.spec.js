@@ -6,7 +6,7 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeAll(async () => {
-  await start("charging-sessions.yaml");
+  await start("charging-sessions.yaml", "charging-sessions.sql");
 });
 test.afterAll(async () => {
   await stop();
@@ -31,5 +31,31 @@ loop((screenshot) => {
       },
     );
     await removeOverlays(page);
+  });
+
+  test("session", async ({ page }) => {
+    await page.goto(`/#/sessions`);
+    await expect(
+      await page.getByTestId("sessions-entry").first(),
+    ).toBeVisible();
+    await screenshot(
+      page,
+      `${BASE_PATH}/charging-sessions-list`,
+      ".app > .container",
+      {
+        all: 20,
+        bottom: -20,
+      },
+    );
+    await page.getByTestId("sessions-entry").nth(5).click();
+    await expect(page.locator("#sessionDetailsModal")).toBeVisible();
+    await screenshot(
+      page,
+      `${BASE_PATH}/charging-sessions-detail`,
+      "#sessionDetailsModal .modal-content",
+      {
+        all: 20,
+      },
+    );
   });
 });
