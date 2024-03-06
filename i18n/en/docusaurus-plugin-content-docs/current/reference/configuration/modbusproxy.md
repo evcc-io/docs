@@ -44,7 +44,7 @@ For more information about evcc sponsorship, please visit [the sponsorship page]
 
 ### `port`
 
-The local TCP/IP port under which a connection is provided as a proxy server, and from which incoming Modbus TCP connections from third-party systems are accepted.
+The local TCP/IP port under which a connection is provided as a proxy server, and from which incoming Modbus TCP connections from third-party systems are accepted. 
 
 **For example**:
 
@@ -53,6 +53,19 @@ port: 5021
 ```
 
 ## Optional Parameters
+
+### `uri`
+
+The IP address and the port of the target device in common URI Scheme. 
+
+Every provided port must be unique and not already in use by another application on the same host, however, it must not be different from the port of the target device. Therefore it is valid to define a configuration for port 502, which refers to port 502 on the target device.
+
+**For example**:
+
+```yaml
+- port: 502
+  uri: 192.0.2.2:502
+```
 
 ### `rtu`
 
@@ -66,7 +79,13 @@ rtu: true
 
 ### `readonly`
 
-By setting `readonly: true`, you can prevent Modbus write accesses by third-party systems.
+By setting this parameter, you can prevent Modbus write accesses by third-party systems.
+
+**Possible values**:
+
+- `true`: Write access is blocked without response
+- `deny`: Write access is blocked with a modbus error as response
+- `false`: Write access is forwarded
 
 **For example**:
 
