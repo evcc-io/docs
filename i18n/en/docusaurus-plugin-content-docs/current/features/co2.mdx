@@ -1,0 +1,76 @@
+---
+sidebar_position: 2
+---
+
+import Screenshot from "../../../../../src/components/Screenshot";
+
+# CO₂-Optimized Charging
+
+:::warning work in progress
+This page needs to be translated from German to English.
+:::
+
+Nicht immer reicht die selbstproduzierte Energie aus, um den eigenen Ladebedarf zu decken, und du musst auf Netzstrom zurückgreifen.
+In diesem Fall ist es sinnvoll, den Ladevorgang dann zu starten, wenn möglichst viel CO₂-neutrale Energie im öffentlichen Stromnetz vorhanden ist.
+
+Selbst wenn du einen Ökostromtarif hast, der mit 0 gCO₂/kWh wirbt, ist ein optimiertes Laden sinnvoll.
+Diese Tarife sind zwar bilanziell CO₂-neutral, du verwendest jedoch immer den lokalen Strommix.
+Sind wenig erneuerbare Energien im Stromnetz vorhanden, muss der zusätzliche Strombedarf durch fossile Energieträger gedeckt werden.
+
+## Datenquelle konfigurieren
+
+Um CO₂-optimiert zu laden, benötigt evcc Vorhersagedaten über die CO₂-Emissionen in deiner Region.
+Die Konfiguration muss über die `evcc.yaml` vorgenommen werden.
+
+```yaml
+tariffs:
+  co2:
+    type: grünstromindex # Beispiel GrünstromIndex (nur Deutschland)
+    zip: 12349 # Deine Postleitzahl
+```
+
+In diesem Beispiel verwenden wir die Daten von [GrünstromIndex](https://www.gruenstromindex.de/).
+Unter [tariffs](../reference/configuration/tariffs/#co2) findest du eine Liste aller unterstützten Datenquellen.
+
+## Sauberes Netzladen
+
+Öffne den Einstellungsdialog am Ladepunkt.
+
+<Screenshot
+  name="features/screenshots/co2-loadpoint-settings"
+  caption="Einstellungen am Ladepunkt"
+/>
+
+Die CO₂-Vorhersagedaten werden im Balkendiagramm angezeigt.
+Jeder Balken repräsentiert eine Stunde.
+Über das Auswahlfeld oder durch den Klick auf einen Balken kannst du dein gewünschtes CO₂-Limit auswählen.
+
+<Screenshot
+  name="features/screenshots/co2-modal"
+  caption="Screenshot vom Smartes Netzladen Dialog mit eingestelltem CO₂-Limit"
+/>
+
+Dieses Limit gilt im **PV-Modus** des aktuellen Ladepunktes.
+Mit Klick auf "überall anwenden" wird das Limit für alle Ladepunkte übernommen.
+Zusätzlich zum [PV-Überschussladen](./solar-charging) wird nun in den Stunden mit niedriger CO₂-Emission (grüne Balken) schnelles Laden aktiviert.
+
+Diese Einstellung ist sinnvoll, um bspw. in den Wintermonaten weiterhin einen vollgeladenen Akku zu haben, und dabei das Stromnetz zu entlasten.
+
+## Ladeplanung
+
+Durch die Nutzung von [Ladeplänen](./plans) kannst du das CO₂-optimierte Laden noch genauer regeln.
+Du musst lediglich deine Energiemenge (kWh) bzw. deinen Zielladestand (%) und die gewünschte Abfahrtszeit angeben.
+Ist eine CO₂-Datenquelle konfiguriert, wählt der Planungsalgorithmus automatisch die Stunden mit der niedrigsten CO₂-Emission aus.
+
+<Screenshot
+  name="features/screenshots/co2-plan"
+  caption="Screenshot des Ladeplan Dialogs mit optimierter CO₂-Ladung"
+/>
+
+Für die Dauer des Ladeplans wird das in "Sauberes Netzladen" eingestellte CO₂-Limit außer Kraft gesetzt.
+
+:::note Hinweis
+Hast du einen [dynamischen Stromtarif](./dynamic-prices) konfiguriert, wird dieser bevorzugt.
+Die CO₂-Daten werden weiterhin an deinen [Ladevorgängen](./sessions) erfasst.
+Der Planungsalgorithmus und die "Günstiges Netzladen"-Funktion optimieren nun jedoch auf Preis anstatt auf CO₂.
+:::

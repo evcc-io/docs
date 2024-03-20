@@ -1,0 +1,104 @@
+---
+sidebar_position: 1
+---
+
+import Screenshot from "../../../../../src/components/Screenshot";
+
+# Solar Surplus Charging
+
+:::warning work in progress
+This page needs to be translated from German to English.
+:::
+
+Überschüssige Sonnenenergie nutzen, um das Elektroauto zu laden.
+Das ist die Kernfunktion von evcc.
+
+## PV-Modus
+
+Die Funktion kann am Ladepunkt über den **PV-Modus** aktiviert werden.
+
+<Screenshot
+  name="features/screenshots/solar-mode"
+  caption="Screenshot eines Ladepunktes. Cursor klickt auf den PV-Modus."
+/>
+
+In diesem Modus startet das Laden automatisch, sobald die PV-Anlage **genügend Leistung** liefert.
+Die Ladeleistung wird kontinuierlich angepasst, sodass möglichst **kein Strom aus dem Netz** bezogen wird.
+Liefert die PV-Anlage nicht mehr genügend Leistung oder steigt der Hausverbrauch, wird die Ladung pausiert und später fortgesetzt.
+
+### Wann startet die Ladung?
+
+Alle Elektroautos haben eine **Mindestladeleistung**.
+Diese ist durch den im Ladestandard [IEC 61851](https://en.wikipedia.org/wiki/IEC_61851) festgelegten Mindeststrom von 6 A bedingt.
+Die Mindestladeleistung ist abhängig von der Anzahl der Phasen, die Auto und Wallbox zum Laden nutzen.
+
+| Phasen               | Minimale Ladeleistung (6 A)              | Maximale Ladeleistung (16 A / 32 A)                            |
+| :------------------- | :--------------------------------------- | :------------------------------------------------------------- |
+| 1-phasig             | **1,4 kW** (1 x 6 A x 230 V)             | **3,7 kW** (1 x 16 A x 230 V)                                  |
+| 2-phasig             | **2,8 kW** (2 x 6 A x 230 V)             | **7,4 kW** (2 x 16 A x 230 V)                                  |
+| 3-phasig<br />&nbsp; | **4,1 kW** (3 x 6 A x 230 V)<br />&nbsp; | **11 kW** (3 x 16 A x 230 V)<br />**22 kW** (3 x 32 A x 230 V) |
+
+Die meisten Wallboxen sind heute dreiphasig (11 kW oder 22 kW) angebunden.
+Damit liegt die Mindestladeleistung bei 4,1 kW.
+Bei [Wallboxen mit automatischer Phasenumschaltung](../devices/chargers#features) (1P/3P) kann evcc je nach Bedarf zwischen ein- und dreiphasig umschalten und die Ladung bereits bei 1,4 kW starten.
+
+Im **Energieflussdiagramm** wird die Einspeiseleistung dargestellt.
+Ist der Überschuss für eine gewisse Zeit oberhalb der Mindestladeleistung, startet die Ladung.
+
+<Screenshot
+  name="features/screenshots/energyflow-surplus"
+  caption="Energieflussdiagramm zeigt 3,4 kW Einspeisung."
+/>
+
+Hinweis: Ausschlaggebend ist der Wert am Netzzähler.
+Bei Anlagen mit abgeregelter Netzeinspeisung („Nulleinspeisung“) funktioniert der **PV-Modus** nicht.
+
+### Nicht genügend Überschuss?
+
+Standardmäßig wird versucht, möglichst keinen Strom aus dem Netz zu beziehen.
+Dieses Verhalten kann über die Konfiguration am Ladepunkt angepasst werden.
+Hierfür sind die Parameter `delay` und `threshold` relevant.
+Mit ihnen kann die Ein-/Ausschaltverzögerung und die Überschussgrenze eingestellt werden.
+
+```yaml
+loadpoints:
+  - title: Garage
+    enable:
+      # einschalten, wenn 1 Minute lang mindestens 2000 W Überschuss vorhanden ist
+      delay: 1m
+      threshold: -2000
+    disable:
+      # ausschalten, wenn 30 Minuten lang mehr als 2000 W aus dem Netz bezogen werden
+      delay: 30m
+      threshold: 2000
+```
+
+Gerade für kleine PV-Anlagen oder in den Wintermonaten kann dies sinnvoll sein, um den eigenen Ladebedarf zumindest teilweise mit PV-Energie zu decken.
+
+Die `enable` und `disable` Parameter sollten so gewählt werden, dass die Ladung nicht zu häufig ein- und ausgeschaltet wird.
+Einige Fahrzeuge verweigern die Ladung, wenn sie zu oft unterbrochen wird, und müssen bspw. durch Aufschließen oder An-/Abstecken des Ladekabels wieder zum Laden gebracht werden.
+
+### Zusammenspiel mit Hausbatterie
+
+Batteriesysteme haben eine eigene, schnelle Regelung.
+Im Standardfall hat die Hausbatterie Vorrang.
+Erst wenn sie keine Leistung mehr aufnehmen kann, beginnt der **PV-Modus** mit der Ladung des Fahrzeuges.
+
+Wie du dieses Verhalten anpassen kannst, erfährst du unter [Hausbatterie](./battery).
+
+## Min+PV-Modus
+
+Der **Min+PV-Modus** ist eine Abwandlung des **PV-Modus**.
+
+<Screenshot
+  name="features/screenshots/min-solar-mode"
+  caption="Screenshot eines Ladepunktes. Cursor klickt auf den Min+PV-Modus."
+/>
+
+Hier beginnt die Ladung sofort mit minimaler Ladeleistung – auch wenn kein oder nicht genügend Überschuss vorhanden ist.
+Ist Überschuss verfügbar, wird die Ladeleistung entsprechend erhöht.
+
+Im Unterschied zum **PV-Modus** wird die Ladung nicht unterbrochen.
+Dies ist vorwiegend für Fahrzeuge sinnvoll, die ein regelmäßiges Starten und Stoppen der Ladung nicht mögen.
+
+Auch bei sehr wechselhaften Wetterbedingungen kann der **Min+PV-Modus** eine gute Alternative zum **PV-Modus** sein.

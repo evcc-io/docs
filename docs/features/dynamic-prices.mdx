@@ -1,0 +1,94 @@
+---
+sidebar_position: 3
+---
+
+import Screenshot from "../../src/components/Screenshot";
+
+# Dynamische Stromtarife
+
+Reicht der eigene PV-Strom nicht aus, muss der Ladestrombedarf von Zeit zu Zeit auch über Netzstrom gedeckt werden.
+Wenn du einen Stromtarif mit flexiblen Strompreisen wie [Tibber](https://tibber.com/de/) oder [Awattar](https://www.awattar.de/) hast, kannst du dein Netzladen mit evcc optimieren.
+
+## Datenquelle konfigurieren
+
+Die Konfiguration von Strompreisen muss aktuell noch über die `evcc.yaml` vorgenommen werden.
+
+### Fester Strompreis
+
+Hier die Konfiguration für einen festen Stromtarif.
+Diese Information wird für die Berechnung der realen Ladekosten verwendet.
+
+```yaml
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.32 # 32ct/kWh
+```
+
+### Zeitabhängiger Strompreis
+
+Über `zones` kannst du abweichende Preise für bestimmte Zeiträume angeben.
+Du kannst beliebig viele Zeiträume definieren, in denen ein abweichender Preis gilt.
+
+```yaml
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.32 # 32ct/kWh (default)
+    zones:
+      - days: Mo-Fr
+        hours: 2-6
+        price: 0.22 # 20ct/kWh (werkstags 2-6 Uhr)
+      - days: Sa,So
+        price: 0.12 # 12ct/kWh (Wochenende)
+```
+
+### Dynamischer Strompreis via API
+
+Hast du einen Stromtarif der bspw. Strombörsenpreisen folgt, kannst du die Preise auch über eine API beziehen.
+Hier eine Beispielkonfiguration für den Stromtarif von [Tibber](https://tibber.com/de/).
+
+```yaml
+tariffs:
+  grid:
+    type: tibber
+    token: "..." # Access Token
+```
+
+Unter [tariffs](../reference/configuration/tariffs/) findest du eine Liste aller unterstützten Tarife.
+Wenn dein Anbieter eine Schnittstelle hat, aber noch nicht von evcc unterstützt wird, dann mach gerne einen [Feature Request](https://github.com/evcc-io/evcc/issues/new/choose) auf.
+
+## Günstiges Netzladen
+
+Hast du einen zeitabhängigen oder dynamischen Stromtarif konfiguriert, erscheint im Einstellungsdialog am Ladepunkt der Bereich "Günstiges Netzladen".
+
+<Screenshot
+  name="features/screenshots/co2-loadpoint-settings"
+  caption="Einstellungen am Ladepunkt"
+/>
+
+Hier siehst du die Energiepreise für die kommenden Stunden und kannst ein Preislimit einstellen.
+
+<Screenshot
+  name="features/screenshots/dynamicprice-modal"
+  caption="Screenshot vom Smartes Netzladen Dialog mit eingestelltem Preislimit"
+/>
+
+Dieses Limit gilt im **PV-Modus** des aktuellen Ladepunktes.
+Mit Klick auf "überall anwenden" wird das Limit für alle Ladepunkte übernommen.
+Zusätzlich zum [PV-Überschussladen](./solar-charging) wird nun in den Stunden mit niedrigem Strompreis (grüne Balken) schnelles Laden aktiviert.
+
+## Ladeplanung
+
+Durch die Nutzung von [Ladeplänen](./plans) kannst du deine Energiekosten noch genauer regeln.
+Du musst lediglich deine Energiemenge (kWh) bzw. deinen Zielladestand (%) und die gewünschte Abfahrtszeit angeben.
+Ist ein zeitabhängiger oder dynamischer Stromtarif konfiguriert, wählt der Planungsalgorithmus automatisch die günstigsten Stunden für die Ladung aus.
+
+<Screenshot
+  name="features/screenshots/dynamicprice-plan"
+  caption="Screenshot des Ladeplan Dialogs mit preisoptimierter Ladung"
+/>
+
+Für die Dauer des Ladeplans wird das in "Günstiges Netzladen" eingestellte Preislimit außer Kraft gesetzt.
