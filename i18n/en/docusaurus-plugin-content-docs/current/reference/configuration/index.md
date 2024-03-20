@@ -69,7 +69,7 @@ graph TD;
 In order for the system to function, an electricity meter is important. This
 allows us to calculate at any point in time the surplus power. Measuring the
 generated power is interesting, but has no effect on the function, with
-[this exception](../../guides/meters#i-have-a-solar-installation-but-i-dont-have-a-readable-grid-connection-meter---can-i-still-use-evcc)
+[this exception](/docs/faq#configuration)
 
 The surplus power is compared with the minimum power required to charge. If
 this is sufficient, the charging process is started.
