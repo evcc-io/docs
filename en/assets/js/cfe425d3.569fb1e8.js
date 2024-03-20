@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkevcc_docs=self.webpackChunkevcc_docs||[]).push([[489],{82660:e=>{e.exports=JSON.parse('{"label":"talk","permalink":"/en/blog/tags/talk","allTagsPath":"/en/blog/tags","count":1,"unlisted":false}')}}]);
