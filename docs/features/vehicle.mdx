@@ -3,3 +3,80 @@ sidebar_position: 8
 ---
 
 # Fahrzeuge
+
+Konfigurierst du dein Fahrzeug, bzw. deine Fahrzeuge in evcc, stehen dir zusätzliche Funktionen zur Verfügung.
+Du kannst [Mindestladung & Ladelimit](./limits) konfigurieren, [Ladepläne](./charging-plans) nutzen und bekommst in den [Ladevorgängen](./charging-sessions) eine detaillierte Auswertung nach Fahrzeug inkl. Informationen wie Kilometerstände.
+
+Das Hinterlegen von Fahrzeugen ist optional. Da evcc in den meisten Fällen den Ladevorgang über die Wallbox steuert, klappt PV- und preisabhängiges Laden auch ohne Fahrzeugkonfiguration.
+
+## Fahrzeugtypen
+
+Die verfügbaren Funktionen hängen vom Fahrzeugtyp ab. Die folgenden Typen werden unterschieden:
+
+### Gastfahrzeug
+
+Hast du kein Fahrzeug konfiguriert, wird am Ladepunkt das Gastfahrzeug angezeigt.
+Dies ist ein Standardfahrzeug, das keine speziellen Funktionen unterstützt.
+Selbst wenn du ein eigenes Fahrzeug konfiguriert hast, kannst du jederzeit auf das Gastfahrzeug umschalten.
+Dies ist bspw. sinnvoll, wenn ein nicht konfiguriertes Fahrzeug an deiner Wallbox lädt.
+evcc verwendet dann die am Ladepunkt konfigurierten Standardwerte für Leistung und Phasen.
+Unter [Ladevorgänge](./charging-sessions) wird diese Ladung dem Gastfahrzeug zugeordnet.
+
+### Fahrzeuge ohne API (Offline)
+
+Hat dein Fahrzeug keine Online-Schnittstelle oder am Ladepunkt keine Internetverbindung, kannst du es als Offline-Fahrzeug konfigurieren.
+Dies erfolgt aktuell über die `evcc.yaml`:
+
+```yaml
+vehicles:
+  - name: my_honda
+    title: grüner Honda e
+    type: template
+    template: offline
+    capacity: 28.5 # in kWh
+```
+
+Damit erscheint das Fahrzeug als "grüner Honda e" in der UI.
+Durch die nun bekannte Akkukapazität kann bspw. der Ladefortschritt und das Ladelimit auch in Prozent (bspw. +25%) dargestellt werden.
+
+Hinweis: Diese Funktion kannst du auch für Fremdfahrzeuge nutzen (Freunde, Familie, Miet- oder Firmenwagen), zu denen du keinen API-Zugriff hast.
+
+### Fahrzeuge mit API (Online)
+
+Hat dein Fahrzeug eine Online-Schnittstelle, ist es sinnvoll, diese auch in evcc zu konfigurieren.
+Unter [Fahrzeuge](../devices/vehicles) findest du eine Liste aller unterstützten Hersteller.
+Die empfohlene Konfiguration erfolgt auch hier über die `evcc.yaml`. Hier ein Beispiel für einen Audi:
+
+```yaml
+vehicles:
+  - name: my_audi
+    title: roter Audi Q4 e-tron
+    type: template
+    template: audi
+    user: info@example.org
+    password: ***
+    capacity: 77 # in kWh
+```
+
+evcc hat jetzt Zugriff auf den aktuellen Ladestand (SoC).
+Abhängig vom Hersteller sind auch weitere Informationen wie Ladestatus, Fahrzeuglimits, Kilometerstand, Klimatisierung und geschätzte Reichweite verfügbar.
+
+:::note Hinweis
+Um den Fahrzeugakku zu schonen, aktualisiert evcc den Ladestand nur, wenn ein Fahrzeug am Ladepunkt angeschlossen ist.
+Je nach Hersteller kann ein API-Zugriff zum Aufwecken des Fahrzeugs führen und den Standby-Verbrauch signifikant erhöhen.
+Dieses Verhalten kannst du über den [`poll` Parameter](../reference/configuration/loadpoints/#poll) am Ladepunkt verändern. 
+:::
+
+## Mehrere Fahrzeuge
+
+### Standardfahrzeug
+
+### automatische Erkennung
+
+### Erkennung via RFID
+
+### Erkennung via Plug&Charge
+
+### Zuordnung über die UI
+
+## Klimatisierung
