@@ -1,32 +1,95 @@
 ---
-sidebar_position: 2
+sidebar_position: 7
+toc_max_heading_level: 2
 ---
 
-# Konfiguration
+# Häufige Fragen
 
-## Einrichtung und Konfiguration
+## Einrichtung
 
-### Hinweis zur Individualisierung
+### Kann ich evcc ohne Netzzähler betreiben?
 
-:::caution
+Der Netzzähler ist das Kernstück für evcc und sollte, wenn möglich, eingebunden werden.
+Es ist jedoch ebenso möglich, sonnengeführtes Laden ausschließlich auf der Grundlage der PV-Leistung zu betreiben.
+In dieser Konstellation kann nicht mit PV-Überschuss geladen werden, da der dazu notwendige Messpunkt (Zähler) fehlt.
+Stattdessen wird in den Lademodi **PV** und **Min+PV** mit der PV-Erzeugungsleistung gearbeitet.
+Als Optimierung kann über die Einstellung [`residualPower`](./reference/configuration/site#residualpower) ein typischer mittlerer Hausverbrauch angegeben werden.
 
-In evcc sind sehr viele individuelle Einstellungen möglich. Die Default-Einstellungen der Parameter beruhen auf Erfahrungswerten und im Allgemeinen sind keine Änderungen notwendig.
+**Beispiel**:
 
-**Bei Individualisierung, bitte folgendes beachten:**
+```yaml
+site:
+  residualPower: 250 # 250W Hausverbrauch
+```
 
-- **Da sich die Parameter teilweise gegenseitig beeinflussen, wird dringend empfohlen, Änderungen an diesen Einstellungen nur einzeln vorzunehmen und die Auswirkungen zu testen, bevor weitere Änderungen vorgenommen werden.**
+### Ich habe keine PV Anlage, kann ich evcc trotzdem sinnvoll einsetzen?
 
-:::
+Hier gibt es verschiedene Nutzungsmöglichkeiten.
+Notwendig ist auf jeden Fall ein auslesbarer Netzzähler.
+Bei einem [variablen Stromtarif](./features/dynamic-prices) (z.B. Nachtstrom, Tibber, Awattar) ist automatisches preisabhängiges Laden möglich.
+Ansonsten kann man evcc zur Fernsteuerung (start/stop) der Wallbox nutzen.
+Darüber hinaus kann man die Ladung einer Fahrzeugbatterie auf einen bestimmten Ladestand (SoC) begrenzen. In diesem Fall ist es aber zwingend notwendig, dass das Fahrzeug in die Konfiguration mit aufgenommen wird.
 
-### Sponsoring
+### Kann ich evcc ausprobieren ohne alle Bestandteile (PV-Anlage, Wallbox, ...) zu haben?
 
-:::info
+Wenn einige Komponenten noch nicht vorhanden sind, lassen sich "Dummy" Komponenten einsetzen.
+Eine gute Quelle für diese ist die [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml).
 
-Dadurch, dass Github die Bezahlmöglichkeiten für das Sponsoring geändert hat, ist leider kein Paypal mehr möglich.
+Beispiel für einen "Dummy" Zähler mit dem `const` plugin:
 
-Wer keine Kredit-/Debitkarte verwenden möchte, kann sich diesbezüglich per Mail an info@evcc.io wenden.
+```yaml
+meters:
+  - name: dummymeter
+    type: custom
+    power:
+      source: const
+      value: 700 # 700 Watt
+```
 
-:::
+Beispiel für eine "Dummy" Wallbox mit dem `script` plugin:
+
+```yaml
+chargers:
+  - name: my_charger
+    type: custom
+    status: # charger status A..F
+      source: script
+      cmd: /bin/sh -c 'echo b'
+    enabled: # charger enabled state (true/false or 0/1)
+      source: script
+      cmd: /bin/sh -c 'echo false'
+    enable: # set charger enabled state (true/false or 0/1)
+      source: script
+      cmd: /bin/sh -c 'echo false'
+    maxcurrent: # set charger max current (A)
+      source: script
+      cmd: /bin/sh -c 'echo 10'
+```
+
+### Kann ich evcc ohne Einbindung des PV-Wechselrichters betreiben?
+
+Ja, wenn ein Netzzähler und eine steuerbare Wallbox vorhanden sind, reicht dies für alle wesentlichen Funktionen von evcc inkl. Überschussladung aus. Es fehlt dann nur die Visualisierung der PV-Erzeugung sowie einige der daraus abgeleiteten Berechnungen und Statistiken.
+Darüber hinaus besteht aber die Möglichkeit, die PV-Erzeugungsleistung mit einem nachgerüsteten Erzeugungszähler direkt zu erfassen und somit alle Features wie bei einer direkten Anbindung des PV-Wechselrichters zu nutzen.
+
+### Kann ich mehrere Wallboxen nutzen?
+
+Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden. Es ist jedoch heute noch **kein** Lastmanagement möglich. Das ist auf unserer langen Liste für die weitere Entwicklung.
+
+### Meine Wallbox hat keine Phasenumschaltung. Kann ich trotzdem 1-phasig laden?
+
+Bei kleinen PV-Anlagen und/oder im Winter macht es Sinn nur 1-phasig zu laden, um den vorhandenen Überschuss bestmöglich ohne Netzbezug zu nutzen.
+
+Bei Wallboxen die keine automatische Phasenumschaltung beherrschen, kann man in der Zuleitung zur Wallbox mittels eines Lasttrennschalters (z.B. Hager HAB304) die Phasen 2 & 3 abschalten. Wenn die volle Leistung benötigt wird, schaltet man die Phasen wieder zu.
+
+:::danger Achtung
+Dieses manuelle Umschalten darf nur erfolgen, wenn das Fahrzeug **NICHT** mit der Wallbox verbunden ist.
+::: 
+
+Alternativ kann im Winter auch einfach ein einphasiges Ladekabel verwendet werden.
+
+Damit evcc weiß, dass nicht mehr 3-phasig geladen werden kann muss die entsprechende Einstellung am Ladepunkt über die UI angepasst werden.
+
+## Fehlersuche
 
 ### Syntax-Fehler in der evcc.yaml finden
 
@@ -93,15 +156,17 @@ Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten 
 Insbesondere hilft es manchmal bei der ersten Einschätzung von "neuen" SunSpec-kompatiblen Modbus-Geräten und bei der Validierung von IP-Konfigurationen.
 Es ist aber mehr ein Entwickler- und Supporttool zu Diagnosezwecken und erkennt auch nur einen nicht näher definierbaren Gerätetypenkreis.
 
-### Fehler: evcc UI ist nicht erreichbar (Demo Modus funktioniert aber)
 
-Es kommt immer wieder vor, dass Fehler in der Konfiguration übersehen werden und der Service gestartet wird. Dabei wird der Start von evcc abgebrochen, ohne das es dafür einen Hinweis gibt. Ergebnis ist, dass das UI nicht erreichbar ist.
+## Fehlermeldungen
 
-In dem Fall sollte man evcc durch Eingabe von `evcc` auf der Kommandozeile starten. Dort werden dann auch Fehlerhinweise gegeben, die den Start des Service verhindert haben.
+### Charger out of sync: expected disabled, got enabled<br/>Charger logic error: disabled but charging
 
-Mittels der oben genannten Tests kann man diesen Fehlern auf den Grund gehen und sie beheben. Erst wenn alles fehlerfrei ist, sollte der Service gestartet werden.
+evcc erwartet nach einem Intervallzyklus bereits den neuen korrekten Status.
+Wenn manche Geräte etwas zu langsam auf Anweisungen reagieren, kommt es kurzzeitig zu einem undefinierten Zustand, der mit diesen Fehlern quittiert wird.
+Sollten ansonsten keine Probleme auftreten, kann die Meldung ignoriert werden.
+Abhilfe schafft ein größeres [`interval`](./reference/configuration/interval).
 
-### Fehler: `connection refused`
+### connection refused
 
 Die IP-Verbindung zum betreffenden Gerät ist prinzipiell vorhanden, jedoch wird der Verbindungsaufbau von diesem Gerät zum angegebenen Port abgewiesen.
 
@@ -112,9 +177,10 @@ Die Gründe dafür können vielfältig sein. Typisch sind:
 - Die maximal mögliche Anzahl an parallelen Verbindungen, die das Zielgerät verwalten kann, ist erschöpft. Andere Verbindungen z. B. von Hausautomationen, Skripten oder weiteren Instanzen von evcc müssen ggf. zunächst beendet werden, bevor eine neue Verbindung möglich ist. Im ungünstigsten Fall lässt das Zielsystem nur eine einzige Verbindung zu.
 - Blockade durch eine Firewall.
 
-### Fehler: `i/o timeout`
+### i/o timeout
 
-Hier ist eine Verbindung zum Gerät ggf. vorhanden, jedoch antwortet das Zielsystem nicht innerhalb der vorgesehenen Zeit. Entweder kommt die Anfrage gar nicht beim Zielsystem an, geht auf dem Rückweg verloren oder die Antwort dauert zu lange.
+Hier ist eine Verbindung zum Gerät ggf. vorhanden, jedoch antwortet das Zielsystem nicht innerhalb der vorgesehenen Zeit.
+Entweder kommt die Anfrage gar nicht beim Zielsystem an, geht auf dem Rückweg verloren oder die Antwort dauert zu lange.
 
 Typische Gründe sind:
 
@@ -124,13 +190,74 @@ Typische Gründe sind:
 - Bestimmte Funktionen des Geräts sind nicht wie von evcc erwartet verfügbar (z. B. durch veraltete Firmware oder abweichende Konfigurationseinstellungen)
 - Zu kurze Timeout- oder Abfragezykluszeiten seitens evcc
 
-### Fehler: `/tmp/evcc: operation not permitted` oder/und `bind: address already in use`
+### /tmp/evcc: operation not permitted<br/>bind: address already in use
 
-Diese Fehlermeldung erscheint, wenn z B. evcc bereits als Dienst läuft und evcc zusätzlich ein weiteres mal auf der Kommandozeile (durch Eingabe `evcc`) gestartet wird, ggf. auch noch mit unterschiedlichen Benutzerberechtigungen. Es darf immer nur eine einzige Instanz von evcc zur gleichen Zeit laufen.
+Diese Fehlermeldung erscheint, wenn z B. evcc bereits als Dienst läuft und evcc zusätzlich ein weiteres Mal auf der Kommandozeile (durch Eingabe `evcc`) gestartet wird, ggf. auch noch mit unterschiedlichen Benutzerberechtigungen.
+Es darf immer nur eine einzige Instanz von evcc zur gleichen Zeit laufen.
 
-Eine Prüfung, ob mehrere evcc Prozesse laufen, kann unter Linux mit Hilfe von `htop` erfolgen.
+Eine Prüfung, ob mehrere evcc Prozesse laufen, kann unter Linux mithilfe von `htop` erfolgen.
 
 Sollte es Gründe geben, evcc auf der Kommandoebene zu starten, sollte vorher der Dienst mit `sudo systemctl stop evcc` beendet werden.
+
+### evcc UI ist nicht erreichbar (Demo Modus funktioniert aber)
+
+Es kommt immer wieder vor, dass Fehler in der Konfiguration übersehen werden und der Service gestartet wird.
+Dabei wird der Start von evcc abgebrochen, ohne das es dafür einen Hinweis gibt.
+Ergebnis ist, dass das UI nicht erreichbar ist.
+
+In dem Fall sollte man evcc durch Eingabe von `evcc` auf der Kommandozeile starten.
+Dort werden dann auch Fehlerhinweise gegeben, die den Start des Service verhindert haben.
+
+Mittels der oben genannten Tests kann man diesen Fehlern auf den Grund gehen und sie beheben.
+Erst wenn alles fehlerfrei ist, sollte der Service gestartet werden.
+
+
+## Laden
+
+### Auto lädt beim Einstecken obwohl kein Überschuss vorhanden ist
+
+Bei einigen Wallboxen wird die Ladung sofort nach dem Einstecken gestartet oder durch das Präsentieren einer RFID-Karte ausgelöst.
+Das Startverhalten können wir leider nicht immer beeinflussen.
+evcc erkannt dieses Fehlverhalten aber und stoppt die Ladung nach kurzer Zeit.
+
+### PV-Erzeugung im Winter nutzen
+
+In den Wintermonaten ist die PV Erzeugung meisst unterhalb oder im Bereich der [Mindestleistung](#ich-habe-pv-überschuß-aber-das-auto-lädt-nicht). Um dennoch möglichst viel eigenen Strom ins Fahrzeug zu laden, kann man folgende "Tricks" anwenden:
+
+#### mittels `residualpower`
+
+In der Konfiguration unter [`site`](/docs/reference/configuration/site) setzt man [`residualPower`](/docs/reference/configuration/site#residualpower) auf einen negativen Wert. Dieser bestimmt dann wieviel Netzbezug im PV Modus noch erlaubt ist. Eine Änderung ist per API möglich.
+
+**Beispiel**:
+
+```yaml
+site:
+  residualPower: -1000 # 1000W Netzbezug im PV Modus erlaubt
+```
+
+"Nachteil" dieser Lösung ist, dass auch bei ausreichendem Überschuss dieser erlaubte Netzbezug ausgenutzt wird.
+
+#### mittels `enable/disable`
+
+In der Konfiguration unter [`loadpoints`](/docs/reference/configuration/loadpoints) stellt man bei `enable`und `disable` das gewünschte Verhalten ein. Eine Änderung der `threshold` Werte ist per API möglich.
+
+**Beispiel**:
+
+```yaml
+loadpoints:
+  enable:
+      delay: 1m
+      threshold: -200 # es wird eingeschaltet, wenn 1 Minute lang 200 W Einspeisung vorhanden sind
+    disable:
+      delay: 30m
+      threshold: 1200 # es wird ausgeschaltet, wenn 30 Minuten lang mehr als 1200 W Netzstrom bezogen wurde
+```
+
+### PSA: Bei meinem Peugeot/Opel wird der Ladezustand nur aktualisiert, wenn ich die Hersteller-App benutze
+
+Das ist leider eine Einschränkung der Herstellerschnittstelle. PSA liefert veraltete Werte aus, solange diese nicht über die App erneuert werden. Leider ist bislang noch keine Schnittstelle bekannt, um diese Erneuerung programmatisch anzustoßen.
+
+## Statistische Daten
 
 ### Telemetry & Community Daten
 
@@ -138,9 +265,9 @@ Auf der [evcc Webseite](https://evcc.io/#live) und im "Auswertung Ladeenergie" D
 
 **Wie kann ich teilnehmen?**
 
-Im "Auswertung Ladeenergie" Dialog kannst du unter "Live-Community" deine Daten teilen. Bislang konnte die Funktion auch über [`telemetry: true`](/docs/reference/configuration/telemetry/) aktiviert werden. Dieser Weg ist nun allerdings veraltet ("deprecated").
+Im "Auswertung Ladeenergie" Dialog kannst du unter "Live-Community" deine Daten teilen.
 
-Für die Teilnahme ist aktuell ein 💚 Sponsor Token erforderlich. Der Hauptgrund dafür ist die Datenqualität hoch zu halten und Fake-Daten zu minimieren.
+Für die Teilnahme ist ein 💚 Sponsor Token erforderlich. Der Hauptgrund dafür ist die Datenqualität hoch zu halten und Fake-Daten zu minimieren.
 
 **Was wird aktuell übertragen?**
 
@@ -219,3 +346,95 @@ Parallel lädst du dein Auto mit 3 kW (bspw. Modus = schnell).
 Das Haus wird in diesem Fall mit 100% Sonnenanteil gerechnet, das Auto mit 0%.
 
 Flexible Preise (Octopus Energy, Awattar, Tibber, etc) werden für die Ermittlung des effektiven Energiepreises berücksichtigt.
+
+## Heizstab & Wärmepumpe
+
+### Beispiel: SG-Ready-Kontakt mit Shelly
+
+In dem Beispiel wird der SG-Ready-Kontakt einer Trinkwasserwärmepumpe gesteuert.
+
+"Vehicle-Soc" dient dabei als Anzeige für die Temperatur.
+
+- Shelly 3EM als Grid-Meter
+- Shelly EM (Stromzange) als Charge-Meter
+- Shelly 1 als Charger (öffnet/schließt den SG-Ready-Kontakt)
+
+<details>
+  <summary>Beispielkonfiguration</summary>
+
+  ```yaml
+  network:
+    schema: http
+    host: evcc.local
+    port: 7070
+
+  interval: 10s
+
+  log: info
+
+  meters:
+    - name: grid
+      type: template
+      template: shelly-3em # Shelly 3EM als Grid-Meter
+      usage: grid
+      host: 192.168.178.28
+
+    - name: WP_Pwr
+      type: template
+      template: shelly-1pm # Shelly EM Stromzange 2
+      #usage: charge
+      host: 192.168.178.21
+      channel: 1
+
+  chargers:
+    - name: WP_SG
+      type: template
+      template: shelly # Shelly 1 für SG-Kontakt
+      host: 192.168.178.29
+      standbypower: 15 
+      integrateddevice: true
+      heating: true
+
+  vehicles:
+    - name: WP
+      type: custom
+      title: Wärmepumpe
+      icon: waterheater
+      phases: 1
+      soc:
+        source: mqtt
+        topic: Haus/Wasser_Temp
+
+  loadpoints:
+    - title: Warmwasser
+      charger: WP_SG
+      meter: WP_Pwr
+      vehicle: WP
+      phases: 1
+      mincurrent: 2 #Verbrauch ca. 500W
+      maxcurrent: 3
+      enable:
+        threshold: 0
+        delay: 1m
+      disable:
+        threshold: 0
+        delay: 15m # Laufzeit mindestens 15 Minuten
+      guardduration: 15m # Pause mindestens 15 Minunten
+      soc:
+        estimate: false
+        poll:
+          mode: always
+          interval: 5m
+
+  site:
+    - title: Wasser
+      meters:
+        grid: grid
+
+  mqtt:
+    broker: raspberrypi:1883
+    topic: evcc
+  ```
+
+</details>
+

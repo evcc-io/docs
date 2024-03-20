@@ -31,7 +31,7 @@ SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [
 
 ### RFID Support 🪪
 
-Bei den Wallboxen von Easee und Warp kann nun auch evcc's [RFID Funktion zur Fahrzeugerkennung](/docs/guides/vehicles#erkennung-über-rfid-karten-und-andere-token) verwendet werden.
+Bei den Wallboxen von Easee und Warp kann nun auch evcc's [RFID Funktion zur Fahrzeugerkennung](/docs/features/vehicle) verwendet werden.
 
 ## Verbesserte Phasenumschaltung (1P/3P)
 

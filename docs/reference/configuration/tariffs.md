@@ -4,7 +4,7 @@ sidebar_position: 11
 
 # `tariffs`
 
-Hier kannst du deinen Energietarif und ggf. deine Einspeisevergütung angeben. Evcc verwendet diese Werte für eine grobe [Einsparungsberechnung](/docs/guides/setup#ersparnisberechnung), die in der Web-UI angezeigt wird.
+Hier kannst du deinen Energietarif und ggf. deine Einspeisevergütung angeben. Evcc verwendet diese Werte für eine grobe [Einsparungsberechnung](/docs/faq#ersparnisberechnung), die in der Web-UI angezeigt wird.
 
 Desweiteren nutzt der Planner diese Einstellungen für Preis- bzw. CO2-optimiertes Zielladen. Dabei werden die Einstellungen in der folgenden Reihenfolge berücksichtigt: "flexibler Grid-Tarif" vor "CO2 Tarif" vor "konstantem Grid-Tarif".
 
