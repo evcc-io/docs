@@ -1,11 +1,12 @@
 ---
 sidebar_position: 8
 ---
+import Screenshot from "../../src/components/Screenshot";
 
 # Fahrzeuge
 
 Konfigurierst du dein Fahrzeug, bzw. deine Fahrzeuge in evcc, stehen dir zusätzliche Funktionen zur Verfügung.
-Du kannst [Mindestladung & Ladelimit](./limits) konfigurieren, [Ladepläne](./charging-plans) nutzen und bekommst in den [Ladevorgängen](./charging-sessions) eine detaillierte Auswertung nach Fahrzeug inkl. Informationen wie Kilometerstände.
+Du kannst [Mindestladung & Ladelimit](./limits) konfigurieren, [Ladepläne](./plans) nutzen und bekommst in den [Ladevorgängen](./sessions) eine detaillierte Auswertung nach Fahrzeug inkl. Informationen wie Kilometerstände.
 
 Das Hinterlegen von Fahrzeugen ist optional. Da evcc in den meisten Fällen den Ladevorgang über die Wallbox steuert, klappt PV- und preisabhängiges Laden auch ohne Fahrzeugkonfiguration.
 
@@ -18,9 +19,9 @@ Die verfügbaren Funktionen hängen vom Fahrzeugtyp ab. Die folgenden Typen werd
 Hast du kein Fahrzeug konfiguriert, wird am Ladepunkt das Gastfahrzeug angezeigt.
 Dies ist ein Standardfahrzeug, das keine speziellen Funktionen unterstützt.
 Selbst wenn du ein eigenes Fahrzeug konfiguriert hast, kannst du jederzeit auf das Gastfahrzeug umschalten.
-Dies ist bspw. sinnvoll, wenn ein nicht konfiguriertes Fahrzeug an deiner Wallbox lädt.
+Dies ist bspw. sinnvoll, wenn ein nicht konfiguriertes Fahrzeug (bspw. spontaner Besuch) an deiner Wallbox lädt.
 evcc verwendet dann die am Ladepunkt konfigurierten Standardwerte für Leistung und Phasen.
-Unter [Ladevorgänge](./charging-sessions) wird diese Ladung dem Gastfahrzeug zugeordnet.
+Unter [Ladevorgänge](./sessions) wird diese Ladung dem Gastfahrzeug zugeordnet.
 
 ### Fahrzeuge ohne API (Offline)
 
@@ -69,14 +70,108 @@ Dieses Verhalten kannst du über den [`poll` Parameter](../reference/configurati
 
 ## Mehrere Fahrzeuge
 
+Du kannst in evcc mehrere Fahrzeuge und mehrere Ladepunkte konfigurieren.
+Für die Zuordnung von Fahrzeugen zu Ladepunkten gibt es verschiedene Möglichkeiten:
+
 ### Standardfahrzeug
 
-### automatische Erkennung
+Hat jedes Fahrzeug einen eigenen Ladepunkt, kannst du das Fahrzeug als Standardfahrzeug am Ladepunkt konfigurieren.
+Das ist die einfachste und empfohlene Konfiguration.
+evcc geht bei einem neuen Ladevorgang davon aus, dass es sich um das Standardfahrzeug handelt.
+Ist dies einmal nicht der Fall (bspw. Gastfahrzeug), kannst du das Fahrzeug in der UI umschalten.
 
-### Erkennung via RFID
-
-### Erkennung via Plug&Charge
+```yaml
+loadpoints:
+  - title: Garage
+    vehicle: my_audi # Standardfahrzeug
+    ...
+```
 
 ### Zuordnung über die UI
 
+Das aktuell zugeordnete Fahrzeug wird in der UI am jeweiligen Ladepunkt angezeigt.
+Durch Klick auf den Fahrzeugnamen kannst du die Zuordnung ändern.
+Diese Auswahl gilt dann für den aktuellen Ladevorgang.
+
+<Screenshot name="features/screenshots/vehicle-select" caption="Ändern eines Fahrzeuges am Ladepunkt" />
+
+### Automatische Erkennung
+
+Laden mehrere Fahrzeuge an einem Ladepunkt wird beim Anstecken die automatische Erkennung genutzt.
+Dafür wird der Ladezustand aller konfigurierten Fahrzeuge abgefragt und das plausibelste Fahrzeug ausgewählt.
+Hat die Erkennung ein falsches Fahrzeug ausgewählt (bspw. weil es an einem andern Ladepunkt geladen wird), kannst du die Zuordnung manuell korrigieren.
+
+### Erkennung via RFID
+
+Hat deine Wallbox einen RFID-Kartenleser, kannst du auch diesen für die Zuordnung nutzen.
+Hierbei ordnet man eine (oder mehrere) RFID-Karten einem bestimmten Fahrzeug zu.
+Jedes Mal, wenn das Fahrzeug wieder an die Wallbox angeschlossen wird, muss der Ladevorgang zunächst mit der entsprechenden RFID-Karte an der Wallbox freigeschaltet werden.
+
+evcc bekommt von der Wallbox eine eindeutige Identifikationskennung.
+Abhängig vom Hersteller ist das direkt die RFID-Kennung oder eine abgeleitete interne Kennung wie bspw. ein Benutzername aus der Wallboxkonfiguration.
+Über den `evcc charger` Befehl kannst du den aktuellen `Identifier` deiner Wallbox auslesen.
+Diese hinterlegst du dann in der `evcc.yaml` am gewünschten Fahrzeug:
+
+```yaml
+vehicles:
+  - name: vehicle_one
+    ...
+    identifiers:
+      - 1234567890 # über `evcc charger` ermittelt
+```
+
+### Erkennung via Plug & Charge
+
+Unterstützt deine Wallbox den ISO 15118 Standard, kann die Erkennung auch direkt über das Ladekabel erfolgen.
+Aktuell sind auf dem Markt aber nur sehr wenige Wallboxen mit dieser Funktion verfügbar.
+
+:::note Hinweis
+In der Wallbox muss das Feature "PLC-Verbindung zum Fahrzeug" aktiviert sein.
+:::
+
+Die Einrichtung erfolgt hier ähnlich wie bei der RFID-Erkennung.
+Das Fahrzeug muss mit der Wallbox verbunden sein.
+Über den `evcc charger` Befehl kannst du den aktuellen `Identifier` deiner Wallbox auslesen.
+Diesen kannst du dann in der `evcc.yaml` einem Fahrzeug zuordnen:
+
+```yaml
+vehicles:
+  - name: vehicle_one
+    ...
+    identifiers:
+      - 01:23:45:67:89:00 # über `evcc charger` ermittelt
+```
+
+
+:::note Hinweis
+Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine eigentlich eindeutige Hardware-Adresse (MAC-Adresse) zurück.
+Manche Hersteller wie VW und Audi ändern diese aber jeden Tag auf einen anderen Zufallswert.
+
+Für diesen Fall kann man eine Wildcard verwenden und nur den sich nicht ändernden Teil angeben:
+
+```yaml
+vehicles:
+- name: vehicle_one
+    ...
+    identifiers:
+    - 01:23:45:*
+```
+
+Dies funktioniert natürlich nur, wenn dies nicht bei mehreren vorhandenen Fahrzeugen auftritt und sich der angegebene Anfangsteil des Wertes jeweils unterscheidet.
+:::
+
 ## Klimatisierung
+
+Bei manchen Fahrzeugen kann evcc über die Online-Verbindung ebenfalls erkennen, ob das Fahrzeug gerade eine Vorklimatisierung durchführt.
+In diesem Fall wird die technisch an der Wallbox niedrigste mögliche Leistung freigegeben, damit das Fahrzeug mit dem Strom über die Wallbox klimatisieren kann.
+
+Dabei kann es vorkommen, dass die Klimatisierung im Fahrzeug weniger als die freigegebene Leistung benötigt.
+Dann verwendet das Fahrzeug die restliche verfügbare Leistung, um die Batterie weiter zu laden, auch wenn eine festgelegte Begrenzung des Ladezustandes bereits erreicht wurde.
+
+Sobald die Klimatisierung als beendet erkannt wird, wird die Wallbox wieder gesperrt, sodass das Fahrzeug keinen weiteren Strom über die Wallbox beziehen kann, falls nicht ohnehin gerade geladen wird.
+
+:::note Anmerkung
+Dies gilt nur für die Kombination von Fahrzeugen und Wallboxen, die über den Standard IEC 61851 kommunizieren. Dies ist heute die Regel.
+
+Bei Fahrzeugen und Wallboxen, die über den Standard ISO 15118 kommunizieren, bekommt das Fahrzeug genau die Energiemenge, welche es direkt an der Wallbox anfragt.
+:::
