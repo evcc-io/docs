@@ -341,3 +341,14 @@ co2:
   token: <token>
   zone: DE
 ```
+
+### `type:` **`National Grid Electricity System Operator Data (GB Only)`**
+
+**For example**:
+
+```yaml
+co2:
+  type: ngeso # provides national data if both region and postcode are omitted - Choose ONE only!
+  region: 1 # optional, coarser than using a postcode - The region details are at https://carbon-intensity.github.io/api-definitions/#region-list
+  postcode: SW1 # optional - Outward postcode i.e. RG41 or SW1 or TF8. Do not include full postcode, outward postcode only
+```
