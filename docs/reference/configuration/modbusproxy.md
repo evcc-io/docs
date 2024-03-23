@@ -50,10 +50,23 @@ Der lokale TCP/IP-Port unter dem eine Verbindung als Proxyserver bereitstellt wi
 **Beispiel**:
 
 ```yaml
-port: 5021
+- port: 5021
 ```
 
 ## Optionale Parameter
+
+### `uri`
+
+Die IP-Adresse und der Port des Zielgerätes nach allgemeinem URI-Schema.
+
+Jeder bereitgestellte Port muss eindeutig und noch nicht von einer anderen Anwendung auf dem evcc Host belegt sein, muss sich aber nicht zwingend vom ausgehenden Port unterscheiden. Es ist somit problemlos möglich eine Freigabe für Port 502 zu definieren, die ihrerseits auf Port 502 des Zielgerätes verweist.
+
+**Beispiel**:
+
+```yaml
+- port: 502
+  uri: 192.0.2.2:502
+```
 
 ### `rtu`
 
@@ -70,7 +83,13 @@ rtu: true
 
 ### `readonly`
 
-Durch `readonly: true` lassen sich Modbus-Schreibzugriffe durch Drittsysteme pauschal unterbinden.
+Durch diesen Parameter lassen sich Modbus-Schreibzugriffe durch Drittsysteme pauschal unterbinden.
+
+**Mögliche Werte**:
+
+- `true`: Schreibzugriffe werden ohne Antwort blockiert
+- `deny`: Schreibzugriffe werden mit einem Modbusfehler als Antwort blockiert
+- `false`: Schreibzugriffe werden weitergeleitet
 
 **Beispiel**:
 
