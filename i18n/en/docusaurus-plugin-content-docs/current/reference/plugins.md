@@ -6,7 +6,7 @@ sidebar_position: 3
 
 Plugins can be used to integrate various devices and external data sources into evcc. These can be used through the `custom` value of the `type` parameter in [`meter`](/docs/reference/configuration/meters#custom) (power meters), [`charger`](/docs/reference/configuration/chargers#type) (charging stations), or [`vehicle`](/docs/devices/vehicles/#custom) (vehicles).
 
-Plugins allow both _write access_ and _read access_. When the plugin is used for _writing_, the data is provided in the `${var[:format]}` format. If `format` is not specified, the data is provided in the default `%v` [Go Format](https://golang.org/pkg/fmt/). The variables are replaced with their corresponding values before the plugin is executed.
+Plugins allow both _write access_ and _read access_. When the plugin is used for _writing_, the data is provided in the `${var[:format]}` format. If `format` is not specified, the data is provided in the default `%v` [Go Format](https://golang.org/pkg/fmt/). The variables are replaced with their corresponding values before the plugin is executed. Additionally the full functionality of the [Go template library](https://pkg.go.dev/text/template) can be used to implement more complex data transformations.
 
 ## Modbus (read/write)
 
@@ -40,14 +40,14 @@ payload: ${var:%d}
 
 ## HTTP (read/write)
 
-The `http` plugin performs HTTP calls to read or update data. It also includes the ability to read or parse JSON data structures using jq queries (e.g., for REST APIs).
+The `http` plugin performs HTTP calls to read or update data. It also includes the ability to read or transform JSON data structures using jq queries (e.g., for REST APIs). The full set of functionalities can be found in the [official jq documentation](https://jqlang.github.io/jq/manual/).
 
 :::important
 XML documents are automatically converted to JSON format internally, which can then be filtered like a native JSON response using jq. Attributes are prefixed with `attr`.
 :::
 
 :::tip
-For testing jq queries, tools like https://www.jsonquerytool.com/ for JSON queries and https://regex101.com/ for regular expression tests can be helpful.
+For testing jq queries, tools like https://jqplay.org/ for JSON queries and https://regex101.com/ for regular expression tests can be helpful.
 :::
 
 **Example of reading from a device**:
@@ -68,10 +68,22 @@ scale: 0.001 # floating point factor applied to result, e.g. for converting kW t
 timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
 ```
 
+```yaml
+source: http
+uri: http://charger/status
+jq: .total_power > 10 # Converts a json integer to a boolean value
+```
+
 **Example of writing to a device**:
 
 ```yaml
 body: %v # only applicable for PUT or POST requests
+```
+
+```yaml
+enable:
+  source: http
+  uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
 ```
 
 ## Websocket (read only)
