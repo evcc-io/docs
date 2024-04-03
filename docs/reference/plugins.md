@@ -6,7 +6,7 @@ sidebar_position: 3
 
 Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren. Diese können über den Wert `custom` des Parameters `type` in [`meter`](/docs/reference/configuration/meters#custom) (Strommessgeräte), [`charger`](/docs/reference/configuration/chargers#type) (Wallboxen) oder [`vehicle`](/docs/devices/vehicles#manuell) (Fahrzeuge) verwendet werden.
 
-Plugins erlauben sowohl _Schreibenzugriff_ also auch _Lesezugriff_. Wenn das Plugin zum _Schreiben_ verwendet wird, werden die Daten in Form von `${var[:format]}` zur Verfügung gestellt. Wenn `format` nicht angegeben wird, werden die Daten im Standard `%v` [Go Format](https://golang.org/pkg/fmt/) bereitgestellt. Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird.
+Plugins erlauben sowohl _Schreibenzugriff_ also auch _Lesezugriff_. Wenn das Plugin zum _Schreiben_ verwendet wird, werden die Daten in Form von `${var[:format]}` zur Verfügung gestellt. Wenn `format` nicht angegeben wird, werden die Daten im Standard `%v` [Go Format](https://golang.org/pkg/fmt/) bereitgestellt. Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird. Zusätzlich können sämtliche Funktionen der [Go Template library](https://pkg.go.dev/text/template) verwendet werden um komplexere Datentransformationen durchzuführen.
 
 ## Modbus (lesen/schreiben)
 
@@ -40,7 +40,7 @@ payload: ${var:%d}
 
 ## HTTP (lesen/schreiben)
 
-Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder zu parsen.
+Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache transformationen durchzuführen. Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
 
 Methoden der Authentifizierung sind `basic`, `bearer` und `digest`. Die Namen der jeweiligen Parameter finden sich [hier](https://github.com/evcc-io/evcc/blob/master/provider/http.go#L140).
 
@@ -49,7 +49,7 @@ XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mi
 :::
 
 :::tip
-Für den Test von jq-Abfragen bietet sich z. B. das Online-Tool https://www.jsonquerytool.com/ und für Regex-Tests z. B. das Online-Tool https://regex101.com/ an.
+Für den Test von jq-Abfragen bietet sich z. B. das Online-Tool https://jqplay.org/ und für Regex-Tests z. B. das Online-Tool https://regex101.com/ an.
 :::
 
 **Beispiel Lesen**:
@@ -70,10 +70,22 @@ scale: 0.001 # floating point factor applied to result, e.g. for kW to W convers
 timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
 ```
 
+```yaml
+source: http
+uri: http://charger/status
+jq: .total_power > 10 # Converts a json integer to a boolean value
+```
+
 **Beispiel Schreiben**:
 
 ```yaml
 body: %v # only applicable for PUT or POST requests
+```
+
+```yaml
+enable:
+  source: http
+  uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
 ```
 
 ## Websocket (nur lesen)
