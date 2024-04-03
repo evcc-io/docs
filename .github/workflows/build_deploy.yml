@@ -1,11 +1,11 @@
-name: Build and Deploy
+name: build-deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
-  gh-release:
+  build-commit-upload:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,8 +23,22 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Generate docs from templates
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          path: build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build-commit-upload
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
