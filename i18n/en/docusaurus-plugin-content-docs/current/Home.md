@@ -2,12 +2,6 @@
 sidebar_position: 1
 ---
 
-:::caution work in progress 🚧
-
-We're still working on the English translation. Some content will still be shown in German.
-
-:::
-
 # Introduction
 
 evcc controls Electric Vehicle (EV) charging as required to optimise for the current energy situation.
