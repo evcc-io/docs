@@ -4,9 +4,9 @@ sidebar_position: 11
 
 # `tariffs`
 
-Here you can specify your energy tariff and, if applicable, your feed-in remuneration. Evcc uses these values for a rough [Einsparungsberechnung](/docs/faq#statistical-data) displayed in the web UI.
+Here you can specify your energy tariff and, if applicable, your feed-in remuneration. evcc uses these values for a rough [Einsparungsberechnung](/docs/faq#statistical-data) displayed in the web UI.
 
-Furthermore, the planner uses these settings for price- or CO<sub>2</sub>-optimised target charging. These settings are taken into account in the following order: "flexible grid tariff" before "CO<sub>2</sub> tariff" before "constant grid tariff".
+Furthermore, the planner uses these settings for price- or CO₂-optimised target charging. These settings are taken into account in the following order: "flexible grid tariff" before "CO₂ tariff" before "constant grid tariff".
 
 **Structure**
 
@@ -318,9 +318,12 @@ The DNO region you are in: [More information](https://www.energy-stats.uk/dno-re
 
 ## `co2`
 
-In addition to optimising the charging schedule based on costs, optimisation can also be done based on other criteria, such as CO<sub>2</sub> emissions. This enables CO<sub>2</sub>-optimised charging even when a variable tariff is not used. Optimisation can be done using the Grünstromindex or ElectricityMaps.
+In addition to optimising the charging schedule based on costs, optimisation can also be done based on other criteria, such as CO<sub>2</sub> emissions. This enables CO₂-optimised charging even when a variable tariff is not used. Optimisation can be done using the Grünstromindex or ElectricityMaps.
 
 ### `type:` **`grünstromindex`**
+
+Uses [Grünstromindex](https://gruenstromindex.de) forecast data.
+Only available in Germany.
 
 **For example**:
 
@@ -332,6 +335,10 @@ co2:
 
 ### `type:` **`electricitymaps`**
 
+Uses [Electricity Maps](https://app.electricitymaps.com/) forecast data.
+[API access](https://api-portal.electricitymaps.com) is required for this feature.
+The "Free Personal Tier" is not sufficient, since it does not provide forecast data.
+
 **For example**:
 
 ```yaml
@@ -342,7 +349,9 @@ co2:
   zone: DE
 ```
 
-### `type:` **`National Grid Electricity System Operator Data (GB Only)`**
+### `type:` **`ngeso`**
+
+National Grid Electricity System Operator Data (GB Only)
 
 **For example**:
 

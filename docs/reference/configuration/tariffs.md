@@ -345,9 +345,12 @@ Die DNO Region in der man sich befindet: [Weitere Informationen](https://www.ene
 
 ## `co2`
 
-Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO2-Intensität. Damit ist CO2-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
+Neben der Optimierung der Ladeplanung nach Kosten kann diese auch nach anderen Kriterien erfolgen, z.B. nach CO₂-Intensität. Damit ist CO₂-optimales Laden auch möglich, wenn kein variabler Tarif verwendet wird. Die Optimierung kann mittels Grünstromindex oder ElectricityMaps erfolgen.
 
 ### `type:` **`grünstromindex`**
+
+Nutzt [Grünstromindex](https://gruenstromindex.de) Vorhersagedaten.
+Nur in Deutschland verfügbar.
 
 **Beispiel**:
 
@@ -358,6 +361,10 @@ co2:
 ```
 
 ### `type:` **`electricitymaps`**
+
+Nutzt [Electricity Maps](https://app.electricitymaps.com/) Vorhersagedaten.
+[API-Zugriff](https://api-portal.electricitymaps.com) ist für diese Funktion erforderlich.
+Die "Free Personal Tier" reicht leider nicht aus, da sie keine Vorhersagedaten liefert.
 
 **Beispiel**:
 
@@ -371,18 +378,13 @@ co2:
 
 ### `type:` **`ngeso`**
 
-Der National Grid Electricity Supply Operator (ESO) im Vereinigten Königreich.
-
-Stellt standardmäßig nationale Daten bereit, kann jedoch durch die Angabe **entweder** einer [Regions-ID](https://api.carbonintensity.org.uk/) oder einer Postleitzahl genauer gemacht werden. **Geben Sie nicht beides an!**
+Der National Grid Electricity Supply Operator (ESO) im Großbritannien.
 
 **Beispiel**:
 
 ```yaml
 co2:
-  type: ngeso
-
-  # Optionally either
-  region: 1
-  # OR
-  postcode: SW1A1AA
+  type: ngeso # provides national data if both region and postcode are omitted - Choose ONE only!
+  region: 1 # optional, coarser than using a postcode - The region details are at https://carbon-intensity.github.io/api-definitions/#region-list
+  postcode: SW1 # optional - Outward postcode i.e. RG41 or SW1 or TF8. Do not include full postcode, outward postcode only
 ```
