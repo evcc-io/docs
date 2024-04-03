@@ -57,16 +57,16 @@ Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu ach
 
 **Nützliche Auswahl zur Nutzung in evcc Benachrichtungen**:
 
-| msg Variable             | Beschreibung                                                                           |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| `${chargedEnergy:%.1fk}` | Geladene Energiemenge in kWh                                                           |
-| `${chargeDuration}`      | Dauer der Ladezeit                                                                     |
-| `${connectedDuration}`   | Dauer der Wallbox Verbindung                                                           |
-| `${loadpoint}`           | Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2...                               |
-| `${mode}`                | Aktiver Lademodus (vgl. [`mode`](loadpoints/#mode) des [`loadpoints`](loadpoints))     |
-| `${pvPower:%.1fk}`       | Aktuell gemessene PV Leistung in kW                                                    |
-| `${title}`               | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints/#title) Parameters |
-| `${vehicleTitle}`        | Fahrzeug: Text des [`vehicles`](vehicles) [`title`](vehicles/#title) Parameters        |
+| msg Variable             | Beschreibung                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `${chargedEnergy:%.1fk}` | Geladene Energiemenge in kWh                                                          |
+| `${chargeDuration}`      | Dauer der Ladezeit                                                                    |
+| `${connectedDuration}`   | Dauer der Wallbox Verbindung                                                          |
+| `${loadpoint}`           | Nummer des [`loadpoints`](loadpoints) (Ladepunkt) 1,2...                              |
+| `${mode}`                | Aktiver Lademodus (vgl. [`mode`](loadpoints#mode) des [`loadpoints`](loadpoints))     |
+| `${pvPower:%.1fk}`       | Aktuell gemessene PV Leistung in kW                                                   |
+| `${title}`               | Ladepunkt: Text des [`loadpoints`](loadpoints) [`title`](loadpoints#title) Parameters |
+| `${vehicleTitle}`        | Fahrzeug: Text des [`vehicles`](vehicles) [`title`](vehicles#title) Parameters        |
 
 **Beispiel**:
 
@@ -141,15 +141,15 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
 - Site
   - Konfiguration
     - [`siteTitle`](site) - Hauptüberschrift der evcc App (_string_)
-    - [`prioritySoc`](site/#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints/#mode) Freigabe (_integer_)
+    - [`prioritySoc`](site#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints#mode) Freigabe (_integer_)
   - Information
     - `batteryConfigured` - Indikator, Hausbatterie/Powerwall-Meter konfiguriert (_bool_)
     - `gridConfigured` - Indikator, Smart/Grid-Meter konfiguriert (_bool_)
     - `pvConfigured` - Indikator, Solaranlagen/Photovoltaik-Meter konfiguriert (_bool_)
 - Infos zum Stromtarif
   - [`currency`](tariffs) - Tarif-Währung (_string_)
-  - [`tariffFeedIn`](tariffs/#feedin) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
-  - [`tariffGrid`](tariffs/#grid) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
+  - [`tariffFeedIn`](tariffs#feedin) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
+  - [`tariffGrid`](tariffs#grid) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
 - Meter Infos
   - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (_float_)
   - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (_integer_)
@@ -162,7 +162,7 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     - [`maxCurrent`](loadpoints#maxcurrent) - Maximale Lade-Stromstärke in Ampere (_float_)
     - [`minCurrent`](loadpoints#mincurrent) - Minimale Lade-Stromstärke in Ampere (_float_)
     - [`mode`](loadpoints#mode) - Initialer Modus des Ladepunktes nach evcc-Start `off`/`now`/`min`/`pv` (_string_)
-    - [`phases`](loadpoints/#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (_integer_)
+    - [`phases`](loadpoints#phases) - Initial aktive Anzahl Stromphasen des Ladepunktes nach evcc-Start (_integer_)
     - [`title`](loadpoints#title) - Bezeichnung des Ladepunktes in der evcc App (_string_)
   - Information
     - `activePhases`- Aktuell aktive Anzahl Stromphasen des Ladepunktes (_integer_)
@@ -181,8 +181,8 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Nanosekunden (_integer_)
 - Fahrzeuge (vehicles)
   - Konfiguration
-    - [`vehicleCapacity`](vehicles/#capacity)- Kapazität der Fahrzeugbatterie in Wh (_float_)
-    - [`vehicleTitle`](vehicles/#title) - Bezeichnung des Fahrzeugs in der evcc App (_string_)
+    - [`vehicleCapacity`](vehicles#capacity)- Kapazität der Fahrzeugbatterie in Wh (_float_)
+    - [`vehicleTitle`](vehicles#title) - Bezeichnung des Fahrzeugs in der evcc App (_string_)
   - Information
     - `climater` - Status der Fahrzeug-Klimatisierung `on`/`off`/`heating`/`cooling` (_string_)
     - `connected` - Indikator, Fahrzeug am Ladepunkt angeschlossen (_bool_)

@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Plugins
 
-Plugins can be used to integrate various devices and external data sources into evcc. These can be used through the `custom` value of the `type` parameter in [`meter`](/docs/reference/configuration/meters#custom) (power meters), [`charger`](/docs/reference/configuration/chargers#type) (charging stations), or [`vehicle`](/docs/devices/vehicles/#custom) (vehicles).
+Plugins can be used to integrate various devices and external data sources into evcc. These can be used through the `custom` value of the `type` parameter in [`meter`](/docs/reference/configuration/meters#custom) (power meters), [`charger`](/docs/reference/configuration/chargers#type) (charging stations), or [`vehicle`](/docs/devices/vehicles#custom) (vehicles).
 
 Plugins allow both _write access_ and _read access_. When the plugin is used for _writing_, the data is provided in the `${var[:format]}` format. If `format` is not specified, the data is provided in the default `%v` [Go Format](https://golang.org/pkg/fmt/). The variables are replaced with their corresponding values before the plugin is executed. Additionally the full functionality of the [Go template library](https://pkg.go.dev/text/template) can be used to implement more complex data transformations.
 

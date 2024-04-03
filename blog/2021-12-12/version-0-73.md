@@ -11,8 +11,8 @@ Heute gibt es ein kleines Update hauptsächlich mit einigen Fehlerkorrekturen un
 
 Das Kommando zur geführten Erstellung einer Konfigurationsdatei und die darunterliegenden Templates hat folgende Verbesserungen erhalten:
 
-- Bei einem Ladepunkt kann nun eingestellt werden, ob beim Abstecken des Ladekabels die Lade-Standardeinstellungen wieder hergestellt werden sollen. Mehr dazu in unserer Dokumentation unter [`resetOnDisconnect`](/docs/reference/configuration/loadpoints#resetondisconnect)
-- Es können nun Fahrzeugspezifische Lade-Standardwerte eingerichtet werden. Interaktiv sind diese mit `evcc configure --advanced` verfügbar. Mehr dazu in der Dokumentation unter [`onIdentify`](/docs/reference/configuration/vehicles#onidentify)
+- Bei einem Ladepunkt kann nun eingestellt werden, ob beim Abstecken des Ladekabels die Lade-Standardeinstellungen wieder hergestellt werden sollen. Mehr dazu in unserer Dokumentation unter `resetOnDisconnect`
+- Es können nun Fahrzeugspezifische Lade-Standardwerte eingerichtet werden. Interaktiv sind diese mit `evcc configure --advanced` verfügbar. Mehr dazu in der Dokumentation unter `onIdentify`
 - Geräte mit Modbus erzeugen nun korrekte Konfigurationen
 - Verbesserter Umgang wenn eine `evcc.yaml` Datei bereits im aktuellen Ordner existiert aber andere Zugriffsrechte hat.
 

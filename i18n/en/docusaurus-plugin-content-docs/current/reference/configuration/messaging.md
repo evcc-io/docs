@@ -56,16 +56,16 @@ When using variables, make sure to use the correct capitalisation (uppercase/low
 
 **Useful messages for use in evcc notifications**:
 
-| msg Variable             | Description                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| `${chargedEnergy:%.1fk}` | Energy amount charged in kWh                                                                |
-| `${chargeDuration}`      | Charging duration                                                                           |
-| `${connectedDuration}`   | Charger connection duration                                                                 |
-| `${loadpoint}`           | Number of [`loadpoints`](loadpoints) (charging point) 1,2...                                |
-| `${mode}`                | Active charging mode (see [`mode`](loadpoints/#mode) of [`loadpoints`](loadpoints))         |
-| `${pvPower:%.1fk}`       | Currently measured PV power in kW                                                           |
-| `${title}`               | Charging point: Text from [`loadpoints`](loadpoints) [`title`](loadpoints/#title) parameter |
-| `${vehicleTitle}`        | Vehicle: Text from [`vehicles`](vehicles) [`title`](vehicles/#title) parameter              |
+| msg Variable             | Description                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `${chargedEnergy:%.1fk}` | Energy amount charged in kWh                                                               |
+| `${chargeDuration}`      | Charging duration                                                                          |
+| `${connectedDuration}`   | Charger connection duration                                                                |
+| `${loadpoint}`           | Number of [`loadpoints`](loadpoints) (charging point) 1,2...                               |
+| `${mode}`                | Active charging mode (see [`mode`](loadpoints#mode) of [`loadpoints`](loadpoints))         |
+| `${pvPower:%.1fk}`       | Currently measured PV power in kW                                                          |
+| `${title}`               | Charging point: Text from [`loadpoints`](loadpoints) [`title`](loadpoints#title) parameter |
+| `${vehicleTitle}`        | Vehicle: Text from [`vehicles`](vehicles) [`title`](vehicles#title) parameter              |
 
 **For example**:
 
@@ -142,15 +142,15 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
 - Site
   - Configuration
     - [`siteTitle`](site) - Main headline of the evcc app (_string_)
-    - [`prioritySoc`](site/#prioritysoc) - Minimum Powerwall state of charge in percent before [PV mode](loadpoints/#mode) release (_integer_)
+    - [`prioritySoc`](site#prioritysoc) - Minimum Powerwall state of charge in percent before [PV mode](loadpoints#mode) release (_integer_)
   - Information
     - `batteryConfigured` - Indicator, home battery/Powerwall meter configured (_bool_)
     - `gridConfigured` - Indicator, smart/grid meter configured (_bool_)
     - `pvConfigured` - Indicator, solar panels/photovoltaic meter configured (_bool_)
 - Tariff Information
   - [`currency`](tariffs) - Tariff currency (_string_)
-  - [`tariffFeedIn`](tariffs/#feedin) - PV feed-in remuneration per kWh in tariff currency (float)
-  - [`tariffGrid`](tariffs/#grid) - Grid consumption price per kWh in tariff currency (float)
+  - [`tariffFeedIn`](tariffs#feedin) - PV feed-in remuneration per kWh in tariff currency (float)
+  - [`tariffGrid`](tariffs#grid) - Grid consumption price per kWh in tariff currency (float)
 - Meter Information
   - `batteryPower` - Current home battery/Powerwall power in watts (_float_)
   - `batterySoc` - Current state of charge of home battery/Powerwall in percent (_integer_)
@@ -162,9 +162,9 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
     - [`loadpoint`](loadpoints) - Loadpoint index (_integer_)
     - [`maxCurrent`](loadpoints#maxcurrent) - Maximum charging current in amperes (_float_)
     - [`minCurrent`](loadpoints#mincurrent) - Minimum charging current in amperes (_float_)
-    - [`mode`](loadpoints/#mode) - Initial mode of the charging point after evcc start `off`/`now`/`min`/`pv` (_string_)
-    - [`phases`](loadpoints/#phases) - Initial active number of phases of the charging point after evcc start (_integer_)
-    - [`title`](loadpoints/#title) - Label of the charging point in the evcc app (_string_)
+    - [`mode`](loadpoints#mode) - Initial mode of the charging point after evcc start `off`/`now`/`min`/`pv` (_string_)
+    - [`phases`](loadpoints#phases) - Initial active number of phases of the charging point after evcc start (_integer_)
+    - [`title`](loadpoints#title) - Label of the charging point in the evcc app (_string_)
   - Information
     - `activePhases`- Currently active number of phases of the charging point (_integer_)
     - `chargeCurrent` - Current total charging current in amperes (_float_)
@@ -182,8 +182,8 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
     - `pvRemaining` - Required PV remaining charging time with activated timer control in nanoseconds (_integer_)
 - Vehicles (vehicles)
   - Configuration
-    - [`vehicleCapacity`](vehicles/#capacity)- Capacity of the vehicle battery in watt-hours (_float_)
-    - [`vehicleTitle`](vehicles/#title) - Label of the vehicle in the evcc app (_string_)
+    - [`vehicleCapacity`](vehicles#capacity)- Capacity of the vehicle battery in watt-hours (_float_)
+    - [`vehicleTitle`](vehicles#title) - Label of the vehicle in the evcc app (_string_)
   - Information
     - `climater` - Status of vehicle climatisation `on`/`off`/`heating`/`cooling` (_string_)
     - `connected` - Indicator, vehicle connected to the charging point (_bool_)
