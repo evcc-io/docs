@@ -10,6 +10,7 @@ import { themes as prismThemes } from "prism-react-renderer";
     baseUrl: "/",
     onBrokenLinks: "throw",
     onBrokenMarkdownLinks: "throw",
+    onBrokenAnchors: "throw",
     favicon: "img/favicon.ico",
     organizationName: "evcc-io", // Usually your GitHub org/user name.
     projectName: "docs", // Usually your repo name.

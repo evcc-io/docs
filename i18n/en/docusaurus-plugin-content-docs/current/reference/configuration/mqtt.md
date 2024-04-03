@@ -6,7 +6,7 @@ sidebar_position: 14
 
 Establishes connectivity with an MQTT broker.
 When the connection is active, evcc automatically pushes all internal values to the specified topic via the MQTT broker and also receives changes there.
-For more information, refer to the [`MQTT API`](/docs/reference/api/#mqtt-api) documentation.
+For more information, refer to the [`MQTT API`](/docs/reference/api#mqtt-api) documentation.
 
 **For example**:
 
