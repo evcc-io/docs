@@ -10,22 +10,22 @@ In diesem Bereich sind die verschiedenen technischen Dokumentationen zu finden.
 
 Hier werden die verschiedenen möglichen Einstellungen erklärt.
 
-[Weiterlesen...](configuration)
+[Weiterlesen...](./reference/configuration)
 
 ### Plugins
 
 Hier wird beschrieben wie man durch ein Plugin ein bisher nicht unterstütztes Gerät anbinden kann.
 
-[Weiterlesen...](plugins)
+[Weiterlesen...](./reference/plugins)
 
 ### Modbus
 
 Hier befindet sich die Modbus Dokumentation, welche in verschiedenen Bereichen genutzt werden kann.
 
-[Weiterlesen...](modbus)
+[Weiterlesen...](./reference/modbus)
 
 ### API
 
 Hier befindet sich die Dokumentation um auf evcc von anderen Systemen zuzugreifen und zu steuern.
 
-[Weiterlesen...](api)
+[Weiterlesen...](./reference/api)

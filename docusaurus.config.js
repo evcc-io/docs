@@ -14,6 +14,7 @@ import { themes as prismThemes } from "prism-react-renderer";
     favicon: "img/favicon.ico",
     organizationName: "evcc-io", // Usually your GitHub org/user name.
     projectName: "docs", // Usually your repo name.
+    trailingSlash: false,
     i18n: {
       defaultLocale: "de",
       locales: ["de", "en"],
