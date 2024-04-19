@@ -236,9 +236,7 @@ The following sections will now explain all the required parameters.
 - `pushover`: [Pushover](https://pushover.net/). See [`pushover`](#pushover) definition
 - `telegram`: [Telegram Messenger](https://telegram.org/). See [`telegram`](#telegram) definition
 - `email`: Email. See [`email`](#email) definition
-- `shout`: [shoutrrr](https://contain
-
-rrr.dev/shoutrrr). See [`shout`](#shout) definition
+- `shout`: [shoutrrr](https://containrrr.dev/shoutrrr/). See [`shout`](#shout) definition
 
 - `script`: Can initiate external scripts to send messages. It's also useful to include any kind of external functionality. See [`script`](#script) definition
 
