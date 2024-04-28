@@ -72,17 +72,27 @@ Here are [the slides](https://speakerdeck.com/naltatis/evcc-open-source-sonne-ta
 
 [![YouTube LIT2023](youtube_linux_infotag.webp)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
-### verdrahtet: PV surplus with evcc
+### verdrahtet: PV surplus with evcc (German)
 
 Tackles evcc basics, integration with ioBroker, and integrating a homematic switch.
 
 [![YouTube verdrahtet](youtube_verdrahtet.webp)](https://youtu.be/6JxktkEaZ2o)
 
-### haus-automatisierung.com: Charging an Electric Vehicle with PV Surplus
+### haus-automatisierung.com: Charging an Electric Vehicle with PV Surplus (German)
 
 Tackles evcc basics, custom plugins, control via MQTT and ioBroker, as well as different installation options.
 
 [![YouTube Haus Automatisierung](youtube_hausautomatisierung.webp)](https://youtu.be/93C47QUjomQ)
+
+### smart home & more: Integrating evcc with Home Assistant (German)
+
+Video series on setting up and using evcc with Home Assistant.
+
+[![YouTube smart home & more](youtube_smart_home_and_more.webp)](https://youtube.com/playlist?list=PLg6A-C9bBxoFSNRSKtvAG567avEuZr5-D)
+
+- [Home Assistant: evcc Basisinstallation und Konfiguration](https://youtu.be/aPq8k2MronY)
+- [Home Assistant: Schritt für Schritt - MQTT-Sensor mit Hilfe des MQTT-Explorer einrichten](https://youtu.be/0QQ3y8fgRVA)
+- [evcc-Daten nutzen: Effizientes Energiedashboard für Home Assistant](https://youtu.be/V3p5-16U_oU)
 
 ## Articles
 

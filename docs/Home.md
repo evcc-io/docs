@@ -76,6 +76,16 @@ Behandelt die Themen evcc Einrichtung, Grundlagen und Custom Plugins, Steuerung 
 
 [![YouTube Haus Automatisierung](youtube_hausautomatisierung.webp)](https://youtu.be/93C47QUjomQ)
 
+### smart home & more: evcc mit Home Assistant integrieren
+
+Video-Serie zur Einrichtung und Nutzung von evcc mit Home Assistant.
+
+[![YouTube smart home & more](youtube_smart_home_and_more.webp)](https://youtube.com/playlist?list=PLg6A-C9bBxoFSNRSKtvAG567avEuZr5-D)
+
+- [Home Assistant: evcc Basisinstallation und Konfiguration](https://youtu.be/aPq8k2MronY)
+- [Home Assistant: Schritt für Schritt - MQTT-Sensor mit Hilfe des MQTT-Explorer einrichten](https://youtu.be/0QQ3y8fgRVA)
+- [evcc-Daten nutzen: Effizientes Energiedashboard für Home Assistant](https://youtu.be/V3p5-16U_oU)
+
 ## Blogartikel
 
 ### hobbyblogging.de
