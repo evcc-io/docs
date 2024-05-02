@@ -384,13 +384,11 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## BMW
-
-### i Wallbox
+## BMW i Wallbox
 
 <DeviceFeatures features="1p3p,mA,rfid" />
 
-Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase switching the Keba phase switch (KeContact S10) is also required.
+Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase switching the Keba phase switch (KeContact S10) is also required and the switching control via Modbus must be set in the wallbox settings. For the X-series in the web menu, for the C-series via Modbus by setting the value "3" in register 5050.
 
 ```yaml
 chargers:
@@ -406,22 +404,6 @@ chargers:
 ```
 
 <SponsorshipRequired />
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### i Wallbox (legacy UDP protocol)
-
-<DeviceFeatures features="mA,rfid,sponsorfree" />
-
-This requires the UDP function to be enabled with DIP 1.3 = ON, see the installation manual.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: keba
-    host: 192.0.2.2 # IP address or hostname 
-```
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -549,26 +531,7 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## DaheimLaden
-
-### Wallbox
-
-<DeviceFeatures features="sponsorfree" />
-
-For use with evcc, the wallbox must be operated in RFID mode.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: daheimladen
-    token: # Request your access token from Daheimladen support: info@daheimladen.de. (optional)
-    stationid: # Serial number as displayed on the wallbox display. (optional) 
-```
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### Wallbox (via ModbusTCP)
+## DaheimLaden Wallbox (via ModbusTCP)
 
 <DeviceFeatures features="sponsorfree" />
 
@@ -802,7 +765,7 @@ chargers:
     user: # Email address
     password: # same as Easee app or the web portal (https://easee.cloud)
     charger: EH______
-    timeout: 10s # optional
+    timeout: 20s # optional
     authorize: # Controls wether evcc shall perform authentication against charger. Benefit is a contolled start of charging. Not compatible with RFID identification of vehicles. (optional) 
 ```
 
@@ -911,7 +874,25 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## EM2GO Pro Power, OCPP/ONC
+## EM2GO
+
+### Home
+
+<DeviceFeatures features="1p3p,mA,sponsorfree" />
+
+Requires Firmware version E3C_V1.1 or newer.
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: em2go-home
+    host: 192.0.2.2 # IP address or hostname 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Pro Power, OCPP/ONC
 
 <DeviceFeatures features="mA,sponsorfree" />
 
@@ -1327,13 +1308,11 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## KEBA
-
-### KeContact P20, P30, C/X Series
+## KEBA KeContact P20, P30, C/X Series
 
 <DeviceFeatures features="1p3p,mA,rfid" />
 
-Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase switching the Keba phase switch (KeContact S10) is also required.
+Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase switching the Keba phase switch (KeContact S10) is also required and the switching control via Modbus must be set in the wallbox settings. For the X-series in the web menu, for the C-series via Modbus by setting the value "3" in register 5050.
 
 ```yaml
 chargers:
@@ -1349,22 +1328,6 @@ chargers:
 ```
 
 <SponsorshipRequired />
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### KeContact P20, P30, C/X Series (legacy UDP protocol)
-
-<DeviceFeatures features="mA,rfid,sponsorfree" />
-
-This requires the UDP function to be enabled with DIP 1.3 = ON, see the installation manual.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: keba
-    host: 192.0.2.2 # IP address or hostname 
-```
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -1968,8 +1931,15 @@ chargers:
     type: template
     template: ichargecion
     
-    # Modbus TCP
-    modbus: tcpip
+    # RS485 via adapter (Modbus RTU)
+    modbus: rs485serial
+    id: 1
+    device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+    baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+    comset: "8N1" # Kommunikationsparameter für den Adapter
+    
+    # RS485 via TCP/IP (Modbus RTU)
+    modbus: rs485tcpip
     id: 1
     host: 192.0.2.2 # Hostname
     port: 502 # Port 
@@ -2127,6 +2097,32 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
+## Smartfox Pro Charger
+
+<DeviceFeatures features="sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: ichargecion
+    
+    # RS485 via adapter (Modbus RTU)
+    modbus: rs485serial
+    id: 1
+    device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+    baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+    comset: "8N1" # Kommunikationsparameter für den Adapter
+    
+    # RS485 via TCP/IP (Modbus RTU)
+    modbus: rs485tcpip
+    id: 1
+    host: 192.0.2.2 # Hostname
+    port: 502 # Port 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
 ## smartWB
 
 <DeviceFeatures features="sponsorfree" />
@@ -2145,7 +2141,7 @@ chargers:
 
 <DeviceFeatures features="1p3p,mA,rfid" />
 
-Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase switching the Keba phase switch (KeContact S10) is also required.
+Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase switching the Keba phase switch (KeContact S10) is also required and the switching control via Modbus must be set in the wallbox settings. For the X-series in the web menu, for the C-series via Modbus by setting the value "3" in register 5050.
 
 ```yaml
 chargers:
@@ -2258,7 +2254,7 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Sungrow ACAC011E-01
+## Sungrow AC011E-01
 
 <DeviceFeatures features="mA" />
 
@@ -2272,20 +2268,20 @@ chargers:
     
     # RS485 via adapter (Modbus RTU)
     modbus: rs485serial
-    id: 1
+    id: 248
     device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
     baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
     comset: "8N1" # Kommunikationsparameter für den Adapter
     
     # RS485 via TCP/IP (Modbus RTU)
     modbus: rs485tcpip
-    id: 1
+    id: 248
     host: 192.0.2.2 # Hostname
     port: 502 # Port
     
     # Modbus TCP
     modbus: tcpip
-    id: 1
+    id: 248
     host: 192.0.2.2 # Hostname
     port: 502 # Port 
 ```
@@ -2401,6 +2397,40 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
+### WARP3 Charger Pro
+
+<DeviceFeatures features="mA,1p3p,rfid,sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: tinkerforge-warp3
+    host: 192.0.2.2 # IP address or hostname of the MQTT broker
+    port: 1883 # MQTT broker port (optional)
+    topic: warp # Topic (omit leading /) (optional)
+    timeout: 30s # Don't accept values older than this value (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### WARP3 Charger Smart
+
+<DeviceFeatures features="mA,1p3p,rfid,sponsorfree" />
+
+```yaml
+chargers:
+  - name: my_charger
+    type: template
+    template: tinkerforge-warp3
+    host: 192.0.2.2 # IP address or hostname of the MQTT broker
+    port: 1883 # MQTT broker port (optional)
+    topic: warp # Topic (omit leading /) (optional)
+    timeout: 30s # Don't accept values older than this value (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
 ## Ubitricity Heinz
 
 <DeviceFeatures features="rfid" />
@@ -2470,7 +2500,7 @@ chargers:
 
 <DeviceFeatures features="" />
 
-Charger has to be in manual mode and Modbus has to be configured for ID 100.
+Enter the host of the GX device (not the charger). The charger has to be in manual mode and Modbus has to be configured for ID 100.
 
 ```yaml
 chargers:
@@ -2535,9 +2565,7 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Wallbe
-
-### Eco, Eco 2.0(s), Pro
+## Wallbe Eco, Eco 2.0(s), Pro
 
 <DeviceFeatures features="mA,rfid" />
 
@@ -2560,75 +2588,7 @@ chargers:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### Eco, Pro
-
-<DeviceFeatures features="sponsorfree" />
-
-The Wallbe must be connected using Ethernet and the DIP switch 10 must be set to 'ON'.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: wallbe
-    host: 192.0.2.2 # IP address or hostname
-    port: 502 # Port (optional) 
-```
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### Eco, Pro (pre ~2019)
-
-<DeviceFeatures features="sponsorfree" />
-
-DIP switch 10 must be set to 'ON'.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: wallbe-pre2019
-    host: 192.0.2.2 # IP address or hostname
-    port: 502 # Port (optional) 
-```
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### Eco, Pro (pre ~2019, with meter)
-
-<DeviceFeatures features="sponsorfree" />
-
-DIP switch 10 must be set to 'ON'.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: wallbe-pre2019-meter
-    host: 192.0.2.2 # IP address or hostname
-    port: 502 # Port (optional) 
-```
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### Eco, Pro (with meter)
-
-<DeviceFeatures features="sponsorfree" />
-
-DIP switch 10 must be set to 'ON'.
-
-```yaml
-chargers:
-  - name: my_charger
-    type: template
-    template: wallbe-meter
-    host: 192.0.2.2 # IP address or hostname
-    port: 502 # Port (optional) 
-```
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-## wallbox Pulsar Plus, Commander 2, Copper SB
+## wallbox Pulsar Plus, Pulsar Max, Commander 2, Copper SB
 
 <DeviceFeatures features="sponsorfree" />
 
