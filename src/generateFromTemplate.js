@@ -4,6 +4,13 @@ const _ = require("lodash");
 
 const AUTOGEN_MARKER = "<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->";
 
+const TARIFF_GROUPS = {
+  "Dynamic electricity price": "price",
+  "Dynamischer Strompreis": "price",
+  "CO₂ Vorhersage": "co2",
+  "CO₂ forecast": "co2",
+};
+
 const CODE_PREAMBLES = {
   vehicle: "vehicles:\n  - name: my_car",
   charger: "chargers:\n  - name: my_charger",
@@ -13,6 +20,8 @@ const CODE_PREAMBLES = {
   battery: "meters:\n  - name: my_battery",
   charge: "meters:\n  - name: my_charger",
   aux: "meters:\n  - name: my_aux",
+  price: "tariffs:\n  grid:",
+  co2: "tariffs:\n  co2:",
 };
 
 const TRANSLATIONS = {
@@ -29,9 +38,9 @@ function escapeRegExp(text) {
 
 function readTemplates(path) {
   const files = fs.readdirSync(path);
-  return files.map((file) =>
-    yaml.load(fs.readFileSync(`${path}/${file}`, "utf8")),
-  );
+  return files
+    .filter((file) => file.endsWith(".yaml"))
+    .map((file) => yaml.load(fs.readFileSync(`${path}/${file}`, "utf8")));
 }
 
 function indent(code) {
@@ -41,13 +50,19 @@ function indent(code) {
 function templateContent(entry, type) {
   const description = entry.description ? entry.description + "\n" : "";
 
-  const codeBlocks = entry.render.map((render) => ({
-    usage: render.usage,
-    code: `\`\`\`yaml
-${CODE_PREAMBLES[render.usage || type]}
+  const codeBlocks = entry.render.map((render) => {
+    let preamble = render.usage || type;
+    if (type === "tariff") {
+      preamble = TARIFF_GROUPS[entry.product.group];
+    }
+    return {
+      usage: render.usage,
+      code: `\`\`\`yaml
+${CODE_PREAMBLES[preamble]}
 ${indent(render.default).trimEnd()} 
 \`\`\``,
-  }));
+    };
+  });
 
   let code = "";
   if (codeBlocks.length === 1) {
@@ -182,7 +197,7 @@ function generateMarkdown(data, type, target) {
   fs.writeFileSync(target, content, "utf-8");
 }
 
-["vehicle", "meter", "charger"].forEach((type) => {
+["vehicle", "meter", "charger", "tariff"].forEach((type) => {
   // German
   const templatesDe = readTemplates(`./templates/release/de/${type}`);
   generateMarkdown(templatesDe, type, `./docs/devices/${type}s.mdx`);
