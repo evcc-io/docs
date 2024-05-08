@@ -118,24 +118,22 @@ tariffs:
 
 ### Eigenes Plugin
 
-Das Plugin muss eine JSON-Struktur zurückgeben, welches eine Liste von Zeiträumen und Preisen enthält. Die Zeiträume müssen in der Form `YYYY-MM-DDTHH:MM:SSZ` sein. Die Preise müssen in Cent angegeben werden.
+Über mit dem Plugin Mechanismus kann eine eigene Tarif-Quelle angebunden werden.
 
-```json
-[
-  {
-    "start": "2025-01-01T00:00:00Z",
-    "end": "2025-01-01T01:00:00Z",
-    "price": 25.0
-  },
-  {
-    "start": "2025-01-01T01:00:00Z",
-    "end": "2025-01-01T02:00:00Z",
-    "price": 30.0
-  }
-]
+**Beispiel: Aktueller Preis via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    price:
+      source: http
+      uri: https://example.com/api/price
 ```
 
-Hier ein Beispiel:
+Der vom Endpunkt zurückgegebene Wert wird als Netzbezugspreis verwendet.
+
+**Beispiel: Vorhersagen via HTTP**
 
 ```yaml
 tariffs:
@@ -147,6 +145,15 @@ tariffs:
       jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "price": .[1] }) | tostring'
 ```
 
+Das Plugin muss eine JSON-Struktur zurückgeben, welches eine Liste von Zeiträumen und Preisen enthält. Die Zeiträume müssen in der Form `YYYY-MM-DDTHH:MM:SSZ` sein.
+Die Preise müssen in der angegebenen Währungseinheit sein (bspw. EUR).
+
+```js
+[
+  { "start": "2025-01-01T00:00:00Z", "end": "2025-01-01T01:00:00Z", "price": 25.0 },
+  { "start": "2025-01-01T01:00:00Z", "end": "2025-01-01T02:00:00Z", "price": 30.0 },
+]
+```
 ### All in Power 
 
 Nur für die Niederlande verfügbar.
@@ -224,6 +231,22 @@ tariffs:
     template: entsoe
     securitytoken: # Registrierung und anschließende Helpdesk-Anfrage erforderlich. Details zum Ablauf gibts hier https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation (optional)
     domain: BZN|DE-LU # siehe https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas (optional)
+    costs: # Zusätzlicher fester Aufschlag pro kWh (z.B. 0.05 für 5 Cent) (optional)
+    tax: # Zusätzlicher prozentualer Aufschlag (z.B. 0.2 für 20%) (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Fraunhofer ISE 
+
+Day-ahead Energiepreise (je kWh) an der Börse. Kann ohne vorherige Anmeldung auf https://api.energy-charts.info/ abgerufen werden. Nutzbar u.a. für dynamische Stromtarife, wo der Anbieter bis dato auf der Kundenschnittstelle noch kein Preis-Vorhersagen anbietet.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
     costs: # Zusätzlicher fester Aufschlag pro kWh (z.B. 0.05 für 5 Cent) (optional)
     tax: # Zusätzlicher prozentualer Aufschlag (z.B. 0.2 für 20%) (optional) 
 ```
