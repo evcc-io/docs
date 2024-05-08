@@ -1,0 +1,41 @@
+### Eigenes Plugin
+
+Über mit dem Plugin Mechanismus kann eine eigene Tarif-Quelle angebunden werden.
+
+**Beispiel: Aktueller Preis via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    price:
+      source: http
+      uri: https://example.com/api/price
+```
+
+Der vom Endpunkt zurückgegebene Wert wird als Netzbezugspreis verwendet.
+
+**Beispiel: Vorhersagen via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    forecast:
+      source: http
+      uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+      jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "price": .[1] }) | tostring'
+```
+
+Das Plugin muss eine JSON-Struktur zurückgeben, welches eine Liste von Zeiträumen und Preisen enthält.
+Die Datumsfelder müssen in der Form `YYYY-MM-DDTHH:MM:SSZ` und der Preis in der korrekten Währungseinheit (bspw. EUR) angegeben werden.
+Siehe nachfolgendes Beispiel:
+
+```js
+[
+  { "start": "2025-01-01T00:00:00Z", "end": "2025-01-01T01:00:00Z", "price": 25.0 },
+  { "start": "2025-01-01T01:00:00Z", "end": "2025-01-01T02:00:00Z", "price": 30.0 },
+]
+```
+
+Das Plugin wird einmal pro Stunde aktualisiert.
