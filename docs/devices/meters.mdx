@@ -6378,6 +6378,47 @@ meters:
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
+## Tasmota SML IR-Lesekopf für smarte Stromzähler bspw Hichi
+
+<DeviceFeatures features="" />
+
+Um die Werte des Smartmeters für evcc korrekt auslesen zu können, muss das Lesekopf-Script so geändert werden, dass folgende JSON-Tags erzeugt werden:
+- **SML** als Gruppenname der ausgelesenen Parameter
+- **Total_in** für den Gesamtverbrauch in KWh (4 Nachkommastellen)
+- **Total_out** für den Gesamteinspeisung in KWh mit (4 Nachkommastellen)
+- **Power_curr** für den aktuellen Verbrauch bzw. die aktuelle Einspeisung (0 Nachkommastellen)
+
+Ein entsprechendes Lesekopf-Script sieht wie folgt aus:
+```
+>D
+>B
+=>sensor53 r
+>M 1
+// highlight-next-line
++1,3,s,16,9600,SML
+// highlight-next-line
+1,77070100010800ff@1000,Gesamtverbrauch,KWh,Total_in,4
+// highlight-next-line
+1,77070100020800ff@1000,Gesamteinspeisung,KWh,Total_out,4
+// highlight-next-line
+1,77070100100700ff@1,Verbrauch,W,Power_curr,0
+1,77070100600100ff@#,Zählernummer,,Meter_Id,0
+#
+```
+
+```yaml
+meters:
+  - name: my_grid
+    type: template
+    template: tasmota-sml
+    usage: grid
+    host: 192.0.2.2 # IP-Adresse oder Hostname
+    user: # Standard-User ist admin (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional) 
+```
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
 ## Tesla Powerwall
 
 <DeviceFeatures features="battery-control" />
@@ -7255,22 +7296,7 @@ meters:
 <DeviceFeatures features="" />
 
 <Tabs>
-<TabItem value="grid" label="Netz" default>
-
-```yaml
-meters:
-  - name: my_grid
-    type: template
-    template: tasmota
-    usage: grid
-    host: 192.0.2.2 # IP-Adresse oder Hostname
-    user: # Standard-User ist admin (optional)
-    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-    channel: 1 # Meterkanal (1-8) 
-```
-
-</TabItem>
-<TabItem value="pv" label="PV">
+<TabItem value="pv" label="PV" default>
 
 ```yaml
 meters:
