@@ -1,0 +1,120 @@
+---
+sidebar_position: 9
+---
+
+# Lastmanagement
+
+:::warning Experimentell
+Lastmanagement befindet sich gerade noch in der Erprobungsphase.
+:::
+
+Lastmanagement ermöglicht es, die Leistung von Ladestationen zu steuern, um die Gesamtlast zu begrenzen.
+Hierfür können Ladepunkte in **Stromkreise** zusammengefasst werden.
+Für jeden Stromkreis (`circuit`) kann eine maximale Stromstärke (`maxCurrent`) und/oder Leistung (`maxPower`) konfiguriert werden.
+Das System arbeitet hierarchisch, d.h. ein Stromkreis kann Teil eines übergeordneten Stromkreises sein.
+
+## Konfiguration
+
+Die Konfiguration erfolgt über die `evcc.yaml`.
+Im Abschnitt `circuits` werden die Stromkreise definiert.
+Jeder Ladepunkt kann dann einem Stromkreis zugeordnet werden.
+
+### Beispiel: Hauptstromkreis
+
+```yaml
+circuits:
+  - name: main # eindeutiger Name, wird als Referenz für andere Circuits verwendet
+    title: Hauptstromkreis # Anzeige in der UI (später)
+    maxCurrent: 63 # 63A (optional)
+    maxPower: 30000 # 30kW (optional)
+    meter: grid # optional
+
+loadpoints:
+  - title: Garage
+    circuit: main
+    # ...
+  - title: Carport
+    circuit: main
+    # ...
+```
+
+Hier wird der **Hauptstromkreis** `main` definiert, der eine maximale Leistung von 30kW und eine maximale Phasen-Stromstärke von 63A hat.
+Die Ladepunkte _Garage_ und _Carport_ sind diesem Stromkreis zugeordnet.
+Sollte an beiden Ladepunkten gleichzeitig ein 22kW Ladevorgang angefordert werden, drosselt die Regelung die Leistung auf jeweils 15kW, um das 30kW Limit (`maxPower`) nicht zu überschreiten.
+
+### Beispiel: Verschachtelte Stromkreise
+
+```yaml
+circuits:
+  - name: main
+    title: Hauptsicherung
+    maxCurrent: 48
+  - name: garage
+    title: Garage
+    maxCurrent: 32
+    parent: main
+  - name: carport
+    title: Carport
+    maxCurrent: 32
+    parent: main
+
+loadpoints:
+  - title: Garage A
+    circuit: garage
+  - title: Garage B
+    circuit: garage
+  - title: Garage C
+    circuit: garage
+  - title: Carport A
+    circuit: carport
+  - title: Carport B
+    circuit: carport
+  - title: Wärmepumpe
+    parent: main (optional)
+```
+
+Hier haben wir zwei Stromkreise `garage` und `carport`, die beide dem Hauptstromkreis (`parent: main`) untergeordnet sind.
+Der Hauptstromkreis `main` hat eine maximale Stromstärke von 48A.
+Die Stromkreise `garage` und `carport` haben jeweils eine maximale Stromstärke von 32A.
+Die Ladepunkte _Garage A_, _Garage B_ und _Garage C_ sind dem Stromkreis `garage` zugeordnet (`circuit: garage`).
+Die Ladepunkte _Carport A_ und _Carport B_ sind dem Stromkreis `carport` zugeordnet (`circuit: carport`).
+Die Stromkreise `garage`, `carport` und die Wärmepumpe sind direkt am Hauptstromkreis (`main`) angeschlossen.
+Die Regelung stellt sicher, dass zu keinem Zeitpunkt die Grenzen der jeweiligen Stromkreise überschritten werden.
+
+**Wichtig:** Es muss immer einen Hauptstromkreis geben.
+Dieser hat keine `parent` Eigenschaft.
+Alle Ladepunkte ohne explizite Stromkreiszuordnung werden diesem Hauptstromkreis zugeordnet.
+
+## Messwerte
+
+Standardmäßig bildet die Steuerung die aktuelle Leistung und Stromstärke aus der Summe der jeweiligen Ladepunkte.
+Über die Konfiguration eines Zählers (`meter`) am `circuit` kann hier auch die real anliegende Last berücksichtigt werden.
+Dies ist insbesondere sinnvoll, wenn an der Sicherung auch noch weitere Verbraucher angeschlossen sind.
+
+```yaml
+meters:
+  - name: carport_meter
+    type: template
+    template: shelly-3em
+
+circuits:
+  - name: carport
+    meter: carport_meter
+    maxCurrent: 32
+```
+
+## Grenzwerte
+
+An jedem Stromkreis kann sowohl eine maximale Stromstärke pro Phase (`maxCurrent`) als auch eine maximale Leistung (`maxPower`) konfiguriert werden.
+Diese Werte werden, sofern konfiguriert, unabhängig voneinander überwacht.
+
+## Einschränkungen
+
+:::info
+Für die kommerzielle Nutzung von Lastmanagement wird später eine separate Lizenz erforderlich sein.
+Private Nutzung mit kleineren Installationen wird kostenlos bleiben.
+:::
+
+- noch keine Statusinformationen und Begrenzungshinweise in der UI
+- `priority` Einstellungen am Ladepunkt werden noch nicht berücksichtigt
+- Lastmanagement wird nicht durch die Ladeplanung berücksichtigt
