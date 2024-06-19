@@ -163,23 +163,60 @@ The ID of the location, if there are multiple locations associated with the acco
 
 The electricity provider [Octopus Energy](https://octopus.energy) in the United Kingdom.
 
-:::tip Tariff and Regional Codes
-Determining the tariff and regional codes is not covered in this documentation.
+This tariff type provides two setup options: API key, and Product Code. There are pros and cons to both options:
+
+**API Key**:
+  * Pros:
+    * Automatic detection of appropriate tariff for your account, including tariff changes (set and forget)
+    * Detection of lower rate during Intelligent Octopus charge periods
+  * Cons:
+    * Requires supplying your (rather powerful) Octopus Energy API Key in configuration
+    
+**Product Code**:
+  * Pros:
+    * Does not require credentials
+  * Cons:
+    * Can be a little complicated to find your product and region code
+    * Cannot determine Intelligent Octopus charge periods, or other user-specific demand flexibility requirements
+
+If in doubt, choose **API Key**. _You cannot use both simultaneously_, or you will receive an error during startup.
+
+#### API Key
+:::tip Finding your API Key
+You can find your API Key here: https://octopus.energy/dashboard/new/accounts/personal-details/api-access
+
+Keep this safe - it provides full access to your account and data! If you think it may have been compromised, reset it immediately.
 :::
 
 **For example**:
 
 ```yaml
 type: octopusenergy
-tariff: AGILE-FLEX-22-11-25 # Tariff code
+apikey: sk_live_************************
+```
+
+##### `apikey`
+
+The API key for your Octopus account.
+
+#### Product Code
+:::tip Product and Regional Codes
+Determining the Product and Regional codes is not covered in this documentation.
+:::
+
+**For example**:
+
+```yaml
+type: octopusenergy
+productcode: AGILE-FLEX-22-11-25
 region: A # optional
 ```
 
-#### `tariff`
+##### `productcode`
 
-The tariff code for your energy contract.
+The product code for your energy contract.
 
-#### `region`
+##### `region`
 
 The DNO region you are in: [More information](https://www.energy-stats.uk/dno-region-codes-explained/)
 
@@ -277,21 +314,21 @@ The price in [currency]/kWh that you receive from the grid operator. Used for sa
 
 The electricity provider [Octopus Energy](https://octopus.energy) in the United Kingdom.
 
-:::tip Tariff and Regional Codes
-Determining the tariff and regional codes is not covered in this documentation.
+:::tip Product and Regional Codes
+Determining the Product and Regional codes is not covered in this documentation.
 :::
 
 **For example**:
 
 ```yaml
 type: octopusenergy
-tariff: AGILE-FLEX-22-11-25 # Tariff code
+productcode: AGILE-FLEX-22-11-25 # Tariff code
 region: A # optional
 ```
 
-#### `tariff`
+#### `productcode`
 
-The tariff code for your energy contract. Make sure this is set to your **import tariff code**.
+The product code for your energy contract. Make sure this is set to your **import product code**.
 
 #### `region`
 
