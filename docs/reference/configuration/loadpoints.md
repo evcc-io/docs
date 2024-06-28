@@ -168,11 +168,11 @@ interval: 60m
 
 #### `estimate`
 
-Berechne (interpoliere) den aktuellen SoC zwischen den Abfragen an das Fahrzeug.
+Berechne eine Schätzung des aktuellen SoC anhand der vorliegenden Messwerte (Extrapolation) zwischen den per `interval` eingestellten Abfragezeitpunkten an das Fahrzeug.
 
 **Mögliche Werte**:
 
-- `true`: evcc interpoliert die SoC Werte zwischen den Fahrzeugabfragen (empfohlen)
+- `true`: evcc extrapoliert die SoC Werte zwischen den Fahrzeugabfragen (empfohlen)
 - `false`: evcc nutzt nur die SoC Werte, welche das Fahrzeug zurückliefert
 
 **Standardwert:** `true`
@@ -180,7 +180,7 @@ Berechne (interpoliere) den aktuellen SoC zwischen den Abfragen an das Fahrzeug.
 **Beispiel**:
 
 ```yaml
-estimate: false # Keine Interpolation
+estimate: false # Keine Extrapolation
 ```
 
 ---
