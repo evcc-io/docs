@@ -2804,6 +2804,83 @@ meters:
 
 ## Kostal
 
+### Energy Meter (einfaches KEM, nicht das Smart Meter KSEM, s. unten)
+<Tabs>
+<TabItem value="grid" label="Netz" default>
+<DeviceFeatures features="" />
+
+Netzeinspeisung bisher nicht getestet. (int16 statt uint16 wählen? oder gibt es für die Einspeiserichtung eigene Register?).
+Die Baud Rate und die Slave ID (Standard ist 1, im Beispiel auf 21 geändert) kann man am Gerät einstellen, auch wenn das nicht dokumentiert ist.
+
+```yaml
+meters:
+  - name: my_grid
+    type: custom
+    power: # power (W)
+      source: calc
+      add:
+      - source: modbus
+        id: 21
+        uri: 192.168.0.2:502 # hostname
+        register:
+          address: 18
+          type: holding # Read an input register
+          decode: uint16
+        scale: 0.1
+      - source: modbus
+        id: 21
+        uri: 192.168.0.2:502 # hostname
+        register:
+          address: 20
+          type: holding # Read an input register
+          decode: uint16
+        scale: 0.1
+      - source: modbus
+        id: 21
+        uri: 192.168.0.2:502 # hostname
+        register:
+          address: 22
+          type: holding # Read an input register
+          decode: uint16
+        scale: 0.1
+    energy: # optional energy (kWh)
+      source: modbus
+      id: 21
+      uri: 192.168.0.2:502 # hostname
+      register:
+        address: 338
+        type: holding # Read an input register
+        decode: uint16
+      scale: 0.1
+    currents: # optional currents (A)
+      - source: modbus # L1 plugin type
+        id: 21
+        uri: 192.168.0.2:502
+        register:
+          address: 12
+          type: holding # Read an input register
+          decode: uint16
+        scale: 0.001
+      - source: modbus # L2 plugin type
+        id: 21
+        uri: 192.168.0.2:502
+        register:
+          address: 14
+          type: holding # Read an input register
+          decode: uint16
+        scale: 0.001
+      - source: modbus # L3 plugin type
+        id: 21
+        uri: 192.168.0.2:502
+        register:
+          address: 16
+          type: holding # Read an input register
+          decode: uint16
+        scale: 0.001
+```
+</TabItem>
+</Tabs>
+
 ### Piko (legacy)
 
 <DeviceFeatures features="" />
