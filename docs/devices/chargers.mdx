@@ -1315,6 +1315,61 @@ chargers:
 
 <SponsorshipRequired />
 
+## Kostal Enector
+
+<DeviceFeatures features="1p3p,mA" />
+
+Aktuelle Firmware erforderlich.
+
+Um den Enector mit evcc zu betreiben sind hardwareseitig folgende Schritte zu unternehmen:
+
+1. Modbus-Kabel direkt vom Enector (nicht über KSEM Smart Meter) mit RS485-Adapter oder RS485 TCP/IP-Gateway verbinden. Die Anschlüsse sind wie in der Beschreibung von Kostal gekreuzt (A->B; B->A).
+
+2. Dip Schalter auf Bank 1 (S1) so setzen:
+
+    ```
+    8    OFF
+    7    ON
+    6    OFF
+    5    ON
+    4    ON
+    3    OFF
+    2    OFF
+    1    OFF
+    ```
+
+3. Verbindungparameter TCP/IP-Gateway:
+
+    ```
+    Baud Rate:  57600
+    Data Bits:  8
+    Parity:     None
+    Stop Bits:  2
+    ```
+
+4. evcc.yaml:
+
+    ```yaml
+    chargers:
+    - name: my_charger
+      type: template
+      template: mennekes-compact
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 50
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 57600
+      comset: "8N2" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 50
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port 
+    ```
+<SponsorshipRequired />
+
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
 ## KSE wBX16
