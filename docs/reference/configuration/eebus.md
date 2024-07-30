@@ -6,6 +6,9 @@ sidebar_position: 13
 
 :::warning
 EEBUS Unterstützung ist noch im experimentellen Stadium. Es wird hier sicher zu dem einen oder anderen Problem kommen!
+
+Wenn EEBUS über Home Assistant genutzt wird, muss unbedingt das Interface "end0" angegeben und die IP-Adresse von Home Assistant im URI (192.168.1.216:4712) eingetragen werden.
+Sehe [Issue](https://github.com/evcc-io/hassio-addon/issues/99)
 :::
 
 **Beispiel**:
