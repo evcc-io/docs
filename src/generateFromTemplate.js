@@ -55,12 +55,14 @@ function templateContent(entry, type) {
     if (type === "tariff") {
       preamble = TARIFF_GROUPS[entry.product.group];
     }
+    const code = `${CODE_PREAMBLES[preamble]}\n${indent(render.default).trimEnd()}`;
+    const advanced =
+      render.advanced && render.advanced !== render.default
+        ? `${CODE_PREAMBLES[preamble]}\n${indent(render.advanced).trimEnd()}`
+        : null;
     return {
       usage: render.usage,
-      code: `\`\`\`yaml
-${CODE_PREAMBLES[preamble]}
-${indent(render.default).trimEnd()} 
-\`\`\``,
+      code: `<DeviceConfig code={\`${code}\`} ${advanced ? `advanced={\`${advanced}\`}` : ""} />\n\n`,
     };
   });
 
