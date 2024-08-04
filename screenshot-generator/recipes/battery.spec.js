@@ -14,7 +14,7 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeEach(async () => {
-  await start("basics.evcc.yaml");
+  await start("basics.evcc.yaml", "password.sql");
 });
 test.afterEach(async () => {
   await stop();
@@ -80,9 +80,9 @@ loop((screenshot) => {
     await removeOverlays(page);
 
     // buffer start
-    await page.locator("#bufferStartSelect").selectOption("90");
+    await page.locator("#batterySettingsBufferStart").selectOption("90");
     await wait(300);
-    await placeOverlay(page, "#bufferStartSelect", CURSOR, 0, 10);
+    await placeOverlay(page, "#batterySettingsBufferStart", CURSOR, 0, 10);
     await placeOverlay(page, ".bufferStartIndicator", FOUR, -100, -21);
 
     await screenshot(

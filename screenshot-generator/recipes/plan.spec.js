@@ -6,7 +6,7 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeEach(async () => {
-  await start(["vehicles.evcc.yaml", "dynamicprice.evcc.yaml"]);
+  await start(["vehicles.evcc.yaml", "dynamicprice.evcc.yaml"], "password.sql");
 });
 test.afterEach(async () => {
   await stop();
@@ -35,8 +35,9 @@ loop((screenshot) => {
   test("charging plan energy", async ({ page }) => {
     await page.goto(`/`);
 
-    await page.getByRole("button", { name: "blue IONIQ 6" }).click();
-    await page.getByRole("button", { name: "red Fiat 500e" }).click();
+    await page
+      .locator("#vehicleOptionsDropdown1")
+      .selectOption("red Fiat 500e");
 
     await page.locator("[data-testid=charging-plan] button").first().click();
     await wait(300);

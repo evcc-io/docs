@@ -6,7 +6,7 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeEach(async () => {
-  await start("vehicles.evcc.yaml");
+  await start("vehicles.evcc.yaml", "password.sql");
 });
 test.afterEach(async () => {
   await stop();
@@ -16,12 +16,12 @@ loop((screenshot) => {
   test("min soc / limit soc / limit energy", async ({ page }) => {
     await page.goto(`/`);
 
-    await expect(
-      page.getByRole("button", { name: "blue IONIQ 6" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "white Model 3" }),
-    ).toBeVisible();
+    await expect(page.getByTestId("vehicle-name").first()).toHaveText(
+      "blue IONIQ 6",
+    );
+    await expect(page.getByTestId("vehicle-name").last()).toHaveText(
+      "white Model 3",
+    );
 
     await page.locator("[data-testid=charging-plan] button").first().click();
     await page
@@ -39,7 +39,7 @@ loop((screenshot) => {
       },
     );
     await removeOverlays(page);
-    await page.locator("#chargingPlanModal_1 [aria-label=Close]").click();
+    await page.getByRole("button", { name: "Close" }).click();
     await expect(page.locator("#chargingPlanModal_1")).not.toBeVisible();
     await screenshot(
       page,
@@ -66,7 +66,7 @@ loop((screenshot) => {
       },
     );
     await removeOverlays(page);
-    await page.locator("#chargingPlanModal_2 [aria-label=Close]").click();
+    await page.getByRole("button", { name: "Close" }).click();
     await expect(page.locator("#chargingPlanModal_2")).not.toBeVisible();
     await page
       .getByTestId("limit-soc")
@@ -90,11 +90,12 @@ loop((screenshot) => {
     );
 
     // limit energy
-    await page.getByRole("button", { name: "white Model 3" }).click();
-    await page.getByRole("button", { name: "red Fiat 500e" }).click();
-    await expect(
-      page.getByRole("button", { name: "red Fiat 500e" }),
-    ).toBeVisible();
+    await page
+      .locator("#vehicleOptionsDropdown2")
+      .selectOption("red Fiat 500e");
+    await expect(page.getByTestId("vehicle-name").last()).toHaveText(
+      "red Fiat 500e",
+    );
     await page
       .getByTestId("limit-energy")
       .locator("select")

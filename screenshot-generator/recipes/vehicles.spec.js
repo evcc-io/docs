@@ -6,7 +6,7 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeEach(async () => {
-  await start("vehicles.evcc.yaml");
+  await start("vehicles.evcc.yaml", "password.sql");
 });
 test.afterEach(async () => {
   await stop();
@@ -17,13 +17,7 @@ loop((screenshot) => {
     await page.goto(`/`);
 
     await page.getByRole("button", { name: "blue IONIQ 6" }).click();
-    await placeOverlay(
-      page,
-      "[aria-labelledby=vehicleOptionsDropdown1] li:nth-child(2)",
-      CURSOR,
-      50,
-      -5,
-    );
+    await placeOverlay(page, "[data-testid='vehicle-name']", CURSOR, 50, -5);
     await screenshot(
       page,
       `${BASE_PATH}/vehicle-select`,

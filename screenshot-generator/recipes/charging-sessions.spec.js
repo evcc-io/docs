@@ -6,7 +6,10 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeAll(async () => {
-  await start("sessions.yaml", "sessions.sql");
+  await start("charging-sessions.yaml", [
+    "charging-sessions.sql",
+    "password.sql",
+  ]);
 });
 test.afterAll(async () => {
   await stop();
@@ -34,7 +37,7 @@ loop((screenshot) => {
   });
 
   test("session", async ({ page }) => {
-    await page.goto(`/#/sessions`);
+    await page.goto(`/#/sessions?year=2024&month=3`);
     await expect(
       await page.getByTestId("sessions-entry").first(),
     ).toBeVisible();
