@@ -6,7 +6,7 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeAll(async () => {
-  await start(["basics.evcc.yaml", "co2.evcc.yaml"]);
+  await start(["basics.evcc.yaml", "co2.evcc.yaml"], "password.sql");
 });
 test.afterAll(async () => {
   await stop();
