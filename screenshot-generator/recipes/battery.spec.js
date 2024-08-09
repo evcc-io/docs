@@ -1,5 +1,6 @@
-const { test, expect } = require("@playwright/test");
 import { loop } from "./utils/loop";
+import enableExperimental from "./utils/enableExperimental";
+const { test, expect } = require("@playwright/test");
 import {
   CURSOR,
   ONE,
@@ -14,8 +15,9 @@ const { start, stop } = require("./utils/evcc");
 const BASE_PATH = "features/screenshots";
 
 test.beforeEach(async () => {
-  await start("basics.evcc.yaml", "password.sql");
+  await start(["basics.evcc.yaml", "dynamicprice.evcc.yaml"], "password.sql");
 });
+
 test.afterEach(async () => {
   await stop();
 });
@@ -95,5 +97,26 @@ loop((screenshot) => {
       },
     );
     await removeOverlays(page);
+  });
+
+  test("grid charging", async ({ page }) => {
+    await page.goto(`/`);
+    await enableExperimental(page);
+    await page.getByTestId("topnavigation-button").click();
+    await page.getByTestId("topnavigation-battery").click();
+    const modal = page.locator("#batterySettingsModal");
+    await expect(modal).toBeVisible();
+    await modal.locator(".nav-item:last-child").click();
+    await page.locator("#smartCostLimit-battery").selectOption("0.12");
+
+    await screenshot(
+      page,
+      `${BASE_PATH}/battery-grid-charging`,
+      "#batterySettingsModal .modal-content",
+      {
+        all: 20,
+        top: 10,
+      },
+    );
   });
 });
