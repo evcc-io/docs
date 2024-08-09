@@ -32,6 +32,15 @@ const TRANSLATIONS = {
   "tab.aux": "AUX",
 };
 
+const PROTOCOLS = {
+  localapi: "Local API",
+  cloudapi: "Cloud API",
+  mqtt: "MQTT",
+  modbus: "Modbus",
+  eebus: "EEBus",
+  ocpp: "OCPP",
+};
+
 function escapeRegExp(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
@@ -150,6 +159,23 @@ function generateMarkdown(data, type, target) {
       return description.toLowerCase();
     },
   ]);
+
+  // add ` (protocol)` to non-unique products
+  dataSorted
+    .filter(
+      (x) =>
+        dataSorted.filter(
+          (y) =>
+            y.product.group === x.product.group &&
+            y.product.brand === x.product.brand &&
+            y.product.description === x.product.description,
+        ).length > 1,
+    )
+    .forEach((x) => {
+      if (x.protocol) {
+        x.product.description += ` (${PROTOCOLS[x.protocol]})`;
+      }
+    });
 
   let generated = "";
   let lastGroup = "";
