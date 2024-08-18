@@ -430,7 +430,7 @@ Requires firmware version 3.10.42 (C-series) bzw. 1.11 (X-series). For phase swi
 
 <DeviceFeatures features="mA,rfid,1p3p" />
 
-The meter- if present- must be configured separately as charge meter.
+S0 meters must be configured separately as charge meter.
 Phase switching is only available with the Solar variant and must be enabled by the user.
 
 <DeviceConfig code={`chargers:
@@ -1161,9 +1161,9 @@ The charger must be switched to "Power" charging mode.
   - name: my_charger
     type: template
     template: etrel-duo
-    connector: 1 # optional
     host: 192.0.2.2 # IP address or hostname
-    port: 502 # Port (optional)`} />
+    port: 502 # Port (optional)
+    connector: 1 # optional`} />
 
 
 
@@ -1171,26 +1171,45 @@ The charger must be switched to "Power" charging mode.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## EVBox Elvi
+## EVBox
 
-<DeviceFeatures features="sponsorfree" />
+### Elvi
+
+<DeviceFeatures features="" />
 
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
     template: elvi
-    timeout: 2m # optional
-    meter: true # Deactivate if the charger has no integrated metering device installed (optional)`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: elvi
-    stationid: EVB-P12354 # The chargers unique station id (or chargepoint id). This id must also be part of the charger OCPP configuration ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Connector number, usually 1 for first connector. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID returned to the charger for authorisation of charging sessions (optional)
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)
+    connector: 1 # Connector number for charging stations with multiple connectors. Counting starts at 1 for the first connector. (optional)
+    remotestart: # Only enable this option if there is no way to initiate transactions from the charger side! This is only the case if e.g. no RFID reader is available and charging processes would have to be released individually via app. Normally, the charger should always be configured at the device so that either an RFID card is used for activation or the charger is set to "Autostart", "Free Charging" or similar. First check the documentation and configuration possibilities of the charger, ask the manufacturer if necessary! (optional)
+    idtag: evcc # This option is only required in exceptional cases if the charger requires a specific token for accepting external transactions. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional
-    meter: true # Deactivate if the charger has no integrated metering device installed (optional)
-    meterinterval: 4s # optional`} />
+    timeout: 30s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
+
+
+
+<SponsorshipRequired />
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Livo
+
+<DeviceFeatures features="sponsorfree" />
+
+The device requires a fixed IP addres.
+
+<DeviceConfig code={`chargers:
+  - name: my_charger
+    type: template
+    template: livo
+    ski: # SKI (Subject Key Identifier)`}  />
 
 
 
@@ -1236,18 +1255,26 @@ The charger must be switched to "Power" charging mode.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Fronius Wattpilot
+## Fronius Wattpilot (OCPP)
 
-<DeviceFeatures features="1p3p,rfid,sponsorfree" />
-
-Requires firmware 36.3 or later.
+<DeviceFeatures features="sponsorfree" />
 
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
-    template: fronius-wattpilot
-    host: 192.0.2.2 # IP address or hostname
-    password: # Password of the user account (use single quotes in case of leading zeros) (optional)`}  />
+    template: ocpp-fronius-wattpilot
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)`} advanced={`chargers:
+  - name: my_charger
+    type: template
+    template: ocpp-fronius-wattpilot
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)
+    connector: 1 # Connector number for charging stations with multiple connectors. Counting starts at 1 for the first connector. (optional)
+    remotestart: # Only enable this option if there is no way to initiate transactions from the charger side! This is only the case if e.g. no RFID reader is available and charging processes would have to be released individually via app. Normally, the charger should always be configured at the device so that either an RFID card is used for activation or the charger is set to "Autostart", "Free Charging" or similar. First check the documentation and configuration possibilities of the charger, ask the manufacturer if necessary! (optional)
+    idtag: evcc # This option is only required in exceptional cases if the charger requires a specific token for accepting external transactions. (optional)
+    connecttimeout: 5m # optional
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
 
@@ -1408,7 +1435,7 @@ Please read the wiring and configuration manual carefully. All boxes must be con
 
 ## Homecharge Homecharger HC11L, HC22L
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="" />
 
 The charger must be equipped with a built-in meter (models HC11L/HC22L Energy or Profi).
 For the OCPP configuration, you need to access the EFR-SECC charge controller at http://host/secc.
@@ -1418,17 +1445,22 @@ For login credentials, ask your dealer or the vendor EFR (www.efr.de).
   - name: my_charger
     type: template
     template: homecharge
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: homecharge
-    stationid: EVB-P12354 # The chargers unique station id (or chargepoint id). This id must also be part of the charger OCPP configuration ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Connector number, usually 1 for first connector. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID returned to the charger for authorisation of charging sessions (optional)
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)
+    connector: 1 # Connector number for charging stations with multiple connectors. Counting starts at 1 for the first connector. (optional)
+    remotestart: # Only enable this option if there is no way to initiate transactions from the charger side! This is only the case if e.g. no RFID reader is available and charging processes would have to be released individually via app. Normally, the charger should always be configured at the device so that either an RFID card is used for activation or the charger is set to "Autostart", "Free Charging" or similar. First check the documentation and configuration possibilities of the charger, ask the manufacturer if necessary! (optional)
+    idtag: evcc # This option is only required in exceptional cases if the charger requires a specific token for accepting external transactions. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -1763,7 +1795,9 @@ For Kostal systems with Smart Energy Meter (KSEM), the additional activation cod
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## NRGKick Connect
+## NRGKick
+
+### Connect
 
 <DeviceFeatures features="sponsorfree" />
 
@@ -1778,6 +1812,37 @@ NRGkick charging unit via HTTP (older than 2022/2023)
     password: # Password of the user account (use single quotes in case of leading zeros)`}  />
 
 
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Gen2
+
+<DeviceFeatures features="1p3p,mA" />
+
+<DeviceConfig code={`chargers:
+  - name: my_charger
+    type: template
+    template: nrggen2
+    
+    # Modbus TCP
+    modbus: tcpip
+    id: 1
+    host: 192.0.2.2 # Hostname
+    port: 502 # Port`} advanced={`chargers:
+  - name: my_charger
+    type: template
+    template: nrggen2
+    
+    # Modbus TCP
+    modbus: tcpip
+    id: 1
+    host: 192.0.2.2 # Hostname
+    port: 502 # Port
+    phases1p3p: false # Activates phase switching. Extended feature "Phase Switching" must be activated in the NRGKick app. (optional)`} />
+
+
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -1919,25 +1984,30 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Orbis Viaris Uni
+## Orbis Viaris
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="" />
 
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
     template: orbis-viaris
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: orbis-viaris
-    stationid: EVB-P12354 # The chargers unique station id (or chargepoint id). This id must also be part of the charger OCPP configuration ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Connector number, usually 1 for first connector. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID returned to the charger for authorisation of charging sessions (optional)
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)
+    connector: 1 # Connector number for charging stations with multiple connectors. Counting starts at 1 for the first connector. (optional)
+    remotestart: # Only enable this option if there is no way to initiate transactions from the charger side! This is only the case if e.g. no RFID reader is available and charging processes would have to be released individually via app. Normally, the charger should always be configured at the device so that either an RFID card is used for activation or the charger is set to "Autostart", "Free Charging" or similar. First check the documentation and configuration possibilities of the charger, ask the manufacturer if necessary! (optional)
+    idtag: evcc # This option is only required in exceptional cases if the charger requires a specific token for accepting external transactions. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -2139,8 +2209,8 @@ DIP switch 10 at the controller needs to be set to 'ON'. A recent controller fir
     id: 1
     host: 192.0.2.2 # Hostname
     port: 502 # Port
-    connector: 1 # optional
-    timeout: 10s # optional`} />
+    timeout: 10s # optional
+    connector: 1 # optional`} />
 
 
 
@@ -2332,7 +2402,7 @@ Please read the wiring and configuration manual carefully. All boxes must be con
 
 <DeviceFeatures features="" />
 
-Requires firmware >= 2.121.5
+Requires firmware >= 2.135
 
 <DeviceConfig code={`chargers:
   - name: my_charger
@@ -2703,11 +2773,11 @@ WARP Firmware v2 required. Automatic phase switching requires the additional WAR
     template: tinkerforge-warp
     host: 192.0.2.2 # IP address or hostname of the MQTT broker
     port: 1883 # MQTT broker port (optional)
-    user: # User account (e.g. email address, user id, etc.) (optional)
-    password: # Password of the user account (use single quotes in case of leading zeros) (optional)
     topic: warp # Topic (omit leading /) (optional)
     timeout: 30s # Don't accept values older than this value (optional)
-    energymanager: # WEM Firmware v2 required. EnergyManager MQTT topic (if installed) (optional)`} />
+    energymanager: # WEM Firmware v2 required. EnergyManager MQTT topic (if installed) (optional)
+    user: # User account (e.g. email address, user id, etc.) (optional)
+    password: # Password of the user account (use single quotes in case of leading zeros) (optional)`} />
 
 
 
@@ -2733,11 +2803,11 @@ WARP Firmware v2 required. Automatic phase switching requires the additional WAR
     template: tinkerforge-warp
     host: 192.0.2.2 # IP address or hostname of the MQTT broker
     port: 1883 # MQTT broker port (optional)
-    user: # User account (e.g. email address, user id, etc.) (optional)
-    password: # Password of the user account (use single quotes in case of leading zeros) (optional)
     topic: warp # Topic (omit leading /) (optional)
     timeout: 30s # Don't accept values older than this value (optional)
-    energymanager: # WEM Firmware v2 required. EnergyManager MQTT topic (if installed) (optional)`} />
+    energymanager: # WEM Firmware v2 required. EnergyManager MQTT topic (if installed) (optional)
+    user: # User account (e.g. email address, user id, etc.) (optional)
+    password: # Password of the user account (use single quotes in case of leading zeros) (optional)`} />
 
 
 
@@ -2762,10 +2832,10 @@ The automatic phase switching for 1p vehicles must be deactivated. Siehe https:/
     template: tinkerforge-warp3
     host: 192.0.2.2 # IP address or hostname of the MQTT broker
     port: 1883 # MQTT broker port (optional)
-    user: # User account (e.g. email address, user id, etc.) (optional)
-    password: # Password of the user account (use single quotes in case of leading zeros) (optional)
     topic: warp # Topic (omit leading /) (optional)
-    timeout: 30s # Don't accept values older than this value (optional)`} />
+    timeout: 30s # Don't accept values older than this value (optional)
+    user: # User account (e.g. email address, user id, etc.) (optional)
+    password: # Password of the user account (use single quotes in case of leading zeros) (optional)`} />
 
 
 
@@ -2790,10 +2860,10 @@ The automatic phase switching for 1p vehicles must be deactivated. Siehe https:/
     template: tinkerforge-warp3
     host: 192.0.2.2 # IP address or hostname of the MQTT broker
     port: 1883 # MQTT broker port (optional)
-    user: # User account (e.g. email address, user id, etc.) (optional)
-    password: # Password of the user account (use single quotes in case of leading zeros) (optional)
     topic: warp # Topic (omit leading /) (optional)
-    timeout: 30s # Don't accept values older than this value (optional)`} />
+    timeout: 30s # Don't accept values older than this value (optional)
+    user: # User account (e.g. email address, user id, etc.) (optional)
+    password: # Password of the user account (use single quotes in case of leading zeros) (optional)`} />
 
 
 
@@ -2841,7 +2911,7 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
 
 ## Victron
 
-### EV charging station
+### EV Charging Station
 
 <DeviceFeatures features="" />
 
@@ -2864,7 +2934,7 @@ Enter the host of the charger (not the GX device) and ensure that the charger is
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### EV Charging Station
+### EV Charging Station (via GX)
 
 <DeviceFeatures features="" />
 
@@ -2988,7 +3058,7 @@ DIP switch 10 at the controller needs to be set to 'ON'. A recent controller fir
 
 ## wallbox Pulsar Plus, Pulsar Max, Commander 2, Copper SB
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="" />
 
 Setup Guide: https://support.wallbox.com/en/knowledge-base/ocpp-activation-and-setup-guide/
 * Switch on “Enable OCPP” (myWallbox app) or enable the “OCPP WebSocket connection” switch (myWallbox Portal)
@@ -3001,17 +3071,22 @@ Setup Guide: https://support.wallbox.com/en/knowledge-base/ocpp-activation-and-s
   - name: my_charger
     type: template
     template: pulsarplus
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: pulsarplus
-    stationid: EVB-P12354 # The chargers unique station id (or chargepoint id). This id must also be part of the charger OCPP configuration ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Connector number, usually 1 for first connector. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID returned to the charger for authorisation of charging sessions (optional)
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)
+    connector: 1 # Connector number for charging stations with multiple connectors. Counting starts at 1 for the first connector. (optional)
+    remotestart: # Only enable this option if there is no way to initiate transactions from the charger side! This is only the case if e.g. no RFID reader is available and charging processes would have to be released individually via app. Normally, the charger should always be configured at the device so that either an RFID card is used for activation or the charger is set to "Autostart", "Free Charging" or similar. First check the documentation and configuration possibilities of the charger, ask the manufacturer if necessary! (optional)
+    idtag: evcc # This option is only required in exceptional cases if the charger requires a specific token for accepting external transactions. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -3189,6 +3264,31 @@ Optional, additionally add any of the following
 
 - Documentation regarding `status A..F`: https://evsim.gonium.net/#der-control-pilot-cp (DE)
 
+### Demo charger
+
+<DeviceFeatures features="sponsorfree" />
+
+For demonstration purposes. Charger with a fixed set of values.
+
+<DeviceConfig code={`chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: A # optional
+    power: 0 # optional
+    enabled: true # optional`} advanced={`chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: A # optional
+    power: 0 # optional
+    enabled: true # optional
+    maxcurrent: 16 # The maximum amperage per connected phase with which the car shuold be charged (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
 ### EEBUS compatible Wallbox
 
 <DeviceFeatures features="mA,sponsorfree" />
@@ -3205,15 +3305,18 @@ Optional, additionally add any of the following
 
 ### OCPP 1.6J compatible charger with Smart Charging Profile
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="mA,rfid,1p3p" />
 
 With OCPP the connection will be established from charger (client) to evcc (server).
 The charger needs to be able to reach evcc via the host name (functioning DNS resolution required!) or via the IP address on port 8887.
 By default, the first incoming connection with any station identifier is used.
 In order to be able to clearly assign several charging points, the respective station identifier (`stationid: `) and connector number (`connector: `) must be configured.
 Many wallboxes automatically add the `station id` to the backend URL, some have to do this manually `ws://<evcc>:8887/<stationid>`.
-The charger may need a pre-configured (virtual) token ID/RFID identifier (`idtag: `) with which the charging sessions can be started without authorization.
-If the charger supports sending metering values try to adjust the interval to a short time span.
+If the charger supports sending metering values try to adjust the interval to a short time span (< 10s) .
+Use your RFID tags (this allows e.g. vehicle identification) or set your charger to "free charging" or "autostart" to generate the transaction required for charging release.
+
+If the charger does not offer any option to start transactions locally, the `remotestart` advanced option can be used to automatically start a transaction as soon as a vehicle is connected.
+This should only be necessary in exceptional cases.
 
 Requirements:
 * If necessary, remove previously configured OCPP profiles (e.g. used for a different backend connection) in the charger configuration
@@ -3222,28 +3325,28 @@ Requirements:
 * No encryption, no authentication, no password
 * Local network connection
 
+The specific configuration and the actual usable functionality depend on the charger model and its software.
+
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
     template: ocpp
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: ocpp
-    stationid: EVB-P12354 # The chargers unique station id (or chargepoint id). This id must also be part of the charger OCPP configuration ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Connector number, usually 1 for first connector. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID returned to the charger for authorisation of charging sessions (optional)
+    stationid: EVB-P12354 # Station ID of the charging point. Only required if multiple OCPP charging stations are set up to assign them correctly. A single OCPP charging station can also be automatically assigned. Note: In exceptional cases, it may be necessary to manually append this ID to the OCPP URL of the charging station in the form ws://<evcc-address>:8887/<stationid>. Most charging stations automatically add the ID internally. (optional)
+    connector: 1 # Connector number for charging stations with multiple connectors. Counting starts at 1 for the first connector. (optional)
+    remotestart: # Only enable this option if there is no way to initiate transactions from the charger side! This is only the case if e.g. no RFID reader is available and charging processes would have to be released individually via app. Normally, the charger should always be configured at the device so that either an RFID card is used for activation or the charger is set to "Autostart", "Free Charging" or similar. First check the documentation and configuration possibilities of the charger, ask the manufacturer if necessary! (optional)
+    idtag: evcc # This option is only required in exceptional cases if the charger requires a specific token for accepting external transactions. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional
-    autostart: # optional
-    nostop: # optional
-    getconfiguration: true # Deactivating can help with certain chargers (optional)
-    bootnotification: false # Activating can help with certain chargers (optional)
-    meterinterval: # optional
-    metervalues: # optional
-    chargingrateunit: # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -3340,10 +3443,10 @@ phases: 1 # ev phases (default 3)
     device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
     user: # User account (e.g. email address, user id, etc.) (optional)
     password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+    standbypower: 15 # Power values above this value will be considered as charging pow (optional)
     meterchannel: 6 # Homematic meter channel number like shown in the CCU web user interface.
     switchchannel: 3 # Homematic switch actor channel number like shown in the CCU web user interface.
     cache: 1s # In case of duty cycle problems try a cache setting of 30s. (optional)
-    standbypower: 15 # Power values above this value will be considered as charging pow (optional)
     integrateddevice: # Integrated device (no vehicle connection) (optional)
     heating: # Heating device (°C instead of %) (optional)
     icon: # Icon as shown in user interface (optional)`} />

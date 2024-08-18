@@ -429,7 +429,7 @@ Erfordert Firmwareversion 3.10.42 (C-series) bzw. 1.11 (X-series). Zur Phasenums
 
 <DeviceFeatures features="mA,rfid,1p3p" />
 
-Der Zähler- falls vorhanden- muss separat als Ladezähler konfiguriert werden.
+Ein evtl. vorhandener S0 Zähler muss separat als Ladezähler konfiguriert werden.
 Phasenumschaltung bietet nur die Solar-Variante und muss vom Anwender freigeschaltet werden.
 
 <DeviceConfig code={`chargers:
@@ -1160,9 +1160,9 @@ Die Wallbox muss sich im "Power" Modus befinden.
   - name: my_charger
     type: template
     template: etrel-duo
-    connector: 1 # optional
     host: 192.0.2.2 # IP-Adresse oder Hostname
-    port: 502 # Port (optional)`} />
+    port: 502 # Port (optional)
+    connector: 1 # optional`} />
 
 
 
@@ -1170,26 +1170,45 @@ Die Wallbox muss sich im "Power" Modus befinden.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## EVBox Elvi
+## EVBox
 
-<DeviceFeatures features="sponsorfree" />
+### Elvi
+
+<DeviceFeatures features="" />
 
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
     template: elvi
-    timeout: 2m # optional
-    meter: true # Deaktiveren wenn die Wallbox keinen integrierten Zähler verbaut hat (optional)`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: elvi
-    stationid: EVB-P12354 # Die Stations-ID der Wallbox (oder des Ladepunkts). Diese ID muss auch Teil der Wallboxkonfiguration für OCPP sein ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Ladepunkt, normalerweise 1 für den ersten Anschluss. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID welche für die Freischaltung der Ladevorgänge an den Ladepunkt zurückgesendet wird (optional)
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    connector: 1 # Anschlussnummer bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+    remotestart: # Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (optional)
+    idtag: evcc # Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional
-    meter: true # Deaktiveren wenn die Wallbox keinen integrierten Zähler verbaut hat (optional)
-    meterinterval: 4s # optional`} />
+    timeout: 30s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
+
+
+
+<SponsorshipRequired />
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Livo
+
+<DeviceFeatures features="sponsorfree" />
+
+Das Gerät benötigt eine feste IP Adresse.
+
+<DeviceConfig code={`chargers:
+  - name: my_charger
+    type: template
+    template: livo
+    ski: # SKI (Subject Key Identifier)`}  />
 
 
 
@@ -1235,18 +1254,26 @@ Die Wallbox muss sich im "Power" Modus befinden.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Fronius Wattpilot
+## Fronius Wattpilot (OCPP)
 
-<DeviceFeatures features="1p3p,rfid,sponsorfree" />
-
-Benötigt mindestens Firmware 36.3 oder neuer.
+<DeviceFeatures features="sponsorfree" />
 
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
-    template: fronius-wattpilot
-    host: 192.0.2.2 # IP-Adresse oder Hostname
-    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)`}  />
+    template: ocpp-fronius-wattpilot
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
+  - name: my_charger
+    type: template
+    template: ocpp-fronius-wattpilot
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    connector: 1 # Anschlussnummer bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+    remotestart: # Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (optional)
+    idtag: evcc # Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (optional)
+    connecttimeout: 5m # optional
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
 
@@ -1407,7 +1434,7 @@ Bitte das Handbuch zur Verkabelung und Konfiguration genau lesen. Alle Boxen mü
 
 ## Homecharge Homecharger HC11L, HC22L
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="" />
 
 Die Verwendung mit evcc erfordert einen eingebauten Stromzähler (Ausführungen HC11L/HC22L Energy oder Profi).
 Die OCPP-Konfiguration erfolgt über den EFR-SECC-Ladecontroller über die URL http://host/secc.
@@ -1417,17 +1444,22 @@ Den Zugang erfragen Sie bitte beim Hersteller EFR (www.efr.de) oder Ihrem Händl
   - name: my_charger
     type: template
     template: homecharge
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: homecharge
-    stationid: EVB-P12354 # Die Stations-ID der Wallbox (oder des Ladepunkts). Diese ID muss auch Teil der Wallboxkonfiguration für OCPP sein ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Ladepunkt, normalerweise 1 für den ersten Anschluss. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID welche für die Freischaltung der Ladevorgänge an den Ladepunkt zurückgesendet wird (optional)
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    connector: 1 # Anschlussnummer bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+    remotestart: # Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (optional)
+    idtag: evcc # Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -1762,7 +1794,9 @@ Bei Kostal-Systemen mit Smart Energy Meter (KSEM) ist der zusätzliche Aktivieru
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## NRGKick Connect
+## NRGKick
+
+### Connect
 
 <DeviceFeatures features="sponsorfree" />
 
@@ -1777,6 +1811,37 @@ NRGkick Ladeeinheit via HTTP (älter als 2022/2023)
     password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)`}  />
 
 
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### Gen2
+
+<DeviceFeatures features="1p3p,mA" />
+
+<DeviceConfig code={`chargers:
+  - name: my_charger
+    type: template
+    template: nrggen2
+    
+    # Modbus TCP
+    modbus: tcpip
+    id: 1
+    host: 192.0.2.2 # Hostname
+    port: 502 # Port`} advanced={`chargers:
+  - name: my_charger
+    type: template
+    template: nrggen2
+    
+    # Modbus TCP
+    modbus: tcpip
+    id: 1
+    host: 192.0.2.2 # Hostname
+    port: 502 # Port
+    phases1p3p: false # Aktiviert Phasenumschaltung. Erweiterte Funktion "Phasenumschaltung" muss in der NRGkick App aktiviert sein. (optional)`} />
+
+
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -1918,25 +1983,30 @@ Der 'Modbus TCP Server für Energiemanagement-Systeme' muss aktiviert sein. 'Reg
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Orbis Viaris Uni
+## Orbis Viaris
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="" />
 
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
     template: orbis-viaris
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: orbis-viaris
-    stationid: EVB-P12354 # Die Stations-ID der Wallbox (oder des Ladepunkts). Diese ID muss auch Teil der Wallboxkonfiguration für OCPP sein ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Ladepunkt, normalerweise 1 für den ersten Anschluss. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID welche für die Freischaltung der Ladevorgänge an den Ladepunkt zurückgesendet wird (optional)
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    connector: 1 # Anschlussnummer bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+    remotestart: # Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (optional)
+    idtag: evcc # Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -2138,8 +2208,8 @@ DIP Schalter 10 des Controllers muss auf 'ON' gestellt sein. Eine aktuelle Contr
     id: 1
     host: 192.0.2.2 # Hostname
     port: 502 # Port
-    connector: 1 # optional
-    timeout: 10s # optional`} />
+    timeout: 10s # optional
+    connector: 1 # optional`} />
 
 
 
@@ -2331,7 +2401,7 @@ Bitte das Handbuch zur Verkabelung und Konfiguration genau lesen. Alle Boxen mü
 
 <DeviceFeatures features="" />
 
-Erfordert Firmware >= 2.121.5
+Erfordert Firmware >= 2.135
 
 <DeviceConfig code={`chargers:
   - name: my_charger
@@ -2702,11 +2772,11 @@ WARP Firmware v2 erforderlich. Für automatische Phasenumschaltung wird zusätzl
     template: tinkerforge-warp
     host: 192.0.2.2 # IP Adresse oder der Hostname des MQTT Brokers
     port: 1883 # MQTT Broker Port (optional)
-    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
     topic: warp # Topic (ohne / am Anfang) (optional)
     timeout: 30s # Akzeptiere keine Daten die älter sind als dieser Wert (optional)
-    energymanager: # WEM Firmware v2 erforderlich. EnergyManager MQTT Topic (falls installiert) (optional)`} />
+    energymanager: # WEM Firmware v2 erforderlich. EnergyManager MQTT Topic (falls installiert) (optional)
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)`} />
 
 
 
@@ -2732,11 +2802,11 @@ WARP Firmware v2 erforderlich. Für automatische Phasenumschaltung wird zusätzl
     template: tinkerforge-warp
     host: 192.0.2.2 # IP Adresse oder der Hostname des MQTT Brokers
     port: 1883 # MQTT Broker Port (optional)
-    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
     topic: warp # Topic (ohne / am Anfang) (optional)
     timeout: 30s # Akzeptiere keine Daten die älter sind als dieser Wert (optional)
-    energymanager: # WEM Firmware v2 erforderlich. EnergyManager MQTT Topic (falls installiert) (optional)`} />
+    energymanager: # WEM Firmware v2 erforderlich. EnergyManager MQTT Topic (falls installiert) (optional)
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)`} />
 
 
 
@@ -2761,10 +2831,10 @@ Die automatische Phasenumschaltung bei 1p Fahrzeugen muss deaktiviert sein. Sieh
     template: tinkerforge-warp3
     host: 192.0.2.2 # IP Adresse oder der Hostname des MQTT Brokers
     port: 1883 # MQTT Broker Port (optional)
-    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
     topic: warp # Topic (ohne / am Anfang) (optional)
-    timeout: 30s # Akzeptiere keine Daten die älter sind als dieser Wert (optional)`} />
+    timeout: 30s # Akzeptiere keine Daten die älter sind als dieser Wert (optional)
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)`} />
 
 
 
@@ -2789,10 +2859,10 @@ Die automatische Phasenumschaltung bei 1p Fahrzeugen muss deaktiviert sein. Sieh
     template: tinkerforge-warp3
     host: 192.0.2.2 # IP Adresse oder der Hostname des MQTT Brokers
     port: 1883 # MQTT Broker Port (optional)
-    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
     topic: warp # Topic (ohne / am Anfang) (optional)
-    timeout: 30s # Akzeptiere keine Daten die älter sind als dieser Wert (optional)`} />
+    timeout: 30s # Akzeptiere keine Daten die älter sind als dieser Wert (optional)
+    user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+    password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)`} />
 
 
 
@@ -2840,7 +2910,7 @@ Der 'Modbus TCP Server für Energiemanagement-Systeme' muss aktiviert sein. 'Reg
 
 ## Victron
 
-### EV charging station
+### EV Charging Station
 
 <DeviceFeatures features="" />
 
@@ -2863,7 +2933,7 @@ Trage den Host der Wallbox (nicht des GX-Geräts) ein und stelle sicher, dass di
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### EV Charging Station
+### EV Charging Station (via GX)
 
 <DeviceFeatures features="" />
 
@@ -2987,7 +3057,7 @@ DIP Schalter 10 des Controllers muss auf 'ON' gestellt sein. Eine aktuelle Contr
 
 ## wallbox Pulsar Plus, Pulsar Max, Commander 2, Copper SB
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="" />
 
 Anleitung: https://support.wallbox.com/en/knowledge-base/ocpp-activation-and-setup-guide/
 * “OCPP aktivieren” (myWallbox app) bzw. den “OCPP-WebSocket-Verbindung” Schalter (myWallbox Portal) aktivieren
@@ -3000,17 +3070,22 @@ Anleitung: https://support.wallbox.com/en/knowledge-base/ocpp-activation-and-set
   - name: my_charger
     type: template
     template: pulsarplus
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: pulsarplus
-    stationid: EVB-P12354 # Die Stations-ID der Wallbox (oder des Ladepunkts). Diese ID muss auch Teil der Wallboxkonfiguration für OCPP sein ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Ladepunkt, normalerweise 1 für den ersten Anschluss. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID welche für die Freischaltung der Ladevorgänge an den Ladepunkt zurückgesendet wird (optional)
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    connector: 1 # Anschlussnummer bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+    remotestart: # Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (optional)
+    idtag: evcc # Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -3189,6 +3264,31 @@ Optional zusätzlich ein oder mehrere aus
 
 - Dokumentation der Werte für `status A..F`: https://evsim.gonium.net/#der-control-pilot-cp
 
+### Demowallbox
+
+<DeviceFeatures features="sponsorfree" />
+
+Zu Demonstrationszwecken. Wallbox mit festen Werten.
+
+<DeviceConfig code={`chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: A # optional
+    power: 0 # optional
+    enabled: true # optional`} advanced={`chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: A # optional
+    power: 0 # optional
+    enabled: true # optional
+    maxcurrent: 16 # Definiert die maximale Stromstärke pro angeschlossener Phase mit welcher das Fahrzeug geladen werden soll (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
 ### EEBUS kompatible Wallbox
 
 <DeviceFeatures features="mA,sponsorfree" />
@@ -3205,15 +3305,18 @@ Optional zusätzlich ein oder mehrere aus
 
 ### OCPP 1.6J kompatible Wallbox mit Smart Charging Profil
 
-<DeviceFeatures features="sponsorfree" />
+<DeviceFeatures features="mA,rfid,1p3p" />
 
 Bei OCPP verbindet sich die Wallbox (Client) zu evcc (Server).
 Die Wallbox muss daher evcc via Hostname (funktionierende DNS-Auflösung erforderlich!) oder über die IP-Adresse auf Port 8887 erreichen können.
 Standardmäßig wird die erste eingehende Verbindung mit einer beliebigen Ladepunktkennung verwendet.
 Um mehrere Ladepunkte eindeutig zuordnen zu können müssen die jeweilige Stationskennung (`stationid: `) und Anschlussnummer (`connector: `) hinterlegt werden.
 Viele Wallboxen fügen die `stationid` automatisch der Backend-URL hinzu, bei manchen muss dies händisch geschehen `ws://<evcc>:8887/<stationid>`.
-Gegebenenfalls benötigt der Ladepunkt eine vorkonfigurierte (virtuelle) Token-ID/RFID-Kennung (`idtag: `) mit der die Ladevorgänge ohne Authentifizierung gestartet werden können.
-Für Zählermesswerte sollte in der Wallbox ein kurzes Zeitintervall konfiguriert werden.
+Für Zählermesswerte sollte in der Wallbox wenn möglich ein kurzes Zeitintervall (< 10s) konfiguriert werden.
+Nutzen Sie Ihre RFID-Tags (dies ermöglicht z.B. eine Fahrzeugidentifizierung) oder setzen Sie Ihre Wallbox auf "freies Laden" oder "Autostart" um die jeweils für die Ladefreigabe benötigte Transaktion zu erzeugen.
+
+Falls die Wallbox keinerlei Option bietet die Transaktionen lokal zu starten, kann die erweiterte Option `remotestart` genutzt werden um automatisch eine Transaktion zu starten sobald ein Fahrzeug angeschlossen wird.
+Dies sollte nur in Ausnahmefällen erforderlich sein.
 
 Voraussetzungen:
 * Ggf. zuvor konfigurierte OCPP-Profile (z.B. durch eine andere Backend-Anbindung) in der Wallboxkonfiguration entfernen
@@ -3222,28 +3325,28 @@ Voraussetzungen:
 * Keine Verschlüsselung, keine Authentifizierung, kein Passwort
 * Verbindung über das lokale Netzwerk
 
+Die konkrete Konfiguration und der tatsächliche nutzbare Funktionsumfang hängen vom Wallbox-Modell und dessen Software ab.
+
 <DeviceConfig code={`chargers:
   - name: my_charger
     type: template
     template: ocpp
-    timeout: 2m # optional`} advanced={`chargers:
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
   - name: my_charger
     type: template
     template: ocpp
-    stationid: EVB-P12354 # Die Stations-ID der Wallbox (oder des Ladepunkts). Diese ID muss auch Teil der Wallboxkonfiguration für OCPP sein ws://<evcc-address>:8887/<stationid>. (optional)
-    connector: 1 # Ladepunkt, normalerweise 1 für den ersten Anschluss. (optional)
-    idtag: '04E6B78921BBA0' # Token-ID welche für die Freischaltung der Ladevorgänge an den Ladepunkt zurückgesendet wird (optional)
+    stationid: EVB-P12354 # Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form ws://<evcc-adresse>:8887/<stationid> anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    connector: 1 # Anschlussnummer bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+    remotestart: # Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (optional)
+    idtag: evcc # Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (optional)
     connecttimeout: 5m # optional
-    timeout: 2m # optional
-    autostart: # optional
-    nostop: # optional
-    getconfiguration: true # Deaktivierung kann bei einigen Chargern hilfreich sein (optional)
-    bootnotification: false # Aktivierung kann bei einigen Chargern hilfreich sein (optional)
-    meterinterval: # optional
-    metervalues: # optional
-    chargingrateunit: # optional`} />
+    timeout: 30s # optional
+    meterinterval: 10s # optional
+    metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # optional`} />
 
 
+
+<SponsorshipRequired />
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
@@ -3346,10 +3449,10 @@ phases: 1 # ev phases (default 3)
     device: '0001EE89AAD848' # Homematic Geräte Id, wie im CCU Webfrontend angezeigt.
     user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
     password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
     meterchannel: 6 # Kanalnummer des Messwertkanals, wie im CCU Webfrontend angezeigt.
     switchchannel: 3 # Kanalnummer der schaltbaren Steckdose, wie im CCU Webfrontend angezeigt.
     cache: 1s # Bei Problemen mit dem Duty Cycle setze den Cache auf bspw 30s. (optional)
-    standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
     integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
     heating: # Wärmeerzeuger (°C anstatt %) (optional)
     icon: # Icon in der Benutzeroberfläche (optional)`} />
