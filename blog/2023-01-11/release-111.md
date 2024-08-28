@@ -9,6 +9,8 @@ hide_table_of_contents: false
 
 Pünktlich am 11.1. haben wir mit dem Release 0.111 wieder einige neue Funktionen am Start die wir euch hier kurz vorstellen möchten.
 
+<!-- truncate -->
+
 ## 🧞‍♂️ Neuer Ladeplaner: Erneuerbaren Netzstrom nutzen
 
 Die Zielladenfunktion gibt es in evcc schon seit einiger Zeit. Damit kannst du eine Zielzeit definieren zu der das verbundene Fahrzeug einen bestimmten Ladestand erreichen soll. Die Funktion ist bspw. praktisch um den Wagen vor längeren Fahrten pünktlich zur Abfahrt aufzuladen.

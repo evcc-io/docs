@@ -37,9 +37,9 @@ import { themes as prismThemes } from "prism-react-renderer";
           },
           blog: {
             showReadingTime: true,
-            blogSidebarTitle: "Letzte Beiträge",
-            blogSidebarCount: 15,
-            postsPerPage: 5,
+            blogSidebarTitle: "Alle Beiträge",
+            blogSidebarCount: "ALL",
+            postsPerPage: "ALL",
             editUrl: "https://github.com/evcc-io/docs/tree/main",
             feedOptions: {
               type: "all",

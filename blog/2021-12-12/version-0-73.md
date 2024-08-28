@@ -7,6 +7,8 @@ hide_table_of_contents: false
 
 Heute gibt es ein kleines Update hauptsächlich mit einigen Fehlerkorrekturen und weiteren Verbesserungen.
 
+<!-- truncate -->
+
 ## `evcc configure`
 
 Das Kommando zur geführten Erstellung einer Konfigurationsdatei und die darunterliegenden Templates hat folgende Verbesserungen erhalten:

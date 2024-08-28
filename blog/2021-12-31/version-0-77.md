@@ -7,6 +7,8 @@ hide_table_of_contents: false
 
 Auf den letzten Metern des Jahres 2021 kommt doch nochmals eine Aktualisierung mit ein paar Fehlerkorrekturen. Das Jahr soll ja schließlich positiv enden ;)
 
+<!-- truncate -->
+
 ## Fehlerkorrekturen
 
 Gegenüber der Version 0.76 haben wir Korrekturen für die Verwendung einiger Geräte und der Handhabung von PV Timern in der UI eingepflegt. Schaut euch gerne über den Changelog Link unten eine detaillierte Auflistung an.

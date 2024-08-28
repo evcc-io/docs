@@ -7,6 +7,8 @@ hide_table_of_contents: false
 
 Heute gibt es zum Jahresende nochmals eine Aktualisierung mit einigen Neuerungen.
 
+<!-- truncate -->
+
 ## Weitere Fahrzeuge und Wallbox
 
 Es werden nun die Dacia und Smart EQ EVs unterstützt, ebenso die Wallbox Innogy eBox.

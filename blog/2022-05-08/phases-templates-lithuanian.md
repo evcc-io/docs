@@ -7,6 +7,8 @@ hide_table_of_contents: false
 
 Seit dem letzten Blogartikel sind schon wieder ein paar Monate vergangen. Wird also Zeit, dass wir hier mal wieder eine kurze Zusammenfassung und einen Überblick über das geben was sich bei evcc in den letzten elf Releases (v0.81 bis v0.91) getan an.
 
+<!-- truncate -->
+
 ## Neu unterstützte Geräte
 
 Die Liste der von evcc unterstützten Hardware wächst fleißig weiter.

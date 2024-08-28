@@ -13,6 +13,8 @@ Die Oberfläche zeigt euch nun die im Hintergrund laufenden Timer an:
 
 ![Timer Phasenumschaltung](1p3p.png)
 
+<!-- truncate -->
+
 - Im PV Modus:
   - Wann wird das Laden unterbrochen
   - Wann wird mit dem Laden wieder begonnen
