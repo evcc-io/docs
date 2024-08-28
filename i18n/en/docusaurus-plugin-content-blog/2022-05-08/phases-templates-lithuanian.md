@@ -7,6 +7,8 @@ hide_table_of_contents: false
 
 It's been a few months since the last blog post. So it's time to give you a short summary and an overview of what has happened at evcc in the last eleven releases (v0.81 to v0.91).
 
+<!-- truncate -->
+
 ## New supported devices
 
 The list of hardware supported by evcc is growing steadily.

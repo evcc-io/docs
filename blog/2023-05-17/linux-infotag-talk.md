@@ -9,6 +9,8 @@ hide_table_of_contents: false
 
 Ende April fand, nach einer langen Coronapause, der [19. Linux Infotag](https://www.luga.de/static/LIT-2023/) statt. Der Infotag ist eine Open-Source-Community-Veranstaltung, die von der [Linux User Group Augsburg e.V. (LUGA)](https://www.luga.de/) organisiert wird.
 
+<!-- truncate -->
+
 ## Video-Aufzeichnung ist jetzt verfügbar
 
 Neben vielen anderen spannenden Themen hatten wir dieses Jahr die Möglichkeit unser Projekt vorzustellen. Inzwischen ist auch die Video-Aufzeichnung verfügbar.

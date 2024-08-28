@@ -7,6 +7,8 @@ hide_table_of_contents: false
 
 Es sind schon wieder siebzehn Releases seit unserem letzten Update hier im Blog vergangen. Wie immer ist eine Menge passiert. Einige Bugfixes, aber auch viele neue Integrationen und Funktionen sind dazu gekommen. Zu unseren Highlights der letzten Monate in einem späteren Blogartikel mehr.
 
+<!-- truncate -->
+
 ## 🌱 Nachhaltige Open Source Entwicklung
 
 evcc hat als kleines Hobbyprojekt angefangen, weil wir unzufrieden mit den bestehenden Lösungen für PV-Überschussladen waren und uns etwas Besseres bauen wollten. Inzwischen macht evcc aber nicht nur unser privates Sonnenladen leichter. Es gibt vermutlich mehrere tausend Installationen, die morgens das Auto wecken, sobald die Sonne auf die heimische PV-Anlage scheint. Der Gedanke macht uns sehr froh.
