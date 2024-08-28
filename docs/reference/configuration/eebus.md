@@ -4,10 +4,6 @@ sidebar_position: 13
 
 # `eebus`
 
-:::warning
-EEBUS Unterstützung ist noch im experimentellen Stadium. Es wird hier sicher zu dem einen oder anderen Problem kommen!
-:::
-
 **Beispiel**:
 
 ```yaml
