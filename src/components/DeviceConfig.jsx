@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import s from "./DeviceConfig.module.css";
+import CodeBlock from "@theme/CodeBlock";
 
 const ShowHideCode = ({ code, advanced }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -9,10 +10,12 @@ const ShowHideCode = ({ code, advanced }) => {
   };
 
   return (
-    <div>
-      <pre>
-        <code>{showAdvanced ? advanced : code}</code>
-        {advanced ? (
+    <div className={s.root}>
+      <CodeBlock className="language-yaml">
+        {showAdvanced ? advanced : code}
+      </CodeBlock>
+      {advanced ? (
+        <div className={s.advanced}>
           <button
             onClick={toggleShowAdvanced}
             className={s.advancedButton}
@@ -22,8 +25,8 @@ const ShowHideCode = ({ code, advanced }) => {
               {showAdvanced ? "hide advanced options" : "show advanced options"}
             </u>
           </button>
-        ) : null}
-      </pre>
+        </div>
+      ) : null}
     </div>
   );
 };
