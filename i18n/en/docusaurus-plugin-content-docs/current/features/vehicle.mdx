@@ -6,57 +6,53 @@ import Screenshot from "../../../../../src/components/Screenshot";
 
 # Vehicles
 
-:::warning work in progress
-This page needs to be translated from German to English.
-:::
+If you configure your vehicle or vehicles in evcc, additional functions are available to you.
+You can configure [Minimum Charge & Limits](./limits), use [Charge Planner](./plans) and get a detailed evaluation by vehicle in the [Charging Sessions](./sessions), including information such as mileage.
 
-Konfigurierst du dein Fahrzeug, bzw. deine Fahrzeuge in evcc, stehen dir zusätzliche Funktionen zur Verfügung.
-Du kannst [Mindestladung & Ladelimit](./limits) konfigurieren, [Ladepläne](./plans) nutzen und bekommst in den [Ladevorgängen](./sessions) eine detaillierte Auswertung nach Fahrzeug inkl. Informationen wie Kilometerstände.
+Storing vehicles is optional. Since evcc controls the charging process via the wallbox in most cases, PV and price-dependent charging also works without vehicle configuration.
 
-Das Hinterlegen von Fahrzeugen ist optional. Da evcc in den meisten Fällen den Ladevorgang über die Wallbox steuert, klappt PV- und preisabhängiges Laden auch ohne Fahrzeugkonfiguration.
+## Vehicle types
 
-## Fahrzeugtypen
+The available functions depend on the vehicle type. The following types are distinguished:
 
-Die verfügbaren Funktionen hängen vom Fahrzeugtyp ab. Die folgenden Typen werden unterschieden:
+### Guest vehicle
 
-### Gastfahrzeug
+If you have not configured a vehicle, the guest vehicle will be displayed at the charging point.
+This is a standard vehicle that does not support any special functions.
+Even if you have configured your own vehicle, you can switch to the guest vehicle at any time.
+This is useful, for example, if an unconfigured vehicle (e.g. a spontaneous visitor) charges at your wallbox.
+evcc then uses the standard values ​​for power and phases configured at the charging point.
+Under [Charging Sessions](./sessions), this charge is assigned to the guest vehicle.
 
-Hast du kein Fahrzeug konfiguriert, wird am Ladepunkt das Gastfahrzeug angezeigt.
-Dies ist ein Standardfahrzeug, das keine speziellen Funktionen unterstützt.
-Selbst wenn du ein eigenes Fahrzeug konfiguriert hast, kannst du jederzeit auf das Gastfahrzeug umschalten.
-Dies ist bspw. sinnvoll, wenn ein nicht konfiguriertes Fahrzeug (bspw. spontaner Besuch) an deiner Wallbox lädt.
-evcc verwendet dann die am Ladepunkt konfigurierten Standardwerte für Leistung und Phasen.
-Unter [Ladevorgänge](./sessions) wird diese Ladung dem Gastfahrzeug zugeordnet.
+### Vehicles without API (offline)
 
-### Fahrzeuge ohne API (Offline)
-
-Hat dein Fahrzeug keine Online-Schnittstelle oder am Ladepunkt keine Internetverbindung, kannst du es als Offline-Fahrzeug konfigurieren.
-Dies erfolgt aktuell über die `evcc.yaml`:
+If your vehicle does not have an online interface or no internet connection at the charging point, you can configure it as an offline vehicle.
+This is currently done via the `evcc.yaml`:
 
 ```yaml
 vehicles:
   - name: my_honda
-    title: grüner Honda e
+    title: Green Honda e
     type: template
     template: offline
     capacity: 28.5 # in kWh
 ```
 
-Damit erscheint das Fahrzeug als "grüner Honda e" in der UI.
-Durch die nun bekannte Akkukapazität kann bspw. der Ladefortschritt und das Ladelimit auch in Prozent (bspw. +25%) dargestellt werden.
+This means that the vehicle appears as a "green Honda e" in the UI.
+Now that the battery capacity is known, the charging progress and the charging limit can also be shown in percent (e.g. +25%).
 
-Hinweis: Diese Funktion kannst du auch für Fremdfahrzeuge nutzen (Freunde, Familie, Miet- oder Firmenwagen), zu denen du keinen API-Zugriff hast.
+Note: You can also use this function for third-party vehicles (friends, family, rental or company cars) to which you do not have API access.
 
-### Fahrzeuge mit API (Online)
+### Vehicles with API (online)
 
-Hat dein Fahrzeug eine Online-Schnittstelle, ist es sinnvoll, diese auch in evcc zu konfigurieren.
-Unter [Fahrzeuge](../devices/vehicles) findest du eine Liste aller unterstützten Hersteller.
-Die empfohlene Konfiguration erfolgt auch hier über die `evcc.yaml`. Hier ein Beispiel für einen Audi:
+If your vehicle has an online interface, it makes sense to configure this in evcc as well.
+You can find a list of all supported manufacturers under [Vehicles](../devices/vehicles).
+The recommended configuration is also done here via `evcc.yaml`. Here is an example for an Audi:
 
 ```yaml
 vehicles:
   - name: my_audi
-    title: roter Audi Q4 e-tron
+    title: Red Audi Q4 e-tron
     type: template
     template: audi
     user: info@example.org
@@ -64,97 +60,97 @@ vehicles:
     capacity: 77 # in kWh
 ```
 
-evcc hat jetzt Zugriff auf den aktuellen Ladestand (SoC).
-Abhängig vom Hersteller sind auch weitere Informationen wie Ladestatus, Fahrzeuglimits, Kilometerstand, Klimatisierung und geschätzte Reichweite verfügbar.
+evcc now has access to the current state of charge (SoC).
+Depending on the manufacturer, other information such as charging status, vehicle limits, mileage, climate control and estimated range are also available.
 
-:::note Hinweis
-Um den Fahrzeugakku zu schonen, aktualisiert evcc den Ladestand nur, wenn ein Fahrzeug am Ladepunkt angeschlossen ist.
-Je nach Hersteller kann ein API-Zugriff zum Aufwecken des Fahrzeugs führen und den Standby-Verbrauch signifikant erhöhen.
-Dieses Verhalten kannst du über den [`poll` Parameter](../reference/configuration/loadpoints#poll) am Ladepunkt verändern.
+:::note Note
+To protect the vehicle battery, evcc only updates the charge level when a vehicle is connected to the charging point.
+Depending on the manufacturer, API access can wake up the vehicle and significantly increase standby consumption.
+You can change this behavior using the [`poll` parameter](../reference/configuration/loadpoints#poll) at the charging point.
 :::
 
-## Mehrere Fahrzeuge
+## Multiple vehicles
 
-Du kannst in evcc mehrere Fahrzeuge und mehrere Ladepunkte konfigurieren.
-Für die Zuordnung von Fahrzeugen zu Ladepunkten gibt es verschiedene Möglichkeiten:
+You can configure multiple vehicles and multiple charging points in evcc.
+There are various options for assigning vehicles to charging points:
 
-### Standardfahrzeug
+### Standard vehicle
 
-Hat jedes Fahrzeug einen eigenen Ladepunkt, kannst du das Fahrzeug als Standardfahrzeug am Ladepunkt konfigurieren.
-Das ist die einfachste und empfohlene Konfiguration.
-evcc geht bei einem neuen Ladevorgang davon aus, dass es sich um das Standardfahrzeug handelt.
-Ist dies einmal nicht der Fall (bspw. Gastfahrzeug), kannst du das Fahrzeug in der UI umschalten.
+If each vehicle has its own charging point, you can configure the vehicle as the standard vehicle at the charging point.
+This is the simplest and recommended configuration.
+When a new charging process starts, evcc assumes that it is the standard vehicle.
+If this is not the case (e.g. guest vehicle), you can switch the vehicle in the UI.
 
 ```yaml
 loadpoints:
   - title: Garage
-    vehicle: my_audi # Standardfahrzeug
+    vehicle: my_audi # Standard vehicle
     ...
 ```
 
-### Zuordnung über die UI
+### Assignment via the UI
 
-Das aktuell zugeordnete Fahrzeug wird in der UI am jeweiligen Ladepunkt angezeigt.
-Durch Klick auf den Fahrzeugnamen kannst du die Zuordnung ändern.
-Diese Auswahl gilt dann für den aktuellen Ladevorgang.
+The currently assigned vehicle is displayed in the UI at the respective charging point.
+You can change the assignment by clicking on the vehicle name.
+This selection then applies to the current charging process.
 
 <Screenshot
   name="features/screenshots/vehicle-select"
-  caption="Ändern eines Fahrzeuges am Ladepunkt"
+  caption="Changing a vehicle at the charging point"
 />
 
-### Automatische Erkennung
+### Automatic detection
 
-Laden mehrere Fahrzeuge an einem Ladepunkt wird beim Anstecken die automatische Erkennung genutzt.
-Dafür wird der Ladezustand aller konfigurierten Fahrzeuge abgefragt und das plausibelste Fahrzeug ausgewählt.
-Hat die Erkennung ein falsches Fahrzeug ausgewählt (bspw. weil es an einem andern Ladepunkt geladen wird), kannst du die Zuordnung manuell korrigieren.
+If several vehicles are charging at one charging point, automatic detection is used when plugging in.
+The charging status of all configured vehicles is checked and the most plausible vehicle is selected.
+If the detection has selected the wrong vehicle (e.g. because it is charging at a different charging point), you can correct the assignment manually.
 
-### Erkennung via RFID
+### Detection via RFID
 
-Hat deine Wallbox einen RFID-Kartenleser, kannst du auch diesen für die Zuordnung nutzen.
-Hierbei ordnet man eine (oder mehrere) RFID-Karten einem bestimmten Fahrzeug zu.
-Jedes Mal, wenn das Fahrzeug wieder an die Wallbox angeschlossen wird, muss der Ladevorgang zunächst mit der entsprechenden RFID-Karte an der Wallbox freigeschaltet werden.
+If your wallbox has an RFID card reader, you can also use this for the assignment.
+This involves assigning one (or more) RFID cards to a specific vehicle.
+Every time the vehicle is connected to the wallbox again, the charging process must first be activated with the corresponding RFID card on the wallbox.
 
-evcc bekommt von der Wallbox eine eindeutige Identifikationskennung.
-Abhängig vom Hersteller ist das direkt die RFID-Kennung oder eine abgeleitete interne Kennung wie bspw. ein Benutzername aus der Wallboxkonfiguration.
-Über den `evcc charger` Befehl kannst du den aktuellen `Identifier` deiner Wallbox auslesen.
-Diese hinterlegst du dann in der `evcc.yaml` am gewünschten Fahrzeug:
+evcc receives a unique identification code from the wallbox.
+Depending on the manufacturer, this is either the RFID code or a derived internal code such as a user name from the wallbox configuration.
+You can read the current identifier of your wallbox using the `evcc charger` command.
+You then store this in the `evcc.yaml` on the desired vehicle:
 
 ```yaml
 vehicles:
   - name: vehicle_one
     ...
     identifiers:
-      - 1234567890 # über `evcc charger` ermittelt
+      - 1234567890 # determined via `evcc charger`
 ```
 
-### Erkennung via Plug & Charge
+### Detection via Plug & Charge
 
-Unterstützt deine Wallbox den ISO 15118 Standard, kann die Erkennung auch direkt über das Ladekabel erfolgen.
-Aktuell sind auf dem Markt aber nur sehr wenige Wallboxen mit dieser Funktion verfügbar.
+If your wallbox supports the ISO 15118 standard, detection can also be carried out directly via the charging cable.
+However, there are currently very few wallboxes available on the market with this function.
 
-:::note Hinweis
-In der Wallbox muss das Feature "PLC-Verbindung zum Fahrzeug" aktiviert sein.
+:::note Note
+The "PLC connection to the vehicle" feature must be activated in the wallbox.
 :::
 
-Die Einrichtung erfolgt hier ähnlich wie bei der RFID-Erkennung.
-Das Fahrzeug muss mit der Wallbox verbunden sein.
-Über den `evcc charger` Befehl kannst du den aktuellen `Identifier` deiner Wallbox auslesen.
-Diesen kannst du dann in der `evcc.yaml` einem Fahrzeug zuordnen:
+The setup is similar to RFID detection.
+The vehicle must be connected to the wallbox.
+You can use the `evcc charger` command to read the current `identifier` of your wallbox.
+You can then assign this to a vehicle in the `evcc.yaml`:
 
 ```yaml
 vehicles:
   - name: vehicle_one
     ...
     identifiers:
-      - 01:23:45:67:89:00 # über `evcc charger` ermittelt
+      - 01:23:45:67:89:00 # determined via `evcc charger`
 ```
 
-:::note Hinweis
-Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine eigentlich eindeutige Hardware-Adresse (MAC-Adresse) zurück.
-Manche Hersteller wie VW und Audi ändern diese aber jeden Tag auf einen anderen Zufallswert.
+:::note Note
+If the vehicle and the wallbox do not support Plug & Charge, the vehicles return a unique hardware address (MAC address).
+However, some manufacturers such as VW and Audi change this to a different random value every day.
 
-Für diesen Fall kann man eine Wildcard verwenden und nur den sich nicht ändernden Teil angeben:
+In this case, you can use a wildcard and only specify the part that does not change:
 
 ```yaml
 vehicles:
@@ -164,21 +160,21 @@ vehicles:
     - 01:23:45:*
 ```
 
-Dies funktioniert natürlich nur, wenn dies nicht bei mehreren vorhandenen Fahrzeugen auftritt und sich der angegebene Anfangsteil des Wertes jeweils unterscheidet.
+Of course, this only works if this does not occur in several existing vehicles and the specified initial part of the value is different in each case.
 :::
 
-## Klimatisierung
+## Air conditioning
 
-Bei manchen Fahrzeugen kann evcc über die Online-Verbindung ebenfalls erkennen, ob das Fahrzeug gerade eine Vorklimatisierung durchführt.
-In diesem Fall wird die technisch an der Wallbox niedrigste mögliche Leistung freigegeben, damit das Fahrzeug mit dem Strom über die Wallbox klimatisieren kann.
+For some vehicles, evcc can also detect via the online connection whether the vehicle is currently performing pre-air conditioning.
+In this case, the lowest possible power is released on the wallbox so that the vehicle can air condition using the power from the wallbox.
 
-Dabei kann es vorkommen, dass die Klimatisierung im Fahrzeug weniger als die freigegebene Leistung benötigt.
-Dann verwendet das Fahrzeug die restliche verfügbare Leistung, um die Batterie weiter zu laden, auch wenn eine festgelegte Begrenzung des Ladezustandes bereits erreicht wurde.
+It can happen that the air conditioning in the vehicle requires less than the released power.
+The vehicle then uses the remaining available power to continue charging the battery, even if a specified limit on the state of charge has already been reached.
 
-Sobald die Klimatisierung als beendet erkannt wird, wird die Wallbox wieder gesperrt, sodass das Fahrzeug keinen weiteren Strom über die Wallbox beziehen kann, falls nicht ohnehin gerade geladen wird.
+As soon as the air conditioning is recognized as finished, the wallbox is locked again so that the vehicle cannot draw any more power from the wallbox unless it is already charging.
 
-:::note Anmerkung
-Dies gilt nur für die Kombination von Fahrzeugen und Wallboxen, die über den Standard IEC 61851 kommunizieren. Dies ist heute die Regel.
+:::note Note
+This only applies to the combination of vehicles and wallboxes that communicate via the IEC 61851 standard. This is the rule today.
 
-Bei Fahrzeugen und Wallboxen, die über den Standard ISO 15118 kommunizieren, bekommt das Fahrzeug genau die Energiemenge, welche es direkt an der Wallbox anfragt.
+For vehicles and wallboxes that communicate via the ISO 15118 standard, the vehicle receives exactly the amount of energy that it requests directly from the wallbox.
 :::
