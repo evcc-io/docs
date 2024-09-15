@@ -1,17 +1,18 @@
 # evcc docs
 
-Official (german) documentation repository of [evcc](https://evcc.io).
+Official documentation repository of [evcc](https://evcc.io).
 
 ## General
 
 - The source content of the folder `templates` is the `templates/docs` folder in the [evcc repository](https://github.com/evcc-io/evcc)
 - We recommend to test changes locally, use the instructions below to run the documentation page locally as you can see how the changes will look like on the web page while you make changes.
+- English translation: If possible please provide the translation in English as well to ensure that the content does not get out of sync.
 
 ## Local setup
 
 First clone the repository, then follow with the following steps.
 
-**Requirement:** You need to have [`nodejs`](https://nodejs.org/en/) (version 16) and `npm` installed (comes with `nodejs`).
+**Requirement:** You need to have [`nodejs`](https://nodejs.org/en/) (version >= 22) and `npm` installed (comes with `nodejs`).
 
 ### Installation
 
