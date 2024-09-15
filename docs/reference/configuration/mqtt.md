@@ -6,7 +6,7 @@ sidebar_position: 14
 
 Stellt die Konnektivität mit einem MQTT-Broker her.
 Bei bestehender Verbindung pusht evcc automatisch alle internen Werte via MQTT-Broker auf das angegebene Topic und empfängt dort auch Änderungen.
-Siehe dazu auch die Dokumentation zur [`MQTT API`](/docs/reference/api#mqtt-api).
+Siehe dazu auch die Dokumentation zur [`MQTT API`](/docs/integrations/mqtt-api).
 
 ---
 

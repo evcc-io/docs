@@ -154,5 +154,18 @@ import { themes as prismThemes } from "prism-react-renderer";
           contextualSearch: true,
         },
       }),
+    plugins: [
+      [
+        "@docusaurus/plugin-client-redirects",
+        {
+          redirects: [
+            {
+              to: "/docs/integrations/rest-api",
+              from: "/docs/reference/api",
+            },
+          ],
+        },
+      ],
+    ],
   }
 );

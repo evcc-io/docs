@@ -24,7 +24,7 @@ evcc is installed onto a system in the local network, so that it can communicate
 - Status [Notifications](/docs/reference/configuration/messaging) via [Telegram](https://telegram.org), [PushOver](https://pushover.net) and [many more](https://containrrr.dev/shoutrrr/)
 - Data Export via [InfluxDB](https://www.influxdata.com) and [Grafana](https://grafana.com/grafana/)
 - Stepless regulation of charging flows with supported wall boxes (e.g the smartWB's [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) functionality)
-- Rest & MQTT [APIs](/docs/reference/api) for integration into other home automation systems (such as [Home Assistant](https://github.com/evcc-io/evcc-hassio-addon))
+- [REST](/docs/integrations/rest-api) & [MQTT](/docs/integrations/rest-api) APIs for integration into other home automation systems (such as [Home Assistant](/docs/integrations/home-assistant))
 
 ## Requirements
 
