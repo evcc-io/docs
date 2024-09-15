@@ -23,9 +23,3 @@ Hier wird beschrieben wie man durch ein Plugin ein bisher nicht unterstütztes G
 Hier befindet sich die Modbus Dokumentation, welche in verschiedenen Bereichen genutzt werden kann.
 
 [Weiterlesen...](./reference/modbus)
-
-### API
-
-Hier befindet sich die Dokumentation um auf evcc von anderen Systemen zuzugreifen und zu steuern.
-
-[Weiterlesen...](./reference/api)

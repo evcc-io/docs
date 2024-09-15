@@ -23,7 +23,7 @@ Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit 
 - Status [Benachrichtigungen](/docs/reference/configuration/messaging) über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und [viele mehr](https://containrrr.dev/shoutrrr/)
 - Datenanalyse mit [InfluxDB](https://www.influxdata.com) und [Grafana](https://grafana.com/grafana/)
 - Stufenlose Regelung der Ladeströme mit unterstützten Wallboxen (z.b. bei smartWB als [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) bezeichnet)
-- REST- und MQTT-[APIs](/docs/reference/api) zur Integration in andere Heimautomationssysteme (z.B. [HomeAssistant](https://github.com/evcc-io/evcc-hassio-addon))
+- [REST](/docs/integrations/rest-api)- und [MQTT](/docs/integrations/mqtt-api)-APIs zur Integration in andere Heimautomationssysteme (z.B. [HomeAssistant](/docs/integrations/home-assistant))
 
 ## Anforderungen
 
