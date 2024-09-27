@@ -12,16 +12,16 @@ const TARIFF_GROUPS = {
 };
 
 const CODE_PREAMBLES = {
-  vehicle: "vehicles:\n  - name: my_car",
-  charger: "chargers:\n  - name: my_charger",
-  meter: "meters:\n  - name: my_meter",
-  grid: "meters:\n  - name: my_grid",
-  pv: "meters:\n  - name: my_pv",
-  battery: "meters:\n  - name: my_battery",
-  charge: "meters:\n  - name: my_charger",
-  aux: "meters:\n  - name: my_aux",
-  price: "tariffs:\n  grid:",
-  co2: "tariffs:\n  co2:",
+  vehicle: "vehicles:\n    - name: my_car",
+  charger: "chargers:\n    - name: my_charger",
+  meter: "meters:\n    - name: my_meter",
+  grid: "meters:\n    - name: my_grid",
+  pv: "meters:\n    - name: my_pv",
+  battery: "meters:\n    - name: my_battery",
+  charge: "meters:\n    - name: my_charger",
+  aux: "meters:\n    - name: my_aux",
+  price: "tariffs:\n    grid:",
+  co2: "tariffs:\n    co2:",
 };
 
 const TRANSLATIONS = {
@@ -44,7 +44,7 @@ function readTemplates(path) {
 }
 
 function indent(code) {
-  return code.replace(/^/gm, "    ");
+  return code.replace(/^/gm, "      ");
 }
 
 function templateContent(entry, type) {
