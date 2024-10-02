@@ -6,7 +6,7 @@ Generate CLI documentation in markdown format
 evcc gendoc <output-dir> [flags]
 ```
 
-## Options inherited from parent commands
+# Options inherited from parent commands
 
 ```
   -c, --config string   Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
@@ -16,7 +16,7 @@ evcc gendoc <output-dir> [flags]
       --log-headers     Log headers
 ```
 
-## See also
+# See also
 
 * [evcc](evcc.md)	 - evcc - open source solar charging
 
