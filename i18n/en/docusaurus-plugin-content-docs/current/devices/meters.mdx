@@ -375,7 +375,9 @@ If your system isn't listed here, that might mean that it is 100% SunSpec-compat
 
 ## Alpha ESS Storion SMILE
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
+
+To use active battery control, times for grid charging must be defined once via the web interface or app. (Settings->Function settings->Grid charging/discharging) A continuous time period should be entered here (e.g.: Charging time 1 00:00-23:00, Charging time 2 23:00-00:00). However, deactivate the "Grid charging" switch. The actual control takes place via evcc. Discharge stop is realized via a scheduled grid charge with a target SoC of 10%. Alternatively, it can also be configured via Modbus. To do this, set the registers `2134,2142,2135,2136,2144,2137,2175` to the values `0,0,23,0,23,0,0,0,0`.
 
 <Tabs>
 <TabItem value="grid" label="Netz" default>
@@ -403,7 +405,32 @@ If your system isn't listed here, that might mean that it is 100% SunSpec-compat
       modbus: tcpip
       id: 85
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: alpha-ess-smile
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 85
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      minsoc: 10 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
+      maxsoc: 100 # optional`} />
 
 
 
@@ -433,7 +460,32 @@ If your system isn't listed here, that might mean that it is 100% SunSpec-compat
       modbus: tcpip
       id: 85
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: alpha-ess-smile
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 85
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      minsoc: 10 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
+      maxsoc: 100 # optional`} />
 
 
 
@@ -487,7 +539,9 @@ If your system isn't listed here, that might mean that it is 100% SunSpec-compat
       id: 85
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      capacity: 50 # Battery capacity in kWh (optional)`} />
+      capacity: 50 # Battery capacity in kWh (optional)
+      minsoc: 10 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
+      maxsoc: 100 # optional`} />
 
 
 
@@ -1872,18 +1926,18 @@ Username and password are identical to Web Portal or My E3/DC App access. Key (=
       usage: grid
       host: 192.0.2.2 # IP address or hostname
       port: 5033 # Port (optional)
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      key: # optional`} advanced={`meters:
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      key:`} advanced={`meters:
     - name: my_grid
       type: template
       template: e3dc-rscp
       usage: grid
       host: 192.0.2.2 # IP address or hostname
       port: 5033 # Port (optional)
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      key: # optional
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      key:
       dischargelimit: # Limits discharge power in 'Hold' battery mode (optional)`} />
 
 
@@ -1898,18 +1952,18 @@ Username and password are identical to Web Portal or My E3/DC App access. Key (=
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       port: 5033 # Port (optional)
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      key: # optional`} advanced={`meters:
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      key:`} advanced={`meters:
     - name: my_pv
       type: template
       template: e3dc-rscp
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       port: 5033 # Port (optional)
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      key: # optional
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      key:
       dischargelimit: # Limits discharge power in 'Hold' battery mode (optional)`} />
 
 
@@ -1924,18 +1978,18 @@ Username and password are identical to Web Portal or My E3/DC App access. Key (=
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       port: 5033 # Port (optional)
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      key: # optional`} advanced={`meters:
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      key:`} advanced={`meters:
     - name: my_battery
       type: template
       template: e3dc-rscp
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       port: 5033 # Port (optional)
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      key: # optional
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      key:
       dischargelimit: # Limits discharge power in 'Hold' battery mode (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
 
@@ -2726,6 +2780,8 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
 ### Solar API V1
 
 <DeviceFeatures features="battery-control" />
+
+Solar API should only be used as fallback. Integration via Modbus is preferred.
 
 Username and password are only required for active battery control.
 
@@ -6533,7 +6589,7 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
 
 ### HYD 3…6K-EP
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 It is recommended to establish the connection via a LSE-3 logger stick using ModBus TCP (LSW-3 WiFi stick is not supported). If you are connecting via serial RS485 using the inverter's COM port and a proper adapter note that on the inverter's side you have to take care of a proper termination of the RS485 bus.
 
@@ -6658,7 +6714,7 @@ It is recommended to establish the connection via a LSE-3 logger stick using Mod
 
 ### HYD 5…20K-3PH
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 It is recommended to establish the connection via a LSE-3 logger stick using ModBus TCP (LSW-3 WiFi stick is not supported). If you are connecting via serial RS485 using the inverter's COM port and a proper adapter note that on the inverter's side you have to take care of a proper termination of the RS485 bus.
 
@@ -6783,7 +6839,7 @@ It is recommended to establish the connection via a LSE-3 logger stick using Mod
 
 ### Inverter, Hybrid Inverter
 
-<DeviceFeatures features="battery-control" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="grid" label="Netz" default>
@@ -6906,7 +6962,7 @@ It is recommended to establish the connection via a LSE-3 logger stick using Mod
 
 ### SOFAR 5…24KTL-G3
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 It is recommended to establish the connection via a LSE-3 logger stick using ModBus TCP (LSW-3 WiFi stick is not supported). If you are connecting via serial RS485 using the inverter's COM port and a proper adapter note that on the inverter's side you have to take care of a proper termination of the RS485 bus.
 
@@ -7031,7 +7087,7 @@ It is recommended to establish the connection via a LSE-3 logger stick using Mod
 
 ### SOFAR 80…136KTL
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 It is recommended to establish the connection via a LSE-3 logger stick using ModBus TCP (LSW-3 WiFi stick is not supported). If you are connecting via serial RS485 using the inverter's COM port and a proper adapter note that on the inverter's side you have to take care of a proper termination of the RS485 bus.
 
@@ -10221,7 +10277,7 @@ An externally connected S0 generation meter is required to record the solar prod
 
 ## ZCS Azzurro Inverter, Hybrid Inverter
 
-<DeviceFeatures features="battery-control" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="grid" label="Netz" default>

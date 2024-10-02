@@ -374,7 +374,9 @@ Die meisten modernen PV-Technikkomponenten, insbesondere Wechselrichter und Batt
 
 ## Alpha ESS Storion SMILE
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
+
+Um die aktive Ladesteuerung zu nutzen muss einmalig über das Webinterface oder App Zeiten für das Netzladen definiert werden. (Einstellungen->Funktionseinstellungen->Netzladen/Entladen) Hier sollte ein durchgehender Zeitraum (z.B: Ladezeit 1 00:00-23:00,   Ladezeit 2 23:00-00:00) eingetragen werden. Den Schalter "Netzladen" aber deaktivieren. Die eigentliche Steuerung erfolgt über evcc. Der Entladestopp wird über eine geplante Netzladung mit einem Ziel-SoC von 10% realisiert. Alternativ können die Zeiten auch über Modbus konfiguriert werden. Dafür die Register `2134,2142,2135,2136,2144,2137,2175` auf die Werte `0,0,23,0,23,0,0,0` setzen.
 
 <Tabs>
 <TabItem value="grid" label="Netz" default>
@@ -402,7 +404,32 @@ Die meisten modernen PV-Technikkomponenten, insbesondere Wechselrichter und Batt
       modbus: tcpip
       id: 85
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: alpha-ess-smile
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 85
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      minsoc: 10 # Ladung mit maximaler Geschwindigkeit bis zu dem angegeben Ladestand unabhängig PV-Erzeugung, wenn der Lademodus nicht auf 'Aus' steht (optional)
+      maxsoc: 100 # optional`} />
 
 
 
@@ -432,7 +459,32 @@ Die meisten modernen PV-Technikkomponenten, insbesondere Wechselrichter und Batt
       modbus: tcpip
       id: 85
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: alpha-ess-smile
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 85
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 85
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      minsoc: 10 # Ladung mit maximaler Geschwindigkeit bis zu dem angegeben Ladestand unabhängig PV-Erzeugung, wenn der Lademodus nicht auf 'Aus' steht (optional)
+      maxsoc: 100 # optional`} />
 
 
 
@@ -486,7 +538,9 @@ Die meisten modernen PV-Technikkomponenten, insbesondere Wechselrichter und Batt
       id: 85
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      capacity: 50 # Akkukapazität in kWh (optional)`} />
+      capacity: 50 # Akkukapazität in kWh (optional)
+      minsoc: 10 # Ladung mit maximaler Geschwindigkeit bis zu dem angegeben Ladestand unabhängig PV-Erzeugung, wenn der Lademodus nicht auf 'Aus' steht (optional)
+      maxsoc: 100 # optional`} />
 
 
 
@@ -1871,18 +1925,18 @@ Benutzername und Passwort sind identisch zum Web-Portal bzw. My E3/DC App. Key (
       usage: grid
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 5033 # Port (optional)
-      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-      key: # optional`} advanced={`meters:
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      key:`} advanced={`meters:
     - name: my_grid
       type: template
       template: e3dc-rscp
       usage: grid
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 5033 # Port (optional)
-      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-      key: # optional
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      key:
       dischargelimit: # Limitiert die Entladeleistung im 'Halten' Batteriemodus (optional)`} />
 
 
@@ -1897,18 +1951,18 @@ Benutzername und Passwort sind identisch zum Web-Portal bzw. My E3/DC App. Key (
       usage: pv
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 5033 # Port (optional)
-      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-      key: # optional`} advanced={`meters:
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      key:`} advanced={`meters:
     - name: my_pv
       type: template
       template: e3dc-rscp
       usage: pv
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 5033 # Port (optional)
-      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-      key: # optional
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      key:
       dischargelimit: # Limitiert die Entladeleistung im 'Halten' Batteriemodus (optional)`} />
 
 
@@ -1923,18 +1977,18 @@ Benutzername und Passwort sind identisch zum Web-Portal bzw. My E3/DC App. Key (
       usage: battery
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 5033 # Port (optional)
-      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-      key: # optional`} advanced={`meters:
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      key:`} advanced={`meters:
     - name: my_battery
       type: template
       template: e3dc-rscp
       usage: battery
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 5033 # Port (optional)
-      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
-      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
-      key: # optional
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      key:
       dischargelimit: # Limitiert die Entladeleistung im 'Halten' Batteriemodus (optional)
       capacity: 50 # Akkukapazität in kWh (optional)`} />
 
@@ -2725,6 +2779,8 @@ Als Batteriespeicher werden seitens der Enphase-API derzeit nur die Batterien vo
 ### Solar API V1
 
 <DeviceFeatures features="battery-control" />
+
+Solar API sollte nur als Fallback genutzt werden. Die Integration über Modbus ist bevorzugt.
 
 Benutzername und Passwort werden nur für die aktive Batteriesteuerung benötigt.
 
@@ -6532,7 +6588,7 @@ In der Weboberfläche des SMA Data Manager muss im Bereich "Externe Kommunikatio
 
 ### HYD 3…6K-EP
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus TCP herzustellen (LSW-3 WLAN Stick wird nicht unterstützt). Bei seriellem Anschluss via RS485 mit entsprechendem Adapter am COM Port ist zu beachten, dass wechselrichterseitig für eine Terminierung des RS485 Busses zu sorgen ist.
 
@@ -6657,7 +6713,7 @@ Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus T
 
 ### HYD 5…20K-3PH
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus TCP herzustellen (LSW-3 WLAN Stick wird nicht unterstützt). Bei seriellem Anschluss via RS485 mit entsprechendem Adapter am COM Port ist zu beachten, dass wechselrichterseitig für eine Terminierung des RS485 Busses zu sorgen ist.
 
@@ -6782,7 +6838,7 @@ Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus T
 
 ### Inverter, Hybrid Inverter
 
-<DeviceFeatures features="battery-control" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="grid" label="Netz" default>
@@ -6905,7 +6961,7 @@ Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus T
 
 ### SOFAR 5…24KTL-G3
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus TCP herzustellen (LSW-3 WLAN Stick wird nicht unterstützt). Bei seriellem Anschluss via RS485 mit entsprechendem Adapter am COM Port ist zu beachten, dass wechselrichterseitig für eine Terminierung des RS485 Busses zu sorgen ist.
 
@@ -7030,7 +7086,7 @@ Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus T
 
 ### SOFAR 80…136KTL
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 Es wird empfohlen die Verbindung über einen LSE-3 Logger Stick mittels ModBus TCP herzustellen (LSW-3 WLAN Stick wird nicht unterstützt). Bei seriellem Anschluss via RS485 mit entsprechendem Adapter am COM Port ist zu beachten, dass wechselrichterseitig für eine Terminierung des RS485 Busses zu sorgen ist.
 
@@ -10220,7 +10276,7 @@ Zur Erfassung der PV-Produktion wird ein extern angebundenener S0-Erzeugungszäh
 
 ## ZCS Azzurro Inverter, Hybrid Inverter
 
-<DeviceFeatures features="battery-control" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="grid" label="Netz" default>
