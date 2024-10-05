@@ -14,7 +14,6 @@ Eine detaillierte Installationsanleitung inklusive Template _evcc.yaml_ findest 
 [Home Assistant Add-on Installation](../installation/home-assistant).
 
 
-
 ## Integration mit ha-evcc
 
 Mit der [ha-evcc](https://github.com/marq24/ha-evcc) von [marq24](https://github.com/marq24) kannst du evcc Daten und Funktionen einfach in Home Assistant integrieren.
