@@ -1,0 +1,214 @@
+---
+sidebar_position: 10
+---
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import Screenshot from "../../src/components/Screenshot";
+
+# Konfiguration
+
+:::note
+Diese Anleitung richtet sich an Benutzer, die evcc als Home Assistant Addon oder als Docker Container verwenden und deshalb den Konfigurationsassistent nicht verwenden können
+Die Anleitung enthält aber eventuell nützliche Tipps, für Personen die ihre Konfiguration, nach der Verwendung des Konfigurationsassistenten noch anpassen müssen.
+:::
+
+Es wird im folgenden davon ausgegangen dass du eine leere Konfigurationsdatei _evcc.yaml_ im korrekten Verzeichnis erstellt hast.
+Die Anleitung findest du in der jeweiligen Installationsanleitung für Docker oder Home Assistant.
+
+```sh
+- config_file Docker:  `/etc/evcc.yaml`
+- config_file Home Assistant: `/config/evcc.yaml`
+```
+
+Kopiere den Inhalt der folgenden minimalen Template Vorlage in deine soeben erstellte Datei _evcc.yaml_.
+Die Vorlage erstellt eine Standardkonfiguration mit statischen Demo-Entitäten.
+
+```yaml
+## Configuration template with demo entities (meters, chargers) ##
+network:
+  # schema is the HTTP schema
+  # setting to `https` does not enable https, it only changes the way URLs are generated
+  schema: http
+  # host is the hostname or IP address
+  # if the host name contains a `.local` suffix, the name will be announced on MDNS
+  # docker: MDNS announcements don't work. host must be set to the docker host's name.
+  host: evcc.local
+  # port is the listening port for UI and api
+  # evcc will listen on all available interfaces
+  port: 7070
+
+interval: 30s # control cycle interval. Interval <30s can lead to unexpected behavior, see https://docs.evcc.io/docs/reference/configuration/interval
+
+# database configuration for persisting charge sessions and settings
+# database:
+#   type: sqlite
+#   dsn: <path-to-db-file>
+
+# sponsor token enables optional features (request at https://sponsor.evcc.io)
+# sponsortoken:
+
+# telemetry enables aggregated statistics
+#
+# Telemetry allows collecting usage data (grid and green energy, charge power).
+# It can be enabled in the configuration section of the UI.
+
+# log settings
+log: info
+levels:
+  site: debug
+  lp-1: debug
+  lp-2: debug
+  cache: error
+  db: error
+
+# meter definitions
+# name can be freely chosen and is used as reference when assigning meters to site and loadpoints
+# for documentation see https://docs.evcc.io/docs/devices/meters
+meters:
+  - name: my_grid
+    type: template
+    template: demo-meter
+    usage: grid
+    power: # optional
+
+  - name: my_pv
+    type: template
+    template: demo-meter
+    usage: pv
+    power: # optional
+
+  - name: my_battery
+    type: template
+    template: demo-battery
+    usage: battery
+    power: # optional
+    soc: # optional
+    controllable: # Supports active battery control (optional)
+
+  - name: my_charger-pw
+    type: template
+    template: demo-meter
+    usage: charge
+    power: # optional
+
+# charger definitions
+# name can be freely chosen and is used as reference when assigning charger to vehicle
+# for documentation see https://docs.evcc.io/docs/devices/chargers
+chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: A # optional
+    power: 0 # optional
+    enabled: true # optional
+
+# vehicle definitions
+# name can be freely chosen and is used as reference when assigning vehicle to loadpoint
+# for documentation see https://docs.evcc.io/docs/devices/vehicles
+vehicles:
+  - name: my_car
+    type: template
+    template: offline
+    title: # Will be displayed in the user interface (optional)
+    capacity: 50 # Battery capacity in kWh (optional)
+
+# site describes the EVU connection, PV and home battery
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid # grid meter
+    pv:
+      - my_pv # list of pv inverters/ meters
+    battery:
+      - my_battery # list of battery meters
+    aux: # list of auxiliary meters for adjusting grid operating point
+
+  residualPower: 0 # in W, Target operating point of the surplus regulation at the grid connection (grid meter).
+  #  Positive values shift the target value towards grid feed-in, while negative values shift it towards grid consumption
+  maxGridSupplyWhileBatteryCharging: 0 # ignore battery charging if AC consumption is above this value
+
+# loadpoint describes the charger, charge meter and connected vehicle
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    meter: my_charger-pw # charge meter
+    mode: "off" # default charge mode to apply when vehicle is disconnected; use "off" to disable by default if charger is publicly available
+
+    # remaining settings are experts-only and best left at default values
+    priority: 0 # relative priority for concurrent charging in PV mode with multiple loadpoints (higher values have higher priority)
+    soc:
+      # polling defines usage of the vehicle APIs
+      # Modifying the default settings it NOT recommended. It MAY deplete your vehicle's battery
+      # or lead to vehicle manufacturer banning you from API use. USE AT YOUR OWN RISK.
+      poll:
+        # poll mode defines under which condition the vehicle API is called:
+        #   charging: update vehicle ONLY when charging (this is the recommended default)
+        #   connected: update vehicle when connected (not only charging), interval defines how often
+        #   always: always update vehicle regardless of connection state, interval defines how often (only supported for single vehicle)
+        mode: charging
+        # poll interval defines how often the vehicle API may be polled if NOT charging
+        interval: 60m
+      estimate: true # set false to disable interpolating between api updates (not recommended)
+      #  threshold values can be edited via API/MQTT
+    enable: # pv mode enable behavior
+      delay: 1m # threshold must be exceeded for this long
+      threshold: 0 # site power threshold (in Watts, negative=export). If zero, export must exceed minimum charge power to enable
+    disable: # pv mode disable behavior
+      delay: 3m # threshold must be exceeded for this long
+      threshold: 0 # maximum import power (W)
+
+# tariffs are the fixed or variable tariffs
+tariffs:
+  currency: EUR # three letter ISO-4217 currency code (default EUR)
+  grid:
+    # either static grid price (or price zones)
+    type: fixed
+    price: 0.19 # EUR/kWh
+    zones:
+      - days: Mon-Sun
+        hours: 7-21  # day
+        price: 0.19 # EUR/kWh
+      - days: Mon-Sun
+        hours: 21-0 # night
+        price: 0.12 # EUR/kWh
+      - days: Mon-Sun  # Night tariffs need to be split
+        hours: 0-7 # night
+        price: 0.12 # EUR/kWh
+```
+
+:::note
+Wenn du stattdessen sehen willst, wie evcc in einer dynamischen Demo läuft,
+kopiere den Inhalt von https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml in deine _evcc.yaml_ Datei.
+:::
+
+- Jetzt kannst du loslegen und das Addon oder den Docker Container starten.
+- Überprüfe die Installation, indem du das WebUI öffnest - du solltest nun das evcc-Webinterface in einem statischen Demo-Modus sehen.
+- Wenn dies ok ist, kannst du die Datei _evcc.yaml_ bearbeiten und dein eigenes Setup erstellen (nur mit der statischen Vorlage möglich).
+- Kopiere dazu die nötigen Templates die du in der Dokumenation im Abschnitt [Geräte, z.b. Wallboxen](../devices/chargers) findest.
+
+:::tip
+Wenn du mit der manuellen Konfiguration nicht zurechtkommen, solltest du ein eigenständiges evcc Windows- oder Linux-System installieren und den Konfigurationsassistenten verwenden.
+
+Der Konfigurationsassistent ist in der Home Assistant-Umgebung nicht verfügbar!!!
+
+Es ist einfacher, dort `evcc configure` zu verwenden und dann die erzeugte _evcc.yaml_ auf das gewünschte System zu kopieren.
+
+**Fortgeschrittene Benutzer** (mit evcc-Erfahrung und etwas technischem Know-how) sollten den erweiterten Konfigurator verwenden:
+:::
+
+:::note
+Die minimale Template Vorlage enthält nur die nötigsten Abschnitte der Konfiguration.
+
+Falls du nicht aufgeführte Strukturen oder Erklärungen benötigst, lohnt sich ein Blick in die vollausgebaute Vorlage unter diesem
+Link https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml.
+:::
+
+- Teste jedes neu hinzugefügte Gerät, um sicherzustellen, dass deine neue Konfiguration funktioniert.
+- Sobald alle Geräte konfiguriert sind, kannst mit der Einrichtung über die Benutzeroberfläche fortfahren.
+
+:::tip
+Für Nutzer von Home Assistant !!
+
+Fahre mit der Installation der EVCC-Integration für Home Assistant fort, wie in diesem Abschnitt [Integrationen](../integrations/home-assistant) beschrieben.
+:::
+
