@@ -35,7 +35,7 @@ Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestel
 ```yaml
 source: mqtt
 topic: mbmd/charger/maxcurrent
-payload: ${var:%d}
+payload: ${maxcurrent:%d}
 ```
 
 ## HTTP (lesen/schreiben)
