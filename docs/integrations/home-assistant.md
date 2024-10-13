@@ -10,6 +10,11 @@ Mit dem community-maintainten [evcc Home Assistant Add-on](https://github.com/ev
 Damit benötigst du keine separate Hardware oder Installationsumgebung.
 evcc läuft direkt in Home Assistant.
 
+:::note
+Nightly Builds und die [Kommandozeilenbefehle](/docs/reference/cli/evcc) sind in der Add-on Version nicht verfügbar.
+Wenn du diese Funktionen benötigst, installiere evcc bitte auf einem separaten System.
+:::
+
 ## Integration mit ha-evcc
 
 Mit der [ha-evcc](https://github.com/marq24/ha-evcc) von [marq24](https://github.com/marq24) kannst du evcc Daten und Funktionen einfach in Home Assistant integrieren.
