@@ -1,0 +1,178 @@
+---
+sidebar_position: 10
+---
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Configuration
+
+:::note
+This guide is aimed at users who use evcc as a Home Assistant add-on or as a Docker container and therefore cannot use the configuration wizard.
+
+However, the guide may contain useful tips for people who still need to adjust their configuration after using the configuration wizard.
+:::
+
+In the following instruction it is assumed that you have created an empty configuration file _evcc.yaml_ in the correct directory.
+The instructions can be found in the respective installation instructions for Docker or Home Assistant.
+
+
+```sh
+- config_file Docker:  `/etc/evcc.yaml`
+- config_file Home Assistant: `/config/evcc.yaml`
+```
+
+Copy the content of the following minimal template into the _evcc.yaml_ file you just created.
+The template creates a standard configuration with static demo entities.
+
+```yaml
+## Configuration template with demo entities (meters, chargers) ##
+network:
+  # schema is the HTTP schema
+  # setting to `https` does not enable https, it only changes the way URLs are generated
+  schema: http
+  # host is the hostname or IP address
+  # if the host name contains a `.local` suffix, the name will be announced on MDNS
+  # docker: MDNS announcements don't work. host must be set to the docker host's name.
+  host: evcc.local
+  # port is the listening port for UI and api
+  # evcc will listen on all available interfaces
+  port: 7070
+
+interval: 30s # control cycle interval. Interval <30s can lead to unexpected behavior, see https://docs.evcc.io/docs/reference/configuration/interval
+
+# database configuration for persisting charge sessions and settings
+# database:
+#   type: sqlite
+#   dsn: <path-to-db-file>
+
+# sponsor token enables optional features (request at https://sponsor.evcc.io)
+# sponsortoken:
+
+# telemetry enables aggregated statistics
+#
+# Telemetry allows collecting usage data (grid and green energy, charge power).
+# It can be enabled in the configuration section of the UI.
+
+
+# log settings
+log: info
+levels:
+  site: debug
+  lp-1: debug
+  lp-2: debug
+  cache: error
+  db: error
+
+# modbus proxy for allowing external programs to reuse the evcc modbus connection
+# each entry will start a proxy instance at the given port speaking Modbus TCP and
+# relaying to the given modbus downstream device (either TCP or RTU, RS485 or TCP)
+modbusproxy:
+  #  - port: 5200
+  #    uri: solar-edge:502
+  #    # rtu: true
+  #    # readonly: true # use `deny` to raise modbus errors
+
+# meter definitions
+# name can be freely chosen and is used as reference when assigning meters to site and loadpoints
+# for documentation see https://docs.evcc.io/docs/devices/meters
+meters:
+  # replace with your real grid meter
+  - name: my_grid
+    type: template
+    template: demo-meter
+    usage: grid
+    power: -1000 # 1 kW feed-in
+  # replace with your real pv system
+  - name: my_pv
+    type: template
+    template: demo-meter
+    usage: pv
+    power: 4000 # 4 kW production
+  # replace with your real battery
+  - name: my_battery
+    type: template
+    template: demo-battery
+    usage: battery
+    power: -1000 # 1 kW battery charging
+    soc: 50 # 50 % state of charge
+
+# replace with your real charger
+# see https://docs.evcc.io/docs/devices/chargers
+chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: C # charging
+    power: 2000 # 2 kW charging power
+    enabled: true # optional
+
+# replace with your real vehicle (optional)
+# see https://docs.evcc.io/docs/devices/vehicles
+vehicles:
+  - name: my_car
+    type: template
+    template: offline
+    title: blue e-Golf
+    capacity: 50 # in kWh
+
+# assign your devices to the site
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid
+    pv:
+      - my_pv
+    battery:
+      - my_battery
+
+# define your loadpoints according your needs
+# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    vehicle: my_car # default vehicle
+
+# enter your real grid tariff and feed-in price
+# see https://docs.evcc.io/docs/devices/tariffs
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.29 # EUR/kWh
+  feedin:
+    type: fixed
+    price: 0.10 # EUR/kWh
+```
+
+If you want to see how evcc runs in a dynamic demo instead,
+copy the content of https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml into your _evcc.yaml_ file.
+
+- Now you can go ahead and start the addon or the Docker container.
+- Check the installation by opening the WebUI - you should now see the evcc web interface in a static demo mode.
+- If this is ok, you can edit the _evcc.yaml_ file and create your own setup (only possible with the static template).
+- To do this, copy the necessary templates that you can find in the documentation in the section [Devices, e.g. wallboxes](../devices/chargers).
+
+:::tip
+If you cannot manage the manual configuration, you should install a stand-alone evcc Windows or Linux system and use the configuration wizard.
+
+The configuration wizard is not available in the Home Assistant environment.
+
+It is easier to use `evcc configure` there and then copy the generated _evcc.yaml_ to the desired system.
+
+**Advanced users** (with evcc experience and some technical know-how) should use the advanced configurator:
+:::
+
+The minimal template contains only the most necessary sections of the configuration.
+
+If you need structures or explanations that are not listed, it is worth taking a look at the fully developed template at this
+link https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml.
+
+
+- Test each newly added device to ensure that your new configuration works.
+- Once all devices are configured, you can continue with the setup via the user interface.
+
+:::tip
+For Home Assistant users
+
+Proceed with the installation of the evcc integration for Home Assistant as described in this section [Integrations](../integrations/home-assistant).
+:::
