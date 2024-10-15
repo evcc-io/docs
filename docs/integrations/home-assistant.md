@@ -10,7 +10,7 @@ Mit dem community-maintainten [evcc Home Assistant Add-on](https://github.com/ev
 Damit benötigst du keine separate Hardware oder Installationsumgebung.
 evcc läuft direkt in Home Assistant.
 
-Eine detaillierte Installationsanleitung inklusive Template _evcc.yaml_ findest du hier
+Eine detaillierte Installationsanleitung findest du hier
 [Home Assistant Add-on Installation](../installation/home-assistant).
 
 
