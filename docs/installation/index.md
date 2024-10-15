@@ -9,7 +9,7 @@ Die Erstinstallation von evcc erfordert aktuell noch etwas Fachwissen. Du sollte
 - [Debian, Ubuntu, Raspberry Pi OS](./installation/linux)
 - [macOS](./installation/macos)
 - [Docker, Synology](./installation/docker)
+- [Manuelle Installation (inkl. Windows)](./installation/manual)
 - [Home Assistant addon](./installation/home-assistant)
 - [Proxmox](./installation/proxmox)
-- [Manuelle Installation (inkl. Windows)](./installation/manual)
 - [Konfiguration (manuell)](./installation/configuration)
