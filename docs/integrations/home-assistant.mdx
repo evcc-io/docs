@@ -1,0 +1,212 @@
+---
+fsidebar_position: 3
+---
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Home Assistant
+
+## Betrieb in Home Assistant
+
+Mit dem community-maintainten [evcc Home Assistant Add-on](https://github.com/evcc-io/hassio-addon) kannst du evcc in einer Home Assistant Umgebung betreiben.
+Damit benötigst du keine separate Hardware oder Installationsumgebung.
+evcc läuft direkt in Home Assistant.
+
+Eine detaillierte Installationsanleitung findest du hier
+[Home Assistant Add-on Installation](../installation/home-assistant).
+
+## Integration mit ha-evcc
+
+Mit der [ha-evcc](https://github.com/marq24/ha-evcc) von [marq24](https://github.com/marq24) kannst du evcc Daten und Funktionen einfach in Home Assistant integrieren.
+Unabhängig davon, ob du evcc in Home Assistant betreibst oder nicht.
+
+Die Integration unterstützt alle notwendigen von evcc in MQTT oder dem API bereitgestellten Entitäten, auch diese zur Anpassung der
+evcc Einstellungen, Ladepunkte und der entsprechenden Fahrzeuge.
+
+## Sensordaten Integrieren
+
+Falls du Geräte, wie Chargers, Meters oder Fahrzeuge, in evcc integrieren möchtest die von Geräten stammen die evcc nicht
+unterstützt (z.B. Zigbee Smartplugs) kannst du dies über [MQTT](/docs/integrations/mqtt-api) oder das
+[REST API](/docs/integrations/rest-api) realisieren. Beide Wege erfordern für Einsteiger einen gewissen Lernaufwand um
+sie erfolgreich nutzen zu können. Doch mit Hilfe der folgenden Kurzanleitungen mit verlinkten Tutorials ist die Aufgabe zu bewältigen.
+
+:::note
+Dank der beiden evcc Schnittstellen können zusätzliche Ladepunkte für eine Vielzahl von verschiebbaren Lasten (Verbrauchern),
+wie Heizgeräte, Waschmaschinen, Geschirrspüler oder Elektro-Zweiräder realisiert werden.
+:::
+
+### Manuelle Integration von Sensordaten über MQTT
+
+MQTT ist ein einfaches Kommunikationsprotokoll, das für das Internet der Dinge (IoT) entwickelt wurde.
+Der Weg über MQTT ist etwas einfacher als über das API, aber falls du noch nie mit MQTT gearbeitest hast,
+gilt es ein paar Punkte zu beachten.
+
+Ein Endgerät (in diesem Fall Home Assistant) sendet eine Nachricht an einen sogenannten Broker.
+In Home Assistant heisst der Broker Mosquitto und ist einfach als Addon installierbar. evcc kann dann die bereitgestellten
+Daten vom Broker auslesen und weiterverarbeiten.
+
+Falls du den Mosquitto Broker in Home Assistant noch nicht installiert hast,
+kannst du dieser [Anleitung](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger) folgen.
+
+In Kurzform geht es darum, die nötigen Home Assistant Addons zu installieren und zu konfigurieren:
+
+1. Das Add-on “Mosquitto broker” installieren
+2. Einen separaten Home Assistant Nutzer für MQTT einrichten (ohne Admin Rechte)
+3. Das Add-on “MQTT Explorer” installieren (wird zur überprüfung der "topics" verwendet)
+4. Die MQTT Integration installieren
+
+Nun wäre MQTT von Home Assistant eingerichtet und der nächste Schritt ist die Zugangsdaten zum Broker in evcc einzutragen
+Dazu musste du folgende Konfiguration in der _evcc.yaml_ ändern oder anfügen.
+
+```yaml
+# mqtt message broker
+mqtt:
+broker: your-HA-IP-Address:1883
+topic: evcc # root topic for publishing, set empty to disable
+user: mosquitto # your username for the broker
+password: yourpassword
+```
+
+Nach einem Restart des Addons müsste evcc mit dem Broker kommunizieren können und die von evcc bereitgestellten topics anzeigen.
+Um das zu überprüfen, musst du das Addon “MQTT Explorer” starten und das WebUI öffnen. Mit den gleichen Zugangssdaten öffnet sich
+dann der Explorer und zeigt in etwa folgendes Bild.
+
+![Image](screenshots/Screenshot_mosquitto_broker_evcc-topics.webp)
+
+Falls dies geklappt bist du nun bereit einen ersten MQTT Sensor in Home Assistant zu definieren. Für dies gibt es im Prinzip
+verschiedene Wege, wir beschränken uns hier aber für den einfachsten über Automatisationen.
+Wenn du den untenstehenden YAML Code kopierst und eine Automatisation daraus erstellst müsstest du den Sensor anschliessend
+im “MQTT Explorer” angezeigt bekommen.
+Selbstverständlich musst du die Entität sensor.shelly_em_channel_2_power mit einem vorhandenen Sensor von dir ersetzen.
+
+:::note
+Die Namen der topics können frei gewählt werden, hier wurde der zugehörige Ladepunkt als Stammverzeichnis gewählt.
+
+In MQTT müssen die topics regelmässig neu publiziert werden, sonst erzeugt evcc einen Fehler "Sensordata outdated"
+:::
+
+```yaml
+alias: MQTT Heatpump Charger Power
+description: sensor.shelly_em_channel_2_power -> actual Power Consumption
+mode: single
+triggers:
+  - entity_id:
+      - sensor.shelly_em_channel_2_power
+    trigger: state
+  - seconds: /15
+    trigger: time_pattern
+conditions: []
+actions:
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      payload: "{{ states('sensor.shelly_em_channel_2_power') }}"
+      topic: evcc/loadpoints/2/charger/ChargePower
+```
+
+Im “MQTT Explorer” zeigt sich etwa folgendes Bild (ohne die 4 zusätzlichen Werte).
+
+![Image](screenshots/Screenshot_mosquitto_broker_evcc-charger-topics.webp)
+
+#### MQTT Templates für ein Heizungs Ladepunkt
+
+Um den Wert in evcc zu lesen muss man einen custom meter in _evcc.yaml_ definieren.
+
+```yaml
+  - name: heatpump-pw
+    type: custom
+    power: # Power (W)
+        source: mqtt
+        topic: evcc/loadpoints/2/charger/ChargePower
+        timeout: 30s # don't accept values older than timeout
+        scale: 1 # floating point factor applied to result, e.g. for converting Wh to kWh
+```
+
+Im dem Beispiel eines Chargers müssen noch drei zusätzliche topics definiert werden.
+Aber die Automatiserungen dazu sind im Prinzip gleich aufgebaut wie das Beispiel des ChargePower, der nicht hier sondern im Ladepunkt
+verlinkt wird.
+
+Link zur [Charger Template Doku](/docs/devices/chargers#manuell)
+
+Hier der zusätzliche "Charger" Abschnitt für die _evcc.yaml_ Datei (icon: features: sind optional).
+
+```yaml
+  - name: Heatpump
+    type: custom
+    status: # charger status A..F
+        source: mqtt
+        topic: evcc/loadpoints/2/charger/ChargerStatus
+        timeout: 10m
+    enabled: # charger enabled state (true/false or 0/1)
+        source: mqtt
+        topic: evcc/loadpoints/2/charger/ChargerEnabled
+        timeout: 10m
+    enable: # set charger ⇒ enable (true/false or 0/1)
+        source: mqtt
+        topic: evcc/loadpoints/2/charger/ChargerEnabled
+        payload: ${enable:%d}
+        timeout: 10m
+    maxcurrent: # set charger max current (A)
+        source: mqtt
+        topic: evcc/loadpoints/2/charger/AConfigured
+        timeout: 10m
+    icon: waterheater
+    features:
+      - integrateddevice
+      - heating
+```
+
+Nun kannst du noch den erfoderlichen Ladepunkt für die Wärmepumpe in _evcc.yaml_ Datei einfügen.
+
+```yaml
+  - title: Heatpump
+    charger: Heatpump
+    meter: heatpump-pw
+    mode: "off"
+    priority: 5 # relative priority for concurrent charging in PV mode with multiple loadpoints (higher values have higher priority)
+    disable:
+        threshold: 500 # maximum import power (W)
+        delay: 5m
+```
+
+Falls du alle Automatisationen für die vier erfoderlichen topics, plus den Ladepunkt erstellt hast müsste nach einem evcc
+Neustart eine Wärmepumpe als Ladepunkt erscheinen.
+
+
+:::note
+Wärmepumpen sind in der Regel über einen Thermostat geregelt und sollten nicht über anderes System ein- aus geschaltet werden,
+wie z.b. einen simplen Heizstab. Man kann aber über den Targt Current "sensor.evcc_heatpump_charge_current" des Ladepunktes
+eine Umwandlung von Strom (A) in Prozent vornehmen und damit den Sollwert der Wärmepumpe beeinflussen.
+
+Doch diesen Ansatz zu erklären würde den Zweck dieser Kurzanleitung überstrapazieren.
+:::
+
+#### Liste der MQTT Templates für Geräte
+
+Unter diesen Links findest du die nötigen Angaben zur Definition von zusätzlichen Geräten die über MQTT kommunizieren können.
+
+- Hausinstallationen [meters](/docs/devices/meters#manuell)
+- Wallboxen [charger](/docs/devices/chargers#manuell)
+- Fahrzeuge [vehicles](/docs/devices/vehicles#manuell)
+- Tarrife [tariffs](/docs/devices/tariffs#eigenes-plugin)
+
+### Manuelle Integration Sensordaten über REST API
+
+Die zweite Möglichkeit um Sensor Daten einzulesen benötigt kein Extra Tool wie einen Broker, setzt aber gewisse Grundkenntnisse 
+über REST API's voraus.
+Wie das über das REST Api geht steht detailliert in der folgenden Anleitung, (ebenso durch [marq24](https://github.com/marq24) bereitgestellt).
+
+[Anleitung, evcc mit Home Assistant Sensordaten](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md)
+
+## Weitere Ressourcen (Videos)
+
+Zu Beachten!
+
+Das erste Video unter diesen Links wiederspiegelt den Lösungsweg vor der Veröffentlichung der Home Assistant evcc Integration.
+
+- [smart home & more: evcc Basisinstallation und Konfiguration](https://youtu.be/aPq8k2MronY)
+- [smart home & more: Schritt für Schritt - MQTT-Sensor mit Hilfe des MQTT-Explorer einrichten](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: Effizientes Energiedashboard für Home Assistant](https://youtu.be/V3p5-16U_oU)
