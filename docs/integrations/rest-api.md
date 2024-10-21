@@ -50,6 +50,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `POST /api/loadpoints/<id>/vehicle/<name>`: set currently selected vehicle
 - `DELETE /api/loadpoints/<id>/vehicle`: remove vehicle
 - `PATCH /api/loadpoints/<id>/vehicle`: start vehicle detection
+- `POST /api/loadpoints/<id>/batteryboost/<status>`: enable/disable battery boost (1/0)   
 
 :::note
 Beispiel: `curl -X POST http://evcc:7070/api/loadpoints/1/mode/pv` um den Lademodus des 1. Ladepunkts auf `pv` zu stellen.
