@@ -7,8 +7,64 @@ import TabItem from "@theme/TabItem";
 # Konfiguration
 
 :::note
-Diese Anleitung richtet sich an Benutzer, die evcc als Home Assistant Addon oder als Docker Container verwenden und deshalb
-den Konfigurationsassistent nicht verwenden können.
+Diese Konfigurations-Anleitung beschreibt beide möglichen Wege eine funktionierende Konfigurationsdatei zu erstellen, mit oder ohne Konfigurationsassistenten.
+Wobei ersteres nur  bei nicht Docker basierten Systemen möglich ist.
+:::
+
+
+## Konfiguration mit Konfigurationsassistenten
+
+Dieser Teil der Anleitung richtet sich an Benutzer, die evcc als als Linux/Mac oder Windows Installation nutzen.
+
+- Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
+
+  ```sh
+  evcc configure
+  ```
+
+  Sofern alle Geräte korrekt konfiguriert sind, kannst du mit den nächsten Schritten fortfahren.
+
+  :::note
+  Fortgeschrittene Anwender (z.B. mit evcc Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
+
+  ```sh
+  evcc configure --advanced
+  ```
+
+  Dieser Modus bietet weitere (technisch fortgeschrittene) Einstellmöglichkeiten.
+  :::
+
+- Teste, ob die Konfiguration funktioniert
+
+  ```sh
+  evcc -c evcc.yaml
+  ```
+
+  Öffne einen Browser und gib die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
+
+- Wenn alles funktioniert, beende evcc durch drücken der Tastenkombination `CTRL-C`.
+
+- Verschiebe die erstellte Konfigurationsdatei in den Zielordner:
+
+  ```sh
+  sudo mv evcc.yaml /etc
+  ```
+
+- Starte evcc neu:
+
+  ```sh
+  sudo systemctl start evcc
+  ```
+
+- Gehe zurück zum Browser und lade die evcc Seite neu. Die Oberfläche sollte nun mit deinen konfigurierten Geräten zu sehen sein.
+
+
+
+## Konfiguration ohne Konfigurationsassistenten
+
+:::note
+Dieser Teil der Anleitung richtet sich an Benutzer, die evcc als Home Assistant Addon oder als Docker Container verwenden und deshalb
+den Konfigurationsassistenten nicht verwenden können.
 Die Anleitung enthält aber eventuell nützliche Tipps, für Personen die ihre Konfiguration, nach der Verwendung des Konfigurationsassistenten noch anpassen müssen.
 :::
 
@@ -23,35 +79,8 @@ Die Anleitung findest du in der jeweiligen Installationsanleitung für Docker od
 Kopiere den Inhalt der folgenden minimalen Template Vorlage in deine soeben erstellte Datei _evcc.yaml_.
 Die Vorlage erstellt eine Standardkonfiguration mit statischen Demo-Entitäten.
 
-```yaml title="evcc.yaml"
+```yaml title="evcc.yaml Mini Template"
 ## Configuration template with demo entities (meters, chargers) ##
-network:
-  # schema is the HTTP schema
-  # setting to `https` does not enable https, it only changes the way URLs are generated
-  schema: http
-  # host is the hostname or IP address
-  # if the host name contains a `.local` suffix, the name will be announced on MDNS
-  # docker: MDNS announcements don't work. host must be set to the docker host's name.
-  host: evcc.local
-  # port is the listening port for UI and api
-  # evcc will listen on all available interfaces
-  port: 7070
-
-interval: 30s # control cycle interval. Interval <30s can lead to unexpected behavior, see https://docs.evcc.io/docs/reference/configuration/interval
-
-# database configuration for persisting charge sessions and settings
-# database:
-#   type: sqlite
-#   dsn: <path-to-db-file>
-
-# sponsor token enables optional features (request at https://sponsor.evcc.io)
-# sponsortoken:
-
-# telemetry enables aggregated statistics
-#
-# Telemetry allows collecting usage data (grid and green energy, charge power).
-# It can be enabled in the configuration section of the UI.
-
 
 # log settings
 log: info
@@ -61,15 +90,6 @@ levels:
   lp-2: debug
   cache: error
   db: error
-
-# modbus proxy for allowing external programs to reuse the evcc modbus connection
-# each entry will start a proxy instance at the given port speaking Modbus TCP and
-# relaying to the given modbus downstream device (either TCP or RTU, RS485 or TCP)
-modbusproxy:
-  #  - port: 5200
-  #    uri: solar-edge:502
-  #    # rtu: true
-  #    # readonly: true # use `deny` to raise modbus errors
 
 # meter definitions
 # name can be freely chosen and is used as reference when assigning meters to site and loadpoints

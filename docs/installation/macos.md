@@ -43,47 +43,12 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
   brew services stop evcc
   ```
 
-- Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
+## Konfiguration
 
-  ```sh
-  evcc configure
-  ```
+Es wird eine **funktionierende** evcc Konfiguration benötigt.
 
-  Sofern alle Geräte korrekt konfiguriert sind, kannst du mit den nächsten Schritten fortfahren.
+Folge nun der [Anleitung](./configuration#konfiguration-mit-konfigurationsassistenten) zur Erstellung einer Konfiguration mit dem Konfigurationsassistenten.
 
-  :::note
-  Fortgeschrittene Anwender (z.B. mit evcc Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
-
-  ```sh
-  evcc configure --advanced
-  ```
-
-  Dieser Modus bietet weitere (technisch fortgeschrittene) Einstellmöglichkeiten.
-  :::
-
-- Teste ob die Konfiguration funktioniert:
-
-  ```sh
-  evcc -c evcc.yaml
-  ```
-
-  Öffne einen Browser und gib die folgende URL ein: http://localhost:7070. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
-
-- Wenn alles funktioniert, beende evcc durch drücken der Tastenkombination `CTRL-C`.
-
-- Verschiebe die erstellte Konfigurationsdatei in den Zielordner:
-
-  ```sh
-  sudo mv evcc.yaml /etc
-  ```
-
-- Starte evcc neu:
-
-  ```sh
-  brew services start evcc
-  ```
-
-- Gehe zurück zum Browser und lade die evcc Seite neu. Die Oberfläche sollte nun mit deinen konfigurierten Geräten zu sehen sein.
 
 ## Aktualisierung
 

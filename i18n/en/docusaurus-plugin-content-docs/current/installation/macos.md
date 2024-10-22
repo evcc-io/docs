@@ -43,47 +43,11 @@ Versions of macOS older than 10.12 (Sierra) are not supported.
   brew services stop evcc
   ```
 
-- You can now start the configuration wizard - simply follow the prompts in your terminal!
+## Configuration
 
-  ```sh
-  evcc configure
-  ```
+A **working** evcc configuration is required.
 
-  Once all devices are configured, you can continue on.
-
-  :::note
-  Advanced users (those with evcc experience & some technical know-how) might want to use the advanced configurator:
-
-  ```sh
-  evcc configure --advanced
-  ```
-
-  This mode offers some further, more technically-involved options.
-  :::
-
-- Test to make sure your new configuration works:
-
-  ```sh
-  evcc -c evcc.yaml
-  ```
-
-  Open a browser and head to `http://localhost:7070`: the evcc interface should now show your own devices.
-
-- If everything's working, press `CTRL+C` to stop the server.
-
-- Move the generated configuration to its home:
-
-  ```sh
-  sudo mv evcc.yaml /etc
-  ```
-
-- Start the evcc server:
-
-  ```sh
-  brew services start evcc
-  ```
-
-- Go back to your browser and refresh to make sure everything's working as it should be!
+Follow the [instructions](./configuration#configuration-with-configuration-wizard) to create a configuration file with the configuration wizard.
 
 ## Upgrades
 
