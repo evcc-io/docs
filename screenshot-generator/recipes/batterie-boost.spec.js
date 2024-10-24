@@ -29,7 +29,7 @@ loop((screenshot) => {
 
     await screenshot(
       page,
-      `${BASE_PATH}/batterie-boost`,
+      `${BASE_PATH}/battery-boost`,
       "#loadpointSettingsModal_1 .modal-content",
       {
         all: 20,
