@@ -44,6 +44,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `evcc/loadpoints/<id>/maxCurrent`: current maxCurrent value (writable)
 - `evcc/loadpoints/<id>/enableThreshold`: threshold value (writable)
 - `evcc/loadpoints/<id>/disableThreshold`: threshold value (writable)
+- `evcc/loadpoints/<id>/batteryboost`:  battery boost enabled (writeable: [1/0])   
 
 :::note
 Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
