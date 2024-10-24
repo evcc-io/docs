@@ -118,10 +118,10 @@ ${block.code}
   return deviceFeatures + description + code + sponsor;
 }
 
-function additionalContent(name, target) {
+function additionalContent(name, source) {
   const filename = name.toLowerCase().replaceAll(" ", "_");
   try {
-    const path = target.replace(/\.mdx$/, `/_${filename}.mdx`);
+    const path = source.replace(/\.mdx$/, `/_${filename}.mdx`);
     const content = fs.readFileSync(path, "utf-8");
     console.log("integrated additional content from ", path);
     return content + "\n";
@@ -129,7 +129,7 @@ function additionalContent(name, target) {
   return "";
 }
 
-function generateMarkdown(data, type, target) {
+function generateMarkdown(data, type, source, target) {
   let brandCounter = 0;
   let productCounter = 0;
 
@@ -163,7 +163,7 @@ function generateMarkdown(data, type, target) {
 
     if (group !== lastGroup) {
       generated += `## ${group}\n\n`;
-      generated += additionalContent(group, target);
+      generated += additionalContent(group, source);
     }
 
     if (brand && brand !== lastBrand) {
@@ -190,7 +190,7 @@ function generateMarkdown(data, type, target) {
   }
 
   const content = fs
-    .readFileSync(target, "utf-8")
+    .readFileSync(source, "utf-8")
     .replace(
       new RegExp(`${escapeRegExp(AUTOGEN_MARKER)}(.|\n)*`, "gm"),
       `${AUTOGEN_MARKER}\n\n${generated}`,
@@ -199,16 +199,21 @@ function generateMarkdown(data, type, target) {
   fs.writeFileSync(target, content, "utf-8");
 }
 
-["vehicle", "meter", "charger", "tariff"].forEach((type) => {
-  // German
-  const templatesDe = readTemplates(`./templates/release/de/${type}`);
-  generateMarkdown(templatesDe, type, `./docs/devices/${type}s.mdx`);
-
-  // English
-  const templatesEn = readTemplates(`./templates/release/en/${type}`);
-  generateMarkdown(
-    templatesEn,
-    type,
-    `./i18n/en/docusaurus-plugin-content-docs/current/devices/${type}s.mdx`,
-  );
+["release", "nightly"].forEach((version) => {
+  ["vehicle", "meter", "charger", "tariff"].forEach((type) => {
+    ["de", "en"].forEach((lang) => {
+      const templates = readTemplates(`./templates/${version}/${lang}/${type}`);
+      const base =
+        lang === "de"
+          ? "./docs"
+          : `./i18n/en/docusaurus-plugin-content-docs/current`;
+      const postfix = version === "release" ? "" : "-nightly";
+      generateMarkdown(
+        templates,
+        type,
+        `${base}/devices/${type}s.mdx`,
+        `${base}/devices/${type}s${postfix}.mdx`,
+      );
+    });
+  });
 });
