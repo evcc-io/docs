@@ -1,13 +1,15 @@
-const { test, expect } = require("@playwright/test");
+import { test, expect } from "@playwright/test";
 import { loop } from "./utils/loop";
 import { CURSOR, ARROW, placeOverlay, removeOverlays } from "./utils/overlay";
-const { start, stop } = require("./utils/evcc");
+import enableExperimental from "./utils/enableExperimental";
+import { start, stop } from "./utils/evcc";
 
 const BASE_PATH = "features/screenshots";
 
 test.beforeAll(async () => {
-  await start(["basics.evcc.yaml"], "password.sql");
+  await start("basics.evcc.yaml", "password.sql");
 });
+
 test.afterAll(async () => {
   await stop();
 });
@@ -17,16 +19,13 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 loop((screenshot) => {
   test("batterie boost", async ({ page }) => {
     await page.goto(`/`);
-    
-    
-    await page.getByTestId("loadpoint-settings-button").nth(1).click();
-    await wait(300);
+    await enableExperimental(page);
 
-    await placeOverlay(
-      page,
-      "[data-testid=battery-boost-checkbox].d-sm-block",
-      CURSOR,
-    );
+    await page.getByTestId("loadpoint-settings-button").nth(1).click();
+    await wait(700);
+    await page.getByTestId("battery-boost-checkbox").first().click();
+
+    await placeOverlay(page, "[data-testid=battery-boost-checkbox]", CURSOR);
 
     await screenshot(
       page,
