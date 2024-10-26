@@ -45,9 +45,9 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
 
 ## Konfiguration
 
-Es wird eine **funktionierende** evcc Konfiguration benötigt.
+Es wird eine funktionierende evcc Konfiguration benötigt.
 
-Folge nun der [Anleitung](./configuration#konfiguration-mit-konfigurationsassistenten) zur Erstellung einer Konfiguration mit dem Konfigurationsassistenten.
+Folge nun der [Anleitung](./configuration#konfiguration-mit-assistenten) zur Erstellung einer Konfiguration mit dem Konfigurationsassistenten.
 
 
 ## Aktualisierung

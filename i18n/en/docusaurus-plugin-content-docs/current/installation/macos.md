@@ -47,7 +47,7 @@ Versions of macOS older than 10.12 (Sierra) are not supported.
 
 A **working** evcc configuration is required.
 
-Follow the [instructions](./configuration#configuration-with-configuration-wizard) to create a configuration file with the configuration wizard.
+Follow the [instructions](./configuration#configuration-with-wizard) to create a configuration file with the configuration wizard.
 
 ## Upgrades
 
