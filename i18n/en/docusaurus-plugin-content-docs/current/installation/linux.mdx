@@ -5,17 +5,12 @@ sidebar_position: 2
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Linux (Debian, Ubuntu, Raspberry Pi)
+# Linux (Debian, Raspberry Pi, ...)
 
-:::caution
-This guide is aimed specifically at APT-based distributions. For distributions using other package managers, please install using [Docker](docker) or [Manual Installation](manual).
-:::
+This guide is aimed at apt-based Linux distributions like Debian, Ubuntu, and Raspberry Pi OS.
+For other Linux distributions, see the [Docker](/installation/docker) or [Manual Installation](/installation/manual) guide.
 
 ## Installation Guide
-
-:::note
-The "evcc" user is created during installation - please make sure this user doesn't already exist!
-:::
 
 - Open a terminal
 - Install required dependencies:
@@ -78,12 +73,55 @@ Cloudsmith provides services to support the development of free software and pla
   sudo systemctl stop evcc
   ```
 
+:::note
+During installation, a user `evcc` is created, so ensure the logged-in user does not have the name `evcc`.
+:::
+
 ## Configuration
 
 A **working** evcc configuration is required.
 
-Follow the [instructions](./configuration#configuration-with-wizard) to create a configuration file with the configuration wizard.
+### Create
 
+We recommend using the configuration wizard:
+
+- Start the configuration wizard and answer the questions:
+
+```sh
+sudo evcc configure
+```
+
+- Move the created configuration file to `/etc/evcc.yaml`:
+
+```sh
+sudo mv evcc.yaml /etc
+```
+
+- Restart the evcc server:
+
+```sh
+sudo systemctl restart evcc
+```
+
+- Access the evcc interface at [http://localhost:7070](http://localhost:7070)
+
+### Modify
+
+If your configuration needs adjustments, you can either rerun the configuration wizard (see above) or manually edit the configuration file.
+
+- Edit the configuration file:
+
+```sh
+sudo nano /etc/evcc.yaml
+```
+
+- Restart the evcc server:
+
+```sh
+sudo systemctl restart evcc
+```
+
+For more information and examples on configuring evcc, see [Configuration](./configuration).
 
 ## Upgrades
 
@@ -128,15 +166,17 @@ sudo systemctl enable evcc # sets the service to run at boot
 sudo systemctl disable evcc # stops the service running at boot
 ```
 
-## Useful Commands
+## Testing
 
-- Show the service status:
+Check the installation
+
+- Show the running evcc service:
 
   ```sh
   sudo systemctl status evcc
   ```
 
-- Show all log entries since yesterday:
+- Check the latest log entries of the evcc service:
 
   ```sh
   sudo journalctl -u evcc --since "yesterday"
@@ -159,3 +199,23 @@ sudo systemctl disable evcc # stops the service running at boot
   ```sh
   sudo evcc -l debug vehicle
   ```
+
+Open a browser and enter the following URL: `http://127.0.0.1:7070`.
+
+:::note
+Replace `127.0.0.1` with the IP address or hostname of the computer if the browser is not opened on the same computer.
+:::
+
+## Backup and Restore
+
+To restore the "original state" after a reinstallation, it is sufficient to back up the configuration file `evcc.yaml` and the database file `evcc.db`.
+The storage location is specified in the log file at program start.
+Typically, the configuration is located under `/etc/evcc.yaml` and the database under `/var/lib/evcc/evcc.db`.
+
+Both files can be copied using the Linux command `cp`.
+
+Example (copying from the usual storage location to the home directory):
+
+Copy yaml: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
+
+Copy db: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`

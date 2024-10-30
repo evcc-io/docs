@@ -5,13 +5,12 @@ sidebar_position: 2
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Debian, Ubuntu, Raspberry Pi
+# Linux (Debian, Raspberry Pi, ...)
+
+Diese Anleitung beschreibt die Installation für apt-basierte Linux Distributionen wie Debian, Ubuntu und Raspberry Pi OS.
+Für andere Linux Distributionen schau dir die [Docker](/installation/docker) oder [Manual Installation](/installation/manual) Anleitung an.
 
 ## Erstinstallation
-
-:::note
-Während der Installation wird ein user "evcc" angelegt, deshalb sollte der angemeldete Nutzer nicht den Namen "evcc" haben.
-:::
 
 - Öffne ein Terminal/Eingabeaufforderung
 - Installiere die benötigten Abhängigkeiten:
@@ -66,13 +65,64 @@ Cloudsmith ist ein Service, welcher die Entwicklung von Software und Dienstleist
   sudo systemctl start evcc
   ```
 
-- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
+- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: [http://localhost:7070](http://localhost:7070). Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
 
 - Stoppe den evcc-Server:
 
   ```sh
   sudo systemctl stop evcc
   ```
+
+:::note
+Während der Installation wird ein Nutzer `evcc` angelegt, deshalb sollte der angemeldete Nutzer nicht den Namen `evcc` haben.
+:::
+
+## Konfiguration
+
+Für den Betrieb musst du eine funktionierende `evcc.yaml` Konfigurationsdatei erstellen.
+Neben allgemeinen Einstellungen beinhaltet die Konfiguration die Definition der einzelnen Komponenten (Zähler, Wallbox, Fahrzeug, ...).
+
+### Erstellen
+
+Wir empfehlen die Verwendung des Konfigurationsassistenten:
+
+- Starte den Konfigurationsassistenten und beantworte die Fragen:
+
+```sh
+sudo evcc configure
+```
+
+- Kopiere die erstellte Konfigurationsdatei nach `/etc/evcc.yaml`:
+
+```sh
+sudo mv evcc.yaml /etc
+```
+
+- Starte den evcc-Server:
+
+```sh
+sudo systemctl restart evcc
+```
+
+- Rufe die evcc Oberfläche auf [http://localhost:7070](http://localhost:7070)
+
+### Anpassen
+
+Benötigt deine Konfiguration noch Anpassungen kannst du entweder den Konfigurationsassistenten erneut ausführen (siehe oben) oder die Konfigurationsdatei manuell anpassen.
+
+- Konfigurationsdatei bearbeiten:
+
+```sh
+sudo nano /etc/evcc.yaml
+```
+
+- Starte den evcc-Server neu:
+
+```sh
+sudo systemctl restart evcc
+```
+
+Unter [Konfiguration](./configuration) findest du weitere Informationen und Beispiele zur Konfiguration von evcc.
 
 ## Aktualisierung
 
@@ -95,14 +145,6 @@ Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte dur
 :::info
 Wenn das unstable Repository (Nightly Versionen) hinzugefügt wurde, wird beim Update immer auf die letzte verfügbare Nightly Version aktualisiert. Sollte das nicht mehr erwünscht sein, muss das unstable Repository mittels `sudo rm /etc/apt/sources.list.d/evcc-unstable.list` entfernt werden.
 :::
-
-## Konfiguration
-
-Es wird eine funktionierende evcc Konfiguration benötigt.
-
-
-
-Folge nun der [Anleitung](./configuration#konfiguration-mit-assistenten) zur Erstellung einer Konfiguration mit dem Konfigurationsassistenten.
 
 ## Downgrade
 
@@ -167,7 +209,9 @@ Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls d
 
 ## Backup und Restore
 
-Um nach einer Neuinstallation wieder den "Ursprungszustand" herzustellen zu können, reicht es die Konfigurationsdatei `evcc.yaml` und die Datenbankdatei `evcc.db` zu sichern. Der Speicherort wird im Logfile beim Programmstart angegeben. Üblicherweise liegt die Konfiguration im Ordner `/etc/` und die Datenbank im Ordner `/var/lib/evcc/`.
+Um nach einer Neuinstallation wieder den "Ursprungszustand" herzustellen zu können, reicht es die Konfigurationsdatei `evcc.yaml` und die Datenbankdatei `evcc.db` zu sichern.
+Der Speicherort wird im Logfile beim Programmstart angegeben.
+Üblicherweise liegt die Konfiguration unter `/etc/evcc.yaml` und die Datenbank unter `/var/lib/evcc/evcc.db`.
 
 Beide Dateien können mit dem Linux-Befehl `cp` kopiert werden.
 
