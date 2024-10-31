@@ -4,21 +4,21 @@ sidebar_position: 3
 
 # macOS
 
-:::note
-Versions of macOS older than 10.12 (Sierra) are not supported.
-:::
+This guide describes the installation for macOS (10.12 and higher) using the [Homebrew](https://brew.sh) package manager.
 
-## Installation
+If you want to install evcc without a package manager or test a nightly version, check out the [Manual Installation](/installation/manual) guide.
 
-- Open a terminal
-- Install [Homebrew](https://brew.sh), if you don't already have it
-- Add our tap:
+## Initial Installation
+
+- Open a terminal window
+- Install [Homebrew](https://brew.sh), if it's not already installed
+- Add the evcc tap:
 
   ```sh
   brew tap evcc-io/tap
   ```
 
-- Update package lists l:
+- Update package lists:
 
   ```sh
   brew update
@@ -36,7 +36,7 @@ Versions of macOS older than 10.12 (Sierra) are not supported.
   brew services start evcc
   ```
 
-- Now check the installation by opening a browser to `http://localhost:7070`. You should see the evcc web interface in demo mode.
+- Check the installation by opening a browser and entering the following URL: [http://localhost:7070](http://localhost:7070). You should see the evcc interface in demo mode.
 - Stop the evcc server:
 
   ```sh
@@ -45,15 +45,56 @@ Versions of macOS older than 10.12 (Sierra) are not supported.
 
 ## Configuration
 
-A **working** evcc configuration is required.
+Now you need a working `evcc.yaml` configuration file.
+In addition to general settings, the configuration includes the definition of individual components (meter, wallbox, vehicle, ...).
 
-Follow the [instructions](./configuration#configuration-with-wizard) to create a configuration file with the configuration wizard.
+### Creating
+
+We recommend using the configuration wizard:
+
+- Start the configuration wizard and answer the questions:
+
+  ```sh
+  sudo evcc configure
+  ```
+
+- Move the created configuration file to `/etc/evcc.yaml`:
+
+  ```sh
+  sudo mv evcc.yaml /etc
+  ```
+
+- Start the evcc server:
+
+  ```sh
+  brew services start evcc
+  ```
+
+- Access the evcc interface at [http://localhost:7070](http://localhost:7070)
+
+### Adjusting
+
+If your configuration needs adjustments, you can either rerun the configuration wizard (see above) or manually edit the configuration file.
+
+- Edit the configuration file:
+
+  ```sh
+  sudo nano /etc/evcc.yaml
+  ```
+
+- Restart the evcc server:
+
+  ```sh
+  brew services restart evcc
+  ```
+
+For more information and examples on configuring evcc, see [Configuration](./configuration).
 
 ## Upgrades
 
-To upgrade to the latest release:
+To upgrade to a new version of evcc, perform the following steps:
 
-- Open a terminal
+- Open a terminal window
 - Update package lists:
 
   ```sh
@@ -64,4 +105,18 @@ To upgrade to the latest release:
 
   ```sh
   brew install evcc
+  ```
+
+## Additional Commands
+
+- Check the status of the evcc server:
+
+  ```sh
+  brew services info evcc
+  ```
+
+- View logs:
+
+  ```sh
+  tail -f /opt/homebrew/var/log/evcc.log
   ```
