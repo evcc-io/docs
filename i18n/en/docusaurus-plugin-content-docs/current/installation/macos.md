@@ -6,9 +6,11 @@ sidebar_position: 3
 
 This guide describes the installation for macOS (10.12 and higher) using the [Homebrew](https://brew.sh) package manager.
 
-If you want to install evcc without a package manager or test a nightly version, check out the [Manual Installation](/installation/manual) guide.
+:::note
+If you want to install evcc without a package manager or test a nightly version, check out the [Manual Installation](#manual) section.
+:::
 
-## Initial Installation
+## Installation
 
 - Open a terminal window
 - Install [Homebrew](https://brew.sh), if it's not already installed
@@ -48,7 +50,7 @@ If you want to install evcc without a package manager or test a nightly version,
 Now you need a working `evcc.yaml` configuration file.
 In addition to general settings, the configuration includes the definition of individual components (meter, wallbox, vehicle, ...).
 
-### Creating
+### Create
 
 We recommend using the configuration wizard:
 
@@ -72,7 +74,7 @@ We recommend using the configuration wizard:
 
 - Access the evcc interface at [http://localhost:7070](http://localhost:7070)
 
-### Adjusting
+### Modify
 
 If your configuration needs adjustments, you can either rerun the configuration wizard (see above) or manually edit the configuration file.
 
@@ -120,3 +122,34 @@ To upgrade to a new version of evcc, perform the following steps:
   ```sh
   tail -f /opt/homebrew/var/log/evcc.log
   ```
+
+## Manual Installation {#manual}
+
+Here you'll find instructions for manually installing evcc on macOS.
+
+### Installation
+
+- Download the appropriate file to your system:
+  - 64-bit ARM or Intel CPU: [evcc_X.XX_macOS_all.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+- Extract the downloaded file (e.g., by double-clicking the file)
+- There will now be a new folder with the `evcc` program
+- Open a terminal and navigate to the folder containing the `evcc` program
+- Start evcc with the following command:
+  ```sh
+  ./evcc -v
+  ```
+- You should see the current version of evcc (e.g., `evcc version 0.xxx.y`).
+
+### Configuration
+
+Create a working `evcc.yaml` configuration file following the instructions under [Configuration](./configuration).
+You can start it with the following command:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Updates/Downgrades
+
+Follow the steps above and replace the evcc program file with the new or previous version.
+The configuration does not need to be redone.

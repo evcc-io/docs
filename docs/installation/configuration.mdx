@@ -6,12 +6,25 @@ import TabItem from "@theme/TabItem";
 
 # Konfiguration
 
-Diese Konfigurations-Anleitung beschreibt unterschiedliche Wege eine funktionierende Konfigurationsdatei (`evcc.yaml`) zu erstellen.
+Diese Anleitung beschreibt, wie du an eine funktionierende `evcc.yaml` Datei kommst.
 
 ## Mit Assistenten
 
-Dieser Teil der Anleitung richtet sich an Benutzer, die evcc als Linux/Mac oder Windows Installation nutzen.
-Es wird vorausgesetzt, dass evcc bereits auf deinem System installiert ist.
+Über den `evcc configure` Befehl kannst du dir eine Konfigurationsdatei über einen Terminal-basierten Assistenten erstellen lassen.
+In einem Frage-Antwort-Dialog kannst du deine jeweiligen Geräte konfigurieren.
+
+### Voraussetzungen
+
+Um den Assistenten nutzen zu können, muss evcc auf deinem System installiert sein.
+Zudem musst du den `evcc` Befehl mit der Kommandozeile (Terminal, Shell, Eingabeaufforderung) ausführen können.
+Läuft evcc auf einem System, wo du diesen Zugriff nicht hast (bspw. Home Assistant, Docker), kannst du den Assistenten leider nicht nutzen.
+
+:::note
+`evcc configure` kann auch in einem Docker Container gestartet werden.
+Siehe dafür die Erklärung in [Docker](./docker).
+:::
+
+### Assistent ausführen
 
 Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
 
@@ -19,16 +32,20 @@ Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
 evcc configure
 ```
 
+Du solltest eine Ausgabe wie die folgende sehen:
+
+![evcc configure](./screenshots/configure.webp)
+
 Nach Abschluss der Konfiguration wird eine `evcc.yaml` Datei im aktuellen Verzeichnis erstellt.
 
 :::note
-Fortgeschrittene Anwender (z.B. mit evcc Erfahrung oder technischem Know-How) können alternativ folgenden Aufruf verwenden:
+Mit `--advanced` kannst du den Assistenten auch in einem erweiterten Modus starten.
+Dann bekommst du zusätzliche Einstellungsmöglichkeiten.
+Für deine erste Konfiguration ist das aber nicht notwendig.
 
 ```sh
 evcc configure --advanced
 ```
-
-In diesem Modus werden weitere Einstellungsmöglichkeiten abgefragt.
 :::
 
 Teste, ob die Konfiguration funktioniert
@@ -79,34 +96,31 @@ Nutze dafür die manuelle Konfiguration.
 
 ## Manuell
 
-:::note
-Dieser Teil der Anleitung richtet sich an Benutzer, die evcc als Home Assistant Addon oder als Docker Container verwenden und deshalb
-den Konfigurationsassistenten nicht verwenden können.
-Die Anleitung enthält aber eventuell nützliche Tipps, für Personen die ihre Konfiguration, nach der Verwendung des Konfigurationsassistenten noch anpassen müssen.
-:::
+Sollte der Assistent für dich nicht verfügbar sein, kannst du die `evcc.yaml` Datei manuell erstellen.
+Hier findest du eine minimale Vorlage, die du als Ausgangspunkt nutzen kannst.
 
-Es wird im folgenden davon ausgegangen dass du eine leere Konfigurationsdatei _evcc.yaml_ im korrekten Verzeichnis erstellt hast.
-Die Anleitung findest du in der jeweiligen Installationsanleitung für Docker oder Home Assistant.
+### Erstellen
 
-```sh
-- config_file Docker:  `/etc/evcc.yaml`
-- config_file Home Assistant: `/config/evcc.yaml`
-```
+Kopiere den Inhalt in eine neue `evcc.yaml` Datei.
 
-Kopiere den Inhalt der folgenden minimalen Template Vorlage in deine soeben erstellte Datei _evcc.yaml_.
-Die Vorlage erstellt eine Standardkonfiguration mit statischen Demo-Entitäten.
+```yaml title="evcc.yaml"
+## minimal configuration example
 
-```yaml title="evcc.yaml Mini Template"
-## Configuration template with demo entities (meters, chargers) ##
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid
+    pv:
+      - my_pv
+    battery:
+      - my_battery
 
-# log settings
-log: info
-levels:
-  site: debug
-  lp-1: debug
-  lp-2: debug
-  cache: error
-  db: error
+# define your loadpoints according your needs
+# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    vehicle: my_car # default vehicle
 
 # meter definitions
 # name can be freely chosen and is used as reference when assigning meters to site and loadpoints
@@ -151,23 +165,6 @@ vehicles:
     title: blue e-Golf
     capacity: 50 # in kWh
 
-# assign your devices to the site
-site:
-  title: Home # display name for UI
-  meters:
-    grid: my_grid
-    pv:
-      - my_pv
-    battery:
-      - my_battery
-
-# define your loadpoints according your needs
-# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
-loadpoints:
-  - title: Garage # display name for UI
-    charger: my_charger # charger
-    vehicle: my_car # default vehicle
-
 # enter your real grid tariff and feed-in price
 # see https://docs.evcc.io/docs/devices/tariffs
 tariffs:
@@ -180,38 +177,45 @@ tariffs:
     price: 0.10 # EUR/kWh
 ```
 
+Mit dieser Datei kannst du evcc starten.
+Nutze dafür die jeweilige Anleitung für dein System.
 
-Wenn du stattdessen sehen willst, wie evcc in einer dynamischen Demo läuft,
-kopiere den Inhalt von https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml in deine _evcc.yaml_ Datei.
+### Testen
+
+Starte evcc neu und öffne deinen Browser unter `http://<evcc-ip>:7070`.
+Überprüfe, ob die Werte plausibel sind.
+Solltest du eine Fehlermeldung erhalten, überprüfe deine Angaben.
+
+Oft sind es auch Einrückungs- oder Tippfehler.
+Die Datei ist im [YAML Format](https://wikipedia.org/wiki/YAML) verfasst.
+Mit dem Online-Tool [YAML Lint](https://www.yamllint.com/) kannst du prüfen ob deine Datei das richtige Format einhält.
 
 
-- Jetzt kannst du loslegen und das Addon oder den Docker Container starten.
-- Überprüfe die Installation, indem du das WebUI öffnest - du solltest nun das evcc-Webinterface in einem statischen Demo-Modus sehen.
-- Wenn dies ok ist, kannst du die Datei _evcc.yaml_ bearbeiten und dein eigenes Setup erstellen (nur mit der statischen Vorlage möglich).
-- Kopiere dazu die nötigen Templates die du in der Dokumenation im Abschnitt [Geräte, z.b. Wallboxen](../devices/chargers) findest.
+### Anpassen
 
-:::tip
-Wenn du mit der manuellen Konfiguration nicht zurechtkommst, solltest du ein eigenständiges evcc Windows- oder Linux-System installieren
- und den Konfigurationsassistenten verwenden.
+Die Datei beinhaltet lediglich Demo-Geräte (`demo-charger`, `demo-meter`, `demo-battery`, `offline`).
+Diese haben feste Werte.
+Gehe die Datei nun Stück für Stück durch und passe die Werte an dein Setup an:
 
-Der Konfigurationsassistent ist in der Home Assistant-Umgebung nicht verfügbar.
+- Ersetze die Demo-Geräte durch deine eigenen [Zähler](../devices/meters), [Wallboxen](../devices/chargers) und [Fahrzeuge](../devices/vehicles).
+- Hast du keine Batterie, kannst du den entsprechenden Abschnitt komplett entfernen.
+- Hast du mehrere PV-Anlagen, kannst du die entsprechenden Abschnitte duplizieren.
+- Hast du mehrere Wallboxen, kopiere den Loadpoint- und Charger-Abschnitt und passe die Namen an.
 
-Es ist einfacher, dort `evcc configure` zu verwenden und dann die erzeugte _evcc.yaml_ auf das gewünschte System zu kopieren.
+Beachte, dass die einzelnen Einträge sich gegenseitig referenzieren.
+Im `site` Eintrag (`meters`), werden die Zähler (`grid`, `pv`, `battery`) ihren Rollen zugeordnet.
+Hierfür wird immer das `name` Feld benutzt.
+Namen müssen daher eindeutig sein.
 
-**Fortgeschrittene Benutzer** (mit evcc-Erfahrung und etwas technischem Know-how) sollten den erweiterten Konfigurator verwenden:
-:::
+Führe diese Änderungen möglichst Schritt für Schritt durch.
+Starte nach jeder Änderung evcc neu und überprüfe die Ausgaben im Browser.
+Dann bemerkst du schnell, wenn du einen Fehler gemacht hast.
 
-Die minimale Template Vorlage enthält nur die nötigsten Abschnitte der Konfiguration.
+### Weitere Informationen
 
-Falls du nicht aufgeführte Strukturen oder Erklärungen benötigst, lohnt sich ein Blick in die vollausgebaute Vorlage unter diesem
-Link https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml.
+Die [evcc.dist.yaml](https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml) im Hauptprojekt beinhaltet eine vollständige Liste aller möglichen Konfigurations-Optionen.
+Ausführlichere Erklärungen zu den Optionen findest du unter [Referenz → evcc.yaml](../reference/configuration).
 
-- Teste jedes neu hinzugefügte Gerät, um sicherzustellen, dass deine neue Konfiguration funktioniert.
-- Sobald alle Geräte konfiguriert sind, kannst du mit der Einrichtung über die Benutzeroberfläche fortfahren.
-
-:::tip
-Für Nutzer von Home Assistant
-
-Fahre mit der Installation der evcc-Integration für Home Assistant fort, wie in diesem Abschnitt [Integrationen](../integrations/home-assistant) beschrieben.
-:::
-
+Willst du eine dynamische Demo sehen kannst du dir auch den Inhalt der Datei [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml) ansehen.
+Diese Datei beinhaltet JavaScript-basierte Demo-Geräte, die eine eingeschränkte Funktionalität simulieren.
+Sie wird auch für [demo.evcc.io](https://demo.evcc.io) genutzt.

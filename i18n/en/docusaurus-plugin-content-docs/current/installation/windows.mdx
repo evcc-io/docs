@@ -1,0 +1,94 @@
+---
+sidebar_position: 6
+---
+
+# Windows
+
+Here you'll find instructions for manually installing evcc on Windows.
+
+:::important
+This manual installation requires advanced PC knowledge, especially when working with the Command Prompt or PowerShell.
+
+Running evcc on Windows is possible.
+However, evcc is typically used in a Linux environment (e.g., Raspberry Pi).
+:::
+
+## Installation
+
+- Download the appropriate file for your system
+  - 64-Bit Intel CPU: [evcc_X.XX_windows_amd64.zip](https://github.com/evcc-io/evcc/releases/latest)
+- Extract the downloaded file (e.g., by double-clicking)
+- You'll now have a new folder containing the `evcc` program
+- Open Command Prompt and navigate to the folder containing the `evcc` program
+- Start evcc with the following command:
+  ```sh
+  evcc -v
+  ```
+- You should see the current version of evcc (e.g., `evcc version 0.xxx.y`).
+
+## Configuration
+
+Create a working `evcc.yaml` configuration file following the instructions under [Configuration](./configuration).
+You can start it with the following command:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+## Update/Downgrade
+
+Follow the steps above and replace the evcc program file with the new or previous version.
+The configuration does not need to be redone.
+
+## Background Service
+
+:::note
+This documentation assumes that evcc is located in `c:\evcc`.
+
+These instructions were created using Windows 10.
+:::
+
+- Open the start menu and search for "Task Scheduler", then right click it and choose "Run As Administrator".
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-1.png)
+
+- Once you've started Task Scheduler, you now need to choose whether to create the new service in your own folder, or in the general tasks folder.
+  In this example, we create the `evcc` folder. To do this, select "New Folder..." from the right hand pane.
+
+![Task Scheduling Library](win10-srv/win10-srv-2.png)
+
+- Now select the new `evcc` folder and open the popup menu again, where we now select "create task".
+
+![New Task window](win10-srv/win10-srv-3.png)
+
+- Give the task a name (probably "evcc") and a short description. Since we need to run as a system service, open user management via "Change User or Group", and enter "SYSTEM" in the box. Once you click "Check Names", the word "SYSTEM" should be underscored - you can now click OK to close this dialog.
+
+![Task Window](win10-srv/win10-srv-4.png) ![User Selection](win10-srv/win10-srv-5.png)
+
+- Select the "triggers" menu, and click "New...".
+- Set the trigger to "At Startup", and check that the "activated" checkbox is ticked.
+
+![Trigger](win10-srv/win10-srv-6.png)
+
+- Open the "actions" menu, and again, select "New".
+- Make sure "Start a Program" is selected, then find your `evcc.exe` executable using the Browse option. We advise also setting the path in the "Start In..." box, to make sure that the configuration file is easily found by evcc.
+
+![Actions](win10-srv/win10-srv-7.png)
+
+- Open the "conditions" menu.
+- These settings should be left as default, except in one scenario:
+  :::info
+  SMA Home Manager can sometimes have issues when used with WiFi - try enabling the "Network" condition and selecting the appropriate connection interface in the dropdown.
+  :::
+
+![Conditions](win10-srv/win10-srv-8.png)
+
+- Open the "settings" menu.
+- Make sure to select "run task as soon as possible...".
+- Also make sure "Stop the task if it runs longer than:" is **not** selected, unless you want a surprise in 3 days when evcc randomly stops running.
+
+![Settings](win10-srv/win10-srv-9.png)
+
+- You're done! 🎉
+
+The task can now be started manually, or test with a reboot. To check it's working as expected, use a browser to navigate to the evcc interface `http://[ipaddress]:7070`.

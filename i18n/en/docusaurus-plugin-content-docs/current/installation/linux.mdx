@@ -5,12 +5,15 @@ sidebar_position: 2
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Linux (Debian, Raspberry Pi, ...)
+# Linux / Raspberry Pi
 
 This guide is aimed at apt-based Linux distributions like Debian, Ubuntu, and Raspberry Pi OS.
-For other Linux distributions, see the [Docker](/installation/docker) or [Manual Installation](/installation/manual) guide.
 
-## Installation Guide
+:::note
+For other Linux distributions, see the [Docker](./docker) guide or [Manual Installation](#manual) section.
+:::
+
+## Installation
 
 - Open a terminal
 - Install required dependencies:
@@ -80,6 +83,7 @@ During installation, a user `evcc` is created, so ensure the logged-in user does
 ## Configuration
 
 A **working** evcc configuration is required.
+The configuration contains general settings and definitions for individual components (meters, wallboxes, vehicles, ...).
 
 ### Create
 
@@ -153,7 +157,7 @@ If you need to go backwards for any reason, you can do so with this command:
   sudo apt install evcc=x.xxx.x # Version Number
 ```
 
-## Managing the Service
+## System Service {#systemd}
 
 evcc runs as a background system service. Here's some useful commands to control it:
 
@@ -219,3 +223,46 @@ Example (copying from the usual storage location to the home directory):
 Copy yaml: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
 
 Copy db: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Manual Installation {#manual}
+
+In addition to the Debian/Ubuntu APT package, we also provide other binaries for Linux.
+
+### Installation
+
+- Download the appropriate file for your system:
+  - 64-bit Intel CPU: [evcc_X.XX_linux_amd64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 64-bit ARM CPU: [evcc_X.XX_linux_arm64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 32-bit ARM CPU (e.g. Raspberry Pi 32-bit OS): [evcc_X.XX_linux_armv6.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+
+- Extract the downloaded file (e.g., by double-clicking).
+- The extracted folder contains an `evcc` program.
+- Open a terminal and navigate to the new folder.
+- Check if evcc works with this command:
+  ```
+  ./evcc -v
+  ```
+- You should see the current version of evcc (e.g., `evcc version 0.xxx.y`).
+
+### Configuration
+
+Create a working `evcc.yaml` configuration file following the [Configuration](./configuration) guide.
+You can start it with this command:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Upgrade/Downgrade
+
+Follow the steps above and replace the evcc program file with the new or previous version.
+The configuration does not need to be redone.
+
+### Setting up the Service
+
+For production use, you'll want to set up evcc as a system service.
+This ensures evcc starts when the computer boots and automatically restarts in case of errors.
+
+:::note
+This documentation assumes Linux supports `systemd`.
+:::

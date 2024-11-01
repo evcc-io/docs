@@ -5,10 +5,13 @@ sidebar_position: 2
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Linux (Debian, Raspberry Pi, ...)
+# Linux / Raspberry Pi
 
 Diese Anleitung beschreibt die Installation für apt-basierte Linux Distributionen wie Debian, Ubuntu und Raspberry Pi OS.
-Für andere Linux Distributionen schau dir die [Docker](/installation/docker) oder [Manual Installation](/installation/manual) Anleitung an.
+
+:::note
+Für andere Linux Distributionen schau dir die [Docker](./docker) Anleitung oder den [Manuelle Installation](#manual) Abschnitt an.
+:::
 
 ## Erstinstallation
 
@@ -154,7 +157,7 @@ Mit folgendem Befehl kann man auf eine ältere Version von evcc wechseln:
 sudo apt install evcc=x.xxx.x # Versionsnummer
 ```
 
-## Systemdienst
+## Systemdienst {#systemd}
 
 evcc läuft als Systemdienst im Hintergrund. Mit folgenden Befehlen kann dieser Dienst gesteuert werden.
 
@@ -220,3 +223,98 @@ Beispiel (kopieren vom üblichen Speicherort ins Homelaufwerk):
 yaml kopieren: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
 
 db kopieren: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Manuelle Installation {#manual}
+
+Neben dem Debian/Ubuntu APT Paket, stellen wir auch weitere Binaries für Linux bereit.
+
+### Installation
+
+- Lade die entsprechende Datei auf dein System herunter:
+  - 64-Bit Intel CPU: [evcc_X.XX_linux_amd64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 64-Bit ARM CPU: [evcc_X.XX_linux_arm64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 32-Bit ARM CPU (e.g. Raspberry Pi 32-Bit OS): [evcc_X.XX_linux_armv6.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+
+- Entpacke die heruntergeladene Datei (z.B. per Doppelklick auf die Datei).
+- Im entpackten Ordner befindet sich ein `evcc` Programm.
+- Öffne ein Terminal und gehe in den Ordner neuen Ordner.
+- Mit folgendem Befehl kannst du prüfen, ob evcc funktioniert:
+  ```
+  ./evcc -v
+  ```
+- Du solltest die aktuelle Version von evcc sehen (bspw. `evcc version 0.xxx.y`).
+
+### Konfiguration
+
+Erstelle dir nach der Anleitung unter [Konfiguration](./configuration) eine funktionierende `evcc.yaml` Konfigurationsdatei.
+Diese kannst du mit folgendem Befehl starten:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Aktualisierung/Downgrade
+
+Führe die obigen Schritte aus und ersetze die evcc Programmdatei mit der neuen bzw. vorherigen Version.
+Die Konfiguration muss nicht erneut durchgeführt werden.
+
+### Service einrichten
+
+Im produktiven Einsatz möchtest du evcc als Systemdienst einrichten.
+Dieser sorgt dafür, dass evcc beim Starten des Computers ausgeführt wird.
+Außerdem wird evcc im Fehlerfall automatisch neu gestartet.
+
+:::note
+Diese Dokumentation geht davon aus, dass Linux `systemd` unterstützt.
+:::
+
+- Führe folgenden Befehl aus, um einen Editor mit einer neuen Datei für den Dienst zu erstellen und zu öffnen:
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Kopiere den folgenden Inhalt in die Datei
+
+  ```
+  [Unit]
+  Description=evcc
+  Requires=network-online.target
+  After=syslog.target network.target network-online.target
+  Wants=network-online.target
+  StartLimitIntervalSec=10
+  StartLimitBurst=10
+
+  [Service]
+  ExecStart=/usr/local/bin/evcc
+  Restart=always
+  RestartSec=5
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Passe den Pfad der `evcc` Datei in `ExecStart` an, falls die Datei in einem anderen Verzeichnis abgelegt ist.
+  Dies geht auch davon aus, dass die Konfigurationsdatei `evcc.yaml` in `/etc/evcc.yaml` zu finden ist.
+  Falls dies nicht der Fall ist, muss in `ExecStart` am Ende der Text `-c /yourpath/evcc.yaml` hinzugefügt werden.
+  Der Text `yourpath` muss mit dem entsprechenden Verzeichnis ersetzt werden.
+
+- Teste den Dienst:
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  Die Ausgabe sollte bei Erfolg folgenden Text beinhalten: `Active: active (running)`.
+
+- Konfiguriere den Dienst so, dass er beim Rechnerstart automatisch startet:
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+- Fertig :-)
+
+Weitere Informationen findest du oben im Abschnitt [Systemdienst](#systemd).
