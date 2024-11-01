@@ -41,3 +41,13 @@ $ npm run build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service. It should be run before any changes are committed, as it also includes link checking.
+
+### Update CLI docs
+
+CLI documentation is automatically generated.
+Generation needs to be triggered manually.
+Run this command inside the evcc core repository (e.g. `./evcc`).
+
+```sh
+go run main.go gendoc ../evcc-docs/docs/reference/cli/
+```

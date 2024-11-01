@@ -2,27 +2,30 @@
 sidebar_position: 9
 ---
 
-# Loadmanagement
+# Load Management
 
 :::warning Experimental
-The Loadmanagement feature is still experimental. It may not perfom as expected in combination with some other features.
+The Load Management feature is still experimental. It may not perform as expected in combination with some other features.
 :::
 
-The loadmanagement/loadbalancing feature can be used to limit te power used by chargers to prevent overloading the circuits and popping brakers. By limiting the power it could also be usefull if you want to avoid acidental high peak usage. To accomplisch this a charging point can be assigned to a `circuit`. A `circuit` can have a maximum current value (`maxCurrent`) and/or a maximum power value (`maxPower`).
-The system works hierarchically, i.e. an electrical circuit can be part of a higher-level electrical circuit. 
+The load management/load balancing feature can be used to limit the power used by chargers to prevent overloading the circuits and tripping breakers.
+By limiting the power, it could also be useful if you want to avoid accidental high peak usage.
+To accomplish this, a charging point can be assigned to a `circuit`.
+A `circuit` can have a maximum current value (`maxCurrent`) and/or a maximum power value (`maxPower`).
+The system works hierarchically, i.e., an electrical circuit can be part of a higher-level electrical circuit.
 
-## Confiuration
+## Configuration
 
-The configuration is done via the `evcc.yaml`.
+The configuration is done via the `evcc.yaml` file.
 The section `circuits` defines the circuits.
 Each charging point can then be assigned to an electrical circuit.
 
-### Example: main circuit
+### Example: Main Circuit
 
 ```yaml
 circuits:
   - name: main # if there is only one circuit defined the name needs to be 'main'
-    title: 'main circuit # name for the UI (not implemented in UI yet)
+    title: 'main circuit' # name for the UI (not implemented in UI yet)
     maxCurrent: 63 # 63A (optional)
     maxPower: 30000 # 30kW (optional)
     meter: grid # optional
@@ -32,10 +35,12 @@ loadpoints:
     circuit: main
 ```
 
-This configuration only configures a main circuit. The circuit has a maximum current of 63A if there are other consumers like an oven/heat pump (this requires a meter) using a total of 50A the charger will only be allowed to use 13A.
-The circuit has a limit of 30kW. If there are 2 charging points that each request 22kW they will both be dailed back to 15kW.
+This configuration only configures a main circuit.
+The circuit has a maximum current of 63A.
+If there are other consumers like an oven/heat pump (this requires a meter) using a total of 50A, the charger will only be allowed to use 13A.
+The circuit has a limit of 30kW. If there are 2 charging points that each request 22kW, they will both be dialed back to 15kW.
 
-### Example: Nested circuits
+### Example: Nested Circuits
 
 ```yaml
 circuits:
@@ -62,24 +67,24 @@ loadpoints:
     circuit: carport
   - title: Carport B
     circuit: carport
-  - title: Heatpump
+  - title: Heat Pump
     circuit: main
 ```
 
-Here we have two circuits `garage` and `carport`, both of which are child/downstream to the main circuit (`parent: main`).
+Here we have two circuits, `garage` and `carport`, both of which are children/downstream of the main circuit (`parent: main`).
 The `main` circuit has a maximum current of 48A.
-The circuits`garage` and `carport` each have a maximum current of 32A.
-The charging points Garage A, Garage B and Garage C are assigned to the circuit (`circuit: garage`).
-The charging points Carport A and Carport B are assigned to the circuit (`circuit: carport`).
-The circuits `garage`, `carport` and the heat pump are connected directly to the root circuit (`main`). The regulation ensures that the limits of the respective circuits are not exceeded at any time.
+The circuits `garage` and `carport` each have a maximum current of 32A.
+The charging points Garage A, Garage B, and Garage C are assigned to the `garage` circuit (`circuit: garage`).
+The charging points Carport A and Carport B are assigned to the `carport` circuit (`circuit: carport`).
+The circuits `garage`, `carport`, and the heat pump are connected directly to the root circuit (`main`).
+The regulation ensures that the limits of the respective circuits are not exceeded at any time.
 
-**Important:** There must always be a main circuit.
-This has no `parent` property.
+**Important:** There must always be a main circuit. This has no `parent` property.
 
 ## Measuring
 
 By default, the control system calculates the current power and current from the sum of the respective charging points.
-By configuring a `meter` on `circuit`, the real load can also be taken into account here.
+By configuring a `meter` on a `circuit`, the real load can also be taken into account.
 This is particularly useful if other consumers are also connected to the fuse.
 
 ```yaml
@@ -107,6 +112,6 @@ Private use with smaller installations will remain free of charge.
 :::
 
 
-- no status information and boundary notices in the UI yet
-- `priority` Settings at the charging point are not yet taken into account
-- Loadmanagement is not taken into account by charging planning
+- No status information and boundary notices in the UI yet.
+- `priority` settings at the charging point are not yet taken into account.
+- Charging planning currently ignores Load Management, so reduced charging speeds due to load limits could lead to missing the charge target.
