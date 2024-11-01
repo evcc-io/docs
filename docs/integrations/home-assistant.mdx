@@ -1,0 +1,83 @@
+---
+fsidebar_position: 3
+---
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Home Assistant
+
+Hier erfährst du, wie du evcc-Daten in Home Assistant visualisieren und Automatisierungen erstellen kannst.
+
+Diese Anleitung setzt voraus, dass du evcc und Home Assistant bereits installiert hast.
+Wenn du nach einer Installationsanleitung suchst, findest du diese unter [Installation → Home Assistant Addon](../installation/home-assistant).
+
+## Schnittstellen
+
+Falls du Geräte, wie Chargers, Meters oder Fahrzeuge, in evcc integrieren möchtest die von Geräten stammen die evcc nicht
+unterstützt (z.B. Zigbee Smartplugs) kannst du dies über [MQTT](./mqtt-api) oder das
+[REST API](./rest-api) realisieren. 
+
+Dank der beiden evcc Schnittstellen können zusätzliche Ladepunkte für eine Vielzahl von verschiebbaren Lasten (Verbrauchern),
+wie Heizgeräte, Waschmaschinen, Geschirrspüler oder Elektro-Zweiräder realisiert werden.
+
+## Option 1: ha-evcc Integration
+
+Mit der [ha-evcc](https://github.com/marq24/ha-evcc) Integration von [marq24](https://github.com/marq24) kannst du evcc Daten und Funktionen einfach in Home Assistant integrieren.
+Unabhängig davon, ob du evcc in Home Assistant betreibst oder nicht.
+
+Die Integration unterstützt alle notwendigen von evcc via API bereitgestellten Entitäten, auch diese zur Anpassung der
+evcc Einstellungen, Ladepunkte und der entsprechenden Fahrzeuge.
+
+Nach der Installation bekommst du eine lange Liste aller Entitäten die du in Home Assistant nutzen kannst.
+
+## Option 2: manuelle MQTT-Integration
+
+MQTT ist ein einfaches Kommunikationsprotokoll, das für das Internet der Dinge (IoT) entwickelt wurde.
+Der Weg über MQTT ist etwas einfacher als über die REST-API, aber falls du noch nie mit MQTT gearbeitet hast,
+gilt es ein paar Punkte zu beachten.
+
+### Vorbereitung
+
+Du benötigst einen MQTT-Broker.
+Dieser ist ein zentraler Knoten, der Nachrichten zwischen verschiedenen Clients vermittelt.
+Ein sehr beliebter und einfacher Broker ist [Mosquitto](https://mosquitto.org/).
+Dieser lässt sich bspw. auch als Home Assistant Addon installieren (siehe [Anleitung](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger)).
+
+Hast du einen Broker installiert, kannst du mit einem Tool wie [MQTT Explorer](http://mqtt-explorer.com) die Nachrichten auf dem Broker ansehen und verfolgen.
+
+### evcc MQTT Konfiguration
+
+Als nächste müssen wir evcc mitteilen, dass es seine Daten an diesen Broker schicken soll.
+Dazu müssen in der `evcc.yaml` Datei die entsprechenden Zugangsdaten hinzugefügt werden.
+
+```yaml title="evcc.yaml"
+mqtt:
+  broker: <broker-ip>:1883
+  topic: evcc # root topic for publishing, set empty to disable
+  user: mosquitto
+  password: yourpassword
+```
+
+Nach einem Neustart von evcc solltest du im MQTT Explorer die bereitgestellten evcc Topics sehen können.
+
+![Screenshot von MQTT Explorer mit evcc Topics](screenshots/mqtt-explorer.webp)
+
+Nun können wir diese Daten in Home Assistant integrieren.
+
+### Home Assistant MQTT Konfiguration
+
+Eine gute Anleitung, wie du MQTT in Home Assistant einrichtest, findest du im [Blog Artikel von Alkly](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
+Hier gibt es auch Beispiele, wie du aus bestimmten Messwerten (bspw. der Ladeleistung) eine Home Assistant Entität erstellen kannst.
+
+## Option 3: manuelle REST Integration
+
+Du kannst evcc Daten auch über die REST API in Home Assistant integrieren.
+Die verfügbaren Endpunkte findest du unter [REST API](/docs/integrations/rest-api).
+
+[Diese Anleitung](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) von [marq24](https://github.com/marq24) gibt dir detaillierte Informationen wie das geht.
+
+## Weitere Ressourcen (Videos)
+
+- [smart home & more: evcc Basisinstallation und Konfiguration](https://youtu.be/aPq8k2MronY)
+- [smart home & more: Schritt für Schritt - MQTT-Sensor mit Hilfe des MQTT-Explorer einrichten](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: Effizientes Energiedashboard für Home Assistant](https://youtu.be/V3p5-16U_oU)

@@ -1,0 +1,92 @@
+---
+sidebar_position: 6
+---
+
+
+# Windows
+
+Here you'll find instructions for manually installing evcc on Windows.
+
+:::important
+This manual installation requires advanced PC knowledge, especially when working with the Command Prompt or PowerShell.
+
+Running evcc on Windows is possible.
+However, evcc is typically used in a Linux environment (e.g., Raspberry Pi).
+:::
+
+## Installation
+
+- Download the appropriate file for your system
+  - 64-Bit Intel CPU: [evcc_X.XX_windows_amd64.zip](https://github.com/evcc-io/evcc/releases/latest)
+- Extract the downloaded file (e.g., by double-clicking)
+- You'll now have a new folder containing the `evcc` program
+- Open Command Prompt and navigate to the folder containing the `evcc` program
+- Start evcc with the following command:
+  ```sh
+  evcc -v
+  ```
+- You should see the current version of evcc (e.g., `evcc version 0.xxx.y`).
+
+## Configuration
+
+Create a working `evcc.yaml` configuration file following the instructions under [Configuration](./configuration).
+You can start it with the following command:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+## Update/Downgrade
+
+Follow the steps above and replace the evcc program file with the new or previous version.
+The configuration does not need to be redone.
+
+## Background Service
+
+:::note
+This documentation assumes that evcc is located in `c:\evcc`.
+
+These instructions were created using Windows 10.
+:::
+
+- Type "Task Scheduler" in the Windows 10 search bar.
+- After typing just a few letters, it should appear as the top match and can be started with "Run as administrator" on the right side:
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-1.png)
+
+- In Task Scheduler, you can create the new service either in your own folder or in the general tasks folder.
+  In this example, we'll create an `evcc` folder.
+  Select "New Folder..." from the right-hand pane:
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-2.png)
+
+- Select the new `evcc` folder, open the context menu, and choose "Create Task":
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-3.png)
+
+- Enter a name (e.g., "evcc") and a brief description.
+  Since this needs to run as a system service, click "Change User or Group" and enter "SYSTEM".
+  After clicking "Check Names", the word "SYSTEM" should be underlined.
+  Click OK to close this dialog:
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-4.png)
+
+- On the "Triggers" tab, click "New" and set "Begin the task" to "At startup".
+  Click OK to close this dialog:
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-5.png)
+
+- On the "Actions" tab, click "New" and enter the following:
+  - Program/script: `c:\evcc\evcc.exe`
+  - Add arguments: `-c c:\evcc\evcc.yaml`
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-6.png)
+
+- On the "Settings" tab, check "Allow task to be run on demand" and "Run task as soon as possible after a scheduled start is missed":
+
+![Windows 10 Task Scheduler](win10-srv/win10-srv-7.png)
+
+- You're done! 🎉
+
+You can now start the task manually or test it by rebooting.
+To verify it's working correctly, open your browser and navigate to the evcc interface at `http://<evcc-ip>:7070`.

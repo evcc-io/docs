@@ -4,8 +4,10 @@ sidebar_position: 3
 
 # macOS
 
+Diese Anleitung beschreibt die Installation für macOS (10.12 und höher) mit dem [Homebrew](https://brew.sh) Paketmanager.
+
 :::note
-Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von macOS werden nicht unterstützt.
+Wenn du evcc ohne Paketmanager installieren willst oder eine nightly Version testen möchtest schau dir den Abschnitt [Manuelle Installation](#manual) an.
 :::
 
 ## Erstinstallation
@@ -36,54 +38,65 @@ Es wird mindestens macOS Version 10.12 (Sierra) benötigt, ältere Versionen von
   brew services start evcc
   ```
 
-- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: `http://localhost:7070`. Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
+- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: [http://localhost:7070](http://localhost:7070). Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
 - Stoppe den evcc-Server:
 
   ```sh
   brew services stop evcc
   ```
 
-- Starte die Konfiguration und folge den Anweisungen im Terminal Fenster:
+## Konfiguration
+
+Für den Betrieb musst du eine funktionierende `evcc.yaml` Konfigurationsdatei erstellen.
+Neben allgemeinen Einstellungen beinhaltet die Konfiguration die Definition der einzelnen Komponenten (Zähler, Wallbox, Fahrzeug, ...).
+
+### Erstellen
+
+Wir empfehlen die Verwendung des Konfigurationsassistenten:
+
+- Starte den Konfigurationsassistenten und beantworte die Fragen:
 
   ```sh
-  evcc configure
+  sudo evcc configure
   ```
 
-  Sofern alle Geräte korrekt konfiguriert sind, kannst du mit den nächsten Schritten fortfahren.
-
-  :::note
-  Fortgeschrittene Anwender (z.B. mit evcc Erfahrung oder technischem Know-How) können auch alternativ folgenden Aufruf verwenden:
-
-  ```sh
-  evcc configure --advanced
-  ```
-
-  Dieser Modus bietet weitere (technisch fortgeschrittene) Einstellmöglichkeiten.
-  :::
-
-- Teste ob die Konfiguration funktioniert:
-
-  ```sh
-  evcc -c evcc.yaml
-  ```
-
-  Öffne einen Browser und gib die folgende URL ein: http://localhost:7070. Die evcc Oberfläche sollte nun mit den eigenen Geräten zu sehen sein.
-
-- Wenn alles funktioniert, beende evcc durch drücken der Tastenkombination `CTRL-C`.
-
-- Verschiebe die erstellte Konfigurationsdatei in den Zielordner:
+- Kopiere die erstellte Konfigurationsdatei nach `/etc/evcc.yaml`:
 
   ```sh
   sudo mv evcc.yaml /etc
   ```
 
-- Starte evcc neu:
+- Starte den evcc-Server:
 
   ```sh
   brew services start evcc
   ```
 
-- Gehe zurück zum Browser und lade die evcc Seite neu. Die Oberfläche sollte nun mit deinen konfigurierten Geräten zu sehen sein.
+- Rufe die evcc Oberfläche auf [http://localhost:7070](http://localhost:7070)
+
+### Anpassen
+
+Benötigt deine Konfiguration noch Anpassungen kannst du entweder den Konfigurationsassistenten erneut ausführen (siehe oben) oder die Konfigurationsdatei manuell anpassen.
+
+- Konfigurationsdatei bearbeiten:
+
+  ```sh
+  sudo nano /etc/evcc.yaml
+  ```
+
+- Starte den evcc-Server neu:
+
+  ```sh
+  brew services restart evcc
+  ```
+
+Unter [Konfiguration](./configuration) findest du weitere Informationen und Beispiele zur Konfiguration von evcc.
+
+## Konfiguration
+
+Es wird eine funktionierende evcc Konfiguration benötigt.
+
+Folge nun der [Anleitung](./configuration) zur Erstellung einer Konfiguration mit dem Konfigurationsassistenten.
 
 ## Aktualisierung
 
@@ -101,3 +114,48 @@ Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte dur
   ```sh
   brew install evcc
   ```
+
+## Weitere Befehle
+
+- Prüfe den Status des evcc-Servers:
+
+  ```sh
+  brew services info evcc
+  ```
+
+- Logs anzeigen:
+
+  ```sh
+  tail -f /opt/homebrew/var/log/evcc.log
+  ```
+
+## Manuelle Installation {#manual}
+
+Hier findest du die Anleitung für die manuelle Installation von evcc auf macOS.
+
+### Installation
+
+- Lade die entsprechende Datei auf dein System herunter:
+  - 64-Bit ARM oder Intel CPU: [evcc_X.XX_macOS_all.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+- Entpacke die heruntergeladene Datei (z.B. per Doppelklick auf die Datei)
+- Es gibt nun einen neuen Ordner mit dem Programm `evcc`.
+- Öffne ein Terminal und gehe in den Ordner mit dem Programm `evcc`
+- Starte evcc mit folgendem Befehl:
+  ```sh
+  ./evcc -v
+  ```
+- Du solltest die aktuelle Version von evcc sehen (bspw. `evcc version 0.xxx.y`).
+
+### Konfiguration
+
+Erstelle dir nach der Anleitung unter [Konfiguration](./configuration) eine funktionierende `evcc.yaml` Konfigurationsdatei.
+Diese kannst du mit folgendem Befehl starten:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Aktualisierung/Downgrade
+
+Führe die obigen Schritte aus und ersetze die evcc Programmdatei mit der neuen bzw. vorherigen Version.
+Die Konfiguration muss nicht erneut durchgeführt werden.

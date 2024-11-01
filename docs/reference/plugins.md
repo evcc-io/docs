@@ -44,7 +44,7 @@ Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisie
 
 Methoden der Authentifizierung sind `basic`, `bearer` und `digest`. Die Namen der jeweiligen Parameter finden sich [hier](https://github.com/evcc-io/evcc/blob/master/provider/http.go#L140).
 
-:::important
+:::important Wichtig
 XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden kann. Attribute bekommen das prefix `attr`.
 :::
 

@@ -17,8 +17,8 @@ Gegenüber der Version 0.76 haben wir Korrekturen für die Verwendung einiger Ge
 
 - [Debian, Ubuntu, Raspberry Pi](/docs/installation/linux)
 - [macOS Homebrew](/docs/installation/macos)
-- [Docker, Synology](/docs/installation/docker)
-- [Manuell (inkl. Windows)](/docs/installation/manual)
+- [Docker](/docs/installation/docker)
+- [Windows](/docs/installation/windows)
 
 ## Changelog
 

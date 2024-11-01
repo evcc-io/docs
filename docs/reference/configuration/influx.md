@@ -10,7 +10,7 @@ Definiert die Influx Konfiguration, um Daten in Influx zu schreiben.
 
 ## InfluxDB v1.8.x
 
-:::important
+:::important Wichtig
 Erfordert mindestens InfluxDB 1.8.3
 :::
 

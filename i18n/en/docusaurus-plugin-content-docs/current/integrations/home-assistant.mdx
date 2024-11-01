@@ -1,0 +1,84 @@
+---
+fsidebar_position: 3
+---
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Home Assistant
+
+Learn how to visualize evcc data in Home Assistant and create automations.
+
+This guide assumes that you have already installed evcc and Home Assistant.
+If you are looking for installation instructions, you can find them under [Installation → Home Assistant Addon](../installation/home-assistant).
+
+## APIs
+
+If you want to integrate devices such as chargers, meters, or vehicles into evcc that come from devices that evcc doesn't
+support (e.g., Zigbee smart plugs), you can do this via [MQTT](./mqtt-api) or the [REST API](./rest-api).
+
+Thanks to these two evcc APIs, additional charging points can be implemented for a variety of deferrable loads (consumers),
+such as heating devices, washing machines, dishwashers, or electric scooters.
+
+## Option 1: ha-evcc Integration
+
+With the [ha-evcc](https://github.com/marq24/ha-evcc) integration by [marq24](https://github.com/marq24), you can easily integrate evcc data and functions into Home Assistant.
+This works regardless of whether you run evcc in Home Assistant or not.
+
+The integration supports all necessary entities provided by evcc via API, including those for customizing
+evcc settings, charging points, and the corresponding vehicles.
+
+After installation, you'll get a long list of all entities that you can use in Home Assistant.
+
+## Option 2: Manual MQTT Integration
+
+MQTT is a simple communication protocol developed for the Internet of Things (IoT).
+The MQTT approach is somewhat easier than using the REST API, but if you've never worked with MQTT before,
+there are a few points to consider.
+
+### Preparation
+
+You need an MQTT broker.
+This is a central node that mediates messages between different clients.
+A very popular and simple broker is [Mosquitto](https://mosquitto.org/).
+This can also be installed as a Home Assistant addon (see [guide (German)](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger)).
+
+Once you have installed a broker, you can use a tool like [MQTT Explorer](http://mqtt-explorer.com) to view and track messages on the broker.
+
+### evcc MQTT Configuration
+
+Next, we need to tell evcc to send its data to this broker.
+To do this, the corresponding credentials must be added to the `evcc.yaml` file.
+
+```yaml title="evcc.yaml"
+mqtt:
+  broker: <broker-ip>:1883
+  topic: evcc # root topic for publishing, set empty to disable
+  user: mosquitto
+  password: yourpassword
+```
+
+After restarting evcc, you should be able to see the provided evcc topics in MQTT Explorer.
+
+![Screenshot of MQTT Explorer with evcc topics](screenshots/mqtt-explorer.webp)
+
+Now we can integrate this data into Home Assistant.
+
+### Home Assistant MQTT Configuration
+
+You can find a good guide on how to set up MQTT in Home Assistant in the [Blog Article by Alkly (German)](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
+It also includes examples of how to create a Home Assistant entity from certain measurements (e.g., charging power).
+
+## Option 3: Manual REST Integration
+
+You can also integrate evcc data into Home Assistant via the REST API.
+You can find the available endpoints under [REST API](/docs/integrations/rest-api).
+
+[This guide](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) by [marq24](https://github.com/marq24) gives you detailed information on how to do this.
+
+## Further Resources (Videos)
+
+Videos are in German.
+
+- [smart home & more: evcc Basic Installation and Configuration](https://youtu.be/aPq8k2MronY)
+- [smart home & more: Step by Step - Setting up MQTT Sensor using MQTT Explorer](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: Efficient Energy Dashboard for Home Assistant](https://youtu.be/V3p5-16U_oU)

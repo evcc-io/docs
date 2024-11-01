@@ -34,8 +34,8 @@ Die Zielladen Funktionalität ist zurück. Hiermit kann man das EV auf ein besti
 
 - [Debian, Ubuntu, Raspberry Pi](/docs/installation/linux)
 - [macOS Homebrew](/docs/installation/macos)
-- [Docker, Synology](/docs/installation/docker)
-- [Manuell (inkl. Windows)](/docs/installation/manual)
+- [Docker](/docs/installation/docker)
+- [Windows](/docs/installation/windows)
 
 ## Changelog
 
