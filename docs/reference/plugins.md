@@ -28,7 +28,7 @@ timeout: 30s # don't accept values older than timeout
 scale: 0.001 # floating point factor applied to result, e.g. for Wh to kWh conversion
 ```
 
-Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt. Falls dieser Paramter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
+Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt. Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
 
 **Beispiel Schreiben**:
 
