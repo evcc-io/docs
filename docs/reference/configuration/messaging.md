@@ -237,6 +237,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - `email`: Email. Siehe [`email`](#email) Definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
 - `script`: Kann externe Skripte zum Versenden von Nachrichten starten. Es ist auch hilfreich, um jede Art von externer Funktionalität einzubinden. Siehe [`script`](#script) Definition
+- `mqtt`: Sendet eine MQTT Nachricht an den in [`mqtt`](/docs/reference/configuration/messaging.md) konfigurierten MQTT server.
 
 **Beispiel**:
 
@@ -349,4 +350,32 @@ Der Pfad zum Script muß in `cmdline` angegeben werden. Ebenso sollte ein `timeo
 - type: script
   cmdline: /home/pi/sendSignalMessage.sh
   timeout: 50s
+```
+
+### `mqtt`
+
+`mqtt` versendet die Nachrichten über MQTT in das mit `topic` definierte Topic (default: `evecc/events`).
+Um diesen Service nutzen zu können muss wie ein MQTT Server konfiguriert sein. Siehe [`mqtt`](/docs/reference/configuration/messaging.md) für mehr Informationen.
+
+Ein in `events` definierter `title` wird ignoriert, es wird nur die `msg` and das MQTT topic gesendet. Die einzige Ausnahme: Falls die `msg` ein JSON Objekt ist, wird der Titel mit dem Key `title` in das JSON Objekt eingefügt bevor diese über MQTT verschickt wird.
+
+**Beispiel**:
+
+```yaml
+
+# MQTT Broker Configuration
+mqtt:
+  broker: broker.mqtt:1883
+  user: evcc
+  password: s3cr3t
+
+# Send lifecycle events via MQTT
+messaging:
+  events: 
+    connect:
+      # Use template to create JSON payload
+      msg: '{"car": "${vehicleTitle}", "mode": "${mode}", "event": "connect"}'
+  services:
+  - type: mqtt
+    topic: 'evcc/events'
 ```

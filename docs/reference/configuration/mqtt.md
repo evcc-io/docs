@@ -6,6 +6,7 @@ sidebar_position: 14
 
 Stellt die Konnektivität mit einem MQTT-Broker her.
 Bei bestehender Verbindung pusht evcc automatisch alle internen Werte via MQTT-Broker auf das angegebene Topic und empfängt dort auch Änderungen.
+Der konfigurierte MQTT Server kann auch als ein Service genutzt werden um die in [`messaging`](/docs/reference/configuration/messaging.md) konfigurierten Events zu verschicken.
 Siehe dazu auch die Dokumentation zur [`MQTT API`](/docs/integrations/mqtt-api).
 
 ---
