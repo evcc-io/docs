@@ -22,10 +22,15 @@ Refer to [MBMD](https://github.com/volkszaehler/mbmd) for an example of how to g
 **Example of reading from a device**:
 
 ```yaml
-source: mqtt
-topic: mbmd/sdm1-1/Power
-timeout: 30s # don't accept values older than timeout
-scale: 0.001 # floating point factor applied to result, e.g. for converting Wh to kWh
+meters:
+- name: grid-meter
+  type: custom
+  power:
+    source: mqtt
+    topic: mbmd/sdm1-1/Power # MQTT topic to listen vor values
+    timeout: 30s # don't accept values older than 30s
+    scale: 0.001 # floating point factor applied to result to convert to W
+                 # (here, a received kW value is converter to W)
 ```
 
 For write access, the data is provided with the `payload` attribute. If this parameter is missing from the configuration, the value is written in the default format.
@@ -33,10 +38,32 @@ For write access, the data is provided with the `payload` attribute. If this par
 **Example of writing to a device**:
 
 ```yaml
-source: mqtt
-topic: mbmd/charger/maxcurrent
-payload: ${var:%d}
+chargers:
+- name: go-e-gemini-11kw
+  type: custom
+    source: mqtt
+    topic: mbmd/charger/maxcurrent
+    # Format parameter "var" as integer value
+    payload: ${var:%d}
 ```
+
+The following parameters can be used for the MQTT plugin:
+
+- **`source:`** Must be set to `mqtt`.
+- **`topic:`** Specifies the MQTT topic where the value is received.
+- **`timeout:`** (read) Defines how old a value received via MQTT can be to still be considered valid. For example, a timeout of 30 seconds means that only values received within the last 30 seconds are used for calculations and display.
+- **`scale:`** (read) A scaling factor to convert the received value to watts. For instance, if the value is received in kW, `scale: 0.001` should be set to convert it to watts.
+- **`payload:`** (write) Describes the format in which a value is written (e.g., to control a `charger` via MQTT).
+
+When an MQTT value is read, it can also be in a more complex format, such as JSON. 
+If the message is received as XML, it is converted to JSON before further processing. 
+The actual scalar value can be extracted in various ways, configured with the following parameters:
+
+- **`regex:`** A regular expression to extract the value from the received MQTT message. If the regular expression does not contain groups (`(....)`), the longest text matching the entire regex is selected. Otherwise, the first matching group is used. For example, a regex ` (\d+) ` applied to a message `Energy= 200 W` extracts the number `200`. With `default:`, a value can be defined to be used if the regex does not match.
+- **`jq:`** Can be used to define a jq expression to extract the value from a received JSON message. For example, the jq expression `.power` applied to a JSON structure `{ "power": 2300, "energy": 300, ...}` extracts the numeric value `2300`. The jq syntax offers many possibilities, all of which are described in the [jq documentation](https://jqlang.github.io/jq/manual/).
+- **`unpack:`** Allows converting a value from another numeric representation. Currently, only `unpack: hex` is supported, which converts hexadecimal values from a string representation (e.g., "F1EA"). Unpack is applied after any extraction using `regex` or `jq`.
+- **`decode:`** Can evaluate various binary formats. For instance, `decode: uint32` converts unsigned 32-bit integers contained in the MQTT payload for further processing. The following binary formats are currently supported: _float32_, _float32s_, _float64_, _uint16_, _uint32_, _uint64_, _int16_, _int32_, _int32s_, _ieee754_, _ieee754s_.
+
 
 ## HTTP (read/write)
 
@@ -53,19 +80,24 @@ For testing jq queries, tools like https://jqplay.org/ for JSON queries and http
 **Example of reading from a device**:
 
 ```yaml
-source: http
-uri: https://volkszaehler/api/data/<uuid>.json?from=now
-method: GET # default HTTP method
-headers:
-  - content-type: application/json
-auth: # basic authorisation
-  type: basic
-  user: foo
-  password: bar
-insecure: false # set to true to trust self-signed certificates
-jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # floating point factor applied to result, e.g. for converting kW to W
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+meters:
+- name: grid-meter
+  type: custom
+    source: http
+    uri: https://volkszaehler/api/data/<uuid>.json?from=now
+    method: GET # default HTTP method
+    headers:
+    - content-type: application/json
+    auth: # basic authentication
+      type: basic
+      user: foo
+      password: bar
+    insecure: false # set to true to trust self-signed certificates
+    jq: .data.tuples[0][1] # parse response json
+    scale: 0.001 # floating point factor applied to result, 
+                 # e.g. for kW to W conversion
+    timeout: 10s # request timeout in golang duration format, 
+                 # see https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml

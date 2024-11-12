@@ -6,7 +6,7 @@ sidebar_position: 3
 
 Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren. Diese können über den Wert `custom` des Parameters `type` in [`meter`](/docs/reference/configuration/meters#custom) (Strommessgeräte), [`charger`](/docs/reference/configuration/chargers#type) (Wallboxen) oder [`vehicle`](/docs/devices/vehicles#manuell) (Fahrzeuge) verwendet werden.
 
-Plugins erlauben sowohl _Schreibenzugriff_ also auch _Lesezugriff_. Wenn das Plugin zum _Schreiben_ verwendet wird, werden die Daten in Form von `${var[:format]}` zur Verfügung gestellt. Wenn `format` nicht angegeben wird, werden die Daten im Standard `%v` [Go Format](https://golang.org/pkg/fmt/) bereitgestellt. Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird. Zusätzlich können sämtliche Funktionen der [Go Template library](https://pkg.go.dev/text/template) verwendet werden um komplexere Datentransformationen durchzuführen.
+Plugins erlauben sowohl _Schreibzugriff_ also auch _Lesezugriff_. Wenn das Plugin zum _Schreiben_ verwendet wird, werden die Daten in Form von `${var[:format]}` zur Verfügung gestellt. Wenn `format` nicht angegeben wird, werden die Daten im Standard `%v` [Go Format](https://golang.org/pkg/fmt/) bereitgestellt. Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird. Zusätzlich können sämtliche Funktionen der [Go Template library](https://pkg.go.dev/text/template) verwendet werden um komplexere Datentransformationen durchzuführen.
 
 ## Modbus (lesen/schreiben)
 
@@ -22,10 +22,16 @@ Siehe [MBMD](https://github.com/volkszaehler/mbmd) für ein Beispiel wie man Mod
 **Beispiel Lesen**:
 
 ```yaml
-source: mqtt
-topic: mbmd/sdm1-1/Power
-timeout: 30s # don't accept values older than timeout
-scale: 0.001 # floating point factor applied to result, e.g. for Wh to kWh conversion
+meters:
+- name: grid-meter
+  type: custom
+  power:
+    source: mqtt
+    topic: mbmd/sdm1-1/Power # MQTT topic auf dem der Wert empfangen wird
+    timeout: 30s # wie alt empfangene Wert maximal 
+                 # sein darf um berücksichtigt zu werden
+    scale: 0.001 # Konvertierungsfaktor um MQTT Wert auf W umzurechnen 
+                 # (hier: kW auf W)
 ```
 
 Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt. Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
@@ -33,10 +39,30 @@ Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestel
 **Beispiel Schreiben**:
 
 ```yaml
-source: mqtt
-topic: mbmd/charger/maxcurrent
-payload: ${var:%d}
+chargers:
+- name: go-e-gemini-11kw
+  type: custom
+    source: mqtt
+    topic: mbmd/charger/maxcurrent
+    payload: ${var:%d}
 ```
+
+Die folgenden Parameter können für das MQTT plugin verwendet werden:
+
+* `source:` muss auf `mqtt` gesetzt sein.
+* `topic:` ist das MQTT Topic auf dem der Wert empfangen wird.
+* `timeout:` (lesen) definiert die Zeit wie alt ein über MQTT empfangener Wert maximal alt sein darf, damit er noch als gültig ist. Z.g. ein Timeout von 30s bedeutet, das bei den Berechnungen und der Anzeige nur Werte berücksichtigt werden, die innerhalb der letzten 30s empfangen wurden.
+* `scale:` (lesen) ist ein Skalenfaktor um den empfangenen Wert auf Watt umzurechnen. Wenn beispielsweise der Wert in kW empfangen wird, dann muss `scale: 0.001` gesetzt werden um auf Watt umzurechnen.
+* `payload:` (schreiben) beschreibt das Format mit dem ein Wert geschrieben wird (z.b. um einen `charger` über MQTT zu steuern)
+
+Wenn ein MQTT Wert gelesen wird, kann dieser auch in einem komplexeren Format wie JSON. 
+Falls die Nachricht als XML empfangen wird, wird diese vor der weiteren Verarbeitung zunächst in JSON umgewandelt.
+Der eigentlich skalare Wert kann auf verschiedene Arten extrahiert werden, die durch folgende Parameter konfiguriert werden können:
+
+* `regex:` ist ein regulärer Ausdruck um den Wert aus der empfangenen MQTT Nachricht zu extrahieren. Wenn der reguläre Ausdruck keine Gruppen (`(....)`) enthält, dann wird der längste Text auf den die gesamte Regexp zutrifft ausgewählt. Ansonsten die erste Gruppe, die zutrifft. Z.g. liefert eine regexp "` (\d+) `" angewendet auf eine Nachricht `Energy= 200 W` die Zahl `200`. Mit `default:` kann ein Wert definiert werden, der verwendet wird falls der reguläre Ausdruck keinen Treffer liefert.
+* `jq:` kann genutzt werden um einen jq Ausdruck zu definieren, der den Wert aus einer empfangenen JSON Nachricht extrahiert. Z.B. liefert der jq Ausdruck `.power` angewendet auf eine JSON Struktur `{ "power": 2300, "energy": 300, ...}` den numerischen Wert `2300`. Der jq Syntax bietet viele Möglichkeiten die alle in der [jq Dokumentation](https://jqlang.github.io/jq/manual/) beschrieben sind.
+* `unpack:` erlaubt es, einen Wert aus einem anderen Zahlenrepräsentation umzuwandeln. Aktuell wird nur `unpack: hex` unterstützt, dass hexadezimale Werte aus einer Stringdarstellung (z.b. "F1EA") umrechnen kann. Unpack wird nach einer eventuellen Extraktion mit `regex` oder `jq` angewendet.
+* `decode:` kann  verschiedene Binärformate auswerten. Z.b wandelt `decode: uint32` die in der MQTT Payload enthaltenen unsigned 32-Bit Integerzahlen um, so dass sie weiterverarbeitet werden können. Aktuell werden folgende Binärformate unterstützt: _float32_, _float32s_, _float64_, _uint16_, _uint32_, _uint64_, _int16_, _int32_, _int32s_, _ieee754_, _ieee754s_.
 
 ## HTTP (lesen/schreiben)
 
@@ -55,19 +81,24 @@ Für den Test von jq-Abfragen bietet sich z. B. das Online-Tool https://jqplay.o
 **Beispiel Lesen**:
 
 ```yaml
-source: http
-uri: https://volkszaehler/api/data/<uuid>.json?from=now
-method: GET # default HTTP method
-headers:
-  - content-type: application/json
-auth: # basic authentication
-  type: basic
-  user: foo
-  password: bar
-insecure: false # set to true to trust self-signed certificates
-jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+meters:
+- name: grid-meter
+  type: custom
+    source: http
+    uri: https://volkszaehler/api/data/<uuid>.json?from=now
+    method: GET # default HTTP method
+    headers:
+    - content-type: application/json
+    auth: # basic authentication
+      type: basic
+      user: foo
+      password: bar
+    insecure: false # set to true to trust self-signed certificates
+    jq: .data.tuples[0][1] # parse response json
+    scale: 0.001 # floating point factor applied to result, 
+                 # e.g. for kW to W conversion
+    timeout: 10s # request timeout in golang duration format, 
+                 # see https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
