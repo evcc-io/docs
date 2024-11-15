@@ -4,7 +4,7 @@ Official documentation repository of [evcc](https://evcc.io).
 
 ## General
 
-- The source content of the folder `templates` is the `templates/docs` folder in the [evcc repository](https://github.com/evcc-io/evcc)
+- The source content of the folder `templates` is the `templates/definition` folder in the [evcc repository](https://github.com/evcc-io/evcc)
 - We recommend to test changes locally, use the instructions below to run the documentation page locally as you can see how the changes will look like on the web page while you make changes.
 - English translation: If possible please provide the translation in English as well to ensure that the content does not get out of sync.
 
