@@ -24,10 +24,18 @@ const CODE_PREAMBLES = {
   co2: "tariffs:\n    co2:",
 };
 
-const TRANSLATIONS = {
+const TRANSLATIONS_de = {
   "tab.grid": "Netz",
   "tab.pv": "PV",
   "tab.battery": "Batterie",
+  "tab.charge": "Wallbox",
+  "tab.aux": "AUX",
+};
+
+const TRANSLATIONS_en = {
+  "tab.grid": "Grid",
+  "tab.pv": "PV",
+  "tab.battery": "Battery",
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
 };
@@ -47,7 +55,7 @@ function indent(code) {
   return code.replace(/^/gm, "      ");
 }
 
-function templateContent(entry, type) {
+function templateContent(entry, type, translations) {
   const description = entry.description ? entry.description + "\n" : "";
 
   const codeBlocks = entry.render.map((render) => {
@@ -74,7 +82,7 @@ function templateContent(entry, type) {
 ${codeBlocks
   .map(
     (block, i) => `<TabItem value="${block.usage}" label="${
-      TRANSLATIONS[`tab.${block.usage}`]
+      translations[`tab.${block.usage}`]
     }"${i === 0 ? " default" : ""}>
 
 ${block.code}
@@ -129,7 +137,7 @@ function additionalContent(name, target) {
   return "";
 }
 
-function generateMarkdown(data, type, target) {
+function generateMarkdown(data, type, translations, target) {
   let brandCounter = 0;
   let productCounter = 0;
 
@@ -183,7 +191,7 @@ function generateMarkdown(data, type, target) {
     }
     productCounter++;
 
-    generated += `${templateContent(entry, type)}`;
+    generated += `${templateContent(entry, type, translations)}`;
 
     lastGroup = group;
     lastBrand = brand;
@@ -202,13 +210,14 @@ function generateMarkdown(data, type, target) {
 ["vehicle", "meter", "charger", "tariff"].forEach((type) => {
   // German
   const templatesDe = readTemplates(`./templates/release/de/${type}`);
-  generateMarkdown(templatesDe, type, `./docs/devices/${type}s.mdx`);
+  generateMarkdown(templatesDe, type, TRANSLATIONS_de, `./docs/devices/${type}s.mdx`);
 
   // English
   const templatesEn = readTemplates(`./templates/release/en/${type}`);
   generateMarkdown(
     templatesEn,
     type,
+    TRANSLATIONS_en,
     `./i18n/en/docusaurus-plugin-content-docs/current/devices/${type}s.mdx`,
   );
 });
