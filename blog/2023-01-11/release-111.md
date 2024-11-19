@@ -72,7 +72,8 @@ Wer keinen dynamischen Stromtarif hat kann dennoch klimaschonen Laden. Dafür bi
 
 ```yaml
 planner:
-  type: grünstromindex
+  type: template
+  template: grünstromindex
   zip: 12349
 ```
 
