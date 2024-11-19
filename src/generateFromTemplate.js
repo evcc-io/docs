@@ -24,7 +24,7 @@ const CODE_PREAMBLES = {
   co2: "tariffs:\n    co2:",
 };
 
-const TRANSLATIONS_de = {
+const TRANSLATIONS_DE = {
   "tab.grid": "Netz",
   "tab.pv": "PV",
   "tab.battery": "Batterie",
@@ -32,7 +32,7 @@ const TRANSLATIONS_de = {
   "tab.aux": "AUX",
 };
 
-const TRANSLATIONS_en = {
+const TRANSLATIONS_EN = {
   "tab.grid": "Grid",
   "tab.pv": "PV",
   "tab.battery": "Battery",
@@ -210,14 +210,19 @@ function generateMarkdown(data, type, translations, target) {
 ["vehicle", "meter", "charger", "tariff"].forEach((type) => {
   // German
   const templatesDe = readTemplates(`./templates/release/de/${type}`);
-  generateMarkdown(templatesDe, type, TRANSLATIONS_de, `./docs/devices/${type}s.mdx`);
+  generateMarkdown(
+    templatesDe,
+    type,
+    TRANSLATIONS_DE,
+    `./docs/devices/${type}s.mdx`,
+  );
 
   // English
   const templatesEn = readTemplates(`./templates/release/en/${type}`);
   generateMarkdown(
     templatesEn,
     type,
-    TRANSLATIONS_en,
+    TRANSLATIONS_EN,
     `./i18n/en/docusaurus-plugin-content-docs/current/devices/${type}s.mdx`,
   );
 });

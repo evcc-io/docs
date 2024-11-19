@@ -24,6 +24,9 @@ import { themes as prismThemes } from "prism-react-renderer";
         },
       },
     },
+    future: {
+      experimental_faster: true,
+    },
     presets: [
       [
         "@docusaurus/preset-classic",
