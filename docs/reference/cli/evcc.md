@@ -10,6 +10,7 @@ evcc [flags]
 
 ```
   -c, --config string   Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
+      --disable-auth    Disable authentication (dangerous)
   -h, --help            Help
       --ignore-db       Run command ignoring service database
   -l, --log string      Log level (fatal, error, warn, info, debug, trace) (default "info")
