@@ -50,6 +50,12 @@ evcc kommt ohne jede Art von Garantie. Du verwendest die Software auf eigenes Ri
 
 ## Videos
 
+### Kieler Open Source und Linux Tage 2024
+
+Projektupdate von [Michael](https://github.com/naltatis) mit kleinem Fokus auf neue Funktionen rund um dynamische Stromtarife. Hier gibts die [Folien zum Vortrag](https://speakerdeck.com/naltatis/evcc-sonne-autos-and-dynamische-stromtarife).
+
+[![Vortrag evcc: Sonne, Autos und dynamische Stromtarife](youtube_kielux2024.webp)](https://www.youtube.com/watch?v=PejujWgAAlw)
+
 ### Night of open Knowledge 2023 in Lübeck
 
 [Michael](https://github.com/naltatis) gibt einen Überblick über den Funktionsumfang und die Möglichkeiten von evcc.

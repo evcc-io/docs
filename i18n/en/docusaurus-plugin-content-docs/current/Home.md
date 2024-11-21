@@ -58,6 +58,12 @@ evcc comes without any kind of guarantee, and you use the software at your own r
 Currently DE only (but please do suggest other languages!)
 :::
 
+### Kieler Open Source und Linux Tage 2024
+
+Project update by [Michael](https://github.com/naltatis) with a small focus on new features around dynamic electricity tariffs. Here are the [slides for the presentation](https://speakerdeck.com/naltatis/evcc-sonne-autos-and-dynamische-stromtarife).
+
+[![Lecture evcc: Sun, Cars, and Dynamic Electricity Tariffs](youtube_kielux2024.webp)](https://www.youtube.com/watch?v=PejujWgAAlw)
+
 ### Night of open Knowledge 2023 in Lübeck Lecture
 
 [Michael](https://github.com/naltatis) gives an overview of the functionality and possibilities of evcc.
