@@ -238,7 +238,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - `email`: Email. Siehe [`email`](#email) Definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
 - `ntfy`: [ntfy](https://ntfy.sh). Siehe [`ntfy`](#ntfy) Definition
-- `custom`: Ermöglicht die Nutzung von allen [Plugins](../plugins), die einen Schreibzugriff erlauben.
+- `custom`: Ermöglicht die Nutzung von allen [Plugins](../plugins), die einen Schreibzugriff erlauben. Siehe [`custom`](#custom) Definition.
 
 
 ---
@@ -344,10 +344,9 @@ Der Typ `custom` ermöglicht es, beliebige [Plugins](../plugins) für die Verarb
   - `json`: Der Wert wird als JSON-Objekt im Format `{ "msg": msg, "title": title }` bereitgestellt. Das Feld `title` wird nur hinzugefügt, wenn es im Abschnitt `events` definiert ist.
   - `csv`: Die Felder `title` und `msg` werden als kommaseparierte Liste bereitgestellt (`title, msg`)
   - `tsv`: Ähnlich wie `csv`, jedoch mit Tabulator als Trennzeichen.
-  - `msg` (Standard): Nur der Nachrichteninhalt (`msg`) wird bereitgestellt.
   - `title`: Nur der Titel (`title`) wird bereitgestellt.
   
-  Wenn `encoding` nicht definiert ist, wird die Nachricht `msg` ohne Titel direkt verwendet.
+  Wenn `encoding` nicht definiert ist, wird die Nachricht `msg` ohne Titel direkt verwendet. Dabei wird nur die in `msg` definierte Nachricht ohne Titel in `${send}` verwendet.
 
 **Beispiel**:
 
