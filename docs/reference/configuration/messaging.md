@@ -181,6 +181,7 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     - `pvRemaining` - Notwendige PV-Restladezeit bei aktivierter Timer Steuerung in Nanosekunden (_integer_)
 - Fahrzeuge (vehicles)
   - Konfiguration
+    - [`vehicleName`](vehicles#name) - Name des Fahrzeugs (_string_)
     - [`vehicleCapacity`](vehicles#capacity)- Kapazität der Fahrzeugbatterie in Wh (_float_)
     - [`vehicleTitle`](vehicles#title) - Bezeichnung des Fahrzeugs in der evcc App (_string_)
   - Information
@@ -236,14 +237,9 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - `telegram`: [Telegram Messenger](https://telegram.org/). Siehe [`telegram`](#telegram) Definition
 - `email`: Email. Siehe [`email`](#email) Definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
-- `script`: Kann externe Skripte zum Versenden von Nachrichten starten. Es ist auch hilfreich, um jede Art von externer Funktionalität einzubinden. Siehe [`script`](#script) Definition
+- `ntfy`: [ntfy](https://ntfy.sh). Siehe [`ntfy`](#ntfy) Definition
+- `custom`: Ermöglicht die Nutzung von allen [Plugins](../plugins), die einen Schreibzugriff erlauben. Siehe [`custom`](#custom) Definition.
 
-**Beispiel**:
-
-```yaml
-services:
-  - type: pushover
-```
 
 ---
 
@@ -337,16 +333,38 @@ Optionale Parameter sind `priority` und `tags`. Alle Parameter werden als String
 
 Weitere Informationen sind in der [ntfy Dokumentation](https://docs.ntfy.sh) zu finden.
 
-### `script`
+### `custom`
 
-`script` startet Shellscripte oder andere Kommandos um Nachrichten zu versenden oder beliebige Aktionen anhand der [Ereignisse](#events) zu starten.
+Der Typ `custom` ermöglicht es, beliebige [Plugins](../plugins) für die Verarbeitung von Nachrichten zu verwenden. Das Plugin muss den Schreibmodus unterstützen. Die Nachricht selbst wird in der Plugin Konfiguration mit dem Parameter `${send}` (bzw. als Template Parameter `{{.send}}`) bereitgestellt.
 
-Der Pfad zum Script muß in `cmdline` angegeben werden. Ebenso sollte ein `timeout` gesetzt werden. Der `timeout` gibt an, nach welcher Zeit das Script abgebrochen wird.
+**Mögliche Werte**:
+
+* `send`: Definiert das zu verwendende Plugin mit dem Feld `source` und plugin-spezifische Parameter. Siehe das Beispiel weiter unten.
+* `encoding`: Definiert das Format, in dem der Wert für `${send}` bereitgestellt wird. Die möglichen Werte sind:
+  - `json`: Der Wert wird als JSON-Objekt im Format `{ "msg": msg, "title": title }` bereitgestellt. Das Feld `title` wird nur hinzugefügt, wenn es im Abschnitt `events` definiert ist.
+  - `csv`: Die Felder `title` und `msg` werden als kommaseparierte Liste bereitgestellt (`title, msg`)
+  - `tsv`: Ähnlich wie `csv`, jedoch mit Tabulator als Trennzeichen.
+  - `title`: Nur der Titel (`title`) wird bereitgestellt.
+  
+  Wenn `encoding` nicht definiert ist, wird die Nachricht `msg` ohne Titel direkt verwendet. Dabei wird nur die in `msg` definierte Nachricht ohne Titel in `${send}` verwendet.
 
 **Beispiel**:
 
 ```yaml
-- type: script
-  cmdline: /home/pi/sendSignalMessage.sh
-  timeout: 50s
+messaging:
+  events:
+    connect:
+      title: "Evcc: ${vehicleName} hat sich verbunden"
+      msg: "${vehiclTitle} wurde verbunden (Lademodus: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # Plugin Typ
+        source: script
+        # Plugin-spezifische Konfiguration. 
+        # {{.send}} enthält die JSON Nachricht
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
 ```
+
+In diesem Beispiel wird ein Shell-Script (`cmd`) mit dem Argument `{"title": "...", "msg": "...."}` aufgerufen.
