@@ -112,22 +112,8 @@ scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 
 ## Manual Configuration
 
-Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden.
-Dazu bedarf es neben den allgemeinen 'modbus' Einstellungen (siehe oben) auch der Definition eines `registers` an Stelle eines `value`, wie bei vordefinierten Geräten. Es ist nicht zulässig, sowohl `value` als auch `register` anzugeben.
-Die Definition eines Registers benötigt folgende Parameter:
-
-- `address`: die Registeradresse
-- `type`: Der Registertyp, zulässig sind `coil`, `input`, `holding`
-- `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden.
-- `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen UND verknüpft, um so einzelne Bits extrahieren zu können.
-  Weitere zulässige Parameter einer manuellen Konfiguration sind:
-- `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z.B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
-- `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z.B. 10s für 10 Sekunden.
-
-// translate above to english
-
 If the Modbus device is not directly supported or if values deviating from the predefined models are to be read or written, the Modbus registers can also be configured manually.
-For this purpose, in addition to the general 'modbus' settings (see above), a `registers` must be defined instead of a `value`, as with predefined devices. It is not allowed to specify both `value` and `register`.
+For this purpose, in addition to the general 'modbus' settings (see above), a `register` must be defined instead of a `value`, as with predefined devices. It is not allowed to specify both `value` and `register`.
 
 The definition of a register requires the following parameters:
 
