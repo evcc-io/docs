@@ -52,7 +52,10 @@ function readTemplates(path) {
 }
 
 function indent(code) {
-  return code.replace(/^/gm, "      ");
+  // escape backticks
+  result = code.replace(/`/g, "\\`");
+  // indent
+  return result.replace(/^/gm, "      ");
 }
 
 function templateContent(entry, type, translations) {
