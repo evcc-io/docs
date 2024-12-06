@@ -106,7 +106,7 @@ To upgrade to a new version of evcc, perform the following steps:
 - Upgrade evcc:
 
   ```sh
-  brew install evcc
+  brew upgrade evcc
   ```
 
 ## Additional Commands

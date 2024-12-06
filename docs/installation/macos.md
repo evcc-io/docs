@@ -112,7 +112,7 @@ Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte dur
 - Installiere evcc:
 
   ```sh
-  brew install evcc
+  brew upgrade evcc
   ```
 
 ## Weitere Befehle
