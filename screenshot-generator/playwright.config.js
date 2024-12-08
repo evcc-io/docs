@@ -22,7 +22,11 @@ module.exports = defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"], deviceScaleFactor: 2 },
+      use: {
+        ...devices["Desktop Chrome"],
+        deviceScaleFactor: 2,
+        viewport: { width: 1280, height: 1600 },
+      },
     },
   ],
 });
