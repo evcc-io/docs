@@ -1,0 +1,318 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
+import PhaseSwitchSupported from "/docs/_phase_switch_supported.mdx";
+import DeviceConfig from "../../src/components/DeviceConfig";
+import DeviceFeatures from "../../src/components/DeviceFeatures";
+import DeviceFeatureFilter from "../../src/components/DeviceFeatureFilter";
+
+# Smarte Schalter
+
+evcc unterstützt smarte Steckdosen und steuerbare Schalter.
+Diese Schalter funktionieren ähnlich wie Wallboxen, jedoch ohne die Regelung der Ladeleistung.
+Hier steuert evcc lediglich den Ein-/Aus-Zustand der Steckdose.
+Ist genügend [Überschuss vorhanden](/docs/features/solar-charging) oder [günstige Energie](/docs/features/dynamic-prices)  aus dem Netz verfügbar, wird automatisch geschaltet.
+Darüber hinaus ist auch eine manuelle Steuerung über "Aus" und "Schnell" möglich.
+
+## Modus
+
+Abhängig vom Anwendungsfall gibt es zwei Modi, in denen geregelt wird.
+Diese werden implizit über den Parameter `standbypower` am Gerät festgelegt.
+
+### Lademodus (Standard)
+
+Dieser Modus eignet sich für die Verwendung von Steckdosen als Ladesteuerung für Akku-betriebene Fahrzeuge (E-Motorrad, E-Bikes, Werkzeugakkus, ...).
+Die gemessene Ladeleistung am Schalter wird als Ladeleistung gewertet.
+Fällt diese Leistung unter einen Schwellwert (Standard: `standbypower: 15`) betrachtet evcc das Gerät als geladen.
+Dieser Modus ist aktiv, wenn der konfigurierte Wert für `standbypower` nicht negativ ist.
+
+Hier ein einfaches Beispiel für eine Tasmota-Steckdose, die im Normalmodus betrieben wird.
+Das angeschlossene Ladegerät hat einen Standby-Verbrauch von maximal 50 W.
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+Das heißt, in diesem Modus wird der Zustand des Ladepunkts abhängig von der gemessenen Leistung bestimmt: 
+
+- Laden: (Leistung > `standbypower`)
+- Geladen: (Leistung ≤ `standbypower`)
+
+:::note
+Dieser Modus setzt voraus, dass der Schalter auch einen eingebauten Energiezähler hat.
+Es ist aktuell nicht möglich dieses Verhalten mit einem zusätzlichen [Energiezähler](/docs/devices/meters) am Ladepunkt zu erreichen.
+:::
+
+### Statischer Modus
+
+Der statische Modus eignet sich für allgemeine Verbraucher wie Wärmepumpen, Klimaanlagen, Heizlüfter, etc.
+Dieser Modus wird durch einen negativen Wert für `standbypower` aktiviert.
+
+Hier ein Beispiel für einen Shelly Schalter, der einen SG-Ready-Kontakt einer Wärmepumpe mit 5 kW Leistung steuert.
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+Der Zustand des Ladepunktes wird direkt vom Schaltzustand der Steckdose abhängig gemacht:
+
+- Laden: Schalter eingeschaltet
+- Geladen: Schalter ausgeschaltet
+
+Zudem geht evcc von einer konstanten Leistung aus, die durch den Parameter `standbypower` festgelegt wird.
+Also bspw. 5 kW bei eingeschaltetem SG-Ready-Kontakt.
+
+Für bessere Auswertungen empfiehlt es sich hier dem Ladepunkt einen separaten [Energiezähler](./meters) hinzuzufügen.
+
+## Besonderheiten
+
+### Keine automatischen Ladevorgänge
+
+In evcc wird der Zeitraum vom Anstecken eines Fahrzeugs bis zum Trennen als Ladevorgang betrachtet.
+Dieses Konzept funktioniert bei Schaltern nicht, da diese keinen verbunden/getrennt Zustand erkennen können.
+Daher protokolliert evcc den Verbrauch an Schaltern als einen langen Ladevorgang, der vom Start bis zum Beenden von evcc läuft.
+Eine rein zeitbasierte Auswertung gibt es aktuell nicht. Diese Funktion ist aber geplant.
+
+Es gibt allerdings schon heute einen Weg, mit dem du manuell einen Ladevorgang erstellen kannst.
+Bei Schaltern wird der aktuelle Ladevorgang beendet, wenn du den Ladepunkt auf **Aus** schaltest.
+Durch ein Ein-/Aus-Schalten über die UI kannst du den Ladevorgang manuell starten.
+Dies ist natürlich auch automatisiert via API möglich (bspw. jede Nacht).
+
+### Integriertes Gerät
+
+Standardmäßig bieten Ladepunkte die Möglichkeit einer Fahrzeugzuordnung.
+In vielen Szenarien ist das jedoch nicht erwünscht.
+Es ergibt wenig Sinn den Tesla mit dem SG-Ready-Kontakt einer Wärmepumpe zu verbinden.
+Über den Parameter `integrateddevice: true` deaktivierst du die manuelle Zuordnung von Fahrzeugen in der UI.
+Zusätzlich wird die automatische Fahrzeugerkennung für diesen Ladepunkt deaktiviert.
+
+### Wärmeerzeugung
+
+Nutzt du den Schalter zur Steuerung eines Wärmeerzeugers solltest du den Parameter `heating: true` setzen.
+Dadurch verändert sich die Darstellung in der UI.
+Es werden die Begriffe "heizen" anstatt "laden" verwendet.
+Zudem wird der `soc` des Chargers (sofern verfügbar) nicht mehr in % sondern als Temperatur in °C angezeigt.
+
+---
+
+<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+## Schaltbare Steckdosen
+
+### AVM FritzDECT
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: fritzdect
+      uri: https://fritz.box # HTTP(S) Adresse (optional)
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      ain: 307788992233 # Die AIN ist auf dem Typenschild auf der Geräterückseite aufgedruckt. Bei führenden Nullen bitte in doppelte Hochkommata setzen.
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: fritzdect
+      uri: https://fritz.box # HTTP(S) Adresse (optional)
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      ain: 307788992233 # Die AIN ist auf dem Typenschild auf der Geräterückseite aufgedruckt. Bei führenden Nullen bitte in doppelte Hochkommata setzen.
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### Homematic IP 
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homematic
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 2010 # Port (optional)
+      device: '0001EE89AAD848' # Homematic Geräte Id, wie im CCU Webfrontend angezeigt.
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homematic
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 2010 # Port (optional)
+      device: '0001EE89AAD848' # Homematic Geräte Id, wie im CCU Webfrontend angezeigt.
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      meterchannel: 6 # Kanalnummer des Messwertkanals, wie im CCU Webfrontend angezeigt.
+      switchchannel: 3 # Kanalnummer der schaltbaren Steckdose, wie im CCU Webfrontend angezeigt.
+      cache: 1s # Bei Problemen mit dem Duty Cycle setze den Cache auf bspw 30s. (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### HomeWizard 
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homewizard
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homewizard
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### myStrom Switch
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: mystrom
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: mystrom
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### Shelly 
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: shelly
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      channel: 0 # optional
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: shelly
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      channel: 0 # optional
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### Tasmota einphasig
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tasmota
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Standard-User ist admin (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      channel: 1 # Schaltkanal (1-8)
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tasmota
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Standard-User ist admin (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      channel: 1 # Schaltkanal (1-8)
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### TP-Link
+
+#### H-Series Smart Plug
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tplink
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tplink
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+#### Tapo P-Series Smart Plug
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tapo
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tapo
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen)
+      standbypower: 15 # Leistung oberhalb des angegebenen Wertes wird als Ladeleistung gewertet (optional)
+      integrateddevice: # Integriertes Gerät (keine Fahrzeugverbindung) (optional)
+      heating: # Wärmeerzeuger (°C anstatt %) (optional)
+      icon: # Icon in der Benutzeroberfläche (optional)`} />
+
+
+

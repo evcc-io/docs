@@ -1,0 +1,320 @@
+---
+sidebar_position: 1
+---
+
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import SponsorshipRequired from "../_sponsorship_required.mdx";
+import PhaseSwitchSupported from "../_phase_switch_supported.mdx";
+import DeviceConfig from "../../../../../src/components/DeviceConfig";
+import DeviceFeatures from "../../../../../src/components/DeviceFeatures";
+import DeviceFeatureFilter from "../../../../../src/components/DeviceFeatureFilter";
+
+# Smart Switches
+
+evcc supports smart sockets and controllable switches.
+These switches work similarly to EV chargers, but without the power control.
+Here, evcc only controls the on/off state of the socket.
+If there is enough [surplus](/docs/features/solar-charging) or [cheap energy](/docs/features/dynamic-prices) available, the socket is switched automatically.
+Additionally, manual control via "Off" and "Fast" is possible.
+
+## Modes
+
+Depending on the application, there are two modes of operation.
+These are set implicitly via the `standbypower` parameter on the device.
+
+### Charging mode (default)
+
+This mode is suitable for the use of sockets that control battery-powered vehicles (e-motorcycles, e-bikes, tool batteries, ...).
+The measured charging power at the switch is considered as charging power.
+If this power falls below a threshold (default: `standbypower: 15`), evcc considers the device as charged.
+This mode is active if the configured value for `standbypower` is not negative.
+
+Here is an example of a Tasmota socket that is operated in charging mode.
+The connected charger has a standby consumption of a maximum of 50 W.
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+This means that in this mode the state of the charger is determined by the measured power:
+
+- Charging: (power > `standbypower`)
+- Charged: (power ≤ `standbypower`)
+
+:::note
+This mode assumes that the switch also has an integrated energy meter.
+It is currently not possible to achieve this behavior with an additional [energy meter](/docs/devices/meters) at the charger.
+:::
+
+### Static mode
+
+This mode is suitable for general consumers such as heat pumps, air conditioners, heaters, etc.
+This mode is activated by a negative value for `standbypower`.
+
+Here is an example of a Shelly switch that controls a heat pump with 5 kW power.
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+The state of the charger is directly dependent on the switch state of the socket:
+
+- Charging: switch on
+- Charged: switch off
+
+evcc assumes a constant power that is set by the `standbypower` parameter.
+In the example above the switch controls a 5 kW heat pump.
+
+If you want to see the real power consumption it is recommended to add a separate [energy meter](./meters) to the charging point.
+
+## Special behavior
+
+### No automatic sessions
+
+In evcc the period from plugging in a vehicle to disconnecting is considered a charging session.
+This concept does not work with switches, as these cannot detect a connected/disconnected state.
+Therefore, evcc logs the consumption at switches as a long charging process that runs from the start to the end of evcc.
+There is currently no purely time-based evaluation.
+There are plans to implement this in the future.
+
+However, there is already a way to manually create a charging sessions.
+When switching the charging point to **Off** at a switch, the current charging session is stopped.
+You can manually start a charging session by switching on and off via the UI.
+You could automate this via API (e.g. every night).
+
+### Integrated device
+
+By default, charging points offer the possibility of vehicle assignment.
+In many switch scenarios this is not desired.
+It makes little sense to connect the Tesla to the SG-Ready contact of a heat pump.
+By setting the parameter `integrateddevice: true` you disable the manual vehicle assignment in the UI.
+Additionally, the automatic vehicle detection is disabled for this charging point.
+
+### Heating
+
+If you use the switch to control a heat pump, you should set the parameter `heating: true`.
+This changes the display in the UI.
+Now the status uses the word "heating" instead of "charging".
+Additionally, the `soc` of the charger (if available) is no longer displayed in % but as a temperature in °C.
+
+---
+
+<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+## Switchable sockets
+
+### AVM FritzDECT
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: fritzdect
+      uri: https://fritz.box # HTTP(S) address (optional)
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      ain: 307788992233 # The AIN is printed on the type label on the back of the device. Embed it in double quotes in case of leading zeroes.
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: fritzdect
+      uri: https://fritz.box # HTTP(S) address (optional)
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      ain: 307788992233 # The AIN is printed on the type label on the back of the device. Embed it in double quotes in case of leading zeroes.
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### Homematic IP 
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homematic
+      host: 192.0.2.2 # IP address or hostname
+      port: 2010 # Port (optional)
+      device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
+      user: # User account (e.g. email address, user id, etc.) (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homematic
+      host: 192.0.2.2 # IP address or hostname
+      port: 2010 # Port (optional)
+      device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
+      user: # User account (e.g. email address, user id, etc.) (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      meterchannel: 6 # Homematic meter channel number like shown in the CCU web user interface.
+      switchchannel: 3 # Homematic switch actor channel number like shown in the CCU web user interface.
+      cache: 1s # In case of duty cycle problems try a cache setting of 30s. (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### HomeWizard 
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homewizard
+      host: 192.0.2.2 # IP address or hostname
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: homewizard
+      host: 192.0.2.2 # IP address or hostname
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### myStrom Switch
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: mystrom
+      host: 192.0.2.2 # IP address or hostname
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: mystrom
+      host: 192.0.2.2 # IP address or hostname
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### Shelly 
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: shelly
+      host: 192.0.2.2 # IP address or hostname
+      user: # User account (e.g. email address, user id, etc.) (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      channel: 0 # optional
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: shelly
+      host: 192.0.2.2 # IP address or hostname
+      user: # User account (e.g. email address, user id, etc.) (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      channel: 0 # optional
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### Tasmota single phase
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tasmota
+      host: 192.0.2.2 # IP address or hostname
+      user: # admin is default (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      channel: 1 # Relaychannel number (1-8)
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tasmota
+      host: 192.0.2.2 # IP address or hostname
+      user: # admin is default (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      channel: 1 # Relaychannel number (1-8)
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+### TP-Link
+
+#### H-Series Smart Plug
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tplink
+      host: 192.0.2.2 # IP address or hostname
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tplink
+      host: 192.0.2.2 # IP address or hostname
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/smartswitch  -->
+
+#### Tapo P-Series Smart Plug
+
+<DeviceConfig code={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tapo
+      host: 192.0.2.2 # IP address or hostname
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)`} advanced={`chargers:
+    - name: my_smartswitch
+      type: template
+      template: tapo
+      host: 192.0.2.2 # IP address or hostname
+      user: # User account (e.g. email address, user id, etc.)
+      password: # Password of the user account (use single quotes in case of leading zeros)
+      standbypower: 15 # Power values above this value will be considered as charging pow (optional)
+      integrateddevice: # Integrated device (no vehicle connection) (optional)
+      heating: # Heating device (°C instead of %) (optional)
+      icon: # Icon as shown in user interface (optional)`} />
+
+
+
