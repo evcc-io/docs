@@ -16,6 +16,7 @@ evcc unterstützt smarte Steckdosen und steuerbare Schalter.
 Diese Schalter funktionieren ähnlich wie Wallboxen, jedoch ohne die Regelung der Ladeleistung.
 Hier steuert evcc lediglich den Ein-/Aus-Zustand der Steckdose.
 Ist genügend [Überschuss vorhanden](/docs/features/solar-charging) oder [günstige Energie](/docs/features/dynamic-prices)  aus dem Netz verfügbar, wird automatisch geschaltet.
+Darüber hinaus ist auch eine manuelle Steuerung über "Aus" und "Schnell" möglich.
 
 ## Modus
 
@@ -27,6 +28,7 @@ Diese werden implizit über den Parameter `standbypower` am Gerät festgelegt.
 Dieser Modus eignet sich für die Verwendung von Steckdosen als Ladesteuerung für Akku-betriebene Fahrzeuge (E-Motorrad, E-Bikes, Werkzeugakkus, ...).
 Die gemessene Ladeleistung am Schalter wird als Ladeleistung gewertet.
 Fällt diese Leistung unter einen Schwellwert (Standard: `standbypower: 15`) betrachtet evcc das Gerät als geladen.
+Dieser Modus ist aktiv, wenn der konfigurierte Wert für `standbypower` nicht negativ ist.
 
 Hier ein einfaches Beispiel für eine Tasmota-Steckdose, die im Normalmodus betrieben wird.
 Das angeschlossene Ladegerät hat einen Standby-Verbrauch von maximal 50 W.
@@ -44,6 +46,11 @@ Das heißt, in diesem Modus wird der Zustand des Ladepunkts abhängig von der ge
 
 - Laden: (Leistung > `standbypower`)
 - Geladen: (Leistung ≤ `standbypower`)
+
+:::note
+Dieser Modus setzt voraus, dass der Schalter auch einen eingebauten Energiezähler hat.
+Es ist aktuell nicht möglich dieses Verhalten mit einem zusätzlichen [Energiezähler](/docs/devices/meters) am Ladepunkt zu erreichen.
+:::
 
 ### Statischer Modus
 
@@ -71,11 +78,6 @@ Also bspw. 5 kW bei eingeschaltetem SG-Ready-Kontakt.
 
 Für bessere Auswertungen empfiehlt es sich hier dem Ladepunkt einen separaten [Energiezähler](./meters) hinzuzufügen.
 
-:::important Wichtig
-Standardmäßig geht evcc von 3-phasigem Betrieb aus.
-Bei der Verwendung von Smart Switches musst du die Phasenanzahl über die UI am Ladepunkt manuell auf **1-phasig** setzen.
-:::
-
 ## Besonderheiten
 
 ### Keine automatischen Ladevorgänge
@@ -96,13 +98,14 @@ Standardmäßig bieten Ladepunkte die Möglichkeit einer Fahrzeugzuordnung.
 In vielen Szenarien ist das jedoch nicht erwünscht.
 Es ergibt wenig Sinn den Tesla mit dem SG-Ready-Kontakt einer Wärmepumpe zu verbinden.
 Über den Parameter `integrateddevice: true` deaktivierst du die manuelle Zuordnung von Fahrzeugen in der UI.
+Zusätzlich wird die automatische Fahrzeugerkennung für diesen Ladepunkt deaktiviert.
 
 ### Wärmeerzeugung
 
 Nutzt du den Schalter zur Steuerung eines Wärmeerzeugers solltest du den Parameter `heating: true` setzen.
 Dadurch verändert sich die Darstellung in der UI.
 Es werden die Begriffe "heizen" anstatt "laden" verwendet.
-Zudem wird der `soc` des Chargers (sofern verfügbar) als Temperatur in °C angezeigt.
+Zudem wird der `soc` des Chargers (sofern verfügbar) nicht mehr in % sondern als Temperatur in °C angezeigt.
 
 ---
 
