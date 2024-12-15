@@ -4,46 +4,46 @@ sidebar_position: 3
 
 # Plugins
 
-Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren für die es keine direkte Unterstützung gibt. 
+Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren, für die es keine direkte Unterstützung gibt.
 Sie können für die Gerätekategorien [`meter`](/docs/reference/configuration/meters#custom) (Strommessgeräte), [`charger`](/docs/reference/configuration/chargers#type) (Wallboxen) oder [`vehicle`](/docs/devices/vehicles#manuell) (Fahrzeuge) verwendet werden.
 Plugins können auch für die in [Messaging](/docs/reference/configuration/messaging) beschriebenen Endpunkte für Events genutzt werden.
 
 Je nach Verwendung werden Plugins **lesend** oder **schreibend** eingesetzt.
 
-## Übersicht 
+## Übersicht
 
-Folgende Plugins koennen verwendet werden um externe Datenquellen einzubinden:
+Folgende Plugins können verwendet werden, um externe Datenquellen einzubinden:
 
-* [Modbus Plugin](#modbus) - Plugin zum Auslesen von einem ModBus-fähigen Gerät (lesen/schreiben).
-* [MQTT Plugin](#mqtt) - Plugin um indirekt über MQTT mit den MQTT-fähigen Geräten zu kommunizieren (lesen/schreiben).
-* [HTTP Plugin](#http) - Plugin das über HTTP-API mit Endgeräten spricht (lesen/schreiben).
-* [Websocket Plugin](#websocket) - Plugin zum Empfangen von Gerätedaten über einen eigenen Webserver. Kann nur zum Lesen von Daten genutzt werden (lesen).
-* [SMA/Speedwire Plugin](#speedwire) - Plugin speziell für SMA Geräte die mit dem Speedwire Protokoll kommunizieren koennen (lesen).
-* [Javascript Plugin](#javascript) - Plugin das Werte in über ein Javascript Skript bereitstellt oder entgegennimmt (lesen/schreiben).
-* [Shell Plugin](#shell) - Plugin das ein Shell Skript ausführen kann um Daten zu erxtrahieren oder schreibend entgegennimmt (lesen/schreiben).
+- [Modbus Plugin](#modbus) - Plugin zum Auslesen von einem Modbus-fähigen Gerät (lesen/schreiben).
+- [MQTT Plugin](#mqtt) - Plugin um indirekt über MQTT mit den MQTT-fähigen Geräten zu kommunizieren (lesen/schreiben).
+- [HTTP Plugin](#http) - Plugin, das über HTTP-API mit Endgeräten spricht (lesen/schreiben).
+- [Websocket Plugin](#websocket) - Plugin zum Empfangen von Gerätedaten über einen eigenen Webserver. Kann nur zum Lesen von Daten genutzt werden (lesen).
+- [SMA/Speedwire Plugin](#speedwire) - Plugin speziell für SMA Geräte, die mit dem Speedwire Protokoll kommunizieren können (lesen).
+- [JavaScript Plugin](#javascript) - Plugin, das Werte in über ein JavaScript Skript bereitstellt oder entgegennimmt (lesen/schreiben).
+- [Shell Plugin](#shell) - Plugin, das ein Shell Skript ausführen kann, um Daten zu extrahieren oder schreibend entgegennimmt (lesen/schreiben).
 
-Neben diesen Plugins, die externe Daten integrieren, gibt es folgende Helfer-Plugins, die Daten direkt bereitstellen koennen. Diese koennen nur in einem lesenden Kontext genutzt werden:
+Neben diesen Plugins, die externe Daten integrieren, gibt es folgende Helfer-Plugins, die Daten direkt bereitstellen können. Diese können nur in einem lesenden Kontext genutzt werden:
 
-* [Const Plugin](#const) - Spezielles Plugin das einfach einen konstanten Wert zurückliefert.
-* [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
-* [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die boolschen Status-Werte für den _angeschlossen_ und _charging_ Zustand, die von Plugins ausgelesen werden, zu einem einzigen Ladestatus zu kombinieren. 
+- [Const Plugin](#const) - Spezielles Plugin das einfach einen konstanten Wert zurückliefert.
+- [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
+- [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den _angeschlossen_ und _charging_ Zustand, die von Plugins ausgelesen werden, zu einem einzigen Ladestatus zu kombinieren.
 
 ### Plugin Syntax
 
-Jedes Plugin besitzt eine individuelles Konfigurationsschema. 
-Dabei ist es wichtig zu wissen, ob das Plugin in einem **lesenden** oder **schreibenden** Kontext verwendet wird. 
-Einige Konfigurationsparameter machen nur in einem lesenden Kontext Sinn, andere nur wenn sie im Schreibmodus genutzt werden. 
-Die meisten Konfigurationsparameter sind plugin spezifisch, jedoch gibt eine handvoll Parameter die beim Lesen von einem Plugin bzw. beim Schreiben via eines Plugins generell genutzt werden können.
+Jedes Plugin besitzt ein individuelles Konfigurationsschema.
+Dabei ist es wichtig zu wissen, ob das Plugin in einem **lesenden** oder **schreibenden** Kontext verwendet wird.
+Einige Konfigurationsparameter machen nur in einem lesenden Kontext Sinn, andere nur, wenn sie im Schreibmodus genutzt werden.
+Die meisten Konfigurationsparameter sind Plugin spezifisch, jedoch gibt es eine handvoll Parameter, die beim Lesen von einem Plugin bzw. beim Schreiben via eines Plugins generell genutzt werden können.
 
-Beispielsweise kann über die folgende Konfiguration ein MQTT Plugin als `meter` eingebunden werden bei dem der aktuelle Stromverbrauch über das spezifierte MQTT topic eingelesen wird:
+Beispielsweise kann über die folgende Konfiguration ein MQTT Plugin als `meter` eingebunden werden, bei dem der aktuelle Stromverbrauch über das spezifizierte MQTT Topic eingelesen wird:
 
 ```yaml title="Beispiel: MQTT Plugin für die Leistungswerte eines Strommessgeräts"
 meters:
-- name: imsys
-  type: custom
-  power:
-    source: mqtt
-    topic: "home/current/imsys/chn2/raw"
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: "home/current/imsys/chn2/raw"
 ```
 
 Das Schema hat dabei immer folgende Struktur:
@@ -56,137 +56,139 @@ Das Schema hat dabei immer folgende Struktur:
     <p-attr1>: ...
     <p-attr2>: ...
     ....
-  <attr2>: 
+  <attr2>:
     ....
 ```
 
-Dabei stehen `<name>`für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräteattribute, `<plugin>` für den Plugintyp und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
+Dabei stehen `<name>`für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräteattribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
 
 #### Lesen
 
-Beim Lesen von Daten mithilfe eines Plugins können sogenannte _Pipelines_ verwendet werden. 
+Beim Lesen von Daten mithilfe eines Plugins können sogenannte _Pipelines_ verwendet werden.
 Damit können Daten aus der Ausgabe des Plugins fein granular extrahiert werden. Dies ermöglicht es, komplexe Datenstrukturen wie JSON oder XML zu verarbeiten und die benötigten Informationen herauszufiltern.
 Mögliche Parameter für die Datenextraktion sind:
 
-* `regex`: Ein regulärer Ausdruck, um Werte aus dem empfangenen Text zu extrahieren.
-* `jq`: Ein [jq](https://jqlang.github.io/jq/)-Ausdruck, um Werte aus JSON-Strukturen zu extrahieren. Die volle Syntax und Möglichkeiten finden sich in der jq-Dokumentation.
-* `unpack`: Konvertiert Werte aus anderen Zahlenrepräsentationen, z.B. `hex`.
-* `decode`: Dekodiert Binärformate wie `uint32`, `float32` etc.
+- `regex`: Ein regulärer Ausdruck, um Werte aus dem empfangenen Text zu extrahieren.
+- `jq`: Ein [jq](https://jqlang.github.io/jq/)-Ausdruck, um Werte aus JSON-Strukturen zu extrahieren. Die volle Syntax und Möglichkeiten finden sich in der jq-Dokumentation.
+- `unpack`: Konvertiert Werte aus anderen Zahlenrepräsentationen, z.B. `hex`.
+- `decode`: Dekodiert Binärformate wie `uint32`, `float32` etc.
 
 #### Schreiben
 
 Beim Schreiben können Parameter in der Konfiguration durch Platzhalter ersetzt werden. Die Daten werden in Form von `${var[:format]}` zur Verfügung gestellt.
-Wenn format nicht angegeben wird, werden die Daten im Standard %v Go-Format bereitgestellt. 
-Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird. 
+Wenn Format nicht angegeben wird, werden die Daten im Standard %v Go-Format bereitgestellt.
+Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird.
 Zusätzlich können sämtliche Funktionen der Go Template Library verwendet werden, um komplexere Datentransformationen durchzuführen.
 
-Die folgende Abschnitte geben einen Überblick jeweils für die einzelnen Geräte welche Attribute mit Plugins konfiguriert werden können und welche Datentypen von dem Plugin erwartet wird.
+Die folgenden Abschnitte geben einen Überblick für die einzelnen Geräte.
+Dabei werden die per Plugin konfigurierbaren Attribute und deren Datentypen aufgeführt.
 
 ### Meter
 
-Folgende Attribute können für die Konfiguration von Strommessgeräten genutzt werden. 
-Dabei werden alle Werte lesend von konfigurierten Plugins übernommen. 
+Folgende Attribute können für die Konfiguration von Strommessgeräten genutzt werden.
+Dabei werden alle Werte lesend von konfigurierten Plugins übernommen.
 
-| Attribut      | Typ            | Beschreibung         |
-|---------------|----------------|----------------------|
-| power         | float          | Leistung             |
-| energy        | float          | Energie              |
-| soc           | int            | Ladestand            |
-| limitsoc      | int            | Ladeziel in %        |
-| currents      | float / array  | Strom (pro Phase)    |
-| batterymode   |                |                      |
-| voltages      |                |                      |
-| powers        |                |                      |
-| maxpower      |                |                      |
-| capacity      |                |                      |
+| Attribut    | Typ           | Beschreibung      |
+| ----------- | ------------- | ----------------- |
+| power       | float         | Leistung          |
+| energy      | float         | Energie           |
+| soc         | int           | Ladestand         |
+| limitsoc    | int           | Ladeziel in %     |
+| currents    | float / array | Strom (pro Phase) |
+| batterymode |               |                   |
+| voltages    |               |                   |
+| powers      |               |                   |
+| maxpower    |               |                   |
+| capacity    |               |                   |
 
 **Beispiel**
 
 In diesem Beispiel wird die Konfiguration eines `meter`s um die gemessene Gesamtenergie über einen REST Aufruf mithilfe des HTTP-Plugins abgefragt:
 
-
-``` yaml
+```yaml
 // TODO ...
 ```
 
 ### Charger
 
-Ladergeräte haben folgende Attribute die ausgelesen werden können:
+Wallboxen und Ladegeräte haben folgende Attribute die ausgelesen werden können:
 
-| Attribut      | Typ    | Beschreibung         |
-|---------------|--------|----------------------|
-| power         | float  | Leistung             |
-| energy        | float  | Energie              |
-| enabled       | bool   | Eingeschaltet?       |
-| status        | bool   | Status               |
-| maxcurrentmilis |      |                      |
-| soc           |        |                      |
-| phases1p3p    |        |                      |
-| power         |        |                      |
-| currents      |        |                      |
-| voltages      |        |                      |
-
-**Beispiel** 
-
-Dieses Beispiel zeigt wie man mit einem Shell Skript den Ladestatus (ladend/nicht ladend) eines `charger`s abfragen kann:
-
-``` yaml
-// TODO ...
-```
-
-
-Neben den read-only Werten können über Plugins auch Aktionen getriggert oder Konfigurationswerte gesetzt werden: 
-
-| Attribut   | Typ       | Beschreibung         |
-|---------------|--------|----------------------|
-| enable        | float  | Schalte an/aus       |
-| maxcurrent    | float  | Max. Ladestrom       |
+| Attribut        | Typ   | Beschreibung   |
+| --------------- | ----- | -------------- |
+| power           | float | Leistung       |
+| energy          | float | Energie        |
+| enabled         | bool  | Eingeschaltet? |
+| status          | bool  | Status         |
+| maxcurrentmilis |       |                |
+| soc             |       |                |
+| phases1p3p      |       |                |
+| power           |       |                |
+| currents        |       |                |
+| voltages        |       |                |
 
 **Beispiel**
 
-Diese Beispiel begrenzt den maximalen Ladestrom in dem eine MQTT message gesendet wird:
+Dieses Beispiel zeigt, wie man mit einem Shell Skript den Ladestatus (ladend/nicht ladend) eines `charger`s abfragen kann:
 
-``` yaml
+```yaml
+// TODO ...
+```
+
+Neben den read-only Werten können über Plugins auch Aktionen getriggert oder Konfigurationswerte gesetzt werden:
+
+| Attribut   | Typ   | Beschreibung   |
+| ---------- | ----- | -------------- |
+| enable     | float | Schalte an/aus |
+| maxcurrent | float | Max. Ladestrom |
+
+**Beispiel**
+
+Dieses Beispiel begrenzt den maximalen Ladestrom in dem eine MQTT Nachricht gesendet wird:
+
+```yaml
 // TODO ...
 ```
 
 ### Vehicle
 
-Fahrzeuge Parameter können ebenfalls über Plugins ausgelesen werden. 
+Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 
-| Attribut      | Typ            | Beschreibung         |
-|---------------|----------------|----------------------|
-| soc           | int            | Ladestand            |
-| status        | bool / A .. F  | Status               |
-| range         | int            | Reichweite           |
-| odometer      | int            | Zählerstand          |
-| climater      | bool           | Klimaanlage (?)      |
-| wakeup        | ?              | Aufweck-Ping         |
-| limitsoc      | int            | Ladeziel in %        |
-| maxcurrent    | int            | Maximaler Ladestrom  |
-| finishtime    |                |                      |
+| Attribut   | Typ           | Beschreibung        |
+| ---------- | ------------- | ------------------- |
+| soc        | int           | Ladestand           |
+| status     | bool / A .. F | Status              |
+| range      | int           | Reichweite          |
+| odometer   | int           | Zählerstand         |
+| climater   | bool          | Klimaanlage (?)     |
+| wakeup     | ?             | Aufweck-Ping        |
+| limitsoc   | int           | Ladeziel in %       |
+| maxcurrent | int           | Maximaler Ladestrom |
+| finishtime |               |                     |
 
-Zusätzlich könen spezielle Kommandos über Plugins an das Fahrzeug geschickt werden:
+Zusätzlich können spezielle Kommandos über Plugins an das Fahrzeug geschickt werden:
 
-| Attribut      | Typ            | Beschreibung         |
-|---------------|----------------|----------------------|
-| wakeup        | ?              | Aufweck-Ping         |
-
+| Attribut | Typ | Beschreibung |
+| -------- | --- | ------------ |
+| wakeup   | ?   | Aufweck-Ping |
 
 ## Plugins
 
-Folgende Plugins stehen zur Verfügung und können für die oben beschriebenen Attribute konfiguriert werden, um eine flexible Anbindung an die verschiedenen Systeme zu erlauben.
+Folgende Plugins stehen zur Verfügung und können für die oben beschriebenen Attribute konfiguriert werden, um eine flexible Anbindung an die verschiedenen Systeme zu ermöglichen.
 
 ### Modbus
 
-Das `modbus` Plugin kann Daten von jedem ModBus fähigen Gerät oder SunSpec-kompatiblen Wechselrichter lesen. Viele Strommessgeräte sind bereits vorkonfiguriert (siehe [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)). Es ist ebenfalls möglich Modbus Register zu Schreiben um weitere Wallboxen zu integrieren.
+Das `modbus` Plugin kann Daten von jedem Modbus-fähigen Gerät oder SunSpec-kompatiblen Wechselrichter lesen.
+Viele Strommessgeräte sind bereits vorkonfiguriert (siehe [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
+Es ist ebenfalls möglich Modbus Register zu Schreiben um weitere Wallboxen zu integrieren.
 
-Für weitere Details siehe die [Modbus Dokumentation](modbus)
+Schaue in die [Modbus Dokumentation](modbus) für weitere Details.
 
 ### MQTT
 
-Das `mqtt` Plugin erlaubt das Lesen von Werten über MQTT Topics. Das ist insbesondere für Strommessgeräte nützlich, z.b. wenn diese ihre Daten bereits über MQTT bereitstellen.
-Siehe [MBMD](https://github.com/volkszaehler/mbmd) für ein Beispiel wie man Modbus Messdaten in MQTT bekommt. Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen (Siehe [HTTP plugin](#http)).
+Das `mqtt` Plugin ermöglicht das Lesen von Werten über MQTT Topics.
+Das ist insbesondere für Strommessgeräte nützlich, z.B. wenn diese ihre Daten bereits über MQTT bereitstellen.
+Schaue in die [MBMD Dokumentation](https://github.com/volkszaehler/mbmd) für ein Beispiel, wie man Modbus Messdaten in MQTT bekommt.
+Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen (Siehe [HTTP plugin](#http)).
 
 **Beispiel Lesen**:
 
@@ -209,12 +211,13 @@ payload: ${var:%d}
 
 ### HTTP
 
-Das `http` Plugin führt HTTP Aufrufe durch um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache Transformationen durchzuführen. Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
+Das `http` Plugin führt HTTP Aufrufe durch, um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache Transformationen durchzuführen. Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
 
 Methoden der Authentifizierung sind `basic`, `bearer` und `digest`. Die Namen der jeweiligen Parameter finden sich [hier](https://github.com/evcc-io/evcc/blob/master/provider/http.go#L140).
 
 :::important Wichtig
-XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden kann. Attribute bekommen das prefix `attr`.
+XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden können.
+Attribute bekommen das prefix `attr`.
 :::
 
 :::tip
@@ -259,7 +262,7 @@ enable:
 
 ### Websocket
 
-Das `websocket` Plugin bietet einen Websocket Listener. Es beinhaltet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen. Dies kann z.B. verwendet werden um Daten von Volkszählers Push Server zu empfangen.
+Das `websocket` Plugin bietet einen Websocket Listener. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen. Dies kann z.B. verwendet werden, um Daten von Volkszählers Push Server zu empfangen.
 
 **Beispiel Lesen**:
 
@@ -273,7 +276,7 @@ timeout: 30s # error if no update received in 30 seconds
 
 ### SMA/Speedwire {#speedwire}
 
-Das `sma` Plugin bietet eine Schnittstelle zu SMA Geräten welche das Speedwire Protokoll beherrschen.
+Das `sma` Plugin bietet eine Schnittstelle zu SMA Geräten, welche das Speedwire Protokoll beherrschen.
 
 **Beispiel Lesen**:
 
@@ -287,13 +290,13 @@ interface: eth0 # optional
 scale: 1 # optional scale factor for value
 ```
 
-Unterstützte Wert für `value` können in der Diagnoseausgabe über das Kommando `evcc meter` (mit konfigurierten SMA `meter` Geräten) gefunden werden.
+Unterstützte Werte für `value` können in der Diagnoseausgabe über das Kommando `evcc meter` (mit konfigurierten SMA `meter` Geräten) gefunden werden.
 
 Alle möglichen Werte können als Konstanten [hier](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) gefunden werden (verwende den Namen der Konstante für `value`).
 
-### Javascript
+### JavaScript
 
-evcc integriert einen Javascript Interpreter mit der [Underscore.js](https://underscorejs.org) Bibliothek, welche direkt über `_.` zugreifbar ist, z.B. `_.random(0,5)`. Das `js` Plugin kann Javascript code über den `script` Parameter ausführen. Sehr hilfreich für das schnelle Erstellen von Prototypen:
+evcc integriert einen JavaScript Interpreter mit der [Underscore.js](https://underscorejs.org) Bibliothek, welche direkt über `_.` zugreifbar ist, z.B. `_.random(0,5)`. Das `js` Plugin kann JavaScript code über den `script` Parameter ausführen. Sehr hilfreich für das schnelle Erstellen von Prototypen:
 
 **Beispiel Lesen**:
 
@@ -304,7 +307,7 @@ script: |
   2 * res; // returns 1000
 ```
 
-Wenn das `js` Plugin zum schreiben verwendet wird, wird der zu schreibende Wert dem Script als Variable übergeben:
+Wenn das `js` Plugin zum Schreiben verwendet wird, wird der zu schreibende Wert dem Script als Variable übergeben:
 
 **Beispiel Schreiben**:
 
@@ -339,7 +342,8 @@ timeout: 5s
 
 ### Const
 
-Das `const` Plugin gibt einen konstanten Wert zurück. Es eignet sich z. B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
+Das `const` Plugin gibt einen konstanten Wert zurück.
+Es eignet sich z.B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
 
 **Beispiel Lesen**:
 
@@ -374,9 +378,9 @@ mul:
   ...
 ```
 
-Als Operanden werden dabei die Grundrechenarten Addition (add) und Multiplikation (mul) unterstützt.
+Als Operanden werden dabei die Grundrechenarten Addition (`add`) und Multiplikation (`mul`) unterstützt.
 
-Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z. B. zur Konvertierung von kWh in Wh.
+Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z.B. zur Konvertierung von kWh in Wh.
 
 Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 bleibt 0) können (in Verbindung mit `mul`) Vorzeichen auf andere Werte übertragen werden. Z.B. um bei Zählern die „Richtung“ der Leistung (Einspeisung oder Bezug) auf die gemessenen Ströme zu übertragen.
 
@@ -390,12 +394,13 @@ Das `calc` Plugin ist hilfreich um z.B.
 - Bekannte Offsets zu eliminieren (addieren mit `const` Plugin)
 
 :::tip
-Konstante Hilfswerte (z. B. für Offsets) lassen sich mit Hilfe des `const` Plugins als Operand erzeugen.
+Konstante Hilfswerte (z. B. für Offsets) lassen sich mithilfe des `const` Plugins als Operand erzeugen.
 :::
 
 ### Combined
 
-Das `combined` Status Plugin wird verwendet um gemischte Boolean Status Werte von `Plugged` (angeschlossen) / `Charging` (Laden) in einen evcc-kompatiblen Ladestatus von A..F zu konvertieren. Es wird z.b. zusammen mit einer OpenWB MQTT Integration verwendet.
+Das `combined` Status Plugin wird verwendet um gemischte Boolean Status Werte von `Plugged` (angeschlossen) / `Charging` (Laden) in einen evcc-kompatiblen Ladestatus von A..F zu konvertieren.
+Es wird z.b. zusammen mit einer OpenWB MQTT Integration verwendet.
 
 **Beispiel Lesen**:
 
