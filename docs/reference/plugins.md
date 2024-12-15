@@ -173,11 +173,6 @@ Zusätzlich könen spezielle Kommandos über Plugins an das Fahrzeug geschickt w
 | wakeup        | ?              | Aufweck-Ping         |
 
 
-Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren. Diese können über den Wert `custom` des Parameters `type` in  verwendet werden.
-
-Plugins erlauben sowohl _Schreibenzugriff_ also auch _Lesezugriff_. Wenn das Plugin zum _Schreiben_ verwendet wird, werden die Daten in Form von `${var[:format]}` zur Verfügung gestellt. Wenn `format` nicht angegeben wird, werden die Daten im Standard `%v` [Go Format](https://golang.org/pkg/fmt/) bereitgestellt. Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird. Zusätzlich können sämtliche Funktionen der [Go Template library](https://pkg.go.dev/text/template) verwendet werden um komplexere Datentransformationen durchzuführen.
-
-
 ## Plugins
 
 Folgende Plugins stehen zur Verfügung und können für die oben beschriebenen Attribute konfiguriert werden, um eine flexible Anbindung an die verschiedenen Systeme zu erlauben.
