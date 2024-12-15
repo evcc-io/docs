@@ -186,7 +186,7 @@ Für weitere Details siehe die [Modbus Dokumentation](modbus)
 ### MQTT
 
 Das `mqtt` Plugin erlaubt das Lesen von Werten über MQTT Topics. Das ist insbesondere für Strommessgeräte nützlich, z.b. wenn diese ihre Daten bereits über MQTT bereitstellen.
-Siehe [MBMD](https://github.com/volkszaehler/mbmd) für ein Beispiel wie man Modbus Messdaten in MQTT bekommt. Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen (Siehe [HTTP plugin](#http-lesenschreiben)).
+Siehe [MBMD](https://github.com/volkszaehler/mbmd) für ein Beispiel wie man Modbus Messdaten in MQTT bekommt. Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen (Siehe [HTTP plugin](#http)).
 
 **Beispiel Lesen**:
 
@@ -317,7 +317,7 @@ charger:
         console.log(maxcurrent);
 ```
 
-### Shell Script
+### Shell Script {#shell}
 
 Das `script` Plugin führt externe Skripte zum Lesen oder Aktualisieren von Daten aus. Das Plugin ist hilfreich um jede Art von externer Funktionalität einzubinden.
 
