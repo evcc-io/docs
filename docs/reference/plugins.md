@@ -175,7 +175,7 @@ Zusätzlich können spezielle Kommandos über Plugins an das Fahrzeug geschickt 
 
 Folgende Plugins stehen zur Verfügung und können für die oben beschriebenen Attribute konfiguriert werden, um eine flexible Anbindung an die verschiedenen Systeme zu ermöglichen.
 
-### Modbus <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
+### Modbus {#modbus} <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
 
 
 Das `modbus` Plugin kann Daten von jedem Modbus-fähigen Gerät oder SunSpec-kompatiblen Wechselrichter lesen.
@@ -184,7 +184,7 @@ Es ist ebenfalls möglich Modbus Register zu Schreiben um weitere Wallboxen zu i
 
 Schaue in die [Modbus Dokumentation](modbus) für weitere Details.
 
-### MQTT <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
+### MQTT {#mqtt} <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
 
 Das `mqtt` Plugin ermöglicht das Lesen von Werten über MQTT Topics.
 Das ist insbesondere für Strommessgeräte nützlich, z.B. wenn diese ihre Daten bereits über MQTT bereitstellen.
@@ -210,7 +210,7 @@ topic: mbmd/charger/maxcurrent
 payload: ${var:%d}
 ```
 
-### HTTP <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
+### HTTP {#http} <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
 
 Das `http` Plugin führt HTTP Aufrufe durch, um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache Transformationen durchzuführen. Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
 
@@ -261,7 +261,7 @@ enable:
   uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
 ```
 
-### Websocket <Tag label="lesen" category="read" />
+### Websocket {#websocket} <Tag label="lesen" category="read" />
 
 Das `websocket` Plugin bietet einen Websocket Listener. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen. Dies kann z.B. verwendet werden, um Daten von Volkszählers Push Server zu empfangen.
 
@@ -296,7 +296,7 @@ Unterstützte Werte für `value` können in der Diagnoseausgabe über das Komman
 
 Alle möglichen Werte können als Konstanten [hier](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) gefunden werden (verwende den Namen der Konstante für `value`).
 
-### JavaScript <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
+### JavaScript {#javascript} <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" />
 
 evcc integriert einen JavaScript Interpreter mit der [Underscore.js](https://underscorejs.org) Bibliothek, welche direkt über `_.` zugreifbar ist, z.B. `_.random(0,5)`. Das `js` Plugin kann JavaScript code über den `script` Parameter ausführen. Sehr hilfreich für das schnelle Erstellen von Prototypen:
 
@@ -342,7 +342,7 @@ cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
 
-### Const <Tag label="lesen" category="read" />
+### Const {#const} <Tag label="lesen" category="read" />
 
 Das `const` Plugin gibt einen konstanten Wert zurück.
 Es eignet sich z.B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
@@ -354,7 +354,7 @@ source: const
 value: -16247
 ```
 
-### Calc <Tag label="lesen" category="read" />
+### Calc {#calc} <Tag label="lesen" category="read" />
 
 Das `calc` Plugin erlaubt es mehrere Einzelwerte mathematisch weiterzuverarbeiten:
 
@@ -399,7 +399,7 @@ Das `calc` Plugin ist hilfreich um z.B.
 Konstante Hilfswerte (z. B. für Offsets) lassen sich mithilfe des `const` Plugins als Operand erzeugen.
 :::
 
-### Combined <Tag label="lesen" category="read" />
+### Combined {#combined} <Tag label="lesen" category="read" />
 
 Das `combined` Status Plugin wird verwendet um gemischte Boolean Status Werte von `Plugged` (angeschlossen) / `Charging` (Laden) in einen evcc-kompatiblen Ladestatus von A..F zu konvertieren.
 Es wird z.b. zusammen mit einer OpenWB MQTT Integration verwendet.
