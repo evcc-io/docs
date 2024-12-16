@@ -62,7 +62,7 @@ Das Schema hat dabei immer folgende Struktur:
     ....
 ```
 
-Dabei stehen `<name>`für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräteattribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
+Dabei stehen `<name>` für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräteattribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
 
 #### Lesen
 
@@ -104,10 +104,16 @@ Dabei werden alle Werte lesend von konfigurierten Plugins übernommen.
 
 **Beispiel**
 
-In diesem Beispiel wird die Konfiguration eines `meter`s um die gemessene Gesamtenergie über einen REST Aufruf mithilfe des HTTP-Plugins abgefragt:
+In diesem Beispiel wird die Konfiguration eines `meter`s um die aktuelle elektrische Leistung über einen HTTP Aufruf abgefragt:
 
 ```yaml
-// TODO ...
+meters:
+  - name: volkszaehler
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
 ```
 
 ### Charger
@@ -129,10 +135,21 @@ Wallboxen und Ladegeräte haben folgende Attribute die ausgelesen werden können
 
 **Beispiel**
 
-Dieses Beispiel zeigt, wie man mit einem Shell Skript den Ladestatus (ladend/nicht ladend) eines `charger`s abfragen kann:
+Dieses Beispiel zeigt, wie man über das Modbus Plugin den Ladestatus (ladend/nicht ladend) eines `charger`s abfragen kann:
 
 ```yaml
-// TODO ...
+chargers:
+  - name: icharge
+    type: custom
+    enabled:
+      source: modbus
+      id: 4711
+      uri: modbus.local:502
+      rtu: false
+      register:
+        address: 100
+        type: holding
+        decode: uint16
 ```
 
 Neben den read-only Werten können über Plugins auch Aktionen getriggert oder Konfigurationswerte gesetzt werden:
@@ -144,10 +161,17 @@ Neben den read-only Werten können über Plugins auch Aktionen getriggert oder K
 
 **Beispiel**
 
-Dieses Beispiel begrenzt den maximalen Ladestrom in dem eine MQTT Nachricht gesendet wird:
+Dieses Beispiel schaltet eine Tasmota Steckdose über eine MQTT Nachricht gesendet an:
 
 ```yaml
-// TODO ...
+chargers:
+  - name: unu-charger
+    type: custom
+    enable:
+      source: mqtt
+      broker: mosquitto.local:883
+      topic: cmd/unu-switch/Power
+      payload: ON
 ```
 
 ### Vehicle
@@ -166,11 +190,39 @@ Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 | maxcurrent | int           | Maximaler Ladestrom |
 | finishtime |               |                     |
 
+**Beispiel**
+
+Im folgenden Beispiel wie die aktuelle Reichweite des Fahrzeugs aus MQTT Nachrichten gelesen:
+
+``` yaml
+vehicles:
+  - name: Mazda
+    type: custom
+    range:
+      source: mqtt
+      topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
 Zusätzlich können spezielle Kommandos über Plugins an das Fahrzeug geschickt werden:
 
 | Attribut | Typ | Beschreibung |
 | -------- | --- | ------------ |
 | wakeup   | ?   | Aufweck-Ping |
+| chargeEnable | ? | Start/Stop des Ladevorgangs über das Vehicle |
+| maxCurrent | ? | Begrenze maximalen Ladestrom |
+
+**Beispiel**
+
+Um ein Auto über einen HTTP Ping aufzuwecken um weiter Abfragen zu senden, kann wie im folgenden Beispiel das HTTP Plugin genutzt werden:
+
+``` yaml
+vehicles:
+  - name: model-y
+    type: custom
+    wakeup:
+      source: http
+      uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
 
 ## Plugins
 
