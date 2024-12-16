@@ -6,7 +6,7 @@ sidebar_position: 3
 
 Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren, für die es keine direkte Unterstützung gibt.
 Sie können für die Gerätekategorien [`meter`](/docs/reference/configuration/meters#custom) (Strommessgeräte), [`charger`](/docs/reference/configuration/chargers#type) (Wallboxen) oder [`vehicle`](/docs/devices/vehicles#manuell) (Fahrzeuge) verwendet werden.
-Plugins können auch für die in [Messaging](/docs/reference/configuration/messaging) beschriebenen Endpunkte für Events genutzt werden.
+Plugins können auch für die in [Messaging](/docs/reference/configuration/messaging) beschriebenen Endpunkte zum Versenden von Lifecycle-Events genutzt werden.
 
 Je nach Verwendung werden Plugins **lesend** oder **schreibend** eingesetzt.
 
@@ -26,9 +26,9 @@ Neben diesen Plugins, die externe Daten integrieren, gibt es folgende Helfer-Plu
 
 - [Const Plugin](#const) - Spezielles Plugin das einfach einen konstanten Wert zurückliefert.
 - [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
-- [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den _angeschlossen_ und _charging_ Zustand, die von Plugins ausgelesen werden, zu einem einzigen Ladestatus zu kombinieren.
+- [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den angeschlossenen (_plugged_) und ladenden (_charging_) Zustand zu einem einzigen Ladestatus zu kombinieren.
 
-### Plugin Syntax
+### Syntax
 
 Jedes Plugin besitzt ein individuelles Konfigurationsschema.
 Dabei ist es wichtig zu wissen, ob das Plugin in einem **lesenden** oder **schreibenden** Kontext verwendet wird.
@@ -80,8 +80,7 @@ Wenn Format nicht angegeben wird, werden die Daten im Standard %v Go-Format bere
 Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird.
 Zusätzlich können sämtliche Funktionen der Go Template Library verwendet werden, um komplexere Datentransformationen durchzuführen.
 
-Die folgenden Abschnitte geben einen Überblick für die einzelnen Geräte.
-Dabei werden die per Plugin konfigurierbaren Attribute und deren Datentypen aufgeführt.
+Je nach Gerät ([`meter`](#meter), [`charger`](#charger) oder [`vehicle`](#vehicle)) können andere Attribute mit Plugins gelesen oder gesetzt werden. 
 
 ### Meter
 
