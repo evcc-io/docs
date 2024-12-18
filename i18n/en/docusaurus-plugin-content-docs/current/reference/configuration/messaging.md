@@ -149,8 +149,8 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
     - `pvConfigured` - Indicator, solar panels/photovoltaic meter configured (_bool_)
 - Tariff Information
   - [`currency`](tariffs) - Tariff currency (_string_)
-  - [`tariffFeedIn`](tariffs#feedin) - PV feed-in remuneration per kWh in tariff currency (float)
-  - [`tariffGrid`](tariffs#grid) - Grid consumption price per kWh in tariff currency (float)
+  - [`tariffFeedIn`](tariffs) - PV feed-in remuneration per kWh in tariff currency (float)
+  - [`tariffGrid`](tariffs) - Grid consumption price per kWh in tariff currency (float)
 - Meter Information
   - `batteryPower` - Current home battery/Powerwall power in watts (_float_)
   - `batterySoc` - Current state of charge of home battery/Powerwall in percent (_integer_)
@@ -341,6 +341,7 @@ The `custom` type allows the use of any [plugin](../plugins) to process messages
 
 - `send`: Defines the plugin to be used with the `source` field and plugin-specific parameters. See the example below.
 - `encoding`: Specifies the format in which the value for `${send}` is provided. The possible values are:
+
   - `json`: The value is provided as a JSON object in the format `{ "msg": msg, "title": title }`. The `title` field is only added if it is defined in the `events` section.
   - `csv`: The fields `title` and `msg` are provided as a comma-separated list (`title, msg`).
   - `tsv`: Similar to `csv`, but with tab separators.
@@ -368,4 +369,3 @@ messaging:
 ```
 
 In this example, a shell script (`cmd`) is invoked with the argument `{"title": "...", "msg": "...."}`.
-
