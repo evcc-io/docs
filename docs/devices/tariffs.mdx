@@ -65,6 +65,75 @@ From                   To                     Price/Cost
 ...
 ```
 
+## Börsenstrompreise
+
+Du hast einen Vertrag der nach Börsenpreisen berechnet wird?
+Für viele Anbieter haben wir eine eigene Schnittstelle angebunden (z.B. [Awattar](#awattar) oder [Tibber](#tibber)).
+Die Liste aller verfügbaren Anbieter findest du im Abschnitt [Dynamischer Strompreis](#dynamischer-strompreis).
+
+### Gebühren und Steuern
+
+Falls dein Anbieter nicht dabei ist, kannst du deinen Tarif auf Basis der Day-Ahead-Preise der europäischen Strombörse selbst berechnen.
+Die [Energy-Charts API](https://www.energy-charts.info/charts/price_spot_market/chart.htm) vom Fraunhofer ISE liefert aktuelle und prognostizierte Preise.
+Diese werden von fast allen Anbietern als Grundlage für die Berechnung ihrer Energiepreise verwendet.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU # Gebotszone, siehe https://api.energy-charts.info/#/prices/day_ahead_price_price_get
+    charges: 0.22 # Fester Aufschlag pro kWh (z.B. 20ct Netzentgelt, 2ct Gebühren)
+    tax: 0.19 # Prozentualer Aufschlag (z.B. 19% MwSt.)
+```
+
+Die Schnittstelle liefert die Börsenpreise in Euro ohne lokale Gebühren oder Steuern.
+Mit den Parametern `charges` und `tax` kannst du einen zusätzlichen festen und prozentualen Aufschlag pro kWh definieren.
+Die genauen Werte kannst du deinem Vertrag entnehmen.
+
+### Eigene Berechnungsformeln
+
+Falls das Modell des festen und prozentualen Aufschlags nicht ausreicht, kannst du eine individuelle Formel definieren.
+Verwende dafür den `formula` Parameter.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # Fester Aufschlag pro kWh
+    tax: 0.19 # Prozentualer Aufschlag
+    formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Im obigen Beispiel wird eine Preisobergrenze von 50 ct/kWh definiert.
+Die Formel wird in Go-Syntax geschrieben.
+Neben den Werten `price`, `charges` und `tax` steht dir die [`math`-Bibliothek](https://pkg.go.dev/math) zur Verfügung.
+
+### Börsenpreise mit Zeitkomponente
+
+Die Formel wird für den aktuellen Strompreis und jeden Zeitslot in der Prognose ausgeführt.
+Ist die Berechnung zeitabhängig, kannst du über `ts` auch auf die [Zeit](https://pkg.go.dev/time#Time) des jeweiligen Slots zugreifen.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    formula: extra := 0.1; if ts.Hour() < 6 || ts.Hour() > 22 { extra = 0.0 }; price + extra
+```
+
+In diesem Beispiel gibt es einen Aufschlag von 10 ct/kWh.
+In der Zeit von 22:00 Uhr bis 06:00 Uhr wird kein Aufschlag berechnet.
+Der Fantasie sind hier keine Grenzen gesetzt.
+
+Der `formula` Mechanismus funktioniert auch für viele andere Datenquellen.
+Schau dir die Konfigurationsoptionen der jeweiligen Quellen an.
+
+Der CLI Befehl `evcc tariff` ist hilfreich um die Berechnungsergebnisse zu überprüfen.
+
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
