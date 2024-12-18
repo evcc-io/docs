@@ -50,10 +50,10 @@ meters:
 
 Das Schema hat dabei immer folgende Struktur:
 
-```yaml
+```yaml {3,5-6,8}
 - name: <name>
   type: custom
-  <attr1>:
+  <span class="highlight"><attr1></span>:
     source: <plugin>
     <p-attr1>: ...
     <p-attr2>: ...
@@ -62,7 +62,7 @@ Das Schema hat dabei immer folgende Struktur:
     ....
 ```
 
-Dabei stehen `<name>` für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräteattribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
+Dabei stehen `<name>` für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräte-spezifischen Attribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
 
 #### Lesen
 
@@ -88,15 +88,16 @@ Je nach Gerät ([`meter`](#meter), [`charger`](#charger) oder [`vehicle`](#vehic
 
 Folgende Attribute können für die Konfiguration von Strommessgeräten genutzt werden.
 Dabei werden alle Werte lesend von konfigurierten Plugins übernommen.
+Bei der Verwendung der Plugins ist es wichtig, dass diese den richtigen Datentyp zurückliefern.
+Um zu dem verlangten Datentypen zu konvertieren können die in [Lesen](#lesen) beschriebenen Pipelines genutzt werde.
 
-| Attribut    | Typ           | Beschreibung      |
-| ----------- | ------------- | ----------------- |
-| power       | float         | Leistung          |
-| energy      | float         | Energie           |
-| soc         | int           | Ladestand         |
-| limitsoc    | int           | Ladeziel in %     |
+| Attribut    | Typ           | Beschreibung      | Einheit |
+| ----------- | ------------- | ----------------- | ------- |
+| power       | float         | Aktuelle elektrische Leistung | W |
+| energy      | float         | Total gemessene Energie | Wh |
+| soc         | int           | Batterie Ladestand |
+| batterymode | int           |                   | 0,1,2,3 |
 | currents    | float / array | Strom (pro Phase) |
-| batterymode |               |                   |
 | voltages    |               |                   |
 | powers      |               |                   |
 | maxpower    |               |                   |
@@ -115,6 +116,11 @@ meters:
       uri: http://zaehler.network.local:8080/api/data.json?from=now
       jq: .data.tuples[0][1]
 ```
+
+
+| Attribut   | Typ   | Beschreibung   | Einheit |
+| ---------- | ----- | -------------- | ------- |
+| limitsoc   | int  | Ladeziel für Batterie | 0 ... 100 %|
 
 ### Charger
 
