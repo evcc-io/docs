@@ -148,8 +148,8 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
     - `pvConfigured` - Indikator, Solaranlagen/Photovoltaik-Meter konfiguriert (_bool_)
 - Infos zum Stromtarif
   - [`currency`](tariffs) - Tarif-Währung (_string_)
-  - [`tariffFeedIn`](tariffs#feedin) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
-  - [`tariffGrid`](tariffs#grid) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
+  - [`tariffFeedIn`](tariffs) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
+  - [`tariffGrid`](tariffs) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
 - Meter Infos
   - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (_float_)
   - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (_integer_)
@@ -239,7 +239,6 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
 - `ntfy`: [ntfy](https://ntfy.sh). Siehe [`ntfy`](#ntfy) Definition
 - `custom`: Ermöglicht die Nutzung von allen [Plugins](../plugins), die einen Schreibzugriff erlauben. Siehe [`custom`](#custom) Definition.
-
 
 ---
 
@@ -339,13 +338,14 @@ Der Typ `custom` ermöglicht es, beliebige [Plugins](../plugins) für die Verarb
 
 **Mögliche Werte**:
 
-* `send`: Definiert das zu verwendende Plugin mit dem Feld `source` und plugin-spezifische Parameter. Siehe das Beispiel weiter unten.
-* `encoding`: Definiert das Format, in dem der Wert für `${send}` bereitgestellt wird. Die möglichen Werte sind:
+- `send`: Definiert das zu verwendende Plugin mit dem Feld `source` und plugin-spezifische Parameter. Siehe das Beispiel weiter unten.
+- `encoding`: Definiert das Format, in dem der Wert für `${send}` bereitgestellt wird. Die möglichen Werte sind:
+
   - `json`: Der Wert wird als JSON-Objekt im Format `{ "msg": msg, "title": title }` bereitgestellt. Das Feld `title` wird nur hinzugefügt, wenn es im Abschnitt `events` definiert ist.
   - `csv`: Die Felder `title` und `msg` werden als kommaseparierte Liste bereitgestellt (`title, msg`)
   - `tsv`: Ähnlich wie `csv`, jedoch mit Tabulator als Trennzeichen.
   - `title`: Nur der Titel (`title`) wird bereitgestellt.
-  
+
   Wenn `encoding` nicht definiert ist, wird die Nachricht `msg` ohne Titel direkt verwendet. Dabei wird nur die in `msg` definierte Nachricht ohne Titel in `${send}` verwendet.
 
 **Beispiel**:
@@ -362,7 +362,7 @@ messaging:
       send:
         # Plugin Typ
         source: script
-        # Plugin-spezifische Konfiguration. 
+        # Plugin-spezifische Konfiguration.
         # {{.send}} enthält die JSON Nachricht
         cmd: /usr/local/bin/evcc_message "{{.send}}"
 ```

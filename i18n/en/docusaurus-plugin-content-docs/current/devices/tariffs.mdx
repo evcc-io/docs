@@ -66,6 +66,76 @@ From                   To                     Price/Cost
 ...
 ```
 
+
+## Exchange Prices
+
+You have a contract that is calculated based on exchange prices?
+For many providers, we have integrated a dedicated interface (e.g., [Awattar](#awattar) or [Tibber](#tibber)).
+You can find the list of all available providers in the section [Dynamic Electricity Price](#dynamic-electricity-price).
+
+### Fees and Taxes
+
+If your provider is not included, you can calculate your tariff based on the day-ahead prices of the European electricity exchange yourself.
+The [Energy-Charts API](https://www.energy-charts.info/charts/price_spot_market/chart.htm) from Fraunhofer ISE provides current and forecasted prices.
+These are used by almost all providers as the basis for calculating their energy prices.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU # Bidding zone, see https://api.energy-charts.info/#/prices/day_ahead_price_price_get
+    charges: 0.22 # Fixed surcharge per kWh (e.g., 20ct grid fee, 2ct extra charges)
+    tax: 0.19 # Percentage surcharge (e.g., 19% VAT)
+```
+
+The interface provides the exchange prices in euros without local fees or taxes.
+With the parameters `charges` and `tax`, you can define an additional fixed and percentage surcharge per kWh.
+You can find the exact values in your contract.
+
+### Custom Formulas
+
+If the model of tax and charges is not sufficient, you can define an individual formula.
+Use the `formula` parameter for for more flexible pricing.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # Fixed surcharge per kWh
+    tax: 0.19 # Percentage surcharge
+    formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+In the example above, a price cap of 50 ct/kWh is defined.
+The formula is written in Go syntax.
+In addition to the values `price`, `charges`, and `tax`, the [`math` library](https://pkg.go.dev/math) is available.
+
+### Exchange Prices with Time Component
+
+The formula is executed for the current electricity price and each time slot in the forecast.
+If the calculation is time-dependent, you can also access the [time](https://pkg.go.dev/time#Time) of the respective slot via `ts`.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    formula: extra := 0.1; if ts.Hour() < 6 || ts.Hour() > 22 { extra = 0.0 }; price + extra
+```
+
+In this example, there is a surcharge of 10 ct/kWh.
+No surcharge is calculated from 10:00 PM to 6:00 AM.
+There are no limits to your imagination.
+
+The `formula` mechanism also works for many other data-providers.
+Check the documentation below.
+
+You can view the respective calculation results using the command `evcc tariff`.
+
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
