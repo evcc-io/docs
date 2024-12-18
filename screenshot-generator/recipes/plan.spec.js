@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 import { loop } from "./utils/loop";
-import { CURSOR, ARROW, placeOverlay } from "./utils/overlay";
+import { CURSOR, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
@@ -19,12 +19,26 @@ loop((screenshot) => {
     await page.goto(`/`);
     await page.locator("[data-testid=charging-plan] button").first().click();
     await wait(300);
-    await page.getByTestId("plan-soc").selectOption("90");
-    await page.getByTestId("plan-active").click();
-    await placeOverlay(page, "#chargingplan-1_0-goal", CURSOR, 60, 5);
+    await page.getByTestId("static-plan-soc").selectOption("90");
+    await page.getByTestId("static-plan-active").click();
+    await placeOverlay(page, "#chargingplan-lp1-1-goal", CURSOR, 60, 5);
     await screenshot(
       page,
       `${BASE_PATH}/plan-soc`,
+      "#chargingPlanModal_1 .modal-content",
+      {
+        all: 20,
+      },
+    );
+    await removeOverlays(page);
+    await page.getByTestId("static-plan-active").click();
+    await page.getByTestId("repeating-plan-add").click();
+    await page.getByTestId("repeating-plan-soc").selectOption("40");
+    await page.getByTestId("repeating-plan-active").click();
+    await placeOverlay(page, "#chargingplan-lp1-2-weekdays", CURSOR, 0, 5);
+    await screenshot(
+      page,
+      `${BASE_PATH}/plan-soc-repeating`,
       "#chargingPlanModal_1 .modal-content",
       {
         all: 20,
@@ -41,9 +55,9 @@ loop((screenshot) => {
 
     await page.locator("[data-testid=charging-plan] button").first().click();
     await wait(300);
-    await page.getByTestId("plan-energy").selectOption("20");
-    await page.getByTestId("plan-active").click();
-    await placeOverlay(page, "#chargingplan-1_0-goal", CURSOR, 60, 5);
+    await page.getByTestId("static-plan-energy").selectOption("20");
+    await page.getByTestId("static-plan-active").click();
+    await placeOverlay(page, "#chargingplan-lp1-1-goal", CURSOR, 60, 5);
     await screenshot(
       page,
       `${BASE_PATH}/plan-energy`,
