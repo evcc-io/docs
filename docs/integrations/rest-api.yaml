@@ -1,0 +1,326 @@
+openapi: "3.0.3"
+info:
+  title: evcc REST-API
+  description: "TODO: Alle möglichen Responses, Enums, Datentypregeln, Authentifizierung und Responseobjekte dokumentieren"
+  version: Latest
+servers:
+  - url: https://demo.evcc.io/api
+tags:
+  - name: State
+    description: TODO
+  - name: Site
+    description: TODO
+  - name: Loadpoints
+    description: TODO
+  - name: Vehicles
+    description: TODO
+paths:
+  /state:
+    get:
+      summary: Get system state
+      description: TODO
+      tags:
+        - State
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/State"
+  # -------------------
+  /health:
+    get:
+      summary: Health check
+      description: TODO
+      tags:
+        - Site
+      responses:
+        200:
+          description: TODO
+          content:
+            text/plan:
+              schema:
+                type: string
+                enum: [OK]
+  /batterydischargecontrol/{enable}:
+    post:
+      summary: Control battery-discharge
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/enable"
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: TODO
+                    type: boolean
+  /batterygridchargelimit/{cost}:
+    post:
+      summary: Set battery grid charge limit
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/cost"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /batterygridchargelimit:
+    delete:
+      summary: Remove battery grid charge limit
+      description: TODO
+      tags:
+        - Site
+      responses:
+        200:
+          description: "TODO: Request does not work or does not respond?"
+  /buffersoc/{soc}:
+    post:
+      summary: Set battery buffer soc
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/soc"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /bufferstartsoc/{soc}:
+    post:
+      summary: Set battery buffer start soc
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/soc"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /prioritysoc/{soc}:
+    post:
+      summary: Set battery priority soc
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/soc"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /residualpower/{power}:
+    post:
+      summary: Set grid residual power
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/power"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /smartcostlimit/{cost}:
+    post:
+      summary: Set smart charging cost limit for all loadpoints
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/cost"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /smartcostlimit:
+    delete:
+      summary: Remove smart charging cost limit for all loadpoints
+      description: TODO
+      tags:
+        - Site
+      responses:
+        200:
+          description: "TODO: Request does not work or does not respond?"
+  /tariff/{type}:
+    get:
+      summary: Get list of tariff prices
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - name: type
+          in: path
+          description: TODO
+          required: true
+          schema:
+            type: string
+            # enum ?
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: TODO
+                    type: object
+                    properties:
+                      rates:
+                        description: TODO
+                        type: array
+                        items:
+                          description: TODO
+                          type: object
+                          properties:
+                            start:
+                              description: TODO
+                              type: string
+                              format: date-time
+                            end:
+                              description: TODO
+                              type: string
+                              format: date-time
+                            price:
+                              description: TODO
+                              type: number
+                              minimum: 0
+  /sessions:
+    get:
+      summary: Get charging sessions
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - name: format
+          in: query
+          description: TODO
+          required: false
+          schema:
+            type: string
+        - name: lang
+          in: query
+          description: TODO
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: TODO
+  /session/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    put:
+      summary: Update session
+      description: TODO
+      tags:
+        - Site
+      responses:
+        200:
+          description: TODO
+    delete:
+      summary: Delete session
+      description: TODO
+      tags:
+        - Site
+      responses:
+        200:
+          description: TODO
+  /settings/telemetry:
+    get:
+      summary: Get telemetry status
+      description: TODO
+      tags:
+        - Site
+      responses:
+        200:
+          $ref: "#/components/responses/BooleanResult"
+  /settings/telemetry/{enable}:
+    post:
+      summary: Enable/disable telemetry
+      description: TODO
+      tags:
+        - Site
+      parameters:
+        - $ref: "#/components/parameters/enable"
+      responses:
+        200:
+          $ref: "#/components/responses/BooleanResult"
+
+components:
+  schemas:
+    State:
+      type: object
+      properties:
+        result:
+          description: TODO
+          type: object
+  parameters:
+    id:
+      name: id
+      in: path
+      description: The ID. Starts with 1.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    enable:
+      name: enable
+      in: path
+      description: TODO
+      required: true
+      schema:
+        type: boolean
+        enum:
+          [1, 0, t, f, T, F, "true", "false", "TRUE", "FALSE", "True", "False"]
+    soc:
+      name: soc
+      in: path
+      description: Soc in %
+      required: true
+      schema:
+        type: number
+        minimum: 0
+        maximum: 100
+    cost:
+      name: cost
+      in: path
+      description: TODO
+      required: true
+      schema:
+        type: number
+    power:
+      name: power
+      in: path
+      description: Power in Watt
+      required: true
+      schema:
+        type: number
+        minimum: 0
+  responses:
+    NumberResult:
+      description: TODO
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                description: TODO
+                type: number
+    BooleanResult:
+      description: TODO
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                description: TODO
+                type: boolean
