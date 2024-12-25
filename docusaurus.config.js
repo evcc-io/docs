@@ -37,6 +37,7 @@ import { themes as prismThemes } from "prism-react-renderer";
             sidebarPath: require.resolve("./sidebars.js"),
             editUrl: "https://github.com/evcc-io/docs/tree/main",
             editLocalizedFiles: true,
+            docItemComponent: "@theme/ApiItem", // Derived from docusaurus-theme-openapi
           },
           blog: {
             showReadingTime: true,
@@ -169,6 +170,23 @@ import { themes as prismThemes } from "prism-react-renderer";
           ],
         },
       ],
+      [
+        "docusaurus-plugin-openapi-docs",
+        {
+          id: "rest-api",
+          docsPluginId: "classic",
+          config: {
+            petstore: {
+              specPath: "./docs/integrations/rest-api.yaml",
+              outputDir: "docs/integrations/rest-api",
+              sidebarOptions: {
+                groupPathsBy: "tag",
+              },
+            },
+          },
+        },
+      ],
     ],
+    themes: ["docusaurus-theme-openapi-docs"],
   }
 );
