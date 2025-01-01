@@ -224,8 +224,10 @@ function generateMarkdown(data, type, translations, target) {
   const content = fs
     .readFileSync(target, "utf-8")
     .replace(
-      new RegExp(`${escapeRegExp(AUTOGEN_MARKER)}(.|\n)*`, "gm"),
-      `${AUTOGEN_MARKER}\n\n${generated}`,
+      new RegExp(
+        `${escapeRegExp(AUTOGEN_MARKER)}([\\s\\S])*`,
+        "gm",
+      )`${AUTOGEN_MARKER}\n\n${generated}`,
     );
   console.log(`${type}: ${brandCounter} brands, ${productCounter} products`);
   fs.writeFileSync(target, content, "utf-8");
