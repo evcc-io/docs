@@ -2,7 +2,7 @@
 openapi: "3.0.3"
 info:
   title: "evcc REST-API"
-  description: "TODO: Alle möglichen Responses, Enums, Datentypregeln, Authentifizierung, Configs (?) und Responseobjekte dokumentieren"
+  description: "TODO: Alle möglichen Responses, Enums, Datentypregeln, Authentifizierung, Configs (?) und Responseobjekte dokumentieren; Examples hinzufügen"
   version: latest
 servers:
   - url: https://demo.evcc.io/api
@@ -168,20 +168,8 @@ paths:
                     type: object
                     properties:
                       rates:
-                        description: TODO
-                        type: array
-                        items:
-                          description: TODO
-                          type: object
-                          properties:
-                            start:
-                              $ref: "#/components/schemas/Timestamp"
-                            end:
-                              $ref: "#/components/schemas/Timestamp"
-                            price:
-                              description: TODO
-                              type: number
-                              minimum: 0
+                        $ref: "#/components/schemas/Rates"
+
   /sessions:
     get:
       summary: Get charging sessions
@@ -283,11 +271,7 @@ paths:
         - $ref: "#/components/parameters/soc"
       responses:
         200:
-          description: TODO
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/responses/NumberResult"
+          $ref: "#/components/responses/NumberResult"
   /vehicles/{name}/limitsoc/{soc}:
     post:
       summary: Set soc-limit
@@ -299,11 +283,7 @@ paths:
         - $ref: "#/components/parameters/soc"
       responses:
         200:
-          description: TODO
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/responses/NumberResult"
+          $ref: "#/components/responses/NumberResult"
   /vehicles/{name}/plan/soc/{soc}/{timestamp}:
     post:
       summary: Set static plan
@@ -358,15 +338,174 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/RepeatingPlan"
-
-#   _______              _                     _             _       _
-#  |__   __|         _  | |                   | |           (_)     | |
-#     | | __ _  __ _(_) | |     ___   __ _  __| |_ __   ___  _ _ __ | |_ ___
-#     | |/ _` |/ _` |   | |    / _ \ / _` |/ _` | '_ \ / _ \| | '_ \| __/ __|
-#     | | (_| | (_| |_  | |___| (_) | (_| | (_| | |_) | (_) | | | | | |_\__ \
-#     |_|\__,_|\__, (_) |______\___/ \__,_|\__,_| .__/ \___/|_|_| |_|\__|___/
-#               __/ |                           | |
-#              |___/                            |_|
+  #   _______              _                     _             _       _
+  #  |__   __|         _  | |                   | |           (_)     | |
+  #     | | __ _  __ _(_) | |     ___   __ _  __| |_ __   ___  _ _ __ | |_ ___
+  #     | |/ _` |/ _` |   | |    / _ \ / _` |/ _` | '_ \ / _ \| | '_ \| __/ __|
+  #     | | (_| | (_| |_  | |___| (_) | (_| | (_| | |_) | (_) | | | | | |_\__ \
+  #     |_|\__,_|\__, (_) |______\___/ \__,_|\__,_| .__/ \___/|_|_| |_|\__|___/
+  #               __/ |                           | |
+  #              |___/                            |_|
+  /loadpoints/{id}/mode/{mode}:
+    post:
+      summary: Set charge mode
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/mode"
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mode"
+  /loadpoints/{id}/limitsoc/{soc}:
+    post:
+      summary: Limit soc
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/soc"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /loadpoints/{id}/limitenery/{power}:
+    post:
+      summary: Limit energy
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/power"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /loadpoints/{id}/mincurrent/{current}:
+    post:
+      summary: Set minimum current
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/current"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /loadpoints/{id}/maxcurrent/{current}:
+    post:
+      summary: Set maximum current
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/current"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /loadpoints/{id}/phases/{phases}:
+    post:
+      summary: Set allowed phases
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - name: phases
+          in: path
+          description: TODO
+          required: true
+          schema:
+            $ref: "#/components/schemas/Phases"
+      responses:
+        200:
+          $ref: "#/components/responses/NumberResult"
+  /loadpoints/{id}/plan:
+    get:
+      summary: Get plan rates
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PlanRates"
+                  - type: object
+                    properties:
+                      planId:
+                        $ref: "#/components/schemas/Id"
+  /loadpoints/{id}/plan/static/preview/{type}/{goal}/{timestamp}:
+    get:
+      summary: Get static plan preview
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - name: type
+          in: path
+          description: TODO
+          required: true
+          schema:
+            type: string
+            enum:
+              - soc
+              - energy
+        - name: goal
+          in: path
+          description: TODO
+          required: true
+          schema:
+            oneOf:
+              - $ref: "#/components/parameters/soc"
+              - $ref: "#/components/parameters/power"
+        - $ref: "#/components/parameters/timestamp"
+      responses:
+        200:
+          $ref: "#/components/responses/PlanRatesResult"
+  /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}:
+    get:
+      summary: Get repeating plan preview
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/soc"
+        - name: weekdays
+          in: path
+          required: true
+          description: TODO
+          schema:
+            $ref: "#/components/schemas/Weekdays"
+        - name: hourMinuteTime
+          in: path
+          required: true
+          description: TODO
+          schema:
+            $ref: "#/components/schemas/HourMinuteTime"
+        - name: timezone
+          in: path
+          required: true
+          description: TODO
+          schema:
+            $ref: "#/components/schemas/IANATimeZone"
+      responses:
+        200:
+          $ref: "#/components/responses/PlanRatesResult"
 
 #   _______               _____             __ _
 #  |__   __|         _   / ____|           / _(_)
@@ -379,49 +518,115 @@ paths:
 
 components:
   schemas:
+    Mode:
+      description: TODO
+      type: string
+      enum:
+        - ""
+        - "off"
+        - now
+        - minpv
+        - pv
     State:
       type: object
       properties:
         result:
           description: TODO
           type: object
+    Phases:
+      description: TODO
+      type: integer
+      enum:
+        - 0
+        - 1
+        - 3
+    Id:
+      description: The ID. Starts with 1.
+      type: integer
+      minimum: 1
     Soc:
       description: Soc in %
       type: number
       minimum: 0
       maximum: 100
+    Current:
+      description: Electric current in Ampere
+      type: number
+      minimum: 0
     Timestamp:
       description: Timestamp
       type: string
       format: date-time
+      example: "2025-07-19T12:30:00.000Z"
+    Power:
+      description: Power in Watt
+      type: number
+      minimum: 0
     StaticPlan:
       description: TODO
       type: object
       properties:
         soc:
           $ref: "#/components/schemas/Soc"
-        plan:
+        time:
           $ref: "#/components/schemas/Timestamp"
+    Rate:
+      type: object
+      properties:
+        start:
+          $ref: "#/components/schemas/Timestamp"
+        end:
+          $ref: "#/components/schemas/Timestamp"
+        price:
+          description: TODO
+          type: number
+          minimum: 0
+    Rates:
+      type: array
+      description: TODO
+      items:
+        $ref: "#/components/schemas/Rate"
+    PlanRates:
+      type: object
+      properties:
+        planTime:
+          $ref: "#/components/schemas/Timestamp"
+        duration:
+          description: TODO
+          type: integer
+          minimum: 0
+        plan:
+          $ref: "#/components/schemas/Rates"
+        power:
+          $ref: "#/components/schemas/Power"
+    Weekdays:
+      description: TODO
+      type: array
+      uniqueItems: true
+      items:
+        description: TODO
+        type: integer
+        minimum: 0
+        maximum: 6
+    HourMinuteTime:
+      description: TODO
+      type: string
+      pattern: "[0-1][0-9]:[0-5][0-9]"
+      format: "HH:MM"
+    IANATimeZone:
+      description: Timezone in IANA format (TODO:Enum dafür?)
+      type: string
+      example: "UTC"
     RepeatingPlan:
       description: TODO
       type: object
       properties:
         weekdays:
-          description: TODO
-          type: array
-          items:
-            description: TODO
-            type: integer
-            minimum: 0
-            maximum: 6
+          $ref: "#/components/schemas/Weekdays"
         time:
-          description: TODO
-          type: string
-          pattern: "[0-1][0-9]:[0-5][0-9]"
-          format: "HH:MM"
+          $ref: "#/components/schemas/HourMinuteTime"
         tz:
-          description: Timezone in IANA format (TODO:Enum dafür?)
-          type: string
+          $ref: "#/components/schemas/IANATimeZone"
         soc:
           $ref: "#/components/schemas/Soc"
         active:
@@ -431,11 +636,17 @@ components:
     id:
       name: id
       in: path
-      description: The ID. Starts with 1.
+      description: TODO
       required: true
       schema:
-        type: integer
-        minimum: 1
+        $ref: "#/components/schemas/Id"
+    mode:
+      name: mode
+      in: path
+      description: TODO
+      required: true
+      schema:
+        $ref: "#/components/schemas/Mode"
     enable:
       name: enable
       in: path
@@ -451,6 +662,7 @@ components:
     soc:
       name: soc
       in: path
+      description: TODO
       required: true
       schema:
         $ref: "#/components/schemas/Soc"
@@ -477,14 +689,19 @@ components:
       required: true
       schema:
         type: number
+    current:
+      name: current
+      in: path
+      description: TODO
+      required: true
+      schema:
+        $ref: "#/components/schemas/Current"
     power:
       name: power
       in: path
-      description: Power in Watt
       required: true
       schema:
-        type: number
-        minimum: 0
+        $ref: "#/components/schemas/Power"
   responses:
     NumberResult:
       description: TODO
@@ -496,6 +713,12 @@ components:
               result:
                 description: TODO
                 type: number
+    PlanRatesResult:
+      description: TODO
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PlanRates"
     BooleanResult:
       description: TODO
       content:
