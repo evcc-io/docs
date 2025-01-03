@@ -48,15 +48,7 @@ paths:
         - $ref: "#/components/parameters/enable"
       responses:
         200:
-          description: TODO
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  result:
-                    description: TODO
-                    type: boolean
+          $ref: "#/components/responses/BooleanResult"
   /batterygridchargelimit/{cost}:
     post:
       summary: Set battery grid charge limit
@@ -251,7 +243,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/State"
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/State"
   #   _______             __      __  _     _      _
   #  |__   __|         _  \ \    / / | |   (_)    | |
   #     | | __ _  __ _(_)  \ \  / /__| |__  _  ___| | ___  ___
@@ -286,7 +281,7 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /vehicles/{name}/plan/soc/{soc}/{timestamp}:
     post:
-      summary: Set static plan
+      summary: Set static soc-plan
       description: TODO
       tags:
         - Vehicles
@@ -300,10 +295,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StaticPlan"
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/StaticPlan"
   /vehicles/{name}/plan/soc:
     delete:
-      summary: Delete static plan
+      summary: Delete static soc-plan
       description: TODO
       tags:
         - Vehicles
@@ -335,9 +333,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/RepeatingPlan"
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      plans:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RepeatingPlan"
   #   _______              _                     _             _       _
   #  |__   __|         _  | |                   | |           (_)     | |
   #     | | __ _  __ _(_) | |     ___   __ _  __| |_ __   ___  _ _ __ | |_ ___
@@ -361,7 +365,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Mode"
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Mode"
   /loadpoints/{id}/limitsoc/{soc}:
     post:
       summary: Limit soc
@@ -441,12 +448,15 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PlanRates"
-                  - type: object
-                    properties:
-                      planId:
-                        $ref: "#/components/schemas/Id"
+                type: object
+                properties:
+                  result:
+                    allOf:
+                      - $ref: "#/components/schemas/PlanRates"
+                      - type: object
+                        properties:
+                          planId:
+                            $ref: "#/components/schemas/Id"
   /loadpoints/{id}/plan/static/preview/{type}/{goal}/{timestamp}:
     get:
       summary: Get static plan preview
@@ -476,8 +486,8 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/PlanRatesResult"
-  /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}:
-    get:
+  ? /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}
+  : get:
       summary: Get repeating plan preview
       description: TODO
       tags:
@@ -506,7 +516,83 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/PlanRatesResult"
-
+  /loadpoints/{id}/plan/energy/{power}/{timestamp}:
+    post:
+      summary: Set static energy-plan
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/power"
+        - $ref: "#/components/parameters/timestamp"
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      energy:
+                        $ref: "#/components/schemas/Power"
+                      time:
+                        $ref: "#/components/schemas/Timestamp"
+  /loadpoints/{id}/plan/energy:
+    delete:
+      summary: Delete static energy-plan
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        200:
+          $ref: "#/components/responses/EmptyResult"
+  /loadpoints/{id}/vehicle/{vehicleName}:
+    post:
+      summary: Set vehicle
+      description: TODO
+      tags:
+        - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/vehicleName"
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      vehicle:
+                        $ref: "#/components/schemas/VehicleName"
+  /loadpoints/{id}/vehicle:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    delete:
+      summary: Delete vehicle
+      description: TODO
+      tags:
+        - Loadpoints
+      responses:
+        200:
+          $ref: "#/components/responses/EmptyResult"
+    patch:
+      summary: Start vehicle detection
+      description: TODO
+      tags:
+        - Loadpoints
+      responses:
+        200:
+          $ref: "#/components/responses/EmptyResult"
 #   _______               _____             __ _
 #  |__   __|         _   / ____|           / _(_)
 #     | | __ _  __ _(_) | |     ___  _ __ | |_ _  __ _
@@ -522,7 +608,6 @@ components:
       description: TODO
       type: string
       enum:
-        - ""
         - "off"
         - now
         - minpv
@@ -554,7 +639,7 @@ components:
       type: number
       minimum: 0
     Timestamp:
-      description: Timestamp
+      description: Timestamp in RFC3339 format
       type: string
       format: date-time
       example: "2025-07-19T12:30:00.000Z"
@@ -617,6 +702,11 @@ components:
       description: Timezone in IANA format (TODO:Enum dafür?)
       type: string
       example: "UTC"
+    VehicleName:
+      description: Name of the vehicle
+      type: string
+      minLength: 1
+      pattern: "[a-zA-Z0-9_.:-]+"
     RepeatingPlan:
       description: TODO
       type: object
@@ -676,12 +766,9 @@ components:
     vehicleName:
       name: name
       in: path
-      description: Name of the vehicle
       required: true
       schema:
-        type: string
-        minLength: 1
-        pattern: "[a-zA-Z0-9_.:-]+"
+        $ref: "#/components/schemas/VehicleName"
     cost:
       name: cost
       in: path
@@ -718,7 +805,10 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/PlanRates"
+            type: object
+            properties:
+              result:
+                $ref: "#/components/schemas/PlanRates"
     BooleanResult:
       description: TODO
       content:
@@ -729,3 +819,12 @@ components:
               result:
                 description: TODO
                 type: boolean
+    EmptyResult:
+      description: TODO
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
