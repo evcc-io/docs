@@ -32,7 +32,8 @@ Konfiguration für awattar
 ```yaml
 tariffs:
   grid:
-    type: awattar
+    type: template
+    template: awattar
     region: de # or at
 ```
 
@@ -41,7 +42,8 @@ Konfiguration für Tibber
 ```yaml
 tariffs:
   grid:
-    type: tibber
+    type: template
+    template: tibber
     token: "476...963a4" # access token
 ```
 
@@ -81,7 +83,8 @@ planner:
 
 ```yaml
 planner:
-  type: electricitymaps
+  type: template
+  template: electricitymaps
   uri: https://api-access.electricitymaps.com/2w...1g/
   token: Rp...D2
   zone: DE
