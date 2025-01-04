@@ -6,7 +6,10 @@ info:
   version: latest
 servers:
   - url: https://demo.evcc.io/api
+  - url: http://192.168.178.69:7070/api
 tags:
+  - name: Auth
+    description: TODO
   - name: State
     description: TODO
   - name: Site
@@ -14,6 +17,10 @@ tags:
   - name: Loadpoints
     description: TODO
   - name: Vehicles
+    description: TODO
+  - name: Config
+    description: TODO
+  - name: System
     description: TODO
 paths:
   #   _______               _____ _ _
@@ -34,7 +41,7 @@ paths:
         200:
           description: TODO
           content:
-            text/plan:
+            text/plain:
               schema:
                 type: string
                 enum: [OK]
@@ -552,7 +559,7 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/EmptyResult"
-  /loadpoints/{id}/vehicle/{vehicleName}:
+  /loadpoints/{id}/vehicle/{name}:
     post:
       summary: Set vehicle
       description: TODO
@@ -727,17 +734,286 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/BooleanResult"
-#   _______               _____             __ _
-#  |__   __|         _   / ____|           / _(_)
-#     | | __ _  __ _(_) | |     ___  _ __ | |_ _  __ _
-#     | |/ _` |/ _` |   | |    / _ \| '_ \|  _| |/ _` |
-#     | | (_| | (_| |_  | |___| (_) | | | | | | | (_| |
-#     |_|\__,_|\__, (_)  \_____\___/|_| |_|_| |_|\__, |
-#               __/ |                             __/ |
-#              |___/                             |___/
-
+  #   _______                            _   _
+  #  |__   __|         _      /\        | | | |
+  #     | | __ _  __ _(_)    /  \  _   _| |_| |__
+  #     | |/ _` |/ _` |     / /\ \| | | | __| '_ \
+  #     | | (_| | (_| |_   / ____ \ |_| | |_| | | |
+  #     |_|\__,_|\__, (_) /_/    \_\__,_|\__|_| |_|
+  #               __/ |
+  #              |___/
+  /auth/password:
+    put:
+      summary: Change password
+      description: TODO
+      tags:
+        - Auth
+      requestBody:
+        description: TODO
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePassword"
+      responses:
+        201:
+          description: TODO
+        400:
+          description: TODO
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - Invalid password
+  /auth/status:
+    get:
+      summary: Get authentication status
+      description: TODO
+      tags:
+        - Auth
+      responses:
+        400:
+          description: TODO
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - "true"
+                  - "false"
+  /auth/login:
+    post:
+      summary: Login
+      description: TODO
+      tags:
+        - Auth
+      requestBody:
+        description: TODO
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  $ref: "#/components/schemas/Password"
+      responses:
+        200:
+          description: TODO
+          headers:
+            Set-Cookie:
+              description: TODO
+              schema:
+                type: string
+                example: auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc0Mzc3NzMzN30.b6IjIUPgPq3OL33bB_CsVmbW_2qAy2wgOnGRB0IotqY; Path=/; Expires=Fri, 04 Apr 2025 14:35:37 GMT; HttpOnly; SameSite=Strict
+        401:
+          description: TODO
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - Invalid password
+  /auth/logout:
+    post:
+      summary: Login
+      description: TODO
+      tags:
+        - Auth
+      responses:
+        200:
+          description: TODO
+          headers:
+            Set-Cookie:
+              description: TODO
+              schema:
+                type: string
+                enum:
+                  - auth=; Path=/; HttpOnly
+  #   _______               _____             __ _
+  #  |__   __|         _   / ____|           / _(_)
+  #     | | __ _  __ _(_) | |     ___  _ __ | |_ _  __ _
+  #     | |/ _` |/ _` |   | |    / _ \| '_ \|  _| |/ _` |
+  #     | | (_| | (_| |_  | |___| (_) | | | | | | | (_| |
+  #     |_|\__,_|\__, (_)  \_____\___/|_| |_|_| |_|\__, |
+  #               __/ |                             __/ |
+  #              |___/                             |___/
+  /config/site:
+    get:
+      summary: TODO
+      description: TODO
+      tags:
+        - Config
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Site"
+    put:
+      summary: TODO
+      description: TODO
+      tags:
+        - Config
+      requestBody:
+        description: TODO
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Site"
+      responses:
+        200:
+          description: TODO
+  #   _______               _____           _
+  #  |__   __|         _   / ____|         | |
+  #     | | __ _  __ _(_) | (___  _   _ ___| |_ ___ _ __ ___
+  #     | |/ _` |/ _` |    \___ \| | | / __| __/ _ \ '_ ` _ \
+  #     | | (_| | (_| |_   ____) | |_| \__ \ ||  __/ | | | | |
+  #     |_|\__,_|\__, (_) |_____/ \__, |___/\__\___|_| |_| |_|
+  #               __/ |            __/ |
+  #              |___/            |___/
+  /system/log:
+    get:
+      summary: Get logs
+      description: TODO
+      security:
+        - cookieAuth: []
+      tags:
+        - System
+      parameters:
+        - name: area
+          in: query
+          description: TODO
+          explode: true
+          schema:
+            $ref: "#/components/schemas/LogAreas"
+        - name: level
+          in: query
+          description: TODO
+          required: true
+          schema:
+            description: TODO
+            type: string
+            enum:
+              - FATAL
+              - ERROR
+              - WARN
+              - INFO
+              - DEBUG
+              - TRACE
+        - name: count
+          in: query
+          description: TODO
+          schema:
+            description: TODO
+            type: integer
+        - name: format
+          in: query
+          description: TODO
+          schema:
+            description: TODO
+            type: string
+            enum:
+              - " "
+              - txt
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      description: TODO
+                      type: string
+            attachment; filename="{NAME}.log":
+              schema:
+                description: TODO
+                type: string
+                format: binary
+        401:
+          $ref: "#/components/responses/Unauthorized"
+  /system/log/areas:
+    get:
+      summary: Get log areas
+      description: TODO
+      security:
+        - cookieAuth: []
+      tags:
+        - System
+      responses:
+        200:
+          description: TODO
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/LogAreas"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+  /system/shutdown:
+    get:
+      summary: Shutdown evcc
+      description: TODO
+      security:
+        - cookieAuth: []
+      tags:
+        - System
+      responses:
+        204:
+          description: TODO
+        401:
+          $ref: "#/components/responses/Unauthorized"
 components:
   schemas:
+    LogArea:
+      description: TODO
+      type: string
+    LogAreas:
+      type: array
+      items:
+        $ref: "#/components/schemas/LogArea"
+    Password:
+      description: TODO
+      type: string
+    ChangePassword:
+      description: TODO
+      type: object
+      properties:
+        current:
+          $ref: "#/components/schemas/Password"
+        now:
+          $ref: "#/components/schemas/Password"
+    Site:
+      description: TODO
+      type: object
+      properties:
+        title:
+          description: TODO
+          type: string
+        grid:
+          description: TODO
+          type: string
+        pv:
+          description: TODO
+          type: array
+          items:
+            description: TODO
+            type: string
+        battery:
+          description: TODO
+          type: array
+          items:
+            description: TODO
+            type: string
     Source:
       description: TODO
       type: string
@@ -883,7 +1159,7 @@ components:
       schema:
         $ref: "#/components/schemas/Id"
     delay:
-      name: id
+      name: delay
       in: path
       description: TODO
       required: true
@@ -906,8 +1182,7 @@ components:
           - type: boolean
           - type: string
           - type: number
-        enum:
-          ["true", "false", 1, 0,]
+        enum: ["true", "false", 1, 0]
     soc:
       name: soc
       in: path
@@ -949,7 +1224,7 @@ components:
       schema:
         $ref: "#/components/schemas/Power"
     threshold:
-      name: power
+      name: threshold
       in: path
       required: true
       schema:
@@ -1003,3 +1278,15 @@ components:
             properties:
               result:
                 type: object
+    Unauthorized:
+      description: TODO
+      content:
+        text/plain:
+          schema:
+            type: string
+            enum: [Unauthorized]
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth
