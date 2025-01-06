@@ -63,7 +63,7 @@ paths:
       tags:
         - Site
       parameters:
-        - $ref: "#/components/parameters/cost"
+        - $ref: "#/components/parameters/costLimit"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
@@ -127,7 +127,7 @@ paths:
       tags:
         - Site
       parameters:
-        - $ref: "#/components/parameters/cost"
+        - $ref: "#/components/parameters/costLimit"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
@@ -305,7 +305,7 @@ paths:
                 type: object
                 properties:
                   result:
-                    $ref: "#/components/schemas/StaticPlan"
+                    $ref: "#/components/schemas/StaticSocPlan"
   /vehicles/{name}/plan/soc:
     delete:
       summary: Delete static soc-plan
@@ -539,12 +539,7 @@ paths:
                 type: object
                 properties:
                   result:
-                    type: object
-                    properties:
-                      energy:
-                        $ref: "#/components/schemas/Power"
-                      time:
-                        $ref: "#/components/schemas/Timestamp"
+                    $ref: "#/components/schemas/StaticEnergyPlan"
   /loadpoints/{id}/plan/energy:
     delete:
       summary: Delete static energy-plan
@@ -599,8 +594,8 @@ paths:
           $ref: "#/components/responses/EmptyResult"
   /loadpoints/{id}/remotedemand/{demand}/{source}:
     post:
-      summary: TODO
-      description: TODO
+      summary: "@naltatis"
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -632,8 +627,8 @@ paths:
                         $ref: "#/components/schemas/Source"
   /loadpoints/{id}/enable/threshold/{threshold}:
     post:
-      summary: TODO
-      description: TODO
+      summary: "@naltatis"
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -644,13 +639,13 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/enable/delay/{delay}:
     post:
-      summary: TODO
-      description: TODO
+      summary: "@naltatis"
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/delay"
+        - $ref: "#/components/parameters/enableDelay"
       responses:
         200:
           $ref: "#/components/responses/IntegerResult"
@@ -674,7 +669,7 @@ paths:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/delay"
+        - $ref: "#/components/parameters/disableDelay"
       responses:
         200:
           $ref: "#/components/responses/IntegerResult"
@@ -686,7 +681,7 @@ paths:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/cost"
+        - $ref: "#/components/parameters/costLimit"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
@@ -978,10 +973,9 @@ components:
       items:
         $ref: "#/components/schemas/LogArea"
     Password:
-      description: TODO
+      description: Admin password
       type: string
     ChangePassword:
-      description: TODO
       type: object
       properties:
         current:
@@ -989,29 +983,27 @@ components:
         now:
           $ref: "#/components/schemas/Password"
     Site:
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/site#metersgrid)"
       type: object
       properties:
         title:
-          description: TODO
+          description: "[See documentation](/en/docs/reference/configuration/site#title)"
           type: string
         grid:
-          description: TODO
+          description: "[See documentation](/en/docs/reference/configuration/site#metersgrid)"
           type: string
         pv:
-          description: TODO
+          description: "[See documentation](/en/docs/reference/configuration/site#meterspv)"
           type: array
           items:
-            description: TODO
             type: string
         battery:
-          description: TODO
+          description: "[See documentation](/en/docs/reference/configuration/site#meters.battery)"
           type: array
           items:
-            description: TODO
             type: string
     Source:
-      description: TODO
+      description: "@naltatis"
       type: string
       pattern: "[0-9a-zA-Z_-]+"
     Demand:
@@ -1022,7 +1014,7 @@ components:
         - hard
         - soft
     Mode:
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#mode)"
       type: string
       enum:
         - "off"
@@ -1031,12 +1023,9 @@ components:
         - pv
     State:
       type: object
-      properties:
-        result:
-          description: TODO
-          type: object
+      # TODO: add properties
     Phases:
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#phases)"
       type: integer
       enum:
         - 0
@@ -1046,10 +1035,12 @@ components:
       description: The ID. Starts with 1.
       type: integer
       minimum: 1
-    Delay:
-      description: TODO
+    EnableDelay:
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
       type: integer
-      minimum: 0
+    DisableDelay:
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
+      type: integer
     Soc:
       description: Soc in %
       type: number
@@ -1069,18 +1060,27 @@ components:
       type: number
       minimum: 0
     Threshold:
-      description: TODO Power in Watt
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold)"
       type: number
-    StaticPlan:
-      description: TODO
+    StaticSocPlan:
+      description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
       type: object
       properties:
         soc:
           $ref: "#/components/schemas/Soc"
         time:
           $ref: "#/components/schemas/Timestamp"
+    StaticEnergyPlan:
+      description: "[See documentation](/en/docs/features/plans#energy-amount-plan)"
+      type: object
+      properties:
+        energy:
+          $ref: "#/components/schemas/Power"
+        time:
+          $ref: "#/components/schemas/Timestamp"
     Rate:
       type: object
+      description: TODO
       properties:
         start:
           $ref: "#/components/schemas/Timestamp"
@@ -1109,21 +1109,29 @@ components:
         power:
           $ref: "#/components/schemas/Power"
     Weekdays:
-      description: TODO
+      description: The Weekdays - [See documentation](/en/docs/features/plans#repeating-plans)
       type: array
       uniqueItems: true
       items:
-        description: TODO
+        description: |
+          0: Sunday
+          1: Monday
+          2: Tuesday
+          3: Wednesday
+          4: Thursday
+          5: Friday
+          6: Saturday
         type: integer
         minimum: 0
         maximum: 6
     HourMinuteTime:
-      description: TODO
+      description: Time in Hours:Minutes format
       type: string
       pattern: "[0-1][0-9]:[0-5][0-9]"
       format: "HH:MM"
+      example: 12:30
     IANATimeZone:
-      description: Timezone in IANA format (TODO:Enum dafür?)
+      description: Timezone in IANA format - [See Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
       type: string
       example: "UTC"
     VehicleName:
@@ -1132,7 +1140,7 @@ components:
       minLength: 1
       pattern: "[a-zA-Z0-9_.:-]+"
     RepeatingPlan:
-      description: TODO
+      description: "[Se documentation](/en/docs/features/plans#repeating-plans)"
       type: object
       properties:
         weekdays:
@@ -1144,7 +1152,7 @@ components:
         soc:
           $ref: "#/components/schemas/Soc"
         active:
-          description: TODO
+          description: Whether evcc should take the plan into account. `false` means that evcc ignores the plan.
           type: boolean
   parameters:
     id:
@@ -1153,12 +1161,18 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Id"
-    delay:
+    disableDelay:
       name: delay
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/Delay"
+        $ref: "#/components/schemas/DisableDelay"
+    enableDelay:
+      name: delay
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/EnableDelay"
     mode:
       name: mode
       in: path
@@ -1168,7 +1182,6 @@ components:
     enable:
       name: enable
       in: path
-      description: TODO
       required: true
       schema:
         oneOf:
@@ -1194,8 +1207,9 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/VehicleName"
-    cost:
+    costLimit:
       name: cost
+      description: Cost limit for a kWh @naltatis-WHICH-CURRENCY?
       in: path
       required: true
       schema:
@@ -1220,27 +1234,25 @@ components:
         $ref: "#/components/schemas/Threshold"
   responses:
     NumberResult:
-      description: TODO
+      description: Number result of your input
       content:
         application/json:
           schema:
             type: object
             properties:
               result:
-                description: TODO
                 type: number
     IntegerResult:
-      description: TODO
+      description: Integer result of your input
       content:
         application/json:
           schema:
             type: object
             properties:
               result:
-                description: TODO
                 type: integer
     PlanRatesResult:
-      description: TODO
+      description: PlanRates result
       content:
         application/json:
           schema:
@@ -1249,17 +1261,16 @@ components:
               result:
                 $ref: "#/components/schemas/PlanRates"
     BooleanResult:
-      description: TODO
+      description: Boolean result of your input
       content:
         application/json:
           schema:
             type: object
             properties:
               result:
-                description: TODO
                 type: boolean
     EmptyResult:
-      description: TODO
+      description: Empty result
       content:
         application/json:
           schema:
@@ -1268,7 +1279,7 @@ components:
               result:
                 type: object
     Unauthorized:
-      description: TODO
+      description: Unauthorized - Login and try again
       content:
         text/plain:
           schema:
