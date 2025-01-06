@@ -6,22 +6,21 @@ info:
   version: latest
 servers:
   - url: https://demo.evcc.io/api
-  - url: http://192.168.178.69:7070/api
 tags:
   - name: Auth
-    description: TODO
+    description: "@naltatis"
   - name: State
-    description: TODO
+    description: "@naltatis"
   - name: Site
-    description: TODO
+    description: "@naltatis"
   - name: Loadpoints
-    description: TODO
+    description: "@naltatis"
   - name: Vehicles
-    description: TODO
+    description: "@naltatis"
   - name: Config
-    description: TODO
+    description: "@naltatis"
   - name: System
-    description: TODO
+    description: "@naltatis"
 paths:
   #   _______               _____ _ _
   #  |__   __|         _   / ____(_) |
@@ -34,7 +33,7 @@ paths:
   /health:
     get:
       summary: Health check
-      description: TODO
+      description: "@naltatis"
       tags:
         - Site
       responses:
@@ -48,7 +47,7 @@ paths:
   /batterydischargecontrol/{enable}:
     post:
       summary: Control battery-discharge
-      description: TODO
+      description: "[See documentation](/en/docs/features/battery#discharge-lock-during-fast-charging)"
       tags:
         - Site
       parameters:
@@ -59,7 +58,7 @@ paths:
   /batterygridchargelimit/{cost}:
     post:
       summary: Set battery grid charge limit
-      description: TODO
+      description: "[See documentation](/en/docs/features/battery#charging-the-battery-from-the-grid)"
       tags:
         - Site
       parameters:
@@ -70,16 +69,16 @@ paths:
   /batterygridchargelimit:
     delete:
       summary: Remove battery grid charge limit
-      description: TODO
+      description: "[See documentation](/en/docs/features/battery#charging-the-battery-from-the-grid)"
       tags:
         - Site
       responses:
         200:
-          description: "TODO"
+          $ref: "#/components/responses/EmptyResult"
   /buffersoc/{soc}:
     post:
       summary: Set battery buffer soc
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/site#buffersoc)"
       tags:
         - Site
       parameters:
@@ -90,7 +89,7 @@ paths:
   /bufferstartsoc/{soc}:
     post:
       summary: Set battery buffer start soc
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/site#bufferstartsoc)"
       tags:
         - Site
       parameters:
@@ -101,7 +100,7 @@ paths:
   /prioritysoc/{soc}:
     post:
       summary: Set battery priority soc
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/site#prioritysoc)"
       tags:
         - Site
       parameters:
@@ -112,7 +111,7 @@ paths:
   /residualpower/{power}:
     post:
       summary: Set grid residual power
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/site#residualpower)"
       tags:
         - Site
       parameters:
@@ -123,7 +122,7 @@ paths:
   /smartcostlimit/{cost}:
     post:
       summary: Set smart charging cost limit for all loadpoints
-      description: TODO
+      description: "@naltatis"
       tags:
         - Site
       parameters:
@@ -134,22 +133,22 @@ paths:
   /smartcostlimit:
     delete:
       summary: Remove smart charging cost limit for all loadpoints
-      description: TODO
+      description: "@naltatis"
       tags:
         - Site
       responses:
         200:
-          description: "TODO"
+          $ref: "#/components/responses/EmptyResult"
   /tariff/{type}:
     get:
       summary: Get list of tariff prices
-      description: TODO
+      description: "@naltatis"
       tags:
         - Site
       parameters:
         - name: type
           in: path
-          description: TODO
+          description: "@naltatis"
           required: true
           schema:
             type: string
@@ -163,57 +162,92 @@ paths:
                 type: object
                 properties:
                   result:
-                    description: TODO
                     type: object
                     properties:
                       rates:
                         $ref: "#/components/schemas/Rates"
-
   /sessions:
     get:
       summary: Get charging sessions
-      description: TODO
+      description: "[See documentation](/en/docs/features/sessions)"
       tags:
         - Site
       parameters:
-        - name: format
+        - name: year
           in: query
-          description: TODO
-          required: false
+          description: Filter for the year
+          schema:
+            type: integer
+            example: 2025
+        - name: month
+          in: query
+          description: |
+            Filter for the month:
+            1: January
+            2: February
+            3: March
+            4: April
+            5: May
+            6: June
+            7: July
+            8: August
+            9: September
+            10: October
+            11: November
+            12: December
           schema:
             type: string
+            example: 2
+            minimum: 1
+            maximum: 12
+        - name: format
+          in: query
+          description: File type
+          schema:
+            type: string
+            enum:
+              - csv
+            # TODO: document csv response
         - name: lang
           in: query
-          description: TODO
-          required: false
+          description: "@naltatis"
           schema:
             type: string
       responses:
         200:
-          description: TODO
+          $ref: "#/components/responses/ChargingSessionsResult"
   /session/{id}:
     parameters:
       - $ref: "#/components/parameters/id"
     put:
-      summary: Update session
-      description: TODO
+      summary: Update vehicle of charging session
+      description: "[See documentation](/en/docs/features/sessions)"
       tags:
         - Site
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vehicle:
+                  $ref: "#/components/schemas/VehicleName"
       responses:
         200:
-          description: TODO
+          $ref: "#/components/responses/ChargingSessionsResult"
     delete:
-      summary: Delete session
-      description: TODO
+      summary: Delete charging session
+      description: "[See documentation](/en/docs/features/sessions)"
       tags:
         - Site
       responses:
         200:
-          description: TODO
+          $ref: "#/components/responses/ChargingSessionsResult"
   /settings/telemetry:
     get:
       summary: Get telemetry status
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/telemetry)"
       tags:
         - Site
       responses:
@@ -222,7 +256,7 @@ paths:
   /settings/telemetry/{enable}:
     post:
       summary: Enable/disable telemetry
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/telemetry)"
       tags:
         - Site
       parameters:
@@ -241,7 +275,7 @@ paths:
   /state:
     get:
       summary: Get system state
-      description: TODO
+      description: "@naltatis"
       tags:
         - State
       responses:
@@ -265,7 +299,7 @@ paths:
   /vehicles/{name}/minsoc/{soc}:
     post:
       summary: Set minimum soc
-      description: TODO
+      description: "[See `minSoc`-documentation](/en/docs/reference/configuration/vehicles#onidentify)"
       tags:
         - Vehicles
       parameters:
@@ -277,7 +311,7 @@ paths:
   /vehicles/{name}/limitsoc/{soc}:
     post:
       summary: Set soc-limit
-      description: TODO
+      description: "[See `targetSoc`-documentation](/en/docs/reference/configuration/vehicles#onidentify)"
       tags:
         - Vehicles
       parameters:
@@ -289,7 +323,7 @@ paths:
   /vehicles/{name}/plan/soc/{soc}/{timestamp}:
     post:
       summary: Set static soc-plan
-      description: TODO
+      description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
       tags:
         - Vehicles
       parameters:
@@ -309,24 +343,22 @@ paths:
   /vehicles/{name}/plan/soc:
     delete:
       summary: Delete static soc-plan
-      description: TODO
       tags:
         - Vehicles
       parameters:
         - $ref: "#/components/parameters/vehicleName"
       responses:
         200:
-          description: TODO
+          $ref: "#/components/responses/EmptyResult"
   /vehicles/{name}/plan/repeating:
     post:
       summary: Set repeating plans
-      description: TODO
+      description: "[See documentation](/en/docs/features/plans#repeating-plans)"
       tags:
         - Vehicles
       parameters:
         - $ref: "#/components/parameters/vehicleName"
       requestBody:
-        description: TODO
         required: true
         content:
           application/json:
@@ -360,7 +392,7 @@ paths:
   /loadpoints/{id}/mode/{mode}:
     post:
       summary: Set charge mode
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#mode)"
       tags:
         - Loadpoints
       parameters:
@@ -379,7 +411,7 @@ paths:
   /loadpoints/{id}/limitsoc/{soc}:
     post:
       summary: Limit soc
-      description: TODO
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -391,7 +423,7 @@ paths:
   /loadpoints/{id}/limitenergy/{power}:
     post:
       summary: Limit energy
-      description: TODO
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -403,7 +435,7 @@ paths:
   /loadpoints/{id}/mincurrent/{current}:
     post:
       summary: Set minimum current
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#mincurrent)"
       tags:
         - Loadpoints
       parameters:
@@ -415,7 +447,7 @@ paths:
   /loadpoints/{id}/maxcurrent/{current}:
     post:
       summary: Set maximum current
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#maxcurrent)"
       tags:
         - Loadpoints
       parameters:
@@ -427,7 +459,7 @@ paths:
   /loadpoints/{id}/phases/{phases}:
     post:
       summary: Set allowed phases
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#phases)"
       tags:
         - Loadpoints
       parameters:
@@ -443,7 +475,7 @@ paths:
   /loadpoints/{id}/plan:
     get:
       summary: Get plan rates
-      description: TODO
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -466,14 +498,12 @@ paths:
   /loadpoints/{id}/plan/static/preview/{type}/{goal}/{timestamp}:
     get:
       summary: Get static plan preview
-      description: TODO
       tags:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
         - name: type
           in: path
-          description: TODO
           required: true
           schema:
             type: string
@@ -482,7 +512,7 @@ paths:
               - energy
         - name: goal
           in: path
-          description: TODO
+          description: The power or soc to reach.
           required: true
           schema:
             oneOf:
@@ -495,7 +525,7 @@ paths:
   ? /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}
   : get:
       summary: Get repeating plan preview
-      description: TODO
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -514,7 +544,6 @@ paths:
         - name: timezone
           in: path
           required: true
-          description: TODO
           schema:
             $ref: "#/components/schemas/IANATimeZone"
       responses:
@@ -522,8 +551,7 @@ paths:
           $ref: "#/components/responses/PlanRatesResult"
   /loadpoints/{id}/plan/energy/{power}/{timestamp}:
     post:
-      summary: Set static energy-plan
-      description: TODO
+      summary: Create static energy-plan
       tags:
         - Loadpoints
       parameters:
@@ -543,7 +571,6 @@ paths:
   /loadpoints/{id}/plan/energy:
     delete:
       summary: Delete static energy-plan
-      description: TODO
       tags:
         - Loadpoints
       parameters:
@@ -553,8 +580,8 @@ paths:
           $ref: "#/components/responses/EmptyResult"
   /loadpoints/{id}/vehicle/{name}:
     post:
-      summary: Set vehicle
-      description: TODO
+      summary: Assign vehicle
+      description: "[See documentation](/en/docs/features/vehicle#assignment-via-the-ui)"
       tags:
         - Loadpoints
       parameters:
@@ -578,7 +605,6 @@ paths:
       - $ref: "#/components/parameters/id"
     delete:
       summary: Delete vehicle
-      description: TODO
       tags:
         - Loadpoints
       responses:
@@ -586,7 +612,7 @@ paths:
           $ref: "#/components/responses/EmptyResult"
     patch:
       summary: Start vehicle detection
-      description: TODO
+      description: "[See documentation](/en/docs/features/vehicle#automatic-detection)"
       tags:
         - Loadpoints
       responses:
@@ -627,20 +653,20 @@ paths:
                         $ref: "#/components/schemas/Source"
   /loadpoints/{id}/enable/threshold/{threshold}:
     post:
-      summary: "@naltatis"
-      description: "@naltatis"
+      summary: Enable threshold
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold)"
       tags:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/threshold"
+        - $ref: "#/components/parameters/enableThreshold"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/enable/delay/{delay}:
     post:
-      summary: "@naltatis"
-      description: "@naltatis"
+      summary: Enable threshold-delay
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
       tags:
         - Loadpoints
       parameters:
@@ -649,22 +675,22 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/IntegerResult"
-  /loadpoints/{id}/disble/threshold/{threshold}:
+  /loadpoints/{id}/disable/threshold/{threshold}:
     post:
-      summary: TODO
-      description: TODO
+      summary: Disable threshold
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold-1)"
       tags:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/threshold"
+        - $ref: "#/components/parameters/disableThreshold"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/disable/delay/{delay}:
     post:
-      summary: TODO
-      description: TODO
+      summary: Disable threshold-delay
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay-1)"
       tags:
         - Loadpoints
       parameters:
@@ -676,7 +702,7 @@ paths:
   /loadpoints/{id}/smartcostlimit/{cost}:
     post:
       summary: Set smart charging cost limit
-      description: TODO
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
@@ -688,25 +714,25 @@ paths:
   /loadpoints/{id}/smartcostlimit:
     delete:
       summary: Remove smart charging cost limit
-      description: TODO
+      description: "@naltatis"
       tags:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
         200:
-          description: "TODO"
+          $ref: "#/components/responses/EmptyResult"
   /loadpoints/{id}/priority/{priority}:
     post:
       summary: Set priority
-      description: TODO
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#priority)"
       tags:
         - Loadpoints
       parameters:
         - $ref: "#/components/parameters/id"
         - name: priority
           in: path
-          description: TODO
+          description: "[See documentation](/en/docs/reference/configuration/loadpoints#priority)"
           required: true
           schema:
             type: integer
@@ -717,7 +743,7 @@ paths:
   /loadpoints/{id}/batteryboost/{enable}:
     post:
       summary: Set battery boost
-      description: TODO
+      description: "[See documentation](/en/docs/features/battery#battery-boost)"
       tags:
         - Loadpoints
       parameters:
@@ -736,12 +762,10 @@ paths:
   #              |___/
   /auth/password:
     put:
-      summary: Change password
-      description: TODO
+      summary: Change admin password
       tags:
         - Auth
       requestBody:
-        description: TODO
         required: true
         content:
           application/json:
@@ -749,7 +773,7 @@ paths:
               $ref: "#/components/schemas/ChangePassword"
       responses:
         201:
-          description: TODO
+          $ref: "#/components/responses/EmptyResult"
         400:
           description: TODO
           content:
@@ -761,7 +785,7 @@ paths:
   /auth/status:
     get:
       summary: Get authentication status
-      description: TODO
+      description: Whether the current user is logged in.
       tags:
         - Auth
       responses:
@@ -777,11 +801,10 @@ paths:
   /auth/login:
     post:
       summary: Login
-      description: TODO
+      description: Creates the authorization cookie
       tags:
         - Auth
       requestBody:
-        description: TODO
         required: true
         content:
           application/json:
@@ -795,12 +818,12 @@ paths:
           description: TODO
           headers:
             Set-Cookie:
-              description: TODO
+              description: The authorization cookie
               schema:
                 type: string
                 example: auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc0Mzc3NzMzN30.b6IjIUPgPq3OL33bB_CsVmbW_2qAy2wgOnGRB0IotqY; Path=/; Expires=Fri, 04 Apr 2025 14:35:37 GMT; HttpOnly; SameSite=Strict
         401:
-          description: TODO
+          description: Invalid password was provided
           content:
             text/plain:
               schema:
@@ -809,8 +832,8 @@ paths:
                   - Invalid password
   /auth/logout:
     post:
-      summary: Login
-      description: TODO
+      summary: Logout
+      description: Deletes the authorization cookie
       tags:
         - Auth
       responses:
@@ -818,7 +841,7 @@ paths:
           description: TODO
           headers:
             Set-Cookie:
-              description: TODO
+              description: The authorization cookie
               schema:
                 type: string
                 enum:
@@ -833,8 +856,8 @@ paths:
   #              |___/                             |___/
   /config/site:
     get:
-      summary: TODO
-      description: TODO
+      summary: "@naltatis"
+      description: "@naltatis"
       tags:
         - Config
       responses:
@@ -845,12 +868,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Site"
     put:
-      summary: TODO
-      description: TODO
+      summary: "@naltatis"
+      description: "@naltatis"
       tags:
         - Config
       requestBody:
-        description: TODO
         required: true
         content:
           application/json:
@@ -859,6 +881,13 @@ paths:
       responses:
         200:
           description: TODO
+          content:
+            application/json::
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Site"
   #   _______               _____           _
   #  |__   __|         _   / ____|         | |
   #     | | __ _  __ _(_) | (___  _   _ ___| |_ ___ _ __ ___
@@ -870,7 +899,7 @@ paths:
   /system/log:
     get:
       summary: Get logs
-      description: TODO
+      description: "@naltatis"
       security:
         - cookieAuth: []
       tags:
@@ -883,32 +912,20 @@ paths:
             $ref: "#/components/schemas/LogAreas"
         - name: level
           in: query
-          description: TODO
           required: true
           schema:
-            description: TODO
-            type: string
-            enum:
-              - FATAL
-              - ERROR
-              - WARN
-              - INFO
-              - DEBUG
-              - TRACE
+            $ref: "#/components/schemas/LogLevel"
         - name: count
           in: query
-          description: TODO
+          description: Number of log lines to return
           schema:
-            description: TODO
             type: integer
         - name: format
           in: query
-          description: TODO
+          description: File type
           schema:
-            description: TODO
             type: string
             enum:
-              - " "
               - txt
       responses:
         200:
@@ -921,11 +938,10 @@ paths:
                   result:
                     type: array
                     items:
-                      description: TODO
                       type: string
             attachment; filename="{NAME}.log":
               schema:
-                description: TODO
+                description: Download txt-file
                 type: string
                 format: binary
         401:
@@ -933,7 +949,6 @@ paths:
   /system/log/areas:
     get:
       summary: Get log areas
-      description: TODO
       security:
         - cookieAuth: []
       tags:
@@ -953,25 +968,42 @@ paths:
   /system/shutdown:
     get:
       summary: Shutdown evcc
-      description: TODO
+      description: TODO @naltatis
       security:
         - cookieAuth: []
       tags:
         - System
       responses:
         204:
-          description: TODO
+          $ref: "#/components/responses/EmptyResult"
         401:
           $ref: "#/components/responses/Unauthorized"
 components:
   schemas:
+    ChargingSessions:
+      description: Charging sessions
+      type: array
+      items:
+        type: object
+        # TODO: add properties ?
     LogArea:
       description: "[See documentation](/en/docs/reference/configuration/log#levels)"
       type: string
     LogAreas:
+      description: "[See documentation](/en/docs/reference/configuration/log#levels)"
       type: array
       items:
         $ref: "#/components/schemas/LogArea"
+    LogLevel:
+      description: "[See documentation](/en/docs/reference/configuration/log#log)"
+      type: string
+      enum:
+        - FATAL
+        - ERROR
+        - WARN
+        - INFO
+        - DEBUG
+        - TRACE
     Password:
       description: Admin password
       type: string
@@ -1007,7 +1039,7 @@ components:
       type: string
       pattern: "[0-9a-zA-Z_-]+"
     Demand:
-      description: TODO
+      description: "@naltatis"
       type: string
       enum:
         - " "
@@ -1023,7 +1055,7 @@ components:
         - pv
     State:
       type: object
-      # TODO: add properties
+      # TODO: add properties or too much effort?
     Phases:
       description: "[See documentation](/en/docs/reference/configuration/loadpoints#phases)"
       type: integer
@@ -1039,7 +1071,7 @@ components:
       description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
       type: integer
     DisableDelay:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay-1)"
       type: integer
     Soc:
       description: Soc in %
@@ -1059,8 +1091,11 @@ components:
       description: Power in Watt
       type: number
       minimum: 0
-    Threshold:
+    EnableThreshold:
       description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold)"
+      type: number
+    DisableThreshold:
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold-1)"
       type: number
     StaticSocPlan:
       description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
@@ -1080,19 +1115,20 @@ components:
           $ref: "#/components/schemas/Timestamp"
     Rate:
       type: object
-      description: TODO
+      description: A charging interval
       properties:
         start:
+          description: Start of charging interval
           $ref: "#/components/schemas/Timestamp"
         end:
+          description: End of charging interval
           $ref: "#/components/schemas/Timestamp"
         price:
-          description: TODO
+          description: Cost of charging interval
           type: number
           minimum: 0
     Rates:
       type: array
-      description: TODO
       items:
         $ref: "#/components/schemas/Rate"
     PlanRates:
@@ -1101,7 +1137,7 @@ components:
         planTime:
           $ref: "#/components/schemas/Timestamp"
         duration:
-          description: TODO
+          description: Charging length
           type: integer
           minimum: 0
         plan:
@@ -1125,7 +1161,7 @@ components:
         minimum: 0
         maximum: 6
     HourMinuteTime:
-      description: Time in Hours:Minutes format
+      description: Time in `HOURS:MINUTES` format
       type: string
       pattern: "[0-1][0-9]:[0-5][0-9]"
       format: "HH:MM"
@@ -1139,8 +1175,9 @@ components:
       type: string
       minLength: 1
       pattern: "[a-zA-Z0-9_.:-]+"
+      example: "blauer e-Golf"
     RepeatingPlan:
-      description: "[Se documentation](/en/docs/features/plans#repeating-plans)"
+      description: "[See documentation](/en/docs/features/plans#repeating-plans)"
       type: object
       properties:
         weekdays:
@@ -1226,15 +1263,21 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Power"
-    threshold:
+    enableThreshold:
       name: threshold
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/Threshold"
+        $ref: "#/components/schemas/EnableThreshold"
+    disableThreshold:
+      name: threshold
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/DisableThreshold"
   responses:
     NumberResult:
-      description: Number result of your input
+      description: Number result
       content:
         application/json:
           schema:
@@ -1243,7 +1286,7 @@ components:
               result:
                 type: number
     IntegerResult:
-      description: Integer result of your input
+      description: Integer result
       content:
         application/json:
           schema:
@@ -1261,7 +1304,7 @@ components:
               result:
                 $ref: "#/components/schemas/PlanRates"
     BooleanResult:
-      description: Boolean result of your input
+      description: Boolean result
       content:
         application/json:
           schema:
@@ -1278,6 +1321,15 @@ components:
             properties:
               result:
                 type: object
+    ChargingSessionsResult:
+      description: TODO
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: "#/components/schemas/ChargingSessions"
     Unauthorized:
       description: Unauthorized - Login and try again
       content:
