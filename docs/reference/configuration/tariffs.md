@@ -36,4 +36,4 @@ tariffs:
     price: 0.08 # [currency]/kWh
 ```
 
-Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Stromtarife](/docs/devices/tariffs).
+Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Stromtarife](/docs/tariffs).
