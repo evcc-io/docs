@@ -34,7 +34,7 @@ _Outgoing_ towards the target device to be queried (e.g., inverter, energy meter
 
 :::tip Sponsortoken required
 
-For more information about evcc sponsorship, please visit [the sponsorship page](../../sponsorship).
+For more information about evcc sponsorship, please visit [the sponsorship page](/docs/sponsorship).
 
 :::
 
