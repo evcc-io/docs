@@ -6,20 +6,63 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
 import PhaseSwitchSupported from "/docs/_phase_switch_supported.mdx";
-import DeviceConfig from "../../src/components/DeviceConfig";
-import DeviceFeatures from "../../src/components/DeviceFeatures";
-import DeviceFeatureFilter from "../../src/components/DeviceFeatureFilter";
+import DeviceConfig from "/src/components/DeviceConfig";
+import DeviceFeatures from "/src/components/DeviceFeatures";
 
 # Wärmeerzeuger
 
-:::warning Experimentell
-Integration mit Wärmeerzeugern ist noch in der Erprobungsphase.
+:::warning In Entwicklung
+Das Thema Wärmeerzeugung ist noch in der Erprobungsphase.<br/>
 Für die hier aufgeführten Geräte wird später ein [Sponsoring erforderlich](/docs/sponsorship) sein.
 :::
 
 evcc unterstützt unterschiedliche Arten von Wärmeerzeugern.
 Einfache Geräte wie Heizlüfter oder Ventilatoren können über [Smarte Schalter](./smartswitches) ein/ausgeschaltet werden.
-Auf dieser Seite erfährst du, wie du auch Wärmepumpen oder Heizstäbe regeln kannst.
+Auf dieser Seite erfährst du wie du auch **Wärmepumpen** oder **Heizstäbe** regeln kannst.
+
+## Wärmepumpen
+
+Viele Wärmepumpen unterstützen das SG-Ready Modell um ihren Betrieb an die Energiesituation vor Ort anzupassen.
+Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)** und ein **Sperrbetrieb (Dimming)** signalisiert werden.
+
+Ist [Überschussstrom vorhanden](/docs/features/solar-charging) oder der [Netzstrom besonders günstig](/docs/features/dynamic-prices) bzw. [sauber](/docs/features/co2), kann evcc die Wärmepumpe anweisen, die Heizleistung zu erhöhen und in den **verstärkten Betrieb (Boost)** zu schalten.
+
+Die Dimming-Funktion wird noch nicht unterstützt.
+Wir planen dies über das [Lastmanagement](/docs/features/loadmanagement) zu integrieren.
+Damit werden auch die Anforderungen für §14e EnWG abgedeckt.
+
+### direkte Kommunikation
+
+Viele moderne Wärmepumpen bieten API-Schnittstellen an, über die nicht nur der Betriebsmodus gesetzt, sondern auch der Zustand des Gerätes (z.B. Temperatur) abgefragt werden kann.
+Unter [Wärmeerzeuger](#wärmeerzeuger) findest du eine Liste aller unterstützten Geräte.
+
+Sollte deine Wärmepumpe eine Schnittstelle haben, die wir noch nicht unterstützen, erstelle gerne ein [GitHub Issue](https://github.com/evcc-io/evcc/issues) mit allen notwendigen Informationen.
+
+### über Relais-Kontakte
+
+Ältere Wärmepumpen verfügen häufig über SG-Ready Relais-Kontakte, über die der Betriebszustand (Normal, Boost, Dimming) signalisiert werden kann.
+In unserem Beispiel konzentrieren wir uns auf den Wechsel zwischen Normal- und Boostbetrieb.
+Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1.
+Dieses Relais wird mit den ensprechenden SG-Ready Kontakten der Wärmepumpe verbunden.
+Die genaue Verkablung hängt vom Gerät ab und sollte in Absprache dem Installateur erfolgen.
+Ist PV-Überschuss oder günstige Energie vorhanden schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
+
+![Diagram für die Steuerung einer Wärmepumpe über ein SG-ReadyRelais](./heating/sgready.svg)
+
+Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
+Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Wallbox-Zähler](./meters) verwendet werden.
+
+## Heizstäbe
+
+Bei Heizstäben gibt evcc die aktuell verfügbare Leistung an das Gerät weiter.
+Diese verfügbare Leistung wird, analog zum Ladevorgang eines Fahrzeuges, permanent an die aktuelle Situation angepasst.
+
+evcc bietet einstellbare Limits an, mit denen du deine Wunschtemperatur einstellen kannst.
+Dies darf aber nicht als Sicherheitsfunktion verstanden werden.
+
+:::danger
+Dein Heizstab muss eine eigene Temperaturlimitierung mitbringen, die bei einer Fehlfunktion von evcc eine Überhitzung verhindert.
+:::
 
 ---
 

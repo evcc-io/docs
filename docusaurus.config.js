@@ -15,6 +15,9 @@ import { themes as prismThemes } from "prism-react-renderer";
     organizationName: "evcc-io", // Usually your GitHub org/user name.
     projectName: "docs", // Usually your repo name.
     trailingSlash: false,
+    markdown: {
+      mermaid: true,
+    },
     i18n: {
       defaultLocale: "de",
       locales: ["de", "en"],
@@ -55,7 +58,7 @@ import { themes as prismThemes } from "prism-react-renderer";
         }),
       ],
     ],
-
+    themes: ["@docusaurus/theme-mermaid"],
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
