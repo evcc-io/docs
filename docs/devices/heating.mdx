@@ -9,7 +9,7 @@ import PhaseSwitchSupported from "/docs/_phase_switch_supported.mdx";
 import DeviceConfig from "/src/components/DeviceConfig";
 import DeviceFeatures from "/src/components/DeviceFeatures";
 
-# Wärmeerzeuger
+# Wärmepumpen, Heizstäbe
 
 :::warning In Entwicklung
 Das Thema Wärmeerzeugung ist noch in der Erprobungsphase.<br/>
@@ -18,16 +18,16 @@ Für die hier aufgeführten Geräte wird später ein [Sponsoring erforderlich](/
 
 evcc unterstützt unterschiedliche Arten von Wärmeerzeugern.
 Einfache Geräte wie Heizlüfter oder Ventilatoren können über [Smarte Schalter](./smartswitches) ein/ausgeschaltet werden.
-Auf dieser Seite erfährst du wie du auch **Wärmepumpen** oder **Heizstäbe** regeln kannst.
+Auf dieser Seite erfährst du, wie du auch **Wärmepumpen** oder **Heizstäbe** regeln kannst.
 
 ## Wärmepumpen
 
-Viele Wärmepumpen unterstützen das SG-Ready Modell um ihren Betrieb an die Energiesituation vor Ort anzupassen.
+Viele Wärmepumpen unterstützen das SG-Ready-Modell, um ihren Betrieb an die Energiesituation vor Ort anzupassen.
 Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)** und ein **Sperrbetrieb (Dimming)** signalisiert werden.
 
 Ist [Überschussstrom vorhanden](/docs/features/solar-charging) oder der [Netzstrom besonders günstig](/docs/features/dynamic-prices) bzw. [sauber](/docs/features/co2), kann evcc die Wärmepumpe anweisen, die Heizleistung zu erhöhen und in den **verstärkten Betrieb (Boost)** zu schalten.
 
-Die Dimming-Funktion wird noch nicht unterstützt.
+Die Dimming-Funktion wird bisher nicht unterstützt.
 Wir planen dies über das [Lastmanagement](/docs/features/loadmanagement) zu integrieren.
 Damit werden auch die Anforderungen für §14e EnWG abgedeckt.
 
@@ -42,21 +42,21 @@ Sollte deine Wärmepumpe eine Schnittstelle haben, die wir noch nicht unterstüt
 
 Ältere Wärmepumpen verfügen häufig über SG-Ready Relais-Kontakte, über die der Betriebszustand (Normal, Boost, Dimming) signalisiert werden kann.
 In unserem Beispiel konzentrieren wir uns auf den Wechsel zwischen Normal- und Boostbetrieb.
-Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1.
-Dieses Relais wird mit den ensprechenden SG-Ready Kontakten der Wärmepumpe verbunden.
+Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1. 
+
+Dieses Relais wird mit den SG-Ready Kontakten der Wärmepumpe verbunden.
 Die genaue Verkablung hängt vom Gerät ab und sollte in Absprache mit dem Installateur erfolgen.
-Ist PV-Überschuss oder günstige Energie vorhanden schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
+Ist PV-Überschuss oder günstige Energie vorhanden, schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
 
-Das folgende Diagramm zeigt den ensprechenden Aufbau:
+Das folgende Diagramm zeigt den Aufbau:
 
-![Diagram für die Steuerung einer Wärmepumpe über ein SG-ReadyRelais](./heating/sgready.svg)
+![Diagram für die Steuerung einer Wärmepumpe über ein SG-Ready Relais](./heating/sgready.svg)
 
 Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
 Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähler](./meters) verwendet werden.
 
 Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
 Dafür kommt der spezielle Typ `sgready` zum Einsatz.
-
 
 ```yaml
 loadpoints:
@@ -110,14 +110,20 @@ chargers:
             type: template
             template: shelly # Boost-Kontakt der Wärmepumpe
             host: 192.168.0.101
+#   temp:
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
 
 # [...]
 ```
 
 :::note
-Dieses Code-Beispiel enthält Redundanz und nutzt.
-Wir werden später Templates für einfachere Konfigurationen bereitstellen.
+Dieses Code-Beispiel enthält einige Redundanzen.
+Wir werden später Templates für die einfachere Konfiguration gängiger Konstellationen bereitstellen.
 :::
+
+Neben `setmode` und `getmode`, kannst du optional auch die aktuelle Temperatur (`temp`) [via Plugin](/docs/reference/plugins) hinzufügen.
+Diese dient lediglich zur Anzeige und wird bei Wärmepumpen nicht für die Regelung verwendet.
 
 ## Heizstäbe
 
@@ -130,6 +136,8 @@ Dies darf aber nicht als Sicherheitsfunktion verstanden werden.
 :::danger
 Dein Heizstab muss eine eigene Temperaturlimitierung mitbringen, die bei einer Fehlfunktion von evcc eine Überhitzung verhindert.
 :::
+
+
 
 ---
 
