@@ -44,13 +44,80 @@ Sollte deine Wärmepumpe eine Schnittstelle haben, die wir noch nicht unterstüt
 In unserem Beispiel konzentrieren wir uns auf den Wechsel zwischen Normal- und Boostbetrieb.
 Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1.
 Dieses Relais wird mit den ensprechenden SG-Ready Kontakten der Wärmepumpe verbunden.
-Die genaue Verkablung hängt vom Gerät ab und sollte in Absprache dem Installateur erfolgen.
+Die genaue Verkablung hängt vom Gerät ab und sollte in Absprache mit dem Installateur erfolgen.
 Ist PV-Überschuss oder günstige Energie vorhanden schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
+
+Das folgende Diagramm zeigt den ensprechenden Aufbau:
 
 ![Diagram für die Steuerung einer Wärmepumpe über ein SG-ReadyRelais](./heating/sgready.svg)
 
 Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
-Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Wallbox-Zähler](./meters) verwendet werden.
+Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähler](./meters) verwendet werden.
+
+Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
+Dafür kommt der spezielle Typ `sgready` zum Einsatz.
+
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready
+    setmode:
+      source: switch
+      switch:
+      - case: 1 # normal
+        set:
+          source: const
+          value: false
+          set:
+            source: charger
+            config:
+              type: template
+              template: shelly # Boost-Kontakt der Wärmepumpe
+              host: 192.168.0.101
+      - case: 2 # boost
+        set:
+          source: const
+          value: true
+          set:
+            source: charger
+            config:
+              type: template
+              template: shelly # Boost-Kontakt der Wärmepumpe
+              host: 192.168.0.101
+      - case: 3 # dimm (not supported, yet)
+        set:
+          source: error
+          error: ErrNotAvailable
+    getmode:
+      source: calc
+      add:
+        - source: const
+          value: 1
+        - source: charger
+          config:
+            type: template
+            template: shelly # Boost-Kontakt der Wärmepumpe
+            host: 192.168.0.101
+
+# [...]
+```
+
+:::note
+Dieses Code-Beispiel enthält Redundanz und nutzt.
+Wir werden später Templates für einfachere Konfigurationen bereitstellen.
+:::
 
 ## Heizstäbe
 
