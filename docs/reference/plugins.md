@@ -86,26 +86,33 @@ Je nach Gerät ([`meter`](#meter), [`charger`](#charger) oder [`vehicle`](#vehic
 
 ### Meter
 
-Folgende Attribute können für die Konfiguration von Strommessgeräten genutzt werden.
-Dabei werden alle Werte lesend von konfigurierten Plugins übernommen.
-Bei der Verwendung der Plugins ist es wichtig, dass diese den richtigen Datentyp zurückliefern.
+Alle `meter` haben gemeinsam, dass sie Stromzähler sind, die den aktuellen Verbrauch messen.
+Wie an [anderer Stelle](/devices/meters) beschrieben, können Zähler in verschiedenen Kontexten innerhalb der `site` Konfiguration verwendet werden: Als Netzzähler (`grid`), Zähler für die PV Produktion (`pv`), Hausbatteriezähler (`battery`). Zähler für die Ladeleistung der Wallbox (`charge`) oder Verbrauchszähler für intelligente Verbraucher (`aux`).
+
+`power` ist das einzige erforderliche Attribut, alle weiteren Attribute sind optional.
+Nicht alle Metertypen unterstützen alle Pluginattribute:
+
+* `limitsoc` und `batterymode` werden ausschliesslich für Batterierzähler genutzt (d.h. für `meter` die in `site.battery` referenziert werden).
+* `currents`, `voltages` und `powers` sind Phasen Attribute, die mit jeweils genau drei Plugin Konfigurationen (in einem YAML Array) konfiguriert werden müssen.
+
+Die folgende Tabellen enthalten alle Attribute, die von Plugins bereitgestellt werden können, wenn sie für `meter` konfiguriert werden.
+Bei der Verwendung der Plugins ist es auch wichtig, dass diese den richtigen Datentyp zurückliefern.
 Um zu dem verlangten Datentypen zu konvertieren können die in [Lesen](#lesen) beschriebenen Pipelines genutzt werde.
 
-| Attribut    | Typ           | Beschreibung      | Einheit |
+| Attribut    | Typ           | Kontext | Beschreibung      | Einheit |
 | ----------- | ------------- | ----------------- | ------- |
-| power       | float         | Aktuelle elektrische Leistung | W |
-| energy      | float         | Total gemessene Energie | Wh |
-| soc         | int           | Batterie Ladestand |
-| batterymode | int           |                   | 0,1,2,3 |
-| currents    | float / array | Strom (pro Phase) |
-| voltages    |               |                   |
-| powers      |               |                   |
-| maxpower    |               |                   |
-| capacity    |               |                   |
+| power       | float         | alle | Aktuelle Verbrauchsleistung | W |
+| energy      | float         | alle | Total gemessene Energie | Wh |
+| soc         | int           | `battery` | Batterie Ladestand (in %) | 0 ... 100 |
+| currents    | float | `grid`, `charge` | Strom (pro Phase) | |
+| voltages    | float | `grid`, `charge` |                   | |
+| powers      | float | |                   | |
+| maxpower    |               | |                   | |
+| capacity    |               | |                   | |
 
 **Beispiel**
 
-In diesem Beispiel wird die Konfiguration eines `meter`s um die aktuelle elektrische Leistung über einen HTTP Aufruf abgefragt:
+In diesem Beispiel wird die Konfiguration eines `meter`s um die aktuelle elektrische Gridleistung über einen HTTP Aufruf abgefragt:
 
 ```yaml
 meters:
@@ -115,12 +122,20 @@ meters:
       source: http
       uri: http://zaehler.network.local:8080/api/data.json?from=now
       jq: .data.tuples[0][1]
+
+site:
+  meters:
+    grid: volkszaehler
+    ...
+  ...
 ```
 
+Neben den Attributen, die Plugins zur lesenden Auswertung bereitstellen werden folgende Attribute von `evcc` genutzt um Aktionen zu triggern:
 
-| Attribut   | Typ   | Beschreibung   | Einheit |
-| ---------- | ----- | -------------- | ------- |
-| limitsoc   | int  | Ladeziel für Batterie | 0 ... 100 %|
+| Attribut   | Typ   | Kontext | Beschreibung   | Werte |
+| ---------- | ----- | ------- | -------------- | ------- |
+| limitsoc   | int  | `battery` | Setze Ladeziel für Batterie (in %). Das Ladezeziel je nach Lademodus aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet. | 0 ... 100 |
+| batterymode | int | `battery` | Setze Lademodus direkt | 1 (Normal), 2 (Hold), 3 (Charge) |
 
 ### Charger
 
