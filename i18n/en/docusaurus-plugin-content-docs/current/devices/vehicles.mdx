@@ -264,7 +264,7 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
       vin: ZFAE... # Required if you own multiple vehicles of the same brand (optional)
       title: # Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      pin: # Required for evcc to refresh the SoC while charging. (optional)`} advanced={`vehicles:
+      pin: # Required for evcc to refresh the SoC while charging. When connected to TWC3, used to start/stop charging. (optional)`} advanced={`vehicles:
     - name: my_car
       type: template
       template: fiat
@@ -273,7 +273,7 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
       vin: ZFAE... # Required if you own multiple vehicles of the same brand (optional)
       title: # Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      pin: # Required for evcc to refresh the SoC while charging. (optional)
+      pin: # Required for evcc to refresh the SoC while charging. When connected to TWC3, used to start/stop charging. (optional)
       icon: car # Icon as shown in user interface (optional)
       phases: 3 # The maximum number of phases which can be used (optional)
       mode: # Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
@@ -372,7 +372,7 @@ Some models (e.g. Kona) switch internally to 2 phases at low charging currents (
       vin: ZFAE... # Required if you own multiple vehicles of the same brand (optional)
       title: # Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      pin: # Required for evcc to refresh the SoC while charging. (optional)`} advanced={`vehicles:
+      pin: # Required for evcc to refresh the SoC while charging. When connected to TWC3, used to start/stop charging. (optional)`} advanced={`vehicles:
     - name: my_car
       type: template
       template: fiat
@@ -381,7 +381,7 @@ Some models (e.g. Kona) switch internally to 2 phases at low charging currents (
       vin: ZFAE... # Required if you own multiple vehicles of the same brand (optional)
       title: # Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      pin: # Required for evcc to refresh the SoC while charging. (optional)
+      pin: # Required for evcc to refresh the SoC while charging. When connected to TWC3, used to start/stop charging. (optional)
       icon: car # Icon as shown in user interface (optional)
       phases: 3 # The maximum number of phases which can be used (optional)
       mode: # Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
@@ -990,9 +990,13 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
 
 ## Tesla 
 
-Tesla `access` and `refresh` tokens are required. These can be generated through [tesla.evcc.io](https://tesla.evcc.io).
-Controlling vehicles in conjunction with a Tesla Wall Connector is done via an evcc proxy server and requires a sponsor token. The evcc virtual key must be installed on the vehicle.
-See [tesla.evcc.io](https://tesla.evcc.io).
+Tesla offers an official, but paid vehicle API.
+For private use, you can create a [Tesla Developer Account](https://developer.tesla.com/) and receive a monthly API credit of 
+0. This is usually sufficient for the common evcc use cases.
+
+The [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/) guide explains the process and generates a free Access and Refresh Token. With this token pair and your Client ID created in the Tesla Developer Account, evcc can directly communicate with the Tesla API. You can see your used credit at Tesla.
+
+To use a Tesla Wall Connector, you need a public Command Proxy Server. [myteslamate.com](https://app.myteslamate.com/) provides this service for 12€/year. Configure the Command permissions at myteslamate.com and enter the Proxy Token here. Start, stopp and current commands are sent to Tesla via this proxy.
 
 <DeviceConfig code={`vehicles:
     - name: my_car
@@ -1000,16 +1004,16 @@ See [tesla.evcc.io](https://tesla.evcc.io).
       template: tesla
       title: # Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      accessToken:
-      refreshToken:
+      accessToken: # From [myteslamate.com](https://app.myteslamate.com/).
+      refreshToken: # From [myteslamate.com](https://app.myteslamate.com/).
       vin: W... # Required if you own multiple vehicles of the same brand (optional)`} advanced={`vehicles:
     - name: my_car
       type: template
       template: tesla
       title: # Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      accessToken:
-      refreshToken:
+      accessToken: # From [myteslamate.com](https://app.myteslamate.com/).
+      refreshToken: # From [myteslamate.com](https://app.myteslamate.com/).
       vin: W... # Required if you own multiple vehicles of the same brand (optional)
       icon: car # Icon as shown in user interface (optional)
       phases: 3 # The maximum number of phases which can be used (optional)
@@ -1018,8 +1022,9 @@ See [tesla.evcc.io](https://tesla.evcc.io).
       maxCurrent: 16 # The maximum amperage per connected phase with which the car shuold be charged (optional)
       identifiers: # Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
-      clientId: # optional
-      commandProxy: https://tesla.evcc.io/ # When using a TWC3 (or other 'dumb' charger not capable of control), evcc can manage the charge directly by communicating with the vehicle through a Command Proxy. By default, the proxy provided by evcc is used. With this parameter, you set the base URL of a custom Command Proxy to use instead of the default evcc one. See for example https://github.com/wimaha/TeslaBleHttpProxy for a proxy sending commands via bluetooth. (optional)
+      clientId: # Client ID of your [Tesla Developer App](https://developer.tesla.com/dashboard).
+      commandProxy: https://api.myteslamate.com # When using a TWC3 (or other 'dumb' charger not capable of control), evcc can manage the charge directly by communicating with the vehicle through a Command Proxy. By default the [myteslamate.com](https://app.myteslamate.com/) proxy is used. With this parameter, you set the base URL of a custom Command Proxy. See for example [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy) for a proxy sending commands via bluetooth. (optional)
+      proxyToken: # Token for the [myteslamate.com](https://app.myteslamate.com/) command proxy (12€/year fee). Ensure, that you've installed their Virtual Key and granted 'Charge Start', 'Charge Stop' and 'Set Charging Amps' permissions. (optional)
       cache: 15m # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
