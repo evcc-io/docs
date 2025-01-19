@@ -2,7 +2,7 @@
 openapi: "3.0.3"
 info:
   title: "evcc REST-API"
-  description: "TODO: Alle möglichen Responses, Enums, Datentypregeln, Authentifizierung, Configs (?) und Responseobjekte dokumentieren; Examples hinzufügen"
+  description: "@naltatis"
   version: latest
 servers:
   - url: https://demo.evcc.io/api
@@ -38,12 +38,14 @@ paths:
         - Site
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             text/plain:
               schema:
                 type: string
                 enum: [OK]
+        500:
+          description: "@naltatis"
   /batterydischargecontrol/{enable}:
     post:
       summary: Control battery-discharge
@@ -74,7 +76,7 @@ paths:
         - Site
       responses:
         200:
-          $ref: "#/components/responses/EmptyResult"
+          $ref: "#/components/responses/NullResult"
   /buffersoc/{soc}:
     post:
       summary: Set battery buffer soc
@@ -138,7 +140,7 @@ paths:
         - Site
       responses:
         200:
-          $ref: "#/components/responses/EmptyResult"
+          $ref: "#/components/responses/NullResult"
   /tariff/{type}:
     get:
       summary: Get list of tariff prices
@@ -155,7 +157,7 @@ paths:
             # enum ?
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -235,7 +237,7 @@ paths:
                   $ref: "#/components/schemas/VehicleName"
       responses:
         200:
-          $ref: "#/components/responses/ChargingSessionsResult"
+          description: Success 🥳
     delete:
       summary: Delete charging session
       description: "[See documentation](/en/docs/features/sessions)"
@@ -243,7 +245,7 @@ paths:
         - Site
       responses:
         200:
-          $ref: "#/components/responses/ChargingSessionsResult"
+          $ref: "#/components/responses/NullResult"
   /settings/telemetry:
     get:
       summary: Get telemetry status
@@ -264,6 +266,17 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/BooleanResult"
+        400:
+          description: Sponsorship required ⛔
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    enum:
+                      - telemetry requires sponsorship
   #   _______               _____ _        _
   #  |__   __|         _   / ____| |      | |
   #     | | __ _  __ _(_) | (___ | |_ __ _| |_ ___
@@ -280,7 +293,7 @@ paths:
         - State
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -307,7 +320,7 @@ paths:
         - $ref: "#/components/parameters/soc"
       responses:
         200:
-          $ref: "#/components/responses/NumberResult"
+          $ref: "#/components/responses/SocResult"
   /vehicles/{name}/limitsoc/{soc}:
     post:
       summary: Set soc-limit
@@ -319,7 +332,7 @@ paths:
         - $ref: "#/components/parameters/soc"
       responses:
         200:
-          $ref: "#/components/responses/NumberResult"
+          $ref: "#/components/responses/SocResult"
   /vehicles/{name}/plan/soc/{soc}/{timestamp}:
     post:
       summary: Set static soc-plan
@@ -332,7 +345,7 @@ paths:
         - $ref: "#/components/parameters/timestamp"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -363,24 +376,17 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/RepeatingPlan"
+              $ref: "#/components/schemas/RepeatingPlans"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   result:
-                    type: object
-                    properties:
-                      plans:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/RepeatingPlan"
+                    $ref: "#/components/schemas/RepeatingPlans"
   #   _______              _                     _             _       _
   #  |__   __|         _  | |                   | |           (_)     | |
   #     | | __ _  __ _(_) | |     ___   __ _  __| |_ __   ___  _ _ __ | |_ ___
@@ -400,7 +406,7 @@ paths:
         - $ref: "#/components/parameters/mode"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -472,6 +478,20 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
+        400:
+          description:
+            Invalid phases-value. ⛔ You have most likely entered the value 0 for a
+            wallbox that cannot switch phases automatically.
+            Take a look at the [documentation](/en/docs/reference/configuration/loadpoints#phases).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    enum:
+                      - "invalid number of phases: 0"
   /loadpoints/{id}/plan:
     get:
       summary: Get plan rates
@@ -482,7 +502,7 @@ paths:
         - $ref: "#/components/parameters/id"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -490,11 +510,11 @@ paths:
                 properties:
                   result:
                     allOf:
-                      - $ref: "#/components/schemas/PlanRates"
                       - type: object
                         properties:
                           planId:
                             $ref: "#/components/schemas/Id"
+                      - $ref: "#/components/schemas/PlanRates"
   /loadpoints/{id}/plan/static/preview/{type}/{goal}/{timestamp}:
     get:
       summary: Get static plan preview
@@ -514,6 +534,13 @@ paths:
           in: path
           description: The power or soc to reach.
           required: true
+          examples:
+            socAvailable:
+              value: 80
+              summary: If SoC is available => specify SoC in %
+            socNotAvailable:
+              value: 2500
+              summary: If SoC is not available => specify power in Watt
           schema:
             oneOf:
               - $ref: "#/components/parameters/soc"
@@ -560,7 +587,7 @@ paths:
         - $ref: "#/components/parameters/timestamp"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -589,7 +616,7 @@ paths:
         - $ref: "#/components/parameters/vehicleName"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -599,7 +626,7 @@ paths:
                     type: object
                     properties:
                       vehicle:
-                        $ref: "#/components/schemas/VehicleName"
+                        $ref: "#/components/schemas/VehicleTitle"
   /loadpoints/{id}/vehicle:
     parameters:
       - $ref: "#/components/parameters/id"
@@ -638,7 +665,7 @@ paths:
             $ref: "#/components/schemas/Source"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -674,7 +701,7 @@ paths:
         - $ref: "#/components/parameters/enableDelay"
       responses:
         200:
-          $ref: "#/components/responses/IntegerResult"
+          $ref: "#/components/responses/NanoSecondsResult"
   /loadpoints/{id}/disable/threshold/{threshold}:
     post:
       summary: Disable threshold
@@ -698,7 +725,7 @@ paths:
         - $ref: "#/components/parameters/disableDelay"
       responses:
         200:
-          $ref: "#/components/responses/IntegerResult"
+          $ref: "#/components/responses/NanoSecondsResult"
   /loadpoints/{id}/smartcostlimit/{cost}:
     post:
       summary: Set smart charging cost limit
@@ -721,7 +748,7 @@ paths:
         - $ref: "#/components/parameters/id"
       responses:
         200:
-          $ref: "#/components/responses/EmptyResult"
+          $ref: "#/components/responses/NullResult"
   /loadpoints/{id}/priority/{priority}:
     post:
       summary: Set priority
@@ -734,6 +761,7 @@ paths:
           in: path
           description: "[See documentation](/en/docs/reference/configuration/loadpoints#priority)"
           required: true
+          example: 2
           schema:
             type: integer
             minimum: 0
@@ -772,16 +800,14 @@ paths:
             schema:
               $ref: "#/components/schemas/ChangePassword"
       responses:
-        201:
-          $ref: "#/components/responses/EmptyResult"
+        202:
+          description: Success 🥳
         400:
-          description: TODO
+          description: Invalid password provided ⛔
           content:
             text/plain:
               schema:
                 type: string
-                enum:
-                  - Invalid password
   /auth/status:
     get:
       summary: Get authentication status
@@ -789,8 +815,8 @@ paths:
       tags:
         - Auth
       responses:
-        400:
-          description: TODO
+        200:
+          description: Success 🥳
           content:
             text/plain:
               schema:
@@ -815,7 +841,7 @@ paths:
                   $ref: "#/components/schemas/Password"
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           headers:
             Set-Cookie:
               description: The authorization cookie
@@ -823,7 +849,7 @@ paths:
                 type: string
                 example: auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc0Mzc3NzMzN30.b6IjIUPgPq3OL33bB_CsVmbW_2qAy2wgOnGRB0IotqY; Path=/; Expires=Fri, 04 Apr 2025 14:35:37 GMT; HttpOnly; SameSite=Strict
         401:
-          description: Invalid password was provided
+          description: Invalid password provided ⛔
           content:
             text/plain:
               schema:
@@ -838,7 +864,7 @@ paths:
         - Auth
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           headers:
             Set-Cookie:
               description: The authorization cookie
@@ -862,11 +888,7 @@ paths:
         - Config
       responses:
         200:
-          description: TODO
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Site"
+          $ref: "#/components/responses/SiteResult"
     put:
       summary: "@naltatis"
       description: "@naltatis"
@@ -880,14 +902,7 @@ paths:
               $ref: "#/components/schemas/Site"
       responses:
         200:
-          description: TODO
-          content:
-            application/json::
-              schema:
-                type: object
-                properties:
-                  result:
-                    $ref: "#/components/schemas/Site"
+          $ref: "#/components/responses/SiteResult"
   #   _______               _____           _
   #  |__   __|         _   / ____|         | |
   #     | | __ _  __ _(_) | (___  _   _ ___| |_ ___ _ __ ___
@@ -918,6 +933,7 @@ paths:
         - name: count
           in: query
           description: Number of log lines to return
+          example: 100
           schema:
             type: integer
         - name: format
@@ -929,7 +945,7 @@ paths:
               - txt
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -955,7 +971,7 @@ paths:
         - System
       responses:
         200:
-          description: TODO
+          description: Success 🥳
           content:
             application/json:
               schema:
@@ -966,16 +982,16 @@ paths:
         401:
           $ref: "#/components/responses/Unauthorized"
   /system/shutdown:
-    get:
+    post:
       summary: Shutdown evcc
-      description: TODO @naltatis
+      description: "@naltatis"
       security:
         - cookieAuth: []
       tags:
         - System
       responses:
         204:
-          $ref: "#/components/responses/EmptyResult"
+          $ref: "#/components/responses/BlankResponse"
         401:
           $ref: "#/components/responses/Unauthorized"
 components:
@@ -985,18 +1001,63 @@ components:
       type: array
       items:
         type: object
-        # TODO: add properties ?
+        properties:
+          id:
+            $ref: "#/components/schemas/Id"
+          created:
+            $ref: "#/components/schemas/Timestamp"
+          finished:
+            $ref: "#/components/schemas/Timestamp"
+          loadpoint:
+            type: string
+            description: "[See documentation](/en/docs/reference/configuration/loadpoints#title)"
+          identifier:
+            type: string
+            description: "@naltatis"
+          vehicle:
+            $ref: "#/components/schemas/VehicleName"
+          odometer:
+            type: number
+            nullable: true
+            description: Current vehicle odometer reading in kilometers
+          meterStart:
+            type: number
+            nullable: true
+            description: "@naltatis"
+          meterStop:
+            type: number
+            nullable: true
+            description: "@naltatis"
+          chargedEnergy:
+            type: number
+            description: In kWh
+          chargeDuration:
+            type: number
+          solarPercentage:
+            type: number
+            description: Solar percentage of the session
+          price:
+            type: number
+            description: Price of the charged energy of the session
+          pricePerKWh:
+            type: number
+            description: Average price of energy per kWh of the session
+          co2PerKWh:
+            type: number
+            description: Average CO2 emissions per kWh
     LogArea:
       description: "[See documentation](/en/docs/reference/configuration/log#levels)"
       type: string
     LogAreas:
       description: "[See documentation](/en/docs/reference/configuration/log#levels)"
       type: array
+      example: ["lp-1", "site", "db"]
       items:
         $ref: "#/components/schemas/LogArea"
     LogLevel:
       description: "[See documentation](/en/docs/reference/configuration/log#log)"
       type: string
+      example: DEBUG
       enum:
         - FATAL
         - ERROR
@@ -1007,12 +1068,13 @@ components:
     Password:
       description: Admin password
       type: string
+      example: passWord1234!
     ChangePassword:
       type: object
       properties:
         current:
           $ref: "#/components/schemas/Password"
-        now:
+        new:
           $ref: "#/components/schemas/Password"
     Site:
       description: "[See documentation](/en/docs/reference/configuration/site#metersgrid)"
@@ -1035,7 +1097,7 @@ components:
           items:
             type: string
     Source:
-      description: "@naltatis"
+      description: "@naltatis-BITTE-AUCH-EXAMPLE-ODER-AM-BESTEN-ENUM-ANGEBEN"
       type: string
       pattern: "[0-9a-zA-Z_-]+"
     Demand:
@@ -1066,21 +1128,26 @@ components:
     Id:
       description: The ID. Starts with 1.
       type: integer
+      example: 1
       minimum: 1
     EnableDelay:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay) - Unit is **seconds**"
       type: integer
+      example: 60
     DisableDelay:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay-1)"
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay-1) - Unit is **seconds**"
       type: integer
+      example: 60
     Soc:
       description: Soc in %
       type: number
+      example: 60
       minimum: 0
       maximum: 100
     Current:
       description: Electric current in Ampere
       type: number
+      example: "@naltatis"
       minimum: 0
     Timestamp:
       description: Timestamp in RFC3339 format
@@ -1091,12 +1158,15 @@ components:
       description: Power in Watt
       type: number
       minimum: 0
+      example: 2500
     EnableThreshold:
       description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold)"
       type: number
+      example: 0
     DisableThreshold:
       description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold-1)"
       type: number
+      example: 200
     StaticSocPlan:
       description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
       type: object
@@ -1148,6 +1218,7 @@ components:
       description: The Weekdays - [See documentation](/en/docs/features/plans#repeating-plans)
       type: array
       uniqueItems: true
+      example: [1, 3, 4]
       items:
         description: |
           0: Sunday
@@ -1169,12 +1240,16 @@ components:
     IANATimeZone:
       description: Timezone in IANA format - [See Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
       type: string
-      example: "UTC"
+      example: "Europe/Berlin"
     VehicleName:
-      description: Name of the vehicle
+      description: "[See documentation](/en/docs/reference/configuration/vehicles#name)"
       type: string
       minLength: 1
       pattern: "[a-zA-Z0-9_.:-]+"
+      example: "vehicle_1"
+    VehicleTitle:
+      description: "[See documentation](/en/docs/reference/configuration/vehicles#title)"
+      type: string
       example: "blauer e-Golf"
     RepeatingPlan:
       description: "[See documentation](/en/docs/features/plans#repeating-plans)"
@@ -1191,6 +1266,13 @@ components:
         active:
           description: Whether evcc should take the plan into account. `false` means that evcc ignores the plan.
           type: boolean
+    RepeatingPlans:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/RepeatingPlan"
   parameters:
     id:
       name: id
@@ -1246,7 +1328,8 @@ components:
         $ref: "#/components/schemas/VehicleName"
     costLimit:
       name: cost
-      description: Cost limit for a kWh @naltatis-WHICH-CURRENCY?
+      description: Cost limit for a kWh @naltatis-WHICH-CURRENCY?-PLEASE-ADD-EXAMPLE
+      example: 
       in: path
       required: true
       schema:
@@ -1276,8 +1359,17 @@ components:
       schema:
         $ref: "#/components/schemas/DisableThreshold"
   responses:
+    NanoSecondsResult:
+      description: Success 🥳 - Number result - Unit is **nanoseconds**
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: integer
     NumberResult:
-      description: Number result
+      description: Success 🥳 - Number result
       content:
         application/json:
           schema:
@@ -1286,7 +1378,7 @@ components:
               result:
                 type: number
     IntegerResult:
-      description: Integer result
+      description: Success 🥳 - Integer result
       content:
         application/json:
           schema:
@@ -1294,8 +1386,20 @@ components:
             properties:
               result:
                 type: integer
+    SocResult:
+      description: Success 🥳 - Soc result
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                properties:
+                  soc:
+                    $ref: "#/components/schemas/Soc"
     PlanRatesResult:
-      description: PlanRates result
+      description: Success 🥳 - PlanRates result
       content:
         application/json:
           schema:
@@ -1304,7 +1408,7 @@ components:
               result:
                 $ref: "#/components/schemas/PlanRates"
     BooleanResult:
-      description: Boolean result
+      description: Success 🥳 - Boolean result
       content:
         application/json:
           schema:
@@ -1312,8 +1416,30 @@ components:
             properties:
               result:
                 type: boolean
+    SiteResult:
+      description: Success 🥳 - Site result
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: "#/components/schemas/Site"
+    NullResult:
+      description: Success 🥳 - Null result
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                description: Value is always null
+                type: object
+                nullable: true
+    BlankResponse:
+      description: Success 🥳 - Blank response
     EmptyResult:
-      description: Empty result
+      description: Success 🥳 - Empty result
       content:
         application/json:
           schema:
@@ -1322,7 +1448,7 @@ components:
               result:
                 type: object
     ChargingSessionsResult:
-      description: TODO
+      description: Success 🥳
       content:
         application/json:
           schema:
@@ -1331,7 +1457,7 @@ components:
               result:
                 $ref: "#/components/schemas/ChargingSessions"
     Unauthorized:
-      description: Unauthorized - Login and try again
+      description: Unauthorized ⛔ - Login and try again
       content:
         text/plain:
           schema:
