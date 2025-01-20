@@ -1,0 +1,128 @@
+---
+title: "v0.133 - Tesla Developer Account required"
+authors: [naltatis]
+tags: [release]
+hide_table_of_contents: false
+---
+
+Starting with evcc v0.133, a [Tesla Developer Account](https://developer.tesla.com/) is required.
+The usage remains free of charge, but requires an additional setup step.
+
+[![Tesla API Update](tesla-api-update-wide.webp)](/blog/2025/01/20/tesla-api-update)
+
+{/* truncate */}
+
+## Paid Tesla Fleet API starting February
+
+Last year we integrated the [Tesla Fleet API](/blog/2024/02/01/v0.124-new-tesla-api) into evcc.
+Tesla was the first manufacturer to provide an official and above all open API for communication with their vehicles.
+
+Tesla had already announced that this API would not stay free of charge.
+The prices are now known and will come into effect starting February 1, 2025.
+The billing is based on usage, with costs varying depending on the type of request.
+
+With [tesla.evcc.io](https://tesla.evcc.io) we have provided a service that allows evcc users to generate access tokens for API usage.
+The API communication of these tokens would be billed to us starting February 2025.
+The costs per user depend on the number of vehicles, charging behavior, and the specific configuration of the update interval.
+For most users, these costs exceed our "$2 im Monat" sponsoring model and would not be sustainable for us, even if we would require sponsorship for Tesla integration.
+
+## Free API credit for private users
+
+Tesla offers private users a monthly API credit of $10, which should be sufficient for most evcc users.
+
+[![Tesla's API credit](./tesla-credit-en.png)](https://developer.tesla.com/)
+
+With the version 0.133, we have adapted the API communication to Tesla so that you can use your own Tesla Developer Account.
+Old tokens generated with [tesla.evcc.io](https://tesla.evcc.io) will no longer work.
+We have considered extending our existing token generation process so that you can use your own Tesla Developer Account.
+Fortunately, [myteslamate.com](https://app.myteslamate.com) has already implemented this function.
+There you can generate **Access- and Refresh-Tokens** with your Developer Account.
+So we decided not to reinvend the wheel.
+
+## What to do?
+
+### For Tesla drivers
+
+1. Sign in with your Tesla credentials in the [Tesla Developer Portal](https://developer.tesla.com/)
+2. Create a "Fleet API Application" (Company details and billing data can be skipped)
+3. You will receive a **Client ID** and a **Client Secret**
+4. Visit [myteslamate.com](https://app.myteslamate.com/) and select the free "Fleet API & Telemetry" option
+5. Sign in with your Tesla account
+6. Enter your **Client ID** and **Client Secret**
+7. In the "free and directly" section you will receive your **Access- and Refresh-Tokens**
+8. Enter these values in your evcc configuration
+
+Example:
+
+```yaml {5-7}
+vehicles:
+  - type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-...     # von developer.tesla.com
+    accessToken: ey1234567890...   # von myteslamate.com
+    refreshToken: EU_1234567890... # von myteslamate.com
+```
+
+On myteslamate.com you will find a [more detailed explanation and guide](https://www.myteslamate.com/tesla-api-application-registration/).
+
+You can track your used API credit in the [Overview of the Tesla Developer Portal](https://developer.tesla.com/dashboard/).
+    
+:::note
+The evcc project is in no way connected to myteslamate.com.
+We are in contact with [jlestel](https://github.com/jlestel), the developer of myteslamate.com.
+The free use of the service for evcc users is explicitly allowed by him.
+Please refer to the [Terms of Service](https://www.myteslamate.com/terms-of-service) and [Privacy Policy](https://www.myteslamate.com/privacy-policy) before using the service.
+:::
+
+### For Tesla Wall Connector users
+
+If you use a Tesla Wall Connector, additional steps are required, as the charging commands require signed communication.
+myteslamate.com offers a "Command Proxy" for 12 € per year, which provides this functionality.
+After registration you will receive a **Proxy-Token**, which you must enter in your evcc configuration.
+
+```yaml {8}
+vehicles:
+  - type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-...     # von developer.tesla.com
+    accessToken: ey1234567890...   # von myteslamate.com
+    refreshToken: EU_1234567890... # von myteslamate.com
+    proxyToken: aaaaa-bbbbb-...    # von myteslamate.com
+```
+
+:::warning
+The proxy token is very powerful.
+It is recommended to limit the permissions at myteslamate.com to the necessary functions.
+For the evcc use case, the functions **Charge Start**, **Charge Stop** and **Set Charging Amps** are necessary.
+:::
+
+## Usage data
+
+## tesla.evcc.io will be discontinued
+
+tesla.evcc.io will be discontinued in February.
+All tokens generated with it will lose their validity.
+For further use of the Tesla API, an update to evcc version 0.133 is required.
+
+## Other alternatives
+
+The Tesla API communication in evcc is not specific to myteslamate.com.
+You can generate the tokens with the corresponding infrastructure (public callback URL necessary) yourself and enter them into the evcc configuration mentioned above.
+
+The alternative query via services such as [TeslaLogger](https://docs.evcc.io/docs/devices/vehicles#teslalogger), [TeslaMate](https://docs.evcc.io/docs/devices/vehicles#teslamate), [Tessie](https://docs.evcc.io/docs/devices/vehicles#tessie) or [Tronity](https://docs.evcc.io/docs/devices/vehicles#tronity) is also possible.
+
+## Conclusion
+
+We have discussed several alternatives for the Tesla integration.
+Special services and price levels for Tesla users were also on the table.
+We believe that our current solution from a user's perspective is the best.
+On the one hand, it does not cause additional costs for most private users.
+The implementation remains sponsor-free.
+The API communication does not require third-party services.
+Users with larger fleets can also use evcc, where the API usage fees directly accrue at Tesla when the monthly free allowance is exceeded.
+
+**Best regards**<br/>
+The evcc team<br/>
+Michael, Andi & Uli
