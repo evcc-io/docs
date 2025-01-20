@@ -6,15 +6,13 @@ import Tag from '@site/src/components/Tag';
 
 # Plugins
 
-Plugins können verwendet werden, um verschiedene Geräte und externe Datenquellen in evcc zu integrieren, für die es keine direkte Unterstützung gibt.
-Sie können für die Gerätekategorien [`meter`](/docs/reference/configuration/meters#custom) (Strommessgeräte), [`charger`](/docs/reference/configuration/chargers#type) (Wallboxen) oder [`vehicle`](/docs/devices/vehicles#manuell) (Fahrzeuge) verwendet werden.
-Plugins können auch für die in [Messaging](/docs/reference/configuration/messaging) beschriebenen Endpunkte zum Versenden von Lifecycle-Events genutzt werden.
-
-Je nach Verwendung werden Plugins **lesend** oder **schreibend** eingesetzt.
+Plugins können verwendet werden, um Geräte und externe Datenquellen in evcc zu integrieren, für die es keine direkte Unterstützung gibt.
+Plugins können für die Kategorien [`meter`](/docs/reference/configuration/meters#custom) (Strommessgeräte), [`charger`](/docs/reference/configuration/chargers#type) (Wallboxen) oder [`vehicle`](/docs/devices/vehicles#manuell) (Fahrzeuge) verwendet werden.
+Zusätzlich können Plugins auch für die in [Messaging](/docs/reference/configuration/messaging) beschriebenen Endpunkte zum Versenden von Lifecycle-Events genutzt werden.
 
 ## Übersicht
 
-Folgende Plugins können verwendet werden, um externe Datenquellen einzubinden:
+evcc bietet folgende Plugins an:
 
 - [Modbus Plugin](#modbus) - Plugin zum Auslesen von einem Modbus-fähigen Gerät.
 - [MQTT Plugin](#mqtt) - Plugin um indirekt über MQTT mit den MQTT-fähigen Geräten zu kommunizieren.
@@ -24,7 +22,7 @@ Folgende Plugins können verwendet werden, um externe Datenquellen einzubinden:
 - [JavaScript Plugin](#javascript) - Plugin, das Werte in über ein JavaScript Skript bereitstellt oder entgegennimmt.
 - [Shell Plugin](#shell) - Plugin, das ein Shell Skript ausführen kann, um Daten zu extrahieren oder schreibend entgegennimmt.
 
-Neben diesen Plugins, die externe Daten integrieren, gibt es folgende Helfer-Plugins, die Daten direkt bereitstellen können. Diese können nur in einem lesenden Kontext genutzt werden:
+Neben diesen Integrations-Plugins, gibt es noch Helfer-Plugins, die Zusatzfunktionen bereit stellt:
 
 - [Const Plugin](#const) - Spezielles Plugin das einfach einen konstanten Wert zurückliefert.
 - [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
@@ -35,7 +33,6 @@ Neben diesen Plugins, die externe Daten integrieren, gibt es folgende Helfer-Plu
 Jedes Plugin besitzt ein individuelles Konfigurationsschema.
 Dabei ist es wichtig zu wissen, ob das Plugin in einem **lesenden** oder **schreibenden** Kontext verwendet wird.
 Einige Konfigurationsparameter machen nur in einem lesenden Kontext Sinn, andere nur, wenn sie im Schreibmodus genutzt werden.
-Die meisten Konfigurationsparameter sind Plugin spezifisch, jedoch gibt es eine handvoll Parameter, die beim Lesen von einem Plugin bzw. beim Schreiben via eines Plugins generell genutzt werden können.
 
 Beispielsweise kann über die folgende Konfiguration ein MQTT Plugin als `meter` eingebunden werden, bei dem der aktuelle Stromverbrauch über das spezifizierte MQTT Topic eingelesen wird:
 
@@ -48,12 +45,12 @@ meters:
       topic: "home/current/imsys/chn2/raw"
 ```
 
-Das Schema hat dabei immer folgende Struktur:
+Das Schema der Plugin Konfiguration hat dabei immer folgende Struktur:
 
 ```yaml {3,5-6,8}
 - name: <name>
   type: custom
-  <span class="highlight"><attr1></span>:
+  <attr1>:
     source: <plugin>
     <p-attr1>: ...
     <p-attr2>: ...
@@ -62,7 +59,7 @@ Das Schema hat dabei immer folgende Struktur:
     ....
 ```
 
-Dabei stehen `<name>` für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräte-spezifischen Attribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen.
+Dabei steht `<name>` für den Namen des Geräts, `<attr1>` und `<attr2>` für eine der unten beschriebenen Geräte-spezifischen Attribute, `<plugin>` für den Plugin-Typ und `<p-attr1>`, `<p-attr2>` für Plugin-spezifische Konfigurationen (z.b. `source`, `topic` für Plugins vom Typ `mqtt`)
 
 #### Lesen
 
@@ -86,21 +83,28 @@ Je nach Gerät ([`meter`](#meter), [`charger`](#charger) oder [`vehicle`](#vehic
 
 ### Meter
 
-Alle `meter` haben gemeinsam, dass sie Stromzähler sind, die den aktuellen Verbrauch messen.
-Wie an [anderer Stelle](/devices/meters) beschrieben, können Zähler in verschiedenen Kontexten innerhalb der `site` Konfiguration verwendet werden: Als Netzzähler (`grid`), Zähler für die PV Produktion (`pv`), Hausbatteriezähler (`battery`). Zähler für die Ladeleistung der Wallbox (`charge`) oder Verbrauchszähler für intelligente Verbraucher (`aux`).
+Stromzähler werden in der Konfigurationssektion [`meters`](/docs/reference/configuration/meters) konfiguriert.
+Zähler, die unter `meters:` definiert werden, können an verschiedenen Stellen innerhalb der `site` Konfiguration verwendet werden:
 
-`power` ist das einzige erforderliche Attribut, alle weiteren Attribute sind optional.
-Nicht alle Metertypen unterstützen alle Pluginattribute:
+* `grid`: Netzzähler
+* `pv`: PV Zähler
+* `battery`: Hausbatteriezähler
+* `charge`: Zähler für die Ladeleistung der Wallbox
+* `aux`: Verbrauchszähler für intelligente Verbraucher
+
+`power` ist das einzig zwingend erfordeliche Attribut das in jeder `meter` Definition vorhanden sein muss, alle weiteren Attribute sind optional.
+
+Jedoch unterstützen nicht alle Metertypen alle Pluginattribute:
 
 * `limitsoc` und `batterymode` werden ausschliesslich für Batterierzähler genutzt (d.h. für `meter` die in `site.battery` referenziert werden).
-* `currents`, `voltages` und `powers` sind Phasen Attribute, die mit jeweils genau drei Plugin Konfigurationen (in einem YAML Array) konfiguriert werden müssen.
+* `currents`, `voltages` und `powers` sind Phasen Attribute, die mit jeweils genau drei Plugin Konfigurationen (in einem YAML Array) konfiguriert werden müssen und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
 
 Die folgende Tabellen enthalten alle Attribute, die von Plugins bereitgestellt werden können, wenn sie für `meter` konfiguriert werden.
 Bei der Verwendung der Plugins ist es auch wichtig, dass diese den richtigen Datentyp zurückliefern.
 Um zu dem verlangten Datentypen zu konvertieren können die in [Lesen](#lesen) beschriebenen Pipelines genutzt werde.
 
 | Attribut    | Typ           | Kontext | Beschreibung      | Einheit |
-| ----------- | ------------- | ----------------- | ------- |
+| ----------- | ------------- | --------| ----------------- | ------- |
 | power       | float         | alle | Aktuelle Verbrauchsleistung | W |
 | energy      | float         | alle | Total gemessene Energie | Wh |
 | soc         | int           | `battery` | Batterie Ladestand (in %) | 0 ... 100 |
@@ -112,7 +116,7 @@ Um zu dem verlangten Datentypen zu konvertieren können die in [Lesen](#lesen) b
 
 **Beispiel**
 
-In diesem Beispiel wird die Konfiguration eines `meter`s um die aktuelle elektrische Gridleistung über einen HTTP Aufruf abgefragt:
+In diesem Beispiel wird die Konfiguration eines meters um die aktuelle elektrische Gridleistung über einen HTTP Aufruf abgefragt:
 
 ```yaml
 meters:
@@ -156,7 +160,7 @@ Wallboxen und Ladegeräte haben folgende Attribute die ausgelesen werden können
 
 **Beispiel**
 
-Dieses Beispiel zeigt, wie man über das Modbus Plugin den Ladestatus (ladend/nicht ladend) eines `charger`s abfragen kann:
+Dieses Beispiel zeigt, wie man über das Modbus Plugin den Ladestatus (ladend/nicht ladend) eines chargers abfragen kann:
 
 ```yaml
 chargers:
@@ -178,7 +182,7 @@ Neben den read-only Werten können über Plugins auch Aktionen getriggert oder K
 | Attribut   | Typ   | Beschreibung   |
 | ---------- | ----- | -------------- |
 | enable     | float | Schalte an/aus |
-| maxcurrent | float | Max. Ladestrom |
+| maxcurrent | float | Setze maximalen Ladestrom |
 
 **Beispiel**
 
@@ -270,7 +274,7 @@ Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Ab
 source: mqtt
 topic: mbmd/sdm1-1/Power
 timeout: 30s # don't accept values older than timeout
-scale: 0.001 # floating point factor applied to result, e.g. for Wh to kWh conversion
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 ```
 
 Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt. Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
@@ -312,8 +316,9 @@ auth: # basic authentication
   password: bar
 insecure: false # set to true to trust self-signed certificates
 jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+scale: 0.001 # factor applied to result, e.g. for kW to W conversion
+timeout: 10s # timeout in golang duration format,
+             # see https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
@@ -344,7 +349,7 @@ Das `websocket` Plugin bietet einen Websocket Listener. Es beinhaltet auch die F
 source: http
 uri: ws://<volkszaehler host:port>/socket
 jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
-scale: 0.001 # floating point factor applied to result, e.g. for Wh to kWh conversion
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 timeout: 30s # error if no update received in 30 seconds
 ```
 
