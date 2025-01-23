@@ -18,41 +18,44 @@ Für die hier aufgeführten Geräte wird später ein [Sponsoring erforderlich](/
 
 evcc unterstützt unterschiedliche Arten von Wärmeerzeugern.
 Einfache Geräte wie Heizlüfter oder Ventilatoren können über [Smarte Schalter](./smartswitches) ein/ausgeschaltet werden.
-Auf dieser Seite erfährst du, wie du auch **Wärmepumpen** oder **Heizstäbe** regeln kannst.
+Auf dieser Seite erfährst du, wie du auch **Wärmepumpen** oder **Heizstäbe** steuern kannst.
 
 ## Wärmepumpen
 
 Viele Wärmepumpen unterstützen das SG-Ready-Modell, um ihren Betrieb an die Energiesituation vor Ort anzupassen.
-Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)** und ein **Sperrbetrieb (Dimming)** signalisiert werden.
+Darüber lassen sich bis zu vier vordefinierte, bei manchen Modellen auch frei konfigurierbare Szenarien ansteuern.
+Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)**, ein **reduzierter Betrieb** und ein **Sperrbetrieb** signalisiert werden.
 
 Ist [Überschussstrom vorhanden](/docs/features/solar-charging) oder der [Netzstrom besonders günstig](/docs/features/dynamic-prices) bzw. [sauber](/docs/features/co2), kann evcc die Wärmepumpe anweisen, die Heizleistung zu erhöhen und in den **verstärkten Betrieb (Boost)** zu schalten.
 
-Die Dimming-Funktion wird bisher nicht unterstützt.
-Wir planen dies über das [Lastmanagement](/docs/features/loadmanagement) zu integrieren.
-Damit werden auch die Anforderungen für §14e EnWG abgedeckt.
+Die Funktion für den reduzierten Betrieb oder den Sperrbetrieb wird bisher nicht unterstützt.
+Wir planen dies ggf. über das [Lastmanagement](/docs/features/loadmanagement) zu integrieren.
+Damit könnten - je nach Modell - ggf. auch Anforderungen nach §14a EnWG abgedeckt werden.
 
 ### direkte Kommunikation
 
-Viele moderne Wärmepumpen bieten API-Schnittstellen an, über die nicht nur der Betriebsmodus gesetzt, sondern auch der Zustand des Gerätes (z.B. Temperatur) abgefragt werden kann.
+Viele moderne Wärmepumpen bieten API-Schnittstellen an, über die nicht nur der Betriebsmodus gesetzt, sondern auch der Zustand des Gerätes (z.B. Leistungsaufnahme, Temperaturen) abgefragt werden kann.
 Unter [Wärmeerzeuger](#wärmeerzeuger) findest du eine Liste aller unterstützten Geräte.
 
 Sollte deine Wärmepumpe eine Schnittstelle haben, die wir noch nicht unterstützen, erstelle gerne ein [GitHub Issue](https://github.com/evcc-io/evcc/issues) mit allen notwendigen Informationen.
 
 ### über Relais-Kontakte
 
-Ältere Wärmepumpen verfügen häufig über SG-Ready Relais-Kontakte, über die der Betriebszustand (Normal, Boost, Dimming) signalisiert werden kann.
+Ältere Wärmepumpen verfügen häufig über SG-Ready Relais-Kontakte, über die der gewünschte Betriebszustand signalisiert werden kann.
 In unserem Beispiel konzentrieren wir uns auf den Wechsel zwischen Normal- und Boostbetrieb.
 Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1. 
 
 Dieses Relais wird mit den SG-Ready Kontakten der Wärmepumpe verbunden.
-Die genaue Verkablung hängt vom Gerät ab und sollte in Absprache mit dem Installateur erfolgen.
+Die genaue Verkabelung, die notwendige Logik und auch die Konfiguration hängt vom Gerät ab und sollte in Absprache mit dem Installateur erfolgen.
 Ist PV-Überschuss oder günstige Energie vorhanden, schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
+Letztendlich entscheidet das Gerät aber abhängig vom aktuellen Betriebszustand und seiner Konfiguration immer selbst ob und wieweit es diesem Wunsch auch tatsächlich entsprechen wird.
 
 Das folgende Diagramm zeigt den Aufbau:
 
 ![Diagram für die Steuerung einer Wärmepumpe über ein SG-Ready Relais](./heating/sgready.svg)
 
-Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
+Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe genau erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
+Dies empfiehlt sich eigentlich fast immer, da die intern ermittelten Daten bei den meisten Modellen am Markt auf Schätzwerten und nicht Messungen basieren oder nicht den Energiebedarf aller Komponenten erfassen.
 Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähler](./meters) verwendet werden.
 
 Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
@@ -124,18 +127,23 @@ Wir werden später Templates für die einfachere Konfiguration gängiger Konstel
 :::
 
 Neben `setmode` und `getmode`, kannst du optional auch die aktuelle Temperatur (`temp`) [via Plugin](/docs/reference/plugins) hinzufügen.
-Diese dient lediglich zur Anzeige und wird bei Wärmepumpen nicht für die Regelung verwendet.
+Diese dient lediglich zur Anzeige und wird bei Wärmepumpen nicht für die Steuerung verwendet.
 
 ## Heizstäbe
 
-Bei Heizstäben gibt evcc die aktuell verfügbare Leistung an das Gerät weiter.
+Normale Heizstäbe können von evcc nur an- oder abgeschaltet werden. Dazu werden diese in der Regel über eine [schaltbare Steckdose](./smartswitches) angeschlossen.
+evcc aktiviert dann bei ausreichend Überschussleistung diese Steckdose (Freigabe) und deaktiviert diese wieder sobald die Bedingungen es erfordern (Sperre).
+
+Bei speziellen Heizstäben mit eigener stufenloser Steuerung gibt evcc die aktuell verfügbare Leistung an das Gerät weiter.
 Diese verfügbare Leistung wird, analog zum Ladevorgang eines Fahrzeuges, permanent an die aktuelle Situation angepasst.
 
-evcc bietet einstellbare Limits an, mit denen du deine Wunschtemperatur einstellen kannst.
+evcc bietet einstellbare Limits an, mit denen du optional deine Wunschtemperatur einstellen kannst.
 Dies darf aber nicht als Sicherheitsfunktion verstanden werden.
 
+Normalerweise sollte die Temperaturregelung ausschließlich über die Thermostatfunktion des Heizstabs selbst erfolgen.
+
 :::danger
-Dein Heizstab muss eine eigene Temperaturlimitierung mitbringen, die bei einer Fehlfunktion von evcc eine Überhitzung verhindert.
+Dein Heizstab muss immer eine eigene Temperaturbegrenzung mitbringen, die bei einer eventuellen Fehlfunktion/Ausfall von evcc oder einer Fehlbedienung eine unzulässige Überhitzung sicher ausschließt.
 :::
 
 
