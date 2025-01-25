@@ -334,7 +334,7 @@ Weitere Informationen sind in der [ntfy Dokumentation](https://docs.ntfy.sh) zu 
 
 ### `custom`
 
-Der Typ `custom` ermöglicht es, beliebige [Plugins](../plugins) für die Verarbeitung von Nachrichten zu verwenden. Das Plugin muss den Schreibmodus unterstützen. Die Nachricht selbst wird in der Plugin Konfiguration mit dem Parameter `${send}` (bzw. als Template Parameter `{{.send}}`) bereitgestellt.
+Der Typ `custom` ermöglicht es, beliebige [Plugins](/docs/devices/plugins) für die Verarbeitung von Nachrichten zu verwenden. Das Plugin muss den Schreibmodus unterstützen. Die Nachricht selbst wird in der Plugin Konfiguration mit dem Parameter `${send}` (bzw. als Template Parameter `{{.send}}`) bereitgestellt.
 
 **Mögliche Werte**:
 
