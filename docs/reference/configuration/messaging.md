@@ -49,7 +49,7 @@ title: Charge started
 
 ### `msg`
 
-`msg` definiert den Text für den Nachrichteninhalt.  
+`msg` definiert den Text für den Nachrichteninhalt.
 Im Text können verschiedene Variablen im Format `${<Variablenname>}` zur Anzeige von evcc Informationen verwendet werden.
 :::note
 Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!
@@ -102,7 +102,7 @@ messaging:
     stop: # charge stop event
       title: Charge of {{.vehicleTitle}} finished
       msg: |
-        Wallbox {{.title}} finished charging {{.vehicleTitle}} 
+        Wallbox {{.title}} finished charging {{.vehicleTitle}}
         with {{round (divf .chargedEnergy 1000) 2 }} kWh in {{.chargeDuration}}.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
@@ -238,7 +238,7 @@ Im folgenden werden nun alle erforderlichen Parameter erklärt.
 - `email`: Email. Siehe [`email`](#email) Definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr). Siehe [`shout`](#shout) Definition
 - `ntfy`: [ntfy](https://ntfy.sh). Siehe [`ntfy`](#ntfy) Definition
-- `custom`: Ermöglicht die Nutzung von allen [Plugins](../plugins), die einen Schreibzugriff erlauben. Siehe [`custom`](#custom) Definition.
+- `custom`: Ermöglicht die Nutzung von allen [Plugins](/docs/devices/plugins), die einen Schreibzugriff erlauben. Siehe [`custom`](#custom) Definition.
 
 ---
 
