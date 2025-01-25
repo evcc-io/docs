@@ -350,7 +350,7 @@ password: "ThePassword"
 
 ### `custom`
 
-Standard implementation, in which individual values are defined via [plugins](/docs/reference/plugins).
+Standard implementation, in which individual values are defined via [plugins](/docs/devices/plugins).
 
 **For example**:
 

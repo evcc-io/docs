@@ -20,7 +20,7 @@ evcc is installed onto a system in the local network, so that it can communicate
   - [Wallboxes & Switchable Sockets](/docs/devices/chargers)
   - [Inverters, Battery Storage, & Energy Meters](/docs/devices/meters)
   - [Vehicles](/docs/devices/vehicles)
-- [Plugins](/docs/reference/plugins) support a wide variety of wallboxes, meters, & vehicles over Modbus, HTTP, MQTT, JavaScript, Websockets, and Shell Scripts
+- [Plugins](/docs/devices/plugins) support a wide variety of wallboxes, meters, & vehicles over Modbus, HTTP, MQTT, JavaScript, Websockets, and Shell Scripts
 - Status [Notifications](/docs/reference/configuration/messaging) via [Telegram](https://telegram.org), [PushOver](https://pushover.net) and [many more](https://containrrr.dev/shoutrrr/)
 - Data Export via [InfluxDB](https://www.influxdata.com) and [Grafana](https://grafana.com/grafana/)
 - Stepless regulation of charging flows with supported wall boxes (e.g the smartWB's [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) functionality)

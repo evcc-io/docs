@@ -101,7 +101,7 @@ messaging:
     stop: # charge stop event
       title: Charge of {{.vehicleTitle}} finished
       msg: |
-        Charger {{.title}} finished charging {{.vehicleTitle}} 
+        Charger {{.title}} finished charging {{.vehicleTitle}}
         with {{round (divf .chargedEnergy 1000) 2 }} kWh in {{.chargeDuration}}.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
@@ -239,7 +239,7 @@ The following sections will now explain all the required parameters.
 - `email`: Email. See [`email`](#email) definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr/). See [`shout`](#shout) definition
 - `ntfy`: [ntfy](https://ntfy.sh). See [`ntfy`](#ntfy) definition
-- `custom`: Allows the usage of any [plugin](../plugins) that supports write access. See [`custom`](#custom) definition.
+- `custom`: Allows the usage of any [plugin](/docs/devices/plugins) that supports write access. See [`custom`](#custom) definition.
 
 ---
 
