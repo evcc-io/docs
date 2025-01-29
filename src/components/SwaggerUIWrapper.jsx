@@ -17,6 +17,26 @@ const customCss = `
 .swagger-ui .copy-to-clipboard {
     transition: none !important;
 }
+.swagger-ui .btn {
+  transition: none !important;
+  box-shadow: none !important;
+}
+.swagger-ui a {
+  color: var(--ifm-link-color);
+  text-decoration: var(--ifm-link-decoration);
+  transition: color var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}
+.swagger-ui a:hover {
+  text-decoration: var(--ifm-link-hover-decoration);
+}
+.swagger-ui .model-box-control:focus,
+.swagger-ui .models-control:focus,
+.swagger-ui .opblock-summary-control:focus {
+  outline: none !important;
+}
+.swagger-ui .opblock-tag {
+  padding-right: 0.35rem;
+}
 `;
 
 export default (props) => {

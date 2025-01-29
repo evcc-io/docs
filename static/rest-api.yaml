@@ -18,51 +18,36 @@ servers:
       PORT:
         default: "7070"
 tags:
-  - name: Auth
-    description: "@naltatis"
-  - name: State
-    description: "@naltatis"
-  - name: Site
-    description: "@naltatis"
+  # - name: Auth (internal)
+  - name: General
   - name: Loadpoints
-    description: "@naltatis"
   - name: Vehicles
-    description: "@naltatis"
-  - name: Config
-    description: "@naltatis"
+  - name: Home Battery
+  - name: Tariffs
+  - name: Sessions
+  - name: Auth
   - name: System
-    description: "@naltatis"
 paths:
-  #   _______               _____ _ _
-  #  |__   __|         _   / ____(_) |
-  #     | | __ _  __ _(_) | (___  _| |_ ___
-  #     | |/ _` |/ _` |    \___ \| | __/ _ \
-  #     | | (_| | (_| |_   ____) | | ||  __/
-  #     |_|\__,_|\__, (_) |_____/|_|\__\___|
-  #               __/ |
-  #              |___/
   /health:
     get:
       summary: Health check
-      description: "@naltatis"
-      tags:
-        - Site
+      description: "Returns 200 if the evcc loop runs as expected."
+      tags: [General]
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             text/plain:
               schema:
                 type: string
-                enum: [OK]
-        500:
-          description: "@naltatis"
+                example: "OK"
   /batterydischargecontrol/{enable}:
     post:
       summary: Control battery-discharge
-      description: "[See documentation](/en/docs/features/battery#discharge-lock-during-fast-charging)"
-      tags:
-        - Site
+      description: >
+        Prevent home battery discharge during vehicle fast charging.
+        [Read more.](/en/docs/features/battery)
+      tags: [Home Battery]
       parameters:
         - $ref: "#/components/parameters/enable"
       responses:
@@ -71,9 +56,15 @@ paths:
   /batterygridchargelimit/{cost}:
     post:
       summary: Set battery grid charge limit
-      description: "[See documentation](/en/docs/features/battery#charging-the-battery-from-the-grid)"
-      tags:
-        - Site
+      description: >
+        Charge home battery from grid when price or emissions are below the threshold.
+
+        Uses price if a dynamic tariff exists.
+        Uses emissions if a CO₂-tariff is configured.
+        Ignored otherwise.
+
+        [Read more.](/en/docs/features/battery)
+      tags: [Home Battery]
       parameters:
         - $ref: "#/components/parameters/costLimit"
       responses:
@@ -82,18 +73,20 @@ paths:
   /batterygridchargelimit:
     delete:
       summary: Remove battery grid charge limit
-      description: "[See documentation](/en/docs/features/battery#charging-the-battery-from-the-grid)"
-      tags:
-        - Site
+      description: >
+        Remove battery grid charge limit.
+        [Read more.](/en/docs/features/battery)
+      tags: [Home Battery]
       responses:
         200:
           $ref: "#/components/responses/NullResult"
   /buffersoc/{soc}:
     post:
-      summary: Set battery buffer soc
-      description: "[See documentation](/en/docs/reference/configuration/site#buffersoc)"
-      tags:
-        - Site
+      summary: Set battery buffer SoC
+      description: >
+        Set battery buffer SoC.
+        [Read more.](/en/docs/features/battery)
+      tags: [Home Battery]
       parameters:
         - $ref: "#/components/parameters/soc"
       responses:
@@ -101,10 +94,11 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /bufferstartsoc/{soc}:
     post:
-      summary: Set battery buffer start soc
-      description: "[See documentation](/en/docs/reference/configuration/site#bufferstartsoc)"
-      tags:
-        - Site
+      summary: Set battery buffer start SoC
+      description: >
+        Set battery buffer start SoC.
+        [Read more.](/en/docs/features/battery)
+      tags: [Home Battery]
       parameters:
         - $ref: "#/components/parameters/soc"
       responses:
@@ -112,10 +106,11 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /prioritysoc/{soc}:
     post:
-      summary: Set battery priority soc
-      description: "[See documentation](/en/docs/reference/configuration/site#prioritysoc)"
-      tags:
-        - Site
+      summary: Set battery priority SoC
+      description: >
+        Set battery priority SoC.
+        [Read more.](/en/docs/features/battery)
+      tags: [Home Battery]
       parameters:
         - $ref: "#/components/parameters/soc"
       responses:
@@ -124,9 +119,10 @@ paths:
   /residualpower/{power}:
     post:
       summary: Set grid residual power
-      description: "[See documentation](/en/docs/reference/configuration/site#residualpower)"
-      tags:
-        - Site
+      description: >
+        Sets target operating point of the control loop.
+        [Read more.](/en/docs/reference/configuration/site#residualpower)
+      tags: [Home Battery]
       parameters:
         - $ref: "#/components/parameters/power"
       responses:
@@ -135,9 +131,10 @@ paths:
   /smartcostlimit/{cost}:
     post:
       summary: Set smart charging cost limit for all loadpoints
-      description: "@naltatis"
-      tags:
-        - Site
+      description: >
+        Conveniance method to set smart charging cost limit for all loadpoints at once.
+        Value is applied to each individual loadpoint.
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/costLimit"
       responses:
@@ -145,30 +142,32 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /smartcostlimit:
     delete:
-      summary: Remove smart charging cost limit for all loadpoints
-      description: "@naltatis"
-      tags:
-        - Site
+      summary: Remove smart charging cost limit for all loadpoints.
+      description: >
+        Conveniance method to remove limit for all loadpoints at once.
+        Value is applied to each individual loadpoint.
+      tags: [Loadpoints]
       responses:
         200:
           $ref: "#/components/responses/NullResult"
   /tariff/{type}:
     get:
-      summary: Get list of tariff prices
-      description: "@naltatis"
-      tags:
-        - Site
+      summary: Tariff information
+      description: >
+        Returns the prices or emission values for the upcoming hours
+        [Read more.](/en/docs/devices/tariffs)
+      tags: [Tariffs]
       parameters:
         - name: type
           in: path
-          description: "@naltatis"
+          description: Tariff type
           required: true
           schema:
             type: string
-            # enum ?
+            enum: [grid, feedin, co2, planner]
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -179,55 +178,45 @@ paths:
                     properties:
                       rates:
                         $ref: "#/components/schemas/Rates"
+        404:
+          description: Tariff not defined
   /sessions:
     get:
-      summary: Get charging sessions
-      description: "[See documentation](/en/docs/features/sessions)"
-      tags:
-        - Site
+      summary: Charging sessions
+      description: >
+        Returns a list of charging sessions.
+        [Read more.](/en/docs/features/sessions)
+      tags: [Sessions]
       parameters:
         - name: year
           in: query
-          description: Filter for the year
+          description: Year filter
           schema:
             type: integer
             example: 2025
         - name: month
           in: query
-          description: |
-            Filter for the month:
-            1: January
-            2: February
-            3: March
-            4: April
-            5: May
-            6: June
-            7: July
-            8: August
-            9: September
-            10: October
-            11: November
-            12: December
+          description: Month filter
           schema:
-            type: string
+            type: integer
             example: 2
             minimum: 1
             maximum: 12
         - name: format
           in: query
-          description: File type
+          description: Response format (default json)
           schema:
             type: string
-            enum:
-              - csv
+            enum: ["csv"]
         - name: lang
           in: query
-          description: "@naltatis"
+          description: Language (defaults to accept header)
           schema:
             type: string
+            example: de
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -245,9 +234,10 @@ paths:
       - $ref: "#/components/parameters/id"
     put:
       summary: Update vehicle of charging session
-      description: "[See documentation](/en/docs/features/sessions)"
-      tags:
-        - Site
+      description: >
+        Update vehicle of charging session.
+        [Read more.](/en/docs/features/sessions)
+      tags: [Sessions]
       requestBody:
         required: true
         content:
@@ -259,63 +249,66 @@ paths:
                   $ref: "#/components/schemas/VehicleName"
       responses:
         200:
-          description: Success 🥳
+          description: Success
     delete:
       summary: Delete charging session
-      description: "[See documentation](/en/docs/features/sessions)"
-      tags:
-        - Site
+      description: >
+        Delete charging session.
+        [Read more.](/en/docs/features/sessions)
+      tags: [Sessions]
       responses:
         200:
           $ref: "#/components/responses/NullResult"
   /settings/telemetry:
     get:
-      summary: Get telemetry status
-      description: "[See documentation](/en/docs/reference/configuration/telemetry)"
-      tags:
-        - Site
+      summary: Telemetry status
+      description: >
+        Returns the current telemetry status.
+        [Read more.](/en/docs/reference/configuration/telemetry)
+      tags: [System]
       responses:
         200:
           $ref: "#/components/responses/BooleanResult"
   /settings/telemetry/{enable}:
     post:
       summary: Enable/disable telemetry
-      description: "[See documentation](/en/docs/reference/configuration/telemetry)"
-      tags:
-        - Site
+      description: >
+        Enable or disable telemetry.
+        Note: Telemetry requires [sponsorship](/en/docs/sponsorship).
+        [Read more.](/en/docs/reference/configuration/telemetry)
+      tags: [System]
       parameters:
         - $ref: "#/components/parameters/enable"
       responses:
         200:
           $ref: "#/components/responses/BooleanResult"
         400:
-          description: Sponsorship required ⛔
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    enum:
-                      - telemetry requires sponsorship
-  #   _______               _____ _        _
-  #  |__   __|         _   / ____| |      | |
-  #     | | __ _  __ _(_) | (___ | |_ __ _| |_ ___
-  #     | |/ _` |/ _` |    \___ \| __/ _` | __/ _ \
-  #     | | (_| | (_| |_   ____) | || (_| | ||  __/
-  #     |_|\__,_|\__, (_) |_____/ \__\__,_|\__\___|
-  #               __/ |
-  #              |___/
+          description: Sponsorship required
   /state:
     get:
-      summary: Get system state
-      description: "@naltatis"
-      tags:
-        - State
+      summary: System state
+      description: >
+        Returns the complete state of the system.
+        This structure is used by the UI.
+        It can be filtered by [JQ](https://jqlang.github.io/jq/) to only return a subset of the data.
+        [Read more.](/en/docs/reference/configuration/state)
+      tags: [General]
+      parameters:
+        - name: jq
+          in: query
+          description: Filter the state with JQ
+          schema:
+            type: string
+          examples:
+            all:
+              value: "."
+              summary: complete state
+            firstLoadpoint:
+              value: ".loadpoints[0]"
+              summary: only first loadpoint
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -323,20 +316,13 @@ paths:
                 properties:
                   result:
                     $ref: "#/components/schemas/State"
-  #   _______             __      __  _     _      _
-  #  |__   __|         _  \ \    / / | |   (_)    | |
-  #     | | __ _  __ _(_)  \ \  / /__| |__  _  ___| | ___  ___
-  #     | |/ _` |/ _` |     \ \/ / _ \ '_ \| |/ __| |/ _ \/ __|
-  #     | | (_| | (_| |_     \  /  __/ | | | | (__| |  __/\__ \
-  #     |_|\__,_|\__, (_)     \/ \___|_| |_|_|\___|_|\___||___/
-  #               __/ |
-  #              |___/
   /vehicles/{name}/minsoc/{soc}:
     post:
-      summary: Set minimum soc
-      description: "[See `minSoc`-documentation](/en/docs/reference/configuration/vehicles#onidentify)"
-      tags:
-        - Vehicles
+      summary: Set minimum SoC
+      description: >
+        Vehicle will be fast-charged until this SoC is reached.
+        [Read more.](/en/docs/features/limits)
+      tags: [Vehicles]
       parameters:
         - $ref: "#/components/parameters/vehicleName"
         - $ref: "#/components/parameters/soc"
@@ -345,10 +331,11 @@ paths:
           $ref: "#/components/responses/SocResult"
   /vehicles/{name}/limitsoc/{soc}:
     post:
-      summary: Set soc-limit
-      description: "[See `targetSoc`-documentation](/en/docs/reference/configuration/vehicles#onidentify)"
-      tags:
-        - Vehicles
+      summary: Set SoC limit
+      description: >
+        Charging will stop when this SoC is reached.
+        [Read more.](/en/docs/features/limits)
+      tags: [Vehicles]
       parameters:
         - $ref: "#/components/parameters/vehicleName"
         - $ref: "#/components/parameters/soc"
@@ -357,17 +344,18 @@ paths:
           $ref: "#/components/responses/SocResult"
   /vehicles/{name}/plan/soc/{soc}/{timestamp}:
     post:
-      summary: Set static soc-plan
-      description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
-      tags:
-        - Vehicles
+      summary: Set a SoC-based charging plan
+      description: >
+        Creates a charging plan with fixed time and SoC target.
+        [Read more.](/en/docs/features/plans)
+      tags: [Vehicles]
       parameters:
         - $ref: "#/components/parameters/vehicleName"
         - $ref: "#/components/parameters/soc"
         - $ref: "#/components/parameters/timestamp"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -377,9 +365,11 @@ paths:
                     $ref: "#/components/schemas/StaticSocPlan"
   /vehicles/{name}/plan/soc:
     delete:
-      summary: Delete static soc-plan
-      tags:
-        - Vehicles
+      summary: Delete a SoC-based charging plan
+      description: >
+        Deletes the charging plan
+        [Read more.](/en/docs/features/plans)
+      tags: [Vehicles]
       parameters:
         - $ref: "#/components/parameters/vehicleName"
       responses:
@@ -387,10 +377,11 @@ paths:
           $ref: "#/components/responses/EmptyResult"
   /vehicles/{name}/plan/repeating:
     post:
-      summary: Set repeating plans
-      description: "[See documentation](/en/docs/features/plans#repeating-plans)"
-      tags:
-        - Vehicles
+      summary: Update repeating plans
+      description: >
+        Updates the repeating charging plan.
+        [Read more.](/en/docs/features/plans)
+      tags: [Vehicles]
       parameters:
         - $ref: "#/components/parameters/vehicleName"
       requestBody:
@@ -401,7 +392,7 @@ paths:
               $ref: "#/components/schemas/RepeatingPlans"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -409,26 +400,19 @@ paths:
                 properties:
                   result:
                     $ref: "#/components/schemas/RepeatingPlans"
-  #   _______              _                     _             _       _
-  #  |__   __|         _  | |                   | |           (_)     | |
-  #     | | __ _  __ _(_) | |     ___   __ _  __| |_ __   ___  _ _ __ | |_ ___
-  #     | |/ _` |/ _` |   | |    / _ \ / _` |/ _` | '_ \ / _ \| | '_ \| __/ __|
-  #     | | (_| | (_| |_  | |___| (_) | (_| | (_| | |_) | (_) | | | | | |_\__ \
-  #     |_|\__,_|\__, (_) |______\___/ \__,_|\__,_| .__/ \___/|_|_| |_|\__|___/
-  #               __/ |                           | |
-  #              |___/                            |_|
   /loadpoints/{id}/mode/{mode}:
     post:
-      summary: Set charge mode
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#mode)"
-      tags:
-        - Loadpoints
+      summary: Update charge mode
+      description: >
+        Changes the charging behavior of the loadpoint.
+        [Read more.](/en/docs/features/solar-charging)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/mode"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -438,10 +422,13 @@ paths:
                     $ref: "#/components/schemas/Mode"
   /loadpoints/{id}/limitsoc/{soc}:
     post:
-      summary: Limit soc
-      description: "@naltatis"
-      tags:
-        - Loadpoints
+      summary: Update limit SoC
+      description: >
+        Updates the SoC limit of the loadpoint.
+        Requires a connected vehicle with known SoC.
+        Limit is maintained across charging sessions.
+        [Read more.](/en/docs/features/limit)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/soc"
@@ -450,10 +437,13 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/limitenergy/{power}:
     post:
-      summary: Limit energy
-      description: "@naltatis"
-      tags:
-        - Loadpoints
+      summary: Update energy limit
+      description: >
+        Updates the energy limit of the loadpoint.
+        Only available for guest vehicles and vehicles with unknown SoC.
+        Limit is removed on vehicle disconnect.
+        [Read more.](/en/docs/features/limit)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/power"
@@ -462,10 +452,11 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/mincurrent/{current}:
     post:
-      summary: Set minimum current
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#mincurrent)"
-      tags:
-        - Loadpoints
+      summary: Update minimum current
+      description: >
+        Updates the minimum current of the loadpoint.
+        [Read more.](/en/docs/reference/configuration/loadpoints#mincurrent)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/current"
@@ -474,10 +465,11 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/maxcurrent/{current}:
     post:
-      summary: Set maximum current
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#maxcurrent)"
-      tags:
-        - Loadpoints
+      summary: Update maximum current
+      description: >
+        Updates the maximum current of the loadpoint.
+        [Read more.](/en/docs/reference/configuration/loadpoints#maxcurrent)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/current"
@@ -486,10 +478,13 @@ paths:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/phases/{phases}:
     post:
-      summary: Set allowed phases
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#phases)"
-      tags:
-        - Loadpoints
+      summary: Update allowed phases
+      description: >
+        Updates the allowed phases of the loadpoint.
+        Selects the desired phase mode for chargers with automatic phase switching.
+        For manual phase switching chargers (via cable or Lasttrennschalter) this value tells evcc the actual phases.
+        [Read more.](/en/docs/reference/configuration/loadpoints#phases)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - name: phases
@@ -501,30 +496,22 @@ paths:
         200:
           $ref: "#/components/responses/NumberResult"
         400:
-          description:
-            Invalid phases-value. ⛔ You have most likely entered the value 0 for a
+          description: Invalid phases-value.
+            You have most likely entered the value 0 for a
             wallbox that cannot switch phases automatically.
-            Take a look at the [documentation](/en/docs/reference/configuration/loadpoints#phases).
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    enum:
-                      - "invalid number of phases: 0"
+            [Read more.](/en/docs/reference/configuration/loadpoints#phases)
   /loadpoints/{id}/plan:
     get:
-      summary: Get plan rates
-      description: "@naltatis"
-      tags:
-        - Loadpoints
+      summary: Plan rates
+      description: >
+        Returns the current charging plan for this loadpoint.
+        [Read more.](/en/docs/features/plans)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -539,9 +526,12 @@ paths:
                       - $ref: "#/components/schemas/PlanRates"
   /loadpoints/{id}/plan/static/preview/{type}/{goal}/{timestamp}:
     get:
-      summary: Get static plan preview
-      tags:
-        - Loadpoints
+      summary: Preview of a charging plan
+      description: >
+        Simulates a charging plan and returns the result.
+        Does not alter the actual charging plan.
+        [Read more.](/en/docs/features/plans)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - name: type
@@ -554,7 +544,7 @@ paths:
               - energy
         - name: goal
           in: path
-          description: The power or soc to reach.
+          description: Energy or SoC to reach.
           required: true
           examples:
             socAvailable:
@@ -571,12 +561,14 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/PlanRatesResult"
-  ? /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}
-  : get:
-      summary: Get repeating plan preview
-      description: "@naltatis"
-      tags:
-        - Loadpoints
+  /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}:
+    get:
+      summary: Repeating plan preview
+      description: >
+        Simulates a repeating charging plan and returns the result.
+        Does not alter the actual charging plan.
+        [Read more.](/en/docs/features/plans)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/soc"
@@ -600,16 +592,19 @@ paths:
           $ref: "#/components/responses/PlanRatesResult"
   /loadpoints/{id}/plan/energy/{power}/{timestamp}:
     post:
-      summary: Create static energy-plan
-      tags:
-        - Loadpoints
+      summary: Sets an energy-based charging plan
+      description: >
+        Creates a charging plan with fixed time and energy target.
+        Only available when a vehicle with unknown SoC is connected.
+        [Read more.](/en/docs/features/plans)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/power"
         - $ref: "#/components/parameters/timestamp"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -619,9 +614,12 @@ paths:
                     $ref: "#/components/schemas/StaticEnergyPlan"
   /loadpoints/{id}/plan/energy:
     delete:
-      summary: Delete static energy-plan
-      tags:
-        - Loadpoints
+      summary: Deletes the energy-based charging plan
+      description: >
+        Deletes the charging plan.
+        Only available when a vehicle with unknown SoC is connected.
+        [Read more.](/en/docs/features/plans)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
@@ -630,15 +628,16 @@ paths:
   /loadpoints/{id}/vehicle/{name}:
     post:
       summary: Assign vehicle
-      description: "[See documentation](/en/docs/features/vehicle#assignment-via-the-ui)"
-      tags:
-        - Loadpoints
+      description: >
+        Changes the association of a vehicle to the loadpoint.
+        [Read more.](/en/docs/features/vehicle)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/vehicleName"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -650,110 +649,119 @@ paths:
                       vehicle:
                         $ref: "#/components/schemas/VehicleTitle"
   /loadpoints/{id}/vehicle:
-    parameters:
-      - $ref: "#/components/parameters/id"
     delete:
       summary: Delete vehicle
-      tags:
-        - Loadpoints
+      description: >
+        Removes the association of a vehicle to the loadpoint.
+        Connected vehicle is treated as guest vehicle.
+        [Read more.](/en/docs/features/vehicle)
+      tags: [Loadpoints]
+      parameters:
+        - $ref: "#/components/parameters/id"
       responses:
         200:
           $ref: "#/components/responses/EmptyResult"
     patch:
       summary: Start vehicle detection
-      description: "[See documentation](/en/docs/features/vehicle#automatic-detection)"
-      tags:
-        - Loadpoints
+      description: >
+        Starts the automaticvehicle detection process.
+        [Read more.](/en/docs/features/vehicle)
+      tags: [Loadpoints]
       responses:
         200:
           $ref: "#/components/responses/EmptyResult"
-  /loadpoints/{id}/remotedemand/{demand}/{source}:
-    post:
-      summary: "@naltatis"
-      description: "@naltatis"
-      tags:
-        - Loadpoints
-      parameters:
-        - $ref: "#/components/parameters/id"
-        - name: demand
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/Demand"
-        - name: source
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/Source"
-      responses:
-        200:
-          description: Success 🥳
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  result:
-                    type: object
-                    properties:
-                      demand:
-                        $ref: "#/components/schemas/Demand"
-                      source:
-                        $ref: "#/components/schemas/Source"
+  #  /loadpoints/{id}/remotedemand/{demand}/{source}:
+  #    post:
+  #      summary: "@naltatis"
+  #      description: "@naltatis"
+  #      tags:
+  #        - Loadpoints
+  #      parameters:
+  #        - $ref: "#/components/parameters/id"
+  #        - name: demand
+  #          in: path
+  #          required: true
+  #          schema:
+  #            $ref: "#/components/schemas/Demand"
+  #        - name: source
+  #          in: path
+  #          required: true
+  #          schema:
+  #            $ref: "#/components/schemas/Source"
+  #      responses:
+  #        200:
+  #          description: Success
+  #          content:
+  #            application/json:
+  #              schema:
+  #                type: object
+  #                properties:
+  #                  result:
+  #                    type: object
+  #                    properties:
+  #                      demand:
+  #                        $ref: "#/components/schemas/Demand"
+  #                      source:
+  #                        $ref: "#/components/schemas/Source"
   /loadpoints/{id}/enable/threshold/{threshold}:
     post:
       summary: Enable threshold
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold)"
-      tags:
-        - Loadpoints
+      description: >
+        Specifies the available surplus power to start charging in solar mode.
+        [Read more.](/en/docs/reference/configuration/loadpoints#threshold)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/enableThreshold"
+        - $ref: "#/components/parameters/threshold"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/enable/delay/{delay}:
     post:
       summary: Enable threshold-delay
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay)"
-      tags:
-        - Loadpoints
+      description: >
+        Specifies the delay before charging starts in solar mode.
+        [Read more.](/en/docs/reference/configuration/loadpoints#delay)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/enableDelay"
+        - $ref: "#/components/parameters/delay"
       responses:
         200:
           $ref: "#/components/responses/NanoSecondsResult"
   /loadpoints/{id}/disable/threshold/{threshold}:
     post:
       summary: Disable threshold
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold-1)"
-      tags:
-        - Loadpoints
+      description: >
+        Specifies the grid draw power to stop charging in solar mode.
+        [Read more.](/en/docs/reference/configuration/loadpoints#threshold-1)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/disableThreshold"
+        - $ref: "#/components/parameters/threshold"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
   /loadpoints/{id}/disable/delay/{delay}:
     post:
       summary: Disable threshold-delay
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay-1)"
-      tags:
-        - Loadpoints
+      description: >
+        Specifies the delay before charging stops in solar mode.
+        [Read more.](/en/docs/reference/configuration/loadpoints)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
-        - $ref: "#/components/parameters/disableDelay"
+        - $ref: "#/components/parameters/delay"
       responses:
         200:
           $ref: "#/components/responses/NanoSecondsResult"
   /loadpoints/{id}/smartcostlimit/{cost}:
     post:
       summary: Set smart charging cost limit
-      description: "@naltatis"
-      tags:
-        - Loadpoints
+      description: >
+        Sets the price or emission limit for fast-charging with grid energy.
+        [Read more.](/en/docs/features/dynamic-prices)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/costLimit"
@@ -763,9 +771,10 @@ paths:
   /loadpoints/{id}/smartcostlimit:
     delete:
       summary: Remove smart charging cost limit
-      description: "@naltatis"
-      tags:
-        - Loadpoints
+      description: >
+        Removes the price or emission limit for fast-charging with grid energy.
+        [Read more.](/en/docs/features/dynamic-prices)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
       responses:
@@ -774,14 +783,15 @@ paths:
   /loadpoints/{id}/priority/{priority}:
     post:
       summary: Set priority
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#priority)"
-      tags:
-        - Loadpoints
+      description: >
+        Sets the priority of the loadpoint.
+        [Read more.](/en/docs/reference/configuration/loadpoints#priority)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - name: priority
           in: path
-          description: "[See documentation](/en/docs/reference/configuration/loadpoints#priority)"
+          description: "Higher number means higher priority."
           required: true
           example: 2
           schema:
@@ -793,28 +803,22 @@ paths:
   /loadpoints/{id}/batteryboost/{enable}:
     post:
       summary: Set battery boost
-      description: "[See documentation](/en/docs/features/battery#battery-boost)"
-      tags:
-        - Loadpoints
+      description: >
+        Enables or disables battery boost.
+        [Read more.](/en/docs/features/battery#battery-boost)
+      tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/enable"
       responses:
         200:
           $ref: "#/components/responses/BooleanResult"
-  #   _______                            _   _
-  #  |__   __|         _      /\        | | | |
-  #     | | __ _  __ _(_)    /  \  _   _| |_| |__
-  #     | |/ _` |/ _` |     / /\ \| | | | __| '_ \
-  #     | | (_| | (_| |_   / ____ \ |_| | |_| | | |
-  #     |_|\__,_|\__, (_) /_/    \_\__,_|\__|_| |_|
-  #               __/ |
-  #              |___/
   /auth/password:
     put:
       summary: Change admin password
-      tags:
-        - Auth
+      description: >
+        Changes the admin password.
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -823,35 +827,28 @@ paths:
               $ref: "#/components/schemas/ChangePassword"
       responses:
         202:
-          description: Success 🥳
+          description: Success
         400:
-          description: Invalid password provided ⛔
-          content:
-            text/plain:
-              schema:
-                type: string
+          description: Invalid password provided
   /auth/status:
     get:
-      summary: Get authentication status
+      summary: Authentication status
       description: Whether the current user is logged in.
-      tags:
-        - Auth
+      tags: [Auth]
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             text/plain:
               schema:
                 type: string
-                enum:
-                  - "true"
-                  - "false"
+                enum: ["true", "false"]
   /auth/login:
     post:
       summary: Login
-      description: Creates the authorization cookie
-      tags:
-        - Auth
+      description: >
+        Login returns an auth cookie required for all protected endpoints.
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -863,30 +860,23 @@ paths:
                   $ref: "#/components/schemas/Password"
       responses:
         200:
-          description: Success 🥳
+          description: Success
           headers:
             Set-Cookie:
               description: The authorization cookie
               schema:
                 type: string
-                example: auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTc0Mzc3NzMzN30.b6IjIUPgPq3OL33bB_CsVmbW_2qAy2wgOnGRB0IotqY; Path=/; Expires=Fri, 04 Apr 2025 14:35:37 GMT; HttpOnly; SameSite=Strict
+                example: auth=ey...qY; Path=/; Expires=Fri, 04 Apr 2025 14:35:37 GMT; HttpOnly; SameSite=Strict
         401:
-          description: Invalid password provided ⛔
-          content:
-            text/plain:
-              schema:
-                type: string
-                enum:
-                  - Invalid password
+          description: Invalid password provided
   /auth/logout:
     post:
       summary: Logout
       description: Deletes the authorization cookie
-      tags:
-        - Auth
+      tags: [Auth]
       responses:
         200:
-          description: Success 🥳
+          description: Success
           headers:
             Set-Cookie:
               description: The authorization cookie
@@ -894,53 +884,15 @@ paths:
                 type: string
                 enum:
                   - auth=; Path=/; HttpOnly
-  #   _______               _____             __ _
-  #  |__   __|         _   / ____|           / _(_)
-  #     | | __ _  __ _(_) | |     ___  _ __ | |_ _  __ _
-  #     | |/ _` |/ _` |   | |    / _ \| '_ \|  _| |/ _` |
-  #     | | (_| | (_| |_  | |___| (_) | | | | | | | (_| |
-  #     |_|\__,_|\__, (_)  \_____\___/|_| |_|_| |_|\__, |
-  #               __/ |                             __/ |
-  #              |___/                             |___/
-  /config/site:
-    get:
-      summary: "@naltatis"
-      description: "@naltatis"
-      tags:
-        - Config
-      responses:
-        200:
-          $ref: "#/components/responses/SiteResult"
-    put:
-      summary: "@naltatis"
-      description: "@naltatis"
-      tags:
-        - Config
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Site"
-      responses:
-        200:
-          $ref: "#/components/responses/SiteResult"
-  #   _______               _____           _
-  #  |__   __|         _   / ____|         | |
-  #     | | __ _  __ _(_) | (___  _   _ ___| |_ ___ _ __ ___
-  #     | |/ _` |/ _` |    \___ \| | | / __| __/ _ \ '_ ` _ \
-  #     | | (_| | (_| |_   ____) | |_| \__ \ ||  __/ | | | | |
-  #     |_|\__,_|\__, (_) |_____/ \__, |___/\__\___|_| |_| |_|
-  #               __/ |            __/ |
-  #              |___/            |___/
   /system/log:
     get:
-      summary: Get logs
-      description: "@naltatis"
+      summary: Logs
+      description: >
+        Returns the latest log lines.
+        [Read more.](/en/docs/reference/configuration/log)
       security:
         - cookieAuth: []
-      tags:
-        - System
+      tags: [System]
       parameters:
         - name: area
           in: query
@@ -967,7 +919,7 @@ paths:
               - txt
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -986,14 +938,15 @@ paths:
           $ref: "#/components/responses/Unauthorized"
   /system/log/areas:
     get:
-      summary: Get log areas
+      summary: List of all log areas
+      description: >
+        Returns a list of all log areas (e.g. `lp-1`, `site`, `db`).
       security:
         - cookieAuth: []
-      tags:
-        - System
+      tags: [System]
       responses:
         200:
-          description: Success 🥳
+          description: Success
           content:
             application/json:
               schema:
@@ -1006,11 +959,13 @@ paths:
   /system/shutdown:
     post:
       summary: Shutdown evcc
-      description: "@naltatis"
+      description: >
+        Shuts down the evcc instance. 
+        There is no reboot command.
+        We expect the underlying system (docker, systemd, etc.) to restart the evcc instance once it's terminated.
       security:
         - cookieAuth: []
-      tags:
-        - System
+      tags: [System]
       responses:
         204:
           $ref: "#/components/responses/BlankResponse"
@@ -1033,40 +988,38 @@ components:
           loadpoint:
             type: string
             description: "[See documentation](/en/docs/reference/configuration/loadpoints#title)"
-          identifier:
-            type: string
-            description: "@naltatis"
           vehicle:
             $ref: "#/components/schemas/VehicleName"
           odometer:
             type: number
             nullable: true
-            description: Current vehicle odometer reading in kilometers
+            description: Vehicle odometer reading in kilometers
           meterStart:
             type: number
             nullable: true
-            description: "@naltatis"
+            description: Meter reading at start of charging session
           meterStop:
             type: number
             nullable: true
-            description: "@naltatis"
+            description: Meter reading at end of charging session
           chargedEnergy:
             type: number
-            description: In kWh
+            description: Charged energy in kWh
           chargeDuration:
             type: number
+            description: Duration of active charging
           solarPercentage:
             type: number
             description: Solar percentage of the session
           price:
             type: number
-            description: Price of the charged energy of the session
+            description: Total price of the session
           pricePerKWh:
             type: number
-            description: Average price of energy per kWh of the session
+            description: Average price per kWh
           co2PerKWh:
             type: number
-            description: Average CO2 emissions per kWh
+            description: Average CO₂ emissions per kWh
     LogArea:
       description: "[See documentation](/en/docs/reference/configuration/log#levels)"
       type: string
@@ -1098,39 +1051,10 @@ components:
           $ref: "#/components/schemas/Password"
         new:
           $ref: "#/components/schemas/Password"
-    Site:
-      description: "[See documentation](/en/docs/reference/configuration/site#metersgrid)"
-      type: object
-      properties:
-        title:
-          description: "[See documentation](/en/docs/reference/configuration/site#title)"
-          type: string
-        grid:
-          description: "[See documentation](/en/docs/reference/configuration/site#metersgrid)"
-          type: string
-        pv:
-          description: "[See documentation](/en/docs/reference/configuration/site#meterspv)"
-          type: array
-          items:
-            type: string
-        battery:
-          description: "[See documentation](/en/docs/reference/configuration/site#meters.battery)"
-          type: array
-          items:
-            type: string
-    Source:
-      description: "@naltatis-BITTE-AUCH-EXAMPLE-ODER-AM-BESTEN-ENUM-ANGEBEN"
-      type: string
-      pattern: "[0-9a-zA-Z_-]+"
-    Demand:
-      description: "@naltatis"
-      type: string
-      enum:
-        - " "
-        - hard
-        - soft
     Mode:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#mode)"
+      description: >
+        Charging mode.
+        [Read more.](/en/docs/reference/configuration/loadpoints#mode)
       type: string
       enum:
         - "off"
@@ -1138,38 +1062,48 @@ components:
         - minpv
         - pv
     State:
+      description: >
+        The actual state structure is not documented yet.
+        Most values should be self-explanatory.
+        Note: While the overall structure is quite stable, details may change between releases.
       type: object
-      # TODO: add properties or too much effort?
     Phases:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#phases)"
+      description: >
+        Number of phases. (0: auto, 1: 1-phase, 3: 3-phase)
+        [Read more.](/en/docs/reference/configuration/loadpoints#phases)
       type: integer
+      example: 3
       enum:
         - 0
         - 1
         - 3
     Id:
-      description: The ID. Starts with 1.
+      description: Loadpoint index. Starts with 1.
       type: integer
       example: 1
       minimum: 1
     EnableDelay:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay) - Unit is **seconds**"
+      description: >
+        Time in seconds.
+        [Read more.](/en/docs/reference/configuration/loadpoints#delay)
       type: integer
       example: 60
     DisableDelay:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#delay-1) - Unit is **seconds**"
+      description: >
+        Time in seconds.
+        [Read more.](/en/docs/reference/configuration/loadpoints#delay-1)
       type: integer
       example: 60
     Soc:
-      description: Soc in %
+      description: SOC in %
       type: number
       example: 60
       minimum: 0
       maximum: 100
     Current:
-      description: Electric current in Ampere
+      description: Electric current in amps
       type: number
-      example: "@naltatis"
+      example: 16
       minimum: 0
     Timestamp:
       description: Timestamp in RFC3339 format
@@ -1177,18 +1111,10 @@ components:
       format: date-time
       example: "2025-07-19T12:30:00.000Z"
     Power:
-      description: Power in Watt
+      description: Power in Watts
       type: number
       minimum: 0
       example: 2500
-    EnableThreshold:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold)"
-      type: number
-      example: 0
-    DisableThreshold:
-      description: "[See documentation](/en/docs/reference/configuration/loadpoints#threshold-1)"
-      type: number
-      example: 200
     StaticSocPlan:
       description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
       type: object
@@ -1350,8 +1276,8 @@ components:
         $ref: "#/components/schemas/VehicleName"
     costLimit:
       name: cost
-      description: Cost limit for a kWh @naltatis-WHICH-CURRENCY?-PLEASE-ADD-EXAMPLE
-      example:
+      description: Cost limit in configured currency (default EUR) or CO2 limit in g/kWh
+      example: 0.25
       in: path
       required: true
       schema:
@@ -1368,21 +1294,15 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Power"
-    enableThreshold:
+    threshold:
       name: threshold
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/EnableThreshold"
-    disableThreshold:
-      name: threshold
-      in: path
-      required: true
-      schema:
-        $ref: "#/components/schemas/DisableThreshold"
+        $ref: "#/components/schemas/Power"
   responses:
     NanoSecondsResult:
-      description: Success 🥳 - Number result - Unit is **nanoseconds**
+      description: Success - Number result - Unit is **nanoseconds**
       content:
         application/json:
           schema:
@@ -1391,7 +1311,7 @@ components:
               result:
                 type: integer
     NumberResult:
-      description: Success 🥳 - Number result
+      description: Success - Number result
       content:
         application/json:
           schema:
@@ -1400,7 +1320,7 @@ components:
               result:
                 type: number
     IntegerResult:
-      description: Success 🥳 - Integer result
+      description: Success - Integer result
       content:
         application/json:
           schema:
@@ -1409,7 +1329,7 @@ components:
               result:
                 type: integer
     SocResult:
-      description: Success 🥳 - Soc result
+      description: Success - Soc result
       content:
         application/json:
           schema:
@@ -1421,7 +1341,7 @@ components:
                   soc:
                     $ref: "#/components/schemas/Soc"
     PlanRatesResult:
-      description: Success 🥳 - PlanRates result
+      description: Success - PlanRates result
       content:
         application/json:
           schema:
@@ -1430,7 +1350,7 @@ components:
               result:
                 $ref: "#/components/schemas/PlanRates"
     BooleanResult:
-      description: Success 🥳 - Boolean result
+      description: Success - Boolean result
       content:
         application/json:
           schema:
@@ -1438,17 +1358,8 @@ components:
             properties:
               result:
                 type: boolean
-    SiteResult:
-      description: Success 🥳 - Site result
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              result:
-                $ref: "#/components/schemas/Site"
     NullResult:
-      description: Success 🥳 - Null result
+      description: Success - Null result
       content:
         application/json:
           schema:
@@ -1459,18 +1370,15 @@ components:
                 type: object
                 nullable: true
     BlankResponse:
-      description: Success 🥳 - Blank response
+      description: Success - Blank response
     EmptyResult:
-      description: Success 🥳 - Empty result
+      description: Success - Empty result
       content:
         application/json:
           schema:
             type: object
-            properties:
-              result:
-                type: object
     Unauthorized:
-      description: Unauthorized ⛔ - Login and try again
+      description: Unauthorized - Login and try again
       content:
         text/plain:
           schema:
