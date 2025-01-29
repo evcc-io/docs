@@ -354,7 +354,7 @@ password: "DasPasswort"
 
 ### `custom`
 
-Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/reference/plugins) definiert werden.
+Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/devices/plugins) definiert werden.
 
 **Beispiel**:
 
