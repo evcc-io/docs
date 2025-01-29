@@ -2,6 +2,14 @@ import React, { useRef, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import SwaggerUI from "swagger-ui-react";
 
+const configs = {
+  url: "/rest-api.yaml",
+  showCommonExtensions: true,
+  displayRequestDuration: true,
+  defaultModelsExpandDepth: -1,
+  requestSnippetsEnabled: true,
+};
+
 const customCss = `
 @import url('/swagger-ui.css');
 .swagger-ui .information-container {
@@ -39,7 +47,7 @@ const customCss = `
 }
 `;
 
-export default (props) => {
+export default () => {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -54,12 +62,12 @@ export default (props) => {
         shadowRoot.appendChild(div);
 
         const root = ReactDOM.createRoot(div);
-        root.render(<SwaggerUI {...props} />);
+        root.render(<SwaggerUI {...configs} />);
       } catch (e) {
         console.error(e);
       }
     }
-  }, [props]);
+  }, []);
 
   return <div ref={containerRef}></div>;
 };
