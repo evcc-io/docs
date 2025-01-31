@@ -247,6 +247,15 @@ See the following example:
 ]
 ```
 
+
+Configuration example for the Danish Strømligning API:
+```yaml
+  uri: https://stromligning.dk/api/prices?productId=ewii_timepris&supplierId=dinel_c
+  jq: '[.prices[]] | map({"start": .date | sub("(?<time>.*)\\.[\\d]{3}(?<tz>.*)"; "\(.time)\(.tz)") | strptime("%Y-%m-%dT%H:%M:%SZ") | strftime("%Y-%m-%dT%H:%M:%SZ"), "end": (.date | sub("(?<time>.*)\\.[\\d]{3}(?<tz>.*)"; "\(.time)\(.tz)") | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "price": (.price.total *100 | round/100) }) | tostring'
+```
+Make sure to adjust `productId` and `supplierId` to match the values for your electricity product and location and please see [the API docs](https://stromligning.dk/api/docs/).
+
+
 The plugin is updated once per hour.
 
 ### Amber Electric 
@@ -311,8 +320,6 @@ Only available for Denmark.
       charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
       tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
       formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
-
-
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
 
