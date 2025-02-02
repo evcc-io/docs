@@ -486,11 +486,7 @@ paths:
       tags: [Loadpoints]
       parameters:
         - $ref: "#/components/parameters/id"
-        - name: phases
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/Phases"
+        - $ref: "#/components/parameters/phases"
       responses:
         200:
           $ref: "#/components/responses/NumberResult"
@@ -560,8 +556,8 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/PlanRatesResult"
-  /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}:
-    get:
+  ? /loadpoints/{id}/plan/repeating/preview/{soc}/{weekdays}/{hourMinuteTime}/{timezone}
+  : get:
       summary: Repeating plan preview
       description: >
         Simulates a repeating charging plan and returns the result.
@@ -571,21 +567,9 @@ paths:
       parameters:
         - $ref: "#/components/parameters/id"
         - $ref: "#/components/parameters/soc"
-        - name: weekdays
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/Weekdays"
-        - name: hourMinuteTime
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/HourMinuteTime"
-        - name: timezone
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/IANATimeZone"
+        - $ref: "#/components/parameters/weekdays"
+        - $ref: "#/components/parameters/hourMinuteTime"
+        - $ref: "#/components/parameters/timezone"
       responses:
         200:
           $ref: "#/components/responses/PlanRatesResult"
@@ -893,16 +877,8 @@ paths:
         - cookieAuth: []
       tags: [System]
       parameters:
-        - name: area
-          in: query
-          explode: true
-          schema:
-            $ref: "#/components/schemas/LogAreas"
-        - name: level
-          in: query
-          required: true
-          schema:
-            $ref: "#/components/schemas/LogLevel"
+        - $ref: "#/components/parameters/logAreas"
+        - $ref: "#/components/parameters/logLevel"
         - name: count
           in: query
           description: Number of log lines to return
@@ -1081,16 +1057,10 @@ components:
       type: integer
       example: 1
       minimum: 1
-    EnableDelay:
+    Delay:
       description: >
         Time in seconds.
         [Read more.](/en/docs/reference/configuration/loadpoints#delay)
-      type: integer
-      example: 60
-    DisableDelay:
-      description: >
-        Time in seconds.
-        [Read more.](/en/docs/reference/configuration/loadpoints#delay-1)
       type: integer
       example: 60
     Soc:
@@ -1227,52 +1197,106 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Id"
-    disableDelay:
-      name: delay
+    phases:
+      name: phases
+      description: >
+        Number of phases. (0: auto, 1: 1-phase, 3: 3-phase)
+        [Read more.](/en/docs/reference/configuration/loadpoints#phases)
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/DisableDelay"
-    enableDelay:
-      name: delay
+        $ref: "#/components/schemas/Phases"
+    weekdays:
+      name: weekdays
+      description: The Weekdays - [See documentation](/en/docs/features/plans#repeating-plans)
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/EnableDelay"
+        $ref: "#/components/schemas/Weekdays"
+    hourMinuteTime:
+      name: hourMinuteTime
+      description: Time in `HOURS:MINUTES` format
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/HourMinuteTime"
+    timezone:
+      name: timezone
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/IANATimeZone"
+    logAreas:
+      name: areas
+      description: Timezone in IANA format - [See Wikipedia](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)
+      in: query
+      explode: true
+      schema:
+        $ref: "#/components/schemas/LogAreas"
+    logLevel:
+      name: level
+      description: "[See documentation](/en/docs/reference/configuration/log#log)"
+      in: query
+      required: true
+      schema:
+        $ref: "#/components/schemas/LogLevel"
+    delay:
+      name: delay
+      description: >
+        Time in seconds.
+        [Read more.](/en/docs/reference/configuration/loadpoints#delay)
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Delay"
     mode:
       name: mode
       in: path
       required: true
       schema:
         $ref: "#/components/schemas/Mode"
-    enable:
-      name: enable
-      in: path
-      required: true
-      schema:
-        oneOf:
-          - type: boolean
-          - type: string
-          - type: number
-        enum: ["true", "false", 1, 0]
     soc:
       name: soc
+      description: SOC in %
       in: path
       required: true
       schema:
         $ref: "#/components/schemas/Soc"
     timestamp:
       name: timestamp
+      description: Timestamp in RFC3339 format
       in: path
       required: true
       schema:
         $ref: "#/components/schemas/Timestamp"
     vehicleName:
       name: name
+      description: "[See documentation](/en/docs/reference/configuration/vehicles#name)"
       in: path
       required: true
       schema:
         $ref: "#/components/schemas/VehicleName"
+    current:
+      name: current
+      description: Electric current in amps
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Current"
+    power:
+      name: power
+      description: Power in Watts
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Power"
+    threshold:
+      name: threshold
+      description: Power in Watts
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Power"
     costLimit:
       name: cost
       description: Cost limit in configured currency (default EUR) or CO2 limit in g/kWh
@@ -1281,24 +1305,19 @@ components:
       required: true
       schema:
         type: number
-    current:
-      name: current
+    enable:
+      name: enable
+      description: >
+        Charging mode.
+        [Read more.](/en/docs/reference/configuration/loadpoints#mode)
       in: path
       required: true
       schema:
-        $ref: "#/components/schemas/Current"
-    power:
-      name: power
-      in: path
-      required: true
-      schema:
-        $ref: "#/components/schemas/Power"
-    threshold:
-      name: threshold
-      in: path
-      required: true
-      schema:
-        $ref: "#/components/schemas/Power"
+        oneOf:
+          - type: boolean
+          - type: string
+          - type: number
+        enum: ["true", "false", 1, 0]
   responses:
     NanoSecondsResult:
       description: Success - Number result - Unit is **nanoseconds**
