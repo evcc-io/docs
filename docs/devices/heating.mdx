@@ -1,0 +1,296 @@
+---
+sidebar_position: 3
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
+import PhaseSwitchSupported from "/docs/_phase_switch_supported.mdx";
+import DeviceConfig from "/src/components/DeviceConfig";
+import DeviceFeatures from "/src/components/DeviceFeatures";
+import SgreadySvg from "./heating/sgready.svg";
+
+# Wärmepumpen, Heizstäbe
+
+:::warning In Entwicklung
+Das Thema Wärmeerzeugung ist noch in der Erprobungsphase.<br/>
+Für die hier aufgeführten Geräte wird später ein [Sponsoring erforderlich](/docs/sponsorship) sein.
+:::
+
+evcc unterstützt unterschiedliche Arten von Wärmeerzeugern.
+Einfache Geräte wie Heizlüfter oder Ventilatoren können über [Smarte Schalter](./smartswitches) ein/ausgeschaltet werden.
+Auf dieser Seite erfährst du, wie du auch **Wärmepumpen** oder **Heizstäbe** steuern kannst.
+
+## Wärmepumpen
+
+Viele Wärmepumpen unterstützen das SG-Ready-Modell, um ihren Betrieb an die Energiesituation vor Ort anzupassen.
+Darüber lassen sich bis zu vier vordefinierte, bei manchen Modellen auch frei konfigurierbare Szenarien ansteuern.
+Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)**, ein **reduzierter Betrieb** und ein **Sperrbetrieb** signalisiert werden.
+
+Ist [Überschussstrom vorhanden](/docs/features/solar-charging) oder der [Netzstrom besonders günstig](/docs/features/dynamic-prices) bzw. [sauber](/docs/features/co2), kann evcc die Wärmepumpe anweisen, die Heizleistung zu erhöhen und in den **verstärkten Betrieb (Boost)** zu schalten.
+
+Die Funktion für den reduzierten Betrieb oder den Sperrbetrieb wird bisher nicht unterstützt.
+Wir planen dies ggf. über das [Lastmanagement](/docs/features/loadmanagement) zu integrieren.
+Damit könnten - je nach Modell - ggf. auch Anforderungen nach §14a EnWG abgedeckt werden.
+
+### direkte Kommunikation
+
+Viele moderne Wärmepumpen bieten API-Schnittstellen an, über die nicht nur der Betriebsmodus gesetzt, sondern auch der Zustand des Gerätes (z.B. Leistungsaufnahme, Temperaturen) abgefragt werden kann.
+Unter [Wärmeerzeuger](#wärmeerzeuger) findest du eine Liste aller unterstützten Geräte.
+
+Sollte deine Wärmepumpe eine Schnittstelle haben, die wir noch nicht unterstützen, erstelle gerne ein [GitHub Issue](https://github.com/evcc-io/evcc/issues) mit allen notwendigen Informationen.
+
+### über Relais-Kontakte
+
+Ältere Wärmepumpen verfügen häufig über SG-Ready Relais-Kontakte, über die der gewünschte Betriebszustand signalisiert werden kann.
+In unserem Beispiel konzentrieren wir uns auf den Wechsel zwischen Normal- und Boostbetrieb.
+Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1. 
+
+Dieses Relais wird mit den SG-Ready Kontakten der Wärmepumpe verbunden.
+Die genaue Verkabelung, die notwendige Logik und auch die Konfiguration hängt vom Gerät ab und sollte in Absprache mit dem Installateur erfolgen.
+Ist PV-Überschuss oder günstige Energie vorhanden, schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
+Letztendlich entscheidet das Gerät abhängig vom aktuellen Betriebszustand und seiner Konfiguration immer selbst ob und wieweit es diesem Wunsch auch tatsächlich entsprechen wird.
+
+Das folgende Diagramm zeigt den Aufbau:
+
+<SgreadySvg alt="Diagram für die Steuerung einer Wärmepumpe über ein SG-Ready Relais" style={{ maxWidth: '700px' }} />
+
+Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe genau erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
+Dies empfiehlt sich eigentlich fast immer, da die intern ermittelten Daten bei den meisten Modellen am Markt auf Schätzwerten und nicht Messungen basieren oder nicht den Energiebedarf aller Komponenten erfassen.
+Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähler](./meters) verwendet werden.
+
+Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
+Dafür kommt der spezielle Typ `sgready` zum Einsatz.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    integrateddevice: true # Fahrzeugauswahl deaktivieren
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready
+    setmode:
+      source: switch
+      switch:
+      - case: 1 # normal
+        set:
+          source: const
+          value: false
+          set:
+            source: charger
+            config:
+              type: template
+              template: shelly # Boost-Kontakt der Wärmepumpe
+              host: 192.168.0.101
+      - case: 2 # boost
+        set:
+          source: const
+          value: true
+          set:
+            source: charger
+            config:
+              type: template
+              template: shelly # Boost-Kontakt der Wärmepumpe
+              host: 192.168.0.101
+      - case: 3 # dimm (not supported, yet)
+        set:
+          source: error
+          error: ErrNotAvailable
+    getmode:
+      source: calc
+      add:
+        - source: const
+          value: 1
+        - source: charger
+          config:
+            type: template
+            template: shelly # Boost-Kontakt der Wärmepumpe
+            host: 192.168.0.101
+#   temp:
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+
+# [...]
+```
+
+:::note
+Dieses Code-Beispiel enthält einige Redundanzen.
+Wir werden später Templates für die einfachere Konfiguration gängiger Konstellationen bereitstellen.
+:::
+
+Neben `setmode` und `getmode`, kannst du optional auch die aktuelle Temperatur (`temp`) [via Plugin](/docs/reference/plugins) hinzufügen.
+Diese dient lediglich zur Anzeige und wird bei Wärmepumpen nicht für die Steuerung verwendet.
+
+## Heizstäbe
+
+Normale Heizstäbe können von evcc nur an- oder abgeschaltet werden. Dazu werden diese in der Regel über eine [schaltbare Steckdose](./smartswitches) angeschlossen.
+evcc aktiviert dann bei ausreichend Überschussleistung diese Steckdose (Freigabe) und deaktiviert diese wieder sobald die Bedingungen es erfordern (Sperre).
+
+Bei speziellen Heizstäben mit eigener stufenloser Steuerung gibt evcc die aktuell verfügbare Leistung an das Gerät weiter.
+Diese verfügbare Leistung wird, analog zum Ladevorgang eines Fahrzeuges, permanent an die aktuelle Situation angepasst.
+
+evcc bietet einstellbare Limits an, mit denen du optional deine Wunschtemperatur einstellen kannst.
+Dies darf aber nicht als Sicherheitsfunktion verstanden werden.
+
+Normalerweise sollte die Temperaturregelung ausschließlich über die Thermostatfunktion des Heizstabs selbst erfolgen.
+
+:::danger
+Dein Heizstab muss immer eine eigene Temperaturbegrenzung mitbringen, die bei einer eventuellen Fehlfunktion/Ausfall von evcc oder einer Fehlbedienung eine unzulässige Überhitzung sicher ausschließt.
+:::
+
+
+
+---
+
+<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+## Wärmeerzeuger
+
+### my-PV
+
+#### AC ELWA 2
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: ac-elwa-2
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+<SponsorshipRequired />
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+#### AC THOR, AC THOR 9s
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: ac-thor
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+<SponsorshipRequired />
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Stiebel Eltron
+
+#### LWA/LWZ (SG Ready)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: stiebel-lwa
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      tempsource: # optional`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+#### WPM (SG Ready)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: stiebel-wpm
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      tempsource: # optional`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Tecalor THZ (SG Ready)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: stiebel-lwa
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      tempsource: # optional`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Vaillant SensoNET (SG Ready)
+
+Die Boost Funktion erwärmt Warmwasser und optional eine Boostzone. Die Boostzone wird durch die ID identifiziert. Die Boost Temperatur wird in Grad Celsius angegeben.
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: vaillant
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      zone: # Id der Boostzone (zusätzlich zu Warmwasser) (optional)
+      setpoint: # Boost Temperatur (zusätzlich zu Warmwasser) (optional)`} advanced={`chargers:
+    - name: my_heating
+      type: template
+      template: vaillant
+      user: # Benutzerkonto (bspw. E-Mail Adresse, User Id, etc.) (optional)
+      password: # Passwort des Benutzerkontos (bei führenden Nullen bitte in einfache Hochkommata setzen) (optional)
+      zone: # Id der Boostzone (zusätzlich zu Warmwasser) (optional)
+      setpoint: # Boost Temperatur (zusätzlich zu Warmwasser) (optional)
+      phases: 3 # Die maximale Anzahl der Phasen welche genutzt werden können (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Weishaupt WPM (SG Ready)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: weishaupt-wpm
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      tempsource: # optional`}  />
+
+
+

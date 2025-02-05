@@ -55,7 +55,6 @@ import { themes as prismThemes } from "prism-react-renderer";
         }),
       ],
     ],
-
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({

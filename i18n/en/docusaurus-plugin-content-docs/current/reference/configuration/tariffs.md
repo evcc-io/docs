@@ -36,4 +36,4 @@ tariffs:
     price: 0.08 # [currency]/kWh
 ```
 
-More examples and a list of available providers can be found in the section [Tariffs](/docs/devices/tariffs).
+More examples and a list of available providers can be found in the section [Tariffs](/docs/tariffs).

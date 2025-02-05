@@ -311,7 +311,7 @@ tariffs:
     price: 0.08 # [currency]/kWh
 ```
 
-Mehr Details zur Konfiguration findest du in [`tariffs`](/docs/devices/tariffs).
+Mehr Details zur Konfiguration findest du in [`tariffs`](/docs/tariffs).
 
 Für die Berechnung der Einsparungen erfasst evcc grob die Gesamtmenge der geladenen Energie und die verwendeten Energiequellen (Netz, Batterie, PV).
 
@@ -348,90 +348,3 @@ Parallel lädst du dein Auto mit 3 kW (bspw. Modus = schnell).
 Das Haus wird in diesem Fall mit 100% Sonnenanteil gerechnet, das Auto mit 0%.
 
 Flexible Preise (Octopus Energy, Awattar, Tibber, etc) werden für die Ermittlung des effektiven Energiepreises berücksichtigt.
-
-## Heizstab & Wärmepumpe
-
-### Beispiel: SG-Ready-Kontakt mit Shelly
-
-In dem Beispiel wird der SG-Ready-Kontakt einer Trinkwasserwärmepumpe gesteuert.
-
-"Vehicle-Soc" dient dabei als Anzeige für die Temperatur.
-
-- Shelly 3EM als Grid-Meter
-- Shelly EM (Stromzange) als Charge-Meter
-- Shelly 1 als Charger (öffnet/schließt den SG-Ready-Kontakt)
-
-<details>
-  <summary>Beispielkonfiguration</summary>
-
-```yaml
-network:
-  schema: http
-  host: evcc.local
-  port: 7070
-
-interval: 10s
-
-log: info
-
-meters:
-  - name: grid
-    type: template
-    template: shelly-3em # Shelly 3EM als Grid-Meter
-    usage: grid
-    host: 192.168.178.28
-
-  - name: WP_Pwr
-    type: template
-    template: shelly-1pm # Shelly EM Stromzange 2
-    #usage: charge
-    host: 192.168.178.21
-    channel: 1
-
-chargers:
-  - name: WP_SG
-    type: template
-    template: shelly # Shelly 1 für SG-Kontakt
-    host: 192.168.178.29
-    standbypower: -1
-    integrateddevice: true
-    heating: true
-
-vehicles:
-  - name: WP
-    type: custom
-    title: Wärmepumpe
-    icon: waterheater
-    phases: 1
-    soc:
-      source: mqtt
-      topic: Haus/Wasser_Temp
-
-loadpoints:
-  - title: Warmwasser
-    charger: WP_SG
-    meter: WP_Pwr
-    vehicle: WP
-    enable:
-      threshold: 0
-      delay: 1m
-    disable:
-      threshold: 0
-      delay: 15m # Laufzeit mindestens 15 Minuten
-    soc:
-      estimate: false
-      poll:
-        mode: always
-        interval: 5m
-
-site:
-  - title: Wasser
-    meters:
-      grid: grid
-
-mqtt:
-  broker: raspberrypi:1883
-  topic: evcc
-```
-
-</details>

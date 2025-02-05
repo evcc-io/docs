@@ -16,10 +16,16 @@ const CHARGER_GROUPS = {
   "Schaltbare Steckdosen": "smartswitch",
 };
 
+const HEATING_GROUPS = {
+  Wärmeerzeuger: "heating",
+  "Heating devices": "heating",
+};
+
 const CODE_PREAMBLES = {
   vehicle: "vehicles:\n    - name: my_car",
   charger: "chargers:\n    - name: my_charger",
   smartswitch: "chargers:\n    - name: my_smartswitch",
+  heating: "chargers:\n    - name: my_heating",
   meter: "meters:\n    - name: my_meter",
   grid: "meters:\n    - name: my_grid",
   pv: "meters:\n    - name: my_pv",
@@ -164,10 +170,16 @@ function generateMarkdown(data, type, translations, target) {
     );
   }
 
-  // remove smart switches from chargers
+  // heating devices only
+  if (type === "heating") {
+    data = data.filter((x) => HEATING_GROUPS[x.product.group] === "heating");
+  }
+
+  // remove smart switches and heating devices from chargers
   if (type === "charger") {
     data = data.filter(
-      (x) => CHARGER_GROUPS[x.product.group] !== "smartswitch",
+      (x) =>
+        !["smartswitch", "heating"].includes(CHARGER_GROUPS[x.product.group]),
     );
   }
 
@@ -231,28 +243,34 @@ function generateMarkdown(data, type, translations, target) {
   fs.writeFileSync(target, content, "utf-8");
 }
 
-["vehicle", "meter", "charger", "tariff", "smartswitch"].forEach((type) => {
-  let templates = type;
-  let markdown = `${type}s.mdx`;
+["vehicle", "meter", "charger", "tariff", "smartswitch", "heating"].forEach(
+  (type) => {
+    let templates = type;
+    let markdown = `devices/${type}s.mdx`;
 
-  if (type === "smartswitch") {
-    templates = "charger";
-    markdown = "smartswitches.mdx";
-  }
+    if (type === "smartswitch") {
+      templates = "charger";
+      markdown = "devices/smartswitches.mdx";
+    }
 
-  const templatesDe = readTemplates(`./templates/release/de/${templates}`);
-  const templatesEn = readTemplates(`./templates/release/en/${templates}`);
+    if (type === "heating") {
+      templates = "charger";
+      markdown = "devices/heating.mdx";
+    }
 
-  generateMarkdown(
-    templatesDe,
-    type,
-    TRANSLATIONS_DE,
-    `./docs/devices/${markdown}`,
-  );
-  generateMarkdown(
-    templatesEn,
-    type,
-    TRANSLATIONS_EN,
-    `./i18n/en/docusaurus-plugin-content-docs/current/devices/${markdown}`,
-  );
-});
+    if (type === "tariff") {
+      markdown = "tariffs.mdx";
+    }
+
+    const templatesDe = readTemplates(`./templates/release/de/${templates}`);
+    const templatesEn = readTemplates(`./templates/release/en/${templates}`);
+
+    generateMarkdown(templatesDe, type, TRANSLATIONS_DE, `./docs/${markdown}`);
+    generateMarkdown(
+      templatesEn,
+      type,
+      TRANSLATIONS_EN,
+      `./i18n/en/docusaurus-plugin-content-docs/current/${markdown}`,
+    );
+  },
+);
