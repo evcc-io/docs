@@ -58,7 +58,6 @@ import { themes as prismThemes } from "prism-react-renderer";
         }),
       ],
     ],
-    themes: ["@docusaurus/theme-mermaid"],
     themeConfig:
       /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
       ({
