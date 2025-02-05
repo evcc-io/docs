@@ -95,7 +95,7 @@ messaging:
         Wallbox {{.title}} started charging {{.vehicleTitle}} in {{ toString .mode | upper }} mode.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
         {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
@@ -106,7 +106,7 @@ messaging:
         with {{round (divf .chargedEnergy 1000) 2 }} kWh in {{.chargeDuration}}.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
         {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
@@ -116,7 +116,7 @@ messaging:
         {{.vehicleTitle}} connected on wallbox {{.title}} at {{round (divf .pvPower 1000) 2 }} kW PV.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
         {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
@@ -126,7 +126,7 @@ messaging:
         {{.vehicleTitle}} disconnected of wallbox {{.title}} after {{.connectedDuration}}.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Netz-Leistung: {{round (divf .gridPower 1000) 3 }} kW
+        Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
         {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
@@ -153,7 +153,7 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
 - Meter Infos
   - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (_float_)
   - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (_integer_)
-  - `gridPower` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (_float_)
+  - `grid.Power` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (_float_)
   - `homePower` - Aktuelle Haus-Abnahmeleistung (ohne Wallboxverbrauch) in Watt (_float_)
   - `pvPower` - Aktuelle Solaranlagen-Leistung in Watt (_float_)
 - Ladepunkte (loadpoint)

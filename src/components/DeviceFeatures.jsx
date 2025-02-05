@@ -5,7 +5,7 @@ const allFeatures = { ...chargerFeatures, ...meterFeatures };
 
 function link(feature) {
   if (feature === "sponsorfree") {
-    return "../../sponsorship";
+    return "/docs/sponsorship";
   }
   return "#features";
 }
