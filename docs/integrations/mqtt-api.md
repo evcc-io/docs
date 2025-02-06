@@ -2,14 +2,10 @@
 sidebar_position: 2
 ---
 
-import AsyncUiWrapper from "../../src/components/AsyncUiWrapper";
-
 # MQTT API
 
 Die MQTT API folgt der [REST API](./rest-api) Struktur.
 Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
-
-<AsyncUiWrapper/>
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
