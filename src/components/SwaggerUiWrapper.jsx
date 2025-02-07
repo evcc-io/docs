@@ -1,6 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import SwaggerUI from "swagger-ui-react";
+import CodeBlock from "@theme/CodeBlock";
+import restApiYaml from "!!raw-loader!../../static/rest-api.yaml";
 
 const configs = {
   url: "/rest-api.yaml",
@@ -132,6 +134,7 @@ let customCss = `
 
 export default () => {
   const containerRef = useRef(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (containerRef.current?.attachShadow) {
@@ -146,11 +149,22 @@ export default () => {
 
         const root = ReactDOM.createRoot(div);
         root.render(<SwaggerUI {...configs} />);
+        setInitialized(true);
       } catch (e) {
         console.error(e);
       }
     }
   }, []);
 
-  return <div ref={containerRef}></div>;
+  return (
+    <>
+      <div ref={containerRef}></div>
+      {/* crawler fallback */}
+      {!initialized && (
+        <CodeBlock language="yaml" title="rest-api.yaml">
+          {restApiYaml}
+        </CodeBlock>
+      )}
+    </>
+  );
 };
