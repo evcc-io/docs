@@ -12,6 +12,10 @@ The usage remains free of charge, but requires an additional setup step.
 
 {/* truncate */}
 
+:::note Update
+8.2.2025: More detailed instructions for the Tesla Fleet API and myteslamate.com configuration.
+:::
+
 ## Paid Tesla Fleet API starting February
 
 Last year we integrated the [Tesla Fleet API](/blog/2024/02/01/v0.124-new-tesla-api) into evcc.
@@ -41,16 +45,35 @@ So we decided not to reinvend the wheel.
 
 ## What to do?
 
-### For Tesla drivers
+### For Tesla drivers {#vehicle}
 
-1. Sign in with your Tesla credentials in the [Tesla Developer Portal](https://developer.tesla.com/)
-2. Create a "Fleet API Application" (Company details and billing data can be skipped)
-3. You will receive a **Client ID** and a **Client Secret**
-4. Visit [myteslamate.com](https://app.myteslamate.com/) and select the free "Fleet API & Telemetry" option
-5. Sign in with your Tesla account
-6. Enter your **Client ID** and **Client Secret**
-7. In the "free and directly" section you will receive your **Access- and Refresh-Tokens**
-8. Enter these values in your evcc configuration
+Here is a step-by-step guide to help you set up your Tesla Developer (1) and myteslamate.com (2) account.
+We recommend to use two browser windows, since both have to be done somewhat in parallel (see skip hints).
+
+1. Create a **Tesla Fleet API Application**
+    1. Log into your [Tesla Developer Portal](https://developer.tesla.com/dashboard) (use your Tesla credentials)
+    2. Click **Create New Application** and follow the wizard
+    3. Application Details: Pick a name, description and usage you like. (skip to 2.1.)
+    4. Client Details: Fill in the three URLs provided by myteslamate.com
+    5. API/Scope: Select these scopes
+        - profile information
+        - vehicle information 
+        - vehicle location _(for vehicle detection, not implemented yet)_
+        - vehicle commands _(for wakeup)_
+        - vehicle charging management _(only for TWC owners, see [instructions below](#charger))_
+    6. Billing Details: Can be skipped
+    7. You'll receive a **Client ID** and a **Client Secret** (skip to 2.4.)
+2. Create a **myteslamate.com account**
+    1. Visit [myteslamate.com](https://app.myteslamate.com/)
+    2. Select the free **Fleet API & Telemetry** option
+    3. Sign in with your Tesla account
+    4. Use your personal URLs (Origin, Redirect, Callback) to complete the Tesla Application registration (skip to 1.4.)
+    5. Enter your **Client ID** and **Client Secret**
+    6. In the "free and directly" section you will receive your **Access- and Refresh-Tokens**
+    7. Copy both tokens to your evcc configuration
+    8. Click the **Delete these tokens from MyTeslaMate** button.<br/>
+       _This is important and ensures, that evcc is the only application to use these tokens.
+       Having multiple applications (including myteslamate.com) use the same tokens will lead to token refresh issues._
 
 Example:
 
@@ -64,9 +87,7 @@ vehicles:
     refreshToken: EU_1234567890... # von myteslamate.com
 ```
 
-On myteslamate.com you will find a [more detailed explanation and guide](https://www.myteslamate.com/tesla-api-application-registration/).
-
-For the evcc use case, only the Tesla permissions "Profile information", "Vehicle data" and "Vehicle location" are required.
+You can also find a [more detailed explanation and guide on myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/).
 
 You can track your used API credit in the [Overview of the Tesla Developer Portal](https://developer.tesla.com/dashboard/).
     
@@ -77,11 +98,16 @@ The free use of the service for evcc users is explicitly allowed by him.
 Please refer to the [Terms of Service](https://www.myteslamate.com/terms-of-service) and [Privacy Policy](https://www.myteslamate.com/privacy-policy) before using the service.
 :::
 
-### For Tesla Wall Connector users
+### For Tesla Wall Connector users {#charger}
 
 If you use a Tesla Wall Connector, additional steps are required, as the charging commands require signed communication.
 myteslamate.com offers a "Command Proxy" for 12 € per year, which provides this functionality.
-After registration you will receive a **Proxy-Token**, which you must enter in your evcc configuration.
+
+We assume you've already completed the [steps described above](#vehicle).
+
+1. Log into your [myteslamate.com](https://app.myteslamate.com/) account a second time after you've deleted you tokens (see 2.8.)
+2. Copy the **Proxy-Token** from the **Use your Tesla API via our proxy** section.
+3. Insert the token into your evcc configuration.
 
 ```yaml {8}
 vehicles:
@@ -94,7 +120,7 @@ vehicles:
     proxyToken: aaaaa-bbbbb-...    # von myteslamate.com
 ```
 
-In addition to the permissions mentioned above, the "Vehicle charging management" permission is also required for this function.
+With this setup, evcc will send charging commands to the myteslamate.com proxy, which will sign it with your Tesla application and forward it to the original Tesla API.
 
 :::warning
 The proxy token is very powerful.
