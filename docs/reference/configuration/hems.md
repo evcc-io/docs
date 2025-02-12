@@ -45,7 +45,7 @@ Definiert ob das definierte HEMS die Ladesteuerung von evcc übernehmen soll.
 **Mögliche Werte**:
 
 - `true`: Hiermit kann das Verhältnis von Netzstrom zu PV Leistung für den Modus **Min+PV** im Sunny Portal über den Slider "Optional energy demand" eingestellt werden. Falls die notwendige PV Leistung nicht verfügbar ist, wird das Laden wie im Modus **PV** unterbrochen. Den Slider also ganz nach links zu schieben, bewirkt dass der Modus **Min+PV** wie beschrieben funktioniert. Wenn der Slider ganz nach rechts geschoben wird, verhällt sich der Modus **Min+PV** wie der **PV** Modus.
-- `false`: Der SHM kann die Lademodi nicht beeinflussen, diese werden nur von evcc gesteuert.
+- `false`: Der SHM kann die Lademodi nicht beeinflussen, diese werden nur von evcc gesteuert (empfohlen).
 
 **Beispiel**:
 
