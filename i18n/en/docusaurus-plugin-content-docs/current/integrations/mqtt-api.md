@@ -66,3 +66,18 @@ Examples:
 
 `2023-08-17T19:30:00Z` = 17th of August 2023 at 21:30 CEST
 :::
+
+:::note
+\*\* Support for empty values:
+The following strings are recognized as empty values:
+- `nil`
+- `null`
+- `none`
+- `-`
+
+Examples:
+
+- `evcc/site/batteryGridChargeLimit/set`: 'none'
+
+To set the price threshold for charging the battery to 'none' or to delete it.
+:::
