@@ -90,7 +90,7 @@ Requires firmware >= 1.6.5
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### TerraAC
+### Terra AC (OCPP)
 
 <DeviceFeatures features="skiptest" />
 
@@ -1612,7 +1612,7 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
 <DeviceFeatures features="1p3p,rfid" />
 
 Requires firmware 052.1 or later.
-For 1P/3P-Phase switching the HTTP API v2 in the charger setup needs to be activated.
+Requires "HTTP API v1" api, "HTTP API v2" for 1P/3P phase switching.
 The “simulate unplugging” option should be activated in the Go-E app ("Car" menu item).
 
 <DeviceConfig code={`chargers:
@@ -2015,6 +2015,38 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
+### AMTRON 4You 310
+
+<DeviceFeatures features="1p3p,mA" />
+
+The wallbox must be configured as satellite/slave using the DIP switches on the mainboard and Modbus RTU must be enabled (bank S1: 4=ON, 5=ON, 7=OFF).
+No external meter should be connected directly to the wallbox, as all functions are controlled directly by evcc.
+For Kostal systems with Smart Energy Meter (KSEM), the additional activation code (Solar Pure Mode / Solar Plus Mode) for the KSEM is *not* required.
+
+<DeviceConfig code={`chargers:
+    - name: my_charger
+      type: template
+      template: mennekes-compact
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 50
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 57600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N2" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 50
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+<SponsorshipRequired />
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
 ### AMTRON ChargeControl
 
 <DeviceFeatures features="rfid" />
@@ -2034,7 +2066,7 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### Amtron Compact 2.0s
+### AMTRON Compact 2.0s
 
 <DeviceFeatures features="1p3p,mA" />
 
@@ -2099,38 +2131,6 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
       template: bender
       host: 192.0.2.2 # IP address or hostname
       port: 502 # Port (optional)`}  />
-
-
-
-<SponsorshipRequired />
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### Amtron Start 2.0s
-
-<DeviceFeatures features="1p3p,mA" />
-
-The wallbox must be configured as satellite/slave using the DIP switches on the mainboard and Modbus RTU must be enabled (bank S1: 4=ON, 5=ON, 7=OFF).
-No external meter should be connected directly to the wallbox, as all functions are controlled directly by evcc.
-For Kostal systems with Smart Energy Meter (KSEM), the additional activation code (Solar Pure Mode / Solar Plus Mode) for the KSEM is *not* required.
-
-<DeviceConfig code={`chargers:
-    - name: my_charger
-      type: template
-      template: mennekes-compact
-      
-      # RS485 via adapter (Modbus RTU)
-      modbus: rs485serial
-      id: 50
-      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
-      baudrate: 57600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
-      comset: "8N2" # Kommunikationsparameter für den Adapter
-      
-      # RS485 via TCP/IP (Modbus RTU)
-      modbus: rs485tcpip
-      id: 50
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
 
 
 
@@ -2300,7 +2300,7 @@ The wallbox has to be configured as loadpoint.
 
 ### Software 2.x
 
-<DeviceFeatures features="1p3p,mA,sponsorfree" />
+<DeviceFeatures features="1p3p,mA,rfid,sponsorfree" />
 
 Requires [`Software 2.x`](https://github.com/openWB/core).
 The following changes are necessary under the 'Einstellungen' tab:
@@ -2327,7 +2327,8 @@ The following changes are necessary under the 'Einstellungen' tab:
       id: 1
       host: 192.0.2.2 # Hostname
       port: 1502 # Port
-      connector: 1 # optional`} />
+      connector: 1 # optional
+      phases1p3p: true # optional`} />
 
 
 
@@ -3085,7 +3086,7 @@ The charger must be switched to "Power" charging mode.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-## Spelsberg Wallbox
+## Spelsberg Wallbox Smart Pro
 
 <DeviceFeatures features="rfid" />
 
@@ -3874,7 +3875,8 @@ For demonstration purposes. Charger with a fixed set of values.
       status: A # optional
       power: 0 # optional
       enabled: true # optional
-      maxcurrent: 16 # The maximum amperage per connected phase with which the car shuold be charged (optional)`} />
+      maxcurrent: 16 # The maximum amperage per connected phase with which the car shuold be charged (optional)
+      phases1p3p: false # optional`} />
 
 
 
@@ -3979,7 +3981,8 @@ The specific configuration and the actual usable functionality depend on the cha
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port
+      tempsource: 1 # optional`}  />
 
 
 
@@ -4053,7 +4056,7 @@ The specific configuration and the actual usable functionality depend on the cha
 
 <DeviceFeatures features="sponsorfree" />
 
-The boost function heats hot water and optionally a boost zone. The boost zone is identified by the ID. The boost temperature is specified in degrees Celsius.
+The boost function heats hot water or a boost zone. The boost zone is identified by the ID. The boost temperature is specified in degrees Celsius. If boost temperature is specified, the boost zone is activated, otherwise hot water.
 
 <DeviceConfig code={`chargers:
     - name: my_charger
@@ -4061,36 +4064,16 @@ The boost function heats hot water and optionally a boost zone. The boost zone i
       template: vaillant
       user: # User account (e.g. email address, user id, etc.) (optional)
       password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      zone: # Boost zone id (in addition to hot water) (optional)
-      setpoint: # Boost temperature setpoint (in addition to hot water) (optional)`} advanced={`chargers:
+      zone: # Boost zone id (optional)
+      setpoint: # Boost temperature setpoint (optional)`} advanced={`chargers:
     - name: my_charger
       type: template
       template: vaillant
       user: # User account (e.g. email address, user id, etc.) (optional)
       password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      zone: # Boost zone id (in addition to hot water) (optional)
-      setpoint: # Boost temperature setpoint (in addition to hot water) (optional)
+      zone: # Boost zone id (optional)
+      setpoint: # Boost temperature setpoint (optional)
       phases: 3 # The maximum number of phases which can be used (optional)`} />
-
-
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
-### Weishaupt WPM (SG Ready)
-
-<DeviceFeatures features="sponsorfree" />
-
-<DeviceConfig code={`chargers:
-    - name: my_charger
-      type: template
-      template: weishaupt-wpm
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      tempsource: # optional`}  />
 
 
 
