@@ -4,6 +4,12 @@ sidebar_position: 2
 
 # MQTT API
 
+:::note
+Die Dokumentation ist noch nicht vollständig.
+Die meisten der über die [REST API](./rest-api) verfügbaren Daten und Funktionen sind auch via MQTT verfügbar.
+Nutze Tools wie [MQTT Explorer](https://mqtt-explorer.com/) um die Daten zu visualisieren.
+:::
+
 Die MQTT API folgt der [REST API](./rest-api) Struktur.
 Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 
@@ -46,7 +52,7 @@ Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
 - `evcc/loadpoints/<id>/enableDelay`: delay value (s) (writable)
 - `evcc/loadpoints/<id>/disableThreshold`: threshold value (writable)
 - `evcc/loadpoints/<id>/disableDelay`: delay value (s) (writable)
-- `evcc/loadpoints/<id>/batteryboost`:  battery boost enabled (writeable: [1/0])
+- `evcc/loadpoints/<id>/batteryboost`: battery boost enabled (writeable: [1/0])
 - `evcc/loadpoints/<id>/priority`: priority value (writable)
 
 :::note

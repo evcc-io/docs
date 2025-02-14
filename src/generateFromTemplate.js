@@ -9,6 +9,17 @@ const TARIFF_GROUPS = {
   "Dynamischer Strompreis": "price",
   "CO₂ Vorhersage": "co2",
   "CO₂ forecast": "co2",
+  "PV Vorhersage": "solar",
+  "PV forecast": "solar",
+};
+
+const GROUP_SORT_ORDER = {
+  "Dynamic electricity price": 1,
+  "Dynamischer Strompreis": 1,
+  "CO₂ Vorhersage": 2,
+  "CO₂ forecast": 2,
+  "PV Vorhersage": 3,
+  "PV forecast": 3,
 };
 
 const CHARGER_GROUPS = {
@@ -34,6 +45,7 @@ const CODE_PREAMBLES = {
   aux: "meters:\n    - name: my_aux",
   price: "tariffs:\n    grid:",
   co2: "tariffs:\n    co2:",
+  solar: "tariffs:\n    solar:",
 };
 
 const TRANSLATIONS_DE = {
@@ -185,7 +197,11 @@ function generateMarkdown(data, type, translations, target) {
 
   // sort
   const dataSorted = _.orderBy(data, [
+    // sort by group order-id if exists
+    (x) => GROUP_SORT_ORDER[x.product.group] || 0,
+    // sort by group name
     (x) => x.product.group.toLowerCase(),
+    // sort by brand and description
     (x) => {
       const { brand, description } = x.product;
       if (brand) {
