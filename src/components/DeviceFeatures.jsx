@@ -21,7 +21,7 @@ export default ({ features }) => {
   });
   return (
     <div className={classes}>
-      {validFeatures.map((f) => (
+      {featureList.map((f) => (
         <a href={link(f)} className="feature" key={f}>
           {allFeatures[f] || f}
         </a>
