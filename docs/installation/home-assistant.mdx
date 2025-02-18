@@ -2,11 +2,27 @@
 sidebar_position: 7
 ---
 
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
 # Home Assistant Addon
 
-:::important Wichtig
+:::info Wichtig
 Das evcc Home Assistant Addon ist eine Community Integration und wird "noch" nicht offiziell von den evcc Maintainern unterstützt.
 Der Grund dafür ist, dass im Fehlerfall wichtige Daten nicht einfach bereitgestellt werden können (fehlende `evcc cli`).
+:::
+
+:::caution Datenmigration
+Bitte beachte, dass wir seit dem 16.02.2025 mit der Version 0.200.1 die Pfade im Addon geändert haben, um mit der [Vorgabe](https://developers.home-assistant.io/blog/2023/11/06/public-addon-config/) von Home Assistant konsistent zu sein.
+
+Ab sofort werden also folgende Pfade im Addon verbunden:
+
+- `/homeassistant/` -> zeigt in Home Assistant auf `/homeassistant/` bzw. `/config/`.
+- `/config/`-> zeigt in Home Assistant auf `/addon_configs/49686a9f_evcc/`.
+
+Falls du von einer alten Version updatest, wird Deine Konfigurationsdatei automatisch in das neue Verzeichnis kopiert.
+Die Datenbank kopieren wir nur, wenn sie ebenfalls in `/config/` lag. Falls du sie in `/data/` hattest, bleibt sie dort.
+Den alten Dateien fügen wir `.migrated` an. Diese können dann von dir händisch gelöscht werden.
 :::
 
 Diese Anleitung beschreibt die Installation von evcc als Home Assistant Addon.
@@ -20,15 +36,44 @@ Siehe [Home Assistant Dokumentation](https://www.home-assistant.io/installation/
 
 ## Installation
 
-1. Klicke auf **Einstellungen** → **Addons** → **Addon Store**
-2. Klicke auf die **drei Punkte** → **Repositories**
-3. Füge die Repository-URL ein und klicke auf **Hinzufügen**
-    ```
-    https://github.com/evcc-io/hassio-addon
-    ```
-4. Webseite neu laden
-5. Finde das Addon **evcc** und klicke es an.
-6. Klicke auf die Schaltfläche **Installieren**
+<Tabs groupId="release-type">
+  <TabItem value="Release" label="Release" default>
+  Die aktuelle stabile Version.
+
+  1. Repository automatisch hinzufügen: Klicke auf den nachfolgenden Button und dann auf **Open link**, dann auf **Hinzufügen**.
+  [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc%2Fhassio-addon)
+  2. Repository manuell hinzufügen:
+     1. Klicke auf **Einstellungen** → **Addons** → **Addon Store**
+     2. Klicke auf die **drei Punkte** → **Repositories**
+     3. Füge die Repository-URL ein und klicke auf **Hinzufügen**
+        ```
+        https://github.com/evcc-io/hassio-addon
+        ```
+  3. Webseite neu laden
+  4. Finde das Addon **evcc** und klicke es an
+  5. Klicke auf die Schaltfläche **Installieren**
+
+  </TabItem>
+  <TabItem value="Nightly" label="Nightly">
+  Die aktuelle Entwicklerversion. Täglich aktualisiert. Kann instabil sein.
+  Kann zwar parallel zur Release Version installiert werden, aber es kann immer nur eine Version gleichzeitig laufen.
+  Falls du das Nightly nutzt, ändern sich auch die in dieser Anleitung genannten Pfade bzw. Docker Container Namen, d.h. statt `evcc` muss `evcc-nightly` verwendet werden. 
+
+  1. Repository automatisch hinzufügen: Klicke auf den nachfolgenden Button und dann auf **Open link**, dann auf **Hinzufügen**.
+  [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc%2Fhassio-addon)
+  2. Repository manuell hinzufügen:
+     1. Klicke auf **Einstellungen** → **Addons** → **Addon Store**
+     2. Klicke auf die **drei Punkte** → **Repositories**
+     3. Füge die Repository-URL ein und klicke auf **Hinzufügen**
+        ```
+        https://github.com/evcc-io/hassio-addon
+        ```
+  3. Webseite neu laden
+  4. Finde das Addon **evcc (nightly)** und klicke es an
+  5. Klicke auf die Schaltfläche **Installieren**
+
+  </TabItem>
+</Tabs>
 
 ## Konfigurationsdatei
 
@@ -45,12 +90,61 @@ Gehe zum Menü **Konfiguration** und wähle dein Arbeitsverzeichnis aus (Beispie
 
 Lasse den Abschnitt Netzwerk unverändert.
 
-Lege eine Konfigurationsdatei `evcc.yaml` in deinem Home Assistant-Stammkonfigurationsordner (`/homeassistant`) an.
-Unter [Konfiguration](./configuration) findest du eine Anleitung, wie du diese erstellen kannst.
+Lege eine leere Konfigurationsdatei `evcc.yaml` in deinem Home Addon-Stammkonfigurationsordner (`/addon_configs/49686a9f_evcc`) an.
+Falls dieser Ordner noch nicht exisiert, erstelle ihn manuell.
+
+Um die Konfigurationsdatei anzulegen bzw. zu editieren, hast du verschiedene Möglichkeiten, hier ein paar zur Auswahl:
+- [Visual Studio Code](https://github.com/hassio-addons/addon-vscode), in Visual Studio Code wähle das Hamburger-Menü oben links aus und wähle "File", "Open Folder...", select `/addon_configs/49686a9f_evcc`
+- [File Editor](https://github.com/home-assistant/addons/tree/master/configurator), stelle sicher, dass Du die Option "Enforce Basepath" in der Addon Konfiguration deaktiviert hast, starte das Addon neu und navigiere nach `/addon_configs/49686a9f_evcc`
+- [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh), navigiere nach `/addon_configs/49686a9f_evcc` und verwende z.B. nano
+
+Unter [Konfiguration](./configuration) findest du eine Anleitung, wie du den Inhalt für die `evcc.yaml` erstellen kannst.
+
+Wenn du erstmal mit einer Demo starten möchtest, kopiere den Inhalt dieser [Demo](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml) in deine `evcc.yaml` Datei.
+
+Jetzt bist du bereit und kannst das Addon starten.
 
 ## Aktualisierungen
 
 Die Aktualisierung auf die neueste Version von evcc ist in den Home Assistant Update-Prozess integriert.
+
+## Erweiterte Tips
+
+Um die folgenden Funktionen auszuführen, benötigst du SSH Zugriff auf Home Assistant. Diesen kannst du z.B. mit dem oben erwähnten SSH Addon bekommen.
+
+- Installiere [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh)
+- deaktiviere den "secure mode" in der Addon Konfiguration
+- Starte das Addon neu
+- Öffne die Benutzeroberfläche des Addons
+
+### Wie komme ich an die evcc Datenbank?
+
+Zeige die Dateien in `/data` an:
+```sh
+docker exec addon_49686a9f_evcc ls -la /data
+```
+
+Kopiere die `evcc.db` nach `/addon_configs/49686a9f_evcc`:
+```sh
+docker cp addon_49686a9f_evcc:/data/evcc.db /addon_configs/49686a9f_evcc/
+```
+
+### Wie kann ich das evcc CLI nutzen?
+
+Öffne eine Shell zum evcc Docker Container:
+```sh
+docker exec -it addon_49686a9f_evcc /bin/sh
+```
+
+Starte evcc CLI Befehle (hier als Beispiel `checkconfig`):
+```sh
+evcc -c /config/evcc.yaml checkconfig
+```
+
+Schließe die Shell im evcc Docker Container wenn du fertig bist:
+```sh
+exit
+```
 
 ## Nächster Schritt: Integration
 
