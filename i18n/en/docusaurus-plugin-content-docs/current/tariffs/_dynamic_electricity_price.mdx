@@ -1,0 +1,41 @@
+### Custom Plugin
+
+Use the plugin mechanism to connect a custom tariff source.
+
+**Example: Current price via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    price:
+      source: http
+      uri: https://example.com/api/price
+```
+
+The value returned by the endpoint is used as the grid price.
+
+**Example: Forecasts via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    forecast:
+      source: http
+      uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+      jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "price": .[1] }) | tostring'
+```
+
+The plugin must return a JSON structure containing a list of time periods and prices.
+The date fields must be in the form `YYYY-MM-DDTHH:MM:SSZ` and the price in the correct currency unit (e.g. EUR).
+See the following example:
+
+```js
+[
+  { "start": "2025-01-01T00:00:00Z", "end": "2025-01-01T01:00:00Z", "price": 25.0 },
+  { "start": "2025-01-01T01:00:00Z", "end": "2025-01-01T02:00:00Z", "price": 30.0 },
+]
+```
+
+The plugin is updated once per hour.

@@ -5,11 +5,22 @@ sidebar_position: 5
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import DeviceConfig from "/src/components/DeviceConfig";
+import DeviceFeatures from "/src/components/DeviceFeatures";
 
 
-# Tariffs
+# Tariffs & Forecasts
 
-You can configure electricity tariffs for grid consumption, feed-in and CO₂ intensity. This allows evcc to calculate your savings and automatically shift charging to cheaper times.
+Optimize your charging by integrating electricity tariffs (`grid`, `feedin`) and forecasts (`co2`, `solar`).
+Here is the basic structure:
+
+```yaml
+tariffs:
+  currency: # currency (default EUR)
+  grid: # grid consumption price
+  feedin: # feed-in price
+  co2: # CO₂ intensity forecast
+  solar: # solar production forecast
+```
 
 ## Fixed Electricity Price
 
@@ -140,76 +151,53 @@ You can view the respective calculation results using the command `evcc tariff`.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
 
-## CO₂ forecast
-
-### Electricity Maps
-
-#### Commercial API
-
-CO₂ data for many countries from https://electricitymaps.com/. The 'Free Personal Tier' unfortunately does not include forecast data. You'll need a commercial account from https://api-portal.electricitymaps.com/. Free trial available.
-
-<DeviceConfig code={`tariffs:
-    co2:
-      type: template
-      template: electricitymaps
-      uri: https://api-access.electricitymaps.com/2w...1g/ # HTTP(S) address
-      token:
-      zone: DE # see https://api.electricitymap.org/v3/zones`}  />
-
-
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
-
-#### Free API
-
-CO₂ data for many countries from https://electricitymaps.com/. The 'Free Personal Tier' unfortunately does not include forecast data. You'll need a commercial account from https://api-portal.electricitymaps.com/. Free trial available.
-
-<DeviceConfig code={`tariffs:
-    co2:
-      type: template
-      template: electricitymaps-free
-      token:
-      zone: DE # see https://api.electricitymap.org/v3/zones`}  />
-
-
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
-
-### Grünstromindex 
-
-Regional emission data from https://gruenstromindex.de. Only available for Germany.
-
-<DeviceConfig code={`tariffs:
-    co2:
-      type: template
-      template: grünstromindex
-      zip:
-      token: # Token for accessing the API from https://console.corrently.io (optional)`}  />
-
-
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
-
-### National Grid ESO 
-
-Only available for the United Kingdom.
-
-<DeviceConfig code={`tariffs:
-    co2:
-      type: template
-      template: ngeso
-      region: 1 # Coarser than using a postcode. See https://carbon-intensity.github.io/api-definitions/#region-list (optional)
-      postalcode: SW1 # Outward postcode i.e. RG41 or SW1 or TF8. Do not include full postcode, outward postcode only. (optional)`}  />
-
-
-
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
-
 ## Dynamic electricity price
+
+### Custom Plugin
+
+Use the plugin mechanism to connect a custom tariff source.
+
+**Example: Current price via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    price:
+      source: http
+      uri: https://example.com/api/price
+```
+
+The value returned by the endpoint is used as the grid price.
+
+**Example: Forecasts via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    forecast:
+      source: http
+      uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+      jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "price": .[1] }) | tostring'
+```
+
+The plugin must return a JSON structure containing a list of time periods and prices.
+The date fields must be in the form `YYYY-MM-DDTHH:MM:SSZ` and the price in the correct currency unit (e.g. EUR).
+See the following example:
+
+```js
+[
+  { "start": "2025-01-01T00:00:00Z", "end": "2025-01-01T01:00:00Z", "price": 25.0 },
+  { "start": "2025-01-01T01:00:00Z", "end": "2025-01-01T02:00:00Z", "price": 30.0 },
+]
+```
+
+The plugin is updated once per hour.
 
 ### Amber Electric 
 
-Only available for Australia.
+<DeviceFeatures features="Australia" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -234,7 +222,7 @@ Only available for Australia.
 
 ### Awattar 
 
-Only available for Germany and Austria.
+<DeviceFeatures features="Germany,Austria" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -255,7 +243,7 @@ Only available for Germany and Austria.
 
 ### Energinet 
 
-Only available for Denmark.
+<DeviceFeatures features="Denmark" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -276,7 +264,7 @@ Only available for Denmark.
 
 ### Enever 
 
-Only available for Netherlands.
+<DeviceFeatures features="Netherlands" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -298,6 +286,8 @@ Only available for Netherlands.
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
 
 ### ENTSO-E 
+
+<DeviceFeatures features="EU" />
 
 Day-ahead prices for the European electricity market. See https://transparency.entsoe.eu for more information.
 Basis for many dynamic tariffs.
@@ -323,6 +313,8 @@ Basis for many dynamic tariffs.
 
 ### Fraunhofer ISE 
 
+<DeviceFeatures features="EU" />
+
 Day-ahead forecast of energy prices (per kWh) on the exchange. No prior registration for https://api.energy-charts.info/ necessary. Can be used for dynamic electricity tariffs, for example, where the supplier does not yet offer a price forecast on the customer interface.
 
 <DeviceConfig code={`tariffs:
@@ -344,7 +336,7 @@ Day-ahead forecast of energy prices (per kWh) on the exchange. No prior registra
 
 ### Groupe E Vario Plus
 
-Only available for Switzerland.
+<DeviceFeatures features="Switzerland" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -362,6 +354,8 @@ Only available for Switzerland.
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
 
 ### Nordpool spot prices 
+
+<DeviceFeatures features="EU" />
 
 Nordpool spot prices in day-ahead market for all markets in the Nordpool region.
 
@@ -388,6 +382,8 @@ Nordpool spot prices in day-ahead market for all markets in the Nordpool region.
 
 #### API
 
+<DeviceFeatures features="United Kingdom" />
+
 You can get the API key in the Octopus portal https://octopus.energy/dashboard/new/accounts/personal-details/api-access
 
 <DeviceConfig code={`tariffs:
@@ -402,6 +398,8 @@ You can get the API key in the Octopus portal https://octopus.energy/dashboard/n
 
 #### Product Code
 
+<DeviceFeatures features="United Kingdom" />
+
 <DeviceConfig code={`tariffs:
     grid:
       type: template
@@ -414,6 +412,8 @@ You can get the API key in the Octopus portal https://octopus.energy/dashboard/n
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
 
 ### Ostrom 
+
+<DeviceFeatures features="Germany" />
 
 Create a 'Production Client' in the Ostrom developer portal: https://developer.ostrom-api.io/
 
@@ -431,7 +431,9 @@ Create a 'Production Client' in the Ostrom developer portal: https://developer.o
 
 ### PUN Orario 
 
-Price data from https://www.mercatoelettrico.org/it/. Often used for feeding into the grid. Only available for Italy.
+<DeviceFeatures features="Italy" />
+
+Price data from https://www.mercatoelettrico.org/it/. Often used for feeding into the grid.
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -450,7 +452,7 @@ Price data from https://www.mercatoelettrico.org/it/. Often used for feeding int
 
 ### SmartEnergy smartCONTROL
 
-Only available for Austria.
+<DeviceFeatures features="Austria" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -469,7 +471,7 @@ Only available for Austria.
 
 ### Spotty Energie 
 
-Only available for Austria.
+<DeviceFeatures features="Austria" />
 
 <DeviceConfig code={`tariffs:
     grid:
@@ -492,6 +494,8 @@ Only available for Austria.
 
 ### Tibber 
 
+<DeviceFeatures features="Norway,Sweden,Germany,Netherlands" />
+
 Get your API token from the Tibber developer portal: https://developer.tibber.com/
 
 <DeviceConfig code={`tariffs:
@@ -508,6 +512,132 @@ Get your API token from the Tibber developer portal: https://developer.tibber.co
       charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
       tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
       formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+## CO₂ forecast
+
+### Electricity Maps
+
+#### Commercial API
+
+<DeviceFeatures features="Global" />
+
+CO₂ data for many countries from https://electricitymaps.com/. The 'Free Personal Tier' unfortunately does not include forecast data. You'll need a commercial account from https://api-portal.electricitymaps.com/. Free trial available.
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: electricitymaps
+      uri: https://api-access.electricitymaps.com/2w...1g/ # HTTP(S) address
+      token:
+      zone: DE # see https://api.electricitymap.org/v3/zones`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+#### Free API
+
+<DeviceFeatures features="Global" />
+
+CO₂ data for many countries from https://electricitymaps.com/. The 'Free Personal Tier' unfortunately does not include forecast data. You'll need a commercial account from https://api-portal.electricitymaps.com/. Free trial available.
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: electricitymaps-free
+      token:
+      zone: DE # see https://api.electricitymap.org/v3/zones`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Grünstromindex 
+
+<DeviceFeatures features="Germany" />
+
+Regional emission data from https://gruenstromindex.de
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: grünstromindex
+      zip:
+      token: # Token for accessing the API from https://console.corrently.io (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### National Grid ESO 
+
+<DeviceFeatures features="United Kingdom" />
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: ngeso
+      region: 1 # Coarser than using a postcode. See https://carbon-intensity.github.io/api-definitions/#region-list (optional)
+      postalcode: SW1 # Outward postcode i.e. RG41 or SW1 or TF8. Do not include full postcode, outward postcode only. (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+## PV forecast
+
+:::warning Under Development
+Currently, PV production forecasts are only consumed and made available via [REST API](/docs/integrations/rest-api) (`/api/state`) and [MQTT API](/docs/integrations/mqtt-api) (`forecast/solar`).
+
+Display of the data in the UI and consideration in the [charging plan](/docs/features/plans) will follow in future releases.
+:::
+
+### Forecast.Solar 
+
+<DeviceFeatures features="Global" />
+
+[forecast.solar](https://forecast.solar) can be used for free. Paid plans can also be used by specifying an API key.
+
+<DeviceConfig code={`tariffs:
+    solar:
+      type: template
+      template: forecast-solar
+      lat: 55.7351
+      lon: 9.1275
+      dec: 25 # 0 = horizontal, 90 = vertical
+      az: 180 # -180 = north, -90 = east, 0 = south, 90 = west, 180 = north
+      kwp: 9.8`} advanced={`tariffs:
+    solar:
+      type: template
+      template: forecast-solar
+      lat: 55.7351
+      lon: 9.1275
+      dec: 25 # 0 = horizontal, 90 = vertical
+      az: 180 # -180 = north, -90 = east, 0 = south, 90 = west, 180 = north
+      kwp: 9.8
+      horizon: '0,0,15,30,45,60,60,60,45,30,15,0' # Simulates terrain shadows, [more information](https://doc.forecast.solar/horizon) (optional)
+      apikey: # optional`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Solcast 
+
+<DeviceFeatures features="Global" />
+
+Requires a [solcast.com](https://solcast.com/free-rooftop-solar-forecasting) account. The free "Home User" tier is often sufficient for private use. This plan has an API limit of 10 requests per day.
+
+<DeviceConfig code={`tariffs:
+    solar:
+      type: template
+      template: solcast
+      site: # ressource ID of your site
+      token: # Solcast API Token`}  />
 
 
 
