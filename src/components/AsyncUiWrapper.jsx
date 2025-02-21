@@ -1,34 +1,38 @@
-import AsyncApiComponent from "@asyncapi/react-component";
+import React, { useRef, useEffect } from "react";
+import AsyncAPIStandalone from "@asyncapi/react-component/browser/standalone";
 
 const configs = {};
-const customCss = "";
+const customCss = "@import url('/asyncapi.css');";
 
-export default () => {
+export default function AsyncUiWrapper() {
   const containerRef = useRef(null);
 
   useEffect(() => {
     if (containerRef.current?.attachShadow) {
       try {
         const shadowRoot = containerRef.current.attachShadow({ mode: "open" });
+
         const style = document.createElement("style");
         style.textContent = customCss;
         shadowRoot.appendChild(style);
 
-        const div = document.createElement("div");
-        shadowRoot.appendChild(div);
+        const asyncDiv = document.createElement("div");
+        shadowRoot.appendChild(asyncDiv);
 
-        const root = ReactDOM.createRoot(div);
-        root.render(
-          <AsyncApiComponent
-            schema={{ url: "/mqtt-api.yaml" }}
-            config={configs}
-          />,
+        AsyncAPIStandalone.render(
+          {
+            schema: {
+              url: "/mqtt-api.yaml",
+            },
+            config: configs,
+          },
+          asyncDiv,
         );
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
     }
   }, []);
 
   return <div ref={containerRef}></div>;
-};
+}
