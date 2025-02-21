@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import AsyncAPIStandalone from "@asyncapi/react-component/browser/standalone";
 
-const configs = {};
+const configs = { show: { info: false } };
 const customCss = "@import url('/asyncapi.css');";
 
 export default function AsyncUiWrapper() {
