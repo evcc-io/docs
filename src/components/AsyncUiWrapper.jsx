@@ -7,6 +7,9 @@ const configs = {
   show: {
     info: false,
   },
+  expand: {
+    messageExamples: true,
+  },
 };
 
 const customCss = "@import url('/asyncapi.css');";
@@ -31,7 +34,7 @@ function AsyncUiComponent() {
                 schema: { url: "/mqtt-api.yaml" },
                 config: configs,
               },
-              asyncDiv
+              asyncDiv,
             );
           })
           .catch((error) => console.error("AsyncAPI render error:", error));
