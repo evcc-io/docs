@@ -19,16 +19,20 @@ function sortAsyncAPI(filePath) {
     let asyncAPI = yaml.load(data);
 
     if (asyncAPI.operations) {
+      for (const operation in asyncAPI.operations) {
+        asyncAPI.operations[operation].channel.parameters = sortObject(
+          asyncAPI.operations[operation].channel.parameters,
+        );
+      }
+
       asyncAPI.operations = sortObject(asyncAPI.operations);
     }
 
-    if (asyncAPI.components) {
-      ["messages", "parameters", "tags"].forEach((key) => {
-        if (asyncAPI.components[key]) {
-          asyncAPI.components[key] = sortObject(asyncAPI.components[key]);
-        }
-      });
-    }
+    ["messages", "parameters", "tags"].forEach((key) => {
+      if (asyncAPI.components[key]) {
+        asyncAPI.components[key] = sortObject(asyncAPI.components[key]);
+      }
+    });
 
     fs.writeFileSync(filePath, yaml.dump(asyncAPI, { quotingType: '"' }));
     console.log("AsyncAPI YAML file successfully sorted and updated.");
