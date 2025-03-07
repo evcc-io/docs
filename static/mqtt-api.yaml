@@ -74,10 +74,10 @@ operations:
       parameters:
         loadpointId:
           $ref: "#/components/parameters/id"
-        phase:
-          $ref: "#/components/parameters/phase"
         phaseId:
           $ref: "#/components/parameters/id"
+        topic:
+          $ref: "#/components/parameters/topic"
       messages:
         chargeCurrentPhase:
           description: TODO
@@ -99,7 +99,7 @@ operations:
         chargeCurrent:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointChargeCurrentsReceive:
@@ -116,7 +116,7 @@ operations:
         chargeCurrents:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointChargePowerReceive:
@@ -133,7 +133,7 @@ operations:
         chargePower:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointChargeRemainingDurationReceive:
@@ -254,7 +254,7 @@ operations:
         chargedEnergy:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointChargerFeatureHeatingReceive:
@@ -486,7 +486,7 @@ operations:
         effectiveMaxCurrent:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointEffectiveMinCurrentReceive:
@@ -503,7 +503,7 @@ operations:
         effectiveMinCurrent:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointEffectivePlanIdReceive:
@@ -836,7 +836,7 @@ operations:
           $ref: "#/components/parameters/topic"
       messages:
         phases:
-          $ref: "#/components/messages/phases"
+          $ref: "#/components/messages/loadpointPhases"
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointPhasesSet:
@@ -851,7 +851,7 @@ operations:
           $ref: "#/components/parameters/topic"
       messages:
         phases:
-          $ref: "#/components/messages/phases"
+          $ref: "#/components/messages/loadpointPhases"
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointPlanActiveReceive:
@@ -885,7 +885,7 @@ operations:
         planEnergy:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointPlanEnergySet:
@@ -909,7 +909,7 @@ operations:
                 type: string
               value:
                 description: TODO
-                type: integer
+                type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointPlanOverrunReceive:
@@ -1026,7 +1026,7 @@ operations:
         sessionEnergy:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointSessionPricePerKWhReceive:
@@ -1109,9 +1109,7 @@ operations:
           $ref: "#/components/parameters/topic"
       messages:
         smartCostLimit:
-          description: TODO
-          payload:
-            type: number
+          $ref: "#/components/messages/smartCostLimit"
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointTitleReceive:
@@ -1194,7 +1192,7 @@ operations:
         vehicleOdometer:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/loadpoints"
   LoadpointVehicleRangeReceive:
@@ -1422,7 +1420,7 @@ operations:
         batteryEnergy:
           description: TODO
           payload:
-            type: integer
+            type: number
       parameters:
         topic:
           $ref: "#/components/parameters/topic"
@@ -1610,19 +1608,100 @@ operations:
     channel:
       address: "{topic}/site/forecast/co2"
       messages:
-        forecastCo2:
+        tariff:
+          $ref: "#/components/messages/tariff"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+    tags:
+      - $ref: "#/components/tags/site"
+  SiteForecastFeedinReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/site/forecast/feedin"
+      messages:
+        tariff:
+          $ref: "#/components/messages/tariff"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+    tags:
+      - $ref: "#/components/tags/site"
+  SiteForecastGridReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/site/forecast/grid"
+      messages:
+        tariff:
+          $ref: "#/components/messages/tariff"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+    tags:
+      - $ref: "#/components/tags/site"
+  SiteForecastSolarDayReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/site/forecast/solar/{day}"
+      messages:
+        forecastGridDay:
           description: TODO
           payload:
-            type: array
-            items:
-              type: object
-              properties:
-                start:
-                  type: string
-                end:
-                  type: string
-                price:
-                  type: integer
+            type: object
+            properties:
+              yield:
+                description: TODO
+                type: string
+              complete:
+                description: TODO
+                type: boolean
+      parameters:
+        day:
+          description: TODO
+          enum:
+            - today
+            - tomorrow
+        topic:
+          $ref: "#/components/parameters/topic"
+    tags:
+      - $ref: "#/components/tags/site"
+  SiteForecastSolarTimeseriesReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/site/forecast/solar/timeseries/{id}"
+      messages:
+        forecastTimeseries:
+          description: TODO
+          payload:
+            type: object
+            properties:
+              timestamp:
+                description: TODO
+                type: integer
+              value:
+                description: TODO
+                type: number
+      parameters:
+        id:
+          $ref: "#/components/parameters/id"
+        topic:
+          $ref: "#/components/parameters/topic"
+    tags:
+      - $ref: "#/components/tags/site"
+  SiteForecastSolarTimeseries_Receive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/site/forecast/solar/timeseries"
+      messages:
+        forecastTimeseries_:
+          description: TODO
+          payload:
+            type: integer
       parameters:
         topic:
           $ref: "#/components/parameters/topic"
@@ -1682,7 +1761,7 @@ operations:
         gridEnergy:
           description: TODO
           payload:
-            type: integer
+            type: number
       parameters:
         topic:
           $ref: "#/components/parameters/topic"
@@ -1697,7 +1776,7 @@ operations:
         gridPower:
           description: TODO
           payload:
-            type: integer
+            type: number
       parameters:
         topic:
           $ref: "#/components/parameters/topic"
@@ -1918,7 +1997,7 @@ operations:
         pvEnergy:
           description: TODO
           payload:
-            type: integer
+            type: number
       parameters:
         topic:
           $ref: "#/components/parameters/topic"
@@ -2007,9 +2086,7 @@ operations:
           $ref: "#/components/parameters/topic"
       messages:
         smartCostLimit:
-          description: TODO
-          payload:
-            type: number
+          $ref: "#/components/messages/smartCostLimit"
     tags:
       - $ref: "#/components/tags/site"
   SiteSmartCostTypeReceive:
@@ -2259,7 +2336,7 @@ operations:
         capacity:
           description: TODO
           payload:
-            type: integer
+            type: number
     tags:
       - $ref: "#/components/tags/vehicles"
   VehicleFeatureReceive:
@@ -2354,6 +2431,36 @@ operations:
             type: integer
     tags:
       - $ref: "#/components/tags/vehicles"
+  VehicleMaxCurrentReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/vehicles/{vehicleName}/maxCurrent"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+        vehicleName:
+          $ref: "#/components/parameters/vehicleName"
+      messages:
+        maxCurrent:
+          $ref: "#/components/messages/maxCurrent"
+    tags:
+      - $ref: "#/components/tags/vehicles"
+  VehicleMinCurrentReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/vehicles/{vehicleName}/minCurrent"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+        vehicleName:
+          $ref: "#/components/parameters/vehicleName"
+      messages:
+        minCurrent:
+          $ref: "#/components/messages/minCurrent"
+    tags:
+      - $ref: "#/components/tags/vehicles"
   VehicleMinSocReceive:
     description: TODO
     action: receive
@@ -2388,24 +2495,27 @@ operations:
             type: integer
     tags:
       - $ref: "#/components/tags/vehicles"
-  VehiclePlanSocReceive:
+  VehiclePhasesReceive:
     description: TODO
     action: receive
     channel:
-      address: "{topic}/vehicles/{vehicleName}/plan/soc"
+      address: "{topic}/vehicles/{vehicleName}/phases"
       parameters:
         topic:
           $ref: "#/components/parameters/topic"
         vehicleName:
           $ref: "#/components/parameters/vehicleName"
       messages:
-        soc:
-          description: TODO
+        vehiclePhases:
           payload:
             type: integer
+            enum:
+              - "1"
+              - "2"
+              - "3"
     tags:
       - $ref: "#/components/tags/vehicles"
-  VehiclePlanSocSet:
+  VehiclePlanSet:
     description: TODO
     action: send
     channel:
@@ -2429,6 +2539,23 @@ operations:
                 type: string
     tags:
       - $ref: "#/components/tags/vehicles"
+  VehiclePlanSocReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/vehicles/{vehicleName}/plan/soc"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+        vehicleName:
+          $ref: "#/components/parameters/vehicleName"
+      messages:
+        soc:
+          description: TODO
+          payload:
+            type: integer
+    tags:
+      - $ref: "#/components/tags/vehicles"
   VehiclePlanTimeReceive:
     description: TODO
     action: receive
@@ -2444,6 +2571,21 @@ operations:
           description: TODO
           payload:
             type: string
+    tags:
+      - $ref: "#/components/tags/vehicles"
+  VehiclePriorityReceive:
+    description: TODO
+    action: receive
+    channel:
+      address: "{topic}/vehicles/{vehicleName}/priority"
+      parameters:
+        topic:
+          $ref: "#/components/parameters/topic"
+        vehicleName:
+          $ref: "#/components/parameters/vehicleName"
+      messages:
+        priority:
+          $ref: "#/components/messages/priority"
     tags:
       - $ref: "#/components/tags/vehicles"
   VehicleRepeatingPlanActiveReceive:
@@ -2647,15 +2789,25 @@ components:
     limitEnergy:
       description: TODO
       payload:
+        type: number
+    loadpointPhases:
+      description: >-
+        Number of phases. (0: auto, 1: 1-phase, 3: 3-phase) [Read
+        more.](/en/docs/reference/configuration/loadpoints#phases)
+      payload:
         type: integer
+        enum:
+          - "0"
+          - "1"
+          - "3"
     maxCurrent:
       description: TODO
       payload:
-        type: integer
+        type: number
     minCurrent:
       description: TODO
       payload:
-        type: integer
+        type: number
     mode:
       description: >-
         Charging mode. [Read
@@ -2667,16 +2819,6 @@ components:
           - pv
           - minpv
           - now
-    phases:
-      description: >-
-        Number of phases. (0: auto, 1: 1-phase, 3: 3-phase) [Read
-        more.](/en/docs/reference/configuration/loadpoints#phases)
-      payload:
-        type: integer
-        enum:
-          - "0"
-          - "1"
-          - "3"
     priority:
       description: TODO
       payload:
@@ -2692,7 +2834,20 @@ components:
     smartCostLimit:
       description: TODO
       payload:
-        type: integer
+        type: number
+    tariff:
+      description: TODO
+      payload:
+        type: array
+        items:
+          type: object
+          properties:
+            start:
+              type: string
+            end:
+              type: string
+            price:
+              type: integer
     vehicleLimitSoc:
       description: TODO
       payload:
