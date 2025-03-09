@@ -62,12 +62,25 @@ Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähle
 Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
 Dafür kommt der spezielle Typ `sgready` zum Einsatz.
 
+*Achtung:* 
+Viele Wärmepumpen sollten eine gewissen Mindestlaufzeit pro Start haben um eine lange Lebensdauer zu erreichen.
+Teilweise ist die durchschnittliche Laufzeit auch Teil der Garantiebedingungen.
+
 ```yaml
 loadpoints:
   - title: Meine Wärmepumpe
     charger: heatpump_control
     meter: heatpump_power
     integrateddevice: true # Fahrzeugauswahl deaktivieren
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z.B.
+    enable:
+      threshold: -1300
+      delay: 5m
+    disable:
+      threshold: 150
+      delay: 20m
+    guardduration: 30m
 
 meters:
   - name: heatpump_power
@@ -81,8 +94,10 @@ chargers:
     setmode:
       source: switch
       switch:
-      - case: 1 # normal
+      - case: 1 # normal: 
         set:
+          # hier wird der Funktionsaufruf eingefügt , der die Heizung in den Normalbetrieb setzt.
+          # dafür können alle üblichen Plugins verwendet werden
           source: const
           value: false
           set:
@@ -93,6 +108,7 @@ chargers:
               host: 192.168.0.101
       - case: 2 # boost
         set:
+          # hier wird der Funktionsaufruf eingefügt , der die Heizung in den Boostbetrieb setzt.
           source: const
           value: true
           set:
@@ -106,6 +122,10 @@ chargers:
           source: error
           error: ErrNotAvailable
     getmode:
+      # hier wird der Funktionsaufruf eingefügt, der den Status der Heizung zurückmeldet:
+      # 1 für Normalbetrieb
+      # 2 für Boostbetrieb
+      # 3 für reduzierte Leistung
       source: calc
       add:
         - source: const
