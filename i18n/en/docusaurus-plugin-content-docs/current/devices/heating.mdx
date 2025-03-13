@@ -65,6 +65,13 @@ loadpoints:
     charger: heatpump_control
     meter: heatpump_power
     integrateddevice: true # Disable vehicle selection
+    # Usual parameters for loadpoints can be added here, especially to prevent short runtimes, e.g.
+    enable:
+      threshold: -1300 # This is an example. Use negativ values for power feedin to the grid.
+      delay: 5m
+    disable:
+      threshold: 150 # This is an example. Use positive values for power consumption from the grid.
+      delay: 20m  #Attention, some heatpumps require a minimum runtime to reach long lifetime or warranty conditions
 meters:
   - name: heatpump_power
     type: template
@@ -82,12 +89,15 @@ chargers:
           source: const
           value: false
           set:
+            # Add the function here to set the heatpump in normal operation mode
+            # all types of plugins can be used
             source: charger
             config:
               type: template
               template: shelly # Boost contact of the heat pump
               host: 192.168.0.101
       - case: 2 # boost
+        # Add the function here to set the heatpump in boost mode
         set:
           source: const
           value: true
@@ -102,6 +112,10 @@ chargers:
           source: error
           error: ErrNotAvailable
     getmode:
+      # Add function here to get the current mode of the heatpump, return
+      # 1 for normal operation
+      # 2 for boost mode
+      # 3 for limited operation mode
       source: calc
       add:
         - source: const
