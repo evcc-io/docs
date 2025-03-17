@@ -140,6 +140,46 @@ tariffs:
 
 In this example, there is a surcharge of 10 ct/kWh.
 No surcharge is calculated from 10:00 PM to 6:00 AM.
+
+### Exchange Prices with Season and Time Component
+Useful for "Tafiff model 3" where tariff is different between summer and winter and furthermore tariff changes during the day.
+
+The tariff is defined in time-slots:
+"low load tariff" from 00 to 06,  "high load tariff" from 06 to 17,  "peak load tariff" from 17 to 21 and "high load tariff" from 21 to 24:
+
+
+```yaml
+tariffs:
+  grid:
+   type: energinet
+    region: dk1   # or dk2
+    charges: 0.81 # my case
+    tax: 0.25     # 25% VAT
+    formula: |
+      // Set default grid fees (winter values)
+      gridfee := 0.2929  // high load tariff
+      if ts.Hour() < 6 {
+        gridfee = 0.0976  // low load tariff
+      } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+        gridfee = 0.8788  // peak load tariff
+      }
+
+      // Adjust grid fees for summer (April - September)
+      if ts.Month() >= 4 && ts.Month() <= 9 {
+        gridfee = 0.1467  // high load tariff
+        if ts.Hour() < 6 {
+          gridfee = 0.0976  // low load tariff
+        } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+          gridfee = 0.3808  // peak load tariff
+        }
+      }
+
+      ( price + charges + gridfee ) * ( 1 + tax )
+```
+In this example, the winter period is defined as October to Marts amd summer from April to September. 
+In each season the tariff for high load, low load and peak load is defined. This value is then added to the price before tax is calculated
+The above example is working with Dynamic Electricyty Prices 
+
 There are no limits to your imagination.
 
 The `formula` mechanism also works for many other data-providers.
