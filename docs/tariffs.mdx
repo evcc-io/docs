@@ -138,11 +138,38 @@ In der Zeit von 22:00 Uhr bis 06:00 Uhr wird kein Aufschlag berechnet.
 
 ### Börsenpreise mit Saison- und Zeitkomponente
 Nützlich für „Tarifmodell 3“, bei dem der Tarif zwischen Sommer und Winter variiert und sich zudem im Tagesverlauf ändert.
+Der Tarif ist in Zeitfenster unterteilt: „low load tariff“ von 00 bis 06 Uhr, „high load tariff“ von 06 bis 17 Uhr, „peak load tariff“ von 17 bis 21 Uhr und erneut „high load tariff“ von 21 bis 24 Uhr.
 
-Der Tarif ist in Zeitfenster unterteilt: „Niedriglasttarif“ von 00 bis 06 Uhr, „Hochlasttarif“ von 06 bis 17 Uhr, „Spitzenlasttarif“ von 17 bis 21 Uhr und erneut „Hochlasttarif“ von 21 bis 24 Uhr.
+```yaml
+tariffs:
+  grid:
+   type: energinet
+    region: dk1   # or dk2
+    charges: 0.81 # my case
+    tax: 0.25     # 25% VAT
+    formula: |
+      // Set default grid fees (winter values)
+      gridfee := 0.2929  // high load tariff
+      if ts.Hour() < 6 {
+        gridfee = 0.0976  // low load tariff
+      } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+        gridfee = 0.8788  // peak load tariff
+      }
 
+      // Adjust grid fees for summer (April - September)
+      if ts.Month() >= 4 && ts.Month() <= 9 {
+        gridfee = 0.1467  // high load tariff
+        if ts.Hour() < 6 {
+          gridfee = 0.0976  // low load tariff
+        } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+          gridfee = 0.3808  // peak load tariff
+        }
+      }
 
-In diesem Beispiel wird der Winterzeitraum von Oktober bis März und der Sommerzeitraum von April bis September definiert. In jeder Saison werden die Tarife für Hochlast, Niedriglast und Spitzenlast festgelegt. Dieser Wert wird dann zum Preis hinzugefügt, bevor die Steuer berechnet wird.
+      ( price + charges + gridfee ) * ( 1 + tax )
+```
+
+In diesem Beispiel wird der Winterzeitraum von Oktober bis März und der Sommerzeitraum von April bis September definiert. In jeder Saison werden die Tarife für high load tariff, low load tariff und peak load tariff festgelegt. Dieser Wert wird dann zum Preis hinzugefügt, bevor die Steuer berechnet wird.
 
 Das obige Beispiel arbeitet mit dynamischen Strompreisen.
 
