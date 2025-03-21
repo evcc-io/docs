@@ -124,7 +124,13 @@ In the example above, a price cap of 50 ct/kWh is defined.
 The formula is written in Go syntax.
 In addition to the values `price`, `charges`, and `tax`, the [`math` library](https://pkg.go.dev/math) is available.
 
-### Exchange Prices with Time Component
+There are no limits to your imagination.
+The `formula` mechanism also works for many other data-providers.
+Check the documentation below.
+
+You can view the respective calculation results using the command `evcc tariff`.
+
+#### Example: Exchange Prices with Time Component
 
 The formula is executed for the current electricity price and each time slot in the forecast.
 If the calculation is time-dependent, you can also access the [time](https://pkg.go.dev/time#Time) of the respective slot via `ts`.
@@ -141,22 +147,21 @@ tariffs:
 In this example, there is a surcharge of 10 ct/kWh.
 No surcharge is calculated from 10:00 PM to 6:00 AM.
 
-### Exchange Prices with Season and Time Component
-Useful when tariff is different between summer and winter and furthermore tariff changes during the day with peak and off-peak tariffs.
+#### Example: Tariff with Season and Time-based Grid Fees
 
-The tariff is defined in time-slots:
-"low load tariff" from 00 to 06,  "high load tariff" from 06 to 17,  "peak load tariff" from 17 to 21 and "high load tariff" from 21 to 24:
-
+Dynamic Danish electricity tariff, whose fees change throughout the year (summer, winter) and during the day (high, low price zones).
 
 ```yaml
 tariffs:
+  currency: DKK
   grid:
    type: energinet
     region: dk1   # or dk2
     charges: 0.81 # my case
     tax: 0.25     # 25% VAT
     formula: |
-      // Set default grid fees (winter values)
+
+      // Set default grid fees (winter)
       gridfee := 0.2929  // high load tariff
       if ts.Hour() < 6 {
         gridfee = 0.0976  // low load tariff
@@ -176,17 +181,10 @@ tariffs:
 
       ( price + charges + gridfee ) * ( 1 + tax )
 ```
-This is an example of a tariff that vary throughout the year (summer, winter). 
-In addition, there are high- and low-price zones throughout the day. The tariff is divided into time slots: "low load tariff" from midnight to 6 a.m., "high load tariff" from 6 a.m. to 5 p.m., "peak load tariff" from 5 p.m. to 9 p.m., and again "high load tariff" from 9 p.m. to midnight.
-The total price is calculated from the exchange price, fees and taxes
-The above example is working with dynamic electricity prices. 
 
-There are no limits to your imagination.
-
-The `formula` mechanism also works for many other data-providers.
-Check the documentation below.
-
-You can view the respective calculation results using the command `evcc tariff`.
+The grid fee (`gridfee`) differs in winter (October - March) and summer (April - September).
+Additionally there is a high- (6am-5pm, 9-12pm), low- (0-6am) and peak-load (5pm-9pm) zone.
+In this example the grid fee is 0.1467 DKK/kWh at 4am in June.
 
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 
