@@ -1,6 +1,10 @@
 const fs = require("fs");
 const yaml = require("js-yaml");
 const _ = require("lodash");
+const countries = require("i18n-iso-countries");
+
+countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
+countries.registerLocale(require("i18n-iso-countries/langs/de.json"));
 
 const AUTOGEN_MARKER = "<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->";
 
@@ -9,6 +13,17 @@ const TARIFF_GROUPS = {
   "Dynamischer Strompreis": "price",
   "CO₂ Vorhersage": "co2",
   "CO₂ forecast": "co2",
+  "PV Vorhersage": "solar",
+  "PV forecast": "solar",
+};
+
+const GROUP_SORT_ORDER = {
+  "Dynamic electricity price": 1,
+  "Dynamischer Strompreis": 1,
+  "CO₂ Vorhersage": 2,
+  "CO₂ forecast": 2,
+  "PV Vorhersage": 3,
+  "PV forecast": 3,
 };
 
 const CHARGER_GROUPS = {
@@ -16,10 +31,16 @@ const CHARGER_GROUPS = {
   "Schaltbare Steckdosen": "smartswitch",
 };
 
+const HEATING_GROUPS = {
+  Wärmeerzeuger: "heating",
+  "Heating devices": "heating",
+};
+
 const CODE_PREAMBLES = {
   vehicle: "vehicles:\n    - name: my_car",
   charger: "chargers:\n    - name: my_charger",
   smartswitch: "chargers:\n    - name: my_smartswitch",
+  heating: "chargers:\n    - name: my_heating",
   meter: "meters:\n    - name: my_meter",
   grid: "meters:\n    - name: my_grid",
   pv: "meters:\n    - name: my_pv",
@@ -28,6 +49,7 @@ const CODE_PREAMBLES = {
   aux: "meters:\n    - name: my_aux",
   price: "tariffs:\n    grid:",
   co2: "tariffs:\n    co2:",
+  solar: "tariffs:\n    solar:",
 };
 
 const TRANSLATIONS_DE = {
@@ -36,6 +58,7 @@ const TRANSLATIONS_DE = {
   "tab.battery": "Batterie",
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
+  global: "Global",
 };
 
 const TRANSLATIONS_EN = {
@@ -44,7 +67,24 @@ const TRANSLATIONS_EN = {
   "tab.battery": "Battery",
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
+  global: "Global",
 };
+
+function makeTranslate(language) {
+  return function translate(key) {
+    const translations = language === "de" ? TRANSLATIONS_DE : TRANSLATIONS_EN;
+    // local lookup
+    if (translations[key]) {
+      return translations[key];
+    }
+    // check for country lookup
+    const countryName = countries.getName(key, language);
+    if (countryName) {
+      return countryName;
+    }
+    return key;
+  };
+}
 
 function escapeRegExp(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -64,7 +104,7 @@ function indent(code) {
   return result.replace(/^/gm, "      ");
 }
 
-function templateContent(entry, type, translations) {
+function templateContent(entry, type, translate) {
   const description = entry.description ? entry.description + "\n" : "";
 
   const codeBlocks = entry.render.map((render) => {
@@ -90,9 +130,9 @@ function templateContent(entry, type, translations) {
     code = `<Tabs>
 ${codeBlocks
   .map(
-    (block, i) => `<TabItem value="${block.usage}" label="${
-      translations[`tab.${block.usage}`]
-    }"${i === 0 ? " default" : ""}>
+    (block, i) => `<TabItem value="${block.usage}" label="${translate(
+      `tab.${block.usage}`,
+    )}"${i === 0 ? " default" : ""}>
 
 ${block.code}
 
@@ -106,10 +146,16 @@ ${block.code}
     ? `<SponsorshipRequired />\n\n`
     : "";
 
+  let countryList = [];
+  if (type === "tariff") {
+    countryList = (entry.countries || ["global"]).map(translate);
+  }
+
   const features = [
     ...(entry.capabilities || []),
     ...(entry.requirements || []),
-  ];
+    ...countryList,
+  ].filter((f) => f !== "skiptest");
 
   // use sponsorfree instead of sponsorship
   if (type === "charger") {
@@ -128,7 +174,7 @@ ${block.code}
   }
 
   const deviceFeatures =
-    type === "charger" || type === "meter"
+    type === "charger" || type === "meter" || type === "tariff"
       ? `<DeviceFeatures features="${features.join(",")}" />\n\n`
       : "";
 
@@ -146,7 +192,7 @@ function additionalContent(name, target) {
   return "";
 }
 
-function generateMarkdown(data, type, translations, target) {
+function generateMarkdown(data, type, translate, target) {
   let brandCounter = 0;
   let productCounter = 0;
 
@@ -164,16 +210,26 @@ function generateMarkdown(data, type, translations, target) {
     );
   }
 
-  // remove smart switches from chargers
+  // heating devices only
+  if (type === "heating") {
+    data = data.filter((x) => HEATING_GROUPS[x.product.group] === "heating");
+  }
+
+  // remove smart switches and heating devices from chargers
   if (type === "charger") {
     data = data.filter(
-      (x) => CHARGER_GROUPS[x.product.group] !== "smartswitch",
+      (x) =>
+        !["smartswitch", "heating"].includes(CHARGER_GROUPS[x.product.group]),
     );
   }
 
   // sort
   const dataSorted = _.orderBy(data, [
+    // sort by group order-id if exists
+    (x) => GROUP_SORT_ORDER[x.product.group] || 0,
+    // sort by group name
     (x) => x.product.group.toLowerCase(),
+    // sort by brand and description
     (x) => {
       const { brand, description } = x.product;
       if (brand) {
@@ -215,7 +271,7 @@ function generateMarkdown(data, type, translations, target) {
     }
     productCounter++;
 
-    generated += `${templateContent(entry, type, translations)}`;
+    generated += `${templateContent(entry, type, translate)}`;
 
     lastGroup = group;
     lastBrand = brand;
@@ -231,28 +287,39 @@ function generateMarkdown(data, type, translations, target) {
   fs.writeFileSync(target, content, "utf-8");
 }
 
-["vehicle", "meter", "charger", "tariff", "smartswitch"].forEach((type) => {
-  let templates = type;
-  let markdown = `${type}s.mdx`;
+["vehicle", "meter", "charger", "tariff", "smartswitch", "heating"].forEach(
+  (type) => {
+    let templates = type;
+    let markdown = `devices/${type}s.mdx`;
 
-  if (type === "smartswitch") {
-    templates = "charger";
-    markdown = "smartswitches.mdx";
-  }
+    if (type === "smartswitch") {
+      templates = "charger";
+      markdown = "devices/smartswitches.mdx";
+    }
 
-  const templatesDe = readTemplates(`./templates/release/de/${templates}`);
-  const templatesEn = readTemplates(`./templates/release/en/${templates}`);
+    if (type === "heating") {
+      templates = "charger";
+      markdown = "devices/heating.mdx";
+    }
 
-  generateMarkdown(
-    templatesDe,
-    type,
-    TRANSLATIONS_DE,
-    `./docs/devices/${markdown}`,
-  );
-  generateMarkdown(
-    templatesEn,
-    type,
-    TRANSLATIONS_EN,
-    `./i18n/en/docusaurus-plugin-content-docs/current/devices/${markdown}`,
-  );
-});
+    if (type === "tariff") {
+      markdown = "tariffs.mdx";
+    }
+
+    const templatesDe = readTemplates(`./templates/release/de/${templates}`);
+    const templatesEn = readTemplates(`./templates/release/en/${templates}`);
+
+    generateMarkdown(
+      templatesDe,
+      type,
+      makeTranslate("de"),
+      `./docs/${markdown}`,
+    );
+    generateMarkdown(
+      templatesEn,
+      type,
+      makeTranslate("en"),
+      `./i18n/en/docusaurus-plugin-content-docs/current/${markdown}`,
+    );
+  },
+);

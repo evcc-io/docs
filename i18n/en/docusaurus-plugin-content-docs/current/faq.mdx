@@ -92,7 +92,7 @@ When making a post, it would be super useful to give as much information as poss
 
 <details>
 <summary>
-   Helper comamnd (*please make sure all usernames, passwords, and other secrets are removed!*).
+   Helper command (*please make sure all usernames, passwords, and other secrets are removed!*).
 </summary>
 
 `egrep -v '^#|^\s+#' evcc.yaml |grep . |sed -E 's/(password|user|token|url|host|broker|accessToken|refreshToken|vin).*/\1: *****/'`
@@ -248,16 +248,21 @@ Sadly, no workaround to this issue has been found.
 
 The password is stored encrypted, so it can't be read.
 You can set a new password via the command line.
+Make sure to stop evcc before changing the password.
 
 ```bash
-evcc password set
+service evcc stop
+EVCC_DATABASE_DSN=/var/lib/evcc/evcc.db evcc password set
+service evcc start
 ```
 
 Alternately, you can reset the password.
 You'll be prompted to set a new password the next time you access the evcc UI.
 
 ```bash
-evcc password reset
+service evcc stop
+EVCC_DATABASE_DSN=/var/lib/evcc/evcc.db evcc password reset
+service evcc start
 ```
 
 ## Statistical Data
@@ -315,7 +320,7 @@ tariffs:
     price: 0.08 # [currency]/kWh
 ```
 
-More details, including on how to use variable rate tariffs (such as those from Octopus Energy) can be found in [Configuration - Tariffs](/docs/devices/tariffs).
+More details, including on how to use variable rate tariffs (such as those from Octopus Energy) can be found in [Configuration - Tariffs](/docs/tariffs).
 
 _Please note that these statistics are rough and shouldn't be treated as perfectly accurate._
 
@@ -351,92 +356,3 @@ In parallel, you charge your car with 3 kW (e.g. mode = fast).
 In this case, the house is calculated with 100% solar share, the car with 0%.
 
 Flexible pricing (Octopus Energy, Awattar, Tibber, etc) is taken into account when determining the effective energy price.
-
-## Water Heater & Heat Pump
-
-### Example: SG-Ready contact with Shelly
-
-In this example of how flexible evcc can be, we control a water heat pump.
-
-"Vehicle State of Charge" is used to show the current temperature of the water.
-
-- Shelly 3EM as the Grid Supply Meter
-- Shelly EM as the Charge Meter
-- Shelly 1 as the Charger (opens/closes the Call for Water contact)
-
-<details>
-  <summary>Beispielkonfiguration</summary>
-
-```yaml
-network:
-  schema: http
-  host: evcc.local
-  port: 7070
-
-interval: 10s
-
-log: info
-
-meters:
-  - name: grid
-    type: template
-    template: shelly-3em # Shelly 3EM as Grid Supply Meter
-    usage: grid
-    host: 192.168.178.28
-
-  - name: WP_Pwr
-    type: template
-    template: shelly-1pm # Shelly EM as the Charge Meter
-    #usage: charge
-    host: 192.168.178.21
-    channel: 1
-
-chargers:
-  - name: WP_SG
-    type: template
-    template: shelly # Shelly 1 opens and closes the Call for Water contact
-    host: 192.168.178.29
-    standbypower: -1
-
-vehicles:
-  - name: WP
-    type: custom
-    title: Hot Water Pump
-    icon: waterheater
-    phases: 1
-    onIdentify:
-      mode: pv
-      minsoc: 40
-      targetsoc: 60
-    soc:
-      source: mqtt
-      topic: House/Water_Temp
-
-loadpoints:
-  - title: HotWater
-    charger: WP_SG
-    meter: WP_Pwr
-    vehicle: WP
-    enable:
-      threshold: 0
-      delay: 1m
-    disable:
-      threshold: 0
-      delay: 15m # Run for at least 15 minutes
-    soc:
-      estimate: false
-      poll:
-        mode: always
-        interval: 5m
-
-site:
-  - title: Water
-    meters:
-      grid: grid
-
-mqtt:
-  broker: raspberrypi:1883
-  topic: evcc
-```
-
-</details>

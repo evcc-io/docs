@@ -1,0 +1,739 @@
+---
+sidebar_position: 5
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import DeviceConfig from "/src/components/DeviceConfig";
+import DeviceFeatures from "/src/components/DeviceFeatures";
+
+
+# Tariffs & Forecasts
+
+Optimize your charging by integrating electricity tariffs (`grid`, `feedin`) and forecasts (`co2`, `solar`).
+Here is the basic structure:
+
+```yaml
+tariffs:
+  currency: # currency (default EUR)
+  grid: # grid consumption price
+  feedin: # feed-in price
+  co2: # CO₂ intensity forecast
+  solar: # solar production forecast
+```
+
+## Fixed Electricity Price
+
+The simplest case is fixed values for grid consumption (`grid`) and feed-in (`feedin`).
+
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    type: fixed
+    price: 0.294 # EUR/kWh
+  feedin:
+    type: fixed
+    price: 0.08 # EUR/kWh
+  co2:
+    ...
+```
+
+## Time-based Electricity Price
+
+Electricity tariffs with fixed time-based prices can also be defined.
+
+```yaml
+tariffs:
+  grid:
+    type: fixed
+    price: 0.294 # EUR/kWh (default)
+    zones:
+      - days: Mo-Fr
+        hours: 2-5
+        price: 0.2 # EUR/kWh
+      - days: Sa,So
+        price: 0.15 # EUR/kWh
+```
+
+You can also define a list of price zones under `zones`.
+The validity period is defined by `days` and/or `hours`.
+If no price zone is defined for a time, the default price is used.
+
+The `evcc tariff` command shows the price list for the upcoming hours.
+
+```
+$ ./evcc tariff
+
+grid:
+From                   To                     Price/Cost
+2026-05-03 00:00:00    2026-05-03 01:00:00    0.399
+...
+
+feedin:
+From                   To                     Price/Cost
+2026-05-03 00:00:00    2026-05-03 01:00:00    0.080
+...
+```
+
+
+## Exchange Prices
+
+You have a contract that is calculated based on exchange prices?
+For many providers, we have integrated a dedicated interface (e.g., [Awattar](#awattar) or [Tibber](#tibber)).
+You can find the list of all available providers in the section [Dynamic Electricity Price](#dynamic-electricity-price).
+
+### Fees and Taxes
+
+If your provider is not included, you can calculate your tariff based on the day-ahead prices of the European electricity exchange yourself.
+The [Energy-Charts API](https://www.energy-charts.info/charts/price_spot_market/chart.htm) from Fraunhofer ISE provides current and forecasted prices.
+These are used by almost all providers as the basis for calculating their energy prices.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU # Bidding zone, see https://api.energy-charts.info/#/prices/day_ahead_price_price_get
+    charges: 0.22 # Fixed surcharge per kWh (e.g., 20ct grid fee, 2ct extra charges)
+    tax: 0.19 # Percentage surcharge (e.g., 19% VAT)
+```
+
+The interface provides the exchange prices in euros without local fees or taxes.
+With the parameters `charges` and `tax`, you can define an additional fixed and percentage surcharge per kWh.
+You can find the exact values in your contract.
+
+### Custom Formulas
+
+If the model of tax and charges is not sufficient, you can define an individual formula.
+Use the `formula` parameter for for more flexible pricing.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # Fixed surcharge per kWh
+    tax: 0.19 # Percentage surcharge
+    formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+In the example above, a price cap of 50 ct/kWh is defined.
+The formula is written in Go syntax.
+In addition to the values `price`, `charges`, and `tax`, the [`math` library](https://pkg.go.dev/math) is available.
+
+There are no limits to your imagination.
+The `formula` mechanism also works for many other data-providers.
+Check the documentation below.
+
+You can view the respective calculation results using the command `evcc tariff`.
+
+#### Example: Exchange Prices with Time Component
+
+The formula is executed for the current electricity price and each time slot in the forecast.
+If the calculation is time-dependent, you can also access the [time](https://pkg.go.dev/time#Time) of the respective slot via `ts`.
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    formula: extra := 0.1; if ts.Hour() < 6 || ts.Hour() > 22 { extra = 0.0 }; price + extra
+```
+
+In this example, there is a surcharge of 10 ct/kWh.
+No surcharge is calculated from 10:00 PM to 6:00 AM.
+
+#### Example: Tariff with Season and Time-based Grid Fees
+
+Dynamic Danish electricity tariff, whose fees change throughout the year (summer, winter) and during the day (high, low price zones).
+
+```yaml
+tariffs:
+  currency: DKK
+  grid:
+   type: energinet
+    region: dk1   # or dk2
+    charges: 0.81 # my case
+    tax: 0.25     # 25% VAT
+    formula: |
+
+      // Set default grid fees (winter)
+      gridfee := 0.2929  // high load tariff
+      if ts.Hour() < 6 {
+        gridfee = 0.0976  // low load tariff
+      } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+        gridfee = 0.8788  // peak load tariff
+      }
+
+      // Adjust grid fees for summer (April - September)
+      if ts.Month() >= 4 && ts.Month() <= 9 {
+        gridfee = 0.1467  // high load tariff
+        if ts.Hour() < 6 {
+          gridfee = 0.0976  // low load tariff
+        } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+          gridfee = 0.3808  // peak load tariff
+        }
+      }
+
+      ( price + charges + gridfee ) * ( 1 + tax )
+```
+
+The grid fee (`gridfee`) differs in winter (October - March) and summer (April - September).
+Additionally there is a high- (6am-5pm, 9-12pm), low- (0-6am) and peak-load (5pm-9pm) zone.
+In this example the grid fee is 0.1467 DKK/kWh at 4am in June.
+
+<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+## Dynamic electricity price
+
+### Custom Plugin
+
+Use the plugin mechanism to connect a custom tariff source.
+
+**Example: Current price via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    price:
+      source: http
+      uri: https://example.com/api/price
+```
+
+The value returned by the endpoint is used as the grid price.
+
+**Example: Forecasts via HTTP**
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    forecast:
+      source: http
+      uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+      jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "price": .[1] }) | tostring'
+```
+
+The plugin must return a JSON structure containing a list of time periods and prices.
+The date fields must be in the form `YYYY-MM-DDTHH:MM:SSZ` and the price in the correct currency unit (e.g. EUR).
+See the following example:
+
+```js
+[
+  { "start": "2025-01-01T00:00:00Z", "end": "2025-01-01T01:00:00Z", "price": 25.0 },
+  { "start": "2025-01-01T01:00:00Z", "end": "2025-01-01T02:00:00Z", "price": 30.0 },
+]
+```
+
+The plugin is updated once per hour.
+
+### Amber Electric 
+
+<DeviceFeatures features="Australia" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: amber
+      token: # optional
+      siteid: # optional
+      channel: # optional`} advanced={`tariffs:
+    grid:
+      type: template
+      template: amber
+      token: # optional
+      siteid: # optional
+      channel: # optional
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Awattar 
+
+<DeviceFeatures features="Germany,Austria" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: awattar
+      region: AT # optional`} advanced={`tariffs:
+    grid:
+      type: template
+      template: awattar
+      region: AT # optional
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Energinet 
+
+<DeviceFeatures features="Denmark" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: energinet
+      region: dk1 # optional`} advanced={`tariffs:
+    grid:
+      type: template
+      template: energinet
+      region: dk1 # optional
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Enever 
+
+<DeviceFeatures features="Netherlands" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: enever
+      token:
+      provider:`} advanced={`tariffs:
+    grid:
+      type: template
+      template: enever
+      token:
+      provider:
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### ENTSO-E 
+
+<DeviceFeatures features="EU" />
+
+Day-ahead prices for the European electricity market. See https://transparency.entsoe.eu for more information.
+Basis for many dynamic tariffs.
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: entsoe
+      securitytoken: # Registration and subsequent helpdesk request required. Details on the process can be found here https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation (optional)
+      domain: BZN|DE-LU # see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas (optional)`} advanced={`tariffs:
+    grid:
+      type: template
+      template: entsoe
+      securitytoken: # Registration and subsequent helpdesk request required. Details on the process can be found here https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_authentication_and_authorisation (optional)
+      domain: BZN|DE-LU # see https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html#_areas (optional)
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Fraunhofer ISE 
+
+<DeviceFeatures features="EU" />
+
+Day-ahead forecast of energy prices (per kWh) on the exchange. No prior registration for https://api.energy-charts.info/ necessary. Can be used for dynamic electricity tariffs, for example, where the supplier does not yet offer a price forecast on the customer interface.
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: energy-charts-api
+      bzn: DE-LU # Bidding zones - https://api.energy-charts.info/#/prices/day_ahead_price_price_get`} advanced={`tariffs:
+    grid:
+      type: template
+      template: energy-charts-api
+      bzn: DE-LU # Bidding zones - https://api.energy-charts.info/#/prices/day_ahead_price_price_get
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Groupe E Vario Plus
+
+<DeviceFeatures features="Switzerland" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: groupe-e`} advanced={`tariffs:
+    grid:
+      type: template
+      template: groupe-e
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Nordpool spot prices 
+
+<DeviceFeatures features="EU" />
+
+Nordpool spot prices in day-ahead market for all markets in the Nordpool region.
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: nordpool
+      region: GER # optional
+      currency: EUR # optional`} advanced={`tariffs:
+    grid:
+      type: template
+      template: nordpool
+      region: GER # optional
+      currency: EUR # optional
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Octopus Energy
+
+#### API
+
+<DeviceFeatures features="United Kingdom" />
+
+You can get the API key in the Octopus portal https://octopus.energy/dashboard/new/accounts/personal-details/api-access
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: octopus-api
+      apiKey: # Octopus Energy API Key.`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+#### Product Code
+
+<DeviceFeatures features="United Kingdom" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: octopus-productcode
+      productCode: AGILE-FLEX-22-11-25 # The tariff code for your energy contract. Make sure this is set to your import tariff code.
+      region: # The DNO region you are located in. More information: https://www.energy-stats.uk/dno-region-codes-explained/`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Ostrom 
+
+<DeviceFeatures features="Germany" />
+
+Create a 'Production Client' in the Ostrom developer portal: https://developer.ostrom-api.io/
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: ostrom
+      clientid: 476c477d8a039529478ebd690d35ddd80e3308ffc49b59c65b142321aee963a4
+      clientsecret: 476c477d8a039529478ebd690d35ddd80e3308ffc49b59c65b142321aee963a4476c477d8a039529478ebd690d35ddd80e3308ffc49b59c65b142321aee963a4a
+      contract: 100523456 # Only required if multiple contracts belong to the same user (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### PUN Orario 
+
+<DeviceFeatures features="Italy" />
+
+Price data from https://www.mercatoelettrico.org/it/. Often used for feeding into the grid.
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: pun`} advanced={`tariffs:
+    grid:
+      type: template
+      template: pun
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### SmartEnergy smartCONTROL
+
+<DeviceFeatures features="Austria" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: smartenergy`} advanced={`tariffs:
+    grid:
+      type: template
+      template: smartenergy
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Spotty Energie 
+
+<DeviceFeatures features="Austria" />
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: spottyenergy
+      contractid: ffffffff-4444-6666-2222-aaaaaabbbbbb # You can get your contract id from the customer portal https://i.spottyenergie.at/
+      pricetype: CONSUMPTION # Price type, either spotmarket price, consumption price or generation compensation (if contractually agreed), more info at https://www.spottyenergie.at/blog/energie-smart-produzieren`} advanced={`tariffs:
+    grid:
+      type: template
+      template: spottyenergy
+      contractid: ffffffff-4444-6666-2222-aaaaaabbbbbb # You can get your contract id from the customer portal https://i.spottyenergie.at/
+      pricetype: CONSUMPTION # Price type, either spotmarket price, consumption price or generation compensation (if contractually agreed), more info at https://www.spottyenergie.at/blog/energie-smart-produzieren
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Tibber 
+
+<DeviceFeatures features="Norway,Sweden,Germany,Netherlands" />
+
+Get your API token from the Tibber developer portal: https://developer.tibber.com/
+
+<DeviceConfig code={`tariffs:
+    grid:
+      type: template
+      template: tibber
+      token: 476c477d8a039529478ebd690d35ddd80e3308ffc49b59c65b142321aee963a4
+      homeid: cc83e83e-8cbf-4595-9bf7-c3cf192f7d9c # Only required if you have multiple homes in your Tibber account. (optional)`} advanced={`tariffs:
+    grid:
+      type: template
+      template: tibber
+      token: 476c477d8a039529478ebd690d35ddd80e3308ffc49b59c65b142321aee963a4
+      homeid: cc83e83e-8cbf-4595-9bf7-c3cf192f7d9c # Only required if you have multiple homes in your Tibber account. (optional)
+      charges: # Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Individual formula for calculating the price (optional)`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+## CO₂ forecast
+
+### Electricity Maps
+
+#### Commercial API
+
+<DeviceFeatures features="Global" />
+
+CO₂ data for many countries from https://electricitymaps.com/. The 'Free Personal Tier' unfortunately does not include forecast data. You'll need a commercial account from https://api-portal.electricitymaps.com/. Free trial available.
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: electricitymaps
+      uri: https://api-access.electricitymaps.com/2w...1g/ # HTTP(S) address
+      token:
+      zone: DE # see https://api.electricitymap.org/v3/zones`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+#### Free API
+
+<DeviceFeatures features="Global" />
+
+CO₂ data for many countries from https://electricitymaps.com/. The 'Free Personal Tier' unfortunately does not include forecast data. You'll need a commercial account from https://api-portal.electricitymaps.com/. Free trial available.
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: electricitymaps-free
+      token:
+      zone: DE # see https://api.electricitymap.org/v3/zones`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Grünstromindex 
+
+<DeviceFeatures features="Germany" />
+
+Regional emission data from https://gruenstromindex.de
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: grünstromindex
+      zip:
+      token: # Token for accessing the API from https://console.corrently.io (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### National Grid ESO 
+
+<DeviceFeatures features="United Kingdom" />
+
+<DeviceConfig code={`tariffs:
+    co2:
+      type: template
+      template: ngeso
+      region: 1 # Coarser than using a postcode. See https://carbon-intensity.github.io/api-definitions/#region-list (optional)
+      postalcode: SW1 # Outward postcode i.e. RG41 or SW1 or TF8. Do not include full postcode, outward postcode only. (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+## PV forecast
+
+If you configure forecast data, the estimated remaining production for the current day will be shown in the UI.
+You also get a forecast chart for the upcoming days.
+
+It is possible to combine **multiple solar forecasts** to cover multiple solar arrays.
+The values will be summed up for this purpose.
+Use the following syntax:
+
+```yaml
+tariffs:
+  solar:
+    - type: template
+      template: ...
+      # ...
+    - type: template
+      template: ...
+      # ...
+```
+
+Many providers have a rate limit.
+Therefore, you may need to increase the update `interval`.
+
+### Forecast.Solar 
+
+<DeviceFeatures features="Global" />
+
+[forecast.solar](https://forecast.solar) can be used for free. Paid plans can also be used by specifying an API key.
+
+<DeviceConfig code={`tariffs:
+    solar:
+      type: template
+      template: forecast-solar
+      lat: 55.7351
+      lon: 9.1275
+      dec: 25 # 0 = horizontal, 90 = vertical
+      kwp: 9.8
+      az: 180 # -180 = north, -90 = east, 0 = south, 90 = west, 180 = north`} advanced={`tariffs:
+    solar:
+      type: template
+      template: forecast-solar
+      lat: 55.7351
+      lon: 9.1275
+      dec: 25 # 0 = horizontal, 90 = vertical
+      kwp: 9.8
+      az: 180 # -180 = north, -90 = east, 0 = south, 90 = west, 180 = north
+      horizon: '0,0,15,30,45,60,60,60,45,30,15,0' # Simulates terrain shadows, [more information](https://doc.forecast.solar/horizon) (optional)
+      apikey: # optional
+      interval: 1h # optional`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Open-Meteo 
+
+<DeviceFeatures features="Global" />
+
+Free Weather API [open-meteo.com](https://open-meteo.com) Open-Meteo is an open-source weather API and offers free access for non-commercial use. No API key required.
+
+<DeviceConfig code={`tariffs:
+    solar:
+      type: template
+      template: open-meteo
+      lat: 55.7351
+      lon: 9.1275
+      dec: 25 # 0 = horizontal, 90 = vertical
+      kwp: 9.8
+      az: 0 # -180 = north, -90 = east, 0 = south, 90 = west, 180 = north`} advanced={`tariffs:
+    solar:
+      type: template
+      template: open-meteo
+      lat: 55.7351
+      lon: 9.1275
+      dec: 25 # 0 = horizontal, 90 = vertical
+      kwp: 9.8
+      az: 0 # -180 = north, -90 = east, 0 = south, 90 = west, 180 = north
+      ac: 1000 # optional
+      dm: 0 # optional
+      de: 0 # optional
+      efficiency: 100 # optional
+      alphatemp: -0.004 # optional
+      rossmodel: 0.0342 # Well Cooled (0.0200), Free Standing (0.0208), Flat on Roof (0.0260), Not So Well Cooled (0.0342), Transparent PV (0.0455), Facade Integrated (0.0538), On Sloped Roof (0.0563) [Paper](https://www.sciencedirect.com/science/article/pii/S0038092X20309107) (optional)
+      interval: 1h # optional`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
+
+### Solcast 
+
+<DeviceFeatures features="Global" />
+
+Requires a [solcast.com](https://solcast.com/free-rooftop-solar-forecasting) account. The free "Home User" tier is often sufficient for private use. This plan has an API limit of 10 requests per day.
+
+<DeviceConfig code={`tariffs:
+    solar:
+      type: template
+      template: solcast
+      site: # ressource ID of your site
+      token: # Solcast API Token`} advanced={`tariffs:
+    solar:
+      type: template
+      template: solcast
+      site: # ressource ID of your site
+      token: # Solcast API Token
+      interval: 3h # optional`} />
+
+
+
