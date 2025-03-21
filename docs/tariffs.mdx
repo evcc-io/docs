@@ -119,7 +119,13 @@ Im obigen Beispiel wird eine Preisobergrenze von 50 ct/kWh definiert.
 Die Formel wird in Go-Syntax geschrieben.
 Neben den Werten `price`, `charges` und `tax` steht dir die [`math`-Bibliothek](https://pkg.go.dev/math) zur Verfügung.
 
-### Börsenpreise mit Zeitkomponente
+Der Fantasie sind hier keine Grenzen gesetzt.
+Der `formula` Mechanismus funktioniert auch für viele andere Datenquellen.
+Schau dir die Konfigurationsoptionen der jeweiligen Quellen an.
+
+Der CLI Befehl `evcc tariff` ist hilfreich um die Berechnungsergebnisse zu überprüfen.
+
+#### Beispiel: Börsenpreise mit Zeitkomponente
 
 Die Formel wird für den aktuellen Strompreis und jeden Zeitslot in der Prognose ausgeführt.
 Ist die Berechnung zeitabhängig, kannst du über `ts` auch auf die [Zeit](https://pkg.go.dev/time#Time) des jeweiligen Slots zugreifen.
@@ -135,12 +141,44 @@ tariffs:
 
 In diesem Beispiel gibt es einen Aufschlag von 10 ct/kWh.
 In der Zeit von 22:00 Uhr bis 06:00 Uhr wird kein Aufschlag berechnet.
-Der Fantasie sind hier keine Grenzen gesetzt.
 
-Der `formula` Mechanismus funktioniert auch für viele andere Datenquellen.
-Schau dir die Konfigurationsoptionen der jeweiligen Quellen an.
+#### Beispiel: Tarif mit jahreszeit- und zeitabhängigen Netzgebühren
 
-Der CLI Befehl `evcc tariff` ist hilfreich um die Berechnungsergebnisse zu überprüfen.
+Dynamischer dänischer Stromtarif, dessen Gebühren sich über das Jahr hinweg (Sommer, Winter) und im Tagesverlauf (Hoch-, Tiefpreiszonen) verändern.
+
+```yaml
+tariffs:
+  currency: DKK
+  grid:
+    type: energinet
+    region: dk1
+    charges: 0.81 
+    tax: 0.25
+    formula: |
+
+      // setzte Standardgebühren (Winter)
+      gridfee := 0.2929 // normale Zone
+      if ts.Hour() < 6 {
+        gridfee = 0.0976 // niedrige Zone
+      } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+        gridfee = 0.8788 // hohe Zone
+      }
+
+      // Anpassung der Gebühren für Sommer (April - September)
+      if ts.Month() >= 4 && ts.Month() <= 9 {
+        gridfee = 0.1467 // normale Zone
+        if ts.Hour() < 6 {
+          gridfee = 0.0976 // niedrige Zone
+        } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+          gridfee = 0.3808 // hohe Zone
+        }
+      }
+      ( price + charges + gridfee ) * ( 1 + tax )
+```
+
+Der Netzgebührenanteil (`gridfee`) unterscheidet sich im Winter (Oktober - März) und im Sommer (April - September).
+Zudem gibt es Normal- (6-17 Uhr, 21-24 Uhr), Niedrig- (0-6 Uhr) und Hochlastzonen (17-21 Uhr).
+In diesem Beispiel betragen die Gebühren im Juni um 4 Uhr 0,1467 DKK/kWh.
 
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 

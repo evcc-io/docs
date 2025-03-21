@@ -124,7 +124,13 @@ In the example above, a price cap of 50 ct/kWh is defined.
 The formula is written in Go syntax.
 In addition to the values `price`, `charges`, and `tax`, the [`math` library](https://pkg.go.dev/math) is available.
 
-### Exchange Prices with Time Component
+There are no limits to your imagination.
+The `formula` mechanism also works for many other data-providers.
+Check the documentation below.
+
+You can view the respective calculation results using the command `evcc tariff`.
+
+#### Example: Exchange Prices with Time Component
 
 The formula is executed for the current electricity price and each time slot in the forecast.
 If the calculation is time-dependent, you can also access the [time](https://pkg.go.dev/time#Time) of the respective slot via `ts`.
@@ -140,12 +146,45 @@ tariffs:
 
 In this example, there is a surcharge of 10 ct/kWh.
 No surcharge is calculated from 10:00 PM to 6:00 AM.
-There are no limits to your imagination.
 
-The `formula` mechanism also works for many other data-providers.
-Check the documentation below.
+#### Example: Tariff with Season and Time-based Grid Fees
 
-You can view the respective calculation results using the command `evcc tariff`.
+Dynamic Danish electricity tariff, whose fees change throughout the year (summer, winter) and during the day (high, low price zones).
+
+```yaml
+tariffs:
+  currency: DKK
+  grid:
+   type: energinet
+    region: dk1   # or dk2
+    charges: 0.81 # my case
+    tax: 0.25     # 25% VAT
+    formula: |
+
+      // Set default grid fees (winter)
+      gridfee := 0.2929  // high load tariff
+      if ts.Hour() < 6 {
+        gridfee = 0.0976  // low load tariff
+      } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+        gridfee = 0.8788  // peak load tariff
+      }
+
+      // Adjust grid fees for summer (April - September)
+      if ts.Month() >= 4 && ts.Month() <= 9 {
+        gridfee = 0.1467  // high load tariff
+        if ts.Hour() < 6 {
+          gridfee = 0.0976  // low load tariff
+        } else if ts.Hour() >= 17 && ts.Hour() < 21 {
+          gridfee = 0.3808  // peak load tariff
+        }
+      }
+
+      ( price + charges + gridfee ) * ( 1 + tax )
+```
+
+The grid fee (`gridfee`) differs in winter (October - March) and summer (April - September).
+Additionally there is a high- (6am-5pm, 9-12pm), low- (0-6am) and peak-load (5pm-9pm) zone.
+In this example the grid fee is 0.1467 DKK/kWh at 4am in June.
 
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 
