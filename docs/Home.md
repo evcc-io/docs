@@ -22,8 +22,8 @@ Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit 
 - [Plugins](/docs/devices/plugins) um nahezu beliebige Wallboxen / Zähler / Fahrzeuge hinzuzufügen: Modbus, HTTP, MQTT, Javascript, WebSockets und Shell Skripte
 - Status [Benachrichtigungen](/docs/reference/configuration/messaging) über [Telegram](https://telegram.org), [PushOver](https://pushover.net) und [viele mehr](https://containrrr.dev/shoutrrr/)
 - Datenanalyse mit [InfluxDB](https://www.influxdata.com) und [Grafana](https://grafana.com/grafana/)
-- Stufenlose Regelung der Ladeströme mit unterstützten Wallboxen (z.b. bei smartWB als [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) bezeichnet)
-- [REST](/docs/integrations/rest-api)- und [MQTT](/docs/integrations/mqtt-api)-APIs zur Integration in andere Heimautomationssysteme (z.B. [HomeAssistant](/docs/integrations/home-assistant))
+- Stufenlose Regelung der Ladeströme mit unterstützten Wallboxen (z. B. bei smartWB als [OLC](https://board.evse-wifi.de/viewtopic.php?f=16&t=187) bezeichnet)
+- [REST](/docs/integrations/rest-api)- und [MQTT](/docs/integrations/mqtt-api)-APIs zur Integration in andere Heimautomationssysteme (z. B. [HomeAssistant](/docs/integrations/home-assistant))
 
 ## Anforderungen
 

@@ -72,17 +72,20 @@ Dabei steht `<name>` für den Namen des Geräts, `<attr1>` und `<attr2>` für ei
 #### Lesen
 
 Beim Lesen von Daten mithilfe eines Plugins können sogenannte _Pipelines_ verwendet werden.
-Damit können Daten aus der Ausgabe des Plugins fein granular extrahiert werden. Dies ermöglicht es, komplexe Datenstrukturen wie JSON oder XML zu verarbeiten und die benötigten Informationen herauszufiltern.
+Damit können Daten aus der Ausgabe des Plugins fein granular extrahiert werden.
+Dies ermöglicht es, komplexe Datenstrukturen wie JSON oder XML zu verarbeiten und die benötigten Informationen herauszufiltern.
 Mögliche Parameter für die Datenextraktion sind:
 
 - `regex`: Ein regulärer Ausdruck, um Werte aus dem empfangenen Text zu extrahieren.
-- `jq`: Ein [jq](https://jqlang.github.io/jq/)-Ausdruck, um Werte aus JSON-Strukturen zu extrahieren. Die volle Syntax und Möglichkeiten finden sich in der jq-Dokumentation.
-- `unpack`: Konvertiert Werte aus anderen Zahlenrepräsentationen, z.B. `hex`.
+- `jq`: Ein [jq](https://jqlang.github.io/jq/)-Ausdruck, um Werte aus JSON-Strukturen zu extrahieren.
+Die volle Syntax und Möglichkeiten finden sich in der jq-Dokumentation.
+- `unpack`: Konvertiert Werte aus anderen Zahlenrepräsentationen, z. B. `hex`.
 - `decode`: Dekodiert Binärformate wie `uint32`, `float32` etc.
 
 #### Schreiben
 
-Beim Schreiben können Parameter in der Konfiguration durch Platzhalter ersetzt werden. Die Daten werden in Form von `${var[:format]}` zur Verfügung gestellt.
+Beim Schreiben können Parameter in der Konfiguration durch Platzhalter ersetzt werden.
+Die Daten werden in Form von `${var[:format]}` zur Verfügung gestellt.
 Wenn Format nicht angegeben wird, werden die Daten im Standard %v Go-Format bereitgestellt.
 Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird.
 Zusätzlich können sämtliche Funktionen der Go Template Library verwendet werden, um komplexere Datentransformationen durchzuführen.
@@ -101,31 +104,31 @@ Zähler, die unter `meters:` definiert werden, können an verschiedenen Stellen 
 * `aux`: Verbrauchszähler für intelligente Verbraucher
 * `ext`: weiterer Zähler, bspw. für Lastmanagement oder Datenerfassung
 
-`power` ist das einzig zwingend erfordeliche Attribut das in jeder `meter` Definition vorhanden sein muss, alle weiteren Attribute sind optional.
+`power` ist das einzig zwingend erforderliche Attribut das in jeder `meter` Definition vorhanden sein muss, alle weiteren Attribute sind optional.
 
 Jedoch unterstützen nicht alle Metertypen alle Pluginattribute:
 
-* `limitsoc` und `batterymode` werden ausschliesslich für Batterierzähler genutzt (d.h. für `meter` die in `site.battery` referenziert werden).
-* `currents`, `voltages` und `powers` sind Phasen Attribute, die mit jeweils genau drei Plugin Konfigurationen (in einem YAML Array) konfiguriert werden müssen und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
+* `limitsoc` und `batterymode` werden ausschließlich für Batteriezähler genutzt (d.h. für `meter` die in `site.battery` referenziert werden).
+* `currents`, `voltages` und `powers` sind Phasen Attribute, die mit jeweils genau drei Plugin-Konfigurationen (in einem YAML Array) konfiguriert werden müssen und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
 
 Die folgenden Tabellen enthalten alle Attribute, die von Plugins bereitgestellt werden können, wenn sie für `meter` konfiguriert werden.
 Bei der Verwendung der Plugins ist es auch wichtig, dass diese den richtigen Datentyp zurückliefern.
-Um zu dem verlangten Datentypen zu konvertieren können die in [Lesen](#lesen) beschriebenen Pipelines genutzt werden.
+Um zu dem verlangten Datentypen zu konvertieren, können die in [Lesen](#lesen) beschriebenen Pipelines genutzt werden.
 
-| Attribut    | Typ           | Kontext | Beschreibung      | Einheit |
-| ----------- | ------------- | --------| ----------------- | ------- |
-| power       | float         | alle | Aktuelle Verbrauchsleistung | W |
-| energy      | float         | alle | Total gemessene Energie | Wh |
-| soc         | int           | `battery` | Batterie Ladestand (in %) | 0 ... 100 |
-| currents    | float | `grid`, `charge` | Strom (pro Phase) | |
-| voltages    | float | `grid`, `charge` |                   | |
-| powers      | float | |                   | |
-| maxpower    |               | |                   | |
-| capacity    |               | |                   | |
+| Attribut  | Typ                 | Erfordert | Kontext        | Beschreibung              |
+|-----------|---------------------|-----------|----------------|---------------------------|
+| power     | float               | ja        | alle           | Aktuelle Leistung in W    |
+| energy    | float               | nein      | alle           | Zählerstand in kWh        |
+| maxpower  | int                 | nein      | `pv` (hybrid)  | Maximale AC-Leistung in W |
+| soc       | int                 | nein      | `battery`      | Ladestand in %            |
+| capacity  | float               | nein      | `battery`      | Kapazität in kWh          |
+| powers    | [float,float,float] | nein      | alle           | Phasenleistungen in W     |
+| currents  | [float,float,float] | nein      | alle           | Phasenströme in A         |
+| voltages  | [float,float,float] | nein      | alle           | Phasenspannungen in V     |
 
 **Beispiel**
 
-In diesem Beispiel wird die Konfiguration eines meters um die aktuelle elektrische Gridleistung über einen HTTP Aufruf abgefragt:
+In diesem Beispiel wird die Konfiguration eines Meters um die aktuelle elektrische Gridleistung über einen HTTP-Aufruf abgefragt:
 
 ```yaml
 meters:
@@ -143,33 +146,36 @@ site:
   ...
 ```
 
-Neben den Attributen, die Plugins zur lesenden Auswertung bereitstellen werden folgende Attribute von `evcc` genutzt um Aktionen zu triggern:
+Neben den Attributen, die Plugins zur lesenden Auswertung bereitstellen, werden folgende Attribute von evcc genutzt, um Aktionen zu triggern:
 
-| Attribut   | Typ   | Kontext | Beschreibung   | Werte |
-| ---------- | ----- | ------- | -------------- | ------- |
-| limitsoc   | int  | `battery` | Setze Ladeziel für Batterie (in %). Das Ladezeziel je nach Lademodus aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet. | 0 ... 100 |
-| batterymode | int | `battery` | Setze Lademodus direkt | 1 (Normal), 2 (Hold), 3 (Charge) |
+| Attribut     | Typ | Erfordert | Kontext   | Beschreibung                                                                                                                                              | 
+|--------------|-----|-----------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| limitsoc     | int | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.     | 
+| batterymode  | int | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge)                                                                                                    |
 
 ### Charger
 
 Wallboxen und Ladegeräte haben folgende Attribute die ausgelesen werden können:
 
-| Attribut        | Typ   | Beschreibung   |
-| --------------- | ----- | -------------- |
-| power           | float | Leistung       |
-| energy          | float | Energie        |
-| enabled         | bool  | Eingeschaltet? |
-| status          | bool  | Status         |
-| maxcurrentmilis |       |                |
-| soc             |       |                |
-| phases1p3p      |       |                |
-| power           |       |                |
-| currents        |       |                |
-| voltages        |       |                |
+| Attribut    | Typ                 | Erfordert | Beschreibung                        |
+|-------------|---------------------|-----------|-------------------------------------|
+| status      | string              | ja        | Status (A..F)                       |
+| enabled     | bool                | ja        | Ist Ladung freigegeben?             |
+| power       | float               | nein      | Ladeleistung in W                   |
+| energy      | float               | nein      | Zählerstand in kWh                  |
+| identify    | string              | nein      | Aktuelle RFID-Kennung               |
+| soc         | int                 | nein      | Ladestand in %                      |
+| phases      | int                 | nein      | Anzahl der physischen Phasen (1..3) |
+| powers      | [float,float,float] | nein      | Phasenleistungen in W               |
+| currents    | [float,float,float] | nein      | Phasenströme in A                   |
+| voltages    | [float,float,float] | nein      | Phasenspannungen in V               |
+| temp        | float               | nein      | Aktuelle Temperatur in °C (Heizung) |
+| templimit   | int                 | nein      | Temperaturlimit in °C (Heizung)     |
+| getmode     | int                 | nein      | SG-Ready Modus (Wärmepumpe)         |
 
 **Beispiel**
 
-Dieses Beispiel zeigt, wie man über das Modbus Plugin den Ladestatus (ladend/nicht ladend) eines chargers abfragen kann:
+Dieses Beispiel zeigt, wie man über das Modbus-Plugin den Ladestatus (ladend/nicht ladend) eines Chargers abfragen kann:
 
 ```yaml
 chargers:
@@ -188,14 +194,19 @@ chargers:
 
 Neben den read-only Werten können über Plugins auch Aktionen getriggert oder Konfigurationswerte gesetzt werden:
 
-| Attribut   | Typ   | Beschreibung   |
-| ---------- | ----- | -------------- |
-| enable     | float | Schalte an/aus |
-| maxcurrent | float | Setze maximalen Ladestrom |
+| Attribut        | Typ   | Erfordert | Beschreibung                                          |
+| --------------- | ----- | --------- | ----------------------------------------------------- |
+| enable          | bool  | ja        | Ladung freigeben / sperren                            |
+| maxcurrent      | int   | ja        | Setze maximalen Ladestrom in A                        |
+| maxcurrentmilis | float | nein      | Setze maximalen Ladestrom in A                        |
+| phases1p3p      | int   | nein      | Phasenumschaltung durchführen (erfordert `tos: true`) |
+| wakeup          | bool  | nein      | Wecke Fahrzeug auf                                    |
+| setmode         | int   | nein      | Ändere SG-Ready Modus (1: normal, 2: boost, 3: stop)  |
+
 
 **Beispiel**
 
-Dieses Beispiel schaltet eine Tasmota Steckdose über eine MQTT Nachricht gesendet an:
+Dieses Beispiel schaltet eine Tasmota-Steckdose über eine MQTT Nachricht gesendet an:
 
 ```yaml
 chargers:
@@ -212,17 +223,16 @@ chargers:
 
 Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 
-| Attribut   | Typ           | Beschreibung        |
-| ---------- | ------------- | ------------------- |
-| soc        | int           | Ladestand           |
-| status     | bool / A .. F | Status              |
-| range      | int           | Reichweite          |
-| odometer   | int           | Zählerstand         |
-| climater   | bool          | Klimaanlage (?)     |
-| wakeup     | ?             | Aufweck-Ping        |
-| limitsoc   | int           | Ladeziel in %       |
-| maxcurrent | int           | Maximaler Ladestrom |
-| finishtime |               |                     |
+| Attribut      | Typ     | Erfordert | Beschreibung                    |
+|---------------|---------|-----------|---------------------------------|
+| soc           | int     | ja        | Ladestand in %                  |
+| limitsoc      | int     | nein      | Ladelimit in %                  |
+| status        | string  | nein      | Status (A..F)                   |
+| range         | int     | nein      | Reichweite in km                |
+| odometer      | int     | nein      | Kilometerstand in km            |
+| climater      | bool    | nein      | Klimatisierung aktiv?           |
+| getmaxcurrent | float   | nein      | Maximaler Ladestrom in A        |
+| finishtime    | string  | nein      | Geplantes Ladeende (RFC3339)    |
 
 **Beispiel**
 
@@ -239,15 +249,15 @@ vehicles:
 
 Zusätzlich können spezielle Kommandos über Plugins an das Fahrzeug geschickt werden:
 
-| Attribut | Typ | Beschreibung |
-| -------- | --- | ------------ |
-| wakeup   | ?   | Aufweck-Ping |
-| chargeEnable | ? | Start/Stop des Ladevorgangs über das Vehicle |
-| maxCurrent | ? | Begrenze maximalen Ladestrom |
+| Attribut     | Typ  | Erfordert | Beschreibung                     |
+|--------------|------|-----------|----------------------------------|
+| wakeup       | bool | nein      | Fahrzeug aufwecken               |
+| chargeenable | bool | nein      | Starte/stoppe den Ladevorgang    |
+| maxcurrent   | int  | nein      | Setze maximalen Ladestrom in A   |
 
 **Beispiel**
 
-Um ein Auto über einen HTTP Ping aufzuwecken um weiter Abfragen zu senden, kann wie im folgenden Beispiel das HTTP Plugin genutzt werden:
+Um ein Auto über einen HTTP Ping aufzuwecken, um weiter Abfragen zu senden, kann wie im folgenden Beispiel das HTTP-Plugin genutzt werden:
 
 ``` yaml
 vehicles:
@@ -258,11 +268,9 @@ vehicles:
       uri: http://teslalogger.local:5000/command/08154711/wake_up
 ```
 
-### Tarife
+### Tarife & Vorhersagen
 
-:::note Work in Progress
-...
-:::
+Siehe [Tarife & Vorhersagen > Eigenes Plugin](../tariffs#plugin) für mehr Details.
 
 ### Lastmanagement
 
@@ -282,7 +290,7 @@ Folgende Plugins stehen zur Verfügung und können für die oben beschriebenen A
 
 ### Modbus <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" /> {#modbus}
 
-Das `modbus` Plugin kann Daten von jedem Modbus-fähigen Gerät oder SunSpec-kompatiblen Wechselrichter lesen.
+Das `modbus`-Plugin kann Daten von jedem Modbus-fähigen Gerät oder SunSpec-kompatiblen Wechselrichter lesen.
 Viele Strommessgeräte sind bereits vorkonfiguriert (siehe [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
 Es ist ebenfalls möglich Modbus Register zu Schreiben um weitere Wallboxen zu integrieren.
 
@@ -290,8 +298,8 @@ Schaue in die [Modbus Dokumentation](/docs/reference/modbus) für weitere Detail
 
 ### MQTT <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" /> {#mqtt}
 
-Das `mqtt` Plugin ermöglicht das Lesen von Werten über MQTT Topics.
-Das ist insbesondere für Strommessgeräte nützlich, z.B. wenn diese ihre Daten bereits über MQTT bereitstellen.
+Das `mqtt`-Plugin ermöglicht das Lesen von Werten über MQTT-Topics.
+Das ist insbesondere für Strommessgeräte nützlich, z. B. wenn diese ihre Daten bereits über MQTT bereitstellen.
 Schaue in die [MBMD Dokumentation](https://github.com/volkszaehler/mbmd) für ein Beispiel, wie man Modbus Messdaten in MQTT bekommt.
 Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen (Siehe [HTTP plugin](#http)).
 
@@ -304,7 +312,8 @@ timeout: 30s # don't accept values older than timeout
 scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 ```
 
-Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt. Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
+Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt.
+Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
 
 **Beispiel Schreiben**:
 
@@ -316,9 +325,12 @@ payload: ${var:%d}
 
 ### HTTP <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" /> {#http}
 
-Das `http` Plugin führt HTTP Aufrufe durch, um Daten zu lesen oder zu aktualisieren. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache Transformationen durchzuführen. Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
+Das `http`-Plugin führt HTTP Aufrufe durch, um Daten zu lesen oder zu aktualisieren.
+Es beinhaltet auch die Fähigkeit, JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache Transformationen durchzuführen.
+Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
 
-Methoden der Authentifizierung sind `basic`, `bearer` und `digest`. Die Namen der jeweiligen Parameter finden sich [hier](https://github.com/evcc-io/evcc/blob/master/provider/http.go#L140).
+Methoden der Authentifizierung sind `basic`, `bearer` und `digest`.
+Die Namen der jeweiligen Parameter finden sich [hier](https://github.com/evcc-io/evcc/blob/master/provider/http.go#L140).
 
 :::important Wichtig
 XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden können.
@@ -368,7 +380,9 @@ enable:
 
 ### Websocket <Tag label="lesen" category="read" /> {#websocket}
 
-Das `websocket` Plugin bietet einen Websocket Listener. Es beinhaltet auch die Fähigkeit JSON-Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen. Dies kann z.B. verwendet werden, um Daten von Volkszählers Push Server zu empfangen.
+Das `websocket`-Plugin bietet einen WebSocket-Listener.
+Es beinhaltet auch die Fähigkeit, JSON-Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen.
+Dies kann z. B. verwendet werden, um Daten von Volkszählers Push Server zu empfangen.
 
 **Beispiel Lesen**:
 
@@ -402,7 +416,8 @@ Alle möglichen Werte können als Konstanten [hier](https://gitlab.com/bboehmke/
 
 ### JavaScript <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" /> {#javascript}
 
-evcc integriert einen JavaScript Interpreter mit der [Underscore.js](https://underscorejs.org) Bibliothek, welche direkt über `_.` zugreifbar ist, z.B. `_.random(0,5)`. Das `js` Plugin kann JavaScript code über den `script` Parameter ausführen. Sehr hilfreich für das schnelle Erstellen von Prototypen:
+evcc integriert einen JavaScript Interpreter mit der [Underscore.js](https://underscorejs.org) Bibliothek, welche direkt über `_.` zugreifbar ist, z. B. `_.random(0,5)`.
+Das `js` Plugin kann JavaScript code über den `script` Parameter ausführen. Sehr hilfreich für das schnelle Erstellen von Prototypen:
 
 **Beispiel Lesen**:
 
@@ -449,7 +464,7 @@ timeout: 5s
 ### Const <Tag label="lesen" category="read" /> {#const}
 
 Das `const` Plugin gibt einen konstanten Wert zurück.
-Es eignet sich z.B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
+Es eignet sich z. B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
 
 **Beispiel Lesen**:
 
@@ -486,11 +501,12 @@ mul:
 
 Als Operanden werden dabei die Grundrechenarten Addition (`add`) und Multiplikation (`mul`) unterstützt.
 
-Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z.B. zur Konvertierung von kWh in Wh.
+Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z. B. zur Konvertierung von kWh in Wh.
 
-Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 bleibt 0) können (in Verbindung mit `mul`) Vorzeichen auf andere Werte übertragen werden. Z.B. um bei Zählern die „Richtung“ der Leistung (Einspeisung oder Bezug) auf die gemessenen Ströme zu übertragen.
+Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 bleibt 0) können (in Verbindung mit `mul`) Vorzeichen auf andere Werte übertragen werden.
+Z. B. um bei Zählern die „Richtung“ der Leistung (Einspeisung oder Bezug) auf die gemessenen Ströme zu übertragen.
 
-Das `calc` Plugin ist hilfreich um z.B.
+Das `calc` Plugin ist hilfreich um z. B.
 
 - Leistungswerte von einzelnen PV-Strings zu summieren (addieren)
 - Die Scheinleistung aus Spannung und Strom zu berechnen (multiplizieren)

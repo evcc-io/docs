@@ -16,7 +16,7 @@ loadpoints:
     mode: pv # charge mode (off, now, minpv, pv)
 ```
 
-Referenzen sind hierbei immer die Werte des Parameters `name` (z.B. `wallbox`) in der jeweiligen Gerätekonfiguration.
+Referenzen sind hierbei immer die Werte des Parameters `name` (z. B. `wallbox`) in der jeweiligen Gerätekonfiguration.
 
 Im folgenden werden nun alle möglichen Parameter erklärt.
 
@@ -73,7 +73,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 Beim Anschluss eines Fahrzeugs an den Ladepunkt wird damit immer davon ausgegangen dass dieses Fahrzeug angeschlossen wurde.
 Die automatische Fahrzeugerkennung wird umgangen.
-Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z.B. Gastfahrzeug) lässt sich dies im Anschluss manuell zuweisen.
+Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z. B. Gastfahrzeug) lässt sich dies im Anschluss manuell zuweisen.
 
 **Beispiel**:
 
@@ -278,7 +278,6 @@ delay: 10m
 ```
 
 ---
-
 
 ### `phases`
 

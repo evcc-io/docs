@@ -6,7 +6,7 @@ sidebar_position: 17
 
 _modbusproxy_ ist eine Liste von Geräten welche für Drittsysteme via Modbus TCP im Netzwerk freigeben werden.
 
-Einige Geräte lassen nur eine sehr beschränkte Anzahl an Modbus TCP Clients zu. Im ungünstigsten Fall nur genau eine einzige Verbindung wie z.B. bei SolarEdge-Komponenten. Aber auch bei seriellen Modbus RTU RS485-Bussystemen ist ohnehin immer nur ein Master erlaubt.
+Einige Geräte lassen nur eine sehr beschränkte Anzahl an Modbus TCP Clients zu. Im ungünstigsten Fall nur genau eine einzige Verbindung wie z. B. bei SolarEdge-Komponenten. Aber auch bei seriellen Modbus RTU RS485-Bussystemen ist ohnehin immer nur ein Master erlaubt.
 Mit Hilfe von `modbusproxy` ist es möglich, evcc zusätzlich als Modbus-Proxy einzurichten welcher die bestehenden Modbus-Verbindungen mit weiteren Systemen teilen kann.
 Damit kommuniziert evcc direkt mit dem Gerät, weitere Systeme aber stattdessen mit evcc, welches die Kommunikationverbindungen bündelt und stellvertretend an das Zielgerät weiterreicht.
 
@@ -28,7 +28,7 @@ modbusproxy:
 ```
 
 :::info
-Die Proxy-Funktion unterstützt _eingehend_ (d.h. von Drittsystemen wie z.B. Hausautomation, Logger) ausschließlich Modbus TCP.
+Die Proxy-Funktion unterstützt _eingehend_ (d.h. von Drittsystemen wie z. B. Hausautomation, Logger) ausschließlich Modbus TCP.
 
 _Ausgehend_ in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
 :::
