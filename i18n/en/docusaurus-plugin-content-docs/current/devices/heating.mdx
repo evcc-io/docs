@@ -64,7 +64,13 @@ loadpoints:
   - title: Meine Wärmepumpe
     charger: heatpump_control
     meter: heatpump_power
-    integrateddevice: true # Disable vehicle selection
+    # Usual parameters for loadpoints can be added here, especially to prevent short runtimes, e.g.
+    enable:
+      threshold: -1300 # Activate at 1.300W power surplas for 5 min.
+      delay: 5m
+    disable:
+      threshold: 150 # Deactivate at 150W power consumption for 20 min.
+      delay: 20m  #some devices require a minimum runtime (check specification / manual of your heatpump)
 meters:
   - name: heatpump_power
     type: template
@@ -82,12 +88,15 @@ chargers:
           source: const
           value: false
           set:
+            # Add the function here to set the heatpump in normal operation mode.
+            # All types of plugins can be used.
             source: charger
             config:
               type: template
               template: shelly # Boost contact of the heat pump
               host: 192.168.0.101
       - case: 2 # boost
+        # Add the function here to set the heatpump in boost mode.
         set:
           source: const
           value: true
@@ -102,6 +111,10 @@ chargers:
           source: error
           error: ErrNotAvailable
     getmode:
+      # Add function here to get the current mode of the heatpump, return
+      # 1 for normal operation
+      # 2 for boost mode
+      # 3 for limited operation mode
       source: calc
       add:
         - source: const

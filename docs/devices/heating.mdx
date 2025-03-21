@@ -67,7 +67,14 @@ loadpoints:
   - title: Meine Wärmepumpe
     charger: heatpump_control
     meter: heatpump_power
-    integrateddevice: true # Fahrzeugauswahl deaktivieren
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z.B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m  # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
 
 meters:
   - name: heatpump_power
@@ -83,6 +90,8 @@ chargers:
       switch:
       - case: 1 # normal
         set:
+          # Hier wird der Funktionsaufruf eingefügt, der die Heizung in den Normalbetrieb setzt.
+          # Dafür können alle üblichen Plugins verwendet werden.
           source: const
           value: false
           set:
@@ -93,6 +102,7 @@ chargers:
               host: 192.168.0.101
       - case: 2 # boost
         set:
+          # Hier wird der Funktionsaufruf eingefügt, der die Heizung in den Boostbetrieb setzt.
           source: const
           value: true
           set:
@@ -106,6 +116,10 @@ chargers:
           source: error
           error: ErrNotAvailable
     getmode:
+      # hier wird der Funktionsaufruf eingefügt, der den Status der Heizung zurückmeldet:
+      # 1 für Normalbetrieb
+      # 2 für Boostbetrieb
+      # 3 für reduzierte Leistung
       source: calc
       add:
         - source: const
