@@ -6,11 +6,11 @@ sidebar_position: 1
 
 evcc benötigt eine Konfigurationsdatei in der die Installation beschrieben wird. Ohne diese Datei kann evcc nicht genutzt werden. Die Datei selbst ist im [YAML](https://de.wikipedia.org/wiki/YAML) Format geschrieben. Dieses Format definiert eine Syntax wodurch eine strukturierte Datenstruktur in Textform erstellt werden kann.
 
-Zur Bearbeitung bzw. Erstellung der Konfigurationsdatei empfehlen wir einen Texteditor zu verwenden, welcher die YAML Synthax beherrscht und damit Fehler aufzeigen kann, z.B. [VS Code](https://code.visualstudio.com) mit der [YAML Erweiterung](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
+Zur Bearbeitung bzw. Erstellung der Konfigurationsdatei empfehlen wir einen Texteditor zu verwenden, welcher die YAML Synthax beherrscht und damit Fehler aufzeigen kann, z. B. [VS Code](https://code.visualstudio.com) mit der [YAML Erweiterung](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
 
 Die Konfigurationsdatei hat standardmäßig den Namen `evcc.yaml` und ist entweder im gleichen Verzeichnis wie das Programm selbst abzulegen, oder bei Linux-Systemen unter `/etc/evcc.yaml`.
 
-Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Parameter beim Aufruf evcc übergeben werden: z.B. `evcc -c /home/evcc.yaml`
+Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Parameter beim Aufruf evcc übergeben werden: z. B. `evcc -c /home/evcc.yaml`
 
 ### Struktur
 
@@ -93,7 +93,7 @@ _Loadpoints_ (Ladepunkte) beschreiben die Ladeinfrastruktur und kombinieren vorh
 
 ### Chargers
 
-_Chargers_ (Wallboxen) beinhaltet eine Liste von Wallboxen und deren Eigenschaften, z.B. wie sie angesprochen werden.
+_Chargers_ (Wallboxen) beinhaltet eine Liste von Wallboxen und deren Eigenschaften, z. B. wie sie angesprochen werden.
 
 [Weiterlesen...](./configuration/chargers)
 

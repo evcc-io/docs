@@ -137,7 +137,7 @@ Hier findest du die Anleitung für die manuelle Installation von evcc auf macOS.
 
 - Lade die entsprechende Datei auf dein System herunter:
   - 64-Bit ARM oder Intel CPU: [evcc_X.XX_macOS_all.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
-- Entpacke die heruntergeladene Datei (z.B. per Doppelklick auf die Datei)
+- Entpacke die heruntergeladene Datei (z. B. per Doppelklick auf die Datei)
 - Es gibt nun einen neuen Ordner mit dem Programm `evcc`.
 - Öffne ein Terminal und gehe in den Ordner mit dem Programm `evcc`
 - Starte evcc mit folgendem Befehl:

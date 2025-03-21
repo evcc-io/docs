@@ -128,8 +128,8 @@ Die Definition eines Registers benötigt folgende Parameter:
 
 Weitere zulässige Parameter einer manuellen Konfiguration sind:
 
-- `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z.B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
-- `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z.B. 10s für 10 Sekunden.
+- `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z. B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
+- `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z. B. 10s für 10 Sekunden.
 
 **Beispiel**:
 
@@ -145,7 +145,7 @@ scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversi
 timeout: 2s # timeout, without unit in ns
 ```
 
-Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z.B. bei E3/DC Geräten nützlich.
+Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z. B. bei E3/DC Geräten nützlich.
 
 ### Schreiben von Registern
 
@@ -165,7 +165,7 @@ register:
 
 ### Gesamtbeispiel
 
-Ein vollständiges Beispiel für einen custom Charger mit modbus Interface (hier ein Phoenix EM-CP-PP-ETH mit der IP-Adresse 192.168.1.10) könnte z.B. so aussehen:
+Ein vollständiges Beispiel für einen custom Charger mit modbus Interface (hier ein Phoenix EM-CP-PP-ETH mit der IP-Adresse 192.168.1.10) könnte z. B. so aussehen:
 
 **Beispiel**:
 

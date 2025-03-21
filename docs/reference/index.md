@@ -12,12 +12,6 @@ Hier werden die verschiedenen möglichen Einstellungen erklärt.
 
 [Weiterlesen...](./reference/configuration)
 
-### Plugins
-
-Hier wird beschrieben wie man durch ein Plugin ein bisher nicht unterstütztes Gerät anbinden kann.
-
-[Weiterlesen...](./reference/plugins)
-
 ### Modbus
 
 Hier befindet sich die Modbus Dokumentation, welche in verschiedenen Bereichen genutzt werden kann.

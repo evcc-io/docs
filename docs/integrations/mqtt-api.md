@@ -11,7 +11,7 @@ Nutze Tools wie [MQTT Explorer](https://mqtt-explorer.com/) um die Daten zu visu
 :::
 
 Die MQTT API folgt der [REST API](./rest-api) Struktur.
-Alle API IDs (z.B. die Loadpoint ID) beginnen bei `1`.
+Alle API IDs (z. B. die Loadpoint ID) beginnen bei `1`.
 
 - `evcc`: root topic
 - `evcc/status`: status (`online`/`offline`)
