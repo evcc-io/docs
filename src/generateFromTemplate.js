@@ -97,11 +97,21 @@ function readTemplates(path) {
     .map((file) => yaml.load(fs.readFileSync(`${path}/${file}`, "utf8")));
 }
 
-function indent(code) {
+function indent(code, list = false) {
   // escape backticks
-  result = code.replace(/`/g, "\\`");
-  // indent
-  return result.replace(/^/gm, "      ");
+  let result = code.replace(/`/g, "\\`");
+
+  if (list) {
+    // indent first line with 6 spaces and dash
+    result = result.replace(/^/, "      - ");
+    // indent remaining lines 8 spaces
+    return result.replace(/\n/gm, "\n        ");
+  } else {
+    // indent all lines 6 spaces
+    result = result.replace(/^/gm, "      ");
+  }
+
+  return result;
 }
 
 function templateContent(entry, type, translate) {
@@ -109,13 +119,17 @@ function templateContent(entry, type, translate) {
 
   const codeBlocks = entry.render.map((render) => {
     let preamble = render.usage || type;
+    let list = false;
     if (type === "tariff") {
       preamble = TARIFF_GROUPS[entry.product.group];
+      if (preamble === "solar") {
+        list = true;
+      }
     }
-    const code = `${CODE_PREAMBLES[preamble]}\n${indent(render.default).trimEnd()}`;
+    const code = `${CODE_PREAMBLES[preamble]}\n${indent(render.default, list).trimEnd()}`;
     const advanced =
       render.advanced && render.advanced !== render.default
-        ? `${CODE_PREAMBLES[preamble]}\n${indent(render.advanced).trimEnd()}`
+        ? `${CODE_PREAMBLES[preamble]}\n${indent(render.advanced, list).trimEnd()}`
         : null;
     return {
       usage: render.usage,
