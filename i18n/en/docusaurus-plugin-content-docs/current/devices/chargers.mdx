@@ -1087,7 +1087,7 @@ DIP switch 10 at the controller needs to be set to 'ON'. A recent controller fir
       user: # Email address
       password: # same as Easee app or the web portal (https://easee.cloud)
       charger: EH______
-      timeout: 20s # optional
+      timeout: 20s # Timout specifically for Easee API interactions. Can reduce warnings and errors in case of lagging Easee API. (optional)
       authorize: # Controls wether evcc shall perform authentication against charger. Benefit is a contolled start of charging. Not compatible with RFID identification of vehicles. (optional)`}  />
 
 
@@ -1107,7 +1107,7 @@ DIP switch 10 at the controller needs to be set to 'ON'. A recent controller fir
       user: # Email address
       password: # same as Easee app or the web portal (https://easee.cloud)
       charger: EH______
-      timeout: 20s # optional
+      timeout: 20s # Timout specifically for Easee API interactions. Can reduce warnings and errors in case of lagging Easee API. (optional)
       authorize: # Controls wether evcc shall perform authentication against charger. Benefit is a contolled start of charging. Not compatible with RFID identification of vehicles. (optional)`}  />
 
 
@@ -1127,7 +1127,7 @@ DIP switch 10 at the controller needs to be set to 'ON'. A recent controller fir
       user: # Email address
       password: # same as Easee app or the web portal (https://easee.cloud)
       charger: EH______
-      timeout: 20s # optional
+      timeout: 20s # Timout specifically for Easee API interactions. Can reduce warnings and errors in case of lagging Easee API. (optional)
       authorize: # Controls wether evcc shall perform authentication against charger. Benefit is a contolled start of charging. Not compatible with RFID identification of vehicles. (optional)`}  />
 
 
@@ -1147,7 +1147,7 @@ DIP switch 10 at the controller needs to be set to 'ON'. A recent controller fir
       user: # Email address
       password: # same as Easee app or the web portal (https://easee.cloud)
       charger: EH______
-      timeout: 20s # optional
+      timeout: 20s # Timout specifically for Easee API interactions. Can reduce warnings and errors in case of lagging Easee API. (optional)
       authorize: # Controls wether evcc shall perform authentication against charger. Benefit is a contolled start of charging. Not compatible with RFID identification of vehicles. (optional)`}  />
 
 
@@ -2164,6 +2164,25 @@ The motherboard requires current firmware. You can recognize a current software 
 ## Mennekes
 
 ### AMEDIO Professional
+
+<DeviceFeatures features="rfid" />
+
+The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must NOT be set to 'Phoenix' or 'TQ-DM100'. Use the third selection labeled 'Ebee', 'Bender', 'MENNEKES' etc. Set 'Allow UID Disclose' to On.
+
+<DeviceConfig code={`chargers:
+    - name: my_charger
+      type: template
+      template: bender
+      host: 192.0.2.2 # IP address or hostname
+      port: 502 # Port (optional)`}  />
+
+
+
+<SponsorshipRequired />
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
+### AMTRON 4You
 
 <DeviceFeatures features="rfid" />
 
@@ -3415,7 +3434,7 @@ The 'Modbus TCP Server' must be enabled. The setting 'Register Address Set' must
 
 <DeviceFeatures features="sponsorfree" />
 
-The TWC wallbox cannot be controlled directly. Control is via the vehicle. The vehicle must be associated with the TWC3 loadpoint. At this time only [Tesla vehicles](https://docs.evcc.io/en/docs/devices/vehicles#tesla) are supported.
+The TWC wallbox cannot be controlled directly. Control is via the vehicle. The vehicle must be selected at the TWC3 loadpoint. At this time only [Tesla vehicles](https://docs.evcc.io/en/docs/devices/vehicles#tesla) are supported.
 
 <DeviceConfig code={`chargers:
     - name: my_charger
@@ -4091,13 +4110,13 @@ For demonstration purposes. Charger with a fixed set of values.
     - name: my_charger
       type: template
       template: demo-charger
-      status: A # [A, B, C] (optional)
+      status: A # [A, B, C]
       power: 0 # optional
       enabled: true # optional`} advanced={`chargers:
     - name: my_charger
       type: template
       template: demo-charger
-      status: A # [A, B, C] (optional)
+      status: A # [A, B, C]
       power: 0 # optional
       enabled: true # optional
       maxcurrent: 16 # The maximum amperage per connected phase with which the car shuold be charged (optional)
@@ -4188,9 +4207,11 @@ Charger connected via the Tessie API. Allows control of charging state and confi
 
 ## Heating devices
 
-### Bosch Bosch (SG Ready)
+### Bosch SG Ready
 
 <DeviceFeatures features="sponsorfree" />
+
+Integrated via [EMSESP](https://emsesp.org/)
 
 <DeviceConfig code={`chargers:
     - name: my_charger
@@ -4198,15 +4219,18 @@ Charger connected via the Tessie API. Allows control of charging state and confi
       template: emsesp
       host: 192.0.2.2 # IP address or hostname
       token: # optional
-      tempsource: # [, warmwater] (optional)`}  />
+      powersource: hpcurrpower # [hpcurrpower, hppower] (optional)
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### Buderus Buderus (SG Ready)
+### Buderus SG Ready
 
 <DeviceFeatures features="sponsorfree" />
+
+Integrated via [EMSESP](https://emsesp.org/)
 
 <DeviceConfig code={`chargers:
     - name: my_charger
@@ -4214,7 +4238,8 @@ Charger connected via the Tessie API. Allows control of charging state and confi
       template: emsesp
       host: 192.0.2.2 # IP address or hostname
       token: # optional
-      tempsource: # [, warmwater] (optional)`}  />
+      powersource: hpcurrpower # [hpcurrpower, hppower] (optional)
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
@@ -4229,12 +4254,12 @@ Charger connected via the Tessie API. Allows control of charging state and confi
       type: template
       template: kermi
       host: 192.0.2.2 # IP address or hostname
-      tempsource: # [, warmwater, buffer] (optional)`} advanced={`chargers:
+      tempsource: # [warmwater, buffer] (optional)`} advanced={`chargers:
     - name: my_charger
       type: template
       template: kermi
       host: 192.0.2.2 # IP address or hostname
-      tempsource: # [, warmwater, buffer] (optional)
+      tempsource: # [warmwater, buffer] (optional)
       watchdog: 60s # optional`} />
 
 
@@ -4255,15 +4280,17 @@ Charger connected via the Tessie API. Allows control of charging state and confi
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # [, warmwater_top, warmwater_bottom, buffer] (optional)`}  />
+      tempsource: # [warmwater_top, warmwater_bottom, buffer] (optional)`}  />
 
 
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### Junkers Junkers (SG Ready)
+### Junkers SG Ready
 
 <DeviceFeatures features="sponsorfree" />
+
+Integrated via [EMSESP](https://emsesp.org/)
 
 <DeviceConfig code={`chargers:
     - name: my_charger
@@ -4271,7 +4298,8 @@ Charger connected via the Tessie API. Allows control of charging state and confi
       template: emsesp
       host: 192.0.2.2 # IP address or hostname
       token: # optional
-      tempsource: # [, warmwater] (optional)`}  />
+      powersource: hpcurrpower # [hpcurrpower, hppower] (optional)
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
@@ -4286,12 +4314,12 @@ Charger connected via the Tessie API. Allows control of charging state and confi
       type: template
       template: kermi
       host: 192.0.2.2 # IP address or hostname
-      tempsource: # [, warmwater, buffer] (optional)`} advanced={`chargers:
+      tempsource: # [warmwater, buffer] (optional)`} advanced={`chargers:
     - name: my_charger
       type: template
       template: kermi
       host: 192.0.2.2 # IP address or hostname
-      tempsource: # [, warmwater, buffer] (optional)
+      tempsource: # [warmwater, buffer] (optional)
       watchdog: 60s # optional`} />
 
 
@@ -4311,23 +4339,13 @@ Energy management settings of the device:
     - name: my_charger
       type: template
       template: lambda-zewotherm
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      tempsource: # [, warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
     - name: my_charger
       type: template
       template: lambda-zewotherm
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      tempsource: # [, warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
       watchdog: 60s # optional`} />
 
 
@@ -4395,7 +4413,7 @@ Energy management settings of the device:
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # [, warmwater] (optional)`}  />
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
@@ -4415,7 +4433,7 @@ Energy management settings of the device:
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # [, warmwater, buffer] (optional)`}  />
+      tempsource: # [warmwater, buffer] (optional)`}  />
 
 
 
@@ -4435,7 +4453,7 @@ Energy management settings of the device:
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # [, warmwater] (optional)`}  />
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
@@ -4473,23 +4491,13 @@ Energy management settings of the device:
     - name: my_charger
       type: template
       template: lambda-zewotherm
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      tempsource: # [, warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
     - name: my_charger
       type: template
       template: lambda-zewotherm
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      tempsource: # [, warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
       watchdog: 60s # optional`} />
 
 
