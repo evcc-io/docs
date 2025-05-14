@@ -16,10 +16,11 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 loop((screenshot) => {
   test("charging plan soc", async ({ page }) => {
-    await page.goto(`/`);
+    await page.goto("/");
     await page.locator("[data-testid=charging-plan] button").first().click();
     await wait(300);
     await page.getByTestId("static-plan-soc").selectOption("90");
+    await page.getByTestId("static-plan-time").fill("10:00");
     await page.getByTestId("static-plan-active").click();
     await placeOverlay(page, "#chargingplan-lp1-1-goal", CURSOR, 60, 5);
     await screenshot(
@@ -31,6 +32,27 @@ loop((screenshot) => {
       },
     );
     await removeOverlays(page);
+
+    // click late
+    await page.getByTestId("static-plan-precondition-lg-toggle").click();
+    await page.getByTestId("static-plan-apply").click();
+    await placeOverlay(
+      page,
+      "[data-testid='static-plan-precondition-lg-select']",
+      CURSOR,
+      0,
+      5,
+    );
+    await screenshot(
+      page,
+      `${BASE_PATH}/plan-precondition`,
+      "#chargingPlanModal_1 .modal-content",
+      { all: 20 },
+    );
+    await page.getByTestId("static-plan-precondition-lg-toggle").click();
+    await removeOverlays(page);
+
+    // repeating
     await page.getByTestId("static-plan-active").click();
     await page.getByTestId("repeating-plan-add").click();
     await page.getByTestId("repeating-plan-soc").selectOption("40");
@@ -40,14 +62,13 @@ loop((screenshot) => {
       page,
       `${BASE_PATH}/plan-soc-repeating`,
       "#chargingPlanModal_1 .modal-content",
-      {
-        all: 20,
-      },
+      { all: 20 },
     );
+    await removeOverlays(page);
   });
 
   test("charging plan energy", async ({ page }) => {
-    await page.goto(`/`);
+    await page.goto("/");
 
     await page
       .locator("#vehicleOptionsDropdown1")
