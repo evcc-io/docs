@@ -62,6 +62,11 @@ The various possible types and their additional parameters are documented below:
 
 ---
 
+:::note Note
+The additional meter fields `title` and `icon` are not supported in the `evcc.yaml` file due to technical reasons.
+Titles and icons (use case dependent) can only be defined for meters created via the configuration interface.
+:::
+
 ## Supported Types
 
 ### `movingaverage`
