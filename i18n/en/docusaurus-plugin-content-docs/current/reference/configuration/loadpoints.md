@@ -329,54 +329,6 @@ If the charging point is not assigned a charger but one of the supported control
 
 ---
 
-### `minCurrent`
-
-:::note deprecated in yaml
-This value can now be set in the charging point settings dialog.
-:::
-
-Defines the minimum used current in amperes (A) per connected phase from the supply to the charger.
-
-As mentioned with `phases`, this value sets the minimum charging power.
-
-For chargers with automatic phase switching, it will continue to charge in 3p until this value (from above) is reached. Only then will it switch to 1p.
-
-:::info
-In general, an electric vehicle requires a minimum current of 6A per phase to charge. However, some vehicles might require a higher minimum current!
-
-For chargers and vehicles communicating via the ISO15118 standard, it might be possible to charge with a lower current per phase if the total power is still at least around 1.4kW.
-:::
-
-**Default value:** `6`
-
-**For example**:
-
-```yaml
-mincurrent: 6
-```
-
----
-
-### `maxCurrent`
-
-:::note deprecated in yaml
-This value can now be set in the charging point settings dialog.
-:::
-
-Defines the maximum allowable current in amps (A) per connected phase from the supply to the charger.
-
-For chargers with automatic phase switching, it will continue to charge in single phase until this value (from below) is reached. Only then will it switch to three-phase.
-
-**Default value:** `16`
-
-**For example**:
-
-```yaml
-maxcurrent: 16
-```
-
----
-
 ### `priority`
 
 During charging, this parameter prioritises loadpoints with each other.

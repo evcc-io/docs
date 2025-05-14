@@ -335,54 +335,6 @@ Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Ste
 
 ---
 
-### `minCurrent`
-
-:::note veraltet in yaml
-Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
-:::
-
-Definiert die minimal genutzte Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
-
-Wie bereits bei `phases` beschrieben, wird über diesen Wert die Mindestladeleistung festgelegt.
-
-Bei Wallboxen mit automatischer Phasenumschaltung wird in 3p solange geladen, bis dieser Wert (von oben) erreicht ist. Erst dann wird auf 1p umgeschaltet.
-
-:::info
-Im Allgemeinen benötigt ein Elektrofahrzeug mindestens eine Stromstärke von 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird jedoch auch eine höhere Mindeststromstärke benötigt!
-
-Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren kann unter Umständen auch mit einer geringeren Stromstärke pro Phase geladen werden, wenn die Gesamtleistung trotzdem mindestens etwa 1,4kW beträgt.
-:::
-
-**Standardwert:** `6`
-
-**Beispiel**:
-
-```yaml
-mincurrent: 6
-```
-
----
-
-### `maxCurrent`
-
-:::note veraltet in yaml
-Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
-:::
-
-Definiert die maximal zulässige Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
-
-Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bis dieser Wert (von unten) erreicht ist. Erst dann wird auf 3p umgeschaltet.
-
-**Standardwert:** `16`
-
-**Beispiel**:
-
-```yaml
-maxcurrent: 16
-```
-
----
-
 ### `priority`
 
 Dient während der Ladung der Priorisierung von Loadpoints untereinander.

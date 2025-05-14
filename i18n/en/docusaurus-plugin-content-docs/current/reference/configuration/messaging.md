@@ -160,8 +160,8 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
 - Charging Point (loadpoint)
   - Configuration
     - [`loadpoint`](loadpoints) - Loadpoint index (_integer_)
-    - [`maxCurrent`](loadpoints#maxcurrent) - Maximum charging current in amperes (_float_)
-    - [`minCurrent`](loadpoints#mincurrent) - Minimum charging current in amperes (_float_)
+    - `maxCurrent` - Maximum charging current in amperes (_float_)
+    - `minCurrent` - Minimum charging current in amperes (_float_)
     - [`mode`](loadpoints#mode) - Initial mode of the charging point after evcc start `off`/`now`/`min`/`pv` (_string_)
     - [`phases`](loadpoints#phases) - Initial active number of phases of the charging point after evcc start (_integer_)
     - [`title`](loadpoints#title) - Label of the charging point in the evcc app (_string_)
