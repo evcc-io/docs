@@ -6,6 +6,7 @@ sidebar_position: 1
 
 In this section you will find installation guides for evcc on various platforms.
 
+- [Preliminary Considerations](./installation/considerations)
 - [Linux / Raspberry Pi](./installation/linux)
 - [macOS](./installation/macos)
 - [Docker](./installation/docker)
