@@ -62,6 +62,11 @@ Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter
 
 ---
 
+:::note Hinweis
+Die zusätzlichen Meter-Felder `title` und `icon` werden in der `evcc.yaml` aus technischen Gründen nicht unterstützt.
+Titel und Icon (je Anwendungsfall) können nur für Zähler definiert werden, die über die Konfigurationsoberfläche angelegt wurden.
+:::
+
 ## Unterstützte Typen
 
 ### `movingaverage`
