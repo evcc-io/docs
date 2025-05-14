@@ -6,6 +6,7 @@ sidebar_position: 1
 
 In diesem Abschnitt findest du Anleitungen für die Installation von evcc auf verschiedenen Plattformen.
 
+- [Vorüberlegungen](./installation/considerations)
 - [Linux / Raspberry Pi](./installation/linux)
 - [macOS](./installation/macos)
 - [Docker](./installation/docker)
