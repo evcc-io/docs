@@ -141,7 +141,7 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
 - Site
   - Konfiguration
     - [`siteTitle`](site) - Hauptüberschrift der evcc App (_string_)
-    - [`prioritySoc`](site#prioritysoc) - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints#mode) Freigabe (_integer_)
+    - `prioritySoc` - Mindest-Füllstand der Powerwall in Prozent, vor [PV mode](loadpoints#mode) Freigabe (_integer_)
   - Information
     - `batteryConfigured` - Indikator, Hausbatterie/Powerwall-Meter konfiguriert (_bool_)
     - `gridConfigured` - Indikator, Smart/Grid-Meter konfiguriert (_bool_)
