@@ -69,3 +69,18 @@ Beispiele:
 
 `2023-08-17T19:30:00Z` = 17. August 2023 um 21:30 Uhr MESZ
 :::
+
+:::note
+\*\* Unterstützung leerer Werte:
+Folgende Zeichenfolgen werden als leere Werte erkannt:
+- `nil`
+- `null`
+- `none`
+- `-`
+
+Beispiele:
+
+- `evcc/site/batteryGridChargeLimit/set`: 'none'
+
+Um die Preisschwelle zum Laden der Batterie auf 'none' zu setzten, bzw. zu löschen.
+:::
