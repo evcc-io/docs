@@ -1,9 +1,9 @@
-# evcc password reset
+# evcc config delete
 
-Reset password
+Delete device
 
 ```
-evcc password reset [flags]
+evcc config delete <id> [flags]
 ```
 
 ## Options inherited from parent commands
@@ -21,6 +21,6 @@ evcc password reset [flags]
 
 ## See also
 
-* [evcc password](evcc_password.md)	 - Password administration
+* [evcc config](evcc_config.md)	 - Dump database configuration
 
 
