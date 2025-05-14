@@ -1,9 +1,15 @@
-# evcc password reset
+# evcc config
 
-Reset password
+Dump database configuration
 
 ```
-evcc password reset [flags]
+evcc config [flags]
+```
+
+## Options
+
+```
+      --class string   Device class (charger|meter|vehicle|tariff|loadpoint|circuit)
 ```
 
 ## Options inherited from parent commands
@@ -21,6 +27,7 @@ evcc password reset [flags]
 
 ## See also
 
-* [evcc password](evcc_password.md)	 - Password administration
+* [evcc](evcc.md)	 - evcc - open source solar charging
+* [evcc config delete](evcc_config_delete.md)	 - Delete device
 
 

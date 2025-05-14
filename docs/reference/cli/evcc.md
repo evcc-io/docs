@@ -9,14 +9,17 @@ evcc [flags]
 ## Options
 
 ```
-  -c, --config string   Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
-      --disable-auth    Disable authentication (dangerous)
-  -h, --help            Help
-      --ignore-db       Run command ignoring service database
-  -l, --log string      Log level (fatal, error, warn, info, debug, trace) (default "info")
-      --log-headers     Log headers
-      --metrics         Expose metrics
-      --profile         Expose pprof profiles
+  -c, --config string          Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
+      --database string        Database location (default "~/.evcc/evcc.db")
+      --disable-auth           Disable authentication (dangerous)
+  -h, --help                   Help
+      --ignore-db              Run command ignoring service database
+  -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
+      --log-headers            Log headers
+      --metrics                Expose metrics
+      --profile                Expose pprof profiles
+      --template string        Add custom template file (debug only)
+      --template-type string   Custom template type (charger, meter, tariff, vehicle (debug only)
 ```
 
 ## See also
@@ -24,6 +27,7 @@ evcc [flags]
 * [evcc charger](evcc_charger.md)	 - Query configured chargers
 * [evcc checkconfig](evcc_checkconfig.md)	 - Check config file for errors
 * [evcc completion](evcc_completion.md)	 - Generate the autocompletion script for the specified shell
+* [evcc config](evcc_config.md)	 - Dump database configuration
 * [evcc configure](evcc_configure.md)	 - Create configuration (evcc.yaml)
 * [evcc detect](evcc_detect.md)	 - Auto-detect compatible hardware
 * [evcc device](evcc_device.md)	 - Query database-configured devices (debug only)
