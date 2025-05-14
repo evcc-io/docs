@@ -16,7 +16,7 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 loop((screenshot) => {
   test("smart grid charging", async ({ page }) => {
-    await page.goto(`/`);
+    await page.goto("/");
     await page.getByTestId("loadpoint-settings-button").nth(1).click();
     await wait(300);
 
@@ -35,10 +35,10 @@ loop((screenshot) => {
   });
 
   test("charging plan", async ({ page }) => {
-    await page.goto(`/`);
+    await page.goto("/");
     await page.locator("[data-testid=charging-plan] button").first().click();
     await wait(300);
-    await page.getByTestId("plan-energy").selectOption("30");
+    await page.getByTestId("static-plan-energy").selectOption("30");
     await screenshot(
       page,
       `${BASE_PATH}/dynamicprice-plan`,
