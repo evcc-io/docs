@@ -142,7 +142,7 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
 - Site
   - Configuration
     - [`siteTitle`](site) - Main headline of the evcc app (_string_)
-    - [`prioritySoc`](site#prioritysoc) - Minimum Powerwall state of charge in percent before [PV mode](loadpoints#mode) release (_integer_)
+    - `prioritySoc` - Minimum Powerwall state of charge in percent before [PV mode](loadpoints#mode) release (_integer_)
   - Information
     - `batteryConfigured` - Indicator, home battery/Powerwall meter configured (_bool_)
     - `gridConfigured` - Indicator, smart/grid meter configured (_bool_)
