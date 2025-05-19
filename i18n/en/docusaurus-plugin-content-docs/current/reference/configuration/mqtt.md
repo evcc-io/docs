@@ -14,7 +14,7 @@ For more information, refer to the [`MQTT API`](/docs/integrations/mqtt-api) doc
 # mqtt message broker
 mqtt:
   broker: localhost:1883
-  topic: evcc # root topic for publishing, set empty to disable publishing
+  topic: evcc # root topic for publishing
   # clientid: foo
   # user:
   # password:
@@ -31,7 +31,6 @@ Connection details (hostname/IP and port) of the MQTT broker to which evcc shoul
 ### `topic`
 
 Specifies the root topic that evcc uses.
-If not specified here, no MQTT communication can take place!
 
 ---
 
