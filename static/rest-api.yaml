@@ -147,6 +147,26 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/NumberResult"
+  /batterymode:
+    delete:
+      summary: Disable external battery control
+      description: Default evcc control behavior is restored
+      tags:
+        - Home Battery
+      responses:
+        "200":
+          $ref: "#/components/responses/BatteryModeResult"
+  /batterymode/{batteryMode}:
+    post:
+      summary: Set external battery mode
+      description: Directly controls the mode of all controllable batteries. evcc behavior like "price limit" or "prevent discharge while fast charging" is overruled. External mode resets after 60s. The external system has to call this endpoint regularly.
+      tags:
+        - Home Battery
+      parameters:
+        - $ref: "#/components/parameters/batteryMode"
+      responses:
+        "200":
+          $ref: "#/components/responses/BatteryModeResult"
   /buffersoc/{soc}:
     post:
       summary: Set battery buffer SoC
@@ -289,8 +309,7 @@ paths:
     post:
       summary: Update maximum current
       description: >
-        Updates the maximum current of the loadpoint. [Read
-        more.](/en/docs/reference/configuration/loadpoints#maxcurrent)
+        Updates the maximum current of the loadpoint.
       tags:
         - Loadpoints
       parameters:
@@ -303,8 +322,7 @@ paths:
     post:
       summary: Update minimum current
       description: >
-        Updates the minimum current of the loadpoint. [Read
-        more.](/en/docs/reference/configuration/loadpoints#mincurrent)
+        Updates the minimum current of the loadpoint.
       tags:
         - Loadpoints
       parameters:
@@ -610,6 +628,8 @@ paths:
               properties:
                 vehicle:
                   $ref: "#/components/schemas/VehicleName"
+                loadpoint:
+                  $ref: "#/components/schemas/LoadpointName"
       responses:
         "200":
           description: Success
@@ -964,6 +984,15 @@ paths:
                     $ref: "#/components/schemas/StaticSocPlan"
 components:
   schemas:
+    BatteryMode:
+      description: TODO
+      type: string
+      example: normal
+      enum:
+        - unknown
+        - normal
+        - hold
+        - charge
     ChangePassword:
       type: object
       properties:
@@ -984,10 +1013,7 @@ components:
           finished:
             $ref: "#/components/schemas/Timestamp"
           loadpoint:
-            type: string
-            description: >-
-              [See
-              documentation](/en/docs/reference/configuration/loadpoints#title)
+            $ref: "#/components/schemas/LoadpointName"
           vehicle:
             $ref: "#/components/schemas/VehicleName"
           odometer:
@@ -1048,6 +1074,10 @@ components:
       type: integer
       example: 1
       minimum: 1
+    LoadpointName:
+      description: "[See documentation](/en/docs/reference/configuration/loadpoints#title)"
+      type: string
+      example: Garage
     LogArea:
       description: "[See documentation](/en/docs/reference/configuration/log#levels)"
       type: string
@@ -1120,7 +1150,7 @@ components:
         end:
           description: End of charging interval
           $ref: "#/components/schemas/Timestamp"
-        price:
+        value:
           description: Cost of charging interval
           type: number
           minimum: 0
@@ -1332,6 +1362,12 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Power"
+    batteryMode:
+      name: batteryMode
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/BatteryMode"
     costLimit:
       name: cost
       description: Cost limit in configured currency (default EUR) or CO2 limit in g/kWh
@@ -1442,6 +1478,18 @@ components:
             type: string
             enum:
               - Unauthorized
+    BatteryModeResult:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: integer
+                description: |
+                  Battery mode. 0: unknown, 1: normal, 2: hold, 3: charge
+                minimum: 0
+                maximum: 3
   securitySchemes:
     cookieAuth:
       type: apiKey

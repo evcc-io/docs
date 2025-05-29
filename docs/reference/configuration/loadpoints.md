@@ -16,7 +16,7 @@ loadpoints:
     mode: pv # charge mode (off, now, minpv, pv)
 ```
 
-Referenzen sind hierbei immer die Werte des Parameters `name` (z.B. `wallbox`) in der jeweiligen Gerätekonfiguration.
+Referenzen sind hierbei immer die Werte des Parameters `name` (z. B. `wallbox`) in der jeweiligen Gerätekonfiguration.
 
 Im folgenden werden nun alle möglichen Parameter erklärt.
 
@@ -73,7 +73,7 @@ Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessg
 
 Beim Anschluss eines Fahrzeugs an den Ladepunkt wird damit immer davon ausgegangen dass dieses Fahrzeug angeschlossen wurde.
 Die automatische Fahrzeugerkennung wird umgangen.
-Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z.B. Gastfahrzeug) lässt sich dies im Anschluss manuell zuweisen.
+Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z. B. Gastfahrzeug) lässt sich dies im Anschluss manuell zuweisen.
 
 **Beispiel**:
 
@@ -279,7 +279,6 @@ delay: 10m
 
 ---
 
-
 ### `phases`
 
 :::note veraltet in yaml
@@ -333,54 +332,6 @@ phases: 0
 :::info
 Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link etc.) zugewiesen, **muss** `phases` zwingend auf **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.  
 :::
-
----
-
-### `minCurrent`
-
-:::note veraltet in yaml
-Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
-:::
-
-Definiert die minimal genutzte Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
-
-Wie bereits bei `phases` beschrieben, wird über diesen Wert die Mindestladeleistung festgelegt.
-
-Bei Wallboxen mit automatischer Phasenumschaltung wird in 3p solange geladen, bis dieser Wert (von oben) erreicht ist. Erst dann wird auf 1p umgeschaltet.
-
-:::info
-Im Allgemeinen benötigt ein Elektrofahrzeug mindestens eine Stromstärke von 6A pro Phase um zu Laden. Bei manchen Fahrzeugen wird jedoch auch eine höhere Mindeststromstärke benötigt!
-
-Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren kann unter Umständen auch mit einer geringeren Stromstärke pro Phase geladen werden, wenn die Gesamtleistung trotzdem mindestens etwa 1,4kW beträgt.
-:::
-
-**Standardwert:** `6`
-
-**Beispiel**:
-
-```yaml
-mincurrent: 6
-```
-
----
-
-### `maxCurrent`
-
-:::note veraltet in yaml
-Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
-:::
-
-Definiert die maximal zulässige Stromstärke in Ampere (A) pro angeschlossener Phase von der Zuleitung zur Wallbox.
-
-Bei Wallboxen mit automatischer Phasenumschaltung wird in 1p solange geladen, bis dieser Wert (von unten) erreicht ist. Erst dann wird auf 3p umgeschaltet.
-
-**Standardwert:** `16`
-
-**Beispiel**:
-
-```yaml
-maxcurrent: 16
-```
 
 ---
 

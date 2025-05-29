@@ -1,0 +1,128 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Preliminary Considerations
+
+Are you technically proficient and know which hardware to install evcc on and which EV charger, solar system, and possibly battery to integrate?
+Then skip this page and go directly to the installation.
+
+If charging with solar power is new to you, you'll find some information below on how to get started with evcc.
+
+## Initial Situation
+
+Is evcc the right solution for surplus charging for me?
+I have a solar system and an electric car and want to try it out.
+Where do I start?
+
+A solar system is particularly economical when I also consume the self-generated electricity.
+For this, the electricity must be consumed exactly when it is produced, i.e., when the sun is shining.
+The simplest solution: I always connect the car for charging when the sun is shining and there are no clouds in sight.
+Unfortunately, we have clouds or we're currently using the solar system's electricity for the washing machine.
+We therefore need to automate the charging control - and that's exactly what evcc does.
+
+For automation, we need to know the current electricity surplus, i.e., how much electricity we don't consume ourselves and therefore feed into the power grid.
+We get this information from the electricity meter.
+This can be the electricity meter of the metering point operator (e.g., your energy provider) or an additional meter that was installed with the solar system.
+The latter is usually the case when the solar system is equipped with a storage battery.
+
+The meter must be electronically readable.
+Just check under [Devices > PV, Battery, Grid, Meters](/docs/devices/meters) to see if you can find your devices.
+If not, you can also integrate them yourself via [Plugins](/docs/devices/plugins).
+
+Another prerequisite for automating surplus charging is a controllable charger.
+The supported devices are listed under [Devices > Chargers](/docs/devices/chargers).
+If I don't (yet) have a charger, a switchable socket with consumption measurement is recommended for testing, e.g., a TP-Link Tapo P110, which is available for under 20 EUR.
+It can later be used to switch the charger for e-scooters or e-bikes.
+For the electric car, this is not a permanent solution since, on the one hand, the charging power cannot be regulated, i.e., adjusted to the current electricity yield of the solar system and self-consumption.
+On the other hand, there is no communication with the electric car, so switching occurs under full load, which means the switchable socket will not survive in the long term.
+With chargers, they communicate with the car, so that before the EV charger switches off, the car has already stopped charging.
+
+## Hardware for evcc Installation
+
+evcc is open-source software developed by volunteers.
+So there is no guarantee of functionality.
+But you also don't pay a purchase price.
+That open-source software can work excellently can be seen, for example, with Linux, which has been developed according to this model for many years.
+However, this requires an active community.
+For example, it answers [beginners' questions](https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe) or develops the software further.
+If you can't contribute to this, you can support the project through [Sponsorship](/docs/sponsorship).
+Sponsorship is necessary for some commercial chargers.
+
+If I just want to try evcc first, I don't need to buy a Raspberry Pi, but can start with an old, discarded PC or laptop.
+All devices from the last 10 years with an Intel-compatible 64-bit CPU and a network card (or WLAN) should work here.
+In the long term, the higher power consumption and the larger space requirements speak against a PC or laptop.
+Furthermore, there can be problems with laptops due to the power-saving mode.
+Alternatives to installation on a Raspberry Pi would be devices already present in the home network.
+This could be, for example, a network storage (NAS) or an existing system like Home Assistant.
+The installation is more demanding here, as evcc then has to run on a virtual machine or as a container.
+
+To ensure high stability, we recommend connecting both evcc and the devices used (charger, solar system, battery, etc.) with a network cable wherever possible.
+Before starting the installation of evcc under Debian or Ubuntu according to the [instructions](/docs/installation/linux), all required IP addresses of meters, solar systems, storage systems, and chargers should be available.
+The IP addresses of all devices are usually listed in the web interface of the DSL or cable routers (e.g., Fritz!Box).
+It is helpful to assign these addresses permanently so that they do not change over a long period of time.
+
+## EV Chargers
+
+Chargers come in different variants.
+The following describes the typical properties and functions of chargers.
+This should make the decision for or against a charger somewhat easier.
+
+### Charging Power
+
+A first decision concerns the maximum charging power of the charger.
+Common are mainly the 11 kW and 22 kW chargers.
+The 11 kW variant should be the most frequently chosen variant.
+This has two main reasons: on the one hand, many vehicles can charge at a maximum of 11 kW AC, and on the other hand, 11 kW chargers can be put into operation with a simple registration (notification) to the grid operator.
+The 22 kW chargers require approval from the provider.
+This may only be granted under certain conditions.
+For example, the provider may require that the charging can be switched off by a control signal in the event of an energy shortage.
+This can drive up the installation costs.
+If the house connection with a 22 kW charger exceeds a connection power of 30 kW, the provider can charge a grid expansion contribution for the connection power exceeding 30 kW.
+The maximum charging power or the maximum current can be configured in the chargers via switches.
+The installer must set this correctly according to the approved maximum power (distribution network operator) the installation (circuit breaker, residual current protection, cable cross-section, cable length, etc.).
+Errors here can quickly lead to failures or fires.
+In the event of damage, the insurance company will ask for the installation protocol or the invoice for the installer approved by the provider.
+
+### Communication Interface
+
+evcc requires a way to communicate with the charger.
+Almost all modern chargers have something like this.
+Under [Devices > Chargers](/docs/devices/chargers) you will find a list of currently supported chargers.
+Ethernet, WLAN, LTE, or serial via RS485 bus (e.g., Modbus RTU interface) are possible as physical interfaces.
+Often several interfaces are present simultaneously.
+A suitable protocol between the charger and evcc is required to control the charging process.
+An open standard that has now become established worldwide is [OCPP (Open Charge Point Protocol)](https://en.wikipedia.org/wiki/OCPP).
+
+In addition to the communication between the charger and evcc, the communication of the charger with the vehicle is relevant.
+In the simplest case, the charger can only signal the charging current between 6A and 32A.
+Depending on whether the charger was connected to the power grid with one or three phases, the vehicle then charges with at least 1.38 kW or 4.14 kW.
+Under [Features > Solar Surplus Charging](/docs/features/solar-charging) you will find more information.
+To be able to charge both low solar power surpluses and larger surpluses, automatic 1p/3p switching is recommended.
+Chargers that support this function are noted accordingly in the [listing](/docs/devices/chargers).
+If the charger does not support automatic switching, in the winter months, with a pre-connected load disconnector (e.g., Hager HAB304), phases 2 and 3 could possibly be switched off manually.
+
+With the above minimal communication between the charger and the vehicle, it is not possible for the charger to identify the connected vehicle or to query the current state of charge (SoC).
+To get this information, evcc takes the route via interfaces (APIs) of the vehicle manufacturer.
+The scope of the information provided there is different and can include, for example, the air conditioning or the position of the vehicle.
+The use of these APIs is sometimes subject to a fee from the manufacturer.
+
+Some chargers already implement the relatively new [ISO 15118](https://en.wikipedia.org/wiki/ISO_15118) protocol (hardware and software extensions necessary), which is used for "Plug & Charge" and "Autocharge" at public fast charging stations.
+With this, it is possible, for example, to determine the identity of the connected vehicle and the SoC and to specify the charging power for each phase individually.
+The prerequisite is that the vehicle also correctly supports the respective function.
+It is not to be expected that older vehicles will still be retrofitted with support for ISO 15118.
+The same applies to chargers.
+If the hardware for communication according to ISO 15118 is not installed, there is no hope.
+
+### Company Cars & Commercial Use
+
+Especially for company car drivers and private individuals who want to provide proof of travel costs to the tax office, a calibrated meter is interesting.
+Some manufacturers therefore also offer their charger in a variant with a calibrated electricity meter.
+This allows the amount of energy charged to be documented for each charging process.
+The meter is also of interest apart from the tax office, as it can be used to determine the charging losses exactly.
+Chargers often work most efficiently at maximum charging power.
+With low charging currents, on the other hand, increased charging losses often occur.
+While this plays only a subordinate role in pure surplus charging, it is a relevant cost factor when charging with grid power.

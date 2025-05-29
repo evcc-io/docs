@@ -9,7 +9,7 @@ import DeviceFeatures from "/src/components/DeviceFeatures";
 import DeviceFeatureFilter from "/src/components/DeviceFeatureFilter";
 import SponsorshipRequired from "/docs/_sponsorship_required.mdx";
 
-# PV, Battery, Grid
+# PV, Battery, Grid, Meter
 
 The devices on this page can all be used as energy measuring points (`meter`) for various purposes:
 
@@ -18,26 +18,45 @@ The devices on this page can all be used as energy measuring points (`meter`) fo
 - `battery`: House battery
 - `charge`: Charging power at the wallbox
 - `aux`: Smart consumer with its own surplus regulation
+- `ext`: Additional meter, e.g. for [load management](../features/loadmanagement) or data logging
 
 The configuration is formatted as follows:
 
 ```yaml
+# Definition of all devices
 meters:
   - name: grid1
     type: ...
   - name: pv1
     type: ...
+  - name: pv2
+    type: ...
   - name: battery1
     type: ...
+
+# Mapping by purpose
+site:
+  meters:
+    grid: grid1
+    pv:
+      - pv1
+      - pv2
+    battery:
+      - battery1
+    aux:
+      - ...
+    ext:
+      - ...
 ```
 
+This page lists the configurations for all supported components that can be used as energy measuring points (`meter`).
 Once you have adapted the code samples to suit your meters in `evcc.yaml`, you can test the connection using the `evcc meter` command, which returns the current status of all connected meters.
-If you just want to test one meter at a time, use `evcc meter --name my_meter`.
+The command `evcc meter --name grid1` can be used to test a single meter by name.
 
 ```
 $ ./evcc meter
 
-grid
+grid1
 -----
 Power:          -31W
 Energy:         5195.5kWh
@@ -45,7 +64,7 @@ Current L1..L3: 3.05A 1.07A 1.15A
 ```
 
 :::note
-Most components used in modern Solar / Battery installations, especially inverters and battery storage (but also some metering devices!) have support for the relatively standardised "SunSpec" data model, which can be queried via Modbus/TCP without requiring device-specific data registers.
+Most components used in modern Solar / Battery installations, especially inverters and battery storage (but also some metering devices!) have support for the standardised SunSpec data model, which can be queried via Modbus TCP without requiring device-specific data registers.
 If your system isn't listed here, that might mean that it is 100% SunSpec-compatible, so try that as your first port of call. (You may need to enable network support on your device - check the manual)
 :::
 
@@ -440,8 +459,8 @@ To use active battery control, times for grid charging must be defined once via 
       id: 85
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -495,8 +514,9 @@ To use active battery control, times for grid charging must be defined once via 
       id: 85
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -551,8 +571,8 @@ To use active battery control, times for grid charging must be defined once via 
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -615,8 +635,8 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -670,8 +690,8 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -727,8 +747,8 @@ To use active battery control, times for grid charging must be defined once via 
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 2 # Default mode for battery control to which the inverter falls back after charging the battery or after stopping discharge. (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -782,6 +802,123 @@ To use active battery control, times for grid charging must be defined once via 
       host: 192.0.2.2 # IP address or hostname`}  />
 
 
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+## Axitec AXIhycon 12-15H
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: solis-hybrid-s
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: solis-hybrid-s
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: solis-hybrid-s
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
+
+
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: solis-hybrid-s
+      usage: battery
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`} advanced={`meters:
+    - name: my_battery
+      type: template
+      template: solis-hybrid-s
+      usage: battery
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity in kWh (optional)`} />
+
+
+
+</TabItem>
+</Tabs>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
@@ -1218,12 +1355,6 @@ To use active battery control, times for grid charging must be defined once via 
       modbus: rs485tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
       port: 502 # Port`}  />
 
 
@@ -1248,7 +1379,44 @@ To use active battery control, times for grid charging must be defined once via 
       modbus: rs485tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### EM24_E1
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: cg-em24_e1
+      usage: grid
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: cg-em24_e1
+      usage: charge
       
       # Modbus TCP
       modbus: tcpip
@@ -1605,8 +1773,8 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -1660,8 +1828,9 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -1716,8 +1885,8 @@ To use active battery control, times for grid charging must be defined once via 
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -1780,8 +1949,10 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      storageunit: 1 # optional
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      includegenport: # optional`} />
 
 
 
@@ -1835,8 +2006,11 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      storageunit: 1 # optional
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
+      includegenport: # optional`} />
 
 
 
@@ -1890,9 +2064,11 @@ To use active battery control, times for grid charging must be defined once via 
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
+      storageunit: 1 # optional
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      includegenport: # optional`} />
 
 
 
@@ -2181,7 +2357,7 @@ To use active battery control, times for grid charging must be defined once via 
 
 <DeviceFeatures features="battery-control" />
 
-Username and password are identical to Web Portal or My E3/DC App access. Key (=RSCP-Password) must be set in the E3/DC System at Personalize/User Profile.
+Username and password are identical to Web Portal or My E3/DC App access. Key (=RSCP-Password) must be set in the E3/DC system at Personalize/User Profile. The IP adresses of evcc and E3/DC system must be in the same subnet.
 
 **Note**: Active battery control will override Smart-Power/Operating Range settings.
 
@@ -2595,7 +2771,14 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       template: enphase
       usage: grid
       host: 192.0.2.2 # IP address or hostname
-      token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)`}  />
+      token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: enphase
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -2608,7 +2791,14 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       template: enphase
       usage: pv
       host: 192.0.2.2 # IP address or hostname
-      token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)`}  />
+      token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: enphase
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -2628,7 +2818,8 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       token: # Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
-      capacity: 50 # Battery capacity in kWh (optional)`} />
+      capacity: 50 # Battery capacity in kWh (optional)
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -2660,7 +2851,9 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
 
 ## FENECON 
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
+
+A commercial license is required for FEMS FENECON systems for active battery control.
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -2695,7 +2888,7 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       password: user # Password of the user account (use single quotes in case of leading zeros) (optional)
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -2714,6 +2907,8 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       password: user # Password of the user account (use single quotes in case of leading zeros) (optional)
+      battery: ess0 # controllable battery component (optional)
+      watchdog: 60s # adjusted to the API timeout (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
 
 
@@ -2848,8 +3043,8 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -2903,8 +3098,9 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -2959,8 +3155,8 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -3005,7 +3201,14 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       template: fronius-gen24
       usage: grid
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port (optional)`}  />
+      port: 502 # Port (optional)`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: fronius-gen24
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      port: 502 # Port (optional)
+      id: 200 # Meter address of primary or secondary meters. On the web interface of the inverter, only the address of the first meter (e.g., 200) can be set. Additional meters receive an ascending number (e.g., 201). (optional)`} />
 
 
 
@@ -3025,7 +3228,7 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       port: 502 # Port (optional)
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -3047,6 +3250,49 @@ Only batteries of type "AC Battery" are currently supported by Enphase-API.
       port: 502 # Port (optional)
       maxchargerate: 100 # Power limit for grid charging. (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### Smartmeter (via Inverter)
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: sunspec-meter
+      usage: grid
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: sunspec-meter
+      usage: pv
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
 
 
 
@@ -3133,7 +3379,14 @@ Username and password are only required for active battery control.
       template: fronius-gen24
       usage: grid
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port (optional)`}  />
+      port: 502 # Port (optional)`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: fronius-gen24
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      port: 502 # Port (optional)
+      id: 200 # Meter address of primary or secondary meters. On the web interface of the inverter, only the address of the first meter (e.g., 200) can be set. Additional meters receive an ascending number (e.g., 201). (optional)`} />
 
 
 
@@ -3153,7 +3406,7 @@ Username and password are only required for active battery control.
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       port: 502 # Port (optional)
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -3185,7 +3438,7 @@ Username and password are only required for active battery control.
 
 ## Ginlong
 
-### Solis Hybrid Inverter (RHI and S series)
+### Solis Hybrid Inverter (RHI series)
 
 <DeviceFeatures features="" />
 
@@ -3251,7 +3504,7 @@ Username and password are only required for active battery control.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -3279,6 +3532,123 @@ Username and password are only required for active battery control.
     - name: my_battery
       type: template
       template: solis-hybrid
+      usage: battery
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity in kWh (optional)`} />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### Solis Hybrid Inverter (S Series)
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: solis-hybrid-s
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: solis-hybrid-s
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: solis-hybrid-s
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
+
+
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: solis-hybrid-s
+      usage: battery
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`} advanced={`meters:
+    - name: my_battery
+      type: template
+      template: solis-hybrid-s
       usage: battery
       
       # RS485 via adapter (Modbus RTU)
@@ -3425,7 +3795,7 @@ Username and password are only required for active battery control.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      battery: 1 # optional`}  />
+      battery: 1 # [1, 2] (optional)`}  />
 
 
 
@@ -3456,7 +3826,7 @@ Username and password are only required for active battery control.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      battery: 1 # optional`} advanced={`meters:
+      battery: 1 # [1, 2] (optional)`} advanced={`meters:
     - name: my_pv
       type: template
       template: goodwe-hybrid
@@ -3480,8 +3850,8 @@ Username and password are only required for active battery control.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      battery: 1 # optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      battery: 1 # [1, 2] (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -3512,7 +3882,7 @@ Username and password are only required for active battery control.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      battery: 1 # optional`} advanced={`meters:
+      battery: 1 # [1, 2] (optional)`} advanced={`meters:
     - name: my_battery
       type: template
       template: goodwe-hybrid
@@ -3536,8 +3906,53 @@ Username and password are only required for active battery control.
       id: 247
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      battery: 1 # optional
+      battery: 1 # [1, 2] (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### GoodWe over Wifi
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: goodwe-wifi
+      usage: grid
+      uri: # HTTP(S) address (optional)`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: goodwe-wifi
+      usage: pv
+      uri: # HTTP(S) address (optional)`}  />
+
+
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: goodwe-wifi
+      usage: battery
+      uri: # HTTP(S) address (optional)`}  />
 
 
 
@@ -3670,7 +4085,7 @@ The active battery control uses the first "Battery first" timeslot, so it cannot
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -3817,7 +4232,7 @@ The active battery control uses the first "Battery first" timeslot, so it cannot
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -3886,6 +4301,9 @@ The active battery control uses the first "Battery first" timeslot, so it cannot
 
 <DeviceFeatures features="" />
 
+<Tabs>
+<TabItem value="pv" label="PV" default>
+
 <DeviceConfig code={`meters:
     - name: my_pv
       type: template
@@ -3894,6 +4312,21 @@ The active battery control uses the first "Battery first" timeslot, so it cannot
       host: 192.0.2.2 # IP address or hostname`}  />
 
 
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: homewizard-kwh
+      usage: charge
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+</Tabs>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
@@ -4078,7 +4511,8 @@ The active battery control uses the first "Battery first" timeslot, so it cannot
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       timeout: 15s # optional
-      storageunit: 1 # optional`} />
+      storageunit: 1 # optional
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -4234,7 +4668,8 @@ See https://forum.huawei.com/enterprise/en/modbus-tcp-guide/thread/6672506771534
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       timeout: 15s # optional
-      storageunit: 1 # optional`} />
+      storageunit: 1 # optional
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -4323,6 +4758,104 @@ See https://forum.huawei.com/enterprise/en/modbus-tcp-guide/thread/6672506771534
       timeout: 15s # optional`}  />
 
 
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+## IAMMETER
+
+### WEM3080
+
+<DeviceFeatures features="" />
+
+3-phase meters (WEM3080T/WEM3046T/WEM3050T) require Net Metering Mode (NEM) to be enabled.
+See https://www.iammeter.com/newsshow/net-energy-metering
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: iammeter
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: iammeter
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: iammeter
+      usage: charge
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### WEM3080T/WEM3046T/WEM3050T
+
+<DeviceFeatures features="" />
+
+3-phase meters (WEM3080T/WEM3046T/WEM3050T) require Net Metering Mode (NEM) to be enabled.
+See https://www.iammeter.com/newsshow/net-energy-metering
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: iammeter
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: iammeter
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: iammeter
+      usage: charge
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+</Tabs>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
@@ -4764,9 +5297,10 @@ Only a single system may access the inverter! For active battery control the fun
       id: 71
       host: 192.0.2.2 # Hostname
       port: 1502 # Port
-      endianness: little # optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
+      endianness: little # [little, big] (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
       watchdog: 60s # optional`} />
 
 
@@ -4795,9 +5329,10 @@ Only a single system may access the inverter! For active battery control the fun
       id: 71
       host: 192.0.2.2 # Hostname
       port: 1502 # Port
-      endianness: little # optional
+      endianness: little # [little, big] (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
       watchdog: 60s # optional`} />
 
 
@@ -4839,8 +5374,8 @@ _see also https://github.com/evcc-io/evcc/wiki/Kostal-Plenticore_
       id: 71
       host: 192.0.2.2 # Hostname
       port: 1502 # Port
-      endianness: little # optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)
+      endianness: little # [little, big] (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
       watchdog: 60s # optional`} />
 
 
@@ -4869,7 +5404,7 @@ _see also https://github.com/evcc-io/evcc/wiki/Kostal-Plenticore_
       id: 71
       host: 192.0.2.2 # Hostname
       port: 1502 # Port
-      endianness: little # optional
+      endianness: little # [little, big] (optional)
       capacity: 50 # Battery capacity in kWh (optional)
       maxchargerate: 100 # Power limit for grid charging. (optional)
       watchdog: 60s # optional`} />
@@ -4927,7 +5462,7 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
 
 ### ESS Home 15
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -4945,7 +5480,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       usage: grid
       host: 192.0.2.2 # IP address or hostname
       password: # User password, see https://github.com/Morluktom/ioBroker.lg-ess-home/tree/master#getting-the-password. Alteratively, use registration id for admin login. (optional)
-      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)`} />
+      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -4965,7 +5502,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       password: # User password, see https://github.com/Morluktom/ioBroker.lg-ess-home/tree/master#getting-the-password. Alteratively, use registration id for admin login. (optional)
-      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)`} />
+      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -4986,7 +5525,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       host: 192.0.2.2 # IP address or hostname
       password: # User password, see https://github.com/Morluktom/ioBroker.lg-ess-home/tree/master#getting-the-password. Alteratively, use registration id for admin login. (optional)
       registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)
-      capacity: 50 # Battery capacity in kWh (optional)`} />
+      capacity: 50 # Battery capacity in kWh (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -4997,7 +5538,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
 
 ### ESS Home 8/10
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
+
+To use the battery control, a firmware version greater than or equal to 10.05.7433 / R2155 is required
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -5015,7 +5558,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       usage: grid
       host: 192.0.2.2 # IP address or hostname
       password: # User password, see https://github.com/Morluktom/ioBroker.lg-ess-home/tree/master#getting-the-password. Alteratively, use registration id for admin login. (optional)
-      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)`} />
+      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -5035,7 +5580,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       password: # User password, see https://github.com/Morluktom/ioBroker.lg-ess-home/tree/master#getting-the-password. Alteratively, use registration id for admin login. (optional)
-      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)`} />
+      registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -5056,7 +5603,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       host: 192.0.2.2 # IP address or hostname
       password: # User password, see https://github.com/Morluktom/ioBroker.lg-ess-home/tree/master#getting-the-password. Alteratively, use registration id for admin login. (optional)
       registration: DE200... # Registration id of the LG ESS HOME inverter. (optional)
-      capacity: 50 # Battery capacity in kWh (optional)`} />
+      capacity: 50 # Battery capacity in kWh (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -5223,7 +5772,7 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
 
 ### Energy Butler GEN3
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -5236,14 +5785,20 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       
       # RS485 via adapter (Modbus RTU)
       modbus: rs485serial
-      id: 247
+      id: 255
       device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
       baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
       comset: "8N1" # Kommunikationsparameter für den Adapter
       
       # RS485 via TCP/IP (Modbus RTU)
       modbus: rs485tcpip
-      id: 247
+      id: 255
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 255
       host: 192.0.2.2 # Hostname
       port: 502 # Port`}  />
 
@@ -5260,14 +5815,20 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       
       # RS485 via adapter (Modbus RTU)
       modbus: rs485serial
-      id: 247
+      id: 255
       device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
       baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
       comset: "8N1" # Kommunikationsparameter für den Adapter
       
       # RS485 via TCP/IP (Modbus RTU)
       modbus: rs485tcpip
-      id: 247
+      id: 255
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 255
       host: 192.0.2.2 # Hostname
       port: 502 # Port`}  />
 
@@ -5284,16 +5845,46 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       
       # RS485 via adapter (Modbus RTU)
       modbus: rs485serial
-      id: 247
+      id: 255
       device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
       baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
       comset: "8N1" # Kommunikationsparameter für den Adapter
       
       # RS485 via TCP/IP (Modbus RTU)
       modbus: rs485tcpip
-      id: 247
+      id: 255
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 255
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`} advanced={`meters:
+    - name: my_battery
+      type: template
+      template: mtec-eb-gen3
+      usage: battery
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 255
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 255
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 255
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity in kWh (optional)`} />
 
 
 
@@ -5392,7 +5983,9 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
 
 ## OpenEMS 
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
+
+A commercial license is required for FEMS FENECON systems for active battery control.
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -5427,7 +6020,7 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       password: user # Password of the user account (use single quotes in case of leading zeros) (optional)
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -5446,6 +6039,8 @@ The energy meter must be installed in sensor position 2 (grid connection). Senso
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       password: user # Password of the user account (use single quotes in case of leading zeros) (optional)
+      battery: ess0 # controllable battery component (optional)
+      watchdog: 60s # adjusted to the API timeout (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
 
 
@@ -5758,7 +6353,33 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port
+      mppt3: false # optional`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: solax
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 19200 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      mppt3: false # optional
+      storageunit: 1 # optional`} />
 
 
 
@@ -5788,7 +6409,8 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`} advanced={`meters:
+      port: 502 # Port
+      mppt3: false # optional`} advanced={`meters:
     - name: my_pv
       type: template
       template: solax
@@ -5812,7 +6434,9 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      mppt3: false # optional
+      storageunit: 1 # optional
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -5842,7 +6466,8 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`} advanced={`meters:
+      port: 502 # Port
+      mppt3: false # optional`} advanced={`meters:
     - name: my_battery
       type: template
       template: solax
@@ -5866,6 +6491,8 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
+      mppt3: false # optional
+      storageunit: 1 # optional
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 0 # Default mode for battery control to which the inverter falls back after charging the battery or after stopping discharge. (optional)`} />
 
@@ -5878,7 +6505,7 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
 
 ## RCT Power
 
-<DeviceFeatures features="" />
+<DeviceFeatures features="battery-control" />
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -5888,7 +6515,15 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       type: template
       template: rct-power
       usage: grid
-      host: 192.0.2.2 # IP address or hostname`}  />
+      host: 192.0.2.2 # IP address or hostname`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: rct-power
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      minsoc: 7 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 97 # Upper limit when charging the battery from the grid (optional)
+      cache: 30s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -5900,7 +6535,15 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       type: template
       template: rct-power
       usage: pv
-      host: 192.0.2.2 # IP address or hostname`}  />
+      host: 192.0.2.2 # IP address or hostname`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: rct-power
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      minsoc: 7 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 97 # Upper limit when charging the battery from the grid (optional)
+      cache: 30s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -5918,7 +6561,10 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       template: rct-power
       usage: battery
       host: 192.0.2.2 # IP address or hostname
-      capacity: 50 # Battery capacity in kWh (optional)`} />
+      capacity: 50 # Battery capacity in kWh (optional)
+      minsoc: 7 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 97 # Upper limit when charging the battery from the grid (optional)
+      cache: 30s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -5986,6 +6632,81 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
 
 ## SAJ
 
+### H1 Series Hybrid Solar Inverter
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: saj-h1
+      usage: grid
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      timeout: 5s # optional`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: saj-h1
+      usage: pv
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      timeout: 5s # optional`}  />
+
+
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: saj-h1
+      usage: battery
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      timeout: 5s # optional`} advanced={`meters:
+    - name: my_battery
+      type: template
+      template: saj-h1
+      usage: battery
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      timeout: 5s # optional
+      capacity: 50 # Battery capacity in kWh (optional)`} />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
 ### H2 Series Hybrid Solar Inverter
 
 <DeviceFeatures features="" />
@@ -6040,8 +6761,8 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -6095,8 +6816,8 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -6152,8 +6873,8 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 2 # Default mode for battery control to which the inverter falls back after charging the battery or after stopping discharge. (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -6302,7 +7023,7 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       template: senec-home
       usage: grid
       host: 192.0.2.2 # IP address or hostname
-      schema: https # optional`}  />
+      schema: https # [https, http] (optional)`}  />
 
 
 
@@ -6315,7 +7036,7 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       template: senec-home
       usage: pv
       host: 192.0.2.2 # IP address or hostname
-      schema: https # optional`}  />
+      schema: https # [https, http] (optional)`}  />
 
 
 
@@ -6328,13 +7049,13 @@ The QCells hybrid inverter has to be registered in the QCellsCloud.
       template: senec-home
       usage: battery
       host: 192.0.2.2 # IP address or hostname
-      schema: https # optional`} advanced={`meters:
+      schema: https # [https, http] (optional)`} advanced={`meters:
     - name: my_battery
       type: template
       template: senec-home
       usage: battery
       host: 192.0.2.2 # IP address or hostname
-      schema: https # optional
+      schema: https # [https, http] (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
 
 
@@ -6818,7 +7539,7 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
 
 ### Inverter (Speedwire)
 
-<DeviceFeatures features="skiptest" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="pv" label="PV" default>
@@ -6886,7 +7607,7 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
       id: 3
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -6993,7 +7714,7 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
 
 ### Sunny Home Manager 2.0
 
-<DeviceFeatures features="smahems,skiptest" />
+<DeviceFeatures features="smahems" />
 
 <DeviceConfig code={`meters:
     - name: my_grid
@@ -7148,7 +7869,13 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
       type: template
       template: smartfox-em2
       usage: grid
-      host: 192.0.2.2 # IP address or hostname`}  />
+      host: 192.0.2.2 # IP address or hostname`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: smartfox-em2
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -7160,7 +7887,13 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
       type: template
       template: smartfox-em2
       usage: pv
-      host: 192.0.2.2 # IP address or hostname`}  />
+      host: 192.0.2.2 # IP address or hostname`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: smartfox-em2
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -7172,7 +7905,13 @@ In the web interface of the SMA Data Manager you need to activate "Modbus Server
       type: template
       template: smartfox-em2
       usage: aux
-      host: 192.0.2.2 # IP address or hostname`}  />
+      host: 192.0.2.2 # IP address or hostname`} advanced={`meters:
+    - name: my_aux
+      type: template
+      template: smartfox-em2
+      usage: aux
+      host: 192.0.2.2 # IP address or hostname
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -7215,7 +7954,31 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: sofarsolar-g3
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)`} />
 
 
 
@@ -7245,7 +8008,32 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: sofarsolar-g3
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -7299,6 +8087,7 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       id: 1
       host: 192.0.2.2 # Hostname
       port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 0 # Default mode for battery control. Valid values are 0 (self use), 1 (time of use), 2 (timing mode), 4 (peak-shaving mode) (optional)`} />
 
@@ -7341,7 +8130,31 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: sofarsolar-g3
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)`} />
 
 
 
@@ -7371,7 +8184,32 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: sofarsolar-g3
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -7425,6 +8263,7 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       id: 1
       host: 192.0.2.2 # Hostname
       port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 0 # Default mode for battery control. Valid values are 0 (self use), 1 (time of use), 2 (timing mode), 4 (peak-shaving mode) (optional)`} />
 
@@ -7590,7 +8429,31 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: sofarsolar-g3
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)`} />
 
 
 
@@ -7620,7 +8483,32 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: sofarsolar-g3
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -7674,6 +8562,7 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       id: 1
       host: 192.0.2.2 # Hostname
       port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 0 # Default mode for battery control. Valid values are 0 (self use), 1 (time of use), 2 (timing mode), 4 (peak-shaving mode) (optional)`} />
 
@@ -7716,7 +8605,31 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: sofarsolar-g3
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)`} />
 
 
 
@@ -7746,7 +8659,32 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 8899 # Port`}  />
+      port: 8899 # Port`} advanced={`meters:
+    - name: my_pv
+      type: template
+      template: sofarsolar-g3
+      usage: pv
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -7800,6 +8738,7 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
       id: 1
       host: 192.0.2.2 # Hostname
       port: 8899 # Port
+      storageunit: 1 # Number of the battery storage. In case of a BTS storage not the address of a BTS 5K battery module, but the storage tower (BTS 5K-BDU control unit with 1-4 BTS 5K modules). (optional)
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 0 # Default mode for battery control. Valid values are 0 (self use), 1 (time of use), 2 (timing mode), 4 (peak-shaving mode) (optional)`} />
 
@@ -7812,7 +8751,7 @@ LSE-3 logger stick using a LAN connection and ModBus TCP via the port 8899 is th
 
 ## Solaranzeige Solaranzeige
 
-<DeviceFeatures features="skiptest" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="grid" label="Grid" default>
@@ -7986,7 +8925,7 @@ For optional battery control, StorageConf_CtrlMode (0xE004) must be set to 4 "Re
       host: 192.0.2.2 # Hostname
       port: 1502 # Port
       timeout: 10s # optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
       watchdog: 60s # optional`} />
 
 
@@ -8224,6 +9163,7 @@ For batter control, the "Connectivity+" function must be activated via the Solar
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
       watchdog: 60s # optional`} />
 
 
@@ -8344,6 +9284,59 @@ For batter control, the "Connectivity+" function must be activated via the Solar
     - name: my_battery
       type: template
       template: solarwatt
+      usage: battery
+      host: 192.0.2.2 # IP address or hostname
+      capacity: 50 # Battery capacity in kWh (optional)`} />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### Manager flex
+
+<DeviceFeatures features="" />
+
+Combines data of all connected PV inverters or batteries.
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: solarwatt-flex
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: solarwatt-flex
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname`}  />
+
+
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: solarwatt-flex
+      usage: battery
+      host: 192.0.2.2 # IP address or hostname`} advanced={`meters:
+    - name: my_battery
+      type: template
+      template: solarwatt-flex
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       capacity: 50 # Battery capacity in kWh (optional)`} />
@@ -8493,7 +9486,33 @@ For batter control, the "Connectivity+" function must be activated via the Solar
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port
+      mppt3: false # optional`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: solax
+      usage: grid
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 19200 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      mppt3: false # optional
+      storageunit: 1 # optional`} />
 
 
 
@@ -8523,7 +9542,8 @@ For batter control, the "Connectivity+" function must be activated via the Solar
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`} advanced={`meters:
+      port: 502 # Port
+      mppt3: false # optional`} advanced={`meters:
     - name: my_pv
       type: template
       template: solax
@@ -8547,7 +9567,9 @@ For batter control, the "Connectivity+" function must be activated via the Solar
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      mppt3: false # optional
+      storageunit: 1 # optional
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -8577,7 +9599,8 @@ For batter control, the "Connectivity+" function must be activated via the Solar
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`} advanced={`meters:
+      port: 502 # Port
+      mppt3: false # optional`} advanced={`meters:
     - name: my_battery
       type: template
       template: solax
@@ -8601,6 +9624,8 @@ For batter control, the "Connectivity+" function must be activated via the Solar
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
+      mppt3: false # optional
+      storageunit: 1 # optional
       capacity: 50 # Battery capacity in kWh (optional)
       defaultmode: 0 # Default mode for battery control to which the inverter falls back after charging the battery or after stopping discharge. (optional)`} />
 
@@ -8936,7 +9961,7 @@ The power for grid charging can be adapted to the inverter power of the sonnenBa
       port: 8080 # Port (optional)
       token: # API Token (required for active battery control) (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      defaultmode: self-consumption # Default mode for active battery control (self-consumption or time-of-use) (optional)
+      defaultmode: self-consumption # Default mode for active battery control [self-consumption, time-of-use]
       chargepower: 3300 # Charging power for grid charging in W (optional)`} />
 
 
@@ -9257,7 +10282,7 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       timeout: 10s # optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -9323,6 +10348,49 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
+## SunSpec Meter
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: sunspec-meter
+      usage: grid
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: sunspec-meter
+      usage: pv
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
 ## Sunsynk
 
 ### 3p hybrid inverter
@@ -9379,8 +10447,8 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -9434,8 +10502,9 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -9490,8 +10559,8 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -9554,8 +10623,10 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      storageunit: 1 # optional
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      includegenport: # optional`} />
 
 
 
@@ -9609,8 +10680,11 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      storageunit: 1 # optional
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
+      includegenport: # optional`} />
 
 
 
@@ -9664,9 +10738,11 @@ Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmw
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
+      storageunit: 1 # optional
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 20 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: 95 # optional`} />
+      minsoc: 20 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)
+      includegenport: # optional`} />
 
 
 
@@ -10028,6 +11104,9 @@ A corresponding IR reader script looks like this:
 #
 ```
 
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
 <DeviceConfig code={`meters:
     - name: my_grid
       type: template
@@ -10038,6 +11117,51 @@ A corresponding IR reader script looks like this:
       password: # Password of the user account (use single quotes in case of leading zeros) (optional)`}  />
 
 
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: tasmota-sml
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      user: # admin is default (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)`}  />
+
+
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: tasmota-sml
+      usage: battery
+      host: 192.0.2.2 # IP address or hostname
+      user: # admin is default (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)`}  />
+
+
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: tasmota-sml
+      usage: charge
+      host: 192.0.2.2 # IP address or hostname
+      user: # admin is default (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)`}  />
+
+
+
+</TabItem>
+</Tabs>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
@@ -10072,8 +11196,8 @@ The following apps allow to create the token:
       password: # Password of the user "customer". By default this is the last 5 characters of password stated on the Tesla Gateway.
       refreshToken: # optional
       siteId: # optional product identifier of the energy site, use to override autodectction (optional)
-      minsoc: 25 # the battery reserve percentage to reset to when switching the Battery back to normal operations (optional)
-      maxsoc: # the battery reserve percentage to set to when switching the Battery to charge mode (optional)`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -10097,8 +11221,8 @@ The following apps allow to create the token:
       password: # Password of the user "customer". By default this is the last 5 characters of password stated on the Tesla Gateway.
       refreshToken: # optional
       siteId: # optional product identifier of the energy site, use to override autodectction (optional)
-      minsoc: 25 # the battery reserve percentage to reset to when switching the Battery back to normal operations (optional)
-      maxsoc: # the battery reserve percentage to set to when switching the Battery to charge mode (optional)`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -10122,8 +11246,8 @@ The following apps allow to create the token:
       password: # Password of the user "customer". By default this is the last 5 characters of password stated on the Tesla Gateway.
       refreshToken: # optional
       siteId: # optional product identifier of the energy site, use to override autodectction (optional)
-      minsoc: 25 # the battery reserve percentage to reset to when switching the Battery back to normal operations (optional)
-      maxsoc: # the battery reserve percentage to set to when switching the Battery to charge mode (optional)`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -10134,7 +11258,7 @@ The following apps allow to create the token:
 
 ## Tibber Pulse
 
-<DeviceFeatures features="skiptest" />
+<DeviceFeatures features="" />
 
 <DeviceConfig code={`meters:
     - name: my_grid
@@ -10142,14 +11266,7 @@ The following apps allow to create the token:
       template: tibber-pulse
       usage: grid
       token: 5K4MVS-OjfWhK_4yrjOlFe1F6kJXPVf7eQYggo8ebAE
-      homeid: 96a14971-525a-4420-aae9-e5aedaa129ff # optional`} advanced={`meters:
-    - name: my_grid
-      type: template
-      template: tibber-pulse
-      usage: grid
-      token: 5K4MVS-OjfWhK_4yrjOlFe1F6kJXPVf7eQYggo8ebAE
-      homeid: 96a14971-525a-4420-aae9-e5aedaa129ff # optional
-      timeout: 1m # optional`} />
+      homeid: 96a14971-525a-4420-aae9-e5aedaa129ff # optional`}  />
 
 
 
@@ -10275,12 +11392,6 @@ PV only available with PV sensor
       modbus: rs485tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
       port: 502 # Port`}  />
 
 
@@ -10305,7 +11416,44 @@ PV only available with PV sensor
       modbus: rs485tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+</Tabs>
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
+
+### EM24_E1
+
+<DeviceFeatures features="" />
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: cg-em24_e1
+      usage: grid
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port`}  />
+
+
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: cg-em24_e1
+      usage: charge
       
       # Modbus TCP
       modbus: tcpip
@@ -10413,8 +11561,8 @@ For grid usage, a grid meter VRM instance is require to enabled load management.
       host: 192.0.2.2 # IP address or hostname
       port: 502 # Port (optional)
       meterid: # Grid meter VRM instance- can be read out in VRM portal or via remoteUI. (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -10434,8 +11582,9 @@ For grid usage, a grid meter VRM instance is require to enabled load management.
       usage: pv
       host: 192.0.2.2 # IP address or hostname
       port: 502 # Port (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -10456,8 +11605,8 @@ For grid usage, a grid meter VRM instance is require to enabled load management.
       host: 192.0.2.2 # IP address or hostname
       port: 502 # Port (optional)
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -11061,7 +12210,7 @@ An externally connected S0 generation meter is required to record the solar prod
 
 ## Zendure Hyper 2000
 
-<DeviceFeatures features="skiptest" />
+<DeviceFeatures features="" />
 
 <Tabs>
 <TabItem value="pv" label="PV" default>
@@ -11073,7 +12222,7 @@ An externally connected S0 generation meter is required to record the solar prod
       usage: pv
       account: dev@zendure.com
       serial: VU5D99F74021B04 # You can find this in the Zendure App in the settings of the device
-      region: EU # optional
+      region: EU # [EU, Global]
       timeout: 10s # optional`}  />
 
 
@@ -11088,7 +12237,7 @@ An externally connected S0 generation meter is required to record the solar prod
       usage: battery
       account: dev@zendure.com
       serial: VU5D99F74021B04 # You can find this in the Zendure App in the settings of the device
-      region: EU # optional
+      region: EU # [EU, Global]
       timeout: 10s # optional`} advanced={`meters:
     - name: my_battery
       type: template
@@ -11096,7 +12245,7 @@ An externally connected S0 generation meter is required to record the solar prod
       usage: battery
       account: dev@zendure.com
       serial: VU5D99F74021B04 # You can find this in the Zendure App in the settings of the device
-      region: EU # optional
+      region: EU # [EU, Global]
       timeout: 10s # optional
       capacity: 2 # Battery capacity in kWh (optional)`} />
 
@@ -11368,6 +12517,7 @@ For demonstration purposes. Meter with a fixed set of values.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
+      maxchargerate: 100 # Power limit for grid charging. (optional)
       capacity: 50 # Battery capacity in kWh (optional)`} />
 
 
@@ -11426,8 +12576,8 @@ For demonstration purposes. Meter with a fixed set of values.
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       capacity: 50 # Battery capacity in kWh (optional)
-      minsoc: 25 # Immediate charging with maximum power up to the defined state of charge independently from solar production if the charge mode is not set to 'Off' (optional)
-      maxsoc: # optional`} />
+      minsoc: 25 # Lower limit when discharging the battery (normal operation) (optional)
+      maxsoc: 95 # Upper limit when charging the battery from the grid (optional)`} />
 
 
 
@@ -11517,7 +12667,7 @@ For demonstration purposes. Meter with a fixed set of values.
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (optional)`} />
+      maxacpower: 0 # Maximum AC power of the hybrid inverter in W (optional)`} />
 
 
 
@@ -11740,7 +12890,7 @@ For demonstration purposes. Meter with a fixed set of values.
 
 #### WebSocket API
 
-<DeviceFeatures features="skiptest" />
+<DeviceFeatures features="" />
 
 <DeviceConfig code={`meters:
     - name: my_grid
@@ -11783,7 +12933,8 @@ For demonstration purposes. Meter with a fixed set of values.
       l3poweruuid: # optional
       l1voltageuuid: # optional
       l2voltageuuid: # optional
-      l3voltageuuid: # optional`} />
+      l3voltageuuid: # optional
+      cache: 1s # Time interval with when data should be reloaded from the vehicle (optional)`} />
 
 
 
@@ -11835,7 +12986,33 @@ For demonstration purposes. Meter with a fixed set of values.
 <DeviceFeatures features="" />
 
 <Tabs>
-<TabItem value="pv" label="PV" default>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: homematic
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      device: 0001EE89AAD848 # Homematic device id like shown in the CCU web user interface.
+      user: # User account (e.g. email address, user id, etc.) (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      meterchannel: 6 # Homematic meter channel number like shown after the device id separated with a colon in the CCU web user interface.`} advanced={`meters:
+    - name: my_grid
+      type: template
+      template: homematic
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      device: 0001EE89AAD848 # Homematic device id like shown in the CCU web user interface.
+      user: # User account (e.g. email address, user id, etc.) (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      meterchannel: 6 # Homematic meter channel number like shown after the device id separated with a colon in the CCU web user interface.
+      cache: 1s # In case of duty cycle problems try a cache setting of 30s. (optional)`} />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
 
 <DeviceConfig code={`meters:
     - name: my_pv
@@ -11843,18 +13020,19 @@ For demonstration purposes. Meter with a fixed set of values.
       template: homematic
       usage: pv
       host: 192.0.2.2 # IP address or hostname
-      device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
+      device: 0001EE89AAD848 # Homematic device id like shown in the CCU web user interface.
       user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)`} advanced={`meters:
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      meterchannel: 6 # Homematic meter channel number like shown after the device id separated with a colon in the CCU web user interface.`} advanced={`meters:
     - name: my_pv
       type: template
       template: homematic
       usage: pv
       host: 192.0.2.2 # IP address or hostname
-      device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
+      device: 0001EE89AAD848 # Homematic device id like shown in the CCU web user interface.
       user: # User account (e.g. email address, user id, etc.) (optional)
       password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      meterchannel: 6 # Homematic meter channel number like shown in the CCU web user interface.
+      meterchannel: 6 # Homematic meter channel number like shown after the device id separated with a colon in the CCU web user interface.
       cache: 1s # In case of duty cycle problems try a cache setting of 30s. (optional)`} />
 
 
@@ -11868,18 +13046,19 @@ For demonstration purposes. Meter with a fixed set of values.
       template: homematic
       usage: charge
       host: 192.0.2.2 # IP address or hostname
-      device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
+      device: 0001EE89AAD848 # Homematic device id like shown in the CCU web user interface.
       user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)`} advanced={`meters:
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      meterchannel: 6 # Homematic meter channel number like shown after the device id separated with a colon in the CCU web user interface.`} advanced={`meters:
     - name: my_charger
       type: template
       template: homematic
       usage: charge
       host: 192.0.2.2 # IP address or hostname
-      device: '0001EE89AAD848' # Homematic device id like shown in the CCU web user interface.
+      device: 0001EE89AAD848 # Homematic device id like shown in the CCU web user interface.
       user: # User account (e.g. email address, user id, etc.) (optional)
       password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      meterchannel: 6 # Homematic meter channel number like shown in the CCU web user interface.
+      meterchannel: 6 # Homematic meter channel number like shown after the device id separated with a colon in the CCU web user interface.
       cache: 1s # In case of duty cycle problems try a cache setting of 30s. (optional)`} />
 
 
@@ -11976,12 +13155,29 @@ For demonstration purposes. Meter with a fixed set of values.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
-### Tasmota (1 Phase Meter)
+### Tasmota
+
+#### Tasmota (1 Phase + SML Meter)
 
 <DeviceFeatures features="" />
 
 <Tabs>
-<TabItem value="pv" label="PV" default>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: tasmota
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      user: # admin is default (optional)
+      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
+      channel: 1 # Meterchannel number (1-8)`}  />
+
+
+
+</TabItem>
+<TabItem value="pv" label="PV">
 
 <DeviceConfig code={`meters:
     - name: my_pv
@@ -12030,7 +13226,7 @@ For demonstration purposes. Meter with a fixed set of values.
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/meter  -->
 
-### Tasmota three phase
+#### three phase
 
 <DeviceFeatures features="" />
 

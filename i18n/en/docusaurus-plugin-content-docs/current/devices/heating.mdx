@@ -64,7 +64,13 @@ loadpoints:
   - title: Meine Wärmepumpe
     charger: heatpump_control
     meter: heatpump_power
-    integrateddevice: true # Disable vehicle selection
+    # Usual parameters for loadpoints can be added here, especially to prevent short runtimes, e.g.
+    enable:
+      threshold: -1300 # Activate at 1.300W power surplas for 5 min.
+      delay: 5m
+    disable:
+      threshold: 150 # Deactivate at 150W power consumption for 20 min.
+      delay: 20m  #some devices require a minimum runtime (check specification / manual of your heatpump)
 meters:
   - name: heatpump_power
     type: template
@@ -77,18 +83,25 @@ chargers:
     setmode:
       source: switch
       switch:
-      - case: 1 # normal
+      - case: 1 # dimm (not supported, yet)
+        set:
+          source: error
+          error: ErrNotAvailable
+      - case: 2 # normal
         set:
           source: const
           value: false
           set:
+            # Add the function here to set the heatpump in normal operation mode.
+            # All types of plugins can be used.
             source: charger
             config:
               type: template
               template: shelly # Boost contact of the heat pump
               host: 192.168.0.101
-      - case: 2 # boost
+      - case: 3 # boost
         set:
+          # Add the function here to set the heatpump in boost mode.
           source: const
           value: true
           set:
@@ -97,15 +110,15 @@ chargers:
               type: template
               template: shelly # Boost contact of the heat pump
               host: 192.168.0.101
-      - case: 3 # dimm (not supported, yet)
-        set:
-          source: error
-          error: ErrNotAvailable
     getmode:
+      # Add function here to get the current mode of the heatpump, return
+      # 1 for reduced operation
+      # 2 for normal operation
+      # 3 for boost operation
       source: calc
       add:
         - source: const
-          value: 1
+          value: 2
         - source: charger
           config:
             type: template
@@ -123,7 +136,7 @@ This code example contains some redundancies.
 We will later provide templates for easier configuration of common hardware constellations.
 :::
 
-In addition to `setmode` and `getmode`, you can optionally add the current temperature (`temp`) [via Plugin](/docs/reference/plugins).
+In addition to `setmode` and `getmode`, you can optionally add the current temperature (`temp`) [via Plugin](./plugins).
 This is only used for display.
 evcc does not use this value for regulation.
 
@@ -148,6 +161,137 @@ Your electric water heater must have its own temperature limit, which prevents o
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 ## Heating devices
+
+### Bosch SG Ready
+
+Integrated via [EMSESP](https://emsesp.org/)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: emsesp
+      host: 192.0.2.2 # IP address or hostname
+      token: # optional
+      powersource: hpcurrpower # [hpcurrpower, hppower] (optional)
+      tempsource: # [warmwater] (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Buderus SG Ready
+
+Integrated via [EMSESP](https://emsesp.org/)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: emsesp
+      host: 192.0.2.2 # IP address or hostname
+      token: # optional
+      powersource: hpcurrpower # [hpcurrpower, hppower] (optional)
+      tempsource: # [warmwater] (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Bösch x-change
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: kermi
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater, buffer] (optional)`} advanced={`chargers:
+    - name: my_heating
+      type: template
+      template: kermi
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater, buffer] (optional)
+      watchdog: 60s # optional`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### IDM 
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: idm
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      tempsource: # [warmwater_top, warmwater_bottom, buffer] (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Junkers SG Ready
+
+Integrated via [EMSESP](https://emsesp.org/)
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: emsesp
+      host: 192.0.2.2 # IP address or hostname
+      token: # optional
+      powersource: hpcurrpower # [hpcurrpower, hppower] (optional)
+      tempsource: # [warmwater] (optional)`}  />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Kermi x-center pro
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: kermi
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater, buffer] (optional)`} advanced={`chargers:
+    - name: my_heating
+      type: template
+      template: kermi
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater, buffer] (optional)
+      watchdog: 60s # optional`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Lambda EU-L Series
+
+Energy management settings of the device:
+
+- E-Meter communication type: "ModBus Client"
+- E-Meter measuring point: "Pos. E-Überschuss"
+
+<DeviceConfig code={`chargers:
+    - name: my_heating
+      type: template
+      template: lambda-zewotherm
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
+    - name: my_heating
+      type: template
+      template: lambda-zewotherm
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
+      watchdog: 60s # optional`} />
+
+
+
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 ### my-PV
 
@@ -181,7 +325,8 @@ Your electric water heater must have its own temperature limit, which prevents o
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
+      port: 502 # Port
+      tempsource: 1 # [1, 2, 3] (optional)`}  />
 
 
 
@@ -203,7 +348,7 @@ Your electric water heater must have its own temperature limit, which prevents o
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # optional`}  />
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
@@ -221,7 +366,7 @@ Your electric water heater must have its own temperature limit, which prevents o
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # optional`}  />
+      tempsource: # [warmwater, buffer] (optional)`}  />
 
 
 
@@ -239,7 +384,7 @@ Your electric water heater must have its own temperature limit, which prevents o
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # optional`}  />
+      tempsource: # [warmwater] (optional)`}  />
 
 
 
@@ -247,7 +392,7 @@ Your electric water heater must have its own temperature limit, which prevents o
 
 ### Vaillant SensoNET (SG Ready)
 
-The boost function heats hot water and optionally a boost zone. The boost zone is identified by the ID. The boost temperature is specified in degrees Celsius.
+The boost function heats hot water or a boost zone. The boost zone is identified by the ID. The boost temperature is specified in degrees Celsius. If boost temperature is specified, the boost zone is activated, otherwise hot water.
 
 <DeviceConfig code={`chargers:
     - name: my_heating
@@ -255,34 +400,33 @@ The boost function heats hot water and optionally a boost zone. The boost zone i
       template: vaillant
       user: # User account (e.g. email address, user id, etc.) (optional)
       password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      zone: # Boost zone id (in addition to hot water) (optional)
-      setpoint: # Boost temperature setpoint (in addition to hot water) (optional)`} advanced={`chargers:
-    - name: my_heating
-      type: template
-      template: vaillant
-      user: # User account (e.g. email address, user id, etc.) (optional)
-      password: # Password of the user account (use single quotes in case of leading zeros) (optional)
-      zone: # Boost zone id (in addition to hot water) (optional)
-      setpoint: # Boost temperature setpoint (in addition to hot water) (optional)
-      phases: 3 # The maximum number of phases which can be used (optional)`} />
+      realm: DE # [DE, AT] (optional)
+      zone: # Boost zone id (optional)
+      setpoint: # Boost temperature setpoint (optional)`}  />
 
 
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
-### Weishaupt WPM (SG Ready)
+### Zewotherm EU-L Series
+
+Energy management settings of the device:
+
+- E-Meter communication type: "ModBus Client"
+- E-Meter measuring point: "Pos. E-Überschuss"
 
 <DeviceConfig code={`chargers:
     - name: my_heating
       type: template
-      template: weishaupt-wpm
-      
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host: 192.0.2.2 # Hostname
-      port: 502 # Port
-      tempsource: # optional`}  />
+      template: lambda-zewotherm
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
+    - name: my_heating
+      type: template
+      template: lambda-zewotherm
+      host: 192.0.2.2 # IP address or hostname
+      tempsource: # [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
+      watchdog: 60s # optional`} />
 
 
 

@@ -148,6 +148,7 @@ import { themes as prismThemes } from "prism-react-renderer";
         prism: {
           theme: prismThemes.github,
           darkTheme: prismThemes.oceanicNext,
+          plugins: ["line-highlight"],
         },
         algolia: {
           appId: "4D0L431W8V",
@@ -168,6 +169,7 @@ import { themes as prismThemes } from "prism-react-renderer";
           ],
         },
       ],
+      "docusaurus-plugin-generate-llms-txt",
     ],
   }
 );

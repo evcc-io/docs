@@ -1,6 +1,10 @@
 const fs = require("fs");
 const yaml = require("js-yaml");
 const _ = require("lodash");
+const countries = require("i18n-iso-countries");
+
+countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
+countries.registerLocale(require("i18n-iso-countries/langs/de.json"));
 
 const AUTOGEN_MARKER = "<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->";
 
@@ -9,6 +13,17 @@ const TARIFF_GROUPS = {
   "Dynamischer Strompreis": "price",
   "CO₂ Vorhersage": "co2",
   "CO₂ forecast": "co2",
+  "PV Vorhersage": "solar",
+  "PV forecast": "solar",
+};
+
+const GROUP_SORT_ORDER = {
+  "Dynamic electricity price": 1,
+  "Dynamischer Strompreis": 1,
+  "CO₂ Vorhersage": 2,
+  "CO₂ forecast": 2,
+  "PV Vorhersage": 3,
+  "PV forecast": 3,
 };
 
 const CHARGER_GROUPS = {
@@ -34,6 +49,7 @@ const CODE_PREAMBLES = {
   aux: "meters:\n    - name: my_aux",
   price: "tariffs:\n    grid:",
   co2: "tariffs:\n    co2:",
+  solar: "tariffs:\n    solar:",
 };
 
 const TRANSLATIONS_DE = {
@@ -42,6 +58,7 @@ const TRANSLATIONS_DE = {
   "tab.battery": "Batterie",
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
+  global: "Global",
 };
 
 const TRANSLATIONS_EN = {
@@ -50,7 +67,24 @@ const TRANSLATIONS_EN = {
   "tab.battery": "Battery",
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
+  global: "Global",
 };
+
+function makeTranslate(language) {
+  return function translate(key) {
+    const translations = language === "de" ? TRANSLATIONS_DE : TRANSLATIONS_EN;
+    // local lookup
+    if (translations[key]) {
+      return translations[key];
+    }
+    // check for country lookup
+    const countryName = countries.getName(key, language);
+    if (countryName) {
+      return countryName;
+    }
+    return key;
+  };
+}
 
 function escapeRegExp(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -63,25 +97,39 @@ function readTemplates(path) {
     .map((file) => yaml.load(fs.readFileSync(`${path}/${file}`, "utf8")));
 }
 
-function indent(code) {
+function indent(code, list = false) {
   // escape backticks
-  result = code.replace(/`/g, "\\`");
-  // indent
-  return result.replace(/^/gm, "      ");
+  let result = code.replace(/`/g, "\\`");
+
+  if (list) {
+    // indent first line with 6 spaces and dash
+    result = result.replace(/^/, "      - ");
+    // indent remaining lines 8 spaces
+    return result.replace(/\n/gm, "\n        ");
+  } else {
+    // indent all lines 6 spaces
+    result = result.replace(/^/gm, "      ");
+  }
+
+  return result;
 }
 
-function templateContent(entry, type, translations) {
+function templateContent(entry, type, translate) {
   const description = entry.description ? entry.description + "\n" : "";
 
   const codeBlocks = entry.render.map((render) => {
     let preamble = render.usage || type;
+    let list = false;
     if (type === "tariff") {
       preamble = TARIFF_GROUPS[entry.product.group];
+      if (preamble === "solar") {
+        list = true;
+      }
     }
-    const code = `${CODE_PREAMBLES[preamble]}\n${indent(render.default).trimEnd()}`;
+    const code = `${CODE_PREAMBLES[preamble]}\n${indent(render.default, list).trimEnd()}`;
     const advanced =
       render.advanced && render.advanced !== render.default
-        ? `${CODE_PREAMBLES[preamble]}\n${indent(render.advanced).trimEnd()}`
+        ? `${CODE_PREAMBLES[preamble]}\n${indent(render.advanced, list).trimEnd()}`
         : null;
     return {
       usage: render.usage,
@@ -96,9 +144,9 @@ function templateContent(entry, type, translations) {
     code = `<Tabs>
 ${codeBlocks
   .map(
-    (block, i) => `<TabItem value="${block.usage}" label="${
-      translations[`tab.${block.usage}`]
-    }"${i === 0 ? " default" : ""}>
+    (block, i) => `<TabItem value="${block.usage}" label="${translate(
+      `tab.${block.usage}`,
+    )}"${i === 0 ? " default" : ""}>
 
 ${block.code}
 
@@ -112,10 +160,16 @@ ${block.code}
     ? `<SponsorshipRequired />\n\n`
     : "";
 
+  let countryList = [];
+  if (type === "tariff") {
+    countryList = (entry.countries || ["global"]).map(translate);
+  }
+
   const features = [
     ...(entry.capabilities || []),
     ...(entry.requirements || []),
-  ];
+    ...countryList,
+  ].filter((f) => f !== "skiptest");
 
   // use sponsorfree instead of sponsorship
   if (type === "charger") {
@@ -134,7 +188,7 @@ ${block.code}
   }
 
   const deviceFeatures =
-    type === "charger" || type === "meter"
+    type === "charger" || type === "meter" || type === "tariff"
       ? `<DeviceFeatures features="${features.join(",")}" />\n\n`
       : "";
 
@@ -152,7 +206,7 @@ function additionalContent(name, target) {
   return "";
 }
 
-function generateMarkdown(data, type, translations, target) {
+function generateMarkdown(data, type, translate, target) {
   let brandCounter = 0;
   let productCounter = 0;
 
@@ -185,7 +239,11 @@ function generateMarkdown(data, type, translations, target) {
 
   // sort
   const dataSorted = _.orderBy(data, [
+    // sort by group order-id if exists
+    (x) => GROUP_SORT_ORDER[x.product.group] || 0,
+    // sort by group name
     (x) => x.product.group.toLowerCase(),
+    // sort by brand and description
     (x) => {
       const { brand, description } = x.product;
       if (brand) {
@@ -227,7 +285,7 @@ function generateMarkdown(data, type, translations, target) {
     }
     productCounter++;
 
-    generated += `${templateContent(entry, type, translations)}`;
+    generated += `${templateContent(entry, type, translate)}`;
 
     lastGroup = group;
     lastBrand = brand;
@@ -265,11 +323,16 @@ function generateMarkdown(data, type, translations, target) {
     const templatesDe = readTemplates(`./templates/release/de/${templates}`);
     const templatesEn = readTemplates(`./templates/release/en/${templates}`);
 
-    generateMarkdown(templatesDe, type, TRANSLATIONS_DE, `./docs/${markdown}`);
+    generateMarkdown(
+      templatesDe,
+      type,
+      makeTranslate("de"),
+      `./docs/${markdown}`,
+    );
     generateMarkdown(
       templatesEn,
       type,
-      TRANSLATIONS_EN,
+      makeTranslate("en"),
       `./i18n/en/docusaurus-plugin-content-docs/current/${markdown}`,
     );
   },

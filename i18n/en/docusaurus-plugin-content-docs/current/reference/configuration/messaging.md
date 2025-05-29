@@ -101,7 +101,7 @@ messaging:
     stop: # charge stop event
       title: Charge of {{.vehicleTitle}} finished
       msg: |
-        Charger {{.title}} finished charging {{.vehicleTitle}} 
+        Charger {{.title}} finished charging {{.vehicleTitle}}
         with {{round (divf .chargedEnergy 1000) 2 }} kWh in {{.chargeDuration}}.
         --------------------------
         evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
@@ -142,7 +142,7 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
 - Site
   - Configuration
     - [`siteTitle`](site) - Main headline of the evcc app (_string_)
-    - [`prioritySoc`](site#prioritysoc) - Minimum Powerwall state of charge in percent before [PV mode](loadpoints#mode) release (_integer_)
+    - `prioritySoc` - Minimum Powerwall state of charge in percent before [PV mode](loadpoints#mode) release (_integer_)
   - Information
     - `batteryConfigured` - Indicator, home battery/Powerwall meter configured (_bool_)
     - `gridConfigured` - Indicator, smart/grid meter configured (_bool_)
@@ -160,8 +160,8 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
 - Charging Point (loadpoint)
   - Configuration
     - [`loadpoint`](loadpoints) - Loadpoint index (_integer_)
-    - [`maxCurrent`](loadpoints#maxcurrent) - Maximum charging current in amperes (_float_)
-    - [`minCurrent`](loadpoints#mincurrent) - Minimum charging current in amperes (_float_)
+    - `maxCurrent` - Maximum charging current in amperes (_float_)
+    - `minCurrent` - Minimum charging current in amperes (_float_)
     - [`mode`](loadpoints#mode) - Initial mode of the charging point after evcc start `off`/`now`/`min`/`pv` (_string_)
     - [`phases`](loadpoints#phases) - Initial active number of phases of the charging point after evcc start (_integer_)
     - [`title`](loadpoints#title) - Label of the charging point in the evcc app (_string_)
@@ -239,7 +239,7 @@ The following sections will now explain all the required parameters.
 - `email`: Email. See [`email`](#email) definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr/). See [`shout`](#shout) definition
 - `ntfy`: [ntfy](https://ntfy.sh). See [`ntfy`](#ntfy) definition
-- `custom`: Allows the usage of any [plugin](../plugins) that supports write access. See [`custom`](#custom) definition.
+- `custom`: Allows the usage of any [plugin](/docs/devices/plugins) that supports write access. See [`custom`](#custom) definition.
 
 ---
 
@@ -335,7 +335,7 @@ Further information can be found in the [ntfy documentation](https://docs.ntfy.s
 
 ### `custom`
 
-The `custom` type allows the use of any [plugin](../plugins) to process messages. The plugin must support write mode. The message itself is provided in the plugin configuration using the parameter `${send}` (or as a template parameter `{{.send}}`).
+The `custom` type allows the use of any [plugin](/docs/devices/plugins) to process messages. The plugin must support write mode. The message itself is provided in the plugin configuration using the parameter `${send}` (or as a template parameter `{{.send}}`).
 
 **Possible Values**:
 
