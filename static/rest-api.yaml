@@ -159,7 +159,11 @@ paths:
   /batterymode/{batteryMode}:
     post:
       summary: Set external battery mode
-      description: Directly controls the mode of all controllable batteries. evcc behavior like "price limit" or "prevent discharge while fast charging" is overruled. External mode resets after 60s. The external system has to call this endpoint regularly.
+      description: >-
+        Directly controls the mode of all controllable batteries. evcc behavior
+        like "price limit" or "prevent discharge while fast charging" is
+        overruled. External mode resets after 60s. The external system has to
+        call this endpoint regularly.
       tags:
         - Home Battery
       parameters:
@@ -308,7 +312,7 @@ paths:
   /loadpoints/{id}/maxcurrent/{current}:
     post:
       summary: Update maximum current
-      description: >
+      description: |
         Updates the maximum current of the loadpoint.
       tags:
         - Loadpoints
@@ -321,7 +325,7 @@ paths:
   /loadpoints/{id}/mincurrent/{current}:
     post:
       summary: Update minimum current
-      description: >
+      description: |
         Updates the minimum current of the loadpoint.
       tags:
         - Loadpoints
@@ -398,6 +402,8 @@ paths:
                         properties:
                           planId:
                             $ref: "#/components/schemas/Id"
+                          precondition:
+                            $ref: "#/components/schemas/Precondition"
                       - $ref: "#/components/schemas/PlanRates"
   /loadpoints/{id}/plan/energy:
     delete:
@@ -972,6 +978,10 @@ paths:
         - $ref: "#/components/parameters/vehicleName"
         - $ref: "#/components/parameters/soc"
         - $ref: "#/components/parameters/timestamp"
+        - in: query
+          name: precondition
+          schema:
+            $ref: "#/components/schemas/Precondition"
       responses:
         "200":
           description: Success
@@ -1143,6 +1153,11 @@ components:
       type: number
       minimum: 0
       example: 2500
+    Precondition:
+      description: Late charging duration in seconds. [Read more.](/en/docs/features/plans#late-charging)
+      type: integer
+      example: 3600
+      minimum: 0
     Rate:
       type: object
       description: A charging interval
@@ -1150,13 +1165,13 @@ components:
         end:
           description: End of charging interval
           $ref: "#/components/schemas/Timestamp"
+        start:
+          description: Start of charging interval
+          $ref: "#/components/schemas/Timestamp"
         value:
           description: Cost of charging interval
           type: number
           minimum: 0
-        start:
-          description: Start of charging interval
-          $ref: "#/components/schemas/Timestamp"
     Rates:
       type: array
       items:
@@ -1170,6 +1185,8 @@ components:
             Whether evcc should take the plan into account. `false` means that
             evcc ignores the plan.
           type: boolean
+        precondition:
+          $ref: "#/components/schemas/Precondition"
         soc:
           $ref: "#/components/schemas/Soc"
         time:
@@ -1203,12 +1220,16 @@ components:
       properties:
         energy:
           $ref: "#/components/schemas/Power"
+        precondition:
+          $ref: "#/components/schemas/Precondition"
         time:
           $ref: "#/components/schemas/Timestamp"
     StaticSocPlan:
       description: "[See documentation](/en/docs/features/plans#create-charging-plan)"
       type: object
       properties:
+        precondition:
+          $ref: "#/components/schemas/Precondition"
         soc:
           $ref: "#/components/schemas/Soc"
         time:
