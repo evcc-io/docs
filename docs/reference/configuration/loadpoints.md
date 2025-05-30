@@ -129,7 +129,7 @@ soc:
 
 Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
 
-Ist beim Charger das `feature` `integrateddevice` konfiguriert, werden die Daten fortlaufend abgerufen. Dann sind keine `poll` Einstellungen notwendig, bzw. diese werden ignoriert.
+Ist beim Charger das `features`-Flag `integrateddevice` konfiguriert, werden die Daten fortlaufend abgerufen. Dann sind keine `poll` Einstellungen notwendig, bzw. diese werden ignoriert.
 
 :::warning
 Es wird **NICHT** empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
