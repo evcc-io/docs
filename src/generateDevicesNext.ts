@@ -34,6 +34,7 @@ interface DeviceCard {
   requirements: string[];
   countries: string[];
   slug: string;
+  group?: string;
 }
 
 const DEVICE_TYPES = ["vehicle", "charger", "meter", "tariff"] as const;
@@ -231,6 +232,7 @@ const generateDeviceCard = (
     requirements: data.requirements || [],
     countries: data.countries || [],
     slug,
+    group: data.product.group,
   };
 };
 
@@ -246,10 +248,11 @@ title: ${title}
 ---
 
 import DeviceCard from '@site/src/components/DeviceCard';
+import DeviceGrid from '@site/src/components/DeviceGrid';
 
 # ${title}
 
-<div className="device-grid">
+<DeviceGrid>
 ${cards
   .sort((a, b) =>
     `${a.brand} ${a.description}`.localeCompare(`${b.brand} ${b.description}`),
@@ -286,10 +289,13 @@ ${cards
     capabilities={[${features.map((f) => `"${f}"`).join(", ")}]}
     requirements={[]}
     href="/docs/devices-next/${deviceType}s/${card.slug}"
+    group="${card.group || ""}"
+    type="${deviceType}"
+    name="${card.slug}"
   />`;
   })
   .join("\n")}
-</div>
+</DeviceGrid>
 `;
 };
 

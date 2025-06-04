@@ -1,4 +1,5 @@
 import React from "react";
+import "@evcc/icons";
 import Link from "@docusaurus/Link";
 import styles from "./DeviceCard.module.css";
 
@@ -9,6 +10,9 @@ interface DeviceCardProps {
   capabilities?: string[];
   requirements?: string[];
   href: string;
+  group?: string;
+  type: string;
+  name: string;
 }
 
 const DeviceCard: React.FC<DeviceCardProps> = ({
@@ -18,6 +22,9 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
   capabilities = [],
   requirements = [],
   href,
+  group,
+  type,
+  name,
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -53,15 +60,12 @@ const DeviceCard: React.FC<DeviceCardProps> = ({
       aria-label={`View details for ${brand} ${description}`}
     >
       <div className={styles.thumbnailContainer}>
-        <img
-          src={thumbnail}
+        <evcc-icon
+          type={type}
+          name={name}
+          size="100%"
           alt={`${brand} ${description}`}
-          className={styles.thumbnail}
-          onError={(e) => {
-            // Fallback to a placeholder image
-            (e.target as HTMLImageElement).src = "/img/devices/placeholder.svg";
-          }}
-        />
+        ></evcc-icon>
       </div>
 
       <div className={styles.content}>
