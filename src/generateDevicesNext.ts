@@ -245,6 +245,7 @@ const generateOverviewPage = (
 
   return `---
 title: ${title}
+hide_table_of_contents: true
 ---
 
 import DeviceCard from '@site/src/components/DeviceCard';
