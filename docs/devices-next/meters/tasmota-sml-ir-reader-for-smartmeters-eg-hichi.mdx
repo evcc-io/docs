@@ -1,0 +1,91 @@
+---
+title: Tasmota SML IR-reader for smartmeters e.g. Hichi
+custom_edit_url: https://github.com/evcc-io/evcc/blob/master/templates/definition/meter/tasmota-sml.yaml
+---
+
+import DeviceConfig from '@site/src/components/DeviceConfig';
+import DeviceFeatures from '@site/src/components/DeviceFeatures';
+import SponsorshipRequired from '/docs/_sponsorship_required.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Tasmota SML IR-reader for smartmeters e.g. Hichi
+
+<DeviceFeatures features="" />
+
+To be able to read the values of the smart meter for evcc correctly, the IR reader script must be changed so that the following JSON tags are generated:
+- **SML** as the group name of the read parameters
+- **Total_in** for the total consumption in KWh (4 decimal places)
+- **Total_out** for the total feed-in in KWh (4 decimal places)
+- **Power_curr** for the current consumption or the current feed-in in W  (0 decimal places)
+
+A corresponding IR reader script looks like this:
+```
+>D
+>B
+=>sensor53 r
+>M 1
+// highlight-next-line
++1,3,s,16,9600,SML
+// highlight-next-line
+1,77070100010800ff@1000,Gesamtverbrauch,KWh,Total_in,4
+// highlight-next-line
+1,77070100020800ff@1000,Gesamteinspeisung,KWh,Total_out,4
+// highlight-next-line
+1,77070100100700ff@1,Verbrauch,W,Power_curr,0
+1,77070100600100ff@#,Zählernummer,,Meter_Id,0
+#
+```
+
+
+<Tabs>
+<TabItem value="grid" label="Grid" default>
+
+<DeviceConfig code={`meters:
+    - name: my_grid
+      type: template
+      template: tasmota-sml
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      user: # Username, admin is default (optional)
+      password: # Password, Use single quotes in case of leading zeros (optional)`}  />
+
+</TabItem>
+<TabItem value="pv" label="PV">
+
+<DeviceConfig code={`meters:
+    - name: my_pv
+      type: template
+      template: tasmota-sml
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      user: # Username, admin is default (optional)
+      password: # Password, Use single quotes in case of leading zeros (optional)`}  />
+
+</TabItem>
+<TabItem value="battery" label="Battery">
+
+<DeviceConfig code={`meters:
+    - name: my_battery
+      type: template
+      template: tasmota-sml
+      usage: battery
+      host: 192.0.2.2 # IP address or hostname
+      user: # Username, admin is default (optional)
+      password: # Password, Use single quotes in case of leading zeros (optional)`}  />
+
+</TabItem>
+<TabItem value="charge" label="Wallbox">
+
+<DeviceConfig code={`meters:
+    - name: my_charger
+      type: template
+      template: tasmota-sml
+      usage: charge
+      host: 192.0.2.2 # IP address or hostname
+      user: # Username, admin is default (optional)
+      password: # Password, Use single quotes in case of leading zeros (optional)`}  />
+
+</TabItem>
+</Tabs>
+
