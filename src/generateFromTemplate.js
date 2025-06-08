@@ -98,8 +98,13 @@ function readTemplates(path) {
 }
 
 function indent(code, list = false) {
-  // escape backticks
-  let result = code.replace(/`/g, "\\`");
+  // escape backticks and specific regex patterns that break MDX
+  let result = code
+    .replace(/`/g, "\\`")
+    .replace(/\\(\d)/g, "\\\\$1") // escape backreferences like \1, \2
+    .replace(/\\\?/g, "\\\\?") // escape literal ? in regex
+    .replace(/\\\(/g, "\\\\(") // escape literal ( in regex
+    .replace(/\\\)/g, "\\\\)"); // escape literal ) in regex
 
   if (list) {
     // indent first line with 6 spaces and dash
