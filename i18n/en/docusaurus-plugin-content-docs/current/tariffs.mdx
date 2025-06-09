@@ -7,7 +7,6 @@ import TabItem from "@theme/TabItem";
 import DeviceConfig from "/src/components/DeviceConfig";
 import DeviceFeatures from "/src/components/DeviceFeatures";
 
-
 # Tariffs & Forecasts
 
 Optimize your charging by integrating electricity tariffs (`grid`, `feedin`) and forecasts (`co2`, `solar`).
@@ -26,7 +25,6 @@ tariffs:
 
 The simplest case is fixed values for grid consumption (`grid`) and feed-in (`feedin`).
 
-
 ```yaml
 tariffs:
   currency: EUR # (default EUR)
@@ -36,8 +34,6 @@ tariffs:
   feedin:
     type: fixed
     price: 0.08 # EUR/kWh
-  co2:
-    ...
 ```
 
 ## Time-based Electricity Price
@@ -50,8 +46,8 @@ tariffs:
     type: fixed
     price: 0.294 # EUR/kWh (default)
     zones:
-      - days: Mon-Fri
-        hours: 2-5
+      - days: Mon-Fri # Monday to INCLUDING Friday
+        hours: 2-5 # 02:00 to 04:59
         price: 0.2 # EUR/kWh
       - days: Sat,Sun
         price: 0.15 # EUR/kWh
@@ -87,15 +83,34 @@ Electricity tariffs with monthly prices can also be defined.
 tariffs:
   grid:
     type: fixed
-    price: 0.2
+    price: 0.2 # EUR/kWh
     zones:
-      - month: May-Sep
-        price: 0.1
-      - month: Jan,Nov,Dez
-        price: 0.3
+      - months: May-Sep # May up to and including September
+        price: 0.1 # EUR/kWh
+      - months: Jan,Oct-Dec # October up to and including January
+        price: 0.3 # EUR/kWh
 ```
 
-You can also combine the `month` condition with `days` and `hours`.
+You can also combine the `months` condition with `days` and `hours`. The following is a more complex example to illustrate the possibilities of `zones`.
+
+```yaml
+tariffs:
+  currency: CHF
+  grid:
+    type: fixed
+    price: 0.35 # CHF/kWh; winter high tariff
+    zones:
+      - months: Apr-Sep # summer low tariff
+        hours: 11-15
+        price: 0.2 # CHF/kWh
+      - months: Apr-Sep # summer high tariff
+        hours: 0-11,15-0
+        price: 0.3 # CHF/kWh
+      - months: Jan-Mar,Oct-Dec # winter low tariff (at weekends from October to March inclusive)
+        days: Sa,So
+        hours: 22-0,0-6 # 22:00 to 05:59; note: 22-6 is not possible, as 00:00 is passed over
+        price: 0.25 # CHF/kWh
+```
 
 ## Exchange Prices
 
