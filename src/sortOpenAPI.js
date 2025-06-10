@@ -9,7 +9,7 @@ function sortObject(obj) {
     .reduce((sorted, key) => {
       sorted[key] = obj[key];
       return sorted;
-    }, {});
+    }, {}); 
 }
 
 function sortOpenAPI(filePath) {
