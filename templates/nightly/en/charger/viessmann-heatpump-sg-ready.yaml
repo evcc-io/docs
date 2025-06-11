@@ -1,0 +1,85 @@
+template: viessmann
+product:
+  identifier: viessmann-heatpump-sg-ready
+  brand: Viessmann
+  description: Heatpump (SG Ready)
+  group: Heating devices
+requirements: ["skiptest"]
+description: |
+  One-time hot water preparation to a configurable target temperature. The device automatically decides whether to use the heat pump or the auxiliary electric heater (if available).
+
+render:
+  - default: |
+      type: template
+      template: viessmann
+      user: # Username, Register at [app.developer.viessmann.com](https://app.developer.viessmann.com)
+      password: # Password, For the configured Viessmann account.
+      clientid: # Client ID, Configure at [app.developer.viessmann.com](https://app.developer.viessmann.com)
+      gateway_serial: # Gateway Serial, VitoConnect serial number (VitoCare App -> Settings -> Communication module -> Serial number)
+      installation_id: # Installation ID, Unfortunately you cannot simply lookup this number in the Viessmann app - instead you need to use the following commands on the command line... we're aware this is not for every user, but currently we don't have a better workflow...<br/>  Prerequisites: curl, jq, and the following parameters:  ``` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> ```  Then execute the following to get an oauth token (n.b. it's best to paste the entire block as-is, since the intermediate 'CODE' is only valid for 20 seconds):  ``` VIESSMANN_REDIRECT_URI="http://localhost:4200/" VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed 's/.*\?code=\(.*\).*/\1/' \   | tr -d '[:space:]')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) ```  Finally, get the installation id:  ``` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann.com/iot/v1/equipment/installations?includeGateways=true \   | jq '.data[].id' ```
+      device_id: 0 # Device ID, typically `0`
+      target_temperature: 45 # Target temperature for one-time charge (°C), max. 60°C
+params:
+  - name: user
+    example:
+    default:
+    choice: []
+    unit:
+    description: Username
+    help: Register at [app.developer.viessmann.com](https://app.developer.viessmann.com)
+    advanced: false
+    optional: false
+  - name: password
+    example:
+    default:
+    choice: []
+    unit:
+    description: Password
+    help: For the configured Viessmann account.
+    advanced: false
+    optional: false
+  - name: clientid
+    example:
+    default:
+    choice: []
+    unit:
+    description: Client ID
+    help: Configure at [app.developer.viessmann.com](https://app.developer.viessmann.com)
+    advanced: false
+    optional: false
+  - name: gateway_serial
+    example:
+    default:
+    choice: []
+    unit:
+    description: Gateway Serial
+    help: VitoConnect serial number (VitoCare App -> Settings -> Communication module -> Serial number)
+    advanced: false
+    optional: false
+  - name: installation_id
+    example:
+    default:
+    choice: []
+    unit:
+    description: Installation ID
+    help: 'Unfortunately you cannot simply lookup this number in the Viessmann app - instead you need to use the following commands on the command line... we''re aware this is not for every user, but currently we don''t have a better workflow...<br/>  Prerequisites: curl, jq, and the following parameters:  ``` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> ```  Then execute the following to get an oauth token (n.b. it''s best to paste the entire block as-is, since the intermediate ''CODE'' is only valid for 20 seconds):  ``` VIESSMANN_REDIRECT_URI="http://localhost:4200/" VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed ''s/.*\?code=\(.*\).*/\1/'' \   | tr -d ''[:space:]'')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) ```  Finally, get the installation id:  ``` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann.com/iot/v1/equipment/installations?includeGateways=true \   | jq ''.data[].id'' ```'
+    advanced: false
+    optional: false
+  - name: device_id
+    example:
+    default: 0
+    choice: []
+    unit:
+    description: Device ID
+    help: typically `0`
+    advanced: false
+    optional: false
+  - name: target_temperature
+    example:
+    default: 45
+    choice: []
+    unit: °C
+    description: Target temperature for one-time charge
+    help: max. 60°C
+    advanced: false
+    optional: false
