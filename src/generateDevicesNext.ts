@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
 import * as countries from "i18n-iso-countries";
-import slugify from "slugify";
 
 // Register locale data
 countries.registerLocale(require("i18n-iso-countries/langs/en.json"));
@@ -13,11 +12,25 @@ interface ProductData {
     brand: string;
     description?: string;
     group?: string;
+    identifier: string;
   };
+  template: string;
   capabilities?: string[];
   requirements?: string[];
   countries?: string[];
   description?: string;
+  params?: Array<{
+    name: string;
+    description: string;
+    help?: string;
+    type?: string;
+    unit?: string;
+    example?: any;
+    default?: any;
+    choice?: any[];
+    optional?: boolean;
+    advanced?: boolean;
+  }>;
   render: Array<{
     usage?: string;
     default: string;
@@ -33,7 +46,7 @@ interface DeviceCard {
   capabilities: string[];
   requirements: string[];
   countries: string[];
-  slug: string;
+  identifier: string;
   group?: string;
 }
 
@@ -70,6 +83,13 @@ const TRANSLATIONS_DE: Record<string, string> = {
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
   global: "Global",
+  "params.title": "## Templateparameter",
+  "params.header": "| Name | Erklärung | Wert | Optional |",
+  "params.separator": "|-----------|-----------|------|----------|",
+  "params.required.yes": "nein",
+  "params.required.no": "ja",
+  "params.advanced": "erweitert",
+  "params.basic": "standard",
 };
 
 const TRANSLATIONS_EN: Record<string, string> = {
@@ -79,6 +99,13 @@ const TRANSLATIONS_EN: Record<string, string> = {
   "tab.charge": "Wallbox",
   "tab.aux": "AUX",
   global: "Global",
+  "params.title": "## Template Parameter",
+  "params.header": "| Name | Explanation | Value | Optional |",
+  "params.separator": "|-----------|-------------|-------|----------|",
+  "params.required.yes": "no",
+  "params.required.no": "yes",
+  "params.advanced": "advanced",
+  "params.basic": "basic",
 };
 
 interface TemplateWithFilename extends ProductData {
@@ -121,80 +148,13 @@ const readTemplates = (templatePath: string): TemplateWithFilename[] => {
     });
 };
 
-const extractTemplateNameFromFilename = (filename: string): string => {
-  // Extract template name from filename like "tesla_0.yaml" -> "tesla"
-  return filename.replace(/_\d+\.yaml$/, "").replace(/\.yaml$/, "");
-};
-
-const normalizeForComparison = (text: string): string => {
-  return text
-    .toLowerCase()
-    .normalize("NFD") // Decompose accented characters
-    .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
-    .replace(/[^a-z0-9]/g, ""); // Remove all non-alphanumeric characters
-};
-
-const createSlug = (
-  brand: string,
-  description: string,
-  templateName: string,
-): string => {
-  const parts: string[] = [];
-
-  // Add brand if it exists and is not empty
-  if (brand && brand.trim()) {
-    parts.push(brand);
-  }
-
-  // Add description if it exists AND is different from brand (normalized comparison)
-  if (description && description.trim()) {
-    const normalizedBrand = normalizeForComparison(brand);
-    const normalizedDescription = normalizeForComparison(description);
-
-    if (normalizedDescription !== normalizedBrand) {
-      parts.push(description);
-    }
-  }
-
-  // If no parts, we have a problem - skip this template
-  if (parts.length === 0) {
-    console.warn(
-      `No brand or description found for template: ${templateName} - skipping`,
-    );
-    return "";
-  }
-
-  return slugify(parts.join(" "), {
-    lower: true,
-    strict: true,
-    remove: /[*+~.()'"!:@]/g,
-  });
-};
-
-const getEnglishDescription = (
-  template: TemplateWithFilename,
-  deviceType: string,
-): string => {
-  // Try to find the corresponding English template
-  const englishTemplatePath = `./templates/release/en/${deviceType}`;
-  try {
-    const englishTemplates = readTemplates(englishTemplatePath);
-    const matchingTemplate = englishTemplates.find(
-      (t) => t._filename === template._filename,
-    );
-
-    if (matchingTemplate && matchingTemplate.product.description) {
-      return matchingTemplate.product.description;
-    }
-  } catch (e) {
-    // If we can't find English template, fall back to current description
-  }
-
-  return template.product.description || "";
-};
-
 const indentCode = (code: string, list = false): string => {
-  let result = code.replace(/`/g, "\\`");
+  let result = code
+    .replace(/`/g, "\\`")
+    .replace(/\\(\d)/g, "\\\\$1") // escape backreferences like \1, \2
+    .replace(/\\\?/g, "\\\\?") // escape literal ? in regex
+    .replace(/\\\(/g, "\\\\(") // escape literal ( in regex
+    .replace(/\\\)/g, "\\\\)"); // escape literal ) in regex
 
   if (list) {
     result = result.replace(/^/, "      - ");
@@ -212,14 +172,14 @@ const generateDeviceCard = (
   language: string,
 ): DeviceCard | null => {
   const brand = data.product.brand || "";
-  // Always use English description for slug consistency
-  const englishDescription = getEnglishDescription(data, deviceType);
   const description = data.product.description || "";
-  const templateName = extractTemplateNameFromFilename(data._filename);
-  const slug = createSlug(brand, englishDescription, templateName);
+  const identifier = data.product.identifier;
 
-  // Skip if no valid slug could be created
-  if (!slug) {
+  // Skip if no identifier is provided
+  if (!identifier) {
+    console.warn(
+      `No identifier found for template: ${data._filename} - skipping`,
+    );
     return null;
   }
 
@@ -227,11 +187,11 @@ const generateDeviceCard = (
     id: `${brand}-${description}`.replace(/\s+/g, "-").toLowerCase(),
     brand,
     description,
-    thumbnail: `/img/devices/${deviceType}/${slug}.jpg`,
+    thumbnail: `/img/devices/${deviceType}/${identifier}.jpg`,
     capabilities: data.capabilities || [],
     requirements: data.requirements || [],
     countries: data.countries || [],
-    slug,
+    identifier,
     group: data.product.group,
   };
 };
@@ -289,15 +249,112 @@ ${cards
     thumbnail="${card.thumbnail}"
     capabilities={[${features.map((f) => `"${f}"`).join(", ")}]}
     requirements={[]}
-    href="/docs/devices-next/${deviceType}s/${card.slug}"
+    href="/docs/devices-next/${deviceType}s/${card.identifier}"
     group="${card.group || ""}"
     type="${deviceType}"
-    name="${card.slug}"
+    name="${card.identifier}"
   />`;
   })
   .join("\n")}
 </DeviceGrid>
 `;
+};
+
+const escapeMarkdown = (text: string): string => {
+  return text
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\|/g, "\\|")
+    .replace(/\[/g, "\\[")
+    .replace(/\]/g, "\\]");
+};
+
+const getParameterTable = (
+  data: TemplateWithFilename,
+  language: string,
+): string => {
+  const translate = makeTranslate(language);
+
+  if (!data.params || data.params.length === 0) {
+    return "";
+  }
+
+  const headerRow = translate("params.header");
+  const separatorRow = translate("params.separator");
+
+  const paramRows = data.params
+    .map((param) => {
+      const name = param.name || "";
+      const description = param.description || "";
+
+      // Parameter: Description<br/>`technical_name`
+      const paramColumn = description
+        ? `${escapeMarkdown(description)}<br/>\`${escapeMarkdown(name)}\``
+        : `\`${escapeMarkdown(name)}\``;
+
+      // Erklärung: help text
+      const explanation = param.help ? escapeMarkdown(param.help) : "";
+
+      // Wert: Standard, Beispiel, Typ, Einheit
+      let value = "";
+      const valueParts: string[] = [];
+
+      if (param.default) {
+        valueParts.push(
+          `Standard: \`${escapeMarkdown(String(param.default))}\``,
+        );
+      }
+      if (param.example) {
+        valueParts.push(
+          `Beispiel: \`${escapeMarkdown(String(param.example))}\``,
+        );
+      }
+      if (param.type) {
+        valueParts.push(`Typ: ${param.type}`);
+      }
+      if (param.unit) {
+        valueParts.push(`Einheit: ${param.unit}`);
+      }
+      if (param.choice && param.choice.length > 0) {
+        // Alle Werte anzeigen, aber bei langen Listen mit Zeilenumbrüchen für bessere Lesbarkeit
+        if (param.choice.length > 10) {
+          // Sehr lange Listen: alle 5 Werte einen Umbruch
+          const choices = param.choice
+            .map((c, index) => {
+              const escaped = `\`${escapeMarkdown(String(c))}\``;
+              return (index + 1) % 5 === 0 ? escaped + "<br/>" : escaped;
+            })
+            .join(", ")
+            .replace(/, <br\/>/g, "<br/>"); // Letztes Komma vor Umbruch entfernen
+          valueParts.push(`Auswahl: ${choices}`);
+        } else {
+          // Normale Listen: alle Werte in einer Zeile
+          const choices = param.choice
+            .map((c) => `\`${escapeMarkdown(String(c))}\``)
+            .join(", ");
+          valueParts.push(`Auswahl: ${choices}`);
+        }
+      }
+
+      value = valueParts.join("<br/>");
+
+      // Optional status
+      const optional =
+        param.optional !== false
+          ? translate("params.required.yes")
+          : translate("params.required.no");
+
+      return `| ${paramColumn} | ${explanation} | ${value} | ${optional} |`;
+    })
+    .join("\n");
+
+  const title = translate("params.title");
+
+  return `${title} \`${data.template}\`
+
+${headerRow}
+${separatorRow}
+${paramRows}`;
 };
 
 const generateDetailPage = (
@@ -371,16 +428,19 @@ ${block.code}
     : "";
 
   // Create title from available parts
-  const titleParts = [brand, description].filter((part) => part.trim());
-  const title = titleParts.join(" ") || "Device";
+  const titleParts = [brand, description].filter((part) => part);
+  const title = titleParts.join(" ").trim() || "Device";
 
   // Generate custom edit URL pointing to the original template
-  const cleanFilename = data._filename.replace(/_\d+\.yaml$/, ".yaml");
-  const editUrl = `https://github.com/evcc-io/evcc/blob/master/templates/definition/${deviceType}/${cleanFilename}`;
+  const editUrl = `https://github.com/evcc-io/evcc/blob/master/templates/definition/${deviceType}/${data.template}.yaml`;
+
+  // Get parameter table for this device type
+  const parameterTable = getParameterTable(data, language);
 
   return `---
 title: ${title}
 custom_edit_url: ${editUrl}
+hide_table_of_contents: true
 ---
 
 import DeviceConfig from '@site/src/components/DeviceConfig';
@@ -393,7 +453,7 @@ import TabItem from '@theme/TabItem';
 
 ${deviceFeatures}${longDescription ? longDescription + "\n\n" : ""}${codeSection}
 
-${sponsor}`;
+${parameterTable ? parameterTable + "\n\n" : ""}${sponsor}`;
 };
 
 const cleanDeviceFolders = () => {
@@ -457,7 +517,7 @@ const generateDevicePages = () => {
             language,
           );
           fs.writeFileSync(
-            path.join(deviceDir, `${card.slug}.mdx`),
+            path.join(deviceDir, `${card.identifier}.mdx`),
             detailContent,
           );
         }
