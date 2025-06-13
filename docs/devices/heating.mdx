@@ -60,7 +60,7 @@ Dies empfiehlt sich eigentlich fast immer, da die intern ermittelten Daten bei d
 Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähler](./meters) verwendet werden.
 
 Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
-Dafür kommt der spezielle Typ `sgready` zum Einsatz.
+Dafür kommt der spezielle Typ `sgready-boost` zum Einsatz.
 
 ```yaml
 loadpoints:
@@ -84,51 +84,11 @@ meters:
 
 chargers:
   - name: heatpump_control
-    type: sgready
-    setmode:
-      source: switch
-      switch:
-      - case: 1 # dimm (not supported, yet)
-        set:
-          source: error
-          error: ErrNotAvailable
-      - case: 2 # normal
-        set:
-          # Hier wird der Funktionsaufruf eingefügt, der die Heizung in den Normalbetrieb setzt.
-          # Dafür können alle üblichen Plugins verwendet werden.
-          source: const
-          value: false
-          set:
-            source: charger
-            config:
-              type: template
-              template: shelly # Boost-Kontakt der Wärmepumpe
-              host: 192.168.0.101
-      - case: 3 # boost
-        set:
-          # Hier wird der Funktionsaufruf eingefügt, der die Heizung in den Boostbetrieb setzt.
-          source: const
-          value: true
-          set:
-            source: charger
-            config:
-              type: template
-              template: shelly # Boost-Kontakt der Wärmepumpe
-              host: 192.168.0.101
-    getmode:
-      # hier wird der Funktionsaufruf eingefügt, der den Status der Heizung zurückmeldet:
-      # 1 für reduzierte Leistung
-      # 2 für Normalbetrieb
-      # 3 für Boostbetrieb
-      source: calc
-      add:
-        - source: const
-          value: 2
-        - source: charger
-          config:
-            type: template
-            template: shelly # Boost-Kontakt der Wärmepumpe
-            host: 192.168.0.101
+    type: sgready-boost
+    charger:
+      type: template
+      template: shelly # Boost-Kontakt der Wärmepumpe
+      host: 192.168.0.101
 #   temp:
 #     source: http
 #     uri: "http://192.168.0.103/temperature"
@@ -136,12 +96,7 @@ chargers:
 # [...]
 ```
 
-:::note
-Dieses Code-Beispiel enthält einige Redundanzen.
-Wir werden später Templates für die einfachere Konfiguration gängiger Konstellationen bereitstellen.
-:::
-
-Neben `setmode` und `getmode`, kannst du optional auch die aktuelle Temperatur (`temp`) [via Plugin](./plugins) hinzufügen.
+Optional kannst du auch die aktuelle Temperatur (`temp`) [via Plugin](./plugins) hinzufügen.
 Diese dient lediglich zur Anzeige und wird bei Wärmepumpen nicht für die Steuerung verwendet.
 
 ## Heizstäbe
