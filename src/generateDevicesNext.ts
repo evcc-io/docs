@@ -261,12 +261,7 @@ ${cards
 };
 
 const escapeMarkdown = (text: string): string => {
-  return text
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\|/g, "\\|")
-    .replace(/\[/g, "\\[")
-    .replace(/\]/g, "\\]");
+  return text.replace(/\|/g, "\\|").replace(/\[/g, "\\[").replace(/\]/g, "\\]");
 };
 
 const getParameterTable = (
@@ -448,10 +443,24 @@ import DeviceFeatures from '@site/src/components/DeviceFeatures';
 import SponsorshipRequired from '/docs/_sponsorship_required.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import '@evcc/icons';
 
 # ${title}
 
-${deviceFeatures}${longDescription ? longDescription + "\n\n" : ""}${codeSection}
+<div className="device-detail-container">
+  <div className="device-detail-content">
+    ${deviceFeatures}${longDescription ? longDescription + "\n\n" : ""}${codeSection}
+  </div>
+  <div className="device-detail-icon">
+    <evcc-icon
+      type="${deviceType}"
+      name="${data.product.identifier}"
+      size="400px"
+      alt="${title}"
+      className="device-detail-icon-img"
+    ></evcc-icon>
+  </div>
+</div>
 
 ${parameterTable ? parameterTable + "\n\n" : ""}${sponsor}`;
 };
