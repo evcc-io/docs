@@ -1,0 +1,58 @@
+template: energy-charts-api
+product:
+  identifier: fraunhofer-ise
+  brand: Fraunhofer ISE
+  group: Dynamic electricity price
+countries: ["EU"]
+requirements: ["skiptest"]
+description: |
+  Day-ahead forecast of energy prices (per kWh) on the exchange. No prior registration for https://api.energy-charts.info/ necessary. Can be used for dynamic electricity tariffs, for example, where the supplier does not yet offer a price forecast on the customer interface.
+render:
+  - default: |
+      type: template
+      template: energy-charts-api
+      bzn: DE-LU # Bidding zone, see https://api.energy-charts.info/#/prices/day_ahead_price_price_get [AT, BE, CH, CZ, DE-LU, DE-AT-LU, DK1, DK2, FR, HU, IT-NORTH, NL, NO2, PL, SE4, SI]
+    advanced: |
+      type: template
+      template: energy-charts-api
+      bzn: DE-LU # Bidding zone, see https://api.energy-charts.info/#/prices/day_ahead_price_price_get [AT, BE, CH, CZ, DE-LU, DE-AT-LU, DK1, DK2, FR, HU, IT-NORTH, NL, NO2, PL, SE4, SI]
+      charges: # Charge, Additional fixed charge per kWh (e.g. 0.05 for 5 cents) (optional)
+      tax: # Tax, Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Formula, Individual formula for calculating the price (optional)
+params:
+  - name: bzn
+    example:
+    default: DE-LU
+    choice: ['AT', 'BE', 'CH', 'CZ', 'DE-LU', 'DE-AT-LU', 'DK1', 'DK2', 'FR', 'HU', 'IT-NORTH', 'NL', 'NO2', 'PL', 'SE4', 'SI']
+    unit:
+    description: Bidding zone
+    help: see https://api.energy-charts.info/#/prices/day_ahead_price_price_get
+    advanced: false
+    optional: false
+  - name: charges
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charge
+    help: Additional fixed charge per kWh (e.g. 0.05 for 5 cents)
+    advanced: true
+    optional: true
+  - name: tax
+    example:
+    default:
+    choice: []
+    unit:
+    description: Tax
+    help: Additional percentage charge (e.g. 0.2 for 20%)
+    advanced: true
+    optional: true
+  - name: formula
+    example: math.Max((price + charges) * (1 + tax), 0.0)
+    default:
+    choice: []
+    unit:
+    description: Formula
+    help: Individual formula for calculating the price
+    advanced: true
+    optional: true

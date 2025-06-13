@@ -1,0 +1,82 @@
+---
+title: OCPP 1.6J kompatibel (Smart Charging)
+custom_edit_url: https://github.com/evcc-io/evcc/blob/master/templates/definition/charger/ocpp.yaml
+hide_table_of_contents: true
+sidebar_class_name: sidebar-item-hidden
+---
+
+import DeviceConfig from '@site/src/components/DeviceConfig';
+import DeviceFeatures from '@site/src/components/DeviceFeatures';
+import SponsorshipRequired from '/docs/_sponsorship_required.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import '@evcc/icons';
+
+# OCPP 1.6J kompatibel (Smart Charging)
+
+<div className="device-detail-container">
+  <div className="device-detail-content">
+    <DeviceFeatures features="mA,rfid,1p3p,sponsorship" />
+
+Bei OCPP verbindet sich die Wallbox (Client) zu evcc (Server).
+Die Wallbox muss daher evcc via Hostname (funktionierende DNS-Auflösung erforderlich!) oder über die IP-Adresse auf Port 8887 erreichen können.
+Standardmäßig wird die erste eingehende Verbindung mit einer beliebigen Ladepunktkennung verwendet.
+Um mehrere Ladepunkte eindeutig zuordnen zu können müssen die jeweilige Stationskennung (`stationid: `) und Anschlussnummer (`connector: `) hinterlegt werden.
+Viele Wallboxen fügen die `stationid` automatisch der Backend-URL hinzu, bei manchen muss dies manuell geschehen `ws://<evcc>:8887/<stationid>`.
+Für Zählermesswerte sollte in der Wallbox wenn möglich ein kurzes Zeitintervall (< 10s) konfiguriert werden.
+Nutzen Sie Ihre RFID-Tags (dies ermöglicht z. B. eine Fahrzeugidentifizierung) oder setzen Sie Ihre Wallbox auf "freies Laden" oder "Autostart" um die für die Ladefreigabe benötigte Transaktion zu erzeugen.
+
+Falls die Wallbox keine Möglichkeit bietet die Transaktionen lokal zu starten, kann die erweiterte Option `remotestart` genutzt werden um automatisch eine Transaktion zu starten sobald ein Fahrzeug angeschlossen wird.
+Dies sollte nur in Ausnahmefällen erforderlich sein.
+
+Voraussetzungen:
+* Ggf. zuvor konfigurierte OCPP-Profile (z.B. durch eine andere Backend-Anbindung) in der Wallboxkonfiguration entfernen
+* Backend-URL (Central System) in der Wallboxkonfiguration: `ws://[evcc-adresse]:8887/` (eventuell noch um `stationid` erweitern)
+* Protokoll: OCPP-J v1.6, ocpp16j, JSON, Websocket, ws:// o.ä.
+* Keine Verschlüsselung, keine Authentifizierung, kein Passwort
+* Verbindung über das lokale Netzwerk
+
+Die konkrete Konfiguration und der tatsächlich nutzbare Funktionsumfang hängen vom Wallbox-Modell und dessen Software ab.
+
+
+<DeviceConfig code={`chargers:
+    - name: my_charger
+      type: template
+      template: ocpp
+      stationid: EVB-P12354 # Station ID, Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form \`ws://<evcc-adresse>:8887/<stationid>\` anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)`} advanced={`chargers:
+    - name: my_charger
+      type: template
+      template: ocpp
+      stationid: EVB-P12354 # Station ID, Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form \`ws://<evcc-adresse>:8887/<stationid>\` anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+      connector: 1 # Anschlussnummer, Bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+      remotestart: # Remote-Transaktion bei Fahrzeugverbindung starten, Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (Verwendet OCPP RemoteStartTransaction) (optional)
+      idtag: evcc # Authentifizierungs-Token, Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (Verwendet OCPP RemoteStartTransaction) (optional)
+      connecttimeout: 5m # Zeitlimit für die Registrierung, Zeitlimit für die Registrierung des Ladepunktes (optional)
+      meterinterval: 10s # Übertragungsintervall der Zählerwerte, Zeitintervall für die Übertragung der Zählerwerte (MeterValueSampleInterval) (optional)
+      metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # Zählerwerte für die Übertragung, Manuelle Vorgabe der zu konfigurierenden Zählerwerte (MeterValuesSampledData) (optional)`} />
+  </div>
+  <div className="device-detail-icon">
+    <evcc-icon
+      type="charger"
+      name="ocpp-1-6j-compatible-smart-charging"
+      size="400px"
+      alt="OCPP 1.6J kompatibel (Smart Charging)"
+      className="device-detail-icon-img"
+    ></evcc-icon>
+  </div>
+</div>
+
+## Templateparameter `ocpp`
+
+| Name | Erklärung | Wert | Optional |
+|-----------|-----------|------|----------|
+| Station ID<br/>`stationid` | Station ID des Ladepunktes. Nur erforderlich wenn mehrere OCPP-Ladestationen eingerichtet sind um diese korrekt zuzuweisen. Eine einzelne OCPP-Ladestation kann auch automatisch zugeordnet werden. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form `ws://<evcc-adresse>:8887/<stationid>` anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. | Beispiel: `EVB-P12354` | nein |
+| Anschlussnummer<br/>`connector` | Bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. | Standard: `1` | nein |
+| Remote-Transaktion bei Fahrzeugverbindung starten<br/>`remotestart` | Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (Verwendet OCPP RemoteStartTransaction) |  | nein |
+| Authentifizierungs-Token<br/>`idtag` | Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (Verwendet OCPP RemoteStartTransaction) | Beispiel: `evcc` | nein |
+| Zeitlimit für die Registrierung<br/>`connecttimeout` | Zeitlimit für die Registrierung des Ladepunktes | Standard: `5m` | nein |
+| Übertragungsintervall der Zählerwerte<br/>`meterinterval` | Zeitintervall für die Übertragung der Zählerwerte (MeterValueSampleInterval) | Standard: `10s` | nein |
+| Zählerwerte für die Übertragung<br/>`metervalues` | Manuelle Vorgabe der zu konfigurierenden Zählerwerte (MeterValuesSampledData) | Beispiel: `Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage` | nein |
+
+<SponsorshipRequired />
+
