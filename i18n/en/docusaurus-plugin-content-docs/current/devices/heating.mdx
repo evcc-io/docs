@@ -79,51 +79,11 @@ meters:
 
 chargers:
   - name: heatpump_control
-    type: sgready
-    setmode:
-      source: switch
-      switch:
-      - case: 1 # dimm (not supported, yet)
-        set:
-          source: error
-          error: ErrNotAvailable
-      - case: 2 # normal
-        set:
-          source: const
-          value: false
-          set:
-            # Add the function here to set the heatpump in normal operation mode.
-            # All types of plugins can be used.
-            source: charger
-            config:
-              type: template
-              template: shelly # Boost contact of the heat pump
-              host: 192.168.0.101
-      - case: 3 # boost
-        set:
-          # Add the function here to set the heatpump in boost mode.
-          source: const
-          value: true
-          set:
-            source: charger
-            config:
-              type: template
-              template: shelly # Boost contact of the heat pump
-              host: 192.168.0.101
-    getmode:
-      # Add function here to get the current mode of the heatpump, return
-      # 1 for reduced operation
-      # 2 for normal operation
-      # 3 for boost operation
-      source: calc
-      add:
-        - source: const
-          value: 2
-        - source: charger
-          config:
-            type: template
-            template: shelly # Boost contact of the heat pump
-            host: 192.168.0.101
+    type: sgready-boost
+    charger:
+      type: template
+      template: shelly # Boost contact of the heat pump
+      host: 192.168.0.101
 #   temp:
 #     source: http
 #     uri: "http://192.168.0.103/temperature"
@@ -131,12 +91,7 @@ chargers:
 # [...]
 ```
 
-:::note
-This code example contains some redundancies.
-We will later provide templates for easier configuration of common hardware constellations.
-:::
-
-In addition to `setmode` and `getmode`, you can optionally add the current temperature (`temp`) [via Plugin](./plugins).
+You can optionally add the current temperature (`temp`) [via Plugin](./plugins).
 This is only used for display.
 evcc does not use this value for regulation.
 
