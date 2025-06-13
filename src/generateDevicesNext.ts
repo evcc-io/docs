@@ -206,6 +206,7 @@ const generateOverviewPage = (
   return `---
 title: ${title}
 hide_table_of_contents: true
+sidebar_class_name: sidebar-item-no-expand
 ---
 
 import DeviceCard from '@site/src/components/DeviceCard';
@@ -436,6 +437,7 @@ ${block.code}
 title: ${title}
 custom_edit_url: ${editUrl}
 hide_table_of_contents: true
+sidebar_class_name: sidebar-item-hidden
 ---
 
 import DeviceConfig from '@site/src/components/DeviceConfig';
