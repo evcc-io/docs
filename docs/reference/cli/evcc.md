@@ -10,7 +10,9 @@ evcc [flags]
 
 ```
   -c, --config string          Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
+      --custom-css string      Additional user-defined CSS file for custom styling. No compatibility guarantees.
       --database string        Database location (default "~/.evcc/evcc.db")
+      --demo                   Enter demo mode. Disables auth, config ui and restart
       --disable-auth           Disable authentication (dangerous)
   -h, --help                   Help
       --ignore-db              Run command ignoring service database

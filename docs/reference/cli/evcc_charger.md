@@ -21,7 +21,9 @@ evcc charger [name] [flags]
 
 ```
   -c, --config string          Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
+      --custom-css string      Additional user-defined CSS file for custom styling. No compatibility guarantees.
       --database string        Database location (default "~/.evcc/evcc.db")
+      --demo                   Enter demo mode. Disables auth, config ui and restart
   -h, --help                   Help
       --ignore-db              Run command ignoring service database
   -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
