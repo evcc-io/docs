@@ -480,9 +480,10 @@ paths:
               value: 2500
               summary: If SoC is not available => specify power in Watt
           schema:
-            oneOf:
-              - $ref: "#/components/parameters/soc"
-              - $ref: "#/components/parameters/power"
+            type: number
+            anyOf:
+              - $ref: "#/components/schemas/Soc"
+              - $ref: "#/components/schemas/Power"
         - name: type
           in: path
           required: true
@@ -563,6 +564,8 @@ paths:
         more.](/en/docs/features/vehicle)
       tags:
         - Loadpoints
+      parameters:
+        - $ref: "#/components/parameters/id"
       responses:
         "200":
           $ref: "#/components/responses/EmptyResult"
@@ -1154,7 +1157,9 @@ components:
       minimum: 0
       example: 2500
     Precondition:
-      description: Late charging duration in seconds. [Read more.](/en/docs/features/plans#late-charging)
+      description: >-
+        Late charging duration in seconds. [Read
+        more.](/en/docs/features/plans#late-charging)
       type: integer
       example: 3600
       minimum: 0
@@ -1405,15 +1410,12 @@ components:
       in: path
       required: true
       schema:
-        oneOf:
-          - type: boolean
-          - type: string
-          - type: number
+        type: string
         enum:
           - "true"
           - "false"
-          - 1
-          - 0
+          - "1"
+          - "0"
   responses:
     NanoSecondsResult:
       description: Success - Number result - Unit is **nanoseconds**
@@ -1500,6 +1502,7 @@ components:
             enum:
               - Unauthorized
     BatteryModeResult:
+      description: Battery mode.
       content:
         application/json:
           schema:
