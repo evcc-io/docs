@@ -38,7 +38,7 @@ If you want to install evcc without a package manager or test a nightly version,
   brew services start evcc
   ```
 
-- Check the installation by opening a browser and entering the following URL: [http://localhost:7070](http://localhost:7070). You should see the evcc interface in demo mode.
+- Check the installation by opening a browser and entering the following URL: [http://localhost:7070](http://localhost:7070). The evcc application will ask you to set a password and start the configuration.
 - Stop the evcc server:
 
   ```sh

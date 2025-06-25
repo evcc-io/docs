@@ -38,7 +38,7 @@ Wenn du evcc ohne Paketmanager installieren willst oder eine nightly Version tes
   brew services start evcc
   ```
 
-- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: [http://localhost:7070](http://localhost:7070). Die evcc Oberfläche sollte im Demo Modus zu sehen sein.
+- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: [http://localhost:7070](http://localhost:7070). Die evcc Oberfläche fordert dich auf ein Password zu vergeben und die Einrichtung zu starten.
 - Stoppe den evcc-Server:
 
   ```sh
