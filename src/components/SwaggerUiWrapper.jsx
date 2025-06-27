@@ -1,6 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import SwaggerUI from "swagger-ui-react";
+import BrowserOnly from "@docusaurus/BrowserOnly";
 import CodeBlock from "@theme/CodeBlock";
 import restApiYaml from "!!raw-loader!../../static/rest-api.yaml";
 
@@ -132,9 +133,8 @@ let customCss = `
 `;
 });
 
-export default () => {
+function SwaggerUIComponent() {
   const containerRef = useRef(null);
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (containerRef.current?.attachShadow) {
@@ -143,28 +143,29 @@ export default () => {
         const style = document.createElement("style");
         style.textContent = customCss;
         shadowRoot.appendChild(style);
-
         const div = document.createElement("div");
         shadowRoot.appendChild(div);
-
         const root = ReactDOM.createRoot(div);
         root.render(<SwaggerUI {...configs} />);
-        setInitialized(true);
       } catch (e) {
         console.error(e);
       }
     }
   }, []);
 
+  return <div ref={containerRef}></div>;
+}
+
+export default function SwaggerUIWrapper() {
   return (
-    <>
-      <div ref={containerRef}></div>
-      {/* crawler fallback */}
-      {!initialized && (
+    <BrowserOnly
+      fallback={
         <CodeBlock language="yaml" title="rest-api.yaml">
           {restApiYaml}
         </CodeBlock>
-      )}
-    </>
+      }
+    >
+      {() => <SwaggerUIComponent />}
+    </BrowserOnly>
   );
-};
+}
