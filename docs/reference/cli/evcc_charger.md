@@ -13,6 +13,7 @@ evcc charger [name] [flags]
       --diagnose        Diagnose
   -d, --disable         Disable
   -e, --enable          Enable
+      --heartbeat       After command, continue running device heartbeats (if any) until interrupted
   -p, --phases int      Set usable phases (1 or 3)
   -w, --wakeup          Wake up
 ```

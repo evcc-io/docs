@@ -11,6 +11,7 @@ evcc meter [name] [flags]
 ```
   -b, --battery-mode string          Set battery mode (normal, hold, charge)
   -w, --battery-mode-wait duration   Wait given duration during which potential watchdogs are active
+      --heartbeat                    After command, continue running device heartbeats (if any) until interrupted
   -r, --repeat                       Repeat until interrupted
       --repeat-interval duration     Interval between repetitions
 ```
