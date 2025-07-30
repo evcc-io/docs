@@ -6,6 +6,8 @@ export default ({ src, poster }) => {
       loop
       muted
       controls
+      controlsList="nodownload"
+      allowFullScreen
       style={{
         maxWidth: "100%",
         height: "auto",

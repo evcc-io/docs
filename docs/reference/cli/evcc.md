@@ -18,6 +18,7 @@ evcc [flags]
       --ignore-db              Run command ignoring service database
   -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
       --log-headers            Log headers
+      --mcp                    Expose MCP service (experimental)
       --metrics                Expose metrics
       --profile                Expose pprof profiles
       --template string        Add custom template file (debug only)
