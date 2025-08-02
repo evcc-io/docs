@@ -37,3 +37,16 @@ influx:
   token: 1234567890abcdef
   org: home
 ```
+
+## VictoriaMetrics
+
+[VictoriaMetrix](https://github.com/VictoriaMetrics/VictoriaMetrics) is a time series database with InfluxDB compatible REST API.
+
+HTTP basic authentication can be done via the URL.
+
+**Example for VictoriaMetrics**:
+
+```yaml
+influx:
+  url: http://[username:password@]victoria-metrics:8428
+```
