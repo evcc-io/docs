@@ -1,0 +1,215 @@
+---
+sidebar_position: 10
+---
+
+# § 14a EnWG & SteuVE
+
+:::info Aktuelle Entwicklung
+Die Umsetzung von § 14a EnWG befindet sich noch im Aufbau.
+Steuerboxen und Smart Meter Gateways werden aktuell ausgerollt.
+:::
+
+evcc unterstützt die externe Steuerung von Ladepunkten durch Netzbetreiber gemäß § 14a EnWG.
+Dies ermöglicht reduzierte Netzentgelte bei gleichzeitiger Sicherstellung der Netzstabilität.
+
+## Hintergrund
+
+Der § 14a des Energiewirtschaftsgesetzes (EnWG) regelt die netzdienliche Steuerung von steuerbaren Verbrauchseinrichtungen (SteuVE).
+Netzbetreiber können bei Netzüberlastung die Leistung großer Verbraucher wie Wallboxen, Wärmepumpen oder Batteriespeicher temporär reduzieren.
+Als Gegenleistung erhalten Kunden reduzierte Netzentgelte.
+
+Wichtige Punkte:
+- Betrifft Verbraucher ab 4,2 kW Leistung
+- Mindestleistung von 4,2 kW pro SteuVE bleibt während der Reduzierung erhalten
+- Jede steuerbare Verbrauchseinrichtung wird einzeln auf 4,2 kW begrenzt
+- Steuerung erfolgt über Smart Meter Gateway oder Steuerbox
+- Kunden profitieren von reduzierten Netzentgelten
+
+evcc unterstützt zwei Wege für die Anbindung: **Relais** (analog über einen Schaltkontakt) oder **EEBus** (digital über das EEBus-Protokoll).
+
+## Konfiguration via Relais (Analog)
+
+Die analoge Anbindung über einen Schaltkontakt ist die einfachste Lösung.
+Die Steuerbox aktiviert einen Kontakt, der von evcc ausgewertet wird.
+
+### Grundkonfiguration
+
+```yaml
+hems:
+  type: relay
+  maxPower: 4200 # Reduzierte Leistung pro Ladepunkt bei aktivem Signal (in Watt)
+  limit:
+    # Plugin-spezifische Konfiguration
+```
+
+### Beispiele für verschiedene Anbindungen
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+<TabItem value="gpio" label="Raspberry Pi GPIO">
+
+Bei Verwendung eines Raspberry Pi kann der GPIO-Pin direkt ausgelesen werden:
+
+```yaml
+hems:
+  type: relay
+  maxPower: 4200
+  limit:
+    source: script
+    cmd: gpioget gpiochip0 17 # GPIO Pin 17 auslesen
+    # Rückgabewert: 0 = nicht begrenzt, 1 = begrenzt
+```
+
+</TabItem>
+<TabItem value="mqtt" label="MQTT">
+
+Wenn die Steuerbox oder ein Gateway MQTT-Nachrichten sendet:
+
+```yaml
+hems:
+  type: relay
+  maxPower: 4200
+  limit:
+    source: mqtt
+    topic: hems/limit/status
+    # Erwartete Werte: 0/false = normal, 1/true = begrenzt
+```
+
+</TabItem>
+<TabItem value="http" label="HTTP-API">
+
+Für Steuerboxen mit REST-API:
+
+```yaml
+hems:
+  type: relay
+  maxPower: 4200
+  limit:
+    source: http
+    uri: http://steuerbox.local/api/limit
+    jq: .limited # JSON-Pfad zum Boolean-Wert
+```
+
+</TabItem>
+</Tabs>
+
+## Konfiguration via EEBus (Digital)
+
+Die digitale Anbindung über EEBus ist die zukunftssichere und bevorzugte Lösung.
+Die Steuerbox kommuniziert über das EEBus-Protokoll direkt mit evcc.
+
+### Voraussetzungen
+
+- evcc-Installation mit EEBus-Unterstützung
+- Steuerbox mit EEBus-Schnittstelle
+- Netzwerkverbindung zwischen evcc und Steuerbox
+
+### Schritt 1: Zertifikate generieren
+
+EEBus benötigt Zertifikate für die sichere Kommunikation. Diese müssen einmalig erstellt werden.
+Führe folgenden Befehl in der Konsole aus:
+
+```bash
+evcc eebus-cert
+```
+
+Dieser Befehl erstellt die benötigten Zertifikate und zeigt die Konfiguration an, die in die `evcc.yaml` eingefügt werden muss.
+
+### Schritt 2: EEBus-Grundkonfiguration
+
+Füge die EEBus-Konfiguration zur `evcc.yaml` hinzu:
+
+```yaml
+# EEBus-Grundkonfiguration
+eebus:
+  certificate:
+    public: |
+      -----BEGIN CERTIFICATE-----
+      # Hier den öffentlichen Schlüssel einfügen
+      -----END CERTIFICATE-----
+    private: |
+      -----BEGIN EC PRIVATE KEY-----
+      # Hier den privaten Schlüssel einfügen
+      -----END EC PRIVATE KEY-----
+  # Optional: Netzwerk-Interface festlegen (empfohlen)
+  interfaces:
+    - eth0  # oder das entsprechende Interface
+  # Optional: Eigene SKI definieren
+  shipid: EVCC-1234567890abcdef
+```
+
+### Schritt 3: HEMS-Konfiguration
+
+Konfiguriere die HEMS-Schnittstelle für § 14a EnWG:
+
+```yaml
+hems:
+  type: eebus
+  maxPower: 4200 # Maximale Leistung pro Ladepunkt bei Reduzierung (in Watt)
+  ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
+  # Die SKI findest du in der Dokumentation deiner Steuerbox
+```
+
+### Schritt 4: SKI ermitteln und Pairing
+
+#### SKI von evcc ermitteln
+
+Nach dem Start von evcc wird die eigene SKI in den Logs angezeigt:
+
+```bash
+evcc --log debug | grep -i ski
+```
+
+#### Pairing durchführen
+
+1. **In der Steuerbox**: evcc als HEMS hinzufügen
+   - Die SKI von evcc eingeben
+   - IP-Adresse von evcc angeben
+   - Pairing-Vorgang starten
+
+2. **In evcc**: HEMS-Konfiguration mit SKI der Steuerbox ergänzen
+   - SKI der Steuerbox in der HEMS-Konfiguration eintragen
+   - evcc neu starten
+
+3. **Verbindung prüfen**: 
+   ```bash
+   # Trace-Logging für EEBus aktivieren
+   evcc -l trace eebus
+   ```
+
+:::tip Wichtig
+- Die Zertifikate müssen nur einmal generiert werden
+- Nach erfolgreichem Pairing darf die Konfiguration nicht mehr geändert werden
+:::
+
+## Funktionsweise
+
+### Normalbetrieb
+
+Im Normalbetrieb lädt evcc ohne Leistungsbegrenzung durch das HEMS.
+Die Ladepunkte arbeiten mit ihrer normalen Konfiguration und werden ggf. durch das [Lastmanagement](./loadmanagement) koordiniert.
+
+### Reduzierungssignal aktiv
+
+Wenn der Netzbetreiber ein Reduzierungssignal sendet:
+
+1. **EEBus**: Die Steuerbox übermittelt die neue Leistungsgrenze digital
+2. **Relais**: Der Kontakt wird geschlossen, evcc begrenzt auf `maxPower`
+
+evcc reduziert dann automatisch:
+- Die Ladeleistung jedes einzelnen Ladepunkts auf maximal 4,2 kW
+- Aktive Ladevorgänge werden nicht unterbrochen
+- Jeder Ladepunkt kann weiterhin mit der reduzierten Leistung laden
+
+### Beispielverhalten
+
+- **Normale Maximalleistung**: 22 kW (2x 11 kW Wallboxen)
+- **Reduzierte Leistung**: 4,2 kW pro Wallbox bei aktivem Signal
+- **Gesamtleistung bei Reduzierung**: max. 8,4 kW (2x 4,2 kW)
+
+## Weiterführende Informationen
+
+- [Lastmanagement](./loadmanagement) - Grundlagen der Lastverteilung
+- [Plugins](../devices/plugins) - Erweiterte Plugin-Konfigurationen
