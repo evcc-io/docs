@@ -4,11 +4,12 @@ sidebar_position: 1
 
 # Einführung
 
-evcc ermöglicht das Laden von Elektrofahrzeugen (EV) bedarfsgerecht zu steuern und den dazu benötigten Energiebezug zu optimieren. Es kann eine Photovoltaikanlage (PV) angebunden werden, um so viel selbsterzeugte Energie wie möglich ins EV zu laden, oder es können auch Anbieter mit dynamischen Strompreisen angebunden werden.
+evcc optimiert das Laden deines Elektrofahrzeugs mit selbsterzeugtem Solarstrom oder günstigen Stromtarifen.
+Die Software funktioniert herstellerübergreifend mit hunderten von Wallboxen, PV-Anlagen und Fahrzeugen.
+evcc läuft lokal auf einem Raspberry Pi oder NAS - keine Cloud erforderlich.
 
-Normalerweise muss die Wallbox dazu mit der bestehenden PV-Installation kompatibel, oft sogar vom selben Hersteller sein. evcc ermöglicht dies jedoch herstellerübergreifend und mit einer Vielzahl von Wallboxen, Strommessgeräten und PV-Wechselrichtern, ohne dass diese speziell dazu vorgesehen sein müssen.
+Lerne, wie du [evcc auf deiner Hardware installierst](/docs/installation).
 
-Dazu wird evcc auf einem System im lokalen Netzwerk installiert, so dass es mit allen notwendigen Geräten kommunizieren kann. evcc selbst arbeitet dabei vollständig lokal und benötigt selbst keine Cloud-Anbindung, wenn keine der angebundenen Komponenten dies erfordert. Die Software ist sehr genügsam, so dass ein einfaches NAS (Netzwerkspeichergerät) oder ein Kleinstcomputersystem wie z. B. ein Raspberry Pi (oder ähnliches) völlig ausreichen.
 
 ![Screenshot](screenshot.webp)
 

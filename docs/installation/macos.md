@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 8
 ---
 
 # macOS
@@ -45,7 +45,7 @@ Wenn du evcc ohne Paketmanager installieren willst oder eine nightly Version tes
   brew services stop evcc
   ```
 
-## Konfiguration
+## evcc.yaml erstellen
 
 Für den Betrieb musst du eine funktionierende `evcc.yaml` Konfigurationsdatei erstellen.
 Neben allgemeinen Einstellungen beinhaltet die Konfiguration die Definition der einzelnen Komponenten (Zähler, Wallbox, Fahrzeug, ...).
@@ -90,9 +90,9 @@ Benötigt deine Konfiguration noch Anpassungen kannst du entweder den Konfigurat
   brew services restart evcc
   ```
 
-Unter [Konfiguration](./configuration) findest du weitere Informationen und Beispiele zur Konfiguration von evcc.
+Unter [evcc.yaml erstellen](./configuration) findest du weitere Informationen und Beispiele zur Konfiguration von evcc.
 
-## Konfiguration
+## evcc.yaml erstellen
 
 Es wird eine funktionierende evcc Konfiguration benötigt.
 
@@ -146,9 +146,9 @@ Hier findest du die Anleitung für die manuelle Installation von evcc auf macOS.
   ```
 - Du solltest die aktuelle Version von evcc sehen (bspw. `evcc version 0.xxx.y`).
 
-### Konfiguration
+### evcc.yaml erstellen
 
-Erstelle dir nach der Anleitung unter [Konfiguration](./configuration) eine funktionierende `evcc.yaml` Konfigurationsdatei.
+Erstelle dir nach der Anleitung unter [evcc.yaml erstellen](./configuration) eine funktionierende `evcc.yaml` Konfigurationsdatei.
 Diese kannst du mit folgendem Befehl starten:
 
 ```sh
