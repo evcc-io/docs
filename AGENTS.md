@@ -26,6 +26,7 @@ Most content is **manually written**, except for:
 
 - `docs/devices/*.mdx` - Device lists auto-generated from templates
 - `docs/tariffs.mdx` - Tariff providers auto-generated from templates
+- `docs/reference/cli/*.md` - CLI documentation auto-generated from main evcc repo
 
 ### Templates (`/templates`)
 
@@ -48,14 +49,18 @@ YAML device templates organized by:
 
 ### Content Workflows
 
-#### Template-Generated Content
+#### Auto-Generated Content
 
-Only specific device and tariff pages are generated:
-
+##### Device & Tariff Pages
 1. Templates in `/templates/{version}/{lang}/{category}/`
 2. Processed by `src/generateFromTemplate.js`
 3. Output to `docs/devices/*.mdx` and `docs/tariffs.mdx`
 4. Marked with `<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->`
+
+##### CLI Documentation
+1. Generated from main evcc repository
+2. Output to `docs/reference/cli/*.md`
+3. See README.md section "Update CLI docs" for generation instructions
 
 #### Manual Content
 
