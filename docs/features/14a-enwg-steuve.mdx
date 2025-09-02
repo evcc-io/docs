@@ -20,12 +20,40 @@ Als Gegenleistung erhalten Kunden reduzierte Netzentgelte.
 
 Wichtige Punkte:
 - Betrifft Verbraucher ab 4,2 kW Leistung
-- Mindestleistung von 4,2 kW pro SteuVE bleibt während der Reduzierung erhalten
-- Jede steuerbare Verbrauchseinrichtung wird einzeln auf 4,2 kW begrenzt
-- Steuerung erfolgt über Smart Meter Gateway oder Steuerbox
+- Steuerung erfolgt über Smart Meter Gateway und Steuerbox
 - Kunden profitieren von reduzierten Netzentgelten
 
 evcc unterstützt zwei Wege für die Anbindung: **Relais** (analog über einen Schaltkontakt) oder **EEBus** (digital über das EEBus-Protokoll).
+
+## Lastmanagement einrichten
+
+Für die § 14a EnWG Steuerung muss das [Lastmanagement](./loadmanagement) konfiguriert sein.
+Dabei wird ein spezieller `lpc` (Local Power Control) Stromkreis angelegt, dem alle steuerbaren Verbraucher zugeordnet werden.
+Bei aktivem Reduzierungssignal setzt evcc automatisch ein temporäres Leistungslimit für diesen Stromkreis.
+
+### Minimale Konfiguration
+
+```yaml
+circuits:
+  - name: lpc  # Local Power Control - Stromkreis für Netzanforderungen
+
+loadpoints:
+  - title: Garage
+    charger: charger1
+    circuit: lpc  # steuerbarer Verbraucher
+  - title: Carport  
+    charger: charger2
+    circuit: lpc  # steuerbarer Verbraucher
+```
+
+Alle Ladepunkte, die dem `lpc` Stromkreis zugeordnet sind, werden bei einer Regelanforderung entsprechend heruntergeregelt.
+
+Für erweiterte Konfigurationen mit Unterschaltkreisen siehe [Lastmanagement](./loadmanagement).
+
+:::tip Konfigurationsoberfläche
+Lastmanagement und HEMS können auch über die Konfigurationsoberfläche eingerichtet werden.
+Wichtig: Konfiguriere zuerst das Lastmanagement, bevor du HEMS einrichtest.
+:::
 
 ## Konfiguration via Relais (Analog)
 
@@ -37,10 +65,16 @@ Die Steuerbox aktiviert einen Kontakt, der von evcc ausgewertet wird.
 ```yaml
 hems:
   type: relay
-  maxPower: 4200 # Reduzierte Leistung pro Ladepunkt bei aktivem Signal (in Watt)
+  maxPower: 8400 # Gesamtleistungslimit bei aktivem Signal (in Watt)
   limit:
     # Plugin-spezifische Konfiguration
 ```
+
+### Ermittlung des Leistungslimits
+
+Das Leistungslimit wird dir vom Netzbetreiber mitgeteilt.
+Bei mehreren steuerbaren Verbrauchseinrichtungen (SteuVE) wird der Gleichzeitigkeitsfaktor berücksichtigt.
+Du kannst das Limit auch selbst berechnen mit der Formel: **Gesamtlimit = Anzahl SteuVE × 4,2 kW × Gleichzeitigkeitsfaktor**. Details zur Berechnung findest du [hier](https://www.inexogy.com/blog/14a-enwg/).
 
 ### Beispiele für verschiedene Anbindungen
 
@@ -55,7 +89,7 @@ Bei Verwendung eines Raspberry Pi kann der GPIO-Pin direkt ausgelesen werden:
 ```yaml
 hems:
   type: relay
-  maxPower: 4200
+  maxPower: 8400  # Beispiel für 2 SteuVE
   limit:
     source: script
     cmd: gpioget gpiochip0 17 # GPIO Pin 17 auslesen
@@ -70,7 +104,7 @@ Wenn die Steuerbox oder ein Gateway MQTT-Nachrichten sendet:
 ```yaml
 hems:
   type: relay
-  maxPower: 4200
+  maxPower: 11340  # Beispiel für 3 SteuVE mit Gleichzeitigkeitsfaktor 0,9
   limit:
     source: mqtt
     topic: hems/limit/status
@@ -85,7 +119,7 @@ Für Steuerboxen mit REST-API:
 ```yaml
 hems:
   type: relay
-  maxPower: 4200
+  maxPower: 13440  # Beispiel für 4 SteuVE mit Gleichzeitigkeitsfaktor 0,8
   limit:
     source: http
     uri: http://steuerbox.local/api/limit
@@ -98,7 +132,7 @@ hems:
 ## Konfiguration via EEBus (Digital)
 
 Die digitale Anbindung über EEBus ist die zukunftssichere und bevorzugte Lösung.
-Die Steuerbox kommuniziert über das EEBus-Protokoll direkt mit evcc.
+Die Steuerbox kommuniziert über das EEBus-Protokoll direkt mit evcc und übermittelt das Leistungslimit automatisch.
 
 ### Voraussetzungen
 
@@ -147,10 +181,13 @@ Konfiguriere die HEMS-Schnittstelle für § 14a EnWG:
 ```yaml
 hems:
   type: eebus
-  maxPower: 4200 # Maximale Leistung pro Ladepunkt bei Reduzierung (in Watt)
   ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
   # Die SKI findest du in der Dokumentation deiner Steuerbox
 ```
+
+:::note Hinweis
+Bei EEBus wird das Leistungslimit automatisch von der Steuerbox übermittelt.
+:::
 
 ### Schritt 4: SKI ermitteln und Pairing
 
@@ -189,25 +226,20 @@ evcc --log debug | grep -i ski
 ### Normalbetrieb
 
 Im Normalbetrieb lädt evcc ohne Leistungsbegrenzung durch das HEMS.
-Die Ladepunkte arbeiten mit ihrer normalen Konfiguration und werden ggf. durch das [Lastmanagement](./loadmanagement) koordiniert.
+Die Ladepunkte arbeiten mit ihrer normalen Konfiguration und werden ggf. durch weitere [Lastmanagement](./loadmanagement)-Einschränkungen koordiniert.
 
 ### Reduzierungssignal aktiv
 
 Wenn der Netzbetreiber ein Reduzierungssignal sendet:
 
-1. **EEBus**: Die Steuerbox übermittelt die neue Leistungsgrenze digital
-2. **Relais**: Der Kontakt wird geschlossen, evcc begrenzt auf `maxPower`
+1. **Relais**: Der Kontakt wird geschlossen, evcc aktiviert das konfigurierte `maxPower` Limit
+2. **EEBus**: Die Steuerbox übermittelt das berechnete Gesamtlimit digital
 
-evcc reduziert dann automatisch:
-- Die Ladeleistung jedes einzelnen Ladepunkts auf maximal 4,2 kW
-- Aktive Ladevorgänge werden nicht unterbrochen
-- Jeder Ladepunkt kann weiterhin mit der reduzierten Leistung laden
+evcc regelt alle dem `lpc` Stromkreis zugeordneten Ladepunkte entsprechend dem Limit herunter.
+Bei zu hohem Gesamtverbrauch können Ladevorgänge auch gestoppt werden.
+Die Regelung betrifft alle Modi (PV, Min+PV, Schnell).
 
-### Beispielverhalten
-
-- **Normale Maximalleistung**: 22 kW (2x 11 kW Wallboxen)
-- **Reduzierte Leistung**: 4,2 kW pro Wallbox bei aktivem Signal
-- **Gesamtleistung bei Reduzierung**: max. 8,4 kW (2x 4,2 kW)
+Wenn ein Regellimit aktiv ist, wird ein **Banner mit Regelhinweis** auf der Hauptseite in evcc angezeigt.
 
 ## Weiterführende Informationen
 
