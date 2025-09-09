@@ -25,7 +25,10 @@ import { themes as prismThemes } from "prism-react-renderer";
       },
     },
     future: {
-      experimental_faster: true,
+      v4: true,
+      experimental_faster: {
+        ssgWorkerThreads: true,
+      },
     },
     presets: [
       [
