@@ -2,35 +2,320 @@
 sidebar_position: 6
 ---
 
+import Tag from '../../../../../src/components/Tag';
+
 # Plugins
 
-Plugins can be used to integrate various devices and external data sources into evcc. These can be used through the `custom` value of the `type` parameter in [`meter`](/docs/reference/configuration/meters#custom) (power meters), [`charger`](/docs/reference/configuration/chargers#type) (charging stations), or [`vehicle`](/docs/devices/vehicles#custom) (vehicles).
+Plugins can be used to integrate devices and external data sources into evcc for which there is no direct support.
+Plugins can be used for the following categories:
 
-Plugins allow both _write access_ and _read access_. When the plugin is used for _writing_, the data is provided in the `${var[:format]}` format. If `format` is not specified, the data is provided in the default `%v` [Go Format](https://golang.org/pkg/fmt/). The variables are replaced with their corresponding values before the plugin is executed. Additionally the full functionality of the [Go template library](https://pkg.go.dev/text/template) can be used to implement more complex data transformations.
+- `meter`: [PV, battery, grid, meters](./meters)
+- `charger`: [Wallboxes](./chargers), [Smart switches](./smartswitches), [Heat pumps, heating rods](./heating)
+- `vehicle`: [Vehicles](./vehicles)
+- `tariff`: [Tariffs, forecasts](../tariffs)
+- `circuit`: [Load management](../features/loadmanagement)
 
-## Modbus (read/write)
 
-The `modbus` plugin can read data from any Modbus-capable device or SunSpec-compatible inverter. Many power meters are already pre-configured (see [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)). It is also possible to write Modbus registers to integrate additional charging stations.
+Additionally, plugins can also be used for the endpoints described in [Messaging](/docs/reference/configuration/messaging) for sending lifecycle events.
 
-For more details, see the [Modbus Documentation](modbus).
+## Overview
 
-## MQTT (read/write)
+evcc offers the following plugins:
 
-The `mqtt` plugin allows reading values via MQTT topics. This is particularly useful for power meters, for example, if they already provide their data via MQTT.
-Refer to [MBMD](https://github.com/volkszaehler/mbmd) for an example of how to get Modbus measurement data into MQTT. The plugin also offers the ability to read or parse JSON data structures using jq-like queries (See [HTTP plugin](#http-readwrite)).
+- [Modbus Plugin](#modbus) - Plugin for reading from a Modbus-capable device.
+- [MQTT Plugin](#mqtt) - Plugin for indirectly communicating with MQTT-capable devices via MQTT.
+- [HTTP Plugin](#http) - Plugin that communicates with end devices via HTTP API.
+- [Websocket Plugin](#websocket) - Plugin for receiving device data via its own web server. Can only be used for reading data.
+- [SMA/Speedwire Plugin](#speedwire) - Plugin specifically for SMA devices that can communicate with the Speedwire protocol.
+- [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
+- [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
 
-**Example of reading from a device**:
+In addition to these integration plugins, there are also helper plugins that provide additional functions:
+
+- [Const Plugin](#const) - Special plugin that simply returns a constant value.
+- [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
+- [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
+
+### Syntax
+
+Each plugin has an individual configuration schema.
+It's important to know whether the plugin is used in a **reading** or **writing** context.
+Some configuration parameters only make sense in a reading context, others only when used in writing mode.
+
+For example, the following configuration can be used to integrate an MQTT plugin as a `meter`, where the current power consumption is read via the specified MQTT topic:
+
+```yaml title="Example: MQTT Plugin for power values of a power meter"
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: "home/current/imsys/chn2/raw"
+```
+
+The plugin configuration schema always has the following structure:
+
+```yaml {3,5-6,8}
+- name: <name>
+  type: custom
+  <attr1>:
+    source: <plugin>
+    <p-attr1>: ...
+    <p-attr2>: ...
+    ....
+  <attr2>:
+    ....
+```
+
+Where `<name>` stands for the device name, `<attr1>` and `<attr2>` for one of the device-specific attributes described below, `<plugin>` for the plugin type and `<p-attr1>`, `<p-attr2>` for plugin-specific configurations (e.g. `source`, `topic` for plugins of type `mqtt`)
+
+#### Reading
+
+When reading data using a plugin, so-called _pipelines_ can be used.
+These allow data to be extracted in a fine-grained manner from the plugin's output.
+This makes it possible to process complex data structures such as JSON or XML and filter out the required information.
+Possible parameters for data extraction are:
+
+- `regex`: A regular expression to extract values from the received text.
+- `jq`: A [jq](https://jqlang.github.io/jq/)-expression to extract values from JSON structures.
+The full syntax and possibilities can be found in the jq documentation.
+- `unpack`: Converts values from other number representations, e.g. `hex`.
+- `decode`: Decodes binary formats like `uint32`, `float32` etc.
+
+#### Writing
+
+When writing, parameters in the configuration can be replaced by placeholders.
+The data is provided in the form `${var[:format]}`.
+If format is not specified, the data is provided in the standard %v Go format.
+The variables are replaced with the corresponding value before the plugin is executed.
+Additionally, all functions of the Go Template Library can be used to perform more complex data transformations.
+
+Depending on the device ([`meter`](#meter), [`charger`](#charger) or [`vehicle`](#vehicle)), different attributes can be read or set with plugins.
+
+### Meter
+
+Power meters are configured in the configuration section [`meters`](/docs/reference/configuration/meters).
+Meters defined under `meters:` can be used at various places within the `site` configuration:
+
+* `grid`: Grid meter
+* `pv`: PV meter
+* `battery`: Home battery meter
+* `charge`: Meter for the charging power of the wallbox
+* `aux`: Consumption meter for intelligent consumers
+* `ext`: Additional meter, e.g. for load management or data collection
+
+`power` is the only mandatory attribute that must be present in every `meter` definition, all other attributes are optional.
+
+However, not all meter types support all plugin attributes:
+
+* `limitsoc` and `batterymode` are used exclusively for battery meters (i.e. for `meter` referenced in `site.battery`).
+* `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin configurations each (in a YAML array) and can be used for grid meters (`grid`) and wallboxes (`charge`).
+
+The following tables contain all attributes that can be provided by plugins when configured for `meter`.
+When using the plugins, it's also important that they return the correct data type.
+To convert to the required data type, the pipelines described in [Reading](#reading) can be used.
+
+| Attribute | Type                | Required | Context       | Description              |
+|-----------|---------------------|----------|---------------|--------------------------|
+| power     | float               | yes      | all           | Current power in W       |
+| energy    | float               | no       | all           | Meter reading in kWh     |
+| maxpower  | int                 | no       | `pv` (hybrid) | Maximum AC power in W    |
+| soc       | int                 | no       | `battery`     | State of charge in %     |
+| capacity  | float               | no       | `battery`     | Capacity in kWh          |
+| powers    | [float,float,float] | no       | all           | Phase powers in W        |
+| currents  | [float,float,float] | no       | all           | Phase currents in A      |
+| voltages  | [float,float,float] | no       | all           | Phase voltages in V      |
+
+**Example**
+
+In this example, the configuration of a meter is queried for the current electrical grid power via an HTTP call:
+
+```yaml
+meters:
+  - name: volkszaehler
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+
+site:
+  meters:
+    grid: volkszaehler
+    ...
+  ...
+```
+
+In addition to the attributes that plugins provide for reading evaluation, the following attributes are used by evcc to trigger actions:
+
+| Attribute    | Type | Required | Context   | Description                                                                                                                                             | 
+|--------------|------|-----------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| limitsoc     | int  | no        | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). | 
+| batterymode  | int  | no        | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                             |
+
+### Charger
+
+Wallboxes and chargers have the following attributes that can be read:
+
+| Attribute   | Type                | Required | Description                        |
+|-------------|---------------------|----------|------------------------------------|
+| status      | string              | yes      | Status (A..F)                      |
+| enabled     | bool                | yes      | Is charging enabled?               |
+| power       | float               | no       | Charging power in W                |
+| energy      | float               | no       | Meter reading in kWh               |
+| identify    | string              | no       | Current RFID identifier            |
+| soc         | int                 | no       | State of charge in %               |
+| phases      | int                 | no       | Number of physical phases (1..3)   |
+| powers      | [float,float,float] | no       | Phase powers in W                  |
+| currents    | [float,float,float] | no       | Phase currents in A                |
+| voltages    | [float,float,float] | no       | Phase voltages in V                |
+| temp        | float               | no       | Current temperature in °C (heating)|
+| templimit   | int                 | no       | Temperature limit in °C (heating)  |
+| getmode     | int                 | no       | SG-Ready mode (heat pump)          |
+
+**Example**
+
+This example shows how to query the charging status (charging/not charging) of a charger via the Modbus plugin:
+
+```yaml
+chargers:
+  - name: icharge
+    type: custom
+    enabled:
+      source: modbus
+      id: 4711
+      uri: modbus.local:502
+      rtu: false
+      register:
+        address: 100
+        type: holding
+        decode: uint16
+```
+
+In addition to read-only values, actions can also be triggered or configuration values set via plugins:
+
+| Attribute       | Type  | Required | Description                                         |
+|-----------------|-------|----------|-----------------------------------------------------|
+| enable          | bool  | yes      | Enable / disable charging                           |
+| maxcurrent      | int   | yes      | Set maximum charging current in A                   |
+| maxcurrentmilis | float | no       | Set maximum charging current in A                   |
+| phases1p3p      | int   | no       | Perform phase switching (requires `tos: true`)     |
+| wakeup          | bool  | no       | Wake up vehicle                                     |
+| setmode         | int   | no       | Change SG-Ready mode (1: normal, 2: boost, 3: stop)|
+
+
+**Example**
+
+This example switches a Tasmota socket via an MQTT message:
+
+```yaml
+chargers:
+  - name: unu-charger
+    type: custom
+    enable:
+      source: mqtt
+      broker: mosquitto.local:883
+      topic: cmd/unu-switch/Power
+      payload: ON
+```
+
+### Vehicle
+
+Vehicle parameters can also be read via plugins.
+
+| Attribute     | Type   | Required | Description                   |
+|---------------|--------|----------|-------------------------------|
+| soc           | int    | yes      | State of charge in %          |
+| limitsoc      | int    | no       | Charge limit in %             |
+| status        | string | no       | Status (A..F)                 |
+| range         | int    | no       | Range in km                   |
+| odometer      | int    | no       | Odometer reading in km        |
+| climater      | bool   | no       | Climate control active?       |
+| getmaxcurrent | float  | no       | Maximum charging current in A |
+| finishtime    | string | no       | Planned charging end (RFC3339)|
+
+**Example**
+
+In the following example, the current range of the vehicle is read from MQTT messages:
+
+``` yaml
+vehicles:
+  - name: Mazda
+    type: custom
+    range:
+      source: mqtt
+      topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Additionally, special commands can be sent to the vehicle via plugins:
+
+| Attribute    | Type | Required | Description                    |
+|--------------|------|----------|--------------------------------|
+| wakeup       | bool | no       | Wake up vehicle                |
+| chargeenable | bool | no       | Start/stop charging process    |
+| maxcurrent   | int  | no       | Set maximum charging current in A |
+
+**Example**
+
+To wake up a car via an HTTP ping to send further queries, the HTTP plugin can be used as in the following example:
+
+``` yaml
+vehicles:
+  - name: model-y
+    type: custom
+    wakeup:
+      source: http
+      uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+### Tariffs & Forecasts
+
+See [Tariffs & Forecasts > Custom Plugin](../tariffs#plugin) for more details.
+
+### Load Management
+
+:::note Work in Progress
+...
+:::
+
+### Messaging
+
+:::note Work in Progress
+...
+:::
+
+## Plugins
+
+The following plugins are available and can be configured for the above-described attributes to enable flexible integration with various systems.
+
+### Modbus <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#modbus}
+
+The `modbus` plugin can read data from any Modbus-capable device or SunSpec-compatible inverter.
+Many power meters are already pre-configured (see [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
+It's also possible to write Modbus registers to integrate additional wallboxes.
+
+See the [Modbus Documentation](/docs/reference/modbus) for more details.
+
+### MQTT <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#mqtt}
+
+The `mqtt` plugin enables reading values via MQTT topics.
+This is particularly useful for power meters, e.g. when they already provide their data via MQTT.
+See the [MBMD Documentation](https://github.com/volkszaehler/mbmd) for an example of how to get Modbus measurement data into MQTT.
+The plugin also offers the ability to read or parse JSON data structures via jq-like queries (see [HTTP plugin](#http)).
+
+**Reading Example**:
 
 ```yaml
 source: mqtt
 topic: mbmd/sdm1-1/Power
 timeout: 30s # don't accept values older than timeout
-scale: 0.001 # floating point factor applied to result, e.g. for converting Wh to kWh
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 ```
 
-For write access, the data is provided with the `payload` attribute. If this parameter is missing from the configuration, the value is written in the default format.
+For write access, the data is provided with the `payload` attribute.
+If this parameter is missing from the configuration, the value is written in the default format.
 
-**Example of writing to a device**:
+**Writing Example**:
 
 ```yaml
 source: mqtt
@@ -38,19 +323,25 @@ topic: mbmd/charger/maxcurrent
 payload: ${var:%d}
 ```
 
-## HTTP (read/write)
+### HTTP <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#http}
 
-The `http` plugin performs HTTP calls to read or update data. It also includes the ability to read or transform JSON data structures using jq queries (e.g., for REST APIs). The full set of functionalities can be found in the [official jq documentation](https://jqlang.github.io/jq/manual/).
+The `http` plugin performs HTTP calls to read or update data.
+It also includes the ability to read or perform simple transformations on JSON data structures via jq queries (e.g. for REST APIs).
+The full functionality can be found in the [official jq documentation](https://jqlang.github.io/jq/manual/).
 
-:::important
-XML documents are automatically converted to JSON format internally, which can then be filtered like a native JSON response using jq. Attributes are prefixed with `attr`.
+Authentication methods are `basic`, `bearer` and `digest`.
+The names of the respective parameters can be found [here](https://github.com/evcc-io/evcc/blob/master/plugin/http_auth.go#L23).
+
+:::important Important
+XML documents are automatically converted to JSON format internally, which can then be filtered with jq like a native JSON response.
+Attributes get the prefix `attr`.
 :::
 
 :::tip
-For testing jq queries, tools like https://jqplay.org/ for JSON queries and https://regex101.com/ for regular expression tests can be helpful.
+For testing jq queries, online tools like https://jqplay.org/ and for regex tests tools like https://regex101.com/ are useful.
 :::
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: http
@@ -58,14 +349,16 @@ uri: https://volkszaehler/api/data/<uuid>.json?from=now
 method: GET # default HTTP method
 headers:
   - content-type: application/json
-auth: # basic authorisation
+auth: # basic authentication
   type: basic
   user: foo
   password: bar
 insecure: false # set to true to trust self-signed certificates
 jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # floating point factor applied to result, e.g. for converting kW to W
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+scale: 0.001 # factor applied to result, e.g. for kW to W conversion
+cache: 60s   # response cache duration
+timeout: 10s # timeout in golang duration format,
+             # see https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
@@ -74,7 +367,7 @@ uri: http://charger/status
 jq: .total_power > 10 # Converts a json integer to a boolean value
 ```
 
-**Example of writing to a device**:
+**Writing Example**:
 
 ```yaml
 body: %v # only applicable for PUT or POST requests
@@ -86,25 +379,27 @@ enable:
   uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
 ```
 
-## Websocket (read only)
+### Websocket <Tag label="read" category="read" /> {#websocket}
 
-The `websocket` plugin provides a WebSocket listener. It also includes the ability to read or parse JSON data structures using jq-like queries. This can be used, for example, to receive data from Volkszähler's push server.
+The `websocket` plugin provides a WebSocket listener.
+It also includes the ability to read or parse JSON data structures via jq-like queries.
+This can be used, for example, to receive data from Volkszähler's push server.
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: http
 uri: ws://<volkszaehler host:port>/socket
 jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
-scale: 0.001 # floating point factor applied to result, e.g. for converting Wh to kWh
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 timeout: 30s # error if no update received in 30 seconds
 ```
 
-## SMA/Speedwire (read only)
+### SMA/Speedwire <Tag label="read" category="read" /> {#speedwire}
 
 The `sma` plugin provides an interface to SMA devices that support the Speedwire protocol.
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: sma
@@ -120,11 +415,12 @@ Supported values for `value` can be found in the diagnostic output using the `ev
 
 All possible values can be found as constants [here](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (use the constant name for `value`).
 
-## Javascript (read/write)
+### JavaScript <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#javascript}
 
-evcc integrates a Javascript interpreter with the [Underscore.js](https://underscorejs.org) library, which is directly accessible through `_.`, e.g., `_.random(0,5)`. The `js` plugin can execute JavaScript code using the `script` parameter. Very helpful for quickly creating prototypes:
+evcc integrates a JavaScript interpreter with the [Underscore.js](https://underscorejs.org) library, which is directly accessible via `_.`, e.g. `_.random(0,5)`.
+The `js` plugin can execute JavaScript code via the `script` parameter. Very helpful for rapid prototyping:
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: js
@@ -135,7 +431,7 @@ script: |
 
 When the `js` plugin is used for writing, the value to be written is passed to the script as a variable:
 
-**Example of writing to a device**:
+**Writing Example**:
 
 ```yaml
 charger:
@@ -146,11 +442,11 @@ charger:
         console.log(maxcurrent);
 ```
 
-## Shell Script (read/write)
+### Shell Script <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#shell}
 
 The `script` plugin executes external scripts to read or update data. The plugin is useful for integrating any kind of external functionality.
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: script
@@ -158,7 +454,7 @@ cmd: /bin/bash -c "cat /dev/urandom"
 timeout: 5s
 ```
 
-**Example of writing to a device**:
+**Writing Example**:
 
 ```yaml
 source: script
@@ -166,22 +462,23 @@ cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
 
-## Const (read only)
+### Const <Tag label="read" category="read" /> {#const}
 
-The `const` plugin returns a constant value. It is suitable, for example, to apply fixed correction values (offsets) to a variable value using the `calc` plugin, or to simulate measurement and status values for testing purposes.
+The `const` plugin returns a constant value.
+It's suitable, for example, to apply fixed correction values (offset) to a variable value in conjunction with the `calc` plugin or to simulate measurement and status values for testing purposes.
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: const
 value: -16247
 ```
 
-## Calc (read only)
+### Calc <Tag label="read" category="read" /> {#calc}
 
-The `calc` plugin allows for further processing of multiple individual values mathematically:
+The `calc` plugin allows mathematical processing of multiple individual values:
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: calc
@@ -195,9 +492,7 @@ add:
 ```yaml
 source: calc
 mul:
-- source
-
-: calc
+- source: calc
   sign:
     source: ... (power)
   ...
@@ -205,30 +500,32 @@ mul:
   ...
 ```
 
-The basic arithmetic operations of addition (add) and multiplication (mul) are supported as operands.
+The basic arithmetic operations addition (`add`) and multiplication (`mul`) are supported as operands.
 
-With `scale: -1`, a simple subtraction can be performed, and with `scale: 0.001`, division can be used, for example, to convert kWh to Wh.
+With `scale: -1` on one of the values, simple subtraction can be performed, with `scale: 0.001` division, e.g. for converting kWh to Wh.
 
-With `sign:` (every positive number becomes +1, every negative number becomes -1, 0 remains 0), signs can be transferred to other values (in conjunction with `mul`). For example, to transfer the "direction" of power (injection or consumption) to the measured currents.
+With `sign:` (every positive number becomes +1, every negative number becomes -1, 0 remains 0), signs can be transferred to other values (in conjunction with `mul`).
+E.g. to transfer the "direction" of power (feed-in or consumption) to the measured currents for meters.
 
-The `calc` plugin is helpful for:
+The `calc` plugin is helpful for e.g.
 
 - Summing power values from individual PV strings (addition)
 - Calculating apparent power from voltage and current (multiplication)
-- Combining separate power values for import and export into a signed single value (subtraction)
+- Combining separate power values for import and export into a signed single value (subtraction).
 - Calculating percentage fill levels (division)
 - Determining the correct direction of current flow (sign)
 - Eliminating known offsets (addition with `const` plugin)
 
 :::tip
-Constant auxiliary values (e.g., for offsets) can be generated as operands using the `const` plugin.
+Constant auxiliary values (e.g. for offsets) can be generated as operands using the `const` plugin.
 :::
 
-## Combined Status (read only)
+### Combined <Tag label="read" category="read" /> {#combined}
 
-The `combined` status plugin is used to convert mixed boolean status values of `Plugged` / `Charging` into an evcc-compatible charging status of A..F. It is used, for example, with the OpenWB MQTT integration.
+The `combined` status plugin is used to convert mixed boolean status values of `Plugged` (connected) / `Charging` (charging) into an evcc-compatible charging status of A..F.
+It's used, for example, with an OpenWB MQTT integration.
 
-**Example of reading from a device**:
+**Reading Example**:
 
 ```yaml
 source: combined
