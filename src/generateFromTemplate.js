@@ -104,7 +104,8 @@ function indent(code, list = false) {
     .replace(/\\(\d)/g, "\\\\$1") // escape backreferences like \1, \2
     .replace(/\\\?/g, "\\\\?") // escape literal ? in regex
     .replace(/\\\(/g, "\\\\(") // escape literal ( in regex
-    .replace(/\\\)/g, "\\\\)"); // escape literal ) in regex
+    .replace(/\\\)/g, "\\\\)") // escape literal ) in regex
+    .replace(/\\(?![\\`\(\)\?\d\s])/g, "\\\\"); // escape remaining backslashes
 
   if (list) {
     // indent first line with 6 spaces and dash
