@@ -9,10 +9,10 @@ import {
   useCodeWordWrap,
 } from '@docusaurus/theme-common/internal';
 import {Highlight, type Language} from 'prism-react-renderer';
-import Line from '@theme-original/CodeBlock/Line';
-import CopyButton from '@theme-original/CodeBlock/CopyButton';
-import WordWrapButton from '@theme-original/CodeBlock/WordWrapButton';
-import Container from '@theme-original/CodeBlock/Container';
+import Line from '@docusaurus/theme-classic/lib/theme/CodeBlock/Line';
+import CopyButton from '@docusaurus/theme-classic/lib/theme/CodeBlock/CopyButton';
+import WordWrapButton from '@docusaurus/theme-classic/lib/theme/CodeBlock/WordWrapButton';
+import Container from '@docusaurus/theme-classic/lib/theme/CodeBlock/Container';
 import type {Props} from '@theme/CodeBlock/Content/String';
 
 import styles from './styles.module.css';
