@@ -24,10 +24,12 @@ import { themes as prismThemes } from "prism-react-renderer";
         },
       },
     },
-    future: {
-      v4: true,
-      experimental_faster: {
-        ssgWorkerThreads: true,
+    customFields: {
+      future: {
+        v4: true,
+        experimental_faster: {
+          ssgWorkerThreads: true,
+        },
       },
     },
     presets: [
