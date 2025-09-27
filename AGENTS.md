@@ -52,12 +52,14 @@ YAML device templates organized by:
 #### Auto-Generated Content
 
 ##### Device & Tariff Pages
+
 1. Templates in `/templates/{version}/{lang}/{category}/`
 2. Processed by `src/generateFromTemplate.js`
 3. Output to `docs/devices/*.mdx` and `docs/tariffs.mdx`
 4. Marked with `<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->`
 
 ##### CLI Documentation
+
 1. Generated from main evcc repository
 2. Output to `docs/reference/cli/*.md`
 3. See README.md section "Update CLI docs" for generation instructions
@@ -83,8 +85,9 @@ Everything else is manually maintained:
 
 - **Be informal and casual** - address readers directly with "you" (English) or "du" (German)
 - Write for individual professionals, not businesses
-- Avoid corporate or marketing language
+- Avoid corporate or marketing language (e.g. don't use words like "bequem", "convenient", "seamlessly")
 - Be concise and direct
+- Use simple, factual language without embellishment
 
 ### Terminology
 
@@ -102,6 +105,12 @@ Everything else is manually maintained:
 
 ### Formatting Conventions
 
+#### Document Structure
+
+- Keep document structure flat where possible - avoid excessive nesting
+- Use clear, descriptive section headings
+- Consider restructuring if sections become too granular
+
 #### Headings
 
 - **German**: Use sentence case (e.g., "Häufige Fragen")
@@ -118,6 +127,7 @@ Everything else is manually maintained:
 - End complete sentences with periods
 - Don't use periods for simple fragments
 - Be consistent within each list
+- Convert bulleted lists to prose when they become too short
 
 #### Numbers & Units
 
@@ -145,6 +155,9 @@ Everything else is manually maintained:
 - Import components: `import Screenshot from "../../src/components/Screenshot"`
 - Tabs for multi-language/multi-platform content: `<Tabs>` and `<TabItem>`
 - Admonitions: `:::note`, `:::tip`, `:::info`, `:::warning`, `:::danger`
+  - Use sparingly - prefer integrating information into main text
+  - `:::warning` for important cautions about functionality
+  - `:::tip` only for genuinely helpful tips that save users time
 - Code blocks with syntax highlighting: ` ```yaml `, ` ```javascript `
 - Frontmatter for metadata: `sidebar_position`, `title`, `tags`
 - Images automatically optimized from `/static/img/`
