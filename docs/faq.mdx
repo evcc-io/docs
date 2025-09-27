@@ -110,13 +110,13 @@ Mittels `evcc charger` oder `evcc meter` oder `evcc vehicle` können auf der Kom
 
 Wird evcc als Linux Systemdienst, wie [hier beschrieben](/docs/installation/linux#systemd), ausgeführt, können die log-Nachrichten über folgende Befehle verfolgt, bzw. aufgelistet werden:
 
-- Kontinuierliche Anzeige der evcc log Meldungen  
+- Kontinuierliche Anzeige der evcc log Meldungen
   `sudo journalctl -fau evcc`
-- Anzeige der evcc log Meldungen seit dem letzten Start des evcc Services (Abbruch mit Strg-c)  
+- Anzeige der evcc log Meldungen seit dem letzten Start des evcc Services (Abbruch mit Strg-c)
   `sudo journalctl -u evcc -q`
-- Speichern der Log-Ausgabe in eine Datei im Home-Verzeichnis  
+- Speichern der Log-Ausgabe in eine Datei im Home-Verzeichnis
   `sudo journalctl -u evcc -q > ~/evcc.log`
-- Ergänzend kann auch noch Start- (`-S`) und Endzeitpunkt (`-U`) der Log-Ausgabe bestimmt werden  
+- Ergänzend kann auch noch Start- (`-S`) und Endzeitpunkt (`-U`) der Log-Ausgabe bestimmt werden
   `sudo journalctl -u evcc -S "2023-03-21 07:00:00" -U "2023-03-21 08:00:00" -q > ~/evcc.log`
 
 Weiterführende Hilfe: [wiki.ubuntuusers.de/systemd/journalctl](https://wiki.ubuntuusers.de/systemd/journalctl/)
@@ -258,6 +258,39 @@ service evcc stop
 EVCC_DATABASE_DSN=/var/lib/evcc/evcc.db evcc password reset
 service evcc start
 ```
+
+## PV Vorhersage {#pv-vorhersage}
+
+Du kannst in evcc verschiedene [PV-Vorhersagen](/docs/tariffs#pv-vorhersage) nutzen, um die geschätzte Restproduktion für den aktuellen Tag und die nächsten Tage zu sehen.
+Als expeimentelles Feature haben wir auch die Möglichkeit eingebaut, die Vorhersagen an deine tatsächliche Produktion anzupassen.
+
+### Anpassung der Vorhersage
+
+Neben der Vorhersage protokolliert evcc auch die aktuelle PV-Leistung und akkumuliert diese über den Lauf der Zeit.
+Das passiert auch für die Vorhersagedaten.
+Durch den Vergleich der beiden Werte über die Zeit kann evcc die Vorhersagen an die Werte deiner tatsächlichen Produktion anpassen.
+Du kannst diese Anpassung im Vorhersage-Popup im UI ein- und ausschalten.
+
+Solltest du Probleme mit den Werten dieser Anpassung haben,
+
+#### Zurücksetzen der für die Anpassung erfassten Daten
+
+Vorgehensweise:
+
+evcc stoppen
+
+dann über die CLI:
+```bash
+# Prognostizierte Energie und real erzeugte Energie zurücksetzen
+evcc settings set solarAccForecast 0
+evcc settings set solarAccYield "{}"
+```
+Du wirst jeweils gefragt, ob du das wirklich möchtest und kannst dies mit `y` bestätigen.
+
+evcc wieder starten.
+
+Jetzt beginnt evcc wieder von null an die Vorhersagen zu akkumulieren.
+
 
 ## Statistische Daten
 
