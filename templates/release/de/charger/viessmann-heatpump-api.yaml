@@ -1,8 +1,8 @@
 template: viessmann
 product:
-  identifier: viessmann-heatpump-sg-ready
+  identifier: viessmann-heatpump-api
   brand: Viessmann
-  description: Heatpump (SG Ready)
+  description: Heatpump (API)
   group: Wärmeerzeuger
 requirements: ["skiptest"]
 description: |
@@ -12,31 +12,11 @@ render:
   - default: |
       type: template
       template: viessmann
-      user: # Benutzerkonto, Registrieren auf [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
-      password: # Passwort, Für den konfigurierten Viessmann Account.
       clientid: # Client ID, Konfigurieren in [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
       gateway_serial: # Gateway Serial, Seriennummer des VitoConnect modul (VitoCare App -> Einstellungen -> Kommunikationsmodul -> Seriennummer)
       installation_id: # Installation ID, Leider kann man die Installation ID nicht einfach in der Viessmann App einsehen - stattdessen müssen wir die folgenden Kommandos in der Kommandozeile ausführen. Es ist uns bewusst, dass das nicht für jeden Benutzer einfach umsetzbar ist, aber bisher haben wir leider keinen besseren Ablauf...<br/>  Vorraussetzungen: curl, jq, und die folgenden Umgebungsvariblen:  ``` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> ```  Dann holen wir uns einen oauth token (n.b. am besten den gesamten Block in das Terminal kopieren, da die Zwischenvariable 'CODE' nur 20 Sekunden gültig ist):  ``` VIESSMANN_REDIRECT_URI="http://localhost:4200/" VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed 's/.*\?code=\(.*\).*/\1/' \   | tr -d '[:space:]')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann-climatesolutions.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) ```  Damit können wir jetzt die Installation ID abfragen:  ``` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann-climatesolutions.com/iot/v1/equipment/installations?includeGateways=true \   | jq '.data[].id' ```
       device_id: 0 # Device ID, normalerweise `0`
 params:
-  - name: user
-    example:
-    default:
-    choice: []
-    unit:
-    description: Benutzerkonto
-    help: Registrieren auf [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
-    advanced: false
-    optional: false
-  - name: password
-    example:
-    default:
-    choice: []
-    unit:
-    description: Passwort
-    help: Für den konfigurierten Viessmann Account.
-    advanced: false
-    optional: false
   - name: clientid
     example:
     default:
