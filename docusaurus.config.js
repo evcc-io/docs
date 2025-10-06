@@ -9,7 +9,6 @@ import { themes as prismThemes } from "prism-react-renderer";
     url: "https://docs.evcc.io",
     baseUrl: "/",
     onBrokenLinks: "throw",
-    onBrokenMarkdownLinks: "throw",
     onBrokenAnchors: "throw",
     favicon: "img/favicon.ico",
     organizationName: "evcc-io", // Usually your GitHub org/user name.
@@ -160,6 +159,7 @@ import { themes as prismThemes } from "prism-react-renderer";
           contextualSearch: true,
         },
       }),
+    clientModules: [require.resolve('./src/clientModules/languageMismatch.js')],
     plugins: [
       [
         "@docusaurus/plugin-client-redirects",
