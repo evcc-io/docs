@@ -2,10 +2,10 @@ import React, { useRef, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import SwaggerUI from "swagger-ui-react";
 import CodeBlock from "@theme/CodeBlock";
-import restApiYaml from "!!raw-loader!../../static/rest-api.yaml";
+import restApiYaml from "!!raw-loader!../../static/openapi.yaml";
 
 const configs = {
-  url: "/rest-api.yaml",
+  url: "/openapi.yaml",
   showCommonExtensions: true,
   displayRequestDuration: true,
   defaultModelsExpandDepth: -1,
@@ -161,7 +161,7 @@ export default () => {
       <div ref={containerRef}></div>
       {/* crawler fallback */}
       {!initialized && (
-        <CodeBlock language="yaml" title="rest-api.yaml">
+        <CodeBlock language="yaml" title="openapi.yaml">
           {restApiYaml}
         </CodeBlock>
       )}
