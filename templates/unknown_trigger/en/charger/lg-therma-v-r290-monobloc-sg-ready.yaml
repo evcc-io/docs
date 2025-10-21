@@ -1,0 +1,72 @@
+template: lg-therma
+product:
+  identifier: lg-therma-v-r290-monobloc-sg-ready
+  brand: LG
+  description: Therma V R290 Monobloc (SG Ready)
+  group: Heating devices
+description: |
+  Modbus connection to LG Therma V heat pump.
+  Uses SG Ready energy states for intelligent control.
+  Set the indoor unit in the installer settings > "Connectivity" > "Energy state" > "ESS use type" > to "Modbus".
+  Since the internal power measurement shows to high values, an external power measurement is suggested.
+  Factory setting Modbus (HEX) = 21 (33).
+  Modbus registers can be found within the installation manual (address without the leading number and -1).
+  Information on the energy state can be found within the installation manual.
+  Energy states 6 and 7 can be adapted at the indoor unit in the installer settings > "Connectivity" > "Energy state" >"Energy state definition".
+
+render:
+  - default: |
+      type: template
+      template: lg-therma
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 33
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 33
+      host: 192.0.2.2 # Hostname
+      port: 502 # Port
+      tempsource: water_tank # DHW warm water tank or inlet flow temperature, [water_tank, water_inlet]
+      energystate: SGReady # SGReady states or modifyable energy state 6 and 7, [SGReady, IndividualEnergystate]
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['rs485']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: true
+  - name: tempsource
+    example:
+    default: water_tank
+    choice: ['water_tank', 'water_inlet']
+    unit:
+    description: DHW warm water tank or inlet flow temperature
+    help:
+    advanced: false
+    optional: false
+  - name: energystate
+    example:
+    default: SGReady
+    choice: ['SGReady', 'IndividualEnergystate']
+    unit:
+    description: SGReady states or modifyable energy state 6 and 7
+    help:
+    advanced: false
+    optional: false
+modbus:
+  baudrate: 9600
+  comset: 8N1
+  device: /dev/ttyUSB0
+  host: 192.0.2.2
+  id: 33
+  port: 502
+  rs485serial: true
+  rs485tcpip: true

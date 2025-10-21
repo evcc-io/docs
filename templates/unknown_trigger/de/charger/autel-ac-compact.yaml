@@ -1,0 +1,95 @@
+template: ocpp-autel
+product:
+  identifier: autel-ac-compact
+  brand: AUTEL
+  description: AC Compact
+capabilities: ["mA"]
+requirements: ["sponsorship", "skiptest"]
+description: |
+  Anleitung:
+  * Erforderliche Firmwareversion verifizieren: Ladesteuergerät: V1.51.00, Leistungsregelmodul: V1.19.00
+  * In der Autel Charge app, klicken sie auf “OCPP Server”
+  * Geben Sie "Custom" in das Feld ein und wählen Sie "Personalisierung" darunter
+  * Server-URL: ws://[evcc-adresse]:8887/ (Verbindung über das lokale Netzwerk)
+  * Ladegerät-ID: Leer lassen (zur Verwendung der Seriennummer) oder einen benutzerdefinierten Wert definieren, der in der Konfiguration als *stationid* wiederverwendet wird
+  * Autorisierungsschlüssel: leer lassen
+
+render:
+  - default: |
+      type: template
+      template: ocpp-autel
+      stationid: EVB-P12354 # Station ID, Station ID des Ladepunktes. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form `ws://<evcc-adresse>:8887/<stationid>` anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+    advanced: |
+      type: template
+      template: ocpp-autel
+      stationid: EVB-P12354 # Station ID, Station ID des Ladepunktes. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form `ws://<evcc-adresse>:8887/<stationid>` anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu. (optional)
+      connector: 1 # Anschlussnummer, Bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss. (optional)
+      remotestart: # Remote-Transaktion bei Fahrzeugverbindung starten, Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (Verwendet OCPP RemoteStartTransaction) (optional)
+      idtag: evcc # Authentifizierungs-Token, Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (Verwendet OCPP RemoteStartTransaction) (optional)
+      connecttimeout: 5m # Zeitlimit für die Registrierung, Zeitlimit für die Registrierung des Ladepunktes (optional)
+      meterinterval: 10s # Übertragungsintervall der Zählerwerte, Zeitintervall für die Übertragung der Zählerwerte (MeterValueSampleInterval) (optional)
+      metervalues: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage # Zählerwerte für die Übertragung, Manuelle Vorgabe der zu konfigurierenden Zählerwerte (MeterValuesSampledData) (optional)
+params:
+  - name: stationid
+    example: EVB-P12354
+    default:
+    choice: []
+    unit:
+    description: Station ID
+    help: 'Station ID des Ladepunktes. Hinweis: In Ausnahmefällen kann es erforderlich sein, diese ID manuell an die OCPP-URL der Ladestation in der Form `ws://<evcc-adresse>:8887/<stationid>` anzuhängen. Die meisten Ladestationen fügen die ID intern automatisch hinzu.'
+    advanced: false
+    optional: true
+  - name: connector
+    example:
+    default: 1
+    choice: []
+    unit:
+    description: Anschlussnummer
+    help: Bei Ladestationen mit mehreren Anschlüssen. Die Zählung beginnt bei 1 für den ersten Anschluss.
+    advanced: true
+    optional: true
+  - name: remotestart
+    example:
+    default:
+    choice: []
+    unit:
+    description: Remote-Transaktion bei Fahrzeugverbindung starten
+    help: Diese Option nur aktivieren wenn keinerlei Möglichkeit besteht Transaktionen seitens des Ladepunktes zu initiieren! Das ist nur der Fall wenn z. B. kein RFID-Lesegerät vorhanden ist und Ladevorgänge grundsätzlich einzeln per App freigeschaltet werden müssten. Normalerweise sollte der Ladepunkt am Gerät immer so konfiguriert werden, dass entweder eine RFID-Karte zur Freischaltung verwendet wird oder der Ladepunkt auf "Autostart", "Freies Laden" o.ä. eingestellt ist. Zunächst die Dokumentation und die Konfigurationsmöglichkeiten des Ladepunktes prüfen, ggf. beim Hersteller nachfragen! (Verwendet OCPP RemoteStartTransaction)
+    advanced: true
+    optional: true
+  - name: idtag
+    example: evcc
+    default:
+    choice: []
+    unit:
+    description: Authentifizierungs-Token
+    help: Diese Option ist nur in Ausnahmefällen erforderlich wenn der Ladepunkt für die Annahme externer Transaktionen einen spezifischen Token erfordert. (Verwendet OCPP RemoteStartTransaction)
+    advanced: true
+    optional: true
+  - name: connecttimeout
+    example:
+    default: 5m
+    choice: []
+    unit:
+    description: Zeitlimit für die Registrierung
+    help: Zeitlimit für die Registrierung des Ladepunktes
+    advanced: true
+    optional: true
+  - name: meterinterval
+    example:
+    default: 10s
+    choice: []
+    unit:
+    description: Übertragungsintervall der Zählerwerte
+    help: Zeitintervall für die Übertragung der Zählerwerte (MeterValueSampleInterval)
+    advanced: true
+    optional: true
+  - name: metervalues
+    example: Energy.Active.Import.Register,Power.Active.Import,SoC,Current.Offered,Power.Offered,Current.Import,Voltage
+    default:
+    choice: []
+    unit:
+    description: Zählerwerte für die Übertragung
+    help: Manuelle Vorgabe der zu konfigurierenden Zählerwerte (MeterValuesSampledData)
+    advanced: true
+    optional: true
