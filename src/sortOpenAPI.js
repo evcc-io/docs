@@ -1,7 +1,7 @@
 const fs = require("fs");
 const yaml = require("js-yaml");
 
-const filePath = "./static/rest-api.yaml";
+const filePath = "./static/openapi.yaml";
 
 function sortObject(obj) {
   return Object.keys(obj)
