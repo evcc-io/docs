@@ -24,27 +24,10 @@ Nach der evcc-Konfiguration werden die Ladepunkte automatisch im Sunny Portal un
 Dort kannst du sie aktivieren und dem Konfigurations-Assistenten folgen.
 Details zur Einrichtung findest du in der [SMA-Anleitung](https://manuals.sma.de/HM-20/de-DE/10426801547.html).
 
-## Konfiguration
+## Gerätekennungen
 
-Die Konfiguration erfolgt über die evcc-Oberfläche:
-
-1. Öffne die **Einstellungen** in evcc
-2. Navigiere zum Abschnitt **Sunny Home Manager**
-3. Aktiviere die Integration und konfiguriere die erweiterten Einstellungen bei Bedarf
-
-### Externe Steuerung erlauben
-
-Mit der Option **Externe Steuerung erlauben** bestimmst du, ob der SHM die Ladeleistung beeinflussen darf:
-
-- **Aktiviert**: Der SHM kann die Ladesteuerung beeinflussen und eigene Optimierungen vornehmen
-- **Deaktiviert** (empfohlen): Die Lademodi werden ausschließlich von evcc gesteuert
-
-:::warning
-In der Praxis ist die externe Steuerung durch den SHM meist nicht hilfreich, da evcc bereits eine optimierte Ladesteuerung bietet.
-Wir empfehlen, diese Option deaktiviert zu lassen.
-:::
-
-### Gerätekennungen
+Es ist keine Konfiguration auf evcc-Seite erforderlich.
+evcc generiert die notwendigen Gerätekennungen selbstständig.
 
 Jeder Ladepunkt erhält eine eindeutige ID im Format:
 ```
@@ -55,5 +38,5 @@ Dabei ist:
 - **AAAAAAAA**: Die Vendor ID (8 Zeichen, hexadezimal)
 - **BBBBBBBBBBBB**: Die Device ID (12 Zeichen, hexadezimal)
 
-Diese IDs werden normalerweise automatisch generiert.
-Wenn evcc auf einen anderen Computer umzieht, kannst du die bestehenden IDs aus dem `/semp/` Endpunkt des alten Systems übernehmen, damit der SHM die Geräte weiterhin erkennt.
+Möchtest du diesen Automatismus überschreiben (z. B. bei Umzug auf andere evcc-Hardware), kannst du die bestehenden IDs aus dem `/semp/` Endpunkt des alten Systems übernehmen und unter **Einstellungen > Sunny Home Manager** anpassen.
+Damit erkennt der SHM die Geräte weiterhin.
