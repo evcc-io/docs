@@ -155,25 +155,63 @@ Neben den Attributen, die Plugins zur lesenden Auswertung bereitstellen, werden 
 | limitsoc    | int | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet. |
 | batterymode | int | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge)                                                                                                |
 
-### Charger
+### Charger {#charger}
 
 Wallboxen und Ladegeräte haben folgende Attribute die ausgelesen werden können:
 
-| Attribut  | Typ                 | Erfordert | Beschreibung                        |
-| --------- | ------------------- | --------- | ----------------------------------- |
-| status    | string              | ja        | Status (A..F)                       |
-| enabled   | bool                | ja        | Ist Ladung freigegeben?             |
-| power     | float               | nein      | Ladeleistung in W                   |
-| energy    | float               | nein      | Zählerstand in kWh                  |
-| identify  | string              | nein      | Aktuelle RFID-Kennung               |
-| soc       | int                 | nein      | Ladestand in %                      |
-| phases    | int                 | nein      | Anzahl der physischen Phasen (1..3) |
-| powers    | [float,float,float] | nein      | Phasenleistungen in W               |
-| currents  | [float,float,float] | nein      | Phasenströme in A                   |
-| voltages  | [float,float,float] | nein      | Phasenspannungen in V               |
-| temp      | float               | nein      | Aktuelle Temperatur in °C (Heizung) |
-| templimit | int                 | nein      | Temperaturlimit in °C (Heizung)     |
-| getmode   | int                 | nein      | SG-Ready Modus (Wärmepumpe)         |
+| Attribut    | Typ                 | Erfordert | Beschreibung                         |
+| ----------- | ------------------- | --------- | ------------------------------------ |
+| status      | string              | ja        | Status (A..F)                        |
+| enabled     | bool                | ja        | Ist Ladung freigegeben?              |
+| power       | float               | nein      | Ladeleistung in W                    |
+| energy      | float               | nein      | Zählerstand in kWh                   |
+| identify    | string              | nein      | Aktuelle RFID-Kennung                |
+| soc         | int                 | nein      | Ladestand in %                       |
+| phases      | int                 | nein      | Anzahl der physischen Phasen (1..3)  |
+| powers      | [float,float,float] | nein      | Phasenleistungen in W                |
+| currents    | [float,float,float] | nein      | Phasenströme in A                    |
+| voltages    | [float,float,float] | nein      | Phasenspannungen in V                |
+| temp        | float               | nein      | Aktuelle Temperatur in °C (Heizung)  |
+| templimit   | int                 | nein      | Temperaturlimit in °C (Heizung)      |
+| getmode     | int                 | nein      | SG-Ready Modus (Wärmepumpe)          |
+| getmaxpower | float               | nein      | Maximale Heizleistung in W (Heizung) |
+
+#### Allgemeine Konfigurationsoptionen {#charger-config}
+
+Zusätzlich zu den Plugin-Attributen können folgende Konfigurationsoptionen direkt am Charger gesetzt werden:
+
+| Attribut     | Typ      | Erfordert | Beschreibung                                                    |
+| ------------ | -------- | --------- | --------------------------------------------------------------- |
+| icon         | string   | nein      | Icon für die Darstellung in der Benutzeroberfläche              |
+| features     | []string | nein      | Feature-Flags für spezielle Charger-Eigenschaften (siehe unten) |
+| standbypower | int      | nein      | Standby-Leistung in W (für `switchsocket` Typ)                  |
+
+##### Feature-Flags {#charger-features}
+
+Über das `features` Array können spezielle Eigenschaften des Chargers aktiviert werden:
+
+| Feature          | Beschreibung                                                                                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| heating          | Behandelt das Gerät als Heizung (z. B. Wärmepumpe, Heizstab). Beeinflusst die Darstellung in der Benutzeroberfläche.                         |
+| integrateddevice | Gerät ohne Ladesitzungen und ohne angeschlossenes Fahrzeug (z. B. Smartes Schalter, fest installierte Verbraucher).                          |
+| coarsecurrent    | Ladestrom kann nur in 1 A Schritten eingestellt werden (wird in der Regelung berücksichtigt).                                                |
+| welcomecharge    | Aktiviert Welcome Charge Funktion. Ladegerät liefert beim Anschließen kurz Strom, damit das Fahrzeug erkennt, dass der Charger funktioniert. |
+
+**Beispiel mit Features**:
+
+```yaml
+chargers:
+  - name: heizstab
+    type: custom
+    features:
+      - heating
+      - integrateddevice
+    icon: heater
+    status:
+      source: mqtt
+      topic: heater/status
+    # ... weitere Attribute
+```
 
 **Beispiel**
 
@@ -204,6 +242,7 @@ Neben den read-only Werten können über Plugins auch Aktionen getriggert oder K
 | phases1p3p      | int   | nein      | Phasenumschaltung durchführen (erfordert `tos: true`)   |
 | wakeup          | bool  | nein      | Wecke Fahrzeug auf                                      |
 | setmode         | int   | nein      | Ändere SG-Ready Modus (1: reduced, 2: normal, 3: boost) |
+| setmaxpower     | int   | nein      | Setze maximale Heizleistung in W (Heizung)              |
 
 **Beispiel**
 
@@ -220,7 +259,7 @@ chargers:
       payload: ON
 ```
 
-### Vehicle
+### Vehicle {#vehicle}
 
 Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 
@@ -235,14 +274,26 @@ Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 | getmaxcurrent | float  | nein      | Maximaler Ladestrom in A     |
 | finishtime    | string | nein      | Geplantes Ladeende (RFC3339) |
 
+#### Allgemeine Konfigurationsoptionen {#vehicle-config}
+
+Folgende Konfigurationsoptionen können direkt am Fahrzeug gesetzt werden:
+
+| Attribut | Typ    | Erfordert | Beschreibung                                        |
+| -------- | ------ | --------- | --------------------------------------------------- |
+| title    | string | nein      | Anzeigename des Fahrzeugs in der Benutzeroberfläche |
+| icon     | string | nein      | Icon für die Darstellung in der Benutzeroberfläche  |
+| capacity | float  | nein      | Batteriekapazität in kWh                            |
+
 **Beispiel**
 
 Im folgenden Beispiel wird die aktuelle Reichweite des Fahrzeugs aus MQTT Nachrichten gelesen:
 
 ```yaml
 vehicles:
-  - name: Mazda
+  - name: mazda
     type: custom
+    title: Grüner Mazda
+    capacity: 50
     range:
       source: mqtt
       topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
@@ -378,8 +429,7 @@ insecure: false # set to true to trust self-signed certificates
 jq: .data.tuples[0][1] # parse response json
 scale: 0.001 # factor applied to result, e.g. for kW to W conversion
 cache: 60s # response cache duration
-timeout: 10s # timeout in golang duration format,
-             # see https://golang.org/pkg/time/#ParseDuration
+timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
