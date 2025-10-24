@@ -9,13 +9,14 @@ evcc charger [name] [flags]
 ## Options
 
 ```
-  -i, --current float   Set maximum current
-      --diagnose        Diagnose
-  -d, --disable         Disable
-  -e, --enable          Enable
-      --heartbeat       After command, continue running device heartbeats (if any) until interrupted
-  -p, --phases int      Set usable phases (1 or 3)
-  -w, --wakeup          Wake up
+  -i, --current float      Set maximum current
+      --diagnose           Diagnose
+  -d, --disable            Disable
+  -e, --enable             Enable
+      --heartbeat          After command, continue running device heartbeats (if any) until interrupted
+  -p, --phases int         Set usable phases (1 or 3)
+      --timeout duration   Timeout (default 1s)
+  -w, --wakeup             Wake up
 ```
 
 ## Options inherited from parent commands
@@ -30,7 +31,7 @@ evcc charger [name] [flags]
   -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
       --log-headers            Log headers
       --template string        Add custom template file (debug only)
-      --template-type string   Custom template type (charger, meter, tariff, vehicle (debug only)
+      --template-type string   Custom template type (charger, meter, tariff, vehicle) (debug only)
 ```
 
 ## See also

@@ -28,6 +28,7 @@ The available events are:
 - `disconnect`: Vehicle disconnected
 - `soc`: Vehicle battery state of charge changed
 - `guest`: Unknown vehicle detected
+- `asleep`: Vehicle not charging despite charge release
 
 **For example**:
 

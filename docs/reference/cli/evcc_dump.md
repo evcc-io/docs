@@ -9,7 +9,8 @@ evcc dump [flags]
 ## Options
 
 ```
-      --cfg   Dump config file
+      --cfg                Dump config file
+      --timeout duration   Timeout (default 1s)
 ```
 
 ## Options inherited from parent commands
@@ -24,7 +25,7 @@ evcc dump [flags]
   -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
       --log-headers            Log headers
       --template string        Add custom template file (debug only)
-      --template-type string   Custom template type (charger, meter, tariff, vehicle (debug only)
+      --template-type string   Custom template type (charger, meter, tariff, vehicle) (debug only)
 ```
 
 ## See also
