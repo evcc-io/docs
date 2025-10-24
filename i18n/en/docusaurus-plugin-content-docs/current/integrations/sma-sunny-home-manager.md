@@ -24,27 +24,10 @@ After configuring evcc, the charge points are automatically suggested as new dev
 There you can activate them and follow the configuration wizard.
 See the [SMA manual](https://manuals.sma.de/HM-20/en-US/10426801547.html) for setup details.
 
-## Configuration
+## Device IDs
 
-Configuration is done via the evcc interface:
-
-1. Open **Settings** in evcc
-2. Navigate to the **Sunny Home Manager** section
-3. Enable the integration and configure advanced settings if needed
-
-### Allow External Control
-
-The **Allow external control** option determines whether the SHM may influence charging power:
-
-- **Enabled**: The SHM can influence charge control and apply its own optimisations
-- **Disabled** (recommended): Charging modes are controlled exclusively by evcc
-
-:::warning
-In practice, external control by the SHM is usually not helpful as evcc already provides optimised charge control.
-We recommend leaving this option disabled.
-:::
-
-### Device IDs
+No configuration is required on the evcc side.
+evcc automatically generates the necessary device IDs.
 
 Each charge point receives a unique ID in the format:
 ```
@@ -55,5 +38,5 @@ Where:
 - **AAAAAAAA**: The Vendor ID (8 characters, hexadecimal)
 - **BBBBBBBBBBBB**: The Device ID (12 characters, hexadecimal)
 
-These IDs are usually generated automatically.
-When moving evcc to another computer, you can copy the existing IDs from the `/semp/` endpoint of the old system so the SHM continues to recognise the devices.
+If you want to override this automatism (e.g. when moving to different evcc hardware), you can copy the existing IDs from the `/semp/` endpoint of the old system and adjust them under **Settings > Sunny Home Manager**.
+This ensures the SHM continues to recognise the devices.
