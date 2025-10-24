@@ -43,7 +43,7 @@ evcc completion fish [flags]
   -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
       --log-headers            Log headers
       --template string        Add custom template file (debug only)
-      --template-type string   Custom template type (charger, meter, tariff, vehicle (debug only)
+      --template-type string   Custom template type (charger, meter, tariff, vehicle) (debug only)
 ```
 
 ## See also

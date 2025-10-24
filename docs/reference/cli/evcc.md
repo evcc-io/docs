@@ -22,11 +22,12 @@ evcc [flags]
       --metrics                Expose metrics
       --profile                Expose pprof profiles
       --template string        Add custom template file (debug only)
-      --template-type string   Custom template type (charger, meter, tariff, vehicle (debug only)
+      --template-type string   Custom template type (charger, meter, tariff, vehicle) (debug only)
 ```
 
 ## See also
 
+* [evcc cache](evcc_cache.md)	 - Manage cache entries
 * [evcc charger](evcc_charger.md)	 - Query configured chargers
 * [evcc checkconfig](evcc_checkconfig.md)	 - Check config file for errors
 * [evcc completion](evcc_completion.md)	 - Generate the autocompletion script for the specified shell

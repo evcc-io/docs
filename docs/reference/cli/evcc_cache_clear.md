@@ -1,9 +1,15 @@
-# evcc tariff
+# evcc cache clear
 
-Query configured tariff
+Clear all cache entries
 
 ```
-evcc tariff [name] [flags]
+evcc cache clear [flags]
+```
+
+## Options
+
+```
+  -f, --force   Force (no confirmation)
 ```
 
 ## Options inherited from parent commands
@@ -23,6 +29,6 @@ evcc tariff [name] [flags]
 
 ## See also
 
-* [evcc](evcc.md)	 - evcc - open source solar charging
+* [evcc cache](evcc_cache.md)	 - Manage cache entries
 
 
