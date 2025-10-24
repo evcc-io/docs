@@ -28,6 +28,7 @@ evcc bietet folgende Plugins an:
 - [SMA/Speedwire Plugin](#speedwire) - Plugin speziell für SMA Geräte, die mit dem Speedwire Protokoll kommunizieren können.
 - [JavaScript Plugin](#javascript) - Plugin, das Werte in über ein JavaScript Skript bereitstellt oder entgegennimmt.
 - [Shell Plugin](#shell) - Plugin, das ein Shell Skript ausführen kann, um Daten zu extrahieren oder schreibend entgegennimmt.
+- [Meter Plugin](#meter-plugin) - Plugin um ein anderes Messgerät als Datenquelle zu verwenden.
 
 Neben diesen Integrations-Plugins, gibt es noch Helfer-Plugins, die Zusatzfunktionen bereit stellt:
 
@@ -579,3 +580,42 @@ value:
 
 In diesem Beispiel wird der Wert nur verwendet, wenn das `valid` Topic `true` zurückgibt.
 Wenn es `false` zurückgibt, wird der Wert als nicht verfügbar markiert.
+
+### Meter <Tag label="lesen" category="read" /> {#meter-plugin}
+
+Das `meter` Plugin ermöglicht es, ein anderes Messgerät als Datenquelle zu verwenden.
+Dies ist nützlich, wenn man ein bestehendes Gerät für mehrere Messwerte verwenden möchte oder wenn man verschiedene Methoden eines Geräts für unterschiedliche Attribute nutzen will.
+
+Die `config` Sektion enthält dabei die vollständige Template-Konfiguration des einzubettenden Messgeräts.
+
+**Beispiel Lesen**:
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    power:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+        method: power
+        scale: -1
+    energy:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+        method: energy
+    soc:
+      source: mqtt
+      topic: Haus/Batterie
+      jq: .soc
+      timeout: 60s
+```
+
+In diesem Beispiel wird ein Shelly 1PM Gerät als Datenquelle für Leistung und Energie einer Batterie verwendet, während der Ladestand (SoC) über MQTT abgerufen wird.
