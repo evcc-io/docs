@@ -93,7 +93,16 @@ interfaces:
 
 ### `shipid`
 
-Defines the Device ID (SKI) to be used.
+Defines the SHIP-ID to be used.
+This should only be necessary for development purposes.
+
+Normally evcc generates the SHIP-ID automatically from the `machine-id` (on real hardware) or a randomly generated plant ID (in container environments like Docker), which is stored in the database.
+You can set an explicit plant ID via `plant` in `evcc.yaml` or the `EVCC_PLANT` environment variable – recommended for better portability.
+The SHIP-ID is tied to the certificate – if either changes, pairing with devices must be redone.
+
+:::warning Warning
+Don't change this value manually unless you know exactly what you're doing.
+:::
 
 **For example**:
 
