@@ -28,6 +28,7 @@ Die verfügbaren Ereignisse sind:
 - `disconnect`: Fahrzeug entfernt
 - `soc`: Fahrzeug Akku-Ladestandsänderung
 - `guest`: Unbekanntes Fahrzeug erkannt
+- `asleep`: Fahrzeug lädt nicht trotz Ladefreigabe
 
 **Beispiel**:
 
