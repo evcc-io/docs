@@ -205,11 +205,15 @@ mul:
   ...
 ```
 
-The basic arithmetic operations of addition (add) and multiplication (mul) are supported as operands.
+The basic arithmetic operations of addition (add), multiplication (mul), division (div), sign inversion (sign), absolute value (abs), minimum value (min) and maximum value (max) are supported as operands.
 
 With `scale: -1`, a simple subtraction can be performed, and with `scale: 0.001`, division can be used, for example, to convert kWh to Wh.
 
 With `sign:` (every positive number becomes +1, every negative number becomes -1, 0 remains 0), signs can be transferred to other values (in conjunction with `mul`). For example, to transfer the "direction" of power (injection or consumption) to the measured currents.
+
+With `abs:`, the absolute value of a number is calculated.
+
+With `min:` and `max:` the minimum value respectively the maximum value will be calculated.
 
 The `calc` plugin is helpful for:
 
