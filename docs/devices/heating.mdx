@@ -25,13 +25,12 @@ Auf dieser Seite erfährst du, wie du auch **Wärmepumpen** oder **Heizstäbe** 
 
 Viele Wärmepumpen unterstützen das SG-Ready-Modell, um ihren Betrieb an die Energiesituation vor Ort anzupassen.
 Darüber lassen sich bis zu vier vordefinierte, bei manchen Modellen auch frei konfigurierbare Szenarien ansteuern.
-Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)**, ein **reduzierter Betrieb** und ein **Sperrbetrieb** signalisiert werden.
+Neben dem **Normalbetrieb** kann darüber von außen ein **verstärkter Betrieb (Boost)** und ein **reduzierter Betrieb (Dim)** signalisiert werden.
 
 Ist [Überschussstrom vorhanden](/docs/features/solar-charging) oder der [Netzstrom besonders günstig](/docs/features/dynamic-prices) bzw. [sauber](/docs/features/co2), kann evcc die Wärmepumpe anweisen, die Heizleistung zu erhöhen und in den **verstärkten Betrieb (Boost)** zu schalten.
 
-Die Funktion für den reduzierten Betrieb oder den Sperrbetrieb wird bisher nicht unterstützt.
-Wir planen dies ggf. über das [Lastmanagement](/docs/features/loadmanagement) zu integrieren.
-Damit könnten - je nach Modell - ggf. auch Anforderungen nach § 14a EnWG abgedeckt werden.
+Für den **reduzierten Betrieb (Dim)** wird die Leistungsaufnahme der Wärmepumpe gesenkt.
+Dies ist nützlich bei Netzengpässen oder im Rahmen von § 14a EnWG.
 
 ### direkte Kommunikation
 
@@ -43,24 +42,28 @@ Sollte deine Wärmepumpe eine Schnittstelle haben, die wir noch nicht unterstüt
 ### über Relais-Kontakte
 
 Ältere Wärmepumpen verfügen häufig über SG-Ready Relais-Kontakte, über die der gewünschte Betriebszustand signalisiert werden kann.
-In unserem Beispiel konzentrieren wir uns auf den Wechsel zwischen Normal- und Boostbetrieb.
-Hierfür wird ein steuerbares Relais verwendet, bpsw. ein Shelly 1. 
+Hierfür werden steuerbare Relais verwendet, bspw. Shelly 1.
 
-Dieses Relais wird mit den SG-Ready Kontakten der Wärmepumpe verbunden.
+Die Relais werden mit den SG-Ready Kontakten der Wärmepumpe verbunden.
 Die genaue Verkabelung, die notwendige Logik und auch die Konfiguration hängt vom Gerät ab und sollte in Absprache mit dem Installateur erfolgen.
-Ist PV-Überschuss oder günstige Energie vorhanden, schaltet evcc das Relais und gibt der Wärmepumpe das Signal für den verstärkten Betrieb (Boost).
-Letztendlich entscheidet das Gerät abhängig vom aktuellen Betriebszustand und seiner Konfiguration immer selbst ob und wieweit es diesem Wunsch auch tatsächlich entsprechen wird.
+Ist PV-Überschuss oder günstige Energie vorhanden, schaltet evcc die Relais und gibt der Wärmepumpe das Signal für den gewünschten Betriebsmodus.
+Letztendlich entscheidet das Gerät abhängig vom aktuellen Betriebszustand und seiner Konfiguration immer selbst, ob und wieweit es diesem Wunsch auch tatsächlich entsprechen wird.
 
-Das folgende Diagramm zeigt den Aufbau:
+Das folgende Diagramm zeigt den Aufbau mit einem einzelnen Relais für den Boost-Modus:
 
-<SgreadySvg alt="Diagram für die Steuerung einer Wärmepumpe über ein SG-Ready Relais" style={{ maxWidth: '700px' }} />
+<SgreadySvg
+  alt="Diagram für die Steuerung einer Wärmepumpe über ein SG-Ready Relais"
+  style={{ maxWidth: "700px" }}
+/>
 
 Möchtest du die Leistung und den Energieverbrauch der Wärmepumpe genau erfassen, kannst du optional einen Zähler an der Stromversorgung des Geräts installieren.
 Dies empfiehlt sich eigentlich fast immer, da die intern ermittelten Daten bei den meisten Modellen am Markt auf Schätzwerten und nicht Messungen basieren oder nicht den Energiebedarf aller Komponenten erfassen.
 Im Diagram ist ein Shelly 3EM dargestellt, hier kann aber ein beliebiger [Zähler](./meters) verwendet werden.
 
-Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 und Shelly 3EM konfigurieren kannst.
-Dafür kommt der spezielle Typ `sgready-boost` zum Einsatz.
+#### Konfiguration mit Boost-Relais
+
+Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 für den Boost-Modus und Shelly 3EM zur Leistungsmessung konfigurieren kannst.
+Dafür kommt der Typ `sgready-relay` zum Einsatz.
 
 ```yaml
 loadpoints:
@@ -74,7 +77,7 @@ loadpoints:
       delay: 5m
     disable:
       threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
-      delay: 20m  # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
 
 meters:
   - name: heatpump_power
@@ -84,20 +87,58 @@ meters:
 
 chargers:
   - name: heatpump_control
-    type: sgready-boost
-    charger:
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
       type: template
-      template: shelly # Boost-Kontakt der Wärmepumpe
+      template: shelly
       host: 192.168.0.101
-#   temp:
+#   temp: # aktuelle Temperatur (optional)
 #     source: http
 #     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
 
 # [...]
 ```
 
-Optional kannst du auch die aktuelle Temperatur (`temp`) [via Plugin](./plugins) hinzufügen.
-Diese dient lediglich zur Anzeige und wird bei Wärmepumpen nicht für die Steuerung verwendet.
+#### Konfiguration mit Boost- und Dim-Relais
+
+Wenn deine Wärmepumpe sowohl den Boost- als auch den Dim-Modus unterstützt, kannst du ein zweites Relais für den Dim-Kontakt konfigurieren.
+Im Dim-Modus wird die Leistungsaufnahme der Wärmepumpe reduziert.
+Dies ist nützlich, um bei Netzengpässen oder im Rahmen von § 14a EnWG die Leistungsaufnahme zu begrenzen.
+
+Du kannst entweder zwei separate Relais verwenden oder ein Relais mit mehreren Kanälen (z. B. Shelly mit verschiedenen `channel`-Werten).
+Neben Shelly sind auch andere [steuerbare Relais](./smartswitches) möglich.
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Optional kannst du auch die aktuelle Temperatur (`temp`), das Geräte-interne Temperaturlimit (`limittemp`), Leistung (`power`) und Energie (`energy`) [via Plugin](./plugins) hinzufügen.
+Diese dienen lediglich zur Anzeige und werden bei Wärmepumpen nicht für die Steuerung verwendet.
 
 ## Heizstäbe
 
@@ -116,8 +157,6 @@ Normalerweise sollte die Temperaturregelung ausschließlich über die Thermostat
 Dein Heizstab muss immer eine eigene Temperaturbegrenzung mitbringen, die bei einer eventuellen Fehlfunktion/Ausfall von evcc oder einer Fehlbedienung eine unzulässige Überhitzung sicher ausschließt.
 :::
 
-
-
 ---
 
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
@@ -126,11 +165,12 @@ Dein Heizstab muss immer eine eigene Temperaturbegrenzung mitbringen, die bei ei
 
 ## Wärmeerzeuger
 
-### alpha innotec 
+### alpha innotec
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -140,7 +180,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -151,9 +192,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -161,16 +201,16 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Eingebunden via [EMSESP](https://emsesp.org/)
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: emsesp
       host: 192.0.2.2 # IP-Adresse oder Hostname
       token: # Token, optional
       powersource: hpcurrpower # Leistungsquelle, [hpcurrpower, hppower] (optional)
-      tempsource: # Temperaturquelle, [warmwater] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -180,7 +220,8 @@ Eingebunden via [EMSESP](https://emsesp.org/)
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -190,7 +231,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -201,9 +243,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -211,7 +252,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -221,7 +263,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -232,9 +275,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -242,35 +284,36 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Eingebunden via [EMSESP](https://emsesp.org/)
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: emsesp
       host: 192.0.2.2 # IP-Adresse oder Hostname
       token: # Token, optional
       powersource: hpcurrpower # Leistungsquelle, [hpcurrpower, hppower] (optional)
-      tempsource: # Temperaturquelle, [warmwater] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 ### Bösch x-change
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: kermi
       host: 192.0.2.2 # IP-Adresse oder Hostname
-      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`} advanced={`chargers:
+      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: kermi
       host: 192.0.2.2 # IP-Adresse oder Hostname
       tempsource: # Temperaturquelle, [warmwater, buffer] (optional)
-      watchdog: 60s # Watchdog, optional`} />
-
-
+      watchdog: 60s # Watchdog, optional`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -278,7 +321,8 @@ Eingebunden via [EMSESP](https://emsesp.org/)
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -288,7 +332,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -299,9 +344,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -313,7 +357,8 @@ Funktioniert mit Altherma 3 Versionen 0775, 0793, 0223, 0774, 29C1.
 
 In Kombination mit einem im Modus 3 (Modbus TCP/IP) konfigurierten HomeHub (EKRHH).
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: daikin-homehub
@@ -323,9 +368,8 @@ In Kombination mit einem im Modus 3 (Modbus TCP/IP) konfigurierten HomeHub (EKRH
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -335,7 +379,8 @@ Funktioniert mit Air 2-Luft-Wärmepumpen, die WLAN-Adapter der 4. Generation (BR
 
 Homehub (EKRHH) muss im Modus 4 (Modbus TCP/IP für Air2Air-Wärmepumpen) konfiguriert werden.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: daikin-homehub-air2air
@@ -344,17 +389,17 @@ Homehub (EKRHH) muss im Modus 4 (Modbus TCP/IP für Air2Air-Wärmepumpen) konfig
       modbus: tcpip
       id: 1
       host: 192.0.2.2 # Hostname
-      port: 502 # Port`}  />
-
-
+      port: 502 # Port`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
-### Elco 
+### Elco
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -364,7 +409,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -375,15 +421,15 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
-### IDM 
+### IDM
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: idm
@@ -393,9 +439,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -403,35 +448,36 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Eingebunden via [EMSESP](https://emsesp.org/)
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: emsesp
       host: 192.0.2.2 # IP-Adresse oder Hostname
       token: # Token, optional
       powersource: hpcurrpower # Leistungsquelle, [hpcurrpower, hppower] (optional)
-      tempsource: # Temperaturquelle, [warmwater] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 ### Kermi x-center pro
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: kermi
       host: 192.0.2.2 # IP-Adresse oder Hostname
-      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`} advanced={`chargers:
+      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: kermi
       host: 192.0.2.2 # IP-Adresse oder Hostname
       tempsource: # Temperaturquelle, [warmwater, buffer] (optional)
-      watchdog: 60s # Watchdog, optional`} />
-
-
+      watchdog: 60s # Watchdog, optional`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -442,13 +488,15 @@ Energiemanagementeinstellungen am Gerät:
 - E-Meter Kommunikationsart: "ModBus Client"
 - E-Meter Messpunkt: "E-Eintrag"
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: lambda-zewotherm
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 502 # Port, optional
-      tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
+      tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: lambda-zewotherm
@@ -456,9 +504,8 @@ Energiemanagementeinstellungen am Gerät:
       port: 502 # Port, optional
       tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
       excess: plus # veraltet, bei neg. E-Überschuss auf minus, [plus, minus] (optional)
-      watchdog: 60s # Watchdog, optional`} />
-
-
+      watchdog: 60s # Watchdog, optional`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -473,7 +520,8 @@ Modbus Register sind im Installationshandbuch zu finden (Adresse jeweils ohne di
 Informationen zu den Energiezuständen finden sich auch im Installationshandbuch.
 Die Energiezustände 6 und 7 können an der Inneneinheit in den erweiterten Einstellungen > "Konnektivität" > "Energiezustand" > "Definition der Energiezustände" angepasst werden.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: lg-therma
@@ -491,9 +539,8 @@ Die Energiezustände 6 und 7 können an der Inneneinheit in den erweiterten Eins
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       tempsource: water_tank # DHW Warmwassertank- oder Wassereinlasstemperatur, [water_tank, water_inlet]
-      energystate: SGReady # SGReady oder anpassbare Energiezustände 6 und 7, [SGReady, IndividualEnergystate]`}  />
-
-
+      energystate: SGReady # SGReady oder anpassbare Energiezustände 6 und 7, [SGReady, IndividualEnergystate]`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -503,7 +550,8 @@ Die Energiezustände 6 und 7 können an der Inneneinheit in den erweiterten Eins
 
 Über das lokale Webinterface des AC ELWA 2 muss der Wert für die "Zeitablauf Ansteuerung" auf einen Wert etwas größer der Intervall Zeit von evcc (z.B. + 5s) gesetzt werden.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: ac-elwa-2
@@ -514,9 +562,8 @@ Die Energiezustände 6 und 7 können an der Inneneinheit in den erweiterten Eins
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional
-      tempsource: 1 # Temperaturquelle, [1, 2] (optional)`}  />
-
-
+      tempsource: 1 # Temperaturquelle, [1, 2] (optional)`}
+/>
 
 <SponsorshipRequired />
 
@@ -526,7 +573,8 @@ Die Energiezustände 6 und 7 können an der Inneneinheit in den erweiterten Eins
 
 Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC ELWA-E muss der Wert für die "Zeitablauf Ansteuerung" auf einen Wert etwas größer der Intervall Zeit von evcc (z.B. + 5s) gesetzt werden.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: ac-elwa-e
@@ -536,9 +584,8 @@ Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC E
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional`}  />
-
-
+      scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional`}
+/>
 
 <SponsorshipRequired />
 
@@ -548,7 +595,8 @@ Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC E
 
 Über das lokale Webinterface des AC•THOR muss der Wert für die "Zeitablauf Ansteuerung" auf einen Wert etwas größer der Intervall Zeit von evcc (z.B. + 5s) gesetzt werden.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: ac-thor
@@ -559,9 +607,8 @@ Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC E
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       tempsource: 1 # Temperaturquelle, [1, 2, 3] (optional)
-      scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional`}  />
-
-
+      scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional`}
+/>
 
 <SponsorshipRequired />
 
@@ -571,7 +618,8 @@ Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC E
 
 Über das lokale Webinterface des AC•THOR muss der Wert für die "Zeitablauf Ansteuerung" auf einen Wert etwas größer der Intervall Zeit von evcc (z.B. + 5s) gesetzt werden.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: ac-thor
@@ -582,9 +630,8 @@ Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC E
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       tempsource: 1 # Temperaturquelle, [1, 2, 3] (optional)
-      scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional`}  />
-
-
+      scale: 1 # Skalierungsfaktor der Leistungsvorgabe, optional`}
+/>
 
 <SponsorshipRequired />
 
@@ -594,7 +641,8 @@ Für den Heizstab von my-PV ohne Display. Über das lokale Webinterface des AC E
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -604,7 +652,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -615,9 +664,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -625,7 +673,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -635,7 +684,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -646,23 +696,22 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 ### Ochsner BWWP Genius 333
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: ochsner-bwwp
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 502 # Port, optional
-      id: 1 # ID, optional`}  />
-
-
+      id: 1 # ID, optional`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -672,7 +721,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -682,7 +732,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -693,9 +744,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -703,7 +753,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -713,7 +764,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -724,9 +776,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -734,7 +785,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 #### LWA/LWZ (SG Ready)
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: stiebel-lwa
@@ -744,15 +796,15 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # Temperaturquelle, [warmwater] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 #### WPM (SG Ready)
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: stiebel-wpm
@@ -762,15 +814,15 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater, buffer] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
 ### Tecalor THZ (SG Ready)
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: stiebel-lwa
@@ -780,9 +832,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      tempsource: # Temperaturquelle, [warmwater] (optional)`}  />
-
-
+      tempsource: # Temperaturquelle, [warmwater] (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -790,7 +841,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Die Boost Funktion erwärmt Warmwasser oder eine Boostzone. Die Boostzone wird durch die ID identifiziert. Die Boost Temperatur wird in Grad Celsius angegeben. Ist eine Boost Temperatur angegeben, wird die Boostzone aktiviert, anderenfalls Warmwasser.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: vaillant
@@ -798,9 +850,8 @@ Die Boost Funktion erwärmt Warmwasser oder eine Boostzone. Die Boostzone wird d
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen (optional)
       realm: DE # Region, [DE, AT] (optional)
       zone: # ID der Boostzone, optional
-      setpoint: # Boost Temperatur, optional`}  />
-
-
+      setpoint: # Boost Temperatur, optional`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -808,16 +859,16 @@ Die Boost Funktion erwärmt Warmwasser oder eine Boostzone. Die Boostzone wird d
 
 Einmalige Warmwasserbereitung. Das Gerät entscheidet eigenständig, ob die Wärmepumpe oder die elektrische Zusatzheizung (falls vorhanden) genutzt wird.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: viessmann
       clientid: # Client ID, Konfigurieren in [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
       gateway_serial: # Gateway Serial, Seriennummer des VitoConnect modul (VitoCare App -> Einstellungen -> Kommunikationsmodul -> Seriennummer)
       installation_id: # Installation ID, Leider kann man die Installation ID nicht einfach in der Viessmann App einsehen - stattdessen müssen wir die folgenden Kommandos in der Kommandozeile ausführen. Es ist uns bewusst, dass das nicht für jeden Benutzer einfach umsetzbar ist, aber bisher haben wir leider keinen besseren Ablauf...<br/>  Vorraussetzungen: curl, jq, und die folgenden Umgebungsvariblen:  \`\`\` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> \`\`\`  Dann holen wir uns einen oauth token (n.b. am besten den gesamten Block in das Terminal kopieren, da die Zwischenvariable 'CODE' nur 20 Sekunden gültig ist):  \`\`\` VIESSMANN_REDIRECT_URI="http://localhost:4200/" VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed 's/.*\\?code=\\(.*\\).*/\\1/' \   | tr -d '[:space:]')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann-climatesolutions.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) \`\`\`  Damit können wir jetzt die Installation ID abfragen:  \`\`\` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann-climatesolutions.com/iot/v1/equipment/installations?includeGateways=true \   | jq '.data[].id' \`\`\`
-      device_id: 0 # Device ID, normalerweise \`0\``}  />
-
-
+      device_id: 0 # Device ID, normalerweise \`0\``}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -827,7 +878,8 @@ Einmalige Warmwasserbereitung. Das Gerät entscheidet eigenständig, ob die Wär
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -837,7 +889,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -848,9 +901,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -858,7 +910,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
 
 Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindestens Software v3.90.3. Aktivierung über SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -868,7 +921,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       id: 1
       host: 192.0.2.2 # Hostname
       port: 502 # Port
-      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`} advanced={`chargers:
+      heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: luxtronik
@@ -879,9 +933,8 @@ Für Wärmepumpen mit Luxtronik 2.1 Steuerung. Nutzt modbus-tcp. Braucht mindest
       host: 192.0.2.2 # Hostname
       port: 502 # Port
       heatoffset: 0.0 # Anhebung der Heizwassertemperatur (K), optional
-      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`} />
-
-
+      wwoffset: 0.0 # Anhebung der Warmwassertemperatur (K), Erhöht evtl. den Verschleiss des Kompressors. (optional)`}
+/>
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -892,13 +945,15 @@ Energiemanagementeinstellungen am Gerät:
 - E-Meter Kommunikationsart: "ModBus Client"
 - E-Meter Messpunkt: "E-Eintrag"
 
-<DeviceConfig code={`chargers:
+<DeviceConfig
+  code={`chargers:
     - name: my_heating
       type: template
       template: lambda-zewotherm
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 502 # Port, optional
-      tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`} advanced={`chargers:
+      tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)`}
+  advanced={`chargers:
     - name: my_heating
       type: template
       template: lambda-zewotherm
@@ -906,7 +961,5 @@ Energiemanagementeinstellungen am Gerät:
       port: 502 # Port, optional
       tempsource: # Temperaturquelle, [warmwater_top, warmwater_bottom, buffer_top, buffer_bottom] (optional)
       excess: plus # veraltet, bei neg. E-Überschuss auf minus, [plus, minus] (optional)
-      watchdog: 60s # Watchdog, optional`} />
-
-
-
+      watchdog: 60s # Watchdog, optional`}
+/>
