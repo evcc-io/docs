@@ -24,13 +24,13 @@ On this page you will learn how to also **heat pumps** or **electric water heate
 ## Heat pumps
 
 Many heat pumps support the SG-ready model, allowing their operation to be adapted to the local energy situation.
-In addition to **normal operation**, an **enhanced operation (boost)** and a **blocking operation (dimming)** can be signaled from the outside.
+Up to four predefined, or in some models freely configurable, scenarios can be controlled.
+In addition to **normal operation**, an **enhanced operation (boost)** and a **reduced operation (dim)** can be signaled from the outside.
 
-  If [excess power is available](/docs/features/solar-charging) or the [grid power is particularly cheap](/docs/features/dynamic-prices) or [clean](/docs/features/co2), evcc can instruct the heat pump to increase the heating power and switch to **enhanced operation (boost)**.
+If [excess power is available](/docs/features/solar-charging) or the [grid power is particularly cheap](/docs/features/dynamic-prices) or [clean](/docs/features/co2), evcc can instruct the heat pump to increase the heating power and switch to **enhanced operation (boost)**.
 
-The dimming function is currently not supported.
-We plan to integrate this via [load management](/docs/features/loadmanagement).
-This would also satisfy the requirements for §14e EnWG.
+For **reduced operation (dim)**, the power consumption of the heat pump is lowered.
+This is useful during grid constraints or within the framework of § 14a EnWG.
 
 ### direct communication
 
@@ -42,22 +42,27 @@ If your heat pump has an interface that we do not yet support, please create a [
 ### via relay contacts
 
 Many older heat pumps have SG-ready relay contacts through which the operating state (normal, boost, dimming) can be signaled.
-In our example, we focus on the switch between normal and boost operation.
-Here, a controllable relay is used, e.g. a Shelly 1.
+Controllable relays are used for this, e.g. Shelly 1.
 
-This relay is connected to the SG-ready contacts of the heat pump.
+The relays are connected to the SG-ready contacts of the heat pump.
 The exact wiring depends on the device and should be discussed with the installer.
-If there is excess PV power or cheap energy, evcc switches the relay and gives the heat pump the signal for enhanced operation (boost).
+If there is excess PV power or cheap energy, evcc switches the relays and gives the heat pump the signal for the desired operating mode.
+Ultimately, the device decides for itself whether and to what extent it will comply with this request, depending on its current operating state and configuration.
 
-The following diagram shows the setup:
+The following diagram shows the setup with a single relay for boost mode:
 
-<SgreadySvg alt="Diagram for controlling a heat pump via an SG-ready relay" style={{ maxWidth: '700px' }} />
+<SgreadySvg
+  alt="Diagram for controlling a heat pump via an SG-ready relay"
+  style={{ maxWidth: "700px" }}
+/>
 
 If you want to monitor the power and energy consumption of the heat pump, you can optionally install a meter at the power supply of the device.
 In the diagram, a Shelly 3EM is shown, but any [meter](./meters) can be used.
 
-This example shows how to configure a heat pump using a Shelly 1 and a Shelly 3EM.
-The special type `sgready-boost` is used for this.
+#### Configuration with boost relay
+
+This example shows how to configure a heat pump using a Shelly 1 for boost mode and a Shelly 3EM for power measurement.
+The type `sgready-relay` is used for this.
 
 ```yaml
 loadpoints:
@@ -66,11 +71,12 @@ loadpoints:
     meter: heatpump_power
     # Usual parameters for loadpoints can be added here, especially to prevent short runtimes, e.g.
     enable:
-      threshold: -1300 # Activate at 1.300W power surplas for 5 min.
+      threshold: -1300 # Activate at 1.300 W power surplus for 5 min.
       delay: 5m
     disable:
-      threshold: 150 # Deactivate at 150W power consumption for 20 min.
-      delay: 20m  #some devices require a minimum runtime (check specification / manual of your heatpump)
+      threshold: 150 # Deactivate at 150 W power consumption for 20 min.
+      delay: 20m #some devices require a minimum runtime (check specification / manual of your heatpump)
+
 meters:
   - name: heatpump_power
     type: template
@@ -79,21 +85,58 @@ meters:
 
 chargers:
   - name: heatpump_control
-    type: sgready-boost
-    charger:
+    type: sgready-relay
+    boost: # Relay for the boost contact
       type: template
-      template: shelly # Boost contact of the heat pump
+      template: shelly
       host: 192.168.0.101
-#   temp:
+#   temp: # current temperature (optional)
 #     source: http
 #     uri: "http://192.168.0.103/temperature"
+#   limittemp: # device-internal temperature limit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
 
 # [...]
 ```
 
-You can optionally add the current temperature (`temp`) [via Plugin](./plugins).
-This is only used for display.
-evcc does not use this value for regulation.
+#### Configuration with boost and dim relays
+
+If your heat pump supports both boost and dim modes, you can configure a second relay for the dim contact.
+In dim mode, the power consumption of the heat pump is reduced.
+This is useful for limiting power consumption during grid constraints or within the framework of § 14a EnWG.
+
+You can use either two separate relays or a relay with multiple channels (e.g. Shelly with different `channel` values).
+Besides Shelly, other [controllable relays](./smartswitches) are also possible.
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relay for the boost contact
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relay for the dim contact (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Power measurement (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energy measurement (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # current temperature (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # device-internal temperature limit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+You can optionally add the current temperature (`temp`), device-internal temperature limit (`limittemp`), power (`power`) and energy (`energy`) [via Plugin](./plugins).
+These are only used for display and are not used for controlling heat pumps.
 
 ## Electric water heaters
 
@@ -106,8 +149,6 @@ This should not be understood as a safety feature.
 :::danger
 Your electric water heater must have its own temperature limit, which prevents overheating in case of a failure of evcc.
 :::
-
-
 
 ---
 
