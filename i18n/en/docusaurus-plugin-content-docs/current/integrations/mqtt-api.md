@@ -76,6 +76,7 @@ Examples:
 :::note
 \*\* Support for empty values:
 The following strings are recognized as empty values:
+
 - `nil`
 - `null`
 - `none`

@@ -10,7 +10,6 @@ evcc läuft lokal auf einem Raspberry Pi oder NAS - keine Cloud erforderlich.
 
 Lerne, wie du [evcc auf deiner Hardware installierst](/docs/installation).
 
-
 ![Screenshot](screenshot.webp)
 
 ## Funktionalitäten

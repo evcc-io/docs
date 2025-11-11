@@ -73,6 +73,7 @@ Beispiele:
 :::note
 \*\* Unterstützung leerer Werte:
 Folgende Zeichenfolgen werden als leere Werte erkannt:
+
 - `nil`
 - `null`
 - `none`

@@ -19,8 +19,6 @@ Password administration
 
 ## See also
 
-* [evcc](evcc.md)	 - evcc - open source solar charging
-* [evcc password reset](evcc_password_reset.md)	 - Reset password
-* [evcc password set](evcc_password_set.md)	 - Set password
-
-
+- [evcc](evcc.md) - evcc - open source solar charging
+- [evcc password reset](evcc_password_reset.md) - Reset password
+- [evcc password set](evcc_password_set.md) - Set password

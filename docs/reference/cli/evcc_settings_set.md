@@ -29,6 +29,4 @@ evcc settings set [flags]
 
 ## See also
 
-* [evcc settings](evcc_settings.md)	 - Manage configuration settings
-
-
+- [evcc settings](evcc_settings.md) - Manage configuration settings

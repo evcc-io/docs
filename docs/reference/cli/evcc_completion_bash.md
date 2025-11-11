@@ -31,7 +31,6 @@ evcc completion bash > $(brew --prefix)/etc/bash_completion.d/evcc
 
 You will need to start a new shell for this setup to take effect.
 
-
 ```
 evcc completion bash
 ```
@@ -59,6 +58,4 @@ evcc completion bash
 
 ## See also
 
-* [evcc completion](evcc_completion.md)	 - Generate the autocompletion script for the specified shell
-
-
+- [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell
