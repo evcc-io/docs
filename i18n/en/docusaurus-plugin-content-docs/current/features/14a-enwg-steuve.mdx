@@ -35,25 +35,23 @@ When a reduction signal is active, evcc automatically sets a temporary power lim
 ### Minimal Configuration
 
 ```yaml
-circuits:
+circuits: # optional
   - name: lpc # Local Power Control - circuit for grid requirements
 
 loadpoints:
   - title: Garage
     charger: charger1
-    circuit: lpc # controllable consumer
   - title: Carport
     charger: charger2
-    circuit: lpc # controllable consumer
 ```
 
-All charging points assigned to the `lpc` circuit or a sub-circuit are reduced accordingly when a control request is received.
+All charging points are automatically assigned to the internal `lpc` circuit and reduced accordingly when a control request is received.
 
 For advanced configurations with sub-circuits, see [Load Management](./loadmanagement).
 
 :::info Highest Level
 The `lpc` circuit always has the highest level.
-If you don't define it manually (as above), it will be automatically created when HEMS is configured and inserted above the highest circuit.
+If you don't define it manually, it will be automatically created when HEMS is configured and inserted above the highest circuit.
 :::
 
 :::tip Configuration Interface
@@ -256,45 +254,18 @@ When a control limit is active, a **banner with control notice** is displayed on
 ## Controlling Additional Consumers
 
 In addition to charging points, other controllable consumers can also be integrated into § 14a load management.
-This applies e.g. to heat pumps or battery storage systems that are configured as meters with a switching output.
+This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with a switching output.
 
-### Prerequisites
+The control takes into account the current power consumption of all consumers assigned to the internal `lpc` circuit.
+This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
 
-- The consumer must be configured as a meter with switching output (`switch`) in evcc
-- HEMS configuration (relay or EEBus) must be set up
-- The meter must be assigned to the `lpc` circuit
+First, all other consumers are dimmed.
+The remaining power is then distributed to the active charging points.
+Due to flat dimming of other consumers, the available charging power for active charging points can in exceptional cases even be higher than in normal state.
+If throttling the charging points including dimming all other consumers is not sufficient, charging processes at charging points are interrupted.
 
-### Configuration Example
-
-```yaml
-meters:
-  - name: heatpump
-    type: template
-    template: eebus-mcp
-    usage: charge
-    # Additional meter configuration ...
-
-circuits:
-  - name: lpc
-    meter: heatpump # Assign meter
-
-hems:
-  type: eebus # or relay
-  # Additional HEMS configuration ...
-```
-
-### How It Works
-
-When a reduction signal is active, evcc automatically controls:
-
-1. **Charging points**: Power is throttled according to the limit
-2. **Switchable meters**: Are switched on and off as needed to maintain the total limit
-
-The control takes into account the current power consumption of all consumers assigned to the `lpc` circuit.
-If throttling the charging points is not sufficient, additional consumers are switched off.
-
-:::note EEBus Consumer
-This feature is currently only available for EEBus consumers.
+:::note Consumer Control
+This feature is currently only implemented for EEBus meters with LPC.
 For some devices, power can also be continuously dimmed.
 This enables more precise control than simple on/off switching.
 Support for additional meters will be added in the future.
