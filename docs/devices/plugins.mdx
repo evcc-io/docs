@@ -37,6 +37,7 @@ Neben diesen Integrations-Plugins, gibt es noch Helfer-Plugins, die Zusatzfunkti
 - [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
 - [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den angeschlossenen (_plugged_) und ladenden (_charging_) Zustand zu einem einzigen Ladestatus zu kombinieren.
 - [Valid Plugin](#valid) - Meta-Plugin um Plugin-Werte basierend auf einer booleschen Validierung bereitzustellen.
+- [Watchdog Plugin](#watchdog) - Meta-Plugin zur automatischen Wiederholung von Schreibvorgängen in regelmäßigen Abständen.
 
 ### Syntax
 
@@ -808,3 +809,90 @@ meters:
 ```
 
 In diesem Beispiel wird ein Shelly 1PM Gerät als Datenquelle für Leistung und Energie einer Batterie verwendet, während der Ladestand (SoC) über MQTT abgerufen wird.
+
+### Watchdog <Tag label="schreiben" category="write" /> {#watchdog}
+
+Das `watchdog` Plugin ist ein Wrapper-Plugin, das Schreibvorgänge automatisch in regelmäßigen Abständen wiederholt.
+Manche Geräte (z. B. Batteriespeicher, Wechselrichter) erwarten, dass Steuerbefehle regelmäßig wiederholt werden, um aktiv zu bleiben.
+Das Watchdog-Plugin überwacht Schreibvorgänge und wiederholt diese automatisch in der Hälfte des konfigurierten Timeout-Intervalls.
+
+**Parameter**:
+
+| Parameter | Typ                | Erfordert | Beschreibung                                                                   |
+| --------- | ------------------ | --------- | ------------------------------------------------------------------------------ |
+| timeout   | duration           | ja        | Zeitintervall für Wiederholungen (Wert wird alle timeout/2 erneut geschrieben) |
+| reset     | string \| [string] | nein      | Wert(e), bei denen Wiederholungen gestoppt werden                              |
+| initial   | string             | nein      | Wert, der beim Start einmalig geschrieben wird                                 |
+| set       | config             | ja        | Verschachteltes Plugin für den eigentlichen Schreibvorgang                     |
+
+**Funktionsweise**:
+
+1. **Start**: Falls `initial` konfiguriert ist, wird dieser Wert beim Start einmalig geschrieben
+2. **Schreiben**: Wenn ein Wert geschrieben wird, prüft das Plugin, ob dieser in der `reset` Liste steht
+3. **Watchdog aktiv**: Falls der Wert **nicht** in `reset` steht, startet der Watchdog und schreibt den Wert automatisch alle `timeout/2` Sekunden erneut
+4. **Watchdog stoppt**: Falls der Wert in `reset` steht, werden keine Wiederholungen durchgeführt
+
+**reset Parameter**:
+
+- Definiert Werte, bei denen der Watchdog gestoppt wird
+- Kann ein einzelner Wert (`reset: 0`) oder mehrere Werte (`reset: [0, 1]`) sein
+- Typischerweise für "sichere" oder "Standard" Zustände verwendet, die keine kontinuierliche Wiederholung benötigen
+
+**initial Parameter**:
+
+- Optionaler Wert, der beim Pluginstart einmalig geschrieben wird
+- Nützlich, um einen definierten Startzustand zu setzen
+- Wird vor allen anderen Schreibvorgängen ausgeführt
+
+**Unterstützte Datentypen**: `int64`, `float64`, `bool`
+
+**Beispiel Schreiben**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+In diesem Beispiel werden Werte automatisch alle 30 s wiederholt, außer wenn der Wert `0` geschrieben wird.
+
+**Ablaufbeispiel** mit `timeout: 60s`, `reset: 0`:
+
+- Plugin startet
+- Schreibe Wert `100` → Watchdog **läuft**, Wert wird alle 30 s wiederholt
+- Nach 2 Minuten: Wert `100` wurde bereits 4x geschrieben (0s, 30s, 60s, 90s, 120s)
+- Schreibe Wert `200` → Watchdog **läuft** weiter, jetzt mit neuem Wert `200` alle 30 s
+- Schreibe Wert `0` → Watchdog **stoppt** (da `0` in `reset` definiert)
+- Keine weiteren Wiederholungen, bis ein neuer Wert != `0` geschrieben wird
+
+**Beispiel mit Batteriesteuerung** (`batterymode` verwendet Werte 1=normal, 2=hold, 3=charge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Stoppe Wiederholungen im Normalbetrieb
+  set:
+    source: switch
+    switch:
+      - case: 1 # normal
+        set:
+          source: modbus
+          # ... Modbus-Konfiguration für Normalbetrieb
+      - case: 2 # hold
+        set:
+          source: modbus
+          # ... Modbus-Konfiguration für Haltemodus
+      - case: 3 # charge
+        set:
+          source: modbus
+          # ... Modbus-Konfiguration für Lademodus
+```
