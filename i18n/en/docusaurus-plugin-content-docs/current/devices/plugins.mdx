@@ -37,6 +37,7 @@ In addition to these integration plugins, there are also helper plugins that pro
 - [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
 - [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
+- [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
 
 ### Syntax
 
@@ -808,3 +809,90 @@ meters:
 ```
 
 In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
+
+### Watchdog <Tag label="write" category="write" /> {#watchdog}
+
+The `watchdog` plugin is a wrapper plugin that automatically repeats write operations at regular intervals.
+Some devices (e.g. battery storage systems, inverters) expect control commands to be repeated regularly to stay active.
+The watchdog plugin monitors write operations and automatically repeats them at half the configured timeout interval.
+
+**Parameters**:
+
+| Parameter | Type               | Required | Description                                                        |
+| --------- | ------------------ | -------- | ------------------------------------------------------------------ |
+| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2) |
+| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                          |
+| initial   | string             | no       | Value that is written once at startup                              |
+| set       | config             | yes      | Nested plugin for the actual write operation                       |
+
+**How it works**:
+
+1. **Start**: If `initial` is configured, this value is written once at startup
+2. **Write**: When a value is written, the plugin checks whether it is in the `reset` list
+3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value every `timeout/2` seconds
+4. **Watchdog stops**: If the value is in `reset`, no repetitions are performed
+
+**reset parameter**:
+
+- Defines values at which the watchdog is stopped
+- Can be a single value (`reset: 0`) or multiple values (`reset: [0, 1]`)
+- Typically used for "safe" or "default" states that don't need continuous repetition
+
+**initial parameter**:
+
+- Optional value that is written once when the plugin starts
+- Useful for setting a defined initial state
+- Executed before all other write operations
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Example Write**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+In this example, values are automatically repeated every 30 s, except when the value `0` is written.
+
+**Flow example** with `timeout: 60s`, `reset: 0`:
+
+- Plugin starts
+- Write value `100` → Watchdog **runs**, value is repeated every 30 s
+- After 2 minutes: Value `100` has been written 4x (0s, 30s, 60s, 90s, 120s)
+- Write value `200` → Watchdog **continues** running, now with new value `200` every 30 s
+- Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
+- No further repetitions until a new value != `0` is written
+
+**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Stop repetitions in normal operation
+  set:
+    source: switch
+    switch:
+      - case: 1 # normal
+        set:
+          source: modbus
+          # ... Modbus configuration for normal operation
+      - case: 2 # hold
+        set:
+          source: modbus
+          # ... Modbus configuration for hold mode
+      - case: 3 # charge
+        set:
+          source: modbus
+          # ... Modbus configuration for charge mode
+```
