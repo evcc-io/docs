@@ -19,6 +19,7 @@ Netzbetreiber können bei Netzüberlastung die Leistung großer Verbraucher wie 
 Als Gegenleistung erhalten Kunden reduzierte Netzentgelte.
 
 Wichtige Punkte:
+
 - Betrifft Verbraucher ab 4,2 kW Leistung
 - Steuerung erfolgt über Smart Meter Gateway und Steuerbox
 - Kunden profitieren von reduzierten Netzentgelten
@@ -35,15 +36,15 @@ Bei aktivem Reduzierungssignal setzt evcc automatisch ein temporäres Leistungsl
 
 ```yaml
 circuits:
-  - name: lpc  # Local Power Control - Stromkreis für Netzanforderungen
+  - name: lpc # Local Power Control - Stromkreis für Netzanforderungen
 
 loadpoints:
   - title: Garage
     charger: charger1
-    circuit: lpc  # steuerbarer Verbraucher
-  - title: Carport  
+    circuit: lpc # steuerbarer Verbraucher
+  - title: Carport
     charger: charger2
-    circuit: lpc  # steuerbarer Verbraucher
+    circuit: lpc # steuerbarer Verbraucher
 ```
 
 Alle Ladepunkte, die dem `lpc` Stromkreis oder einem Unterstromkreis zugeordnet sind, werden bei einer Regelanforderung entsprechend reduziert.
@@ -83,8 +84,8 @@ Du kannst das Limit auch selbst berechnen mit der Formel: **Gesamtlimit = Anzahl
 
 ### Beispiele für verschiedene Anbindungen
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 <Tabs>
 <TabItem value="gpio" label="Raspberry Pi GPIO">
@@ -94,7 +95,7 @@ Bei Verwendung eines Raspberry Pi kann der GPIO-Pin direkt ausgelesen werden:
 ```yaml
 hems:
   type: relay
-  maxPower: 8400  # Beispiel für 2 SteuVE
+  maxPower: 8400 # Beispiel für 2 SteuVE
   limit:
     source: script
     cmd: gpioget gpiochip0 17 # GPIO Pin 17 auslesen
@@ -109,7 +110,7 @@ Wenn die Steuerbox oder ein Gateway MQTT-Nachrichten sendet:
 ```yaml
 hems:
   type: relay
-  maxPower: 11340  # Beispiel für 3 SteuVE mit Gleichzeitigkeitsfaktor 0,9
+  maxPower: 11340 # Beispiel für 3 SteuVE mit Gleichzeitigkeitsfaktor 0,9
   limit:
     source: mqtt
     topic: hems/limit/status
@@ -124,7 +125,7 @@ Für Steuerboxen mit REST-API:
 ```yaml
 hems:
   type: relay
-  maxPower: 13440  # Beispiel für 4 SteuVE mit Gleichzeitigkeitsfaktor 0,8
+  maxPower: 13440 # Beispiel für 4 SteuVE mit Gleichzeitigkeitsfaktor 0,8
   limit:
     source: http
     uri: http://steuerbox.local/api/limit
@@ -174,7 +175,7 @@ eebus:
       -----END EC PRIVATE KEY-----
   # Optional: Netzwerk-Interface festlegen (empfohlen)
   interfaces:
-    - eth0  # oder das entsprechende Interface
+    - eth0 # oder das entsprechende Interface
   # Optional: Eigene SKI definieren
   shipid: EVCC-1234567890abcdef
 ```
@@ -215,7 +216,7 @@ evcc --log debug | grep -i ski
    - SKI der Steuerbox in der HEMS-Konfiguration eintragen
    - evcc neu starten
 
-3. **Verbindung prüfen**: 
+3. **Verbindung prüfen**:
    ```bash
    # Trace-Logging für EEBus aktivieren
    evcc -l trace eebus
@@ -224,7 +225,7 @@ evcc --log debug | grep -i ski
 :::tip Wichtig
 - Die Zertifikate müssen nur einmal generiert werden
 - Nach erfolgreichem Pairing darf die Konfiguration nicht mehr geändert werden
-:::
+  :::
 
 ## Funktionsweise
 
@@ -250,6 +251,53 @@ Die Batterie wird in den "Hold"-Modus versetzt, sodass sie weder lädt noch entl
 Nach Ende der Leistungsreduzierung wird das Netzladen automatisch fortgesetzt.
 
 Wenn ein Regellimit aktiv ist, wird ein **Banner mit Regelhinweis** auf der Hauptseite in evcc angezeigt.
+
+## Steuerung weiterer Verbraucher
+
+Neben Ladepunkten können auch weitere steuerbare Verbraucher in das §14a Lastmanagement einbezogen werden.
+Dies betrifft z. B. Wärmepumpen oder Batteriespeicher, die als Zähler mit Schaltausgang konfiguriert sind.
+
+### Voraussetzungen
+
+- Der Verbraucher muss als Zähler mit Schaltausgang (`switch`) in evcc konfiguriert sein
+- HEMS-Konfiguration (Relais oder EEBus) muss eingerichtet sein
+- Der Zähler muss dem `lpc` Stromkreis zugeordnet werden
+
+### Konfigurationsbeispiel
+
+```yaml
+meters:
+  - name: heatpump
+    type: template
+    template: eebus-mcp
+    usage: charge
+    # Weitere Zähler-Konfiguration ...
+
+circuits:
+  - name: lpc
+    meter: heatpump # Zähler zuordnen
+
+hems:
+  type: eebus # oder relay
+  # Weitere HEMS-Konfiguration ...
+```
+
+### Funktionsweise
+
+Bei aktivem Reduzierungssignal regelt evcc automatisch:
+
+1. **Ladepunkte**: Leistung wird entsprechend dem Limit gedrosselt
+2. **Schaltbare Zähler**: Werden bei Bedarf ab- und zugeschaltet, um das Gesamtlimit einzuhalten
+
+Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller dem `lpc` Stromkreis zugeordneten Verbraucher.
+Reicht die Drosselung der Ladepunkte nicht aus, werden weitere Verbraucher abgeschaltet.
+
+:::note EEBus Verbraucher
+Diese Funktion ist derzeit nur für EEBus Verbraucher verfügbar.
+Bei einigen Geräten kann die Leistung auch stufenlos gedrosselt werden.
+Dies ermöglicht eine präzisere Regelung als das reine Ein-/Ausschalten.
+Unterstützung für weitere Zähler wird in Zukunft hinzugefügt.
+:::
 
 ## Weiterführende Informationen
 
