@@ -23,6 +23,4 @@ evcc config delete <id> [flags]
 
 ## See also
 
-* [evcc config](evcc_config.md)	 - Dump database configuration
-
-
+- [evcc config](evcc_config.md) - Dump database configuration

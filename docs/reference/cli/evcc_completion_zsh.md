@@ -7,7 +7,7 @@ Generate the autocompletion script for zsh
 Generate the autocompletion script for the zsh shell.
 
 If shell completion is not already enabled in your environment you will need
-to enable it.  You can execute the following once:
+to enable it. You can execute the following once:
 
 ```
 echo "autoload -U compinit; compinit" >> ~/.zshrc
@@ -34,7 +34,6 @@ evcc completion zsh > $(brew --prefix)/share/zsh/site-functions/_evcc
 ```
 
 You will need to start a new shell for this setup to take effect.
-
 
 ```
 evcc completion zsh [flags]
@@ -63,6 +62,4 @@ evcc completion zsh [flags]
 
 ## See also
 
-* [evcc completion](evcc_completion.md)	 - Generate the autocompletion script for the specified shell
-
-
+- [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell

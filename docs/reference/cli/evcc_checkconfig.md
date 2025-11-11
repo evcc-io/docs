@@ -5,8 +5,8 @@ Check config file for errors
 ## Synopsis
 
 Check the (specified or default) config file for errors. Note that
-	       checkconfig only checks the config file for parsing errors and does
-		   not check that individual device configurations are valid.
+checkconfig only checks the config file for parsing errors and does
+not check that individual device configurations are valid.
 
 ```
 evcc checkconfig [flags]
@@ -29,6 +29,4 @@ evcc checkconfig [flags]
 
 ## See also
 
-* [evcc](evcc.md)	 - evcc - open source solar charging
-
-
+- [evcc](evcc.md) - evcc - open source solar charging
