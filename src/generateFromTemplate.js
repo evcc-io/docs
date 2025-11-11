@@ -239,7 +239,8 @@ function generateMarkdown(data, type, translate, target) {
   if (type === "charger") {
     data = data.filter(
       (x) =>
-        !["smartswitch", "heating"].includes(CHARGER_GROUPS[x.product.group]),
+        !["smartswitch", "heating"].includes(CHARGER_GROUPS[x.product.group]) &&
+        !["heating"].includes(HEATING_GROUPS[x.product.group]),
     );
   }
 
