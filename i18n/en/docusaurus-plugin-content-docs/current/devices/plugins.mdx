@@ -19,7 +19,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 
 ## Overview
 
-evcc offers the following plugins:
+### Plugins
 
 - [Modbus Plugin](#modbus) - Plugin for reading from a Modbus-capable device.
 - [MQTT Plugin](#mqtt) - Plugin for indirectly communicating with MQTT-capable devices via MQTT.
@@ -29,15 +29,22 @@ evcc offers the following plugins:
 - [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
 - [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
 - [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
-- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Prometheus Plugin](#prometheus) - Plugin for reading metrics from Prometheus using PromQL.
 
-In addition to these integration plugins, there are also helper plugins that provide additional functions:
+### Helpers
 
 - [Const Plugin](#const) - Special plugin that simply returns a constant value.
 - [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
 - [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
+- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Switch Plugin](#switch) - Meta-plugin for conditional write operations based on input values (like switch/case).
 - [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
+- [Sequence Plugin](#sequence) - Meta-plugin for sequential execution of multiple write operations.
+- [Sleep Plugin](#sleep) - Helper plugin for delaying actions (usually used with Sequence).
+- [Map Plugin](#map) - Meta-plugin for translating integer values (e.g., device-specific modes to evcc modes).
+- [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
+- [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
 
 ### Syntax
 
@@ -669,6 +676,48 @@ cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
 
+### Prometheus <Tag label="read" category="read" /> {#prometheus}
+
+The `prometheus` plugin reads metrics from a Prometheus instance using PromQL queries.
+This is useful when monitoring data is already available in Prometheus and should be used in evcc.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                  |
+| --------- | -------- | -------- | ---------------------------- |
+| uri       | string   | yes      | Prometheus server URL        |
+| query     | string   | yes      | PromQL query                 |
+| timeout   | duration | no       | Timeout (default: 2 minutes) |
+
+**Supported query results**:
+
+- **Scalar**: A single numerical value
+- **Vector**: A vector with exactly one metric entry
+
+**Example**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Example with time range**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+The query must return a single numerical value.
+For vector results, exactly one metric must be included.
+
+## Helpers
+
 ### Const <Tag label="read" category="read" /> {#const}
 
 The `const` plugin returns a constant value.
@@ -810,6 +859,50 @@ meters:
 
 In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
 
+### Switch <Tag label="write" category="write" /> {#switch}
+
+The `switch` plugin performs conditional write operations, similar to a switch/case statement in programming languages.
+Based on the input value, the corresponding action is executed.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                        |
+| --------- | ------ | -------- | -------------------------------------------------- |
+| switch    | [case] | yes      | Array of cases with `case` and `set` configuration |
+| default   | config | no       | Fallback plugin if no case matches                 |
+
+**How it works**:
+
+1. Input value is compared with the `case` values
+2. On match, the corresponding `set` plugin is executed
+3. If no case matches and `default` is defined, it is executed
+4. If no case matches and no `default` is defined, an error occurs
+
+**Supported data types**: `int64` (integer values only)
+
+**Example**:
+
+```yaml
+setmode:
+  source: switch
+  switch:
+    - case: 1 # reduced
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "eco"
+    - case: 2 # normal
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "normal"
+    - case: 3 # boost
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "boost"
+```
+
 ### Watchdog <Tag label="write" category="write" /> {#watchdog}
 
 The `watchdog` plugin is a wrapper plugin that automatically repeats write operations at regular intervals.
@@ -896,3 +989,275 @@ batterymode:
           source: modbus
           # ... Modbus configuration for charge mode
 ```
+
+### Sequence <Tag label="write" category="write" /> {#sequence}
+
+The `sequence` plugin executes multiple write operations sequentially.
+All nested plugins receive the same input value and are executed in the defined order.
+Execution stops immediately on error.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                           |
+| --------- | -------- | -------- | ------------------------------------- |
+| set       | [config] | yes      | Array of nested plugin configurations |
+
+**How it works**:
+
+1. Input value is received
+2. Each plugin in the `set` list is called sequentially with this value
+3. On error, the sequence is aborted and the error is returned
+4. Successful execution means all plugins executed successfully
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Use cases**:
+
+- Execute multiple HTTP calls sequentially
+- Combine with `sleep` plugin for time-delayed actions
+- Write multiple modbus registers simultaneously
+- Propagate values to multiple targets
+
+**Example 1: Multiple HTTP calls**
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/pin1
+      method: POST
+      body: '{"value": "on"}'
+    - source: http
+      uri: http://device.local/api/pin4
+      method: POST
+      body: '{"value": "off"}'
+```
+
+**Example 2: Combination with switch**
+
+```yaml
+batterymode:
+  source: sequence
+  set:
+    - source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            body: "automatic"
+        - case: 3 # charge
+          set:
+            source: sequence
+            set:
+              - source: sleep
+                duration: 1s
+              - source: http
+                uri: http://battery.local/api/charge
+                body: "5000" # 5 kW
+    - source: mqtt
+      topic: home/battery/status
+      payload: "mode_${batterymode}"
+```
+
+**Flow for `batterymode: 1` (normal)**:
+
+1. Outer `sequence` receives value `1`
+2. First step: `switch` checks value `1`
+   - Case `1` matches → HTTP call to `/api/mode` with body `automatic`
+3. Second step: `mqtt` sends message to `home/battery/status` with payload `mode_1`
+4. Done
+
+**Flow for `batterymode: 3` (charge)**:
+
+1. Outer `sequence` receives value `3`
+2. First step: `switch` checks value `3`
+   - Case `3` matches → Inner `sequence` is executed:
+     - Wait 1 second (`sleep`)
+     - HTTP call to `/api/charge` with body `5000`
+3. Second step: `mqtt` sends message to `home/battery/status` with payload `mode_3`
+4. Done
+
+The value flows through all plugins, with `switch` executing different actions based on the value and `mqtt` always notifying at the end.
+
+### Sleep <Tag label="write" category="write" /> {#sleep}
+
+The `sleep` plugin adds a delay.
+Typically used within a `sequence` plugin to create time intervals between actions.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                                        |
+| --------- | -------- | -------- | -------------------------------------------------- |
+| duration  | duration | yes      | Wait time (e.g., `1s`, `500ms`, `0s` for no delay) |
+
+**Example**:
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/prepare
+      method: POST
+    - source: sleep
+      duration: 500ms
+    - source: http
+      uri: http://device.local/api/activate
+      method: POST
+```
+
+### Map <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#map}
+
+The `map` plugin translates integer values to other integer values using a lookup table.
+It is often used to convert device-specific values to evcc standard values and vice versa.
+
+**Parameters**:
+
+| Parameter | Type            | Required | Description                                     |
+| --------- | --------------- | -------- | ----------------------------------------------- |
+| values    | map[int64]int64 | yes      | Lookup table with input → output mapping        |
+| get       | config          | no       | Plugin for reading (only required when reading) |
+| set       | config          | no       | Plugin for writing (only required when writing) |
+
+**How it works**:
+
+**When reading**:
+
+1. `get` plugin returns a value (e.g., `0`)
+2. Value is looked up in the `values` table
+3. The mapped value is returned (e.g., `0` → `2`)
+
+**When writing**:
+
+1. Input value is received (e.g., `3`)
+2. Value is looked up in the `values` table
+3. The mapped value is passed to the `set` plugin (e.g., `3` → `6`)
+
+If no matching value is found in the table, an error occurs.
+
+**Supported data types**: `int64` (integer values only)
+
+**Reading example** (device value → evcc):
+
+```yaml
+getmode:
+  source: map
+  values:
+    0: 2 # Device "Free" → evcc "normal"
+    1: 1 # Device "Forced off" → evcc "reduced"
+    2: 3 # Device "Recommended on" → evcc "boost"
+    3: 3 # Device "Forced on" → evcc "boost"
+  get:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: holding
+      encoding: int16
+```
+
+**Writing example** (evcc → device value):
+
+```yaml
+setmode:
+  source: map
+  values:
+    1: 1 # evcc "reduced" → Device "Forced off"
+    2: 0 # evcc "normal" → Device "Free"
+    3: 3 # evcc "boost" → Device "Forced on"
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: writeholding
+      encoding: int16
+```
+
+### Convert <Tag label="write" category="write" /> {#convert}
+
+The `convert` plugin converts data types when writing.
+It is used when a plugin expects a different data type than evcc provides.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                         |
+| --------- | ------ | -------- | ----------------------------------- |
+| convert   | string | yes      | Conversion type                     |
+| set       | config | yes      | Plugin for writing after conversion |
+
+**Supported conversions**:
+
+| Conversion | Description                                    |
+| ---------- | ---------------------------------------------- |
+| float2int  | Float64 → Int64 (decimal places are truncated) |
+| int2float  | Int64 → Float64                                |
+| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
+
+**Example** (evcc provides float, device expects int):
+
+```yaml
+limitsoc:
+  source: convert
+  convert: float2int
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 41009
+      type: writesingle
+      encoding: uint16
+```
+
+In this example, evcc converts a float value like `85.5` to `85` before writing it to the modbus register.
+
+### Ignore <Tag label="write" category="write" /> {#ignore}
+
+The `ignore` plugin suppresses specific error messages when writing.
+It is used when a device returns harmless errors that can be ignored.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | -------- | --------------------------- |
+| error     | string | yes      | Error text prefix to ignore |
+| set       | config | yes      | Plugin for writing          |
+
+**How it works**:
+
+1. The nested `set` plugin is executed
+2. If an error occurs, it checks whether the error message starts with the `error` string
+3. If yes, the error is ignored and success is returned
+4. If no, the error is passed through normally
+
+**Supported data types**: `int64`, `float64`, `bool`, `[]byte`
+
+**Example**:
+
+```yaml
+batterymode:
+  source: switch
+  switch:
+    - case: 1 # normal
+      set:
+        source: const
+        value: 2
+        set:
+          source: ignore
+          error: "modbus: response data size '18' does not match count '4'"
+          set:
+            source: modbus
+            uri: 192.168.1.10:502
+            id: 1
+            register:
+              address: 0x1110
+              type: writemultiple
+              encoding: int16
+```
+
+In this example, the device returns a harmless modbus error that is ignored.
