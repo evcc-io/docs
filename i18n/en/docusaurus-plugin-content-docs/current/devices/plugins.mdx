@@ -29,6 +29,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
 - [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
 - [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
+- [Prometheus Plugin](#prometheus) - Plugin for reading metrics from Prometheus using PromQL.
 
 ### Helpers
 
@@ -675,6 +676,46 @@ cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
 
+### Prometheus <Tag label="read" category="read" /> {#prometheus}
+
+The `prometheus` plugin reads metrics from a Prometheus instance using PromQL queries.
+This is useful when monitoring data is already available in Prometheus and should be used in evcc.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                  |
+| --------- | -------- | -------- | ---------------------------- |
+| uri       | string   | yes      | Prometheus server URL        |
+| query     | string   | yes      | PromQL query                 |
+| timeout   | duration | no       | Timeout (default: 2 minutes) |
+
+**Supported query results**:
+
+- **Scalar**: A single numerical value
+- **Vector**: A vector with exactly one metric entry
+
+**Example**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Example with time range**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+The query must return a single numerical value.
+For vector results, exactly one metric must be included.
+
 ## Helpers
 
 ### Const <Tag label="read" category="read" /> {#const}
@@ -825,10 +866,10 @@ Based on the input value, the corresponding action is executed.
 
 **Parameters**:
 
-| Parameter | Type     | Required | Description                                             |
-| --------- | -------- | -------- | ------------------------------------------------------- |
-| switch    | [case]   | yes      | Array of cases with `case` and `set` configuration      |
-| default   | config   | no       | Fallback plugin if no case matches                      |
+| Parameter | Type   | Required | Description                                        |
+| --------- | ------ | -------- | -------------------------------------------------- |
+| switch    | [case] | yes      | Array of cases with `case` and `set` configuration |
+| default   | config | no       | Fallback plugin if no case matches                 |
 
 **How it works**:
 
@@ -849,17 +890,17 @@ setmode:
       set:
         source: http
         uri: http://device.local/api/mode
-        body: 'eco'
+        body: "eco"
     - case: 2 # normal
       set:
         source: http
         uri: http://device.local/api/mode
-        body: 'normal'
+        body: "normal"
     - case: 3 # boost
       set:
         source: http
         uri: http://device.local/api/mode
-        body: 'boost'
+        body: "boost"
 ```
 
 ### Watchdog <Tag label="write" category="write" /> {#watchdog}
@@ -957,9 +998,9 @@ Execution stops immediately on error.
 
 **Parameters**:
 
-| Parameter | Type      | Required | Description                                      |
-| --------- | --------- | -------- | ------------------------------------------------ |
-| set       | [config]  | yes      | Array of nested plugin configurations            |
+| Parameter | Type     | Required | Description                           |
+| --------- | -------- | -------- | ------------------------------------- |
+| set       | [config] | yes      | Array of nested plugin configurations |
 
 **How it works**:
 
@@ -1005,7 +1046,7 @@ batterymode:
           set:
             source: http
             uri: http://battery.local/api/mode
-            body: 'automatic'
+            body: "automatic"
         - case: 3 # charge
           set:
             source: sequence
@@ -1014,10 +1055,10 @@ batterymode:
                 duration: 1s
               - source: http
                 uri: http://battery.local/api/charge
-                body: '5000' # 5 kW
+                body: "5000" # 5 kW
     - source: mqtt
       topic: home/battery/status
-      payload: 'mode_${batterymode}'
+      payload: "mode_${batterymode}"
 ```
 
 **Flow for `batterymode: 1` (normal)**:
@@ -1047,9 +1088,9 @@ Typically used within a `sequence` plugin to create time intervals between actio
 
 **Parameters**:
 
-| Parameter | Type     | Required | Description                                             |
-| --------- | -------- | -------- | ------------------------------------------------------- |
-| duration  | duration | yes      | Wait time (e.g., `1s`, `500ms`, `0s` for no delay)     |
+| Parameter | Type     | Required | Description                                        |
+| --------- | -------- | -------- | -------------------------------------------------- |
+| duration  | duration | yes      | Wait time (e.g., `1s`, `500ms`, `0s` for no delay) |
 
 **Example**:
 
@@ -1074,20 +1115,22 @@ It is often used to convert device-specific values to evcc standard values and v
 
 **Parameters**:
 
-| Parameter | Type            | Required | Description                                      |
-| --------- | --------------- | -------- | ------------------------------------------------ |
-| values    | map[int64]int64 | yes      | Lookup table with input → output mapping         |
-| get       | config          | no       | Plugin for reading (only required when reading)  |
-| set       | config          | no       | Plugin for writing (only required when writing)  |
+| Parameter | Type            | Required | Description                                     |
+| --------- | --------------- | -------- | ----------------------------------------------- |
+| values    | map[int64]int64 | yes      | Lookup table with input → output mapping        |
+| get       | config          | no       | Plugin for reading (only required when reading) |
+| set       | config          | no       | Plugin for writing (only required when writing) |
 
 **How it works**:
 
 **When reading**:
+
 1. `get` plugin returns a value (e.g., `0`)
 2. Value is looked up in the `values` table
 3. The mapped value is returned (e.g., `0` → `2`)
 
 **When writing**:
+
 1. Input value is received (e.g., `3`)
 2. Value is looked up in the `values` table
 3. The mapped value is passed to the `set` plugin (e.g., `3` → `6`)
@@ -1142,18 +1185,18 @@ It is used when a plugin expects a different data type than evcc provides.
 
 **Parameters**:
 
-| Parameter | Type   | Required | Description                           |
-| --------- | ------ | -------- | ------------------------------------- |
-| convert   | string | yes      | Conversion type                       |
-| set       | config | yes      | Plugin for writing after conversion   |
+| Parameter | Type   | Required | Description                         |
+| --------- | ------ | -------- | ----------------------------------- |
+| convert   | string | yes      | Conversion type                     |
+| set       | config | yes      | Plugin for writing after conversion |
 
 **Supported conversions**:
 
-| Conversion | Description                                       |
-| ---------- | ------------------------------------------------- |
-| float2int  | Float64 → Int64 (decimal places are truncated)   |
-| int2float  | Int64 → Float64                                   |
-| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)         |
+| Conversion | Description                                    |
+| ---------- | ---------------------------------------------- |
+| float2int  | Float64 → Int64 (decimal places are truncated) |
+| int2float  | Int64 → Float64                                |
+| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
 
 **Example** (evcc provides float, device expects int):
 
@@ -1180,10 +1223,10 @@ It is used when a device returns harmless errors that can be ignored.
 
 **Parameters**:
 
-| Parameter | Type   | Required | Description                                       |
-| --------- | ------ | -------- | ------------------------------------------------- |
-| error     | string | yes      | Error text prefix to ignore                       |
-| set       | config | yes      | Plugin for writing                                |
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | -------- | --------------------------- |
+| error     | string | yes      | Error text prefix to ignore |
+| set       | config | yes      | Plugin for writing          |
 
 **How it works**:
 

@@ -29,6 +29,7 @@ Zusätzlich können Plugins auch für die in [Messaging](/docs/reference/configu
 - [Go Plugin](#go) - Plugin, das Werte über ein Go Skript bereitstellt oder entgegennimmt.
 - [JavaScript Plugin](#javascript) - Plugin, das Werte in über ein JavaScript Skript bereitstellt oder entgegennimmt.
 - [Shell Plugin](#shell) - Plugin, das ein Shell Skript ausführen kann, um Daten zu extrahieren oder schreibend entgegennimmt.
+- [Prometheus Plugin](#prometheus) - Plugin zum Lesen von Metriken aus Prometheus über PromQL.
 
 ### Helpers
 
@@ -674,6 +675,46 @@ source: script
 cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
+
+### Prometheus <Tag label="lesen" category="read" /> {#prometheus}
+
+Das `prometheus` Plugin liest Metriken aus einer Prometheus-Instanz über PromQL-Abfragen.
+Dies ist nützlich, wenn bereits Monitoring-Daten in Prometheus vorliegen, die in evcc verwendet werden sollen.
+
+**Parameter**:
+
+| Parameter | Typ      | Erfordert | Beschreibung                  |
+| --------- | -------- | --------- | ----------------------------- |
+| uri       | string   | ja        | Prometheus Server URL         |
+| query     | string   | ja        | PromQL-Abfrage                |
+| timeout   | duration | nein      | Timeout (Standard: 2 Minuten) |
+
+**Unterstützte Abfrageergebnisse**:
+
+- **Scalar**: Ein einzelner Zahlenwert
+- **Vector**: Ein Vektor mit genau einem Metrik-Eintrag
+
+**Beispiel**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Beispiel mit Zeitbereich**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+Die Abfrage muss einen einzelnen numerischen Wert zurückgeben.
+Bei Vektor-Ergebnissen muss genau eine Metrik enthalten sein.
 
 ## Helpers
 
