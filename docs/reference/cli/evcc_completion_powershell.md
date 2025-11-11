@@ -15,7 +15,6 @@ evcc completion powershell | Out-String | Invoke-Expression
 To load completions for every new session, add the output of the above command
 to your powershell profile.
 
-
 ```
 evcc completion powershell [flags]
 ```
@@ -43,6 +42,4 @@ evcc completion powershell [flags]
 
 ## See also
 
-* [evcc completion](evcc_completion.md)	 - Generate the autocompletion script for the specified shell
-
-
+- [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell

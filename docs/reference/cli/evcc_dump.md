@@ -30,6 +30,4 @@ evcc dump [flags]
 
 ## See also
 
-* [evcc](evcc.md)	 - evcc - open source solar charging
-
-
+- [evcc](evcc.md) - evcc - open source solar charging

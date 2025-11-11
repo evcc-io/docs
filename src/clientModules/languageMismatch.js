@@ -1,6 +1,6 @@
-import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
+import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
 
-const DISMISSED_KEY = 'langMismatchDismissed';
+const DISMISSED_KEY = "langMismatchDismissed";
 
 function createLanguageMismatchDialog() {
   if (!ExecutionEnvironment.canUseDOM) return;
@@ -12,44 +12,48 @@ function createLanguageMismatchDialog() {
 
   // Detect page language from initial URL
   const path = window.location.pathname;
-  const isEnglishPage = path.startsWith('/en/') || path.startsWith('/en');
-  const pageLanguage = isEnglishPage ? 'en' : 'de';
+  const isEnglishPage = path.startsWith("/en/") || path.startsWith("/en");
+  const pageLanguage = isEnglishPage ? "en" : "de";
 
   // Detect browser language preference
-  const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-  const prefersEnglish = browserLang.startsWith('en');
-  const prefersGerman = browserLang.startsWith('de');
+  const browserLang = (
+    navigator.language ||
+    navigator.userLanguage ||
+    ""
+  ).toLowerCase();
+  const prefersEnglish = browserLang.startsWith("en");
+  const prefersGerman = browserLang.startsWith("de");
 
   // Determine if dialog should be shown
   let shouldShow = false;
-  let message = '';
-  let switchText = '';
-  let stayText = '';
-  let targetLanguage = '';
+  let message = "";
+  let switchText = "";
+  let stayText = "";
+  let targetLanguage = "";
 
-  if (pageLanguage === 'de' && prefersEnglish) {
+  if (pageLanguage === "de" && prefersEnglish) {
     shouldShow = true;
-    message = 'This page is available in English.';
-    switchText = 'Switch to English';
-    stayText = 'No thanks';
-    targetLanguage = 'en';
-  } else if (pageLanguage === 'en' && prefersGerman && !prefersEnglish) {
+    message = "This page is available in English.";
+    switchText = "Switch to English";
+    stayText = "No thanks";
+    targetLanguage = "en";
+  } else if (pageLanguage === "en" && prefersGerman && !prefersEnglish) {
     shouldShow = true;
-    message = 'Diese Seite ist auf Deutsch verfügbar.';
-    switchText = 'Zu Deutsch wechseln';
-    stayText = 'Nein danke';
-    targetLanguage = 'de';
+    message = "Diese Seite ist auf Deutsch verfügbar.";
+    switchText = "Zu Deutsch wechseln";
+    stayText = "Nein danke";
+    targetLanguage = "de";
   }
 
   if (!shouldShow) return;
 
   // Create dialog container
-  const dialog = document.createElement('div');
-  dialog.className = 'lang-dialog-container';
-  dialog.style.animation = 'langDialogSlideIn 0.3s ease-out';
+  const dialog = document.createElement("div");
+  dialog.className = "lang-dialog-container";
+  dialog.style.animation = "langDialogSlideIn 0.3s ease-out";
 
   // Inject styles
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     .lang-dialog-container {
       --lang-dialog-bg: var(--ifm-card-background-color);
@@ -168,28 +172,27 @@ function createLanguageMismatchDialog() {
   document.body.appendChild(dialog);
 
   // Handle dismiss button
-  const stayButton = dialog.querySelector('#langDialogStay');
-  stayButton.addEventListener('click', () => {
-    localStorage.setItem(DISMISSED_KEY, 'true');
-    dialog.style.animation = 'langDialogSlideOut 0.3s ease-out';
+  const stayButton = dialog.querySelector("#langDialogStay");
+  stayButton.addEventListener("click", () => {
+    localStorage.setItem(DISMISSED_KEY, "true");
+    dialog.style.animation = "langDialogSlideOut 0.3s ease-out";
     setTimeout(() => dialog.remove(), 300);
   });
 
   // Handle switch button - get current URL at click time
-  const switchButton = dialog.querySelector('#langDialogSwitch');
-  switchButton.addEventListener('click', () => {
+  const switchButton = dialog.querySelector("#langDialogSwitch");
+  switchButton.addEventListener("click", () => {
     const currentPath = window.location.pathname;
     let targetUrl;
 
-    if (targetLanguage === 'en') {
-      targetUrl = '/en' + currentPath;
+    if (targetLanguage === "en") {
+      targetUrl = "/en" + currentPath;
     } else {
-      targetUrl = currentPath.replace(/^\/en/, '') || '/';
+      targetUrl = currentPath.replace(/^\/en/, "") || "/";
     }
 
     window.location.href = targetUrl;
   });
-
 }
 
 // Export for Docusaurus client module lifecycle

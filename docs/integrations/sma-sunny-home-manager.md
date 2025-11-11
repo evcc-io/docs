@@ -30,11 +30,13 @@ Es ist keine Konfiguration auf evcc-Seite erforderlich.
 evcc generiert die notwendigen Gerätekennungen selbstständig.
 
 Jeder Ladepunkt erhält eine eindeutige ID im Format:
+
 ```
 F-AAAAAAAA-BBBBBBBBBBBB-00
 ```
 
 Dabei ist:
+
 - **AAAAAAAA**: Die Vendor ID (8 Zeichen, hexadezimal)
 - **BBBBBBBBBBBB**: Die Device ID (12 Zeichen, hexadezimal)
 

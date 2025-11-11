@@ -44,7 +44,7 @@ For more information about evcc sponsorship, please visit [the sponsorship page]
 
 ### `port`
 
-The local TCP/IP port under which a connection is provided as a proxy server, and from which incoming Modbus TCP connections from third-party systems are accepted. 
+The local TCP/IP port under which a connection is provided as a proxy server, and from which incoming Modbus TCP connections from third-party systems are accepted.
 
 **For example**:
 
@@ -56,7 +56,7 @@ port: 5021
 
 ### `uri`
 
-The IP address and the port of the target device in common URI Scheme. 
+The IP address and the port of the target device in common URI Scheme.
 
 Every provided port must be unique and not already in use by another application on the same host, however, it must not be different from the port of the target device. Therefore it is valid to define a configuration for port 502, which refers to port 502 on the target device.
 
