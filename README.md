@@ -6,7 +6,6 @@ Official documentation repository of [evcc](https://evcc.io).
 
 - The source content of the folder `templates` is the `templates/definition` folder in the [evcc repository](https://github.com/evcc-io/evcc)
 - We recommend to test changes locally, use the instructions below to run the documentation page locally as you can see how the changes will look like on the web page while you make changes.
-- English translation: If possible please provide the translation in English as well to ensure that the content does not get out of sync.
 
 ## Local setup
 
@@ -51,3 +50,22 @@ Run this command inside the evcc core repository (e.g. `./evcc`).
 ```sh
 go run main.go gendoc ../evcc-docs/docs/reference/cli/
 ```
+
+## Contributing
+
+### Code Formatting
+
+Before submitting a PR, run `npm run format` to ensure consistent code formatting.
+
+The CI pipeline will automatically check formatting and fail if files are not properly formatted.
+
+**VS Code users:** The repository includes recommended settings to format files automatically on save.
+
+### Content Changes
+
+**Important:** When making content changes, always update both German and English versions together to prevent translations from getting out of sync.
+
+- German content: `/docs` and `/blog`
+- English content: `/i18n/en/docusaurus-plugin-content-docs/current` and `/i18n/en/docusaurus-plugin-content-blog`
+
+If you only speak one language, please mention this in your PR so maintainers can help with the translation.
