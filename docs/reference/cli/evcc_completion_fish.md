@@ -20,7 +20,6 @@ evcc completion fish > ~/.config/fish/completions/evcc.fish
 
 You will need to start a new shell for this setup to take effect.
 
-
 ```
 evcc completion fish [flags]
 ```
@@ -48,6 +47,4 @@ evcc completion fish [flags]
 
 ## See also
 
-* [evcc completion](evcc_completion.md)	 - Generate the autocompletion script for the specified shell
-
-
+- [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell

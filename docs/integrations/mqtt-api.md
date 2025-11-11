@@ -24,7 +24,7 @@ Alle API IDs (z. B. die Loadpoint ID) beginnen bei `1`.
 - `evcc/site/bufferSoc`: battery buffer SoC (writable)
 - `evcc/site/bufferStartSoc`: battery buffer start SoC (writable)
 - `evcc/site/residualPower`: grid residual power (writable)
-- `evcc/site/smartCostLimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
+- `evcc/site/batteryGridChargeLimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
 - `evcc/site/batteryDischargeControl`: enable/disable battery discharge control (true/false) (writable)
 
 ## Vehicles
@@ -73,6 +73,7 @@ Beispiele:
 :::note
 \*\* Unterstützung leerer Werte:
 Folgende Zeichenfolgen werden als leere Werte erkannt:
+
 - `nil`
 - `null`
 - `none`

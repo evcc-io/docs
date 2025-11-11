@@ -30,11 +30,13 @@ No configuration is required on the evcc side.
 evcc automatically generates the necessary device IDs.
 
 Each charge point receives a unique ID in the format:
+
 ```
 F-AAAAAAAA-BBBBBBBBBBBB-00
 ```
 
 Where:
+
 - **AAAAAAAA**: The Vendor ID (8 characters, hexadecimal)
 - **BBBBBBBBBBBB**: The Device ID (12 characters, hexadecimal)
 

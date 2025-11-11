@@ -159,7 +159,7 @@ import { themes as prismThemes } from "prism-react-renderer";
           contextualSearch: true,
         },
       }),
-    clientModules: [require.resolve('./src/clientModules/languageMismatch.js')],
+    clientModules: [require.resolve("./src/clientModules/languageMismatch.js")],
     plugins: [
       [
         "@docusaurus/plugin-client-redirects",

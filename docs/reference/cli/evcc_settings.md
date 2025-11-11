@@ -19,8 +19,6 @@ Manage configuration settings
 
 ## See also
 
-* [evcc](evcc.md)	 - evcc - open source solar charging
-* [evcc settings get](evcc_settings_get.md)	 - Get configuration settings
-* [evcc settings set](evcc_settings_set.md)	 - Set configuration setting
-
-
+- [evcc](evcc.md) - evcc - open source solar charging
+- [evcc settings get](evcc_settings_get.md) - Get configuration settings
+- [evcc settings set](evcc_settings_set.md) - Set configuration setting

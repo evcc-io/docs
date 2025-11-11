@@ -121,7 +121,7 @@ function indent(code, list = false) {
 }
 
 function templateContent(entry, type, translate) {
-  const description = entry.description ? entry.description + "\n" : "";
+  const description = entry.description ? `${entry.description}\n` : "";
 
   const codeBlocks = entry.render.map((render) => {
     let preamble = render.usage || type;
@@ -139,31 +139,32 @@ function templateContent(entry, type, translate) {
         : null;
     return {
       usage: render.usage,
-      code: `<DeviceConfig code={\`${code}\`} ${advanced ? `advanced={\`${advanced}\`}` : ""} />\n\n`,
+      code: advanced
+        ? `<DeviceConfig\n  code={\`${code}\`}\n  advanced={\`${advanced}\`}\n/>\n`
+        : `<DeviceConfig\n  code={\`${code}\`}\n/>\n`,
     };
   });
 
   let code = "";
   if (codeBlocks.length === 1) {
-    code = codeBlocks[0].code + "\n\n";
+    code = codeBlocks[0].code;
   } else {
     code = `<Tabs>
 ${codeBlocks
   .map(
-    (block, i) => `<TabItem value="${block.usage}" label="${translate(
+    (block, i) => `  <TabItem value="${block.usage}" label="${translate(
       `tab.${block.usage}`,
     )}"${i === 0 ? " default" : ""}>
 
 ${block.code}
-
-</TabItem>`,
+  </TabItem>`,
   )
   .join("\n")}
 </Tabs>\n\n`;
   }
 
   const sponsor = entry.requirements?.includes("sponsorship")
-    ? `<SponsorshipRequired />\n\n`
+    ? `<SponsorshipRequired />\n`
     : "";
 
   let countryList = [];
@@ -239,7 +240,8 @@ function generateMarkdown(data, type, translate, target) {
   if (type === "charger") {
     data = data.filter(
       (x) =>
-        !["smartswitch", "heating"].includes(CHARGER_GROUPS[x.product.group]),
+        !["smartswitch", "heating"].includes(CHARGER_GROUPS[x.product.group]) &&
+        !["heating"].includes(HEATING_GROUPS[x.product.group]),
     );
   }
 
@@ -270,19 +272,21 @@ function generateMarkdown(data, type, translate, target) {
     generated += `<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/${type}  -->\n\n`;
 
     if (group !== lastGroup) {
-      generated += `## ${group}\n\n`;
+      generated += `## ${group.trim()}\n\n`;
       generated += additionalContent(group, target);
     }
 
     if (brand && brand !== lastBrand) {
       const level = group ? "###" : "##";
-      generated += `${level} ${brand}\n\n`;
+      generated += `${level} ${brand.trim()}\n\n`;
       brandCounter++;
     }
 
     if (brand && brand !== nextBrand && brand !== lastBrand) {
-      generated = generated.slice(0, -2); // remove last newline characters
-      generated += ` ${description}\n\n`;
+      if (description) {
+        generated = generated.slice(0, -2); // remove last two newline characters
+        generated += ` ${description}\n\n`;
+      }
     } else {
       let level = "##";
       if (group) level += "#";

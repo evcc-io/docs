@@ -19,23 +19,32 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 
 ## Overview
 
-evcc offers the following plugins:
+### Plugins
 
 - [Modbus Plugin](#modbus) - Plugin for reading from a Modbus-capable device.
 - [MQTT Plugin](#mqtt) - Plugin for indirectly communicating with MQTT-capable devices via MQTT.
 - [HTTP Plugin](#http) - Plugin that communicates with end devices via HTTP API.
 - [Websocket Plugin](#websocket) - Plugin for receiving device data via its own web server. Can only be used for reading data.
 - [SMA/Speedwire Plugin](#speedwire) - Plugin specifically for SMA devices that can communicate with the Speedwire protocol.
+- [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
 - [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
 - [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
-- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Prometheus Plugin](#prometheus) - Plugin for reading metrics from Prometheus using PromQL.
 
-In addition to these integration plugins, there are also helper plugins that provide additional functions:
+### Helpers
 
 - [Const Plugin](#const) - Special plugin that simply returns a constant value.
 - [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
 - [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
+- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Switch Plugin](#switch) - Meta-plugin for conditional write operations based on input values (like switch/case).
+- [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
+- [Sequence Plugin](#sequence) - Meta-plugin for sequential execution of multiple write operations.
+- [Sleep Plugin](#sleep) - Helper plugin for delaying actions (usually used with Sequence).
+- [Map Plugin](#map) - Meta-plugin for translating integer values (e.g., device-specific modes to evcc modes).
+- [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
+- [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
 
 ### Syntax
 
@@ -117,16 +126,16 @@ The following tables contain all attributes that can be provided by plugins when
 When using the plugins, it's also important that they return the correct data type.
 To convert to the required data type, the pipelines described in [Reading](#reading) can be used.
 
-| Attribute | Type                | Required | Context       | Description           |
-| --------- | ------------------- | -------- | ------------- | --------------------- |
-| power     | float               | yes      | all           | Current power in W    |
-| energy    | float               | no       | all           | Meter reading in kWh  |
-| maxpower  | int                 | no       | `pv` (hybrid) | Maximum AC power in W |
-| soc       | int                 | no       | `battery`     | State of charge in %  |
-| capacity  | float               | no       | `battery`     | Capacity in kWh       |
-| powers    | [float,float,float] | no       | all           | Phase powers in W     |
-| currents  | [float,float,float] | no       | all           | Phase currents in A   |
-| voltages  | [float,float,float] | no       | all           | Phase voltages in V   |
+| Attribute | Type                | Required | Context       | Description                                                 |
+| --------- | ------------------- | -------- | ------------- | ----------------------------------------------------------- |
+| power     | float               | yes      | all           | Current power in W                                          |
+| energy    | float               | no       | all           | Meter reading in kWh                                        |
+| maxpower  | int                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
+| soc       | int                 | no       | `battery`     | State of charge in %                                        |
+| capacity  | float               | no       | `battery`     | Capacity in kWh                                             |
+| powers    | [float,float,float] | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
+| currents  | [float,float,float] | no       | all           | Phase currents in A. For detecting active phases.           |
+| voltages  | [float,float,float] | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
 
 **Example**
 
@@ -159,22 +168,22 @@ In addition to the attributes that plugins provide for reading evaluation, the f
 
 Wallboxes and chargers have the following attributes that can be read:
 
-| Attribute   | Type                | Required | Description                          |
-| ----------- | ------------------- | -------- | ------------------------------------ |
-| status      | string              | yes      | Status (A..F)                        |
-| enabled     | bool                | yes      | Is charging enabled?                 |
-| power       | float               | no       | Charging power in W                  |
-| energy      | float               | no       | Meter reading in kWh                 |
-| identify    | string              | no       | Current RFID identifier              |
-| soc         | int                 | no       | State of charge in %                 |
-| phases      | int                 | no       | Number of physical phases (1..3)     |
-| powers      | [float,float,float] | no       | Phase powers in W                    |
-| currents    | [float,float,float] | no       | Phase currents in A                  |
-| voltages    | [float,float,float] | no       | Phase voltages in V                  |
-| temp        | float               | no       | Current temperature in °C (heating)  |
-| templimit   | int                 | no       | Temperature limit in °C (heating)    |
-| getmode     | int                 | no       | SG-Ready mode (heat pump)            |
-| getmaxpower | float               | no       | Maximum heating power in W (heating) |
+| Attribute   | Type                | Required | Description                                                 |
+| ----------- | ------------------- | -------- | ----------------------------------------------------------- |
+| status      | string              | yes      | Status (A..F)                                               |
+| enabled     | bool                | yes      | Is charging enabled?                                        |
+| power       | float               | no       | Charging power in W                                         |
+| energy      | float               | no       | Meter reading in kWh                                        |
+| identify    | string              | no       | Current RFID identifier                                     |
+| soc         | int                 | no       | State of charge in %                                        |
+| phases      | int                 | no       | Number of physical phases (1..3)                            |
+| powers      | [float,float,float] | no       | Phase powers in W. For sign detection of unsigned currents. |
+| currents    | [float,float,float] | no       | Phase currents in A. For detecting active phases.           |
+| voltages    | [float,float,float] | no       | Phase voltages in V. For connection detection (1p/3p).      |
+| temp        | float               | no       | Current temperature in °C (heating)                         |
+| templimit   | int                 | no       | Temperature limit in °C (heating)                           |
+| getmode     | int                 | no       | SG-Ready mode (heat pump)                                   |
+| getmaxpower | float               | no       | Maximum heating power in W (heating)                        |
 
 #### General Configuration Options {#charger-config}
 
@@ -531,6 +540,95 @@ Supported values for `value` can be found in the diagnostic output using the `ev
 
 All possible values can be found as constants [here](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (use the constant name for `value`).
 
+### Go <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#go}
+
+The `go` plugin uses the [Yaegi](https://github.com/traefik/yaegi) interpreter to execute Go code at runtime.
+It's particularly useful for type-safe calculations and complex data processing logic.
+
+#### Available Go Standard Libraries
+
+The following Go packages are automatically available and don't need to be imported:
+
+- `fmt` - Formatted I/O
+- `math` - Mathematical functions
+- `strings` - String manipulation
+- `time` - Time and date functions
+
+**Reading Example**:
+
+```yaml
+source: go
+script: |
+  res := 500.0
+  res * 2 // returns 1000.0
+```
+
+**Example with Time Functions**:
+
+```yaml
+source: go
+script: |
+  hour := time.Now().Hour()
+  price := 50.0 // Night tariff
+  if hour >= 9 && hour < 17 {
+    price = 100.0 // Tariff price during business hours
+  }
+  price
+```
+
+**Example with String Processing**:
+
+```yaml
+source: go
+script: |
+  text := "hello world"
+  strings.ToUpper(text) // returns "HELLO WORLD"
+```
+
+When the `go` plugin is used for writing, the value to be written is passed to the script as a variable:
+
+**Writing Example**:
+
+```yaml
+charger:
+  - type: custom
+    maxcurrent:
+      source: go
+      script: |
+        fmt.Printf("Setting charge current: %d A\n", maxcurrent)
+        // maxcurrent variable is automatically available
+```
+
+#### Using Input Transformations
+
+The `in` parameter allows you to use values from other sources as variables in your script.
+This example shows conditional logic that cannot be achieved with simple Calc operations:
+
+```yaml
+power:
+  source: go
+  script: |
+    // Power based on SoC and standby
+    power := 5000.0 // normal
+    if standby {
+      power = 0.0 // no load in standby
+    } else if soc < 20.0 {
+      power = 1000.0 // low
+    }
+    power
+  in:
+    - name: soc
+      type: float
+      config:
+        source: const
+        value: 85.0
+    - name: standby
+      type: bool
+      config:
+        source: const
+        value: false
+```
+
 ### JavaScript <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#javascript}
 
 evcc integrates a JavaScript interpreter with the [Underscore.js](https://underscorejs.org) library, which is directly accessible via `_.`, e.g. `_.random(0,5)`.
@@ -577,6 +675,48 @@ source: script
 cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
+
+### Prometheus <Tag label="read" category="read" /> {#prometheus}
+
+The `prometheus` plugin reads metrics from a Prometheus instance using PromQL queries.
+This is useful when monitoring data is already available in Prometheus and should be used in evcc.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                  |
+| --------- | -------- | -------- | ---------------------------- |
+| uri       | string   | yes      | Prometheus server URL        |
+| query     | string   | yes      | PromQL query                 |
+| timeout   | duration | no       | Timeout (default: 2 minutes) |
+
+**Supported query results**:
+
+- **Scalar**: A single numerical value
+- **Vector**: A vector with exactly one metric entry
+
+**Example**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Example with time range**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+The query must return a single numerical value.
+For vector results, exactly one metric must be included.
+
+## Helpers
 
 ### Const <Tag label="read" category="read" /> {#const}
 
@@ -718,3 +858,406 @@ meters:
 ```
 
 In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
+
+### Switch <Tag label="write" category="write" /> {#switch}
+
+The `switch` plugin performs conditional write operations, similar to a switch/case statement in programming languages.
+Based on the input value, the corresponding action is executed.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                        |
+| --------- | ------ | -------- | -------------------------------------------------- |
+| switch    | [case] | yes      | Array of cases with `case` and `set` configuration |
+| default   | config | no       | Fallback plugin if no case matches                 |
+
+**How it works**:
+
+1. Input value is compared with the `case` values
+2. On match, the corresponding `set` plugin is executed
+3. If no case matches and `default` is defined, it is executed
+4. If no case matches and no `default` is defined, an error occurs
+
+**Supported data types**: `int64` (integer values only)
+
+**Example**:
+
+```yaml
+setmode:
+  source: switch
+  switch:
+    - case: 1 # reduced
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "eco"
+    - case: 2 # normal
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "normal"
+    - case: 3 # boost
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "boost"
+```
+
+### Watchdog <Tag label="write" category="write" /> {#watchdog}
+
+The `watchdog` plugin is a wrapper plugin that automatically repeats write operations at regular intervals.
+Some devices (e.g. battery storage systems, inverters) expect control commands to be repeated regularly to stay active.
+The watchdog plugin monitors write operations and automatically repeats them at half the configured timeout interval.
+
+**Parameters**:
+
+| Parameter | Type               | Required | Description                                                        |
+| --------- | ------------------ | -------- | ------------------------------------------------------------------ |
+| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2) |
+| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                          |
+| initial   | string             | no       | Value that is written once at startup                              |
+| set       | config             | yes      | Nested plugin for the actual write operation                       |
+
+**How it works**:
+
+1. **Start**: If `initial` is configured, this value is written once at startup
+2. **Write**: When a value is written, the plugin checks whether it is in the `reset` list
+3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value every `timeout/2` seconds
+4. **Watchdog stops**: If the value is in `reset`, no repetitions are performed
+
+**reset parameter**:
+
+- Defines values at which the watchdog is stopped
+- Can be a single value (`reset: 0`) or multiple values (`reset: [0, 1]`)
+- Typically used for "safe" or "default" states that don't need continuous repetition
+
+**initial parameter**:
+
+- Optional value that is written once when the plugin starts
+- Useful for setting a defined initial state
+- Executed before all other write operations
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Example Write**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+In this example, values are automatically repeated every 30 s, except when the value `0` is written.
+
+**Flow example** with `timeout: 60s`, `reset: 0`:
+
+- Plugin starts
+- Write value `100` → Watchdog **runs**, value is repeated every 30 s
+- After 2 minutes: Value `100` has been written 4x (0s, 30s, 60s, 90s, 120s)
+- Write value `200` → Watchdog **continues** running, now with new value `200` every 30 s
+- Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
+- No further repetitions until a new value != `0` is written
+
+**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Stop repetitions in normal operation
+  set:
+    source: switch
+    switch:
+      - case: 1 # normal
+        set:
+          source: modbus
+          # ... Modbus configuration for normal operation
+      - case: 2 # hold
+        set:
+          source: modbus
+          # ... Modbus configuration for hold mode
+      - case: 3 # charge
+        set:
+          source: modbus
+          # ... Modbus configuration for charge mode
+```
+
+### Sequence <Tag label="write" category="write" /> {#sequence}
+
+The `sequence` plugin executes multiple write operations sequentially.
+All nested plugins receive the same input value and are executed in the defined order.
+Execution stops immediately on error.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                           |
+| --------- | -------- | -------- | ------------------------------------- |
+| set       | [config] | yes      | Array of nested plugin configurations |
+
+**How it works**:
+
+1. Input value is received
+2. Each plugin in the `set` list is called sequentially with this value
+3. On error, the sequence is aborted and the error is returned
+4. Successful execution means all plugins executed successfully
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Use cases**:
+
+- Execute multiple HTTP calls sequentially
+- Combine with `sleep` plugin for time-delayed actions
+- Write multiple modbus registers simultaneously
+- Propagate values to multiple targets
+
+**Example 1: Multiple HTTP calls**
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/pin1
+      method: POST
+      body: '{"value": "on"}'
+    - source: http
+      uri: http://device.local/api/pin4
+      method: POST
+      body: '{"value": "off"}'
+```
+
+**Example 2: Combination with switch**
+
+```yaml
+batterymode:
+  source: sequence
+  set:
+    - source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            body: "automatic"
+        - case: 3 # charge
+          set:
+            source: sequence
+            set:
+              - source: sleep
+                duration: 1s
+              - source: http
+                uri: http://battery.local/api/charge
+                body: "5000" # 5 kW
+    - source: mqtt
+      topic: home/battery/status
+      payload: "mode_${batterymode}"
+```
+
+**Flow for `batterymode: 1` (normal)**:
+
+1. Outer `sequence` receives value `1`
+2. First step: `switch` checks value `1`
+   - Case `1` matches → HTTP call to `/api/mode` with body `automatic`
+3. Second step: `mqtt` sends message to `home/battery/status` with payload `mode_1`
+4. Done
+
+**Flow for `batterymode: 3` (charge)**:
+
+1. Outer `sequence` receives value `3`
+2. First step: `switch` checks value `3`
+   - Case `3` matches → Inner `sequence` is executed:
+     - Wait 1 second (`sleep`)
+     - HTTP call to `/api/charge` with body `5000`
+3. Second step: `mqtt` sends message to `home/battery/status` with payload `mode_3`
+4. Done
+
+The value flows through all plugins, with `switch` executing different actions based on the value and `mqtt` always notifying at the end.
+
+### Sleep <Tag label="write" category="write" /> {#sleep}
+
+The `sleep` plugin adds a delay.
+Typically used within a `sequence` plugin to create time intervals between actions.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                                        |
+| --------- | -------- | -------- | -------------------------------------------------- |
+| duration  | duration | yes      | Wait time (e.g., `1s`, `500ms`, `0s` for no delay) |
+
+**Example**:
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/prepare
+      method: POST
+    - source: sleep
+      duration: 500ms
+    - source: http
+      uri: http://device.local/api/activate
+      method: POST
+```
+
+### Map <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#map}
+
+The `map` plugin translates integer values to other integer values using a lookup table.
+It is often used to convert device-specific values to evcc standard values and vice versa.
+
+**Parameters**:
+
+| Parameter | Type            | Required | Description                                     |
+| --------- | --------------- | -------- | ----------------------------------------------- |
+| values    | map[int64]int64 | yes      | Lookup table with input → output mapping        |
+| get       | config          | no       | Plugin for reading (only required when reading) |
+| set       | config          | no       | Plugin for writing (only required when writing) |
+
+**How it works**:
+
+**When reading**:
+
+1. `get` plugin returns a value (e.g., `0`)
+2. Value is looked up in the `values` table
+3. The mapped value is returned (e.g., `0` → `2`)
+
+**When writing**:
+
+1. Input value is received (e.g., `3`)
+2. Value is looked up in the `values` table
+3. The mapped value is passed to the `set` plugin (e.g., `3` → `6`)
+
+If no matching value is found in the table, an error occurs.
+
+**Supported data types**: `int64` (integer values only)
+
+**Reading example** (device value → evcc):
+
+```yaml
+getmode:
+  source: map
+  values:
+    0: 2 # Device "Free" → evcc "normal"
+    1: 1 # Device "Forced off" → evcc "reduced"
+    2: 3 # Device "Recommended on" → evcc "boost"
+    3: 3 # Device "Forced on" → evcc "boost"
+  get:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: holding
+      encoding: int16
+```
+
+**Writing example** (evcc → device value):
+
+```yaml
+setmode:
+  source: map
+  values:
+    1: 1 # evcc "reduced" → Device "Forced off"
+    2: 0 # evcc "normal" → Device "Free"
+    3: 3 # evcc "boost" → Device "Forced on"
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: writeholding
+      encoding: int16
+```
+
+### Convert <Tag label="write" category="write" /> {#convert}
+
+The `convert` plugin converts data types when writing.
+It is used when a plugin expects a different data type than evcc provides.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                         |
+| --------- | ------ | -------- | ----------------------------------- |
+| convert   | string | yes      | Conversion type                     |
+| set       | config | yes      | Plugin for writing after conversion |
+
+**Supported conversions**:
+
+| Conversion | Description                                    |
+| ---------- | ---------------------------------------------- |
+| float2int  | Float64 → Int64 (decimal places are truncated) |
+| int2float  | Int64 → Float64                                |
+| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
+
+**Example** (evcc provides float, device expects int):
+
+```yaml
+limitsoc:
+  source: convert
+  convert: float2int
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 41009
+      type: writesingle
+      encoding: uint16
+```
+
+In this example, evcc converts a float value like `85.5` to `85` before writing it to the modbus register.
+
+### Ignore <Tag label="write" category="write" /> {#ignore}
+
+The `ignore` plugin suppresses specific error messages when writing.
+It is used when a device returns harmless errors that can be ignored.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | -------- | --------------------------- |
+| error     | string | yes      | Error text prefix to ignore |
+| set       | config | yes      | Plugin for writing          |
+
+**How it works**:
+
+1. The nested `set` plugin is executed
+2. If an error occurs, it checks whether the error message starts with the `error` string
+3. If yes, the error is ignored and success is returned
+4. If no, the error is passed through normally
+
+**Supported data types**: `int64`, `float64`, `bool`, `[]byte`
+
+**Example**:
+
+```yaml
+batterymode:
+  source: switch
+  switch:
+    - case: 1 # normal
+      set:
+        source: const
+        value: 2
+        set:
+          source: ignore
+          error: "modbus: response data size '18' does not match count '4'"
+          set:
+            source: modbus
+            uri: 192.168.1.10:502
+            id: 1
+            register:
+              address: 0x1110
+              type: writemultiple
+              encoding: int16
+```
+
+In this example, the device returns a harmless modbus error that is ignored.

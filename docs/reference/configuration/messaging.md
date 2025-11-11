@@ -341,7 +341,6 @@ Der Typ `custom` ermöglicht es, beliebige [Plugins](/docs/devices/plugins) für
 
 - `send`: Definiert das zu verwendende Plugin mit dem Feld `source` und plugin-spezifische Parameter. Siehe das Beispiel weiter unten.
 - `encoding`: Definiert das Format, in dem der Wert für `${send}` bereitgestellt wird. Die möglichen Werte sind:
-
   - `json`: Der Wert wird als JSON-Objekt im Format `{ "msg": msg, "title": title }` bereitgestellt. Das Feld `title` wird nur hinzugefügt, wenn es im Abschnitt `events` definiert ist.
   - `csv`: Die Felder `title` und `msg` werden als kommaseparierte Liste bereitgestellt (`title, msg`)
   - `tsv`: Ähnlich wie `csv`, jedoch mit Tabulator als Trennzeichen.
