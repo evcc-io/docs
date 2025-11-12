@@ -26,37 +26,17 @@ Important points:
 
 evcc supports two connection methods: **Relay** (analogue via a switch contact) or **EEBus** (digital via the EEBus protocol).
 
-## Setting Up Load Management
+## Setup
 
-Load management must be configured for § 14a EnWG control.
-A special `lpc` (Local Power Control) circuit is created, to which all controllable consumers are assigned.
-When a reduction signal is active, evcc automatically sets a temporary power limit for this circuit.
+§ 14a EnWG control uses evcc's [Load Management](./loadmanagement).
+When setting up HEMS, an internal `lpc` (Local Power Control) control circuit is automatically created, to which all charging points and other consumers are assigned.
+When a reduction signal is active, evcc sets a temporary power limit for this circuit.
 
-### Minimal Configuration
+No separate load management configuration is required.
+If you already use load management, the `lpc` control circuit will be placed as the highest level above your existing circuits.
 
-```yaml
-circuits: # optional
-  - name: lpc # Local Power Control - circuit for grid requirements
-
-loadpoints:
-  - title: Garage
-    charger: charger1
-  - title: Carport
-    charger: charger2
-```
-
-All charging points are automatically assigned to the internal `lpc` circuit and reduced accordingly when a control request is received.
-
-For advanced configurations with sub-circuits, see [Load Management](./loadmanagement).
-
-:::info Highest Level
-The `lpc` circuit always has the highest level.
-If you don't define it manually, it will be automatically created when HEMS is configured and inserted above the highest circuit.
-:::
-
-:::tip Configuration Interface
-Load management and HEMS can also be set up via the configuration interface.
-Important: Configure load management first before setting up HEMS.
+:::tip
+HEMS can also be set up via the configuration interface.
 :::
 
 ## Configuration via Relay (Analogue)
@@ -254,7 +234,7 @@ When a control limit is active, a **banner with control notice** is displayed on
 ## Controlling Additional Consumers
 
 In addition to charging points, other controllable consumers can also be integrated into § 14a load management.
-This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with a switching output.
+This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with an additional relay output.
 
 The control takes into account the current power consumption of all consumers assigned to the internal `lpc` circuit.
 This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
@@ -264,11 +244,9 @@ The remaining power is then distributed to the active charging points.
 Due to flat dimming of other consumers, the available charging power for active charging points can in exceptional cases even be higher than in normal state.
 If throttling the charging points including dimming all other consumers is not sufficient, charging processes at charging points are interrupted.
 
-:::note Consumer Control
-This feature is currently only implemented for EEBus meters with LPC.
-For some devices, power can also be continuously dimmed.
-This enables more precise control than simple on/off switching.
-Support for additional meters will be added in the future.
+:::note Availability
+Currently, only one dimmable meter (EEBus consumer) exists.
+This feature is being expanded and compatible meters will be marked in the [device documentation](/docs/devices/meters).
 :::
 
 ## Further Information
