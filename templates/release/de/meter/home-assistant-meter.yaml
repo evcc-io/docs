@@ -53,6 +53,7 @@ render:
       voltageL2: sensor.house_voltage_l2 # L2 Spannungsentität, Entitäts-ID für L2 Spannungsmessung in Volt (optional)
       voltageL3: sensor.house_voltage_l3 # L3 Spannungsentität, Entitäts-ID für L3 Spannungsmessung in Volt (optional)
       soc: sensor.battery_soc # Batterieladestand, Entitäts-ID für Batterieladestand in Prozent (optional)
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
   - usage: battery
     default: |
       type: template
@@ -61,6 +62,9 @@ render:
       uri: http://homeassistant.local:8123 # URI, HTTP(S) Adresse
       token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
       power: sensor.house_power # Leistungsentität, Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
+      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
     advanced: |
       type: template
       template: homeassistant
@@ -68,6 +72,9 @@ render:
       uri: http://homeassistant.local:8123 # URI, HTTP(S) Adresse
       token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
       power: sensor.house_power # Leistungsentität, Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
+      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
       energy: sensor.house_energy # Energieentität, Entitäts-ID für kumulative Energiemessung in kWh. Sollte die gesamte verbrauchte/produzierte Energie liefern, nicht tägliche oder Intervallwerte. (optional)
       currentL1: sensor.house_current_l1 # L1 Stromentität, Entitäts-ID für L1 Strommessung in Ampere (optional)
       currentL2: sensor.house_current_l2 # L2 Stromentität, Entitäts-ID für L2 Strommessung in Ampere (optional)
@@ -76,6 +83,8 @@ render:
       voltageL2: sensor.house_voltage_l2 # L2 Spannungsentität, Entitäts-ID für L2 Spannungsmessung in Volt (optional)
       voltageL3: sensor.house_voltage_l3 # L3 Spannungsentität, Entitäts-ID für L3 Spannungsmessung in Volt (optional)
       soc: sensor.battery_soc # Batterieladestand, Entitäts-ID für Batterieladestand in Prozent (optional)
+      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
+      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
   - usage: aux
     default: |
       type: template
@@ -150,6 +159,33 @@ params:
     help: Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
     advanced: false
     optional: false
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Akkukapazität
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default:
+    choice: []
+    unit: '%'
+    description: Minimaler Ladestand
+    help: Untere Grenze beim Entladen der Batterie im normalen Betrieb
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default:
+    choice: []
+    unit: '%'
+    description: Maximaler Ladestand
+    help: Oberes Limit beim Laden der Batterie aus dem Netz
+    advanced: false
+    optional: true
   - name: energy
     example: sensor.house_energy
     default:
@@ -220,5 +256,32 @@ params:
     unit:
     description: Batterieladestand
     help: Entitäts-ID für Batterieladestand in Prozent
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Ladeleistung
+    help: Für erzwungenes Laden des Speichers.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Entladeleistung
+    help: Maximale Entladeleistung des Speichers.
+    advanced: true
+    optional: true
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximale AC Leistung des Hybrid-Wechselrichters
+    help:
     advanced: true
     optional: true

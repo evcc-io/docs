@@ -53,6 +53,7 @@ render:
       voltageL2: sensor.house_voltage_l2 # L2 Voltage Entity, Entity ID for L2 voltage measurement in volts (optional)
       voltageL3: sensor.house_voltage_l3 # L3 Voltage Entity, Entity ID for L3 voltage measurement in volts (optional)
       soc: sensor.battery_soc # Battery State of Charge, Entity ID for battery state of charge in percent (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
   - usage: battery
     default: |
       type: template
@@ -61,6 +62,9 @@ render:
       uri: http://homeassistant.local:8123 # URI, HTTP(S) address
       token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
       power: sensor.house_power # Power Entity, Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
       template: homeassistant
@@ -68,6 +72,9 @@ render:
       uri: http://homeassistant.local:8123 # URI, HTTP(S) address
       token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
       power: sensor.house_power # Power Entity, Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       energy: sensor.house_energy # Energy Entity, Entity ID for cumulative energy measurement in kWh. Should provide total energy consumed/produced, not daily or interval values. (optional)
       currentL1: sensor.house_current_l1 # L1 Current Entity, Entity ID for L1 current measurement in amperes (optional)
       currentL2: sensor.house_current_l2 # L2 Current Entity, Entity ID for L2 current measurement in amperes (optional)
@@ -76,6 +83,8 @@ render:
       voltageL2: sensor.house_voltage_l2 # L2 Voltage Entity, Entity ID for L2 voltage measurement in volts (optional)
       voltageL3: sensor.house_voltage_l3 # L3 Voltage Entity, Entity ID for L3 voltage measurement in volts (optional)
       soc: sensor.battery_soc # Battery State of Charge, Entity ID for battery state of charge in percent (optional)
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
   - usage: aux
     default: |
       type: template
@@ -150,6 +159,33 @@ params:
     help: Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
     advanced: false
     optional: false
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default:
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit when discharging the battery in normal operation
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default:
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit when charging the battery from the grid
+    advanced: false
+    optional: true
   - name: energy
     example: sensor.house_energy
     default:
@@ -220,5 +256,32 @@ params:
     unit:
     description: Battery State of Charge
     help: Entity ID for battery state of charge in percent
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: For forced charging of the battery.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
+    advanced: true
+    optional: true
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximum AC power of the hybrid inverter
+    help:
     advanced: true
     optional: true
