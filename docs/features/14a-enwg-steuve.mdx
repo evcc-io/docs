@@ -26,39 +26,17 @@ Wichtige Punkte:
 
 evcc unterstützt zwei Wege für die Anbindung: **Relais** (analog über einen Schaltkontakt) oder **EEBus** (digital über das EEBus-Protokoll).
 
-## Lastmanagement einrichten
+## Einrichtung
 
-Für die § 14a EnWG Steuerung muss das [Lastmanagement](./loadmanagement) konfiguriert sein.
-Dabei wird ein spezieller `lpc` (Local Power Control) Stromkreis angelegt, dem alle steuerbaren Verbraucher zugeordnet werden.
-Bei aktivem Reduzierungssignal setzt evcc automatisch ein temporäres Leistungslimit für diesen Stromkreis.
+Die § 14a EnWG Steuerung nutzt das [Lastmanagement](./loadmanagement) von evcc.
+Beim Einrichten von HEMS wird automatisch ein interner `lpc` (Local Power Control) Steuerstromkreis angelegt, dem alle Ladepunkte und sonstigen Verbraucher zugeordnet werden.
+Bei aktivem Reduzierungssignal setzt evcc ein temporäres Leistungslimit für diesen Stromkreis.
 
-### Minimale Konfiguration
+Eine separate Lastmanagement-Konfiguration ist nicht erforderlich.
+Falls du bereits Lastmanagement nutzt, wird der `lpc` Steuerstromkreis als oberste Ebene über deine bestehenden Stromkreise gesetzt.
 
-```yaml
-circuits:
-  - name: lpc # Local Power Control - Stromkreis für Netzanforderungen
-
-loadpoints:
-  - title: Garage
-    charger: charger1
-    circuit: lpc # steuerbarer Verbraucher
-  - title: Carport
-    charger: charger2
-    circuit: lpc # steuerbarer Verbraucher
-```
-
-Alle Ladepunkte, die dem `lpc` Stromkreis oder einem Unterstromkreis zugeordnet sind, werden bei einer Regelanforderung entsprechend reduziert.
-
-Für erweiterte Konfigurationen mit Unterstromkreisen siehe [Lastmanagement](./loadmanagement).
-
-:::info Höchste Ebene
-Der `lpc` Stromkreis hat immer die höchste Ebene.
-Definierst du ihn nicht manuell (wie oben), wird er bei konfiguriertem HEMS automatisch erstellt und über dem höchsten Stromkreis eingefügt.
-:::
-
-:::tip Konfigurationsoberfläche
-Lastmanagement und HEMS können auch über die Konfigurationsoberfläche eingerichtet werden.
-Wichtig: Konfiguriere zuerst das Lastmanagement, bevor du HEMS einrichtest.
+:::tip
+HEMS kann auch über die Konfigurationsoberfläche eingerichtet werden.
 :::
 
 ## Konfiguration via Relais (Analog)
@@ -252,6 +230,24 @@ Die Batterie wird in den "Hold"-Modus versetzt, sodass sie weder lädt noch entl
 Nach Ende der Leistungsreduzierung wird das Netzladen automatisch fortgesetzt.
 
 Wenn ein Regellimit aktiv ist, wird ein **Banner mit Regelhinweis** auf der Hauptseite in evcc angezeigt.
+
+## Steuerung weiterer Verbraucher
+
+Neben Ladepunkten können auch weitere steuerbare Verbraucher in das §14a Lastmanagement einbezogen werden.
+Dies betrifft z. B. Wärmepumpen oder Batteriespeicher, die über EEBus angebunden oder als Zähler mit zusätzlichem Relaisausgang konfiguriert sind.
+
+Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller dem internen `lpc` Stromkreis zugeordneten Verbraucher.
+Dazu zählen automatisch alle Ladepunkte und alle Zähler mit entsprechenden Schaltausgängen oder EEBus-Schnittstelle mit LPC Use Case als sonstige Verbraucher.
+
+Zunächst werden alle sonstigen Verbraucher gedimmt.
+Die verbleibende Leistung wird dann auf die aktiven Ladepunkte verteilt.
+Durch pauschale Dimmung der sonstigen Verbraucher kann die verfügbare Ladeleistung für aktive Ladepunkte in Ausnahmefällen sogar höher sein als im Normalzustand.
+Reicht die Drosselung der Ladepunkte einschließlich der Dimmung aller sonstigen Verbraucher nicht aus, werden Ladevorgänge an Ladepunkten unterbrochen.
+
+:::note Verfügbarkeit
+Aktuell existiert nur ein dimmbarer Zähler (EEBus Verbraucher).
+Diese Funktion wird weiter ausgebaut und entsprechende Zähler werden in der [Gerätedokumentation](/docs/devices/meters) markiert.
+:::
 
 ## Weiterführende Informationen
 
