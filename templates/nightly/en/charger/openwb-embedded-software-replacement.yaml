@@ -1,0 +1,148 @@
+template: openwb-native
+product:
+  identifier: openwb-embedded-software-replacement
+  brand: openWB
+  description: Embedded software replacement
+capabilities: ["1p3p", "rfid", "mA"]
+description: |
+  Replacement for the OpenWB software, when evcc runs directly on the OpenWB hardware. Currently supported Hardware is OpenWB Series2.
+  mA control is used automatically if the EVSE firmware supports it.
+
+  Please be aware that installing evcc on the OpenWB Hardware will void your guarantee!
+
+  Installation without display:
+  - Install and configure Raspberry Pi OS Lite (64bit) image.
+  - Add the following at then end of `/boot/firmware/config.txt`:
+    ```ini
+    [all]
+    gpio=4,5,7,11,17,22,23,24,25,26,27=op,dl
+    gpio=6,8,9,10,12,13,16,21=ip,pu
+    ```
+  - Install evcc according to the manual.
+  - Add the groups required for user evcc to access the hardware: `usermod -a -G gpio,dialout,input evcc`
+  - Configure evcc according to the manual. There are multiple distinct Hardware versions, which differ regarding the built-in modbus
+    adapters and charge meters.
+    - A single or multiple Modbus adapters are found at `/dev/ttyUSB0`, `/dev/ttyUSB1` (some Duo) or `/dev/ttyACM0`.
+      Some Duo's contain two Modbus adapters, some just one.
+    - The EVSE for the first connector has always the ID 1, the one for the second ID 2.
+    - The different possible charge meters are:
+      - Bernecker Engineering MPM3PM (template: mpm3pm) with ID 5 or ID 6 for the Duo's second connector.
+      - SDM630/SDM72 (template: eastron) with ID 105 or ID 106 for the Duo's second connector.
+      - ABB B23 (template: abb-ab) with ID 201
+
+  Additional steps for showing evcc on the display (be careful, because this will allow anybody to enable charging!):
+  - `apt install labwc wayfire seatd xdg-user-dirs firefox swayidle wlopm`
+  - Create the file `/home/pi/.config/labwc/autostart` with the following contents:
+    ```bash
+    /usr/bin/firefox --kiosk http://localhost:7070/ &
+    /usr/bin/swayidle -w timeout 600 'wlopm --off \*' resume 'wlopm --on \*' &
+    ```
+  - Create file `/home/pi/.config/systemd/user/kiosk.service` with the following content:
+    ```ini
+    [Unit]
+    Description=Start Kiosk mode
+    [Service]
+    Type=simple
+    ExecStart=/usr/bin/labwc
+    [Install]
+    WantedBy=default.target
+    ```
+  - Enable autostart of kiosk mode: `systemctl --user enable kiosk`
+  - As root: Enable start of systemd user units without the user having to log-in: `loginctl enable-linger pi`
+
+  At https://github.com/evcc-io/images complete images for both variants are available.
+
+render:
+  - default: |
+      type: template
+      template: openwb-native
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      phases1p3p: false # Phase switching, Device is equipped with phase switching option (optional)
+      rfid: 413d:2107 # RFID card reader USB VID:PID, RFID card reader USB VID:PID value (as be obtained from lsusb), leave empty for no RFID card reader (optional)
+    advanced: |
+      type: template
+      template: openwb-native
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      phases1p3p: false # Phase switching, Device is equipped with phase switching option (optional)
+      rfid: 413d:2107 # RFID card reader USB VID:PID, RFID card reader USB VID:PID value (as be obtained from lsusb), leave empty for no RFID card reader (optional)
+      cpwait: 10s # Duration of CP interruption, when phase-switching and waking up car. Minimum 5 seconds. (optional)
+      connector: 1 # Connector, 1 or 2, usually 1, except for Duo (optional)
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['rs485']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: true
+  - name: phases1p3p
+    example:
+    default: false
+    choice: []
+    unit:
+    description: Phase switching
+    help: Device is equipped with phase switching option
+    advanced: false
+    optional: true
+  - name: rfid
+    example: 413d:2107
+    default:
+    choice: []
+    unit:
+    description: RFID card reader USB VID:PID
+    help: RFID card reader USB VID:PID value (as be obtained from lsusb), leave empty for no RFID card reader
+    advanced: false
+    optional: true
+  - name: cpwait
+    example:
+    default: 10s
+    choice: []
+    unit:
+    description: Duration of CP interruption
+    help: when phase-switching and waking up car. Minimum 5 seconds.
+    advanced: true
+    optional: true
+  - name: connector
+    example:
+    default: 1
+    choice: []
+    unit:
+    description: Connector
+    help: 1 or 2, usually 1, except for Duo
+    advanced: true
+    optional: true
+modbus:
+  baudrate: 9600
+  comset: 8N1
+  device: /dev/ttyUSB0
+  host:
+  id: 1
+  port: 502
+  rs485serial: true
+  rs485tcpip: true
