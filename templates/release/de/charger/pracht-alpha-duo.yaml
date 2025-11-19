@@ -1,0 +1,70 @@
+template: pracht-alpha
+product:
+  identifier: pracht-alpha-duo
+  brand: Pracht
+  description: Alpha Duo
+requirements: ["sponsorship"]
+description: |
+  Eine Pracht Alpha Duo wird als zwei Pracht Alpha Mono mit unterschiedlichen `connector` Werten konfiguriert.
+  
+  Eine Identifikation des Fahrzeugs über die RFID Karte ist nicht möglich.
+  
+  Um Kommunikationsprobleme durch die doppelte Verbindung zu verhindern, empfiehlt es sich einen [`modbusproxy`](/docs/reference/configuration/modbusproxy) einzurichten.
+  Die Wallbox kommuniziert per `Modbus RTU` mit `baudrate: 9600`, `comset: "8N1"` und `id: 1`.
+  
+  In der Beispielkonfiguration ist der `modbusproxy` unter `host: 127.0.0.1` und `port: 5021` erreichbar.
+  
+  Verbindungen zum `modbusproxy` nutzen immer `modbus: tcpip`.
+  
+  Beispiel ist für den linken Ladepunkt. Tipp: Nutze `name: pracht_links`
+  
+  Füge den rechten Ladepunkt als Kopie linken hinzu und ändere `connector:` zu `2`, sowie `name` z.B. zu `pracht_rechts`.
+  
+render:
+  - default: |
+      type: template
+      template: pracht-alpha
+
+      # Modbus TCP zur Verbindung zu modbusproxy
+      modbus: tcpip
+      id: 1
+      host: 127.0.0.1 # modbusproxy
+      port: 5021 # modbusproxy
+      connector: 1 # Linker Ladepunkt
+      timeout: 10s # Zeitüberschreitung, optional
+
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip']
+    unit:
+    description: Modbus Typ. tcpip für Proxy
+    help:
+    advanced: false
+    optional: true
+  - name: timeout
+    example: 10s
+    default:
+    choice: []
+    unit:
+    description: Zeitüberschreitung
+    help:
+    advanced: false
+    optional: true
+  - name: connector
+    example:
+    default: 1
+    choice: []
+    unit:
+    description: Ladepunkt (1 für den Linken Ladepunkt, 2 für den rechten Ladepunkt)
+    help:
+    advanced: true
+    optional: true
+modbus:  # Verbindung zum modbusproxy
+  host: 127.0.0.1 # modbusproxy
+  id: 1
+  port: 5021 # modbusproxy
+  rs485serial: false
+  rs485tcpip: false
+  tcpip: true
