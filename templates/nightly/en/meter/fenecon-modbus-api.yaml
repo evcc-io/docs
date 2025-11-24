@@ -1,0 +1,246 @@
+template: openems-modbus
+product:
+  identifier: fenecon-modbus-api
+  brand: FENECON
+  description: Modbus-API
+capabilities: ["battery-control"]
+description: |
+  ##### License notice:
+  For active battery control on FENECON FEMS systems, a commercial license (*FEMS App Modbus/TCP Write Access*) is required.<br/><br/>
+  ##### FEMS documentation:
+  - [FEMS App Modbus/TCP — Read Access](https://docs.fenecon.de/en/fems/fems-app/App_ModbusTCP_Lesezugriff.html)
+  - [FEMS App Modbus/TCP — Write Access](https://docs.fenecon.de/en/fems/fems-app/App_ModbusTCP_Schreibzugriff.html)
+  ##### OpenEMS documentation:
+  - [OpenEMS Edge Api Modbus Controller](https://openems.github.io/openems.io/openems/latest/edge/controller.html#_api_modbus)
+
+render:
+  - usage: grid
+    default: |
+      type: template
+      template: openems-modbus
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+    advanced: |
+      type: template
+      template: openems-modbus
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      grid_power_register: 315 # Modbus register for grid power, GridActivePower (W) (optional)
+      grid_energy_register: 359 # Modbus register for grid import energy, GridBuyActiveEnergy (Wh) (optional)
+  - usage: pv
+    default: |
+      type: template
+      template: openems-modbus
+      usage: pv
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+    advanced: |
+      type: template
+      template: openems-modbus
+      usage: pv
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      pv_power_register: 327 # Modbus register for PV power, ProductionActivePower (W) (optional)
+      pv_energy_register: 367 # Modbus register for PV energy, ProductionActiveEnergy (Wh) (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+  - usage: battery
+    default: |
+      type: template
+      template: openems-modbus
+      usage: battery
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      battery: false # controls battery component, active battery control (Modbus/TCP Write Access) (optional)
+    advanced: |
+      type: template
+      template: openems-modbus
+      usage: battery
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      battery: false # controls battery component, active battery control (Modbus/TCP Write Access) (optional)
+      battery_power_register: 415 # Modbus register for battery power, EssDischargePower (W) (optional)
+      battery_soc_register: 302 # Modbus register for state of charge, SoC (%) (optional)
+      battery_set_register: 710 # Modbus register for charge power, SetActivePowerLessOrEquals (W) (optional)
+      watchdog: 60s # FEMS/OpenEMS battery control API timeout, FEMS/OpenEMS standard 60s (optional)
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+params:
+  - name: modbus
+    example:
+    default: tcpip
+    choice: ['tcpip']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: true
+  - name: battery
+    example:
+    default: false
+    choice: []
+    unit:
+    description: controls battery component
+    help: active battery control (Modbus/TCP Write Access)
+    advanced: false
+    optional: true
+  - name: grid_power_register
+    example:
+    default: 315
+    choice: []
+    unit:
+    description: Modbus register for grid power
+    help: GridActivePower (W)
+    advanced: true
+    optional: true
+  - name: grid_energy_register
+    example:
+    default: 359
+    choice: []
+    unit:
+    description: Modbus register for grid import energy
+    help: GridBuyActiveEnergy (Wh)
+    advanced: true
+    optional: true
+  - name: pv_power_register
+    example:
+    default: 327
+    choice: []
+    unit:
+    description: Modbus register for PV power
+    help: ProductionActivePower (W)
+    advanced: true
+    optional: true
+  - name: pv_energy_register
+    example:
+    default: 367
+    choice: []
+    unit:
+    description: Modbus register for PV energy
+    help: ProductionActiveEnergy (Wh)
+    advanced: true
+    optional: true
+  - name: battery_power_register
+    example:
+    default: 415
+    choice: []
+    unit:
+    description: Modbus register for battery power
+    help: EssDischargePower (W)
+    advanced: true
+    optional: true
+  - name: battery_soc_register
+    example:
+    default: 302
+    choice: []
+    unit:
+    description: Modbus register for state of charge
+    help: SoC (%)
+    advanced: true
+    optional: true
+  - name: battery_set_register
+    example:
+    default: 710
+    choice: []
+    unit:
+    description: Modbus register for charge power
+    help: SetActivePowerLessOrEquals (W)
+    advanced: true
+    optional: true
+  - name: watchdog
+    example:
+    default: 60s
+    choice: []
+    unit:
+    description: FEMS/OpenEMS battery control API timeout
+    help: FEMS/OpenEMS standard 60s
+    advanced: true
+    optional: true
+  - name: minsoc
+    example: 25
+    default:
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit when discharging the battery in normal operation
+    advanced: true
+    optional: true
+  - name: maxsoc
+    example: 95
+    default:
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit when charging the battery from the grid
+    advanced: true
+    optional: true
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: For forced charging of the battery.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
+    advanced: true
+    optional: true
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximum AC power of the hybrid inverter
+    help:
+    advanced: true
+    optional: true
+modbus:
+  host:
+  id: 1
+  modbus: tcpip
+  port: 502
+  tcpip: true
