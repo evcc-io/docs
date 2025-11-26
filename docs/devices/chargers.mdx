@@ -2270,6 +2270,8 @@ Benötigt HTTP-API-Zugriff
 
 <DeviceFeatures features="" />
 
+Wird die Wallbox mit Phasenrotation installiert, kann mit der EVBox Connect App diese Phasenrotation in der EVBox Elvi hinterlegt werden, damit die gemessenen Spannungen und Ströme auf der tatsächlichen Phase ausgegeben werden. Dies ist für das EVBox eigene Lastmanagement notwendig, für die Verwendung mit evcc darf die Phasenrotation aber hier nicht eingetragen sein. Insbesondere bei einer gebrauchten Elvi oder einer Elvi die bekanntermaßen im EVBox eigenen Lastmanagement betrieben wurde, sollte deshalb im Installationsmodus der EVBox Connect App sichergestellt werden, dass der String unter "Phasenrotation" mit "RST" endet.
+
 <DeviceConfig
   code={`chargers:
     - name: my_charger
@@ -3895,6 +3897,102 @@ Benötigt mindestens Firmware 7.0 oder neuer.
 
 ## openWB
 
+### Embedded software replacement
+
+<DeviceFeatures features="1p3p,rfid,mA,sponsorfree" />
+
+Ersatz für die OpenWB Software, wenn evcc direkt auf der OpenWB Hardware läuft. Unterstützte Hardware ist die OpenWB Series2.
+mA Regelung wird automatisch benutzt wenn die EVSE-Firmware es unterstützt.
+
+Achtung: Die Installation von evcc auf der OpenWB Hardware führt zum Verlust der Garantie!
+
+Installation ohne Display:
+
+- Raspberry Pi OS Lite (64bit) Image installieren und konfigurieren.
+- Folgendes am Ende von `/boot/firmware/config.txt` hinzufügen:
+  ```ini
+  [all]
+  gpio=4,5,7,11,17,22,23,24,25,26,27=op,dl
+  gpio=6,8,9,10,12,13,16,21=ip,pu
+  ```
+- evcc nach Anleitung installieren.
+- Notwendige Gruppen zum Zugriff auf die Hardware für user evcc setzen (als root): `usermod -a -G gpio,dialout,input evcc`
+- evcc konfigurieren. Es gibt unterschiedliche Hardware Versionen, die bezüglich der verbauten Modbus Adapter und Wallbox Zähler variieren.
+  - Der oder die Modbus Adapter sind entweder auf `/dev/ttyUSB0`, `/dev/ttyUSB1` (manche Duo) oder `/dev/ttyACM0` zu finden.
+    Manche Duo's haben zwei Modbus Adapter, manche nur einen.
+  - Die EVSE für den ersten Ladepunkt hat immer die ID 1, die für den zweiten ID 2.
+  - Die verschiedenen möglichen Zähler sind:
+    - Bernecker Engineering MPM3PM (template: mpm3pm) mit ID 5 oder ID 6 für den zweiten Ladepunkt bei der Duo.
+    - SDM630/SDM72 (template: eastron) mit ID 105 oder ID 106 für den zweiten Ladepunkt bei der Duo.
+    - ABB B23 (template: abb-ab) mit ID 201
+
+Zusätzlich für die Anzeige von evcc im Display (Achtung dann können auch Unbefugte laden!):
+
+- `apt install labwc wayfire seatd xdg-user-dirs firefox swayidle wlopm`
+- Datei `/home/pi/.config/labwc/autostart` mit folgendem Inhalt anlegen:
+  ```bash
+  /usr/bin/firefox --kiosk http://localhost:7070/ &
+  /usr/bin/swayidle -w timeout 600 'wlopm --off \*' resume 'wlopm --on \*' &
+  ```
+- Datei `/home/pi/.config/systemd/user/kiosk.service` mit folgendem Inhalt anlegen:
+  ```ini
+  [Unit]
+  Description=Start Kiosk mode
+  [Service]
+  Type=simple
+  ExecStart=/usr/bin/labwc
+  [Install]
+  WantedBy=default.target
+  ```
+- Kiosk Modus Autostart aktivieren: `systemctl --user enable kiosk`
+- Als root: Starten von systemd user units ohne login des Users aktivieren: `loginctl enable-linger pi`
+
+Unter https://github.com/evcc-io/images gibt es auch fertige Images für beide Varianten.
+
+<DeviceConfig
+  code={`chargers:
+    - name: my_charger
+      type: template
+      template: openwb-native
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      phases1p3p: false # Phasenumschaltung, Gerät ist mit Phasenumschaltungsoption ausgestattet (optional)
+      rfid: 413d:2107 # RFID-Kartenleser USB VID:PID, RFID-Kartenleser USB VID:PID Wert (kann der Ausgabe von lsusb entnommen werden), leer wenn kein RFID Kartenleser vorhanden ist (optional)`}
+  advanced={`chargers:
+    - name: my_charger
+      type: template
+      template: openwb-native
+      
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      phases1p3p: false # Phasenumschaltung, Gerät ist mit Phasenumschaltungsoption ausgestattet (optional)
+      rfid: 413d:2107 # RFID-Kartenleser USB VID:PID, RFID-Kartenleser USB VID:PID Wert (kann der Ausgabe von lsusb entnommen werden), leer wenn kein RFID Kartenleser vorhanden ist (optional)
+      cpwait: 10s # Dauer der CP Unterbrechnung, bei der Phasenumschaltung und Aufwecken des Autos. Mindestens 5 Sekunden. (optional)
+      connector: 1 # Ladepunkt, 1 oder 2, normalerweise 1, ausser bei Duo (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
+
 ### Pro
 
 <DeviceFeatures features="1p3p,mA,iso151182,sponsorfree" />
@@ -4921,30 +5019,13 @@ Wichtig: Die möglichst reibungslose Funktionalität ist aufgrund von Software-F
 
 ## SMA
 
-### eCharger
-
-<DeviceFeatures features="mA" />
-
-Der EV Charger muss sich im Modus "Fast" befinden und der Benutzer muss die Rechte "Administrator" haben.
-
-<DeviceConfig
-  code={`chargers:
-    - name: my_charger
-      type: template
-      template: smaevcharger
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
-      password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen`}
-/>
-<SponsorshipRequired />
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
 ### eCharger (SEMP)
 
 <DeviceFeatures features="mA,1p3p" />
 
 Konfiguriere die SEMP Basis-URL (z.B. http://192.168.178.100/SEMP) und die Geräte-ID des Chargers.
 WICHTIG: Der Charger darf NICHT gleichzeitig im Sunny Home Manager bzw. im Sunny Portal direkt als Verbraucher registriert sein!
+Die Konfigurationsoption "Trennung nach Vollladung" muss deaktiviert sein.
 
 <DeviceConfig
   code={`chargers:
@@ -4956,30 +5037,13 @@ WICHTIG: Der Charger darf NICHT gleichzeitig im Sunny Home Manager bzw. im Sunny
 <SponsorshipRequired />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
 
-### EV Charger
-
-<DeviceFeatures features="mA" />
-
-Der EV Charger muss sich im Modus "Fast" befinden und der Benutzer muss die Rechte "Administrator" haben.
-
-<DeviceConfig
-  code={`chargers:
-    - name: my_charger
-      type: template
-      template: smaevcharger
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
-      password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen`}
-/>
-<SponsorshipRequired />
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/charger  -->
-
 ### EV Charger (SEMP)
 
 <DeviceFeatures features="mA,1p3p" />
 
 Konfiguriere die SEMP Basis-URL (z.B. http://192.168.178.100/SEMP) und die Geräte-ID des Chargers.
 WICHTIG: Der Charger darf NICHT gleichzeitig im Sunny Home Manager bzw. im Sunny Portal direkt als Verbraucher registriert sein!
+Die Konfigurationsoption "Trennung nach Vollladung" muss deaktiviert sein.
 
 <DeviceConfig
   code={`chargers:
