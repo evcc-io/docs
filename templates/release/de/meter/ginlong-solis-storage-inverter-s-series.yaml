@@ -1,16 +1,19 @@
-template: sungrow-hybrid
+template: solis-hybrid-s
 product:
-  identifier: sungrow-sh-series-hybrid-inverter
-  brand: Sungrow
-  description: SH Series Hybrid Inverter
+  identifier: ginlong-solis-storage-inverter-s-series
+  brand: Ginlong
+  description: Solis Storage Inverter (S Series)
 capabilities: ["battery-control"]
 description: |
-  Connections via the WiNet-S dongle (WiFi or LAN) only work with the latest firmware. Older versions do not provide all required data (power, state of charge).
+  Um die aktive Ladesteuerung zum Netzladen nutzen zu können ist eine einmalige manuelle Einrichtung notwendig.
+  Navigiere zu "System Settings" > "Storage Mode" im Wechselrichter Menü und aktiviere "Allow grid charging".
+  Wenn die aktive Ladesteuerung dann die "Battery Reserve"-Einstellung anpasst, lädt der Wechselrichter die Batterie aus dem Netz bis zum hier konfigurierten Max SOC Wert auf (Standard: 95%).
+
 render:
   - usage: grid
     default: |
       type: template
-      template: sungrow-hybrid
+      template: solis-hybrid-s
       usage: grid
 
       # RS485 via adapter (Modbus RTU)
@@ -25,16 +28,9 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host:  # Hostname
-      port: 502 # Port
-      timeout: 10s # Timeout, optional
     advanced: |
       type: template
-      template: sungrow-hybrid
+      template: solis-hybrid-s
       usage: grid
 
       # RS485 via adapter (Modbus RTU)
@@ -49,17 +45,10 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host:  # Hostname
-      port: 502 # Port
-      timeout: 10s # Timeout, optional
   - usage: pv
     default: |
       type: template
-      template: sungrow-hybrid
+      template: solis-hybrid-s
       usage: pv
 
       # RS485 via adapter (Modbus RTU)
@@ -74,16 +63,9 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host:  # Hostname
-      port: 502 # Port
-      timeout: 10s # Timeout, optional
     advanced: |
       type: template
-      template: sungrow-hybrid
+      template: solis-hybrid-s
       usage: pv
 
       # RS485 via adapter (Modbus RTU)
@@ -98,18 +80,11 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host:  # Hostname
-      port: 502 # Port
-      timeout: 10s # Timeout, optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
   - usage: battery
     default: |
       type: template
-      template: sungrow-hybrid
+      template: solis-hybrid-s
       usage: battery
 
       # RS485 via adapter (Modbus RTU)
@@ -124,17 +99,9 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host:  # Hostname
-      port: 502 # Port
-      timeout: 10s # Timeout, optional
-      capacity: 50 # Battery capacity (kWh), optional
     advanced: |
       type: template
-      template: sungrow-hybrid
+      template: solis-hybrid-s
       usage: battery
 
       # RS485 via adapter (Modbus RTU)
@@ -149,34 +116,16 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-
-      # Modbus TCP
-      modbus: tcpip
-      id: 1
-      host:  # Hostname
-      port: 502 # Port
-      timeout: 10s # Timeout, optional
-      capacity: 50 # Battery capacity (kWh), optional
-      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
-      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
-      maxchargepower: 5000 # Maximum charge power (W), For forced charging of the battery. (optional)
-      maxdischargepower: 5000 # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
+      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
 params:
   - name: modbus
     example:
     default:
-    choice: ['rs485', 'tcpip']
+    choice: ['rs485']
     unit:
-    description: Modbus Type
-    help:
-    advanced: false
-    optional: true
-  - name: timeout
-    example: 10s
-    default:
-    choice: []
-    unit:
-    description: Timeout
+    description: Modbus Typ
     help:
     advanced: false
     optional: true
@@ -185,16 +134,16 @@ params:
     default:
     choice: []
     unit: kWh
-    description: Battery capacity
+    description: Akkukapazität
     help:
-    advanced: false
+    advanced: true
     optional: true
   - name: maxacpower
     example: 5000
     default: 0
     choice: []
     unit: W
-    description: Maximum AC power of the hybrid inverter
+    description: Maximale AC Leistung des Hybrid-Wechselrichters
     help:
     advanced: true
     optional: true
@@ -203,8 +152,8 @@ params:
     default:
     choice: []
     unit: '%'
-    description: Minimum charge
-    help: Lower limit when discharging the battery in normal operation
+    description: Minimaler Ladestand
+    help: Untere Grenze beim Entladen der Batterie im normalen Betrieb
     advanced: true
     optional: true
   - name: maxsoc
@@ -212,26 +161,8 @@ params:
     default:
     choice: []
     unit: '%'
-    description: Maximum charge
-    help: Upper limit when charging the battery from the grid
-    advanced: true
-    optional: true
-  - name: maxchargepower
-    example:
-    default: 5000
-    choice: []
-    unit: W
-    description: Maximum charge power
-    help: For forced charging of the battery.
-    advanced: true
-    optional: true
-  - name: maxdischargepower
-    example:
-    default: 5000
-    choice: []
-    unit: W
-    description: Maximum discharge power
-    help: Maximum discharge power of the storage.
+    description: Maximaler Ladestand
+    help: Oberes Limit beim Laden der Batterie aus dem Netz
     advanced: true
     optional: true
 modbus:
@@ -243,4 +174,3 @@ modbus:
   port: 502
   rs485serial: true
   rs485tcpip: true
-  tcpip: true

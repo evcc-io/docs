@@ -1,28 +1,25 @@
-template: ford-connect
+template: ioBroker.bmw
 product:
-  identifier: ford
-  brand: Ford
+  identifier: iobroker-bmw
+  description: ioBroker.bmw
+  group: Generische Unterstützung
+description: |
+  ioBroker BMW Adapter. Benötigt ioBroker.bmw und ioBroker.simple-api
 render:
   - default: |
       type: template
-      template: ford-connect
+      template: ioBroker.bmw
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      clientid: # FordConnect API Client ID, Einrichtung unter https://developer.ford.com
-      clientsecret: # FordConnect API Client Secret, Einrichtung unter https://developer.ford.com
-      accessToken: # Access token
-      refreshToken: # Refresh token
-      vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      vin: WBA8E9G50GM091234 # Fahrzeugidentifikationsnummer, BMW Fahrzeugidentifikationsnummer
+      uri: # ioBroker URL, einschliesslich ioBroker.simple-api Port
     advanced: |
       type: template
-      template: ford-connect
+      template: ioBroker.bmw
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      clientid: # FordConnect API Client ID, Einrichtung unter https://developer.ford.com
-      clientsecret: # FordConnect API Client Secret, Einrichtung unter https://developer.ford.com
-      accessToken: # Access token
-      refreshToken: # Refresh token
-      vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      vin: WBA8E9G50GM091234 # Fahrzeugidentifikationsnummer, BMW Fahrzeugidentifikationsnummer
+      uri: # ioBroker URL, einschliesslich ioBroker.simple-api Port
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
@@ -30,7 +27,10 @@ render:
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
-      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
+      id: 0 # Instanz-ID, optional
+      coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
+      streaming: true # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
+      welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)
 params:
   - name: title
     example:
@@ -50,51 +50,24 @@ params:
     help:
     advanced: false
     optional: true
-  - name: clientid
-    example:
-    default:
-    choice: []
-    unit:
-    description: FordConnect API Client ID
-    help: Einrichtung unter https://developer.ford.com
-    advanced: false
-    optional: false
-  - name: clientsecret
-    example:
-    default:
-    choice: []
-    unit:
-    description: FordConnect API Client Secret
-    help: Einrichtung unter https://developer.ford.com
-    advanced: false
-    optional: false
-  - name: accessToken
-    example:
-    default:
-    choice: []
-    unit:
-    description: Access token
-    help:
-    advanced: false
-    optional: false
-  - name: refreshToken
-    example:
-    default:
-    choice: []
-    unit:
-    description: Refresh token
-    help:
-    advanced: false
-    optional: false
   - name: vin
-    example: WF0FXX...
+    example: WBA8E9G50GM091234
     default:
     choice: []
     unit:
     description: Fahrzeugidentifikationsnummer
-    help: Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+    help: BMW Fahrzeugidentifikationsnummer
     advanced: false
-    optional: true
+    optional: false
+  - name: uri
+    example:
+    default:
+    choice: []
+    unit:
+    description: ioBroker URL
+    help: einschliesslich ioBroker.simple-api Port
+    advanced: false
+    optional: false
   - name: icon
     example:
     default: car
@@ -158,12 +131,39 @@ params:
     help: Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie
     advanced: true
     optional: true
-  - name: cache
-    example: 5m
-    default: 15m
+  - name: id
+    example:
+    default: 0
     choice: []
     unit:
-    description: Cache
-    help: Zeitintervall für erneute Datenabfrage
+    description: Instanz-ID
+    help:
+    advanced: true
+    optional: true
+  - name: coarsecurrent
+    example:
+    default:
+    choice: []
+    unit:
+    description: 1A Ladestromvorgabe
+    help: Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe
+    advanced: true
+    optional: true
+  - name: streaming
+    example:
+    default: true
+    choice: []
+    unit:
+    description: Unterstützt Streaming
+    help: Streaming Datenempfang erfolgt asynchron
+    advanced: true
+    optional: true
+  - name: welcomecharge
+    example:
+    default:
+    choice: []
+    unit:
+    description: Laden bei Verbindung
+    help: Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden.
     advanced: true
     optional: true
