@@ -382,7 +382,20 @@ Schaue in die [Modbus Dokumentation](/docs/reference/modbus) für weitere Detail
 Das `mqtt`-Plugin ermöglicht das Lesen von Werten über MQTT-Topics.
 Das ist insbesondere für Strommessgeräte nützlich, z. B. wenn diese ihre Daten bereits über MQTT bereitstellen.
 Schaue in die [MBMD Dokumentation](https://github.com/volkszaehler/mbmd) für ein Beispiel, wie man Modbus Messdaten in MQTT bekommt.
-Das Plugin bietet auch die Fähigkeit JSON Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen (Siehe [HTTP plugin](#http)).
+
+**Parameter (Lesen)**:
+
+| Parameter | Typ      | Erfordert | Beschreibung                                                             |
+| --------- | -------- | --------- | ------------------------------------------------------------------------ |
+| topic     | string   | ja        | MQTT Topic zum Lesen                                                     |
+| timeout   | duration | nein      | Maximales Alter empfangener Werte                                        |
+| scale     | float    | nein      | Skalierungsfaktor für Ergebnis (z. B. 0.001 für Wh zu kWh Konvertierung) |
+
+Das Plugin gibt einen Fehler zurück, wenn innerhalb der `timeout` Dauer kein neuer Wert empfangen wurde.
+Wenn `timeout` nicht gesetzt ist, werden Werte beliebigen Alters akzeptiert, sobald die erste Nachricht empfangen wurde.
+Es wird empfohlen, einen Timeout zu setzen, um zu erkennen, wenn die Quelle keine aktuellen Daten mehr liefert.
+
+Für die Datenextraktion stehen die unter [Lesen](#lesen) beschriebenen Pipeline-Parameter zur Verfügung (`regex`, `jq`, `quote`, etc.).
 
 **Beispiel Lesen**:
 
@@ -392,6 +405,13 @@ topic: mbmd/sdm1-1/Power
 timeout: 30s # don't accept values older than timeout
 scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 ```
+
+**Parameter (Schreiben)**:
+
+| Parameter | Typ    | Erfordert | Beschreibung                                                            |
+| --------- | ------ | --------- | ----------------------------------------------------------------------- |
+| topic     | string | ja        | MQTT Topic zum Schreiben                                                |
+| payload   | string | nein      | Payload-Template (verwendet Wert im Standardformat, wenn nicht gesetzt) |
 
 Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt.
 Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
