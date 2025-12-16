@@ -1,9 +1,11 @@
 # UI Configuration Release - Documentation Update TODO
 
 ## Context
+
 With PR https://github.com/evcc-io/evcc/pull/25762, UI configuration is being released as the new recommended way to configure evcc. The experimental flag is being removed and users no longer need to create an evcc.yaml file to get started.
 
 ## Status: IN PROGRESS
+
 Started: 2025-12-16
 
 ---
@@ -11,6 +13,7 @@ Started: 2025-12-16
 ## 🔴 IMMEDIATE PRIORITY - Critical for Release
 
 ### 1. Installation Landing Pages
+
 - [x] Update `/docs/installation/index.md`
   - [x] Change "Nach der Installation: evcc.yaml erstellen" to new UI-first approach
   - [x] Add note that UI configuration is now recommended (restructured configuration page instead)
@@ -19,6 +22,7 @@ Started: 2025-12-16
   - [x] Add note that UI configuration is now recommended (restructured configuration page instead)
 
 ### 2. Linux Image Documentation (Remove Experimental Warnings)
+
 - [x] Update `/docs/installation/linux-image.mdx`
   - [x] Remove experimental warning box (lines 10-15)
   - [x] Update text to emphasize UI-first approach
@@ -28,6 +32,7 @@ Started: 2025-12-16
   - [x] Remove "activate experimental" instruction (line 61)
 
 ### 3. Create New UI Setup Guide
+
 - [ ] Create `/docs/installation/ui-setup.mdx`
   - [ ] Opening evcc for the first time
   - [ ] Setting admin password
@@ -41,6 +46,7 @@ Started: 2025-12-16
   - [ ] English translation of above
 
 ### 4. Update Configuration Documentation
+
 - [x] Update `/docs/installation/configuration.mdx`
   - [x] Add prominent note at top: UI configuration is now recommended
   - [x] Restructure to show UI method first, file-based as alternative
@@ -53,6 +59,7 @@ Started: 2025-12-16
 ## 🟡 SECONDARY PRIORITY - Should be done soon after release
 
 ### 5. Platform-Specific Installation Guides
+
 - [ ] Update `/docs/installation/docker.mdx`
   - [ ] Remove requirement for evcc.yaml in prerequisites
   - [ ] Add note about UI configuration option
@@ -69,6 +76,7 @@ Started: 2025-12-16
 - [ ] Update all English translations of above
 
 ### 6. FAQ Updates
+
 - [ ] Update `/docs/faq.mdx`
   - [ ] Add Q&A about UI vs file configuration
   - [ ] Update troubleshooting sections for UI-based solutions
@@ -77,6 +85,7 @@ Started: 2025-12-16
 - [ ] Update `/i18n/en/docusaurus-plugin-content-docs/current/faq.mdx`
 
 ### 7. Sponsorship Documentation
+
 - [ ] Update `/docs/sponsorship.mdx` if needed
   - [ ] Check if token entry via UI needs documentation
 - [ ] Update English version
@@ -86,6 +95,7 @@ Started: 2025-12-16
 ## 🟢 GOOD TO HAVE - Can be done after release
 
 ### 8. Device Documentation Templates
+
 - [ ] Update device page generators if they mention configuration
 - [ ] Add notes about UI configuration option in:
   - `/docs/devices/chargers.mdx`
@@ -94,18 +104,21 @@ Started: 2025-12-16
   - All English translations
 
 ### 9. Reference Documentation
+
 - [ ] Update `/docs/reference/configuration/index.md`
   - [ ] Add clear distinction between UI and file configuration
   - [ ] Update introduction to mention both methods
 - [ ] Update all configuration reference pages as needed
 
 ### 10. Blog Post
+
 - [ ] Consider writing announcement blog post about UI configuration release
   - [ ] Highlight ease of use
   - [ ] Migration guide for existing users
   - [ ] New features overview
 
 ### 11. Migration Guide
+
 - [ ] Create `/docs/guides/migrate-to-ui.mdx`
   - [ ] How to migrate from evcc.yaml to UI
   - [ ] Backup existing configuration
@@ -113,6 +126,7 @@ Started: 2025-12-16
   - [ ] Troubleshooting common issues
 
 ### 12. Video Tutorials
+
 - [ ] Plan video content for UI setup
 - [ ] Record walkthrough videos
 - [ ] Embed in relevant documentation pages
@@ -122,18 +136,21 @@ Started: 2025-12-16
 ## 📝 NOTES
 
 ### Important Considerations
+
 1. **Both configuration methods remain supported** - evcc.yaml is not deprecated, just no longer the primary method
 2. **Maintain German and English in sync** - All changes must be made in both languages
 3. **Screenshots need updating** - Remove experimental badges and update UI screenshots
 4. **Backwards compatibility** - Ensure existing users aren't confused by changes
 
 ### Files with "experimental" mentions to check:
+
 - `/docs/installation/linux-image.mdx` - Main experimental warning
 - `/docs/sponsorship.mdx` - May reference experimental features
 - `/docs/features/loadmanagement.mdx` - Check for UI config mentions
 - Various blog posts - Leave historical content as-is
 
 ### Key Messages to Communicate
+
 1. UI configuration is now the recommended way to get started
 2. No evcc.yaml needed for new installations
 3. Existing evcc.yaml configurations continue to work
@@ -143,6 +160,7 @@ Started: 2025-12-16
 ---
 
 ## Progress Tracking
+
 - Total Items: ~50
 - Completed: 0
 - In Progress: 0
