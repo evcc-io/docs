@@ -382,7 +382,20 @@ See the [Modbus Documentation](/docs/reference/modbus) for more details.
 The `mqtt` plugin enables reading values via MQTT topics.
 This is particularly useful for power meters, e.g. when they already provide their data via MQTT.
 See the [MBMD Documentation](https://github.com/volkszaehler/mbmd) for an example of how to get Modbus measurement data into MQTT.
-The plugin also offers the ability to read or parse JSON data structures via jq-like queries (see [HTTP plugin](#http)).
+
+**Parameters (Reading)**:
+
+| Parameter | Type     | Required | Description                                                     |
+| --------- | -------- | -------- | --------------------------------------------------------------- |
+| topic     | string   | yes      | MQTT topic to read from                                         |
+| timeout   | duration | no       | Maximum age of received values                                  |
+| scale     | float    | no       | Scaling factor for result (e.g. 0.001 for Wh to kWh conversion) |
+
+The plugin returns an error if no new value has been received within the `timeout` duration.
+If `timeout` is not set, values of any age are accepted once the first message has been received.
+It is recommended to set a timeout to detect when the source is no longer providing current data.
+
+For data extraction, the pipeline parameters described under [Reading](#reading) are available (`regex`, `jq`, `quote`, etc.).
 
 **Reading Example**:
 
@@ -392,6 +405,13 @@ topic: mbmd/sdm1-1/Power
 timeout: 30s # don't accept values older than timeout
 scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 ```
+
+**Parameters (Writing)**:
+
+| Parameter | Type   | Required | Description                                                |
+| --------- | ------ | -------- | ---------------------------------------------------------- |
+| topic     | string | yes      | MQTT topic to write to                                     |
+| payload   | string | no       | Payload template (uses value in default format if not set) |
 
 For write access, the data is provided with the `payload` attribute.
 If this parameter is missing from the configuration, the value is written in the default format.
