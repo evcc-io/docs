@@ -30,6 +30,7 @@ Zusätzlich können Plugins auch für die in [Messaging](/docs/reference/configu
 - [JavaScript Plugin](#javascript) - Plugin, das Werte in über ein JavaScript Skript bereitstellt oder entgegennimmt.
 - [Shell Plugin](#shell) - Plugin, das ein Shell Skript ausführen kann, um Daten zu extrahieren oder schreibend entgegennimmt.
 - [Prometheus Plugin](#prometheus) - Plugin zum Lesen von Metriken aus Prometheus über PromQL.
+- [GPIO Plugin](#gpio) - Plugin zum direkten Zugriff auf GPIO-Pins (nur Linux).
 
 ### Helpers
 
@@ -735,6 +736,46 @@ energy:
 
 Die Abfrage muss einen einzelnen numerischen Wert zurückgeben.
 Bei Vektor-Ergebnissen muss genau eine Metrik enthalten sein.
+
+### GPIO <Tag label="lesen" category="read" /> <Tag label="schreiben" category="write" /> {#gpio}
+
+Das `gpio` Plugin ermöglicht den direkten Zugriff auf GPIO-Pins (General Purpose Input/Output) unter Linux.
+Es ist besonders für Raspberry Pi und ähnliche Einplatinencomputer geeignet.
+
+**Parameter**:
+
+| Parameter | Typ    | Erfordert | Beschreibung                                   |
+| --------- | ------ | --------- | ---------------------------------------------- |
+| function  | string | ja        | Modus: `read` (Eingang) oder `write` (Ausgang) |
+| pin       | int    | ja        | Pin-Nummer (BCM-Nummerierung, z. B. GPIO 17)   |
+
+**Funktionsweise**:
+
+- **Lesen** (`function: read`): Liest den Zustand eines GPIO-Pins als Boolean-Wert (`true` = HIGH, `false` = LOW)
+- **Schreiben** (`function: write`): Setzt einen GPIO-Pin auf HIGH (`true`) oder LOW (`false`)
+
+Die Pin-Nummerierung folgt dem BCM-Schema (Broadcom-Nummern, nicht die physische Pin-Position).
+Für ein Raspberry Pi Pinout siehe z. B. [pinout.xyz](https://pinout.xyz/).
+
+**Beispiel Lesen**:
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM pin number
+```
+
+**Beispiel Schreiben**:
+
+```yaml
+source: gpio
+function: write
+pin: 27 # BCM pin number
+```
+
+:::note
+Dieses Plugin funktioniert nur auf Linux-Systemen mit Zugriff auf `/dev/gpiomem`.
+:::
 
 ## Helpers
 
