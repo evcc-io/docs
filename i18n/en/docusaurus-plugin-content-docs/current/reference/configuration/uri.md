@@ -20,4 +20,8 @@ network:
   # port is the listening port for UI and api
   # evcc will listen on all available interfaces
   port: 7070
+  # externalUrl is the URL you use to access evcc in your browser
+  # used for autodiscovery by the evcc app and by services/devices connecting to evcc
+  # if you're running evcc behind a reverse proxy, use that URL, e.g. "https://evcc.example.com" (requires authentication at the proxy)
+  externalUrl: https://evcc.local
 ```
