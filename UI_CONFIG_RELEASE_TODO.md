@@ -80,11 +80,13 @@ Started: 2025-12-16
 
 ### 7. Device Documentation Templates
 
-- [ ] Update device page generators if they mention configuration
-- [ ] Add notes about UI configuration option in:
+- [x] Update device page generators if they mention configuration
+- [x] Add notes about UI configuration option in:
   - `/docs/devices/chargers.mdx`
   - `/docs/devices/meters.mdx`
   - `/docs/devices/vehicles.mdx`
+  - `/docs/devices/heating.mdx`
+  - `/docs/devices/smartswitches.mdx`
   - All English translations
 
 ### 8. Reference Documentation
@@ -130,7 +132,7 @@ Started: 2025-12-16
 ## Progress Tracking
 
 - Total Items: 21
-- Completed: 17
-- Remaining: 4
+- Completed: 18
+- Remaining: 3
 
-Last Updated: 2025-12-17
+Last Updated: 2025-12-17 19:29
