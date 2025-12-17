@@ -60,22 +60,25 @@ Started: 2025-12-16
 
 ### 5. Platform-Specific Installation Guides
 
-- [ ] Update `/docs/installation/docker.mdx`
-  - [ ] Remove requirement for evcc.yaml in prerequisites
-  - [ ] Add note about UI configuration option
-  - [ ] Update volumes section to clarify evcc.yaml is optional
-- [ ] Update `/docs/installation/linux.mdx`
-  - [ ] Update first-start instructions to mention UI setup
-  - [ ] De-emphasize evcc.yaml creation
-- [ ] Update `/docs/installation/macos.md`
-  - [ ] Update first-start instructions
+- [x] Update `/docs/installation/docker.mdx`
+  - [x] Remove requirement for evcc.yaml in prerequisites
+  - [x] Add note about UI configuration option
+  - [x] Update volumes section to clarify evcc.yaml is optional
+- [x] Update `/docs/installation/linux.mdx`
+  - [x] Update first-start instructions to mention UI setup
+  - [x] De-emphasize evcc.yaml creation
+- [x] Update `/docs/installation/macos.md`
+  - [x] Update first-start instructions
 - [x] Update `/docs/installation/windows.mdx`
   - [x] Update first-start instructions
   - [x] Add UI configuration as primary method
   - [x] De-emphasize evcc.yaml creation
-- [ ] Update `/docs/installation/home-assistant.mdx`
-  - [ ] Mention UI configuration as primary method
-- [x] Update English translation of windows.mdx
+- [x] Update `/docs/installation/home-assistant.mdx`
+  - [x] Mention UI configuration as primary method
+  - [x] Restructure to show UI method first
+  - [x] Make evcc.yaml optional
+- [x] Update English translations of windows.mdx and home-assistant.mdx
+- [x] Update English translations of docker.mdx, linux.mdx and macos.md
 
 ### 6. FAQ Updates
 
@@ -168,4 +171,4 @@ Started: 2025-12-16
 - In Progress: 0
 - Remaining: 50
 
-Last Updated: 2025-12-16
+Last Updated: 2025-12-17
