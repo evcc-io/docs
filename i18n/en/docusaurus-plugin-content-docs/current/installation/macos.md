@@ -38,59 +38,21 @@ If you want to install evcc without a package manager or test a nightly version,
   brew services start evcc
   ```
 
-- Check the installation by opening a browser and entering the following URL: [http://localhost:7070](http://localhost:7070). The evcc application will ask you to set a password and start the configuration.
-- Stop the evcc server:
-
-  ```sh
-  brew services stop evcc
-  ```
+- Open the evcc interface in your browser: [http://localhost:7070](http://localhost:7070)
+- The evcc application will ask you to set an administrator password
+- You can then configure your devices directly via the web interface
 
 ## Configuration
 
-Now you need a working `evcc.yaml` configuration file.
-In addition to general settings, the configuration includes the definition of individual components (meter, wallbox, vehicle, ...).
+:::tip Recommended
+Configure evcc directly in your browser.
+:::
 
-### Create
+After the first start, you can configure evcc at [http://localhost:7070](http://localhost:7070).
+Settings are automatically saved in the database.
 
-We recommend using the configuration wizard:
-
-- Start the configuration wizard and answer the questions:
-
-  ```sh
-  sudo evcc configure
-  ```
-
-- Move the created configuration file to `/etc/evcc.yaml`:
-
-  ```sh
-  sudo mv evcc.yaml /etc
-  ```
-
-- Start the evcc server:
-
-  ```sh
-  brew services start evcc
-  ```
-
-- Access the evcc interface at [http://localhost:7070](http://localhost:7070)
-
-### Modify
-
-If your configuration needs adjustments, you can either rerun the configuration wizard (see above) or manually edit the configuration file.
-
-- Edit the configuration file:
-
-  ```sh
-  sudo nano /etc/evcc.yaml
-  ```
-
-- Restart the evcc server:
-
-  ```sh
-  brew services restart evcc
-  ```
-
-For more information and examples on configuring evcc, see [Configuration](./configuration).
+Alternatively, you can use an `evcc.yaml` configuration file at `/etc/evcc.yaml`.
+Details can be found in [Configuration](./configuration).
 
 ## Upgrades
 
@@ -142,8 +104,9 @@ Here you'll find instructions for manually installing evcc on macOS.
 
 ### Configuration
 
-Create a working `evcc.yaml` configuration file following the instructions under [Configuration](./configuration).
-You can start it with the following command:
+After the first start, open [http://localhost:7070](http://localhost:7070) in your browser and configure evcc via the web interface.
+
+Alternatively, you can create an `evcc.yaml` configuration file (see [Configuration](./configuration)) and start evcc with it:
 
 ```sh
 ./evcc -c evcc.yaml
