@@ -17,7 +17,7 @@ For Raspberry Pi, we recommend the easier installation with [evcc Linux Image](.
 For other Linux distributions, see the [Docker](./docker) guide or [Manual Installation](#manual) section.
 :::
 
-## Installation
+## First Installation
 
 - Open a terminal
 - Install required dependencies:
@@ -137,7 +137,8 @@ To update to the latest version of evcc, follow this guide:
   ```
 
 :::info
-If the unstable repository (nightly versions) has been added, the update will always be updated to the latest available nightly version. If this is no longer desired, the unstable repository can be removed using `sudo rm /etc/apt/sources.list.d/evcc-unstable.list`.
+If the unstable repository (nightly versions) has been added, updates will always install the latest available nightly version.
+If this is no longer desired, the unstable repository can be removed using `sudo rm /etc/apt/sources.list.d/evcc-unstable.list`.
 :::
 
 ## Downgrade
@@ -201,12 +202,12 @@ Open a browser and enter the following URL: `http://127.0.0.1:7070`.
 Replace `127.0.0.1` with the IP address or hostname of the computer if the browser is not opened on the same computer.
 :::
 
-## Backup and Restore
+## Backup and Restore {#backup}
 
 ### Via Web Interface (recommended)
 
 The easiest method is to backup via the web interface.
-See [Configuration → Backup & Restore](./configuration#backup--restore) for details.
+See [Configuration → Backup & Restore](./configuration#backup) for details.
 
 ### Manual Backup
 
@@ -246,7 +247,8 @@ The first empty `ExecStart=` line is important to override the default command.
 
 :::tip
 All parameters from `evcc.yaml` can be set as environment variables: `EVCC_` + parameter name in uppercase.
-For a complete list of available parameters, see the [CLI documentation](/docs/reference/cli/evcc).
+
+For a complete list of all CLI options, see the [CLI documentation](/docs/reference/cli/evcc).
 :::
 
 ## Manual Installation {#manual}
@@ -295,3 +297,52 @@ This ensures evcc starts when the computer boots and automatically restarts in c
 :::note
 This documentation assumes Linux supports `systemd`.
 :::
+
+- Run the following command to create and open an editor with a new file for the service:
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Copy the following content into the file:
+
+  ```
+  [Unit]
+  Description=evcc
+  Requires=network-online.target
+  After=syslog.target network.target network-online.target
+  Wants=network-online.target
+  StartLimitIntervalSec=10
+  StartLimitBurst=10
+
+  [Service]
+  ExecStart=/usr/local/bin/evcc
+  Restart=always
+  RestartSec=5
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Adjust the path of the `evcc` file in `ExecStart` if the file is located in a different directory.
+  This also assumes that the configuration file `evcc.yaml` can be found at `/etc/evcc.yaml`.
+  If this is not the case, add the text `-c /yourpath/evcc.yaml` at the end of `ExecStart`.
+  Replace `yourpath` with the appropriate directory.
+
+- Test the service:
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  On success, the output should contain: `Active: active (running)`.
+
+- Configure the service to start automatically at system boot:
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+For more information, see the [System Service](#systemd) section above.
