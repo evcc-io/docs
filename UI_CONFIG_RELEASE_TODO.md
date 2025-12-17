@@ -74,9 +74,9 @@ Started: 2025-12-16
 
 ### 6. Sponsorship Documentation
 
-- [ ] Update `/docs/sponsorship.mdx` if needed
-  - [ ] Check if token entry via UI needs documentation
-- [ ] Update English version
+- [x] Update `/docs/sponsorship.mdx` if needed
+  - [x] Check if token entry via UI needs documentation
+- [x] Update English version
 
 ### 7. Device Documentation Templates
 
@@ -104,6 +104,11 @@ Started: 2025-12-16
 2. **Maintain German and English in sync** - All changes must be made in both languages
 3. **Screenshots need updating** - Remove experimental badges and update UI screenshots
 4. **Backwards compatibility** - Ensure existing users aren't confused by changes
+
+### Terminology
+
+- **German UI menu**: **Konfiguration** (not "Einstellungen")
+- **English UI menu**: **Configuration** (not "Settings")
 
 ### Files with "experimental" mentions to check:
 
