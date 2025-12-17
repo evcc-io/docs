@@ -69,11 +69,13 @@ Started: 2025-12-16
   - [ ] De-emphasize evcc.yaml creation
 - [ ] Update `/docs/installation/macos.md`
   - [ ] Update first-start instructions
-- [ ] Update `/docs/installation/windows.mdx`
-  - [ ] Update first-start instructions
+- [x] Update `/docs/installation/windows.mdx`
+  - [x] Update first-start instructions
+  - [x] Add UI configuration as primary method
+  - [x] De-emphasize evcc.yaml creation
 - [ ] Update `/docs/installation/home-assistant.mdx`
   - [ ] Mention UI configuration as primary method
-- [ ] Update all English translations of above
+- [x] Update English translation of windows.mdx
 
 ### 6. FAQ Updates
 
