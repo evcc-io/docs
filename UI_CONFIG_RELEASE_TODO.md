@@ -10,7 +10,7 @@ Started: 2025-12-16
 
 ---
 
-## 🔴 IMMEDIATE PRIORITY - Critical for Release
+## Tasks
 
 ### 1. Installation Landing Pages
 
@@ -31,21 +31,7 @@ Started: 2025-12-16
   - [x] Remove experimental warning box (lines 10-15)
   - [x] Remove "activate experimental" instruction (line 61)
 
-### 3. Create New UI Setup Guide
-
-- [ ] Create `/docs/installation/ui-setup.mdx`
-  - [ ] Opening evcc for the first time
-  - [ ] Setting admin password
-  - [ ] Configuration wizard overview
-  - [ ] Adding first loadpoint/charging station
-  - [ ] Configuring meters (grid, PV, battery)
-  - [ ] Adding vehicles
-  - [ ] Setting up integrations (tariffs, etc.)
-  - [ ] Backup/restore functionality
-- [ ] Create `/i18n/en/docusaurus-plugin-content-docs/current/installation/ui-setup.mdx`
-  - [ ] English translation of above
-
-### 4. Update Configuration Documentation
+### 3. Update Configuration Documentation
 
 - [x] Update `/docs/installation/configuration.mdx`
   - [x] Add prominent note at top: UI configuration is now recommended
@@ -54,11 +40,7 @@ Started: 2025-12-16
 - [x] Update `/i18n/en/docusaurus-plugin-content-docs/current/installation/configuration.mdx`
   - [x] Same changes as German version
 
----
-
-## 🟡 SECONDARY PRIORITY - Should be done soon after release
-
-### 5. Platform-Specific Installation Guides
+### 4. Platform-Specific Installation Guides
 
 - [x] Update `/docs/installation/docker.mdx`
   - [x] Remove requirement for evcc.yaml in prerequisites
@@ -80,26 +62,23 @@ Started: 2025-12-16
 - [x] Update English translations of windows.mdx and home-assistant.mdx
 - [x] Update English translations of docker.mdx, linux.mdx and macos.md
 
-### 6. FAQ Updates
+### 5. FAQ Updates
 
-- [ ] Update `/docs/faq.mdx`
-  - [ ] Add Q&A about UI vs file configuration
-  - [ ] Update troubleshooting sections for UI-based solutions
-  - [ ] Add migration information
-  - [ ] Update sections mentioning evcc.yaml as required
-- [ ] Update `/i18n/en/docusaurus-plugin-content-docs/current/faq.mdx`
+- [x] Update `/docs/faq.mdx`
+  - [x] Add Q&A about UI vs file configuration
+  - [x] Update troubleshooting sections for UI-based solutions
+  - [x] Add migration information
+  - [x] Update sections mentioning evcc.yaml as required
+  - [x] Remove "Experimentell aktivieren" from backup/restore section
+- [x] Update `/i18n/en/docusaurus-plugin-content-docs/current/faq.mdx`
 
-### 7. Sponsorship Documentation
+### 6. Sponsorship Documentation
 
 - [ ] Update `/docs/sponsorship.mdx` if needed
   - [ ] Check if token entry via UI needs documentation
 - [ ] Update English version
 
----
-
-## 🟢 GOOD TO HAVE - Can be done after release
-
-### 8. Device Documentation Templates
+### 7. Device Documentation Templates
 
 - [ ] Update device page generators if they mention configuration
 - [ ] Add notes about UI configuration option in:
@@ -108,33 +87,12 @@ Started: 2025-12-16
   - `/docs/devices/vehicles.mdx`
   - All English translations
 
-### 9. Reference Documentation
+### 8. Reference Documentation
 
 - [ ] Update `/docs/reference/configuration/index.md`
   - [ ] Add clear distinction between UI and file configuration
   - [ ] Update introduction to mention both methods
 - [ ] Update all configuration reference pages as needed
-
-### 10. Blog Post
-
-- [ ] Consider writing announcement blog post about UI configuration release
-  - [ ] Highlight ease of use
-  - [ ] Migration guide for existing users
-  - [ ] New features overview
-
-### 11. Migration Guide
-
-- [ ] Create `/docs/guides/migrate-to-ui.mdx`
-  - [ ] How to migrate from evcc.yaml to UI
-  - [ ] Backup existing configuration
-  - [ ] Import/export options
-  - [ ] Troubleshooting common issues
-
-### 12. Video Tutorials
-
-- [ ] Plan video content for UI setup
-- [ ] Record walkthrough videos
-- [ ] Embed in relevant documentation pages
 
 ---
 

@@ -7,6 +7,54 @@ toc_max_heading_level: 2
 
 ## Einrichtung
 
+### Soll ich evcc über die Weboberfläche oder mit der Konfigurationsdatei einrichten?
+
+Wir empfehlen die Einrichtung über die **Weboberfläche**.
+Nach der Installation von evcc öffnest du die Oberfläche im Browser und konfigurierst deine Geräte direkt dort.
+Die Einstellungen werden automatisch in der Datenbank gespeichert.
+
+Die **Konfigurationsdatei** (`evcc.yaml`) ist die traditionelle Methode und wird weiterhin unterstützt.
+
+**Wichtig**: Einige neuere Features sind ausschließlich über die Weboberfläche verfügbar.
+Beide Methoden können auch parallel genutzt werden.
+
+Mehr Informationen findest du unter [Einrichtung](./installation/configuration).
+
+### Ich habe eine evcc.yaml Konfiguration. Wie migriere ich zur Weboberfläche?
+
+Du kannst beide Konfigurationsmethoden parallel nutzen und schrittweise migrieren.
+
+**Vorgehen:**
+
+1. Konfiguriere ein neues Gerät direkt über die Weboberfläche unter **Einstellungen**.
+2. Entferne den entsprechenden Eintrag aus deiner `evcc.yaml`.
+3. Wiederhole dies für alle Geräte, bis deine `evcc.yaml` leer ist.
+
+**Zusammenführung von Geräten:**
+
+Ladepunkte, Netzzähler, PV-Anlagen, Batterien, Fahrzeuge und weitere Zähler werden aus beiden Quellen zusammengeführt.
+Auf der Konfigurationsseite sind Geräte aus der `evcc.yaml` sichtbar, aber nicht bearbeitbar.
+Du kannst Geräte sowohl aus der `evcc.yaml` als auch aus der UI gleichzeitig nutzen.
+
+**Vorrang der UI-Konfiguration:**
+
+Bei anderen Einstellungen (MQTT, Benachrichtigungen, InfluxDB, Tarife, ...) haben Werte aus der Weboberfläche Vorrang gegenüber Werten aus der `evcc.yaml`.
+Wir empfehlen immer nur eine Quelle zu nutzen, um Verwirrung zu vermeiden.
+
+**Hinweis:** An einigen Stellen (HEMS, Sponsortoken) ist die UI-Konfiguration gesperrt, falls bereits über `evcc.yaml` konfiguriert wurde.
+Lösche den Eintrag aus der `evcc.yaml`, um die UI-Bearbeitung zu ermöglichen.
+
+**Fazit:**
+
+Eine vollständige Migration ist nicht zwingend erforderlich.
+Du kannst die `evcc.yaml` auch weiterhin für bestimmte Konfigurationen nutzen und neue Features über die Weboberfläche hinzufügen.
+
+:::note
+Es gibt keine automatische Migration.
+Der früher vorhandene `evcc migrate` Befehl wurde aufgrund hoher Komplexität entfernt.
+Bitte migriere händisch.
+:::
+
 ### Kann ich evcc ohne Netzzähler betreiben?
 
 Der Netzzähler ist das Kernstück für evcc und sollte, wenn möglich, eingebunden werden.
@@ -64,51 +112,41 @@ Damit evcc weiß, dass nicht mehr 3-phasig geladen werden kann muss die entsprec
 
 ## Fehlersuche
 
+### Etwas funktioniert nicht. Was nun?
+
+Schau zuerst im [Community Forum](https://github.com/evcc-io/evcc/discussions) nach, ob dein Problem bereits diskutiert wurde.
+Hier helfen sowohl Entwickler als auch Anwender bei verschiedenen Problemen.
+
+Die einfachste Möglichkeit um Hilfe zu bekommen ist die **Problem melden** Funktion in der evcc Weboberfläche.
+Klicke in der Oberfläche auf das Menü (oben rechts) und wähle **Hilfe benötigt?** → **Problem melden**.
+Hier werden Details zu deiner Konfiguration, Datenbank, Logs und dem Zustand der Anwendung angezeigt.
+Daraus kannst du direkt einen [GitHub Discussions](https://github.com/evcc-io/evcc/discussions) Beitrag oder ein [GitHub Issue](https://github.com/evcc-io/evcc/issues) erstellen.
+
+Wenn du selbst einen Beitrag erstellst, gib bitte genaue Informationen an:
+
+- Beschreibung des Problems mit reproduzierbaren Schritten.
+- Welche Geräte (Fahrzeug, Hausinstallation, Wallbox) verwendet werden.
+
+Eine gute Problembeschreibung führt zu schnellerer und besserer Hilfe.
+
 ### Syntax-Fehler in der evcc.yaml finden
 
-yaml ist sehr syntax-empfindlich. Fehler fallen nicht immer sofort ins Auge.
+yaml ist sehr syntax-empfindlich.
+Fehler fallen nicht immer sofort ins Auge.
 
 Eine schnelle Hilfe bieten yaml-Tester wie z. B. (https://onlineyamltools.com/validate-yaml)
 
-### Etwas funktioniert nicht. Was nun?
-
-Bei evcc gibt es einen [Community Support](https://github.com/evcc-io/evcc/discussions). Hier helfen sowohl Entwickler als auch Anwender bei verschiedenen Problemen. Es wäre gut, dabei möglichst genaue Informationen zu folgenden Bereichen mitzuteilen:
-
-- Welche Geräte (Fahrzeug, Hausinstallation, Wallbox) verwendet werden.
-
-- Die Konfigurationsdatei `evcc.yaml`,
-
-<details>
-<summary>
-  d.h. deren Inhalt (*bitte Benutzernamen, Passwörter und ähnliches entfernen*).
-</summary>
-
-`egrep -v '^#|^\s+#' evcc.yaml |grep . |sed -E 's/(password|user|token|url|host|broker|accessToken|refreshToken|vin).*/\1: *****/'`
-
-</details>
-
-- alternativ kann mit `evcc dump --cfg >~/config.txt` eine anonymisierte Konfigurationsdatei erstellt und unter dem angegebenen Namen im Home-Verzeichnis gespeichert werden.
-
-- Eine möglichst genaue Beschreibung was das Problem ist.
-
-**Erste Hilfe**
-
-Zur Erleichterung wurde eine Erste-Hilfe Funktionalität entwickelt. Durch Eingabe von `evcc discuss` auf der Kommandozeile wird ein neuer Diskussionsbeitrag in der Rubrik "Erste Hilfe" erstellt. Dieser Beitrag beinhaltet automatisch die Fehlermeldung(en) und die anonymisierte Konfigurationsdatei. Ergänzt werden muss nur noch ein aussagekräftiger Titel und eine Problembeschreibung.
-Diese Erste-Hilfe ist jeweils nur für die Erst-Erstellung eines Diskussionsbeitrages nutzbar. Sind im Zuge der Lösungsfindung weitere Informationen notwendig, müssen diese händisch erstellt werden.
-
-Wir versuchen natürlich Probleme so gut es geht zu vermeiden, aber das kann aufgrund der Komplexität leider nicht immer gelingen.
-
 ### Wie kann ich ein Logfile zur Fehleranalyse erstellen?
 
-evcc gibt in seiner Standard Konfiguration nur dann Fehlermeldungen aus, wenn ein Fehler auftritt (siehe auch [`log`](/docs/reference/configuration/log#log) Parameter in der `evcc.yaml`).
+Die einfachste Möglichkeit ist das **Log in der Weboberfläche** einzusehen und herunterzuladen.
+Klicke im Menü (oben rechts) auf "Logs".
+Dort kannst du auch nach verschiedenen Level und Bereichen filtern.
 
-Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet.
+Das Log umfasst die letzten 10k Zeilen.
 
-Mittels `evcc charger` oder `evcc meter` oder `evcc vehicle` können auf der Kommandozeile die verschiedenen Gerätetypen getestet werden. Dabei kommt der in `evcc.yaml` konfigurierte Log-Parameter (siehe oben) zum Einsatz. Will man davon abweichende Tests durchführen, kann der Log-Parameter beim Aufruf entsprechend ergänzt werden.
+**Erweiterte Log-Optionen:**
 
-`Beispiel: evcc -l debug meter`
-
-Wird evcc als Linux Systemdienst, wie [hier beschrieben](/docs/installation/linux#systemd), ausgeführt, können die log-Nachrichten über folgende Befehle verfolgt, bzw. aufgelistet werden:
+Wird evcc als Linux Systemdienst ausgeführt, können die log-Nachrichten über folgende Befehle verfolgt werden:
 
 - Kontinuierliche Anzeige der evcc log Meldungen
   `sudo journalctl -fau evcc`
@@ -122,14 +160,6 @@ Wird evcc als Linux Systemdienst, wie [hier beschrieben](/docs/installation/linu
 Weiterführende Hilfe: [wiki.ubuntuusers.de/systemd/journalctl](https://wiki.ubuntuusers.de/systemd/journalctl/)
 
 Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/).
-
-:::tip
-
-Als Ergänzung zu den Konsolenausgaben gibt es auch die Möglichkeit, das fortlaufenden Log im WebUI einzusehen und herunterzuladen. Dazu im Web-Menü (oben rechts) den Menüpunkt "Logs" auswählen. Dort kann auch nach verschiedenen Level und Bereichen gefiltert werden.
-
-Dieses Log umfasst allerdings nur die letzten 10k Zeilen.
-
-:::
 
 ### Weiterführende Hilfe bei der Geräteerkennung
 
@@ -179,17 +209,10 @@ Eine Prüfung, ob mehrere evcc Prozesse laufen, kann unter Linux mithilfe von `h
 
 Sollte es Gründe geben, evcc auf der Kommandoebene zu starten, sollte vorher der Dienst mit `sudo systemctl stop evcc` beendet werden.
 
-### evcc UI ist nicht erreichbar (Demo Modus funktioniert aber)
+### evcc UI ist nicht erreichbar
 
-Es kommt immer wieder vor, dass Fehler in der Konfiguration übersehen werden und der Service gestartet wird.
-Dabei wird der Start von evcc abgebrochen, ohne das es dafür einen Hinweis gibt.
-Ergebnis ist, dass das UI nicht erreichbar ist.
-
-In dem Fall sollte man evcc durch Eingabe von `evcc` auf der Kommandozeile starten.
-Dort werden dann auch Fehlerhinweise gegeben, die den Start des Service verhindert haben.
-
-Mittels der oben genannten Tests kann man diesen Fehlern auf den Grund gehen und sie beheben.
-Erst wenn alles fehlerfrei ist, sollte der Service gestartet werden.
+Schaue ins Log, um die Fehlerursache zu finden.
+Wie du das Log aufrufst, findest du in der [Installation](/docs/installation) unter deiner jeweiligen Installationsmethode.
 
 ### MQTT plugin gibt `outdated` Warnung
 
@@ -268,7 +291,7 @@ service evcc start
 
 ### Wie kann ich meine Konfiguration sichern und wiederherstellen? {#backup-restore}
 
-In der evcc UI findest du unter **Einstellungen** → **Experimentell aktivieren** → **Sichern & Wiederherstellen** folgende Optionen:
+In der evcc Weboberfläche findest du unter **Einstellungen** → **Sichern & Wiederherstellen** folgende Optionen:
 
 **Sichern:**
 Lädt eine Kopie deiner Datenbank (evcc.db) herunter.
@@ -291,7 +314,7 @@ Du kannst einzelne Bereiche deiner Datenbank löschen:
 
 :::warning Achtung
 Nach dem Zurücksetzen der Konfiguration musst du alle Geräte neu konfigurieren.
-Deine `evcc.yaml` bleibt dabei unverändert.
+Deine `evcc.yaml` (falls vorhanden) bleibt dabei unverändert.
 :::
 
 Alternativ kannst du einzelne Caches über die Kommandozeile löschen:
