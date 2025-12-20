@@ -38,6 +38,24 @@ influx:
   org: home
 ```
 
+---
+
+## HTTPS with Self-Signed Certificate
+
+When using HTTPS (`https://`), the TLS certificate is verified by default.
+If you're using a self-signed certificate, certificate verification can be disabled:
+
+**For example**:
+
+```yaml
+influx:
+  url: https://influxdb.example.com:8086
+  database: evcc
+  token: 1234567890abcdef
+  org: home
+  insecure: true
+```
+
 ## VictoriaMetrics
 
 [VictoriaMetrix](https://github.com/VictoriaMetrics/VictoriaMetrics) is a time series database with InfluxDB compatible REST API.
