@@ -30,6 +30,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
 - [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
 - [Prometheus Plugin](#prometheus) - Plugin for reading metrics from Prometheus using PromQL.
+- [GPIO Plugin](#gpio) - Plugin for direct access to GPIO pins (Linux only).
 
 ### Helpers
 
@@ -735,6 +736,46 @@ energy:
 
 The query must return a single numerical value.
 For vector results, exactly one metric must be included.
+
+### GPIO <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#gpio}
+
+The `gpio` plugin enables direct access to GPIO pins (General Purpose Input/Output) on Linux systems.
+It is particularly suitable for Raspberry Pi and similar single-board computers.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                              |
+| --------- | ------ | -------- | ---------------------------------------- |
+| function  | string | yes      | Mode: `read` (input) or `write` (output) |
+| pin       | int    | yes      | Pin number (BCM numbering, e.g. GPIO 17) |
+
+**How it works**:
+
+- **Reading** (`function: read`): Reads the state of a GPIO pin as a boolean value (`true` = HIGH, `false` = LOW)
+- **Writing** (`function: write`): Sets a GPIO pin to HIGH (`true`) or LOW (`false`)
+
+Pin numbering follows the BCM scheme (Broadcom numbers, not the physical pin position).
+For a Raspberry Pi pinout, see e.g. [pinout.xyz](https://pinout.xyz/).
+
+**Reading Example**:
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM pin number
+```
+
+**Writing Example**:
+
+```yaml
+source: gpio
+function: write
+pin: 27 # BCM pin number
+```
+
+:::note
+This plugin only works on Linux systems with access to `/dev/gpiomem`.
+:::
 
 ## Helpers
 
