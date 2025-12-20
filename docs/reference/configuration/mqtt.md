@@ -28,7 +28,7 @@ mqtt:
 
 ## MQTT mit TLS-Verschlüsselung
 
-Beispiel:
+**Beispiel**:
 
 ```yaml
 # mqtt message broker
@@ -39,6 +39,12 @@ mqtt:
   # user:
   # password:
 ```
+
+Bei Verwendung von TLS-Verschlüsselung (`tls://`) wird standardmäßig das TLS-Zertifikat des Brokers überprüft.
+Falls ein selbst-signiertes Zertifikat verwendet wird, gibt es zwei Möglichkeiten:
+
+1. Das Zertifikat systemweit installieren (z. B. unter Linux in `/etc/ssl/certs`), damit evcc es automatisch verwendet
+2. Die Zertifikatsüberprüfung mit `insecure: true` deaktivieren (siehe unten)
 
 ---
 
@@ -67,4 +73,63 @@ Das Anmeldepasswort am MQTT-Broker.
 
 ### `clientid`
 
-Erlaubt eine feste MQTT-Client ID vorzugegeben. Andernfalls wird diese dynamisch vergeben.
+Erlaubt eine feste MQTT-Client ID vorzugegeben.
+Andernfalls wird diese dynamisch vergeben.
+
+### `insecure`
+
+Deaktiviert die TLS-Zertifikatsüberprüfung bei Verwendung von `tls://`.
+
+**Beispiel**:
+
+```yaml
+mqtt:
+  broker: tls://broker.example.com:8883
+  topic: evcc
+  insecure: true
+```
+
+### `caCert`
+
+CA-Zertifikat für die Überprüfung des Broker-Zertifikats (Zertifikatsinhalt).
+
+**Beispiel**:
+
+```yaml
+mqtt:
+  broker: tls://broker.example.com:8883
+  topic: evcc
+  caCert: |
+    -----BEGIN CERTIFICATE-----
+    MIIDXTCCAkWgAwIBAgIJAKZm...
+    ...
+    -----END CERTIFICATE-----
+```
+
+### `clientCert`
+
+Client-Zertifikat für gegenseitige TLS-Authentifizierung (Zertifikatsinhalt).
+Muss zusammen mit `clientKey` verwendet werden.
+
+**Beispiel**:
+
+```yaml
+mqtt:
+  broker: tls://broker.example.com:8883
+  topic: evcc
+  clientCert: |
+    -----BEGIN CERTIFICATE-----
+    MIIDXTCCAkWgAwIBAgIJAKZm...
+    ...
+    -----END CERTIFICATE-----
+  clientKey: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0B...
+    ...
+    -----END PRIVATE KEY-----
+```
+
+### `clientKey`
+
+Privater Schlüssel des Client-Zertifikats (Schlüsselinhalt).
+Muss zusammen mit `clientCert` verwendet werden.
