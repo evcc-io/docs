@@ -321,7 +321,7 @@ Here, the parameter `uri` with the value `https://<host>/<topics>` is expected. 
 - `<host>`: Address (hostname or IP address) of the ntfy server
 - `<topics>`: Subscribed topic or topics
 
-Optional parameters are `priority` and `tags`. All parameters are passed as strings.
+Optional parameters are `priority`, `tags` and `authtoken`. All parameters are passed as strings.
 
 **For example**:
 
@@ -330,6 +330,7 @@ Optional parameters are `priority` and `tags`. All parameters are passed as stri
   uri: https://ntfy.sh/evcctestalerts
   priority: default
   tags: electric_plug,blue_car
+  authtoken: 61RgoYLOsi8S318j6ycU2qEsleC2p9njoyw4890121412JloH7rMPaqQwi5KWTit
 ```
 
 Further information can be found in the [ntfy documentation](https://docs.ntfy.sh).
