@@ -72,13 +72,9 @@ Cloudsmith ist ein Service, welcher die Entwicklung von Software und Dienstleist
   sudo systemctl start evcc
   ```
 
-- Prüfe die Installation und öffne einen Browser und gib die folgende URL ein: [http://localhost:7070](http://localhost:7070). Die evcc Oberfläche fordert dich auf ein Password zu vergeben und die Einrichtung zu starten.
-
-- Stoppe den evcc-Server:
-
-  ```sh
-  sudo systemctl stop evcc
-  ```
+- Öffne die evcc Oberfläche in deinem Browser: [http://localhost:7070](http://localhost:7070)
+- Die evcc Oberfläche fordert dich auf ein Administrator-Passwort zu vergeben
+- Anschließend kannst du deine Geräte direkt über die Weboberfläche einrichten
 
 :::note
 Während der Installation wird ein Nutzer `evcc` angelegt, deshalb sollte der angemeldete Nutzer nicht den Namen `evcc` haben.
@@ -90,44 +86,29 @@ Dieser Befehl fügt den Benutzer evcc zur Gruppe plugdev hinzu.
 Die Gruppe plugdev dient dazu, Zugriffsrechte für Plug-in-Geräte (wie USB, serielle Schnittstelle usw.) zu erteilen, ohne dass Root-Rechte erforderlich sind.
 :::
 
-## evcc.yaml erstellen
+## Konfiguration
 
-Für den Betrieb musst du eine funktionierende `evcc.yaml` Konfigurationsdatei erstellen.
-Neben allgemeinen Einstellungen beinhaltet die Konfiguration die Definition der einzelnen Komponenten (Zähler, Wallbox, Fahrzeug, ...).
+evcc kann über die Weboberfläche oder eine Konfigurationsdatei eingerichtet werden.
 
-### Erstellen
+:::tip Empfohlen
+Die Konfiguration über die Weboberfläche ist der einfachste Weg, evcc einzurichten.
+:::
 
-Wir empfehlen die Verwendung des Konfigurationsassistenten:
+### Weboberfläche (empfohlen)
 
-- Starte den Konfigurationsassistenten und beantworte die Fragen:
+Nach dem ersten Start kannst du evcc direkt im Browser unter [http://localhost:7070](http://localhost:7070) konfigurieren.
+Die Einstellungen werden automatisch in der Datenbank gespeichert.
 
-  ```sh
-  sudo evcc configure
-  ```
+### Konfigurationsdatei (traditionell)
 
-- Kopiere die erstellte Konfigurationsdatei nach `/etc/evcc.yaml`:
+Alternativ kannst du eine `evcc.yaml` Konfigurationsdatei verwenden.
+Details zur Erstellung der Konfigurationsdatei findest du unter [Einrichtung](./configuration).
 
-  ```sh
-  sudo mv evcc.yaml /etc
-  ```
+:::important
+Die Konfigurationsdatei muss unter `/etc/evcc.yaml` abgelegt werden.
+:::
 
-- Starte den evcc-Server:
-
-  ```sh
-  sudo systemctl restart evcc
-  ```
-
-- Rufe die evcc Oberfläche auf [http://localhost:7070](http://localhost:7070)
-
-### Anpassen
-
-Benötigt deine Konfiguration noch Anpassungen kannst du entweder den Konfigurationsassistenten erneut ausführen (siehe oben) oder die Konfigurationsdatei manuell anpassen.
-
-- Konfigurationsdatei bearbeiten:
-
-  ```sh
-  sudo nano /etc/evcc.yaml
-  ```
+- Erstelle die Konfigurationsdatei gemäß [Anleitung](./configuration) und speichere sie unter `/etc/evcc.yaml`
 
 - Starte den evcc-Server neu:
 
@@ -135,7 +116,7 @@ Benötigt deine Konfiguration noch Anpassungen kannst du entweder den Konfigurat
   sudo systemctl restart evcc
   ```
 
-Unter [evcc.yaml erstellen](./configuration) findest du weitere Informationen und Beispiele zur Konfiguration von evcc.
+- Rufe die evcc Oberfläche auf [http://localhost:7070](http://localhost:7070)
 
 ## Aktualisierung
 
@@ -220,9 +201,16 @@ Prüfe die Installation
 Ersetze `127.0.0.1` mit der IP Adresse oder dem Hostnamen des Computers, falls der Browser nicht auf dem gleichen Computer geöffnet wurde.
 :::
 
-## Backup und Restore
+## Backup und Restore {#backup}
 
-Um nach einer Neuinstallation wieder den "Ursprungszustand" herzustellen zu können, reicht es die Konfigurationsdatei `evcc.yaml` und die Datenbankdatei `evcc.db` zu sichern.
+### Über die Weboberfläche (empfohlen)
+
+Die einfachste Methode ist das Backup über die Weboberfläche.
+Details findest du unter [Einrichtung → Sichern & Wiederherstellen](./configuration#backup).
+
+### Manuelles Backup
+
+Um nach einer Neuinstallation wieder den "Ursprungszustand" herzustellen zu können, reicht es die Konfigurationsdatei `evcc.yaml` (falls verwendet) und die Datenbankdatei `evcc.db` zu sichern.
 Der Speicherort wird im Logfile beim Programmstart angegeben.
 Üblicherweise liegt die Konfiguration unter `/etc/evcc.yaml` und die Datenbank unter `/var/lib/evcc/evcc.db`.
 
@@ -233,6 +221,34 @@ Beispiel (kopieren vom üblichen Speicherort ins Homelaufwerk):
 yaml kopieren: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
 
 db kopieren: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Umgebungsvariablen & CLI-Optionen {#environment}
+
+Bei der Installation über APT läuft evcc als systemd-Dienst.
+Du kannst das Verhalten über eine Override-Datei anpassen:
+
+```sh
+sudo systemctl edit evcc
+```
+
+### Beispiel
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_LOG=debug,tariff:trace"
+ExecStart=
+ExecStart=/usr/bin/evcc --custom-css /path/to/my.css
+```
+
+:::note
+Die erste leere `ExecStart=` Zeile ist wichtig, um den Standard-Befehl zu überschreiben.
+:::
+
+:::tip
+Alle Parameter aus `evcc.yaml` können als Umgebungsvariable gesetzt werden: `EVCC_` + Parametername in Großbuchstaben.
+
+Eine vollständige Liste aller CLI-Optionen findest du in der [CLI-Dokumentation](/docs/reference/cli/evcc).
+:::
 
 ## Manuelle Installation {#manual}
 
@@ -254,14 +270,18 @@ Neben dem Debian/Ubuntu APT Paket, stellen wir auch weitere Binaries für Linux 
   ```
 - Du solltest die aktuelle Version von evcc sehen (bspw. `evcc version 0.xxx.y`).
 
-### evcc.yaml erstellen
+### Konfiguration
 
-Erstelle dir nach der Anleitung unter [evcc.yaml erstellen](./configuration) eine funktionierende `evcc.yaml` Konfigurationsdatei.
-Diese kannst du mit folgendem Befehl starten:
+Du kannst evcc über die Weboberfläche oder eine Konfigurationsdatei einrichten.
+Details findest du unter [Einrichtung](./configuration).
+
+Starte evcc mit:
 
 ```sh
-./evcc -c evcc.yaml
+./evcc
 ```
+
+Öffne dann deinen Browser unter [http://localhost:7070](http://localhost:7070) und folge den Anweisungen.
 
 ### Aktualisierung/Downgrade
 
@@ -324,7 +344,5 @@ Diese Dokumentation geht davon aus, dass Linux `systemd` unterstützt.
   ```sh
   sudo systemctl enable evcc.service
   ```
-
-- Fertig :-)
 
 Weitere Informationen findest du oben im Abschnitt [Systemdienst](#systemd).

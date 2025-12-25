@@ -2,19 +2,39 @@
 sidebar_position: 1
 ---
 
-# evcc.yaml
+# Konfiguration
 
-evcc benötigt eine Konfigurationsdatei in der die Installation beschrieben wird. Ohne diese Datei kann evcc nicht genutzt werden. Die Datei selbst ist im [YAML](https://de.wikipedia.org/wiki/YAML) Format geschrieben. Dieses Format definiert eine Syntax wodurch eine strukturierte Datenstruktur in Textform erstellt werden kann.
+evcc kann auf zwei Arten konfiguriert werden:
 
-Zur Bearbeitung bzw. Erstellung der Konfigurationsdatei empfehlen wir einen Texteditor zu verwenden, welcher die YAML Synthax beherrscht und damit Fehler aufzeigen kann, z. B. [VS Code](https://code.visualstudio.com) mit der [YAML Erweiterung](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
+**1. UI-Konfiguration (empfohlen)**
 
-Die Konfigurationsdatei hat standardmäßig den Namen `evcc.yaml` und ist entweder im gleichen Verzeichnis wie das Programm selbst abzulegen, oder bei Linux-Systemen unter `/etc/evcc.yaml`.
+Die Konfiguration erfolgt über die Weboberfläche unter **Konfiguration**.
+Die Einstellungen werden automatisch in der Datenbank gespeichert.
+Weitere Informationen findest du unter [Einrichtung](/docs/installation/configuration).
 
-Wenn die Konfigurationsdatei nicht gefunden wird, kann diese über einen Parameter beim Aufruf evcc übergeben werden: z. B. `evcc -c /home/evcc.yaml`
+**2. Dateibasierte Konfiguration**
+
+Die Konfiguration über die `evcc.yaml` Datei wird weiterhin unterstützt.
+Dieser Bereich dokumentiert die YAML-basierte Konfiguration.
+
+:::info Parallele Nutzung
+Beide Konfigurationsmethoden können parallel genutzt werden.
+Geräte (Ladepunkte, Zähler, PV-Anlagen, Batterien, Fahrzeuge) werden aus beiden Quellen zusammengeführt.
+Bei anderen Einstellungen hat die UI-Konfiguration Vorrang.
+Details findest du in der [FAQ](/docs/faq#ui-migration).
+:::
+
+## Dateibasierte Konfiguration (evcc.yaml)
+
+Die Konfigurationsdatei ist im YAML Format geschrieben und hat standardmäßig den Namen `evcc.yaml`.
+Sie liegt entweder im gleichen Verzeichnis wie das Programm oder bei Linux-Systemen unter `/etc/evcc.yaml`.
+
+Abweichende Pfade können beim Start angegeben werden: `evcc -c /pfad/zur/evcc.yaml`
 
 ### Struktur
 
-Die Konfigurationsdatei von evcc besteht aus mehreren Bereichen. Um von einem Bereich auf Elemente eines anderen Bereichs zu verweisen, haben einzelne Geräte einen `name` Parameter, den man frei mit einem Text vergeben kann. Der vergebene Text dient der Identifikation und Referenzierung.
+Die Konfigurationsdatei besteht aus mehreren Bereichen.
+Um zwischen Bereichen zu referenzieren, haben Geräte einen `name` Parameter zur Identifikation.
 
 Eine Beispieldatei mit vielen Parametern findet man hier: https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml
 
@@ -54,7 +74,7 @@ graph TD;
 
 ### Wie funktioniert evcc? (Ein Blick ins Innere)
 
-Wichtig für die Funktionalität ist ein Netzanschlusszähler (grid-meter). Dieser ermittelt die aktuelle Überschussleistung.
+Wichtig für die Funktionalität ist ein Netzanschlusszähler (`grid` Zähler). Dieser ermittelt die aktuelle Überschussleistung.
 Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss.
 Ein Betrieb ist aber auch ohne Netzanschlusszähler möglich. Mehr dazu findest du [hier](/docs/faq#einrichtung).
 

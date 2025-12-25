@@ -22,37 +22,24 @@ Diese werden hier allerdings nicht behandelt.
 
 ## Vorbereitung
 
-### Konfigurationsdatei
+### Konfiguration
 
-Du benötigst eine `evcc.yaml` Konfigurationsdatei für deine Komponenten (Zähler, Wallbox, Fahrzeug, ...).
-Es gibt mehrere Möglichkeiten, diese zu erstellen:
+evcc kann auf zwei Arten konfiguriert werden:
 
-1. **Assistent auf anderem System:** Führe `evcc configure` vorher auf einem [Linux](./linux), [macOS](./macos) oder [Windows](./windows) System aus.
-   Verwende die damit erstellte `evcc.yaml` Datei für deine Docker Installation.
+1. **Weboberfläche** (empfohlen): Starte den Container ohne `evcc.yaml`. Nach dem Start richtest du evcc direkt im Browser ein. Die Konfiguration wird automatisch in der Datenbank gespeichert.
 
-2. **Manuell:** Erstelle die `evcc.yaml` manuell.
-   Hier findest du eine Anleitung unter [evcc.yaml erstellen](./configuration).
-
-3. **Assistent in Docker:**
-   Praktisch, wenn du Docker auf einem Linux System installiert hast.
-   Erstelle eine leere `evcc.yaml` Datei und führe den Konfigurationsassistenten direkt in Docker aus.
-   Folge den Fragen des Assistenten.
-   Am Ende wird die Konfiguration in die erstellte `evcc.yaml` Datei geschrieben.
-
-   ```sh
-   touch evcc.yaml
-   docker run -v $(pwd)/evcc.yaml:/app/evcc.yaml -it evcc/evcc:latest evcc configure
-   ```
+2. **Konfigurationsdatei** (traditionelle Methode): Erstelle eine `evcc.yaml` Datei mit deinen Einstellungen. Eine Anleitung findest du unter [Einrichtung](./configuration).
 
 ### Volumes
 
-Der evcc Docker Container benötigt zwei Volumes:
+Der evcc Docker Container benötigt mindestens ein Volume:
 
-- `/etc/evcc.yaml` für die Konfigurationsdatei
-- `/root/.evcc/` Verzeichnis für die interne SQLite Datenbank. Die Datenbank wird automatisch in diesem Verzeichnis abgelegt.
+- `/root/.evcc/` Verzeichnis für die interne SQLite Datenbank (erforderlich). Die Datenbank wird automatisch in diesem Verzeichnis abgelegt.
+- `/etc/evcc.yaml` für die Konfigurationsdatei (optional - nur bei dateibasierter Konfiguration)
 
-Erstelle diese Verzeichnisse auf deinem Host-System.
-In dieser Anleitung verwenden wir exemplarisch die Pfade `/home/user/.evcc/` und `/home/user/evcc.yaml`
+Erstelle das Datenbank-Verzeichnis auf deinem Host-System.
+In dieser Anleitung verwenden wir exemplarisch den Pfad `/home/user/.evcc/`.
+Falls du die dateibasierte Konfiguration nutzt, verwende zusätzlich `/home/user/evcc.yaml`
 
 ## Installation
 
@@ -71,22 +58,22 @@ Hier sind die relevanten Angaben, die du eintragen musst:
 
 #### Volume Mounts {#volumes}
 
-| Host Pfad              | Container Pfad   | Beschreibung                      |
-| ---------------------- | ---------------- | --------------------------------- |
-| `/home/user/evcc.yaml` | `/etc/evcc.yaml` | Konfigurationsdatei               |
-| `/home/user/.evcc/`    | `/root/.evcc`    | Verzeichnis für interne Datenbank |
+| Host Pfad              | Container Pfad   | Beschreibung                                               | Erfordert |
+| ---------------------- | ---------------- | ---------------------------------------------------------- | --------- |
+| `/home/user/evcc.yaml` | `/etc/evcc.yaml` | Konfigurationsdatei (nur bei dateibasierter Konfiguration) | nein      |
+| `/home/user/.evcc/`    | `/root/.evcc`    | Verzeichnis für interne Datenbank                          | ja        |
 
 #### Ports {#ports}
 
-| Host Port | Container Port | Beschreibung           | Optional |
-| --------- | -------------- | ---------------------- | -------- |
-| 7070      | 7070/tcp       | Web UI, API            |          |
-| 8887      | 8887/tcp       | OCPP Server            | Yes      |
-| 9522      | 9522/udp       | SMA Sunny Home Manager | Yes      |
-| 7090      | 7090/udp       | KEBA Chargers          | Yes      |
-| 5353      | 5353/udp       | mDNS                   | Yes      |
-| 4712      | 4712/tcp       | EEBus                  | Yes      |
-| 8899      | 8899/udp       | Modbus UDP             | Yes      |
+| Host Port | Container Port | Beschreibung           | Erfordert |
+| --------- | -------------- | ---------------------- | --------- |
+| 7070      | 7070/tcp       | Web UI, API            | ja        |
+| 8887      | 8887/tcp       | OCPP Server            | nein      |
+| 9522      | 9522/udp       | SMA Sunny Home Manager | nein      |
+| 7090      | 7090/udp       | KEBA Chargers          | nein      |
+| 5353      | 5353/udp       | mDNS                   | nein      |
+| 4712      | 4712/tcp       | EEBus                  | nein      |
+| 8899      | 8899/udp       | Modbus UDP             | nein      |
 
 Öffne die Docker UI deines Systems und erstelle einen neuen Container mit den obigen Angaben und starte ihn.
 
@@ -106,7 +93,7 @@ Sollten nach einer Aktualisierung bspw. deine Ladevorgänge nicht mehr angezeigt
 
 ### via Docker CLI
 
-Installiere und starte den Docker Container der zu deiner Komponenten-Konstellation passt mit einem der folgenden Befehle.
+Installiere und starte den Docker Container mit einem der folgenden Befehle.
 Ob du `sudo` benötigst, hängt von deinem System ab.
 
 <Tabs groupId="docker">
@@ -114,7 +101,7 @@ Ob du `sudo` benötigst, hängt von deinem System ab.
 
 ```sh
 sudo docker run -d --name evcc \
--v /home/user/evcc.yaml:/etc/evcc.yaml \
+-v /home/user/evcc.yaml:/etc/evcc.yaml \  # optional
 -v /home/user/.evcc:/root/.evcc \
 -p 7070:7070 \
 -p 8887:8887 \
@@ -189,11 +176,11 @@ Springe zum Abschnitt [Testen](#test) um zu prüfen, ob die Installation erfolgr
 [docker-compose](https://docs.docker.com/compose) hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile
 Alle Parameter werden in einer Datei hinterlegt.
 Zudem kannst du weitere Programme wie Traefik in Verbindung mit evcc konfigurieren und gemeinsam starten.
-Im aktiven Verzeichnis legt man dazu einfach eine Konfigurationsdatei mit dem Namen `compose.yml` an.  
+Im aktiven Verzeichnis legt man dazu einfach eine Konfigurationsdatei mit dem Namen `compose.yml` an.
 Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgenden Konfigurationen in die `compose.yml` und speichert diese ab:
 
 <Tabs groupId="compose">
-  <TabItem value="default" label="Standard" default>
+  <TabItem value="standard" label="Standard" default>
 
 ```yaml
 version: "3"
@@ -207,8 +194,8 @@ services:
       - 7070:7070/tcp
       - 8887:8887/tcp
     volumes:
-      - /home/user/evcc.yaml:/etc/evcc.yaml
       - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
     restart: unless-stopped
     # optional:
     #user: <UID>:<GID>
@@ -277,11 +264,19 @@ sudo docker compose up -d
 Hast du deinen Container erfolgreich erstellt und gestartet, kannst du die evcc Web UI unter `http://<host>:7070` aufrufen.
 `<host>` ist hier die IP-Adresse oder der Hostname des Computers, auf dem der Container läuft.
 
-Du solltest die evcc Oberfläche sehen und aufgefordert werden ein Administrations-Passwort zu setzen.
+**Bei der ersten Verwendung:**
+
+- Wirst du aufgefordert ein Administrations-Passwort zu setzen
+- Kannst du anschließend deine Geräte über die Weboberfläche einrichten (bei UI-Konfiguration)
+- Oder siehst direkt deine konfigurierten Geräte (bei dateibasierter Konfiguration)
 
 Solltest du keine Verbindung herstellen können, überprüfe die Logs deines Containers.
-Wenn du die Oberfläche siehst, aber eine Fehlermeldung angezeigt wird, überprüfe die Konfiguration in der `evcc.yaml` Datei.
-Weitere Details findest du in [evcc.yaml erstellen](./configuration) oder in den [GitHub Diskussionen](https://github.com/evcc-io/evcc/discussions).
+Wenn du die Oberfläche siehst, aber eine Fehlermeldung angezeigt wird, überprüfe:
+
+- Bei dateibasierter Konfiguration: die Einstellungen in der `evcc.yaml` Datei
+- Bei UI-Konfiguration: die Geräteeinstellungen auf der Konfigurationsseite
+
+Weitere Details findest du in [Einrichtung](./configuration) oder in den [GitHub Diskussionen](https://github.com/evcc-io/evcc/discussions).
 
 ## Community Anleitungen
 

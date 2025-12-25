@@ -54,4 +54,4 @@ If you want to learn more about how wallboxes and EV charging work, first check 
   />
 </NavCardGrid>
 
-After installation: [Create evcc.yaml](./installation/configuration)
+After installation: [Configure evcc](./installation/configuration)
