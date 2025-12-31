@@ -22,37 +22,24 @@ However, these are not covered here.
 
 ## Preparation
 
-### Configuration File
+### Configuration
 
-You need an `evcc.yaml` configuration file for your components (meters, wallbox, vehicle, ...).
-There are several ways to create this:
+evcc can be configured in two ways:
 
-1. **Assistant on another system:** Run `evcc configure` beforehand on a [Linux](./linux), [macOS](./macos) or [Windows](./windows) system.
-   Use the created `evcc.yaml` file for your Docker installation.
+1. **Web interface** (recommended): Start the container without `evcc.yaml`. After starting, configure evcc directly in the browser. The configuration is automatically saved in the database.
 
-2. **Manual:** Create the `evcc.yaml` manually.
-   You can find instructions under [Configuration](./configuration).
-
-3. **Assistant in Docker:**
-   Handy if you have Docker installed on a Linux system.
-   Create an empty `evcc.yaml` file and run the configuration assistant directly in Docker.
-   Follow the assistant's questions.
-   At the end, the configuration will be written to the created `evcc.yaml` file.
-
-   ```sh
-   touch evcc.yaml
-   docker run -v $(pwd)/evcc.yaml:/app/evcc.yaml -it evcc/evcc:latest evcc configure
-   ```
+2. **Configuration file** (traditional method): Create an `evcc.yaml` file with your settings. Instructions can be found under [Configuration](./configuration).
 
 ### Volumes
 
-The evcc Docker container needs two volumes:
+The evcc Docker container needs at least one volume:
 
-- `/etc/evcc.yaml` for the configuration file
-- `/root/.evcc/` directory for the internal SQLite database. The database is automatically stored in this directory.
+- `/root/.evcc/` directory for the internal SQLite database (required). The database is automatically stored in this directory.
+- `/etc/evcc.yaml` for the configuration file (optional - only for file-based configuration)
 
-Create these directories on your host system.
-In this guide we use the paths `/home/user/.evcc/` and `/home/user/evcc.yaml` as examples.
+Create the database directory on your host system.
+In this guide we use the path `/home/user/.evcc/` as an example.
+If you're using file-based configuration, also use `/home/user/evcc.yaml`
 
 ## Installation
 
@@ -71,22 +58,22 @@ Here are the relevant details you need to enter:
 
 #### Volume Mounts {#volumes}
 
-| Host Path              | Container Path   | Description                     |
-| ---------------------- | ---------------- | ------------------------------- |
-| `/home/user/evcc.yaml` | `/etc/evcc.yaml` | Configuration file              |
-| `/home/user/.evcc/`    | `/root/.evcc`    | Directory for internal database |
+| Host Path              | Container Path   | Description                                            | Required |
+| ---------------------- | ---------------- | ------------------------------------------------------ | -------- |
+| `/home/user/evcc.yaml` | `/etc/evcc.yaml` | Configuration file (only for file-based configuration) | no       |
+| `/home/user/.evcc/`    | `/root/.evcc`    | Directory for internal database                        | yes      |
 
 #### Ports {#ports}
 
-| Host Port | Container Port | Description            | Optional |
+| Host Port | Container Port | Description            | Required |
 | --------- | -------------- | ---------------------- | -------- |
-| 7070      | 7070/tcp       | Web UI, API            |          |
-| 8887      | 8887/tcp       | OCPP Server            | Yes      |
-| 9522      | 9522/udp       | SMA Sunny Home Manager | Yes      |
-| 7090      | 7090/udp       | KEBA Chargers          | Yes      |
-| 5353      | 5353/udp       | mDNS                   | Yes      |
-| 4712      | 4712/tcp       | EEBus                  | Yes      |
-| 8899      | 8899/udp       | Modbus UDP             | Yes      |
+| 7070      | 7070/tcp       | Web UI, API            | Yes      |
+| 8887      | 8887/tcp       | OCPP Server            | No       |
+| 9522      | 9522/udp       | SMA Sunny Home Manager | No       |
+| 7090      | 7090/udp       | KEBA Chargers          | No       |
+| 5353      | 5353/udp       | mDNS                   | No       |
+| 4712      | 4712/tcp       | EEBus                  | No       |
+| 8899      | 8899/udp       | Modbus UDP             | No       |
 
 Open your system's Docker UI and create a new container with the above settings and start it.
 
@@ -106,7 +93,7 @@ If after an update your charging sessions are no longer displayed, the `/root/.e
 
 ### via Docker CLI
 
-Install and start the Docker container that matches your component configuration using one of the following commands.
+Install and start the Docker container using one of the following commands.
 Whether you need `sudo` depends on your system.
 
 <Tabs groupId="docker">
@@ -114,7 +101,7 @@ Whether you need `sudo` depends on your system.
 
 ```sh
 sudo docker run -d --name evcc \
--v /home/user/evcc.yaml:/etc/evcc.yaml \
+-v /home/user/evcc.yaml:/etc/evcc.yaml \  # optional
 -v /home/user/.evcc:/root/.evcc \
 -p 7070:7070 \
 -p 8887:8887 \
@@ -163,7 +150,7 @@ Simply create a configuration file named `compose.yml` in your active directory.
 Copy one of the following configurations matching your component setup into `compose.yml` and save it:
 
 <Tabs groupId="compose">
-  <TabItem value="default" label="Standard" default>
+  <TabItem value="standard" label="Standard" default>
 
 ```yaml
 services:
@@ -176,8 +163,8 @@ services:
       - 7070:7070/tcp
       - 8887:8887/tcp
     volumes:
-      - /home/user/evcc.yaml:/etc/evcc.yaml
       - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
     restart: unless-stopped
     # optional:
     #user: <UID>:<GID>
@@ -244,10 +231,18 @@ sudo docker-compose up -d
 After successfully creating and starting your container, you can access the evcc Web UI at `http://<host>:7070`.
 `<host>` is the IP address or hostname of the computer running the container.
 
-You should see the evcc interface and be prompted to set an administration password.
+**On first use:**
+
+- You will be prompted to set an administration password
+- You can then configure your devices via the web interface (for UI configuration)
+- Or see your configured devices directly (for file-based configuration)
 
 If you cannot establish a connection, check your container logs.
-If you see the interface but an error message is displayed, check the configuration in the `evcc.yaml` file.
+If you see the interface but an error message is displayed, check:
+
+- For file-based configuration: the settings in your `evcc.yaml` file
+- For UI configuration: the device settings on the configuration page
+
 You can find more details in [Configuration](./configuration) or in the [GitHub Discussions](https://github.com/evcc-io/evcc/discussions).
 
 ## Community Guides

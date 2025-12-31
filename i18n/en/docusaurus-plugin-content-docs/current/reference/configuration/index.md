@@ -2,30 +2,39 @@
 sidebar_position: 1
 ---
 
-# evcc.yaml
+# Configuration
 
-evcc requires a configuration file to describe the system and cannot be used
-without it. The file itself is written in
-[YAML](https://en.wikipedia.org/wiki/YAML), which is a structured,
-human-readable, plain text format.
+evcc can be configured in two ways:
 
-To create or edit the configuration file, we recommend using a text editor that
-understands YAML and thus helps with the formatting and shows any errors, e.g.
-instance, [VS Code](https://code.visualstudio.com) with the
-[YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml).
+**1. UI Configuration (recommended)**
 
-The configuration file is called by default `evcc.yaml` and is either in the
-same directory as evcc itself, or on POSIX (e.g. Linux) systems in
-`/etc/evcc.yaml`.
+Configuration is done via the web interface under **Configuration**.
+Settings are saved automatically in the database.
+For more information, see [Configuration](/docs/installation/configuration).
 
-For non-standard paths, the filename can be passed as a command line argument,
-e.g. `evcc -c /home/evcc.yaml`
+**2. File-based Configuration**
+
+Configuration via the `evcc.yaml` file remains supported.
+This section documents the YAML-based configuration.
+
+:::info Parallel Usage
+Both configuration methods can be used in parallel.
+Devices (loadpoints, meters, PV systems, batteries, vehicles) are merged from both sources.
+For other settings, UI configuration takes priority.
+Details can be found in the [FAQ](/docs/faq#ui-migration).
+:::
+
+## File-based Configuration (evcc.yaml)
+
+The configuration file is written in YAML format and is called `evcc.yaml` by default.
+It is located either in the same directory as evcc itself, or on POSIX (e.g. Linux) systems in `/etc/evcc.yaml`.
+
+Non-standard paths can be specified at startup: `evcc -c /path/to/evcc.yaml`
 
 ### Structure
 
-evcc's configuration file contains multiple sections. In order to refer to
-elements in a different section, each device has a `name` parameter, which is a
-free text field and is used for identification.
+The configuration file contains multiple sections.
+To reference between sections, devices have a `name` parameter for identification.
 
 An example file with many parameters can be found here:
 https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml

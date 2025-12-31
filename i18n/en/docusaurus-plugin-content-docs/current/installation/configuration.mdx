@@ -5,103 +5,68 @@ sidebar_position: 10
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Create evcc.yaml
+# Configuration
 
-This guide describes how to create a working `evcc.yaml` file.
+After installing evcc, you can configure your devices and settings.
+The recommended way is configuration through the web interface.
+File-based configuration is also available for advanced users.
 
-## With Assistant
+## via Web Interface
 
-Using the `evcc configure` command, you can create a configuration file through a terminal-based assistant.
-You can configure your devices through an interactive question-and-answer dialog.
-
-### Prerequisites
-
-To use the assistant, evcc must be installed on your system.
-You also need to be able to run the `evcc` command from the command line (terminal, shell, command prompt).
-If evcc is running on a system where you don't have this access (e.g., Home Assistant, Docker), you unfortunately cannot use the assistant.
-
-:::note
-`evcc configure` can also be started in a Docker container.
-See the explanation in [Docker](./docker).
+:::tip Recommended
+The web interface is the easiest and fastest way to set up evcc.
 :::
 
-### Running the Assistant
+### Getting Started
 
-Start the configuration and follow the prompts in the terminal window:
+1. **Start evcc**: After [installation](../installation), start evcc according to the instructions for your system
+2. **Open browser**: Go to `http://<your-ip>:7070` (e.g., `http://evcc.local:7070` or `http://192.168.1.50:7070`)
+3. **Set administrator password**: On first start, you'll be prompted to set a password
+4. **Setup**: Follow the instructions on the welcome page
 
-```sh
-evcc configure
-```
+### Adding Devices
 
-You should see output similar to the following:
+In the configuration area, you can set up the following components:
 
-![evcc configure](./screenshots/configure.webp)
+- **Charging & Heating** (required): Wallboxes and heat pumps – at least one device must be configured
+- **Grid** (recommended): Grid connection meter and electricity tariffs – important for proper energy management
+- **Solar & Battery** (optional): Solar systems and battery storage
+- **Vehicles** (optional): Vehicle integrations for battery capacity and state of charge, enables smarter charging
 
-After completing the configuration, an `evcc.yaml` file will be created in the current directory.
+### Integrations
 
-:::note
-With `--advanced` you can start the assistant in an advanced mode.
-This will give you additional configuration options.
-However, this is not necessary for your first configuration.
+Additionally, you can integrate various services and protocols:
 
-```sh
-evcc configure --advanced
-```
+- **MQTT**: Data exchange with other systems on the network
+- **Messaging**: Push notifications and email alerts
+- **InfluxDB**: Data export for long-term analysis
+- **EEBus**: Communication with other EEBus devices
+- **OCPP Server**: Connection with OCPP-capable wallboxes
+- **Circuits**: Circuit monitoring and control
+- **Modbus Proxy**: Multiple access to Modbus devices
+- **Sunny Home Manager**: Integration via SEMP protocol
+- **HEMS**: External control and grid operator integration
 
+### Backup & Restore {#backup}
+
+The web interface offers integrated data backup functions:
+
+- **Backup**: Download database for data backup
+- **Restore**: Restore data from a backup file
+- **Reset**: Delete configuration or charging history
+
+## via Configuration File
+
+:::info Traditional Method
+This method uses an `evcc.yaml` file and requires knowledge of command line and YAML files. Some new features are only configurable via the web interface.
 :::
 
-Test if the configuration works:
+### From Scratch
 
-```sh
-evcc -c evcc.yaml
-```
-
-Open a browser and enter the following URL: `http://localhost:7070`.
-The evcc interface should now show your own devices.
-
-If everything works, you can move your `evcc.yaml` to the location required for your installation.
-
-### Troubleshooting
-
-If errors occur, you can get additional information using the following commands.
-
-- Syntax check
-
-  ```sh
-  evcc -c evcc.yaml checkconfig
-  ```
-
-- Meters (Grid, Solar, Battery)
-
-  ```sh
-  evcc -c evcc.yaml -l debug meter
-  ```
-
-- Vehicles
-
-  ```sh
-  evcc -c evcc.yaml -l debug vehicle
-  ```
-
-- Wallboxes
-
-  ```sh
-  evcc -c evcc.yaml -l debug charger
-  ```
-
-Check the output of each command for plausibility.
-
-You can also run `evcc configure` again and correct your entries.
-Note that the assistant always creates a completely new configuration.
-Targeted modification of an existing configuration is not possible.
-Use manual configuration for this.
-
-## Manual
-
-If the assistant is not available to you, you can create the `evcc.yaml` file manually.
+You can also create the `evcc.yaml` file manually.
 Here you'll find a minimal template that you can use as a starting point.
 
-### Creation
+#### Creation
 
 Copy the content into a new `evcc.yaml` file.
 
@@ -182,7 +147,7 @@ tariffs:
 You can start evcc with this file.
 Use the respective instructions for your system.
 
-### Testing
+#### Testing
 
 Restart evcc and open your browser at `http://<evcc-ip>:7070`.
 Check if the values are plausible.
@@ -192,7 +157,7 @@ Often these are indentation or typing errors.
 The file is written in [YAML format](https://wikipedia.org/wiki/YAML).
 You can use the online tool [YAML Lint](https://www.yamllint.com/) to check if your file follows the correct format.
 
-### Customizing
+#### Customizing
 
 The file only contains demo devices (`demo-charger`, `demo-meter`, `demo-battery`, `offline`).
 These have fixed values.
@@ -212,7 +177,7 @@ Make these changes step by step if possible.
 Restart evcc after each change and check the output in the browser.
 This way you'll quickly notice if you've made a mistake.
 
-### Further Information
+#### Further Information
 
 The [evcc.dist.yaml](https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml) in the main project contains a complete list of all possible configuration options.
 More detailed explanations of the options can be found under [Reference → evcc.yaml](../reference/configuration).
@@ -222,4 +187,115 @@ This file contains JavaScript-based demo devices that simulate limited functiona
 It is also used for [demo.evcc.io](https://demo.evcc.io).
 
 To run your own installation in demo mode, just start evcc with the parameter `--demo`.
-See [CLI Referenz](/docs/reference/cli/evcc) for more information.
+See [CLI Reference](/docs/reference/cli/evcc) for more information.
+
+### With Assistant
+
+Using the `evcc configure` command, you can create a configuration file through a terminal-based assistant.
+You can configure your devices through an interactive question-and-answer dialog.
+
+:::warning
+The `evcc configure` assistant is deprecated and will be removed in an upcoming version. We recommend configuration through the web interface.
+:::
+
+#### Prerequisites
+
+To use the assistant, evcc must be installed on your system.
+You also need to be able to run the `evcc` command from the command line (terminal, shell, command prompt).
+
+#### Running the Assistant
+
+Start the configuration and follow the prompts in the terminal window:
+
+```sh
+evcc configure
+```
+
+You should see output similar to the following:
+
+![evcc configure](./screenshots/configure.webp)
+
+After completing the configuration, an `evcc.yaml` file will be created in the current directory.
+
+:::note
+With `--advanced` you can start the assistant in an advanced mode.
+This will give you additional configuration options.
+However, this is not necessary for your first configuration.
+
+```sh
+evcc configure --advanced
+```
+
+:::
+
+### With Assistant via Docker
+
+You can also run the configuration assistant in a Docker container.
+Handy if you don't want or can't run the evcc binary directly on your machine.
+
+#### Preparation
+
+Create an empty `evcc.yaml` file:
+
+```sh
+touch evcc.yaml
+```
+
+#### Running the Assistant
+
+Run the configuration assistant directly in Docker:
+
+```sh
+docker run -v $(pwd)/evcc.yaml:/app/evcc.yaml -it evcc/evcc:latest evcc configure
+```
+
+Follow the assistant's questions.
+At the end, the configuration will be written to the created `evcc.yaml` file.
+
+## Testing
+
+Test if the configuration works:
+
+```sh
+evcc -c evcc.yaml
+```
+
+Open a browser and enter the URL: `http://<your-ip>:7070` (e.g., `http://evcc.local:7070`).
+The evcc interface should now show your own devices.
+
+If everything works, you can move your `evcc.yaml` to the location required for your installation.
+
+## Troubleshooting
+
+If errors occur, you can get additional information using the following commands.
+
+- Syntax check
+
+  ```sh
+  evcc -c evcc.yaml checkconfig
+  ```
+
+- Meters (Grid, Solar, Battery)
+
+  ```sh
+  evcc -c evcc.yaml -l debug meter
+  ```
+
+- Vehicles
+
+  ```sh
+  evcc -c evcc.yaml -l debug vehicle
+  ```
+
+- Wallboxes
+
+  ```sh
+  evcc -c evcc.yaml -l debug charger
+  ```
+
+Check the output of each command for plausibility.
+
+You can also run `evcc configure` again and correct your entries.
+Note that the assistant always creates a completely new configuration.
+Targeted modification of an existing configuration is not possible.
+Use manual configuration for this.

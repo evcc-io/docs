@@ -6,6 +6,10 @@ sidebar_position: 16
 
 `sponsortoken` definiert ein Token das auf [https://sponsor.evcc.io](https://sponsor.evcc.io) vergeben wird.
 
+:::tip
+Wir empfehlen die Eingabe des Sponsortokens über die Weboberfläche unter **Konfiguration**.
+:::
+
 **Beispiel**:
 
 ```yaml
