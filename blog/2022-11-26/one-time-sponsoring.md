@@ -41,6 +41,10 @@ Wir haben schon mehrfach das Feedback bekommen, dass Nutzer Bauchschmerzen mit m
 
 Die Ausstellung für die unbefristeten Sponsortoken funktioniert genauso wie der aktuelle Prozess über [sponsor.evcc.io](https://sponsor.evcc.io). Einziger Unterschied ist, dass das Token nicht abläuft.
 
+:::note Update
+Wir haben die Sponsorstufen 2026 angepasst. Mehr dazu in unserem [aktuellen Blog-Post](/blog/2026/01/01/highlights-browser-config-ready#sponsoring).
+:::
+
 ## 🎟️ Contributor-Token
 
 Community-Mitglieder, die über GitHub PRs zu substanziell zu evcc beigetragen haben, können auch ein freies Token erhalten. Wir sind immer froh über Bugfixes, brauchen aber auch dringend Unterstützung im Bereich Dokumentation und [Übersetzung](https://github.com/evcc-io/evcc/discussions/5218).
