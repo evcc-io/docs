@@ -33,7 +33,6 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      timeout: 10s # Timeout, optional
     advanced: |
       type: template
       template: solaredge-hybrid
@@ -57,7 +56,6 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      timeout: 10s # Timeout, optional
       watchdog: 60s # Watchdog, optional
   - usage: pv
     default: |
@@ -83,7 +81,6 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      timeout: 10s # Timeout, optional
     advanced: |
       type: template
       template: solaredge-hybrid
@@ -107,7 +104,6 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      timeout: 10s # Timeout, optional
       maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
       watchdog: 60s # Watchdog, optional
   - usage: battery
@@ -134,7 +130,9 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      timeout: 10s # Timeout, optional
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
       template: solaredge-hybrid
@@ -158,12 +156,11 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      timeout: 10s # Timeout, optional
       capacity: 50 # Battery capacity (kWh), optional
-      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
-      maxdischargepower: 5000 # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: 5000 # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
       watchdog: 60s # Watchdog, optional
 params:
   - name: modbus
@@ -175,15 +172,6 @@ params:
     help:
     advanced: false
     optional: true
-  - name: timeout
-    example: 10s
-    default:
-    choice: []
-    unit:
-    description: Timeout
-    help:
-    advanced: false
-    optional: true
   - name: capacity
     example: 50
     default:
@@ -191,7 +179,25 @@ params:
     unit: kWh
     description: Battery capacity
     help:
-    advanced: true
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default:
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit when discharging the battery in normal operation
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default:
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit when charging the battery from the grid
+    advanced: false
     optional: true
   - name: maxacpower
     example: 5000
@@ -218,24 +224,6 @@ params:
     unit: W
     description: Maximum discharge power
     help: Maximum discharge power of the storage.
-    advanced: true
-    optional: true
-  - name: minsoc
-    example: 25
-    default:
-    choice: []
-    unit: '%'
-    description: Minimum charge
-    help: Lower limit when discharging the battery in normal operation
-    advanced: true
-    optional: true
-  - name: maxsoc
-    example: 95
-    default:
-    choice: []
-    unit: '%'
-    description: Maximum charge
-    help: Upper limit when charging the battery from the grid
     advanced: true
     optional: true
   - name: watchdog
