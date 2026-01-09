@@ -29,6 +29,8 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxdischargecurrent: 100 # Max Discharge Current, Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).
+      gridchargecurrent: 60 # Grid Charge Current, Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).
     advanced: |
       type: template
       template: deye-hybrid-3p
@@ -78,6 +80,8 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxdischargecurrent: 100 # Max Discharge Current, Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).
+      gridchargecurrent: 60 # Grid Charge Current, Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).
     advanced: |
       type: template
       template: deye-hybrid-3p
@@ -101,9 +105,9 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
       maxdischargecurrent: 100 # Max Discharge Current, Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).
       gridchargecurrent: 60 # Grid Charge Current, Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
   - usage: battery
     default: |
       type: template
@@ -128,6 +132,11 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
+      maxdischargecurrent: 100 # Max Discharge Current, Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).
+      gridchargecurrent: 60 # Grid Charge Current, Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).
     advanced: |
       type: template
       template: deye-hybrid-3p
@@ -156,6 +165,8 @@ render:
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       maxdischargecurrent: 100 # Max Discharge Current, Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).
       gridchargecurrent: 60 # Grid Charge Current, Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
 params:
   - name: modbus
     example:
@@ -173,7 +184,7 @@ params:
     unit: kWh
     description: Battery capacity
     help:
-    advanced: true
+    advanced: false
     optional: true
   - name: minsoc
     example: 25
@@ -182,7 +193,7 @@ params:
     unit: '%'
     description: Minimum charge
     help: Lower limit when discharging the battery in normal operation
-    advanced: true
+    advanced: false
     optional: true
   - name: maxsoc
     example: 95
@@ -191,8 +202,26 @@ params:
     unit: '%'
     description: Maximum charge
     help: Upper limit when charging the battery from the grid
-    advanced: true
+    advanced: false
     optional: true
+  - name: maxdischargecurrent
+    example:
+    default: 100
+    choice: []
+    unit:
+    description: Max Discharge Current
+    help: 'Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).'
+    advanced: false
+    optional: false
+  - name: gridchargecurrent
+    example:
+    default: 60
+    choice: []
+    unit:
+    description: Grid Charge Current
+    help: 'Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).'
+    advanced: false
+    optional: false
   - name: maxacpower
     example: 5000
     default: 0
@@ -202,24 +231,24 @@ params:
     help:
     advanced: true
     optional: true
-  - name: maxdischargecurrent
+  - name: maxchargepower
     example:
-    default: 100
+    default:
     choice: []
-    unit:
-    description: Max Discharge Current
-    help: 'Maximum battery discharge current in Amperes (A) for normal mode. Typical range 50-350A depending on battery capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 100A * 48V = 4800W (4.8kW).'
+    unit: W
+    description: Maximum charge power
+    help: For forced charging of the battery.
     advanced: true
-    optional: false
-  - name: gridchargecurrent
+    optional: true
+  - name: maxdischargepower
     example:
-    default: 60
+    default:
     choice: []
-    unit:
-    description: Grid Charge Current
-    help: 'Maximum battery charging current in Amperes (A) from grid for charge mode. Typical range 30-350A depending on battery and inverter capacity. Power calculation: P(W) = Current(A) * Voltage(V). Example with 48V battery: 60A * 48V = 2880W (2.9kW).'
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
     advanced: true
-    optional: false
+    optional: true
 modbus:
   baudrate: 9600
   comset: 8N1

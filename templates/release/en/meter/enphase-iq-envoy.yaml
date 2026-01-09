@@ -18,8 +18,8 @@ render:
       host: 192.0.2.2 # IP address or hostname
       token: # Token, Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
       schema: http # Schema, [https, http] (optional)
-      cache: 1s # Cache, Time interval for data refresh (optional)
       battery_type: ac # Enphase Battery Type (AC or IQ), Select 'iq' for new Enphase IQ Batteries. Leave at default 'ac' for older generation AC Batteries. [ac, iq] (optional)
+      cache: 1s # Cache, Time interval for data refresh (optional)
   - usage: pv
     default: |
       type: template
@@ -34,8 +34,8 @@ render:
       host: 192.0.2.2 # IP address or hostname
       token: # Token, Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
       schema: http # Schema, [https, http] (optional)
-      cache: 1s # Cache, Time interval for data refresh (optional)
       battery_type: ac # Enphase Battery Type (AC or IQ), Select 'iq' for new Enphase IQ Batteries. Leave at default 'ac' for older generation AC Batteries. [ac, iq] (optional)
+      cache: 1s # Cache, Time interval for data refresh (optional)
   - usage: battery
     default: |
       type: template
@@ -43,16 +43,23 @@ render:
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       token: # Token, Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
       template: enphase
       usage: battery
       host: 192.0.2.2 # IP address or hostname
       token: # Token, Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication (optional)
-      schema: http # Schema, [https, http] (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      cache: 1s # Cache, Time interval for data refresh (optional)
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
+      schema: http # Schema, [https, http] (optional)
       battery_type: ac # Enphase Battery Type (AC or IQ), Select 'iq' for new Enphase IQ Batteries. Leave at default 'ac' for older generation AC Batteries. [ac, iq] (optional)
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      cache: 1s # Cache, Time interval for data refresh (optional)
 params:
   - name: host
     example: 192.0.2.2
@@ -72,6 +79,33 @@ params:
     help: 'Required if Envoy Firmware D7.x.xxx. Token is valid for one year. Instructions for obtaining a token via web UI: https://enphase.com/download/accessing-iq-gateway-local-apis-or-local-ui-token-based-authentication'
     advanced: false
     optional: true
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default:
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit when discharging the battery in normal operation
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default:
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit when charging the battery from the grid
+    advanced: false
+    optional: true
   - name: schema
     example:
     default: http
@@ -81,13 +115,31 @@ params:
     help:
     advanced: true
     optional: true
-  - name: capacity
-    example: 50
+  - name: battery_type
+    example:
+    default: ac
+    choice: ['ac', 'iq']
+    unit:
+    description: Enphase Battery Type (AC or IQ)
+    help: Select 'iq' for new Enphase IQ Batteries. Leave at default 'ac' for older generation AC Batteries.
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
     default:
     choice: []
-    unit: kWh
-    description: Battery capacity
-    help:
+    unit: W
+    description: Maximum charge power
+    help: For forced charging of the battery.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
     advanced: true
     optional: true
   - name: cache
@@ -97,14 +149,5 @@ params:
     unit:
     description: Cache
     help: Time interval for data refresh
-    advanced: true
-    optional: true
-  - name: battery_type
-    example:
-    default: ac
-    choice: ['ac', 'iq']
-    unit:
-    description: Enphase Battery Type (AC or IQ)
-    help: Select 'iq' for new Enphase IQ Batteries. Leave at default 'ac' for older generation AC Batteries.
     advanced: true
     optional: true
