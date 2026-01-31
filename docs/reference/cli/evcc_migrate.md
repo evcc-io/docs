@@ -1,6 +1,6 @@
 # evcc migrate
 
-Migrate yaml to database (overwrites db settings)
+Migrate yaml to database (deprecated), reset only
 
 ```
 evcc migrate [flags]
