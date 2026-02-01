@@ -26,6 +26,7 @@ Alle API IDs (z. B. die Loadpoint ID) beginnen bei `1`.
 - `evcc/site/residualPower`: grid residual power (writable)
 - `evcc/site/batteryGridChargeLimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
 - `evcc/site/batteryDischargeControl`: enable/disable battery discharge control (true/false) (writable)
+- `evcc/site/batteryMode`: external battery mode (writable: `normal`, `hold`, `charge`) - directly controls all controllable batteries, overrules other evcc modes, resets after 60s
 
 ## Vehicles
 
