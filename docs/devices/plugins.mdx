@@ -39,6 +39,7 @@ Zusätzlich können Plugins auch für die in [Messaging](/docs/reference/configu
 - [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den angeschlossenen (_plugged_) und ladenden (_charging_) Zustand zu einem einzigen Ladestatus zu kombinieren.
 - [Valid Plugin](#valid) - Meta-Plugin um Plugin-Werte basierend auf einer booleschen Validierung bereitzustellen.
 - [Meter Plugin](#meter-plugin) - Plugin um ein anderes Messgerät als Datenquelle zu verwenden.
+- [Delta Plugin](#delta) - Meta-Plugin zur Umwandlung von absoluten Werten in Änderungswerte (Deltas) beim Schreiben.
 - [Switch Plugin](#switch) - Meta-Plugin für bedingte Schreibvorgänge basierend auf Eingabewerten (wie switch/case).
 - [Watchdog Plugin](#watchdog) - Meta-Plugin zur automatischen Wiederholung von Schreibvorgängen in regelmäßigen Abständen.
 - [Sequence Plugin](#sequence) - Meta-Plugin zur sequentiellen Ausführung mehrerer Schreibvorgänge.
@@ -919,6 +920,90 @@ meters:
 ```
 
 In diesem Beispiel wird ein Shelly 1PM Gerät als Datenquelle für Leistung und Energie einer Batterie verwendet, während der Ladestand (SoC) über MQTT abgerufen wird.
+
+### Delta <Tag label="schreiben" category="write" /> {#delta}
+
+Das `delta` Plugin wandelt absolute Werte in Änderungswerte (Deltas) um.
+Es wird für Geräte verwendet, die geschriebene Werte zu einem internen Summenwert addieren, anstatt sie direkt zu setzen.
+
+**Parameter**:
+
+| Parameter | Typ    | Erfordert | Beschreibung                                |
+| --------- | ------ | --------- | ------------------------------------------- |
+| get       | config | nein      | Plugin zum Lesen des aktuellen Gesamtwerts  |
+| set       | config | ja        | Plugin zum Schreiben des berechneten Deltas |
+
+**Funktionsweise**:
+
+1. Eingabewert wird empfangen (z. B. `1000`)
+2. Falls `get` konfiguriert ist, wird der aktuelle Gesamtwert vom Gerät gelesen
+3. Delta wird berechnet: `delta = neuer_wert - aktueller_gesamtwert`
+4. Delta wird über das `set` Plugin geschrieben
+5. Interner Zustand wird aktualisiert
+
+Ohne `get` Parameter führt das Plugin den Gesamtwert intern (startet bei 0).
+Bei Neustart von evcc geht die Synchronisation zum Gerät verloren.
+Daher wird empfohlen, `get` zu konfigurieren, wenn das Gerät einen lesbaren Summenwert bereitstellt.
+
+**Unterstützte Datentypen**: `int64`, `float64`
+
+**Anwendungsfall**:
+
+Einige Wärmepumpen (z. B. Ochsner) haben Register, die Änderungswerte statt absolute Werte erwarten.
+Beim Schreiben von `500` addiert das Gerät 500 W zum internen Wert, anstatt auf 500 W zu setzen.
+Um von 1000 W auf 1500 W zu erhöhen, muss `+500` geschrieben werden.
+Um zu reduzieren, werden negative Werte geschrieben (z. B. `-300`).
+
+**Beispiel Schreiben**:
+
+```yaml
+setmaxpower:
+  source: delta
+  get: # Aktuellen Gesamtwert vom Gerät lesen
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2012 # Interner Summenwert des Geräts
+      type: input
+      decode: uint16
+  set: # Berechnetes Delta schreiben
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2201 # Delta-Register
+      type: writeholding
+      decode: uint16
+```
+
+**Beispiel mit Watchdog**:
+
+Häufig wird das Delta Plugin mit dem [Watchdog Plugin](#watchdog) kombiniert, wenn das Gerät regelmäßige Updates benötigt:
+
+```yaml
+setmaxpower:
+  source: watchdog
+  timeout: 60s # Erneutes Senden alle 30 Sekunden
+  set:
+    source: delta # Absolute Werte in Deltas umwandeln
+    get: # Aktuellen Gesamtwert lesen
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2012 # Summenwert-Register
+        type: input
+        decode: uint16
+    set: # Delta schreiben
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2201 # Delta-Register
+        type: writeholding
+        decode: uint16
+```
 
 ### Switch <Tag label="schreiben" category="write" /> {#switch}
 

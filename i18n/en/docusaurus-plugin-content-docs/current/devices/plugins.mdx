@@ -39,6 +39,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
 - [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
 - [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Delta Plugin](#delta) - Meta-plugin for converting absolute values to delta/increment values when writing.
 - [Switch Plugin](#switch) - Meta-plugin for conditional write operations based on input values (like switch/case).
 - [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
 - [Sequence Plugin](#sequence) - Meta-plugin for sequential execution of multiple write operations.
@@ -919,6 +920,90 @@ meters:
 ```
 
 In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
+
+### Delta <Tag label="write" category="write" /> {#delta}
+
+The `delta` plugin converts absolute values to delta/increment values.
+It's used for devices that add written values to an internal sum instead of setting them directly.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                      |
+| --------- | ------ | -------- | ------------------------------------------------ |
+| get       | config | no       | Plugin for reading the current total from device |
+| set       | config | yes      | Plugin for writing the calculated delta          |
+
+**How it works**:
+
+1. Input value is received (e.g., `1000`)
+2. If `get` is configured, the current total is read from the device
+3. Delta is calculated: `delta = new_value - current_total`
+4. Delta is written via the `set` plugin
+5. Internal state is updated
+
+Without the `get` parameter, the plugin tracks the total internally (starts at 0).
+When evcc restarts, synchronisation with the device is lost.
+Therefore, it's recommended to configure `get` if the device provides a readable total register.
+
+**Supported data types**: `int64`, `float64`
+
+**Use case**:
+
+Some heat pumps (e.g., Ochsner) have registers that expect delta values instead of absolute values.
+When writing `500`, the device adds 500 W to the internal value instead of setting it to 500 W.
+To increase from 1000 W to 1500 W, you must write `+500`.
+To decrease, negative values are written (e.g., `-300`).
+
+**Writing Example**:
+
+```yaml
+setmaxpower:
+  source: delta
+  get: # Read current total from device
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2012 # Device's internal sum register
+      type: input
+      decode: uint16
+  set: # Write calculated delta
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2201 # Delta register
+      type: writeholding
+      decode: uint16
+```
+
+**Example with Watchdog**:
+
+The delta plugin is often combined with the [watchdog plugin](#watchdog) when the device requires periodic updates:
+
+```yaml
+setmaxpower:
+  source: watchdog
+  timeout: 60s # Resend every 30 seconds
+  set:
+    source: delta # Convert absolute values to deltas
+    get: # Read current total
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2012 # Total register
+        type: input
+        decode: uint16
+    set: # Write delta
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2201 # Delta register
+        type: writeholding
+        decode: uint16
+```
 
 ### Switch <Tag label="write" category="write" /> {#switch}
 
