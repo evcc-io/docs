@@ -114,6 +114,80 @@ value: Power
 scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 ```
 
+## Negation von Werten {#negation}
+
+Bei MBMD-Messgeräten können Messwerte durch Voranstellen eines `-` (Minus) vor dem Aliasnamen invertiert werden.
+Dies ist nützlich, wenn Messgeräte in unterschiedlichen Konfigurationen oder Montagerichtungen verwendet werden und das Vorzeichen der Messwerte angepasst werden muss.
+
+### Unterstützte Messungen
+
+Die Negation funktioniert für folgende MBMD-Messungen:
+
+- `power` - Gesamtleistung
+- `currents` - Ströme pro Phase (Array)
+- `powers` - Leistungen pro Phase (Array)
+
+### Syntax
+
+```yaml
+meters:
+  - name: my-meter
+    type: modbus
+    model: sdm
+    power: -Power # invertiert den Leistungswert
+```
+
+### Beispiele
+
+#### Invertierte Gesamtleistung
+
+```yaml
+meters:
+  - name: pv-meter
+    type: modbus
+    model: sdm
+    power: -Power # Leistung wird invertiert (z. B. +1000 W wird zu -1000 W)
+```
+
+#### Invertierte Phasenleistungen
+
+```yaml
+meters:
+  - name: grid-meter
+    type: modbus
+    model: sdm
+    power: Power
+    powers:
+      - -PowerL1 # Phase 1 invertiert
+      - -PowerL2 # Phase 2 invertiert
+      - -PowerL3 # Phase 3 invertiert
+```
+
+#### Invertierte Ströme (einzelne Phasen)
+
+```yaml
+meters:
+  - name: grid-meter
+    type: modbus
+    model: sdm
+    power: Power
+    currents:
+      - -CurrentL1 # Strom Phase 1 invertiert
+      - CurrentL2 # Strom Phase 2 normal
+      - -CurrentL3 # Strom Phase 3 invertiert
+```
+
+### Anwendungsfälle
+
+**Falsch montierte Messgeräte**:
+Wenn ein Stromsensor/Messgerät physisch in der falschen Richtung installiert ist, können die Werte in der Software korrigiert werden.
+
+**Netzeinspeisung vs. Verbrauch**:
+Für PV-Messgeräte, bei denen die Vorzeichenkonvention umgekehrt werden muss.
+
+**Unterschiedliche CT-Orientierungen**:
+Für mehrphasige Installationen mit unterschiedlich ausgerichteten Stromwandlern.
+
 ## Manuelle Konfiguration
 
 Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden.

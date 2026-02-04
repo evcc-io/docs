@@ -110,6 +110,80 @@ value: Power
 scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 ```
 
+## Value Negation {#negation}
+
+For MBMD meters, measurement values can be inverted by prefixing the alias name with a `-` (minus sign).
+This is useful when meters are used in different configurations or mounting orientations and the sign of measurement values needs to be adjusted.
+
+### Supported Measurements
+
+Negation works for the following MBMD measurements:
+
+- `power` - Total power
+- `currents` - Currents per phase (array)
+- `powers` - Powers per phase (array)
+
+### Syntax
+
+```yaml
+meters:
+  - name: my-meter
+    type: modbus
+    model: sdm
+    power: -Power # inverts the power value
+```
+
+### Examples
+
+#### Inverted Total Power
+
+```yaml
+meters:
+  - name: pv-meter
+    type: modbus
+    model: sdm
+    power: -Power # Power will be inverted (e.g. +1000 W becomes -1000 W)
+```
+
+#### Inverted Phase Powers
+
+```yaml
+meters:
+  - name: grid-meter
+    type: modbus
+    model: sdm
+    power: Power
+    powers:
+      - -PowerL1 # Phase 1 inverted
+      - -PowerL2 # Phase 2 inverted
+      - -PowerL3 # Phase 3 inverted
+```
+
+#### Inverted Currents (Individual Phases)
+
+```yaml
+meters:
+  - name: grid-meter
+    type: modbus
+    model: sdm
+    power: Power
+    currents:
+      - -CurrentL1 # Current Phase 1 inverted
+      - CurrentL2 # Current Phase 2 normal
+      - -CurrentL3 # Current Phase 3 inverted
+```
+
+### Use Cases
+
+**Incorrectly Mounted Meters**:
+If a current sensor/meter is physically installed in the wrong direction, you can correct the values in software.
+
+**Grid Feed-in vs. Consumption**:
+For solar meters where the sign convention needs to be reversed.
+
+**Different CT Orientations**:
+For multi-phase installations with differently oriented current transformers.
+
 ## Manual Configuration
 
 If the Modbus device is not directly supported or if values deviating from the predefined models are to be read or written, the Modbus registers can also be configured manually.
