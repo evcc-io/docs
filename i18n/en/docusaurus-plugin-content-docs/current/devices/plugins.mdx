@@ -21,32 +21,32 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 
 ### Plugins
 
+- [GPIO Plugin](#gpio) - Plugin for direct access to GPIO pins (Linux only).
+- [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
+- [HTTP Plugin](#http) - Plugin that communicates with end devices via HTTP API.
+- [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
 - [Modbus Plugin](#modbus) - Plugin for reading from a Modbus-capable device.
 - [MQTT Plugin](#mqtt) - Plugin for indirectly communicating with MQTT-capable devices via MQTT.
-- [HTTP Plugin](#http) - Plugin that communicates with end devices via HTTP API.
-- [Websocket Plugin](#websocket) - Plugin for receiving device data via its own web server. Can only be used for reading data.
-- [SMA/Speedwire Plugin](#speedwire) - Plugin specifically for SMA devices that can communicate with the Speedwire protocol.
-- [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
-- [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
-- [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
 - [Prometheus Plugin](#prometheus) - Plugin for reading metrics from Prometheus using PromQL.
-- [GPIO Plugin](#gpio) - Plugin for direct access to GPIO pins (Linux only).
+- [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
+- [SMA/Speedwire Plugin](#speedwire) - Plugin specifically for SMA devices that can communicate with the Speedwire protocol.
+- [Websocket Plugin](#websocket) - Plugin for receiving device data via its own web server. Can only be used for reading data.
 
 ### Helpers
 
-- [Const Plugin](#const) - Special plugin that simply returns a constant value.
 - [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
-- [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
-- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Const Plugin](#const) - Special plugin that simply returns a constant value.
+- [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
 - [Delta Plugin](#delta) - Meta-plugin for converting absolute values to delta/increment values when writing.
-- [Switch Plugin](#switch) - Meta-plugin for conditional write operations based on input values (like switch/case).
-- [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
+- [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
+- [Map Plugin](#map) - Meta-plugin for translating integer values (e.g., device-specific modes to evcc modes).
+- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
 - [Sequence Plugin](#sequence) - Meta-plugin for sequential execution of multiple write operations.
 - [Sleep Plugin](#sleep) - Helper plugin for delaying actions (usually used with Sequence).
-- [Map Plugin](#map) - Meta-plugin for translating integer values (e.g., device-specific modes to evcc modes).
-- [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
-- [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
+- [Switch Plugin](#switch) - Meta-plugin for conditional write operations based on input values (like switch/case).
+- [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
+- [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
 
 ### Syntax
 
@@ -371,59 +371,133 @@ See [Tariffs & Forecasts > Custom Plugin](../tariffs#plugin) for more details.
 
 The following plugins are available and can be configured for the above-described attributes to enable flexible integration with various systems.
 
-### Modbus <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#modbus}
+### GPIO <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#gpio}
 
-The `modbus` plugin can read data from any Modbus-capable device or SunSpec-compatible inverter.
-Many power meters are already pre-configured (see [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
-It's also possible to write Modbus registers to integrate additional wallboxes.
+The `gpio` plugin enables direct access to GPIO pins (General Purpose Input/Output) on Linux systems.
+It is particularly suitable for Raspberry Pi and similar single-board computers.
 
-See the [Modbus Documentation](/docs/reference/modbus) for more details.
+**Parameters**:
 
-### MQTT <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#mqtt}
+| Parameter | Type   | Required | Description                              |
+| --------- | ------ | -------- | ---------------------------------------- |
+| function  | string | yes      | Mode: `read` (input) or `write` (output) |
+| pin       | int    | yes      | Pin number (BCM numbering, e.g. GPIO 17) |
 
-The `mqtt` plugin enables reading values via MQTT topics.
-This is particularly useful for power meters, e.g. when they already provide their data via MQTT.
-See the [MBMD Documentation](https://github.com/volkszaehler/mbmd) for an example of how to get Modbus measurement data into MQTT.
+**How it works**:
 
-**Parameters (Reading)**:
+- **Reading** (`function: read`): Reads the state of a GPIO pin as a boolean value (`true` = HIGH, `false` = LOW)
+- **Writing** (`function: write`): Sets a GPIO pin to HIGH (`true`) or LOW (`false`)
 
-| Parameter | Type     | Required | Description                                                     |
-| --------- | -------- | -------- | --------------------------------------------------------------- |
-| topic     | string   | yes      | MQTT topic to read from                                         |
-| timeout   | duration | no       | Maximum age of received values                                  |
-| scale     | float    | no       | Scaling factor for result (e.g. 0.001 for Wh to kWh conversion) |
-
-The plugin returns an error if no new value has been received within the `timeout` duration.
-If `timeout` is not set, values of any age are accepted once the first message has been received.
-It is recommended to set a timeout to detect when the source is no longer providing current data.
-
-For data extraction, the pipeline parameters described under [Reading](#reading) are available (`regex`, `jq`, `quote`, etc.).
+Pin numbering follows the BCM scheme (Broadcom numbers, not the physical pin position).
+For a Raspberry Pi pinout, see e.g. [pinout.xyz](https://pinout.xyz/).
 
 **Reading Example**:
 
 ```yaml
-source: mqtt
-topic: mbmd/sdm1-1/Power
-timeout: 30s # don't accept values older than timeout
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+source: gpio
+function: read
+pin: 17 # BCM pin number
 ```
-
-**Parameters (Writing)**:
-
-| Parameter | Type   | Required | Description                                                |
-| --------- | ------ | -------- | ---------------------------------------------------------- |
-| topic     | string | yes      | MQTT topic to write to                                     |
-| payload   | string | no       | Payload template (uses value in default format if not set) |
-
-For write access, the data is provided with the `payload` attribute.
-If this parameter is missing from the configuration, the value is written in the default format.
 
 **Writing Example**:
 
 ```yaml
-source: mqtt
-topic: mbmd/charger/maxcurrent
-payload: ${var:%d}
+source: gpio
+function: write
+pin: 27 # BCM pin number
+```
+
+:::note
+This plugin only works on Linux systems with access to `/dev/gpiomem`.
+:::
+
+### Go <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#go}
+
+The `go` plugin uses the [Yaegi](https://github.com/traefik/yaegi) interpreter to execute Go code at runtime.
+It's particularly useful for type-safe calculations and complex data processing logic.
+
+#### Available Go Standard Libraries
+
+The following Go packages are automatically available and don't need to be imported:
+
+- `fmt` - Formatted I/O
+- `math` - Mathematical functions
+- `strings` - String manipulation
+- `time` - Time and date functions
+
+**Reading Example**:
+
+```yaml
+source: go
+script: |
+  res := 500.0
+  res * 2 // returns 1000.0
+```
+
+**Example with Time Functions**:
+
+```yaml
+source: go
+script: |
+  hour := time.Now().Hour()
+  price := 50.0 // Night tariff
+  if hour >= 9 && hour < 17 {
+    price = 100.0 // Tariff price during business hours
+  }
+  price
+```
+
+**Example with String Processing**:
+
+```yaml
+source: go
+script: |
+  text := "hello world"
+  strings.ToUpper(text) // returns "HELLO WORLD"
+```
+
+When the `go` plugin is used for writing, the value to be written is passed to the script as a variable:
+
+**Writing Example**:
+
+```yaml
+charger:
+  - type: custom
+    maxcurrent:
+      source: go
+      script: |
+        fmt.Printf("Setting charge current: %d A\n", maxcurrent)
+        // maxcurrent variable is automatically available
+```
+
+#### Using Input Transformations
+
+The `in` parameter allows you to use values from other sources as variables in your script.
+This example shows conditional logic that cannot be achieved with simple Calc operations:
+
+```yaml
+power:
+  source: go
+  script: |
+    // Power based on SoC and standby
+    power := 5000.0 // normal
+    if standby {
+      power = 0.0 // no load in standby
+    } else if soc < 20.0 {
+      power = 1000.0 // low
+    }
+    power
+  in:
+    - name: soc
+      type: float
+      config:
+        source: const
+        value: 85.0
+    - name: standby
+      type: bool
+      config:
+        source: const
+        value: false
 ```
 
 ### HTTP <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#http}
@@ -526,131 +600,6 @@ enable:
   uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
 ```
 
-### Websocket <Tag label="read" category="read" /> {#websocket}
-
-The `websocket` plugin provides a WebSocket listener.
-It also includes the ability to read or parse JSON data structures via jq-like queries.
-This can be used, for example, to receive data from Volkszähler's push server.
-
-**Reading Example**:
-
-```yaml
-source: http
-uri: ws://<volkszaehler host:port>/socket
-jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
-timeout: 30s # error if no update received in 30 seconds
-```
-
-### SMA/Speedwire <Tag label="read" category="read" /> {#speedwire}
-
-The `sma` plugin provides an interface to SMA devices that support the Speedwire protocol.
-
-**Reading Example**:
-
-```yaml
-source: sma
-uri: 192.168.4.51 # alternative to serial
-serial: 123456 # alternative to uri
-value: ActivePowerPlus # ID of value to read
-password: "0000" # optional (default: 0000)
-interface: eth0 # optional
-scale: 1 # optional scale factor for value
-```
-
-Supported values for `value` can be found in the diagnostic output using the `evcc meter` command (with configured SMA `meter` devices).
-
-All possible values can be found as constants [here](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (use the constant name for `value`).
-
-### Go <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#go}
-
-The `go` plugin uses the [Yaegi](https://github.com/traefik/yaegi) interpreter to execute Go code at runtime.
-It's particularly useful for type-safe calculations and complex data processing logic.
-
-#### Available Go Standard Libraries
-
-The following Go packages are automatically available and don't need to be imported:
-
-- `fmt` - Formatted I/O
-- `math` - Mathematical functions
-- `strings` - String manipulation
-- `time` - Time and date functions
-
-**Reading Example**:
-
-```yaml
-source: go
-script: |
-  res := 500.0
-  res * 2 // returns 1000.0
-```
-
-**Example with Time Functions**:
-
-```yaml
-source: go
-script: |
-  hour := time.Now().Hour()
-  price := 50.0 // Night tariff
-  if hour >= 9 && hour < 17 {
-    price = 100.0 // Tariff price during business hours
-  }
-  price
-```
-
-**Example with String Processing**:
-
-```yaml
-source: go
-script: |
-  text := "hello world"
-  strings.ToUpper(text) // returns "HELLO WORLD"
-```
-
-When the `go` plugin is used for writing, the value to be written is passed to the script as a variable:
-
-**Writing Example**:
-
-```yaml
-charger:
-  - type: custom
-    maxcurrent:
-      source: go
-      script: |
-        fmt.Printf("Setting charge current: %d A\n", maxcurrent)
-        // maxcurrent variable is automatically available
-```
-
-#### Using Input Transformations
-
-The `in` parameter allows you to use values from other sources as variables in your script.
-This example shows conditional logic that cannot be achieved with simple Calc operations:
-
-```yaml
-power:
-  source: go
-  script: |
-    // Power based on SoC and standby
-    power := 5000.0 // normal
-    if standby {
-      power = 0.0 // no load in standby
-    } else if soc < 20.0 {
-      power = 1000.0 // low
-    }
-    power
-  in:
-    - name: soc
-      type: float
-      config:
-        source: const
-        value: 85.0
-    - name: standby
-      type: bool
-      config:
-        source: const
-        value: false
-```
-
 ### JavaScript <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#javascript}
 
 evcc integrates a JavaScript interpreter with the [Underscore.js](https://underscorejs.org) library, which is directly accessible via `_.`, e.g. `_.random(0,5)`.
@@ -678,24 +627,59 @@ charger:
         console.log(maxcurrent);
 ```
 
-### Shell Script <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#shell}
+### Modbus <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#modbus}
 
-The `script` plugin executes external scripts to read or update data. The plugin is useful for integrating any kind of external functionality.
+The `modbus` plugin can read data from any Modbus-capable device or SunSpec-compatible inverter.
+Many power meters are already pre-configured (see [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
+It's also possible to write Modbus registers to integrate additional wallboxes.
+
+See the [Modbus Documentation](/docs/reference/modbus) for more details.
+
+### MQTT <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#mqtt}
+
+The `mqtt` plugin enables reading values via MQTT topics.
+This is particularly useful for power meters, e.g. when they already provide their data via MQTT.
+See the [MBMD Documentation](https://github.com/volkszaehler/mbmd) for an example of how to get Modbus measurement data into MQTT.
+
+**Parameters (Reading)**:
+
+| Parameter | Type     | Required | Description                                                     |
+| --------- | -------- | -------- | --------------------------------------------------------------- |
+| topic     | string   | yes      | MQTT topic to read from                                         |
+| timeout   | duration | no       | Maximum age of received values                                  |
+| scale     | float    | no       | Scaling factor for result (e.g. 0.001 for Wh to kWh conversion) |
+
+The plugin returns an error if no new value has been received within the `timeout` duration.
+If `timeout` is not set, values of any age are accepted once the first message has been received.
+It is recommended to set a timeout to detect when the source is no longer providing current data.
+
+For data extraction, the pipeline parameters described under [Reading](#reading) are available (`regex`, `jq`, `quote`, etc.).
 
 **Reading Example**:
 
 ```yaml
-source: script
-cmd: /bin/bash -c "cat /dev/urandom"
-timeout: 5s
+source: mqtt
+topic: mbmd/sdm1-1/Power
+timeout: 30s # don't accept values older than timeout
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 ```
+
+**Parameters (Writing)**:
+
+| Parameter | Type   | Required | Description                                                |
+| --------- | ------ | -------- | ---------------------------------------------------------- |
+| topic     | string | yes      | MQTT topic to write to                                     |
+| payload   | string | no       | Payload template (uses value in default format if not set) |
+
+For write access, the data is provided with the `payload` attribute.
+If this parameter is missing from the configuration, the value is written in the default format.
 
 **Writing Example**:
 
 ```yaml
-source: script
-cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
-timeout: 5s
+source: mqtt
+topic: mbmd/charger/maxcurrent
+payload: ${var:%d}
 ```
 
 ### Prometheus <Tag label="read" category="read" /> {#prometheus}
@@ -738,59 +722,63 @@ energy:
 The query must return a single numerical value.
 For vector results, exactly one metric must be included.
 
-### GPIO <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#gpio}
+### Shell Script <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#shell}
 
-The `gpio` plugin enables direct access to GPIO pins (General Purpose Input/Output) on Linux systems.
-It is particularly suitable for Raspberry Pi and similar single-board computers.
-
-**Parameters**:
-
-| Parameter | Type   | Required | Description                              |
-| --------- | ------ | -------- | ---------------------------------------- |
-| function  | string | yes      | Mode: `read` (input) or `write` (output) |
-| pin       | int    | yes      | Pin number (BCM numbering, e.g. GPIO 17) |
-
-**How it works**:
-
-- **Reading** (`function: read`): Reads the state of a GPIO pin as a boolean value (`true` = HIGH, `false` = LOW)
-- **Writing** (`function: write`): Sets a GPIO pin to HIGH (`true`) or LOW (`false`)
-
-Pin numbering follows the BCM scheme (Broadcom numbers, not the physical pin position).
-For a Raspberry Pi pinout, see e.g. [pinout.xyz](https://pinout.xyz/).
+The `script` plugin executes external scripts to read or update data. The plugin is useful for integrating any kind of external functionality.
 
 **Reading Example**:
 
 ```yaml
-source: gpio
-function: read
-pin: 17 # BCM pin number
+source: script
+cmd: /bin/bash -c "cat /dev/urandom"
+timeout: 5s
 ```
 
 **Writing Example**:
 
 ```yaml
-source: gpio
-function: write
-pin: 27 # BCM pin number
+source: script
+cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
+timeout: 5s
 ```
 
-:::note
-This plugin only works on Linux systems with access to `/dev/gpiomem`.
-:::
+### SMA/Speedwire <Tag label="read" category="read" /> {#speedwire}
 
-## Helpers
-
-### Const <Tag label="read" category="read" /> {#const}
-
-The `const` plugin returns a constant value.
-It's suitable, for example, to apply fixed correction values (offset) to a variable value in conjunction with the `calc` plugin or to simulate measurement and status values for testing purposes.
+The `sma` plugin provides an interface to SMA devices that support the Speedwire protocol.
 
 **Reading Example**:
 
 ```yaml
-source: const
-value: -16247
+source: sma
+uri: 192.168.4.51 # alternative to serial
+serial: 123456 # alternative to uri
+value: ActivePowerPlus # ID of value to read
+password: "0000" # optional (default: 0000)
+interface: eth0 # optional
+scale: 1 # optional scale factor for value
 ```
+
+Supported values for `value` can be found in the diagnostic output using the `evcc meter` command (with configured SMA `meter` devices).
+
+All possible values can be found as constants [here](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (use the constant name for `value`).
+
+### Websocket <Tag label="read" category="read" /> {#websocket}
+
+The `websocket` plugin provides a WebSocket listener.
+It also includes the ability to read or parse JSON data structures via jq-like queries.
+This can be used, for example, to receive data from Volkszähler's push server.
+
+**Reading Example**:
+
+```yaml
+source: http
+uri: ws://<volkszaehler host:port>/socket
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+timeout: 30s # error if no update received in 30 seconds
+```
+
+## Helpers
 
 ### Calc <Tag label="read" category="read" /> {#calc}
 
@@ -859,67 +847,55 @@ charging:
   topic: openWB/lp/1/boolChargeStat
 ```
 
-### Valid <Tag label="read" category="read" /> {#valid}
+### Const <Tag label="read" category="read" /> {#const}
 
-The `valid` plugin allows providing plugin values based on boolean validation.
-It separates the validity of a value from its actual content.
-If the validation returns `false`, the value is considered unavailable.
-
-This is particularly useful for integrations like ioBroker that provide validity and value separately.
+The `const` plugin returns a constant value.
+It's suitable, for example, to apply fixed correction values (offset) to a variable value in conjunction with the `calc` plugin or to simulate measurement and status values for testing purposes.
 
 **Reading Example**:
 
 ```yaml
-source: valid
-valid:
-  source: mqtt
-  topic: iobroker/wallbox/power/valid
-value:
-  source: mqtt
-  topic: iobroker/wallbox/power/value
+source: const
+value: -16247
 ```
 
-In this example, the value is only used when the `valid` topic returns `true`.
-If it returns `false`, the value is marked as unavailable.
+### Convert <Tag label="write" category="write" /> {#convert}
 
-### Meter <Tag label="read" category="read" /> {#meter-plugin}
+The `convert` plugin converts data types when writing.
+It is used when a plugin expects a different data type than evcc provides.
 
-The `meter` plugin allows using another meter as a data source.
-This is useful when you want to use an existing device for multiple measurements or when you need different methods of a device for different attributes.
+**Parameters**:
 
-The `config` section contains the complete template configuration of the meter to be embedded.
+| Parameter | Type   | Required | Description                         |
+| --------- | ------ | -------- | ----------------------------------- |
+| convert   | string | yes      | Conversion type                     |
+| set       | config | yes      | Plugin for writing after conversion |
 
-**Reading Example**:
+**Supported conversions**:
+
+| Conversion | Description                                    |
+| ---------- | ---------------------------------------------- |
+| float2int  | Float64 → Int64 (decimal places are truncated) |
+| int2float  | Int64 → Float64                                |
+| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
+
+**Example** (evcc provides float, device expects int):
 
 ```yaml
-meters:
-  - name: battery
-    type: custom
-    power:
-      source: meter
-      config:
-        type: template
-        template: shelly-1pm
-        host: 192.168.178.21
-        channel: 0
-      method: power
-      scale: -1
-    energy:
-      source: meter
-      config:
-        type: template
-        template: shelly-1pm
-        host: 192.168.178.21
-        channel: 0
-      method: energy
-    soc:
-      source: mqtt
-      topic: Haus/Batterie
-      jq: .soc
-      timeout: 60s
+limitsoc:
+  source: convert
+  convert: float2int
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 41009
+      type: writesingle
+      encoding: uint16
 ```
 
-In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
+In this example, evcc converts a float value like `85.5` to `85` before writing it to the modbus register.
 
 ### Delta <Tag label="write" category="write" /> {#delta}
 
@@ -1005,136 +981,160 @@ setmaxpower:
         decode: uint16
 ```
 
-### Switch <Tag label="write" category="write" /> {#switch}
+### Ignore <Tag label="write" category="write" /> {#ignore}
 
-The `switch` plugin performs conditional write operations, similar to a switch/case statement in programming languages.
-Based on the input value, the corresponding action is executed.
+The `ignore` plugin suppresses specific error messages when writing.
+It is used when a device returns harmless errors that can be ignored.
 
 **Parameters**:
 
-| Parameter | Type   | Required | Description                                        |
-| --------- | ------ | -------- | -------------------------------------------------- |
-| switch    | [case] | yes      | Array of cases with `case` and `set` configuration |
-| default   | config | no       | Fallback plugin if no case matches                 |
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | -------- | --------------------------- |
+| error     | string | yes      | Error text prefix to ignore |
+| set       | config | yes      | Plugin for writing          |
 
 **How it works**:
 
-1. Input value is compared with the `case` values
-2. On match, the corresponding `set` plugin is executed
-3. If no case matches and `default` is defined, it is executed
-4. If no case matches and no `default` is defined, an error occurs
+1. The nested `set` plugin is executed
+2. If an error occurs, it checks whether the error message starts with the `error` string
+3. If yes, the error is ignored and success is returned
+4. If no, the error is passed through normally
 
-**Supported data types**: `int64` (integer values only)
+**Supported data types**: `int64`, `float64`, `bool`, `[]byte`
 
 **Example**:
 
 ```yaml
-setmode:
+batterymode:
   source: switch
   switch:
-    - case: 1 # reduced
+    - case: 1 # normal
       set:
-        source: http
-        uri: http://device.local/api/mode
-        body: "eco"
-    - case: 2 # normal
-      set:
-        source: http
-        uri: http://device.local/api/mode
-        body: "normal"
-    - case: 3 # boost
-      set:
-        source: http
-        uri: http://device.local/api/mode
-        body: "boost"
+        source: const
+        value: 2
+        set:
+          source: ignore
+          error: "modbus: response data size '18' does not match count '4'"
+          set:
+            source: modbus
+            uri: 192.168.1.10:502
+            id: 1
+            register:
+              address: 0x1110
+              type: writemultiple
+              encoding: int16
 ```
 
-### Watchdog <Tag label="write" category="write" /> {#watchdog}
+In this example, the device returns a harmless modbus error that is ignored.
 
-The `watchdog` plugin is a wrapper plugin that automatically repeats write operations at regular intervals.
-Some devices (e.g. battery storage systems, inverters) expect control commands to be repeated regularly to stay active.
-The watchdog plugin monitors write operations and automatically repeats them at half the configured timeout interval.
+### Map <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#map}
+
+The `map` plugin translates integer values to other integer values using a lookup table.
+It is often used to convert device-specific values to evcc standard values and vice versa.
 
 **Parameters**:
 
-| Parameter | Type               | Required | Description                                                        |
-| --------- | ------------------ | -------- | ------------------------------------------------------------------ |
-| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2) |
-| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                          |
-| initial   | string             | no       | Value that is written once at startup                              |
-| set       | config             | yes      | Nested plugin for the actual write operation                       |
+| Parameter | Type            | Required | Description                                     |
+| --------- | --------------- | -------- | ----------------------------------------------- |
+| values    | map[int64]int64 | yes      | Lookup table with input → output mapping        |
+| get       | config          | no       | Plugin for reading (only required when reading) |
+| set       | config          | no       | Plugin for writing (only required when writing) |
 
 **How it works**:
 
-1. **Start**: If `initial` is configured, this value is written once at startup
-2. **Write**: When a value is written, the plugin checks whether it is in the `reset` list
-3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value every `timeout/2` seconds
-4. **Watchdog stops**: If the value is in `reset`, no repetitions are performed
+**When reading**:
 
-**reset parameter**:
+1. `get` plugin returns a value (e.g., `0`)
+2. Value is looked up in the `values` table
+3. The mapped value is returned (e.g., `0` → `2`)
 
-- Defines values at which the watchdog is stopped
-- Can be a single value (`reset: 0`) or multiple values (`reset: [0, 1]`)
-- Typically used for "safe" or "default" states that don't need continuous repetition
+**When writing**:
 
-**initial parameter**:
+1. Input value is received (e.g., `3`)
+2. Value is looked up in the `values` table
+3. The mapped value is passed to the `set` plugin (e.g., `3` → `6`)
 
-- Optional value that is written once when the plugin starts
-- Useful for setting a defined initial state
-- Executed before all other write operations
+If no matching value is found in the table, an error occurs.
 
-**Supported data types**: `int64`, `float64`, `bool`
+**Supported data types**: `int64` (integer values only)
 
-**Example Write**:
+**Reading example** (device value → evcc):
 
 ```yaml
-source: watchdog
-timeout: 60s
-reset: 0
-set:
-  source: modbus
-  uri: 192.168.1.10:502
-  id: 1
-  register:
-    address: 100
-    type: writemultiple
-    encoding: uint16
+getmode:
+  source: map
+  values:
+    0: 2 # Device "Free" → evcc "normal"
+    1: 1 # Device "Forced off" → evcc "reduced"
+    2: 3 # Device "Recommended on" → evcc "boost"
+    3: 3 # Device "Forced on" → evcc "boost"
+  get:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: holding
+      encoding: int16
 ```
 
-In this example, values are automatically repeated every 30 s, except when the value `0` is written.
-
-**Flow example** with `timeout: 60s`, `reset: 0`:
-
-- Plugin starts
-- Write value `100` → Watchdog **runs**, value is repeated every 30 s
-- After 2 minutes: Value `100` has been written 4x (0s, 30s, 60s, 90s, 120s)
-- Write value `200` → Watchdog **continues** running, now with new value `200` every 30 s
-- Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
-- No further repetitions until a new value != `0` is written
-
-**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge):
+**Writing example** (evcc → device value):
 
 ```yaml
-batterymode:
-  source: watchdog
-  timeout: 60s
-  reset: 1 # Stop repetitions in normal operation
+setmode:
+  source: map
+  values:
+    1: 1 # evcc "reduced" → Device "Forced off"
+    2: 0 # evcc "normal" → Device "Free"
+    3: 3 # evcc "boost" → Device "Forced on"
   set:
-    source: switch
-    switch:
-      - case: 1 # normal
-        set:
-          source: modbus
-          # ... Modbus configuration for normal operation
-      - case: 2 # hold
-        set:
-          source: modbus
-          # ... Modbus configuration for hold mode
-      - case: 3 # charge
-        set:
-          source: modbus
-          # ... Modbus configuration for charge mode
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: writeholding
+      encoding: int16
 ```
+
+### Meter <Tag label="read" category="read" /> {#meter-plugin}
+
+The `meter` plugin allows using another meter as a data source.
+This is useful when you want to use an existing device for multiple measurements or when you need different methods of a device for different attributes.
+
+The `config` section contains the complete template configuration of the meter to be embedded.
+
+**Reading Example**:
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    power:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: power
+      scale: -1
+    energy:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: energy
+    soc:
+      source: mqtt
+      topic: Haus/Batterie
+      jq: .soc
+      timeout: 60s
+```
+
+In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
 
 ### Sequence <Tag label="write" category="write" /> {#sequence}
 
@@ -1254,156 +1254,156 @@ setmode:
       method: POST
 ```
 
-### Map <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#map}
+### Switch <Tag label="write" category="write" /> {#switch}
 
-The `map` plugin translates integer values to other integer values using a lookup table.
-It is often used to convert device-specific values to evcc standard values and vice versa.
+The `switch` plugin performs conditional write operations, similar to a switch/case statement in programming languages.
+Based on the input value, the corresponding action is executed.
 
 **Parameters**:
 
-| Parameter | Type            | Required | Description                                     |
-| --------- | --------------- | -------- | ----------------------------------------------- |
-| values    | map[int64]int64 | yes      | Lookup table with input → output mapping        |
-| get       | config          | no       | Plugin for reading (only required when reading) |
-| set       | config          | no       | Plugin for writing (only required when writing) |
+| Parameter | Type   | Required | Description                                        |
+| --------- | ------ | -------- | -------------------------------------------------- |
+| switch    | [case] | yes      | Array of cases with `case` and `set` configuration |
+| default   | config | no       | Fallback plugin if no case matches                 |
 
 **How it works**:
 
-**When reading**:
-
-1. `get` plugin returns a value (e.g., `0`)
-2. Value is looked up in the `values` table
-3. The mapped value is returned (e.g., `0` → `2`)
-
-**When writing**:
-
-1. Input value is received (e.g., `3`)
-2. Value is looked up in the `values` table
-3. The mapped value is passed to the `set` plugin (e.g., `3` → `6`)
-
-If no matching value is found in the table, an error occurs.
+1. Input value is compared with the `case` values
+2. On match, the corresponding `set` plugin is executed
+3. If no case matches and `default` is defined, it is executed
+4. If no case matches and no `default` is defined, an error occurs
 
 **Supported data types**: `int64` (integer values only)
-
-**Reading example** (device value → evcc):
-
-```yaml
-getmode:
-  source: map
-  values:
-    0: 2 # Device "Free" → evcc "normal"
-    1: 1 # Device "Forced off" → evcc "reduced"
-    2: 3 # Device "Recommended on" → evcc "boost"
-    3: 3 # Device "Forced on" → evcc "boost"
-  get:
-    source: modbus
-    uri: 192.168.1.10:502
-    id: 1
-    register:
-      address: 55
-      type: holding
-      encoding: int16
-```
-
-**Writing example** (evcc → device value):
-
-```yaml
-setmode:
-  source: map
-  values:
-    1: 1 # evcc "reduced" → Device "Forced off"
-    2: 0 # evcc "normal" → Device "Free"
-    3: 3 # evcc "boost" → Device "Forced on"
-  set:
-    source: modbus
-    uri: 192.168.1.10:502
-    id: 1
-    register:
-      address: 55
-      type: writeholding
-      encoding: int16
-```
-
-### Convert <Tag label="write" category="write" /> {#convert}
-
-The `convert` plugin converts data types when writing.
-It is used when a plugin expects a different data type than evcc provides.
-
-**Parameters**:
-
-| Parameter | Type   | Required | Description                         |
-| --------- | ------ | -------- | ----------------------------------- |
-| convert   | string | yes      | Conversion type                     |
-| set       | config | yes      | Plugin for writing after conversion |
-
-**Supported conversions**:
-
-| Conversion | Description                                    |
-| ---------- | ---------------------------------------------- |
-| float2int  | Float64 → Int64 (decimal places are truncated) |
-| int2float  | Int64 → Float64                                |
-| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
-
-**Example** (evcc provides float, device expects int):
-
-```yaml
-limitsoc:
-  source: convert
-  convert: float2int
-  set:
-    source: modbus
-    uri: 192.168.1.10:502
-    id: 1
-    register:
-      address: 41009
-      type: writesingle
-      encoding: uint16
-```
-
-In this example, evcc converts a float value like `85.5` to `85` before writing it to the modbus register.
-
-### Ignore <Tag label="write" category="write" /> {#ignore}
-
-The `ignore` plugin suppresses specific error messages when writing.
-It is used when a device returns harmless errors that can be ignored.
-
-**Parameters**:
-
-| Parameter | Type   | Required | Description                 |
-| --------- | ------ | -------- | --------------------------- |
-| error     | string | yes      | Error text prefix to ignore |
-| set       | config | yes      | Plugin for writing          |
-
-**How it works**:
-
-1. The nested `set` plugin is executed
-2. If an error occurs, it checks whether the error message starts with the `error` string
-3. If yes, the error is ignored and success is returned
-4. If no, the error is passed through normally
-
-**Supported data types**: `int64`, `float64`, `bool`, `[]byte`
 
 **Example**:
 
 ```yaml
-batterymode:
+setmode:
   source: switch
   switch:
-    - case: 1 # normal
+    - case: 1 # reduced
       set:
-        source: const
-        value: 2
-        set:
-          source: ignore
-          error: "modbus: response data size '18' does not match count '4'"
-          set:
-            source: modbus
-            uri: 192.168.1.10:502
-            id: 1
-            register:
-              address: 0x1110
-              type: writemultiple
-              encoding: int16
+        source: http
+        uri: http://device.local/api/mode
+        body: "eco"
+    - case: 2 # normal
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "normal"
+    - case: 3 # boost
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "boost"
 ```
 
-In this example, the device returns a harmless modbus error that is ignored.
+### Valid <Tag label="read" category="read" /> {#valid}
+
+The `valid` plugin allows providing plugin values based on boolean validation.
+It separates the validity of a value from its actual content.
+If the validation returns `false`, the value is considered unavailable.
+
+This is particularly useful for integrations like ioBroker that provide validity and value separately.
+
+**Reading Example**:
+
+```yaml
+source: valid
+valid:
+  source: mqtt
+  topic: iobroker/wallbox/power/valid
+value:
+  source: mqtt
+  topic: iobroker/wallbox/power/value
+```
+
+In this example, the value is only used when the `valid` topic returns `true`.
+If it returns `false`, the value is marked as unavailable.
+
+### Watchdog <Tag label="write" category="write" /> {#watchdog}
+
+The `watchdog` plugin is a wrapper plugin that automatically repeats write operations at regular intervals.
+Some devices (e.g. battery storage systems, inverters) expect control commands to be repeated regularly to stay active.
+The watchdog plugin monitors write operations and automatically repeats them at half the configured timeout interval.
+
+**Parameters**:
+
+| Parameter | Type               | Required | Description                                                        |
+| --------- | ------------------ | -------- | ------------------------------------------------------------------ |
+| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2) |
+| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                          |
+| initial   | string             | no       | Value that is written once at startup                              |
+| set       | config             | yes      | Nested plugin for the actual write operation                       |
+
+**How it works**:
+
+1. **Start**: If `initial` is configured, this value is written once at startup
+2. **Write**: When a value is written, the plugin checks whether it is in the `reset` list
+3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value every `timeout/2` seconds
+4. **Watchdog stops**: If the value is in `reset`, no repetitions are performed
+
+**reset parameter**:
+
+- Defines values at which the watchdog is stopped
+- Can be a single value (`reset: 0`) or multiple values (`reset: [0, 1]`)
+- Typically used for "safe" or "default" states that don't need continuous repetition
+
+**initial parameter**:
+
+- Optional value that is written once when the plugin starts
+- Useful for setting a defined initial state
+- Executed before all other write operations
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Example Write**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+In this example, values are automatically repeated every 30 s, except when the value `0` is written.
+
+**Flow example** with `timeout: 60s`, `reset: 0`:
+
+- Plugin starts
+- Write value `100` → Watchdog **runs**, value is repeated every 30 s
+- After 2 minutes: Value `100` has been written 4x (0s, 30s, 60s, 90s, 120s)
+- Write value `200` → Watchdog **continues** running, now with new value `200` every 30 s
+- Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
+- No further repetitions until a new value != `0` is written
+
+**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Stop repetitions in normal operation
+  set:
+    source: switch
+    switch:
+      - case: 1 # normal
+        set:
+          source: modbus
+          # ... Modbus configuration for normal operation
+      - case: 2 # hold
+        set:
+          source: modbus
+          # ... Modbus configuration for hold mode
+      - case: 3 # charge
+        set:
+          source: modbus
+          # ... Modbus configuration for charge mode
+```
