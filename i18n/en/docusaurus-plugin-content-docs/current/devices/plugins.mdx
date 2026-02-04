@@ -1329,12 +1329,13 @@ The watchdog plugin monitors write operations and automatically repeats them at 
 
 **Parameters**:
 
-| Parameter | Type               | Required | Description                                                        |
-| --------- | ------------------ | -------- | ------------------------------------------------------------------ |
-| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2) |
-| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                          |
-| initial   | string             | no       | Value that is written once at startup                              |
-| set       | config             | yes      | Nested plugin for the actual write operation                       |
+| Parameter | Type               | Required | Description                                                           |
+| --------- | ------------------ | -------- | --------------------------------------------------------------------- |
+| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2)    |
+| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                             |
+| initial   | string             | no       | Value that is written once at startup                                 |
+| defer     | bool               | no       | Defers updates instead of executing them immediately (default: false) |
+| set       | config             | yes      | Nested plugin for the actual write operation                          |
 
 **How it works**:
 
@@ -1354,6 +1355,14 @@ The watchdog plugin monitors write operations and automatically repeats them at 
 - Optional value that is written once when the plugin starts
 - Useful for setting a defined initial state
 - Executed before all other write operations
+
+**defer parameter**:
+
+- Ensures that timeouts between updates are respected
+- The watchdog is stopped during the delay and restarted with the new value after expiry
+- Useful when devices require a minimum wait time between mode changes
+- The delay is calculated based on the time since the last update
+- Reset values are always written immediately (without delay)
 
 **Supported data types**: `int64`, `float64`, `bool`
 
