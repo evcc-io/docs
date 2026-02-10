@@ -11,8 +11,6 @@ import NavCardGrid from '@site/src/components/NavCardGrid';
 In diesem Abschnitt findest du Anleitungen für die Installation von evcc auf verschiedenen Plattformen.
 Falls du mehr über die Funktionsweise von Wallboxen und E-Auto-Laden erfahren möchtest, schau dir zuerst die [Vorüberlegungen](./installation/considerations) an.
 
-<iframe title="New X11 server, New portable package manager, no more Steam Deck LCD - Linux Weekly News" src="https://foss.video/videos/embed/r2h7WhpDeerU7dpd3AcCXe" allow="fullscreen" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" style={{ width: '100%', aspectRatio: '16/9.08', border: '3px solid #ccc', borderRadius: '20px'}}></iframe>
-
 <NavCardGrid>
   <NavCard 
     to="/docs/installation/linux-image" 
