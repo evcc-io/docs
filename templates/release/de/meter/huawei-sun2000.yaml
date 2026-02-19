@@ -59,7 +59,6 @@ render:
       host:  # Hostname
       port: 502 # Port
       timeout: 15s # Zeitüberschreitung, optional
-      storageunit: 1 # Nummer des Batteriespeichers, optional
   - usage: pv
     default: |
       type: template
@@ -109,7 +108,6 @@ render:
       host:  # Hostname
       port: 502 # Port
       timeout: 15s # Zeitüberschreitung, optional
-      storageunit: 1 # Nummer des Batteriespeichers, optional
       maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
   - usage: battery
     default: |
@@ -135,6 +133,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers.
       timeout: 15s # Zeitüberschreitung, optional
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
@@ -162,13 +161,13 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers.
       timeout: 15s # Zeitüberschreitung, optional
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
       maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
       storageunit: 1 # Nummer des Batteriespeichers, optional
       forceaccharging: false # Wechselrichterkaskade, AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert Stand-by. (optional)
-      maxchargepower: 10000 # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
       maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
 params:
   - name: modbus
@@ -178,6 +177,15 @@ params:
     unit:
     description: Modbus Typ
     help:
+    advanced: false
+    optional: false
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Ladeleistung
+    help: Für erzwungenes Laden des Speichers.
     advanced: false
     optional: false
   - name: timeout
@@ -216,21 +224,21 @@ params:
     help: Oberes Limit beim Laden der Batterie aus dem Netz
     advanced: false
     optional: true
-  - name: storageunit
-    example:
-    default: 1
-    choice: []
-    unit:
-    description: Nummer des Batteriespeichers
-    help:
-    advanced: true
-    optional: true
   - name: maxacpower
     example: 5000
     default: 0
     choice: []
     unit: W
     description: Maximale AC Leistung des Hybrid-Wechselrichters
+    help:
+    advanced: true
+    optional: true
+  - name: storageunit
+    example:
+    default: 1
+    choice: []
+    unit:
+    description: Nummer des Batteriespeichers
     help:
     advanced: true
     optional: true
@@ -241,15 +249,6 @@ params:
     unit:
     description: Wechselrichterkaskade
     help: AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert Stand-by.
-    advanced: true
-    optional: true
-  - name: maxchargepower
-    example:
-    default: 10000
-    choice: []
-    unit: W
-    description: Maximale Ladeleistung
-    help: Für erzwungenes Laden des Speichers.
     advanced: true
     optional: true
   - name: maxdischargepower

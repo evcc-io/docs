@@ -59,7 +59,6 @@ render:
       host:  # Hostname
       port: 502 # Port
       timeout: 15s # Timeout, optional
-      storageunit: 1 # Battery storage unit index, optional
   - usage: pv
     default: |
       type: template
@@ -109,7 +108,6 @@ render:
       host:  # Hostname
       port: 502 # Port
       timeout: 15s # Timeout, optional
-      storageunit: 1 # Battery storage unit index, optional
       maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
   - usage: battery
     default: |
@@ -135,6 +133,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery.
       timeout: 15s # Timeout, optional
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
@@ -162,13 +161,13 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery.
       timeout: 15s # Timeout, optional
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       storageunit: 1 # Battery storage unit index, optional
       forceaccharging: false # Inverter cascade, Keep AC charging active to charge the storage from other inverters via AC. Prevents stand-by. (optional)
-      maxchargepower: 10000 # Maximum charge power (W), For forced charging of the battery. (optional)
       maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
 params:
   - name: modbus
@@ -178,6 +177,15 @@ params:
     unit:
     description: Modbus Type
     help:
+    advanced: false
+    optional: false
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: For forced charging of the battery.
     advanced: false
     optional: false
   - name: timeout
@@ -216,21 +224,21 @@ params:
     help: Upper limit when charging the battery from the grid
     advanced: false
     optional: true
-  - name: storageunit
-    example:
-    default: 1
-    choice: []
-    unit:
-    description: Battery storage unit index
-    help:
-    advanced: true
-    optional: true
   - name: maxacpower
     example: 5000
     default: 0
     choice: []
     unit: W
     description: Maximum AC power of the hybrid inverter
+    help:
+    advanced: true
+    optional: true
+  - name: storageunit
+    example:
+    default: 1
+    choice: []
+    unit:
+    description: Battery storage unit index
     help:
     advanced: true
     optional: true
@@ -241,15 +249,6 @@ params:
     unit:
     description: Inverter cascade
     help: Keep AC charging active to charge the storage from other inverters via AC. Prevents stand-by.
-    advanced: true
-    optional: true
-  - name: maxchargepower
-    example:
-    default: 10000
-    choice: []
-    unit: W
-    description: Maximum charge power
-    help: For forced charging of the battery.
     advanced: true
     optional: true
   - name: maxdischargepower
