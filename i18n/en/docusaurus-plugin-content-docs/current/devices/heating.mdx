@@ -388,6 +388,27 @@ Homehub (EKRHH) needs to be configured in mode 4 (Modbus TCP/IP for air2air heat
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
+### E.G.O. Smart Heater
+
+The Smart Heater must be connected to the local network. Messages must be repeated at least every 60 seconds, otherwise the heater will turn off for safety reasons.
+
+**Important:** In the loadpoint configuration, set `mincurrent: 4` and `maxcurrent: 16`, as well as `phases: 1` for single-phase operation.
+
+<DeviceConfig
+  code={`chargers:
+    - name: my_heating
+      type: template
+      template: ego-smartheater
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port`}
+/>
+<SponsorshipRequired />
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
 ### Elco
 
 For heatpumps with Luxtronik 2.1 controller. Uses modbus-tcp. Requires software v3.90.3 or later. Enable via SERVICE, Systemsteuerung, Konnektivität, Smart-Home-Interface.
@@ -416,6 +437,22 @@ For heatpumps with Luxtronik 2.1 controller. Uses modbus-tcp. Requires software 
       port: 502 # Port
       heatoffset: 0.0 # Heating temperature boost (K), optional
       wwoffset: 0.0 # Hot water temperature boost (K), Temperature boost offset for hot water. Possibly increases wear on compressor. (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
+
+### Glen Dimplex WPM (SG Ready)
+
+<DeviceConfig
+  code={`chargers:
+    - name: my_heating
+      type: template
+      template: glen-dimplex
+      
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -505,7 +542,7 @@ Energy management settings of the device:
 Modbus connection to LG Therma V heat pump.
 Uses SG Ready energy states for intelligent control.
 Set the indoor unit in the installer settings > "Connectivity" > "Energy state" > "ESS use type" > to "Modbus".
-Since the internal power measurement shows to high values, an external power measurement is suggested.
+Since the internal power measurement shows too high values, an external power measurement is suggested.
 Factory setting Modbus (HEX) = 21 (33).
 Modbus registers can be found within the installation manual (address without the leading number and -1).
 Information on the energy state can be found within the installation manual.
@@ -867,7 +904,7 @@ One-time hot water preparation. The device automatically decides whether to use 
       clientid: # Client ID, Configure at [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
       redirecturi: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect URI of the evcc instance. Must match the redirect URI set in the Viessmann developer portal.
       gateway_serial: # Gateway Serial, VitoConnect serial number (VitoCare App -> Settings -> Communication module -> Serial number)
-      installation_id: # Installation ID, Unfortunately you cannot simply lookup this number in the Viessmann app - instead you need to use the following commands on the command line... we're aware this is not for every user, but currently we don't have a better workflow...<br/>  Prerequisites: curl, jq, and the following parameters:  \`\`\` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> \`\`\`  Then execute the following to get an oauth token (n.b. it's best to paste the entire block as-is, since the intermediate 'CODE' is only valid for 20 seconds):  \`\`\` VIESSMANN_REDIRECT_URI=<your-redirect-uri> VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed 's/.*\\?code=\\(.*\\).*/\\1/' \   | tr -d '[:space:]')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann-climatesolutions.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) \`\`\`  Finally, get the installation id:  \`\`\` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann-climatesolutions.com/iot/v1/equipment/installations?includeGateways=true \   | jq '.data[].id' \`\`\`
+      installation_id: # Installation ID, Unfortunately you cannot simply lookup this number in the Viessmann app - instead you need to use the following commands on the command line... we're aware this is not for every user, but currently we don't have a better workflow...<br/>  Prerequisites: curl, jq, and the following parameters:  \`\`\` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> \`\`\`  Then execute the following to get an oauth token (n.b. it's best to paste the entire block as-is, since the intermediate 'CODE' is only valid for 20 seconds):  \`\`\` VIESSMANN_REDIRECT_URI=<your-redirect-uri> VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed 's/.*\\?code=\\(.*\\).*/\\1/' \   | tr -d '[:space:]')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann-climatesolutions.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) \`\`\`  Finally, get the installation id:  \`\`\` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann-climatesolutions.com/iot/v2/equipment/installations?includeGateways=true \   | jq '.data[].id' \`\`\`
       device_id: 0 # Device ID, typically \`0\``}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
