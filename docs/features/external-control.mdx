@@ -1,0 +1,246 @@
+---
+sidebar_position: 10
+title: Externe Steuerung (§14a, §9)
+---
+
+# Externe Steuerung (§14a EnWG & §9 EEG)
+
+evcc unterstützt die externe Steuerung von Ladepunkten und anderen Verbrauchern durch Netzbetreiber oder übergeordnete Energiemanagementsysteme.
+Folgende Anwendungsfälle werden abgedeckt:
+
+- **§14a EnWG**: Temporäre Leistungsreduzierung und Dimmung von Verbrauchern durch den Netzbetreiber
+- **§9 EEG**: Abregelung von PV-Anlagen bei Netzüberlastung
+- **EMS-Integration**: Umsetzung von Limits anderer Energiemanagementsysteme
+
+## Hintergrund
+
+### Steuerbare Verbrauchseinrichtungen (§14a EnWG)
+
+§14a des Energiewirtschaftsgesetzes (EnWG) regelt die netzdienliche Steuerung von steuerbaren Verbrauchseinrichtungen (SteuVE).
+Netzbetreiber können bei Netzüberlastung die Leistung großer Verbraucher wie Wallboxen, Wärmepumpen oder Batteriespeicher temporär reduzieren.
+
+Wichtige Punkte:
+
+- Betrifft Verbraucher ab 4,2 kW Leistung
+- Steuerung erfolgt über Smart Meter Gateway und Steuerbox
+
+### Einspeisemanagement (§9 EEG)
+
+:::warning In Entwicklung
+Der Mechanismus ist implementiert.
+Die Integration und Dokumentation unterstützter Wechselrichter ist in Arbeit.
+:::
+
+Nach §9 des Erneuerbare-Energien-Gesetzes (EEG) können Netzbetreiber bei drohender Netzüberlastung die Einspeisung von Erneuerbare-Energien-Anlagen abregeln.
+Dies betrifft hauptsächlich größere PV-Anlagen, kann aber auch im privaten Bereich relevant werden.
+
+### Anbindungsmöglichkeiten
+
+Die Anbindung erfolgt über **Relais** (über einen Schaltkontakt) oder **EEBus** (über das EEBus-Protokoll).
+
+## Vorbereitung
+
+Die externe Steuerung nutzt das [Lastmanagement](./loadmanagement).
+Lastmanagement muss konfiguriert sein (mindestens minimale Konfiguration).
+
+**1. Lastmanagement konfigurieren**
+
+In der Benutzeroberfläche unter **Konfiguration > Lastmanagement** muss folgender Eintrag angelegt werden:
+
+```yaml title="Lastmanagement (Minimale Konfiguration)"
+- name: lpc
+```
+
+Hinweis: Falls bereits Lastmanagement mit bestehenden Stromkreisen genutzt wird, wird `lpc` automatisch als oberste Ebene darüber gesetzt.
+
+**2. Ladepunkte zuordnen**
+
+Alle Ladepunkte und Wärmepumpen, die durch die externe Steuerung geregelt werden sollen, müssen im jeweiligen Konfigurationsdialog diesem Stromkreis zugeordnet werden.
+
+Jetzt kann die Einrichtung der externen Steuerung erfolgen.
+Extern gesetzte Limits sind in der Lastmanagement-Statusübersicht dargestellt (`lpc` Stromkreis).
+
+## Konfiguration via Relais
+
+Die Anbindung über einen Schaltkontakt ist die einfachste Lösung.
+Die Steuerbox aktiviert einen Kontakt, der von evcc ausgewertet wird.
+
+### Grundkonfiguration
+
+```yaml title="External Control"
+type: relay
+maxPower: 8400 # Gesamtleistungslimit bei aktivem Signal (in Watt)
+limit:
+  # Plugin-spezifische Konfiguration
+```
+
+### Ermittlung des Leistungslimits
+
+Das Leistungslimit wird dir vom Netzbetreiber mitgeteilt.
+Bei mehreren steuerbaren Verbrauchseinrichtungen (SteuVE) wird der Gleichzeitigkeitsfaktor berücksichtigt.
+Du kannst das Limit auch selbst berechnen mit der Formel: **Gesamtlimit = Anzahl SteuVE × 4,2 kW × Gleichzeitigkeitsfaktor**. Details zur Berechnung findest du [hier](https://www.inexogy.com/blog/14a-enwg/).
+
+### Beispiele für verschiedene Anbindungen
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+<Tabs>
+<TabItem value="gpio" label="Raspberry Pi GPIO">
+
+Bei Verwendung eines Raspberry Pi kann der GPIO-Pin direkt ausgelesen werden:
+
+```yaml title="External Control"
+type: relay
+maxPower: 8400 # Beispiel für 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # GPIO Pin 17 auslesen
+  # Rückgabewert: false = nicht begrenzt, true = begrenzt
+```
+
+Weitere Details zum GPIO-Plugin findest du in der [Plugin-Dokumentation](/docs/devices/plugins#gpio).
+
+</TabItem>
+<TabItem value="mqtt" label="MQTT">
+
+Wenn die Steuerbox oder ein Gateway MQTT-Nachrichten sendet:
+
+```yaml title="External Control"
+type: relay
+maxPower: 11340 # Beispiel für 3 SteuVE mit Gleichzeitigkeitsfaktor 0,9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Erwartete Werte: 0/false = normal, 1/true = begrenzt
+```
+
+</TabItem>
+<TabItem value="http" label="HTTP-API">
+
+Für Steuerboxen mit REST-API:
+
+```yaml title="External Control"
+type: relay
+maxPower: 13440 # Beispiel für 4 SteuVE mit Gleichzeitigkeitsfaktor 0,8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON-Pfad zum Boolean-Wert
+```
+
+</TabItem>
+</Tabs>
+
+## Konfiguration via EEBus
+
+Die digitale Anbindung über EEBus ist die zukunftssichere und bevorzugte Lösung.
+Die Steuerbox kommuniziert über das EEBus-Protokoll direkt mit evcc und übermittelt das Leistungslimit automatisch.
+
+### Voraussetzungen
+
+- Steuerbox mit EEBus-Schnittstelle
+- Netzwerkverbindung zwischen evcc und Steuerbox
+
+EEBus ist vorkonfiguriert.
+SHIP-ID und SKI der evcc Instanz können unter **Konfiguration > EEBus** eingesehen werden.
+
+### Steuerbox verbinden
+
+Konfiguriere die Verbindung zur Steuerbox.
+Die SKI findest du in der Dokumentation deiner Steuerbox:
+
+```yaml title="External Control"
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
+```
+
+:::note Hinweis
+Bei EEBus wird das Leistungslimit automatisch von der Steuerbox übermittelt.
+:::
+
+### Pairing
+
+#### SKI von evcc ermitteln
+
+Die SKI kann unter **Konfiguration > EEBus** eingesehen werden.
+
+#### Pairing durchführen
+
+1. **In der Steuerbox**: evcc als HEMS hinzufügen
+   - Die SKI von evcc eingeben
+   - IP-Adresse von evcc angeben
+   - Pairing-Vorgang starten
+
+2. **In evcc**: Konfiguration mit SKI der Steuerbox ergänzen
+   - SKI der Steuerbox in der Konfiguration eintragen
+   - evcc neu starten
+
+## Funktionsweise
+
+### Normalbetrieb
+
+Im Normalbetrieb lädt evcc ohne externe Leistungsbegrenzung.
+Die Ladepunkte arbeiten mit ihrer normalen Konfiguration und werden ggf. durch weitere [Lastmanagement](./loadmanagement)-Einschränkungen koordiniert.
+
+### Reduzierungssignal aktiv
+
+Wenn der Netzbetreiber ein Reduzierungssignal sendet:
+
+1. **Relais**: Der Kontakt wird geschlossen, evcc aktiviert das konfigurierte `maxPower` Limit
+2. **EEBus**: Die Steuerbox übermittelt das berechnete Gesamtlimit digital
+
+evcc regelt alle dem `lpc` Stromkreis zugeordneten Ladepunkte entsprechend dem Limit herunter.
+Bei zu hohem Gesamtverbrauch können Ladevorgänge auch gestoppt werden.
+Die Regelung betrifft alle Modi (PV, Min+PV, Schnell).
+
+**Batteriesteuerung während der Reduzierung:**
+Ist [aktive Batteriesteuerung](./battery#battery-control) konfiguriert und ein Netzladevorgang der Hausbatterie aktiv, wird dieser automatisch pausiert.
+Die Batterie wird in den "Hold"-Modus versetzt, sodass sie nicht mehr entlädt.
+Das Laden der Batterie bei PV-Überschuss ist idR. weiterhin möglich.
+Nach Ende der Leistungsreduzierung wird das Netzladen automatisch fortgesetzt.
+
+Wenn ein Regellimit aktiv ist, wird ein **Banner mit Regelhinweis** auf der Hauptseite in evcc angezeigt.
+
+## Protokollierung
+
+Alle Limitierungsanfragen durch den Netzbetreiber werden automatisch dokumentiert.
+Die Protokolldaten können unter **Konfiguration > Externe Steuerung** als CSV-Datei heruntergeladen werden.
+
+Jeder Eintrag enthält:
+
+- Start- und Endzeitpunkt der Limitierung
+- Art der Steuerung (Verbrauchsreduzierung oder Einspeisebegrenzung)
+- Gemessene Netzleistung zu Beginn der Limitierung
+- Gesetztes Leistungslimit
+
+Diese Dokumentation kann auf Anfrage dem Netzbetreiber vorgelegt werden, um die Einhaltung der Steueranfragen nachzuweisen.
+
+:::info Verantwortung (§14a, §9)
+Die Elektrofachkraft muss nach der Einrichtung überprüfen, dass die externe Steuerung wie vorgesehen funktioniert.
+Der Anlagenbetreiber ist für den ordnungsgemäßen Betrieb verantwortlich und muss das Protokoll für mindestens 2 Jahre aufbewahren.
+:::
+
+## Steuerung weiterer Verbraucher
+
+Neben Ladepunkten können auch weitere steuerbare Verbraucher in das §14a Lastmanagement einbezogen werden.
+Dies betrifft z. B. Wärmepumpen oder Batteriespeicher, die über EEBus angebunden oder als Zähler mit zusätzlichem Relaisausgang konfiguriert sind.
+
+Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller dem internen `lpc` Stromkreis zugeordneten Verbraucher.
+Dazu zählen automatisch alle Ladepunkte und alle Zähler mit entsprechenden Schaltausgängen oder EEBus-Schnittstelle mit LPC Use Case als sonstige Verbraucher.
+
+Zunächst werden alle sonstigen Verbraucher gedimmt.
+Die verbleibende Leistung wird dann auf die aktiven Ladepunkte verteilt.
+Durch pauschale Dimmung der sonstigen Verbraucher kann die verfügbare Ladeleistung für aktive Ladepunkte in Ausnahmefällen sogar höher sein als im Normalzustand.
+Reicht die Drosselung der Ladepunkte einschließlich der Dimmung aller sonstigen Verbraucher nicht aus, werden Ladevorgänge an Ladepunkten unterbrochen.
+
+:::note Verfügbarkeit
+Aktuell existiert nur ein dimmbarer Zähler (EEBus Verbraucher).
+Diese Funktion wird weiter ausgebaut und entsprechende Zähler werden in der [Gerätedokumentation](/docs/devices/meters) markiert.
+:::
+
+## Weiterführende Informationen
+
+- [Lastmanagement](./loadmanagement) - Grundlagen der Lastverteilung
+- [Plugins](../devices/plugins) - Erweiterte Plugin-Konfigurationen

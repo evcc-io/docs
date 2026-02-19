@@ -1,0 +1,246 @@
+---
+sidebar_position: 10
+title: External Control (§14a, §9)
+---
+
+# External Control (§14a EnWG & §9 EEG)
+
+evcc supports external control of charging points and other consumers by grid operators or higher-level energy management systems.
+The following use cases are supported:
+
+- **§14a EnWG** (German regulation): Temporary power reduction and dimming of consumers by the grid operator
+- **§9 EEG** (German regulation): Curtailment of solar installations in case of grid overload
+- **EMS Integration**: Applying limits from other energy management systems
+
+## Background
+
+### Controllable Consumption Devices (§14a EnWG)
+
+§14a of the German Energy Industry Act (EnWG) regulates grid-friendly control of controllable consumption devices (SteuVE).
+Grid operators can temporarily reduce the power of large consumers such as wallboxes, heat pumps or battery storage systems in the event of grid overload.
+
+Important points:
+
+- Affects consumers from 4.2 kW power
+- Control via Smart Meter Gateway and control box
+
+### Feed-in Management (§9 EEG)
+
+:::warning Under development
+The mechanism is implemented.
+Integration and documentation of supported inverters is work in progress.
+:::
+
+According to §9 of the Renewable Energy Act (EEG), grid operators can curtail the feed-in of renewable energy installations in the event of imminent grid overload.
+This mainly affects larger solar installations, but can also become relevant in the residential sector.
+
+### Connection Options
+
+Connection is established via **Relay** (via a switch contact) or **EEBus** (via the EEBus protocol).
+
+## Preparation
+
+External control uses [Load Management](./loadmanagement).
+Load management must be configured (at least minimal configuration).
+
+**1. Configure load management**
+
+In the user interface under **Configuration > Load Management**, the following entry must be created:
+
+```yaml title="Load Management (Minimal Configuration)"
+- name: lpc
+```
+
+Note: If load management with existing circuits is already in use, `lpc` will automatically be placed as the top level above them.
+
+**2. Assign charging points**
+
+All charging points and heat pumps that should be controlled by external control must be assigned to this circuit in their respective configuration dialog.
+
+Now external control can be configured.
+Externally set limits are displayed in the load management status overview (`lpc` circuit).
+
+## Configuration via Relay
+
+The connection via a switch contact is the simplest solution.
+The control box activates a contact which is evaluated by evcc.
+
+### Basic Configuration
+
+```yaml title="External Control"
+type: relay
+maxPower: 8400 # Total power limit when signal is active (in watts)
+limit:
+  # Plugin-specific configuration
+```
+
+### Determining the Power Limit
+
+The power limit is communicated to you by the grid operator.
+For multiple controllable consumption devices (SteuVE), the simultaneity factor is taken into account.
+You can also calculate the limit yourself using the formula: **Total limit = Number of SteuVE × 4.2 kW × Simultaneity factor**. Details on the calculation can be found [here](https://www.inexogy.com/blog/14a-enwg/).
+
+### Examples for Different Connections
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+<Tabs>
+<TabItem value="gpio" label="Raspberry Pi GPIO">
+
+When using a Raspberry Pi, the GPIO pin can be read directly:
+
+```yaml title="External Control"
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+For more details on the GPIO plugin, see the [plugin documentation](/docs/devices/plugins#gpio).
+
+</TabItem>
+<TabItem value="mqtt" label="MQTT">
+
+If the control box or gateway sends MQTT messages:
+
+```yaml title="External Control"
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem value="http" label="HTTP API">
+
+For control boxes with REST API:
+
+```yaml title="External Control"
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+</Tabs>
+
+## Configuration via EEBus
+
+The digital connection via EEBus is the future-proof and preferred solution.
+The control box communicates directly with evcc via the EEBus protocol and automatically transmits the power limit.
+
+### Prerequisites
+
+- Control box with EEBus interface
+- Network connection between evcc and control box
+
+EEBus is preconfigured.
+The evcc instance's SHIP-ID and SKI can be viewed under **Configuration > EEBus**.
+
+### Connect Control Box
+
+Configure the connection to the control box.
+You can find the SKI in your control box documentation:
+
+```yaml title="External Control"
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+:::note Note
+With EEBus, the power limit is automatically transmitted by the control box.
+:::
+
+### Pairing
+
+#### Determine evcc SKI
+
+The SKI can be viewed under **Configuration > EEBus**.
+
+#### Perform Pairing
+
+1. **In the control box**: Add evcc as HEMS
+   - Enter the SKI of evcc
+   - Specify the IP address of evcc
+   - Start the pairing process
+
+2. **In evcc**: Add the control box SKI to the configuration
+   - Enter the control box SKI in the configuration
+   - Restart evcc
+
+## How It Works
+
+### Normal Operation
+
+In normal operation, evcc charges without external power limitation.
+The charging points operate with their normal configuration and are coordinated by additional [Load Management](./loadmanagement) restrictions if applicable.
+
+### Reduction Signal Active
+
+When the grid operator sends a reduction signal:
+
+1. **Relay**: The contact is closed, evcc activates the configured `maxPower` limit
+2. **EEBus**: The control box digitally transmits the calculated total limit
+
+evcc reduces all charging points assigned to the `lpc` circuit according to the limit.
+If total consumption is too high, charging processes can also be stopped.
+The control affects all modes (Solar, Min+Solar, Fast).
+
+**Battery control during reduction:**
+If [active battery control](./battery#battery-control) is configured and grid charging of the home battery is active, this is automatically paused.
+The battery is set to "hold" mode so that it no longer discharges.
+Charging the battery from solar surplus is usually still possible.
+After the power reduction ends, grid charging automatically resumes.
+
+When a control limit is active, a **banner with control notice** is displayed on the main page in evcc.
+
+## Logging
+
+All limitation requests from the grid operator are automatically documented.
+The log data can be downloaded as a CSV file under **Configuration > External Control**.
+
+Each entry contains:
+
+- Start and end time of the limitation
+- Type of control (consumption reduction or feed-in curtailment)
+- Measured grid power at the start of the limitation
+- Set power limit
+
+This documentation can be provided to the grid operator upon request to verify compliance with control requests.
+
+:::info Responsibility (German regulations §14a, §9)
+The qualified electrician must verify after installation that the external control is working as expected.
+The system operator is responsible for proper operation and must keep the log for at least 2 years.
+:::
+
+## Controlling Additional Consumers
+
+In addition to charging points, other controllable consumers can also be integrated into German §14a load management.
+This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with an additional relay output.
+
+The control takes into account the current power consumption of all consumers assigned to the internal `lpc` circuit.
+This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
+
+First, all other consumers are dimmed.
+The remaining power is then distributed to the active charging points.
+Due to flat dimming of other consumers, the available charging power for active charging points can in exceptional cases even be higher than in normal state.
+If throttling the charging points including dimming all other consumers is not sufficient, charging processes at charging points are interrupted.
+
+:::note Availability
+Currently, only one dimmable meter (EEBus consumer) exists.
+This feature is being expanded and compatible meters will be marked in the [device documentation](/docs/devices/meters).
+:::
+
+## Further Information
+
+- [Load Management](./loadmanagement) - Basics of load distribution
+- [Plugins](../devices/plugins) - Advanced plugin configurations
