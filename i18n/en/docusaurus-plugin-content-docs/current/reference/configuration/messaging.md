@@ -98,7 +98,7 @@ messaging:
         Grid power: {{round (divf .gridPower 1000) 3 }} kW
         Solar power: {{round (divf .pvPower 1000) 3 }} kW
         Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
     stop: # charge stop event
       title: Charge of {{.vehicleTitle}} finished
       msg: |
@@ -109,7 +109,7 @@ messaging:
         Grid power: {{round (divf .gridPower 1000) 3 }} kW
         Solar power: {{round (divf .pvPower 1000) 3 }} kW
         Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
     connect: # vehicle connect event
       title: "{{.vehicleTitle}} connected on Charger {{.title}}"
       msg: |
@@ -119,7 +119,7 @@ messaging:
         Grid power: {{round (divf .gridPower 1000) 3 }} kW
         Solar power: {{round (divf .pvPower 1000) 3 }} kW
         Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
     disconnect: # vehicle connected event
       title: "{{.vehicleTitle}} disconnected of Charger {{.title}}"
       msg: |
@@ -131,7 +131,7 @@ messaging:
 
 
         Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
 ```
 
 :::
@@ -153,8 +153,8 @@ The variables provided by evcc (also see /api/state) must be defined as `${<Vari
   - [`tariffFeedIn`](tariffs) - PV feed-in remuneration per kWh in tariff currency (float)
   - [`tariffGrid`](tariffs) - Grid consumption price per kWh in tariff currency (float)
 - Meter Information
-  - `batteryPower` - Current home battery/Powerwall power in watts (_float_)
-  - `batterySoc` - Current state of charge of home battery/Powerwall in percent (_integer_)
+  - `battery.Power` - Current home battery/Powerwall power in watts (_float_)
+  - `battery.Soc` - Current state of charge of home battery/Powerwall in percent (_integer_)
   - `gridPower` - Current grid feed-in(-) or consumption(+) in watts (_float_)
   - `homePower` - Current home consumption power (excluding Charger consumption) in watts (_float_)
   - `pvPower` - Current solar panels power in watts (_float_)
