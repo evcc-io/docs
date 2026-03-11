@@ -38,27 +38,11 @@ Dies betrifft hauptsächlich größere PV-Anlagen, kann aber auch im privaten Be
 
 Die Anbindung erfolgt über **Relais** (über einen Schaltkontakt) oder **EEBus** (über das EEBus-Protokoll).
 
-## Vorbereitung
+## Einrichtung
 
-Die externe Steuerung nutzt das [Lastmanagement](./loadmanagement).
-Lastmanagement muss konfiguriert sein (mindestens minimale Konfiguration).
-
-**1. Lastmanagement konfigurieren**
-
-In der Benutzeroberfläche unter **Konfiguration > Lastmanagement** muss folgender Eintrag angelegt werden:
-
-```yaml title="Lastmanagement (Minimale Konfiguration)"
-- name: lpc
-```
-
-Hinweis: Falls bereits Lastmanagement mit bestehenden Stromkreisen genutzt wird, wird `lpc` automatisch als oberste Ebene darüber gesetzt.
-
-**2. Ladepunkte zuordnen**
-
-Alle Ladepunkte und Wärmepumpen, die durch die externe Steuerung geregelt werden sollen, müssen im jeweiligen Konfigurationsdialog diesem Stromkreis zugeordnet werden.
-
-Jetzt kann die Einrichtung der externen Steuerung erfolgen.
-Extern gesetzte Limits sind in der Lastmanagement-Statusübersicht dargestellt (`lpc` Stromkreis).
+Die Einrichtung erfolgt über **Konfiguration > Externe Steuerung**.
+Das Umsetzen der Begrenzung erfolgt über das [Lastmanagement](./loadmanagement).
+Dabei wird automatisch ein "Externe Begrenzung" Stromkreis (`gridcontrol`) erstellt, der als oberste Ebene über eventuell bestehende Stromkreise gesetzt wird.
 
 ## Konfiguration via Relais
 
@@ -191,7 +175,7 @@ Wenn der Netzbetreiber ein Reduzierungssignal sendet:
 1. **Relais**: Der Kontakt wird geschlossen, evcc aktiviert das konfigurierte `maxPower` Limit
 2. **EEBus**: Die Steuerbox übermittelt das berechnete Gesamtlimit digital
 
-evcc regelt alle dem `lpc` Stromkreis zugeordneten Ladepunkte entsprechend dem Limit herunter.
+Alle dem "Externe Begrenzung" Stromkreis (`gridcontrol`) zugeordneten Ladepunkte werden entsprechend dem Limit heruntergeregelt.
 Bei zu hohem Gesamtverbrauch können Ladevorgänge auch gestoppt werden.
 Die Regelung betrifft alle Modi (PV, Min+PV, Schnell).
 
@@ -227,7 +211,7 @@ Der Anlagenbetreiber ist für den ordnungsgemäßen Betrieb verantwortlich und m
 Neben Ladepunkten können auch weitere steuerbare Verbraucher in das §14a Lastmanagement einbezogen werden.
 Dies betrifft z. B. Wärmepumpen oder Batteriespeicher, die über EEBus angebunden oder als Zähler mit zusätzlichem Relaisausgang konfiguriert sind.
 
-Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller dem internen `lpc` Stromkreis zugeordneten Verbraucher.
+Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller dem "Externe Begrenzung" Stromkreis (`gridcontrol`) zugeordneten Verbraucher.
 Dazu zählen automatisch alle Ladepunkte und alle Zähler mit entsprechenden Schaltausgängen oder EEBus-Schnittstelle mit LPC Use Case als sonstige Verbraucher.
 
 Zunächst werden alle sonstigen Verbraucher gedimmt.

@@ -38,27 +38,11 @@ This mainly affects larger solar installations, but can also become relevant in 
 
 Connection is established via **Relay** (via a switch contact) or **EEBus** (via the EEBus protocol).
 
-## Preparation
+## Setup
 
-External control uses [Load Management](./loadmanagement).
-Load management must be configured (at least minimal configuration).
-
-**1. Configure load management**
-
-In the user interface under **Configuration > Load Management**, the following entry must be created:
-
-```yaml title="Load Management (Minimal Configuration)"
-- name: lpc
-```
-
-Note: If load management with existing circuits is already in use, `lpc` will automatically be placed as the top level above them.
-
-**2. Assign charging points**
-
-All charging points and heat pumps that should be controlled by external control must be assigned to this circuit in their respective configuration dialog.
-
-Now external control can be configured.
-Externally set limits are displayed in the load management status overview (`lpc` circuit).
+Configuration is done via **Configuration > External Control**.
+Limits are enforced via [Load Management](./loadmanagement).
+An "External Limit" circuit (`gridcontrol`) is automatically created and placed as the top level above any existing circuits.
 
 ## Configuration via Relay
 
@@ -191,7 +175,7 @@ When the grid operator sends a reduction signal:
 1. **Relay**: The contact is closed, evcc activates the configured `maxPower` limit
 2. **EEBus**: The control box digitally transmits the calculated total limit
 
-evcc reduces all charging points assigned to the `lpc` circuit according to the limit.
+All charging points assigned to the "External Limit" circuit (`gridcontrol`) are reduced according to the limit.
 If total consumption is too high, charging processes can also be stopped.
 The control affects all modes (Solar, Min+Solar, Fast).
 
@@ -227,7 +211,7 @@ The system operator is responsible for proper operation and must keep the log fo
 In addition to charging points, other controllable consumers can also be integrated into German §14a load management.
 This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with an additional relay output.
 
-The control takes into account the current power consumption of all consumers assigned to the internal `lpc` circuit.
+The control takes into account the current power consumption of all consumers assigned to the "External Limit" circuit (`gridcontrol`).
 This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
 
 First, all other consumers are dimmed.
