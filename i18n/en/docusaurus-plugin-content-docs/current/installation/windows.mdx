@@ -62,58 +62,165 @@ The configuration does not need to be redone.
 
 ## Background Service
 
+### Task Scheduler {#task-scheduler}
+
 :::note
 This documentation assumes that evcc is located in `c:\evcc`.
-
 These instructions were created using Windows 10.
 :::
 
-- Open the start menu and search for "Task Scheduler", then right click it and choose "Run As Administrator".
+- Open the start menu and search for "Task Scheduler", then right-click it and choose "Run as administrator":
 
 ![Windows 10 Task Scheduler](win10-srv/win10-srv-1.png)
 
-- Once you've started Task Scheduler, you now need to choose whether to create the new service in your own folder, or in the general tasks folder.
-  In this example, we create the `evcc` folder.
-  To do this, select "New Folder..." from the right hand pane.
+- Once you've started Task Scheduler, choose whether to create the new service in its own folder or in the general Task Scheduler Library.
+  In this example, we create a dedicated `evcc` folder.
+  Select "Task Scheduler Library", then right-click to open the context menu and choose "New Folder...":
 
 ![Task Scheduling Library](win10-srv/win10-srv-2.png)
 
-- Now select the new `evcc` folder and open the popup menu again, where we now select "create task".
+- Now select the new `evcc` folder and open the context menu again.
+  Choose "Create Task":
 
 ![New Task window](win10-srv/win10-srv-3.png)
 
-- Give the task a name (probably "evcc") and a short description.
-  Since we need to run as a system service, open user management via "Change User or Group", and enter "SYSTEM" in the box.
-  Once you click "Check Names", the word "SYSTEM" should be underscored - you can now click OK to close this dialog.
+- Give the task a name (e.g. "evcc") and a short description.
+  Since we need to run as a system service, open user management via "Change User or Group" and enter `SYSTEM` in the box.
+  Click "Check Names" — the word "SYSTEM" should be underscored.
+  Click OK to close the dialog:
 
 ![Task Window](win10-srv/win10-srv-4.png) ![User Selection](win10-srv/win10-srv-5.png)
 
-- Select the "triggers" menu, and click "New...".
-- Set the trigger to "At Startup", and check that the "activated" checkbox is ticked.
+- In the "Triggers" tab, click "New...".
+  Set the trigger to "At Startup" and check that the "Enabled" checkbox is ticked:
 
 ![Trigger](win10-srv/win10-srv-6.png)
 
-- Open the "actions" menu, and again, select "New".
-- Make sure "Start a Program" is selected, then find your `evcc.exe` executable using the Browse option.
-  We advise also setting the path in the "Start In..." box, to make sure that the configuration file is easily found by evcc.
+- In the "Actions" tab, click "New".
+  Make sure "Start a Program" is selected, then find your `evcc.exe` executable using the Browse option.
+  It is recommended to also set the path in the "Start in" box so that the configuration file is found automatically:
 
 ![Actions](win10-srv/win10-srv-7.png)
 
-- Open the "conditions" menu.
-- These settings should be left as default, except in one scenario:
+- In the "Conditions" tab, the default settings can be left as-is.
+
   :::info
-  SMA Home Manager can sometimes have issues when used with WiFi - try enabling the "Network" condition and selecting the appropriate connection interface in the dropdown.
+  SMA Home Manager can sometimes have issues when used with Wi-Fi — try enabling the "Network" condition and selecting the appropriate connection interface in the dropdown.
   :::
 
 ![Conditions](win10-srv/win10-srv-8.png)
 
-- Open the "settings" menu.
-- Make sure to select "run task as soon as possible...".
-- Also make sure "Stop the task if it runs longer than:" is **not** selected, unless you want a surprise in 3 days when evcc randomly stops running.
+- In the "Settings" tab, make sure to select "Run task as soon as possible after a scheduled start is missed".
+  Also make sure "Stop the task if it runs longer than:" is **not** selected — otherwise evcc will randomly stop running.
 
 ![Settings](win10-srv/win10-srv-9.png)
 
-- You're done! 🎉
+The task can now be started manually or tested with a reboot.
+To check it's working, navigate to `http://localhost:7070` in your browser.
 
-The task can now be started manually, or test with a reboot.
-To check it's working as expected, use a browser to navigate to the evcc interface `http://[ipaddress]:7070`.
+### NSSM {#windows-service}
+
+:::note
+This documentation assumes that evcc is located in `c:\Tools\evcc`.
+These instructions were created using Windows 11.
+:::
+
+As an alternative to Task Scheduler, you can run evcc as a Windows service.
+A service runs without user login and offers better control over restart behaviour and error handling.
+
+Since evcc does not natively support the Windows service interface, [_nssm_](https://nssm.cc/download) (_Non-Sucking Service Manager_) can be used as a service wrapper.
+
+- Download _nssm_ from [nssm.cc](https://nssm.cc/download) and extract the ZIP file to `C:\Tools\nssm\`.
+- Open a command prompt (`cmd.exe`) and change to the `win64` folder:
+
+  ```sh
+  cd /D C:\Tools\nssm\nssm-2.24\win64
+  ```
+
+- Install the service:
+
+  ```sh
+  nssm install EVCC
+  ```
+
+- Go through the tabs of the dialog.
+  The following settings are recommendations.
+
+  - **Application**:
+
+    ![Application](win11-nssm/win11-nssm_01_Application.png)
+
+    - _Path_: Path to `evcc.exe`.
+    - _Start directory_: Working directory for evcc.
+    - _Arguments_: Parameters for evcc, e.g. `-c evcc.yaml`.
+      Optional: `--database evcc.db` to explicitly set the database path.
+      Without this option, the database is stored in the executing account's user profile.
+      Under the _System_ account, that would be `%SystemRoot%\system32\config\systemprofile\.evcc\evcc.db` — a different location than when starting interactively.
+      With `--database` you ensure the same database is always used.
+      This is relevant when [resetting the password](/docs/faq#password-reset).
+
+  - **Details**:
+
+    ![Details](win11-nssm/win11-nssm_02_Details.png)
+
+    - _Display Name_: Name of the service in Windows Services (ideally the same as _Service Name_).
+    - _Startup type_: _Automatic_ for auto-start on boot.
+
+  - **Log on**:
+
+    ![Log on](win11-nssm/win11-nssm_03_Log_on.png)
+
+    Default: service runs under the _System_ account.
+    Details: [nssm documentation](https://nssm.cc/usage).
+
+    :::important
+    The account chosen here determines where evcc stores its database `evcc.db` (see _Arguments_ above).
+    :::
+
+  - **Dependencies**:
+
+    ![Dependencies](win11-nssm/win11-nssm_04_Dependencies.png)
+
+    Adding `NlaSvc` as a dependency ensures the network is ready before evcc starts.
+
+  - **Process**:
+
+    ![Process](win11-nssm/win11-nssm_05_Process.png)
+
+    Keep defaults.
+
+  - **Shutdown**:
+
+    ![Shutdown](win11-nssm/win11-nssm_06_Shutdown.png)
+
+    Keep defaults.
+    nssm first tries `Ctrl`+`C`, then `WM_CLOSE`/`WM_QUIT`, and forcefully terminates the process after timeout.
+
+  - **Exit actions**:
+
+    ![Exit actions](win11-nssm/win11-nssm_07_Exit_actions.png)
+
+    Recommendation: _Restart application_ with 10 second delay, so evcc automatically restarts after a crash or restart via the web UI.
+
+  - **I/O**:
+
+    ![I/O](win11-nssm/win11-nssm_08_IO.png)
+
+    Optional: redirect `stdout` and `stderr` to log files.
+    Keep evcc's log level low to avoid the files growing too quickly.
+
+  - **File rotation**:
+
+    ![File rotation](win11-nssm/win11-nssm_09_File_rotation.png)
+
+    Optional: enable log rotation to limit log file sizes.
+
+  - **Environment**:
+
+    ![Environment](win11-nssm/win11-nssm_10_Environment.png)
+
+    Keep defaults.
+
+Click _Install Service_ to set up the service.
+The service can then be started and stopped via the Windows Services management console.
+To verify, navigate to `http://localhost:7070` in your browser.
