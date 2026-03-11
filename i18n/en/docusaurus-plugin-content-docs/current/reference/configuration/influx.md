@@ -58,7 +58,7 @@ influx:
 
 ## VictoriaMetrics
 
-[VictoriaMetrix](https://github.com/VictoriaMetrics/VictoriaMetrics) is a time series database with InfluxDB compatible REST API.
+[VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) is a time series database with InfluxDB compatible REST API.
 
 HTTP basic authentication can be done via the URL.
 
