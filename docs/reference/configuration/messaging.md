@@ -99,7 +99,7 @@ messaging:
         Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
     stop: # charge stop event
       title: Charge of {{.vehicleTitle}} finished
       msg: |
@@ -110,7 +110,7 @@ messaging:
         Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
     connect: # vehicle connect event
       title: "{{.vehicleTitle}} connected on wallbox {{.title}}"
       msg: |
@@ -120,7 +120,7 @@ messaging:
         Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
     disconnect: # vehicle connected event
       title: "{{.vehicleTitle}} disconnected of wallbox {{.title}}"
       msg: |
@@ -130,7 +130,7 @@ messaging:
         Netz-Leistung: {{round (divf .grid.Power 1000) 3 }} kW
         Solar-Leistung: {{round (divf .pvPower 1000) 3 }} kW
         Eigenverbrauch: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .batteryPower 1000) 3 }} kW ({{.batterySoc }} %){{end}}
+        {{if .batteryConfigured}}Batteriespeicher-Status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
 ```
 
 :::
@@ -152,8 +152,8 @@ Die von evcc bereitgestellten Variablen (siehe auch /api/state) müssen als rege
   - [`tariffFeedIn`](tariffs) - PV-Einspeisevergütung pro kWh in der Tarif-Währung (float)
   - [`tariffGrid`](tariffs) - Netz-Abnahmepreis pro kWh in der Tarif-Währung (float)
 - Meter Infos
-  - `batteryPower` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (_float_)
-  - `batterySoc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (_integer_)
+  - `battery.Power` - Aktuelle Hausbatterie/Powerwall-Leistung in Watt (_float_)
+  - `battery.Soc` - Aktueller Füllstand der Hausbatterie/Powerwall in Prozent (_integer_)
   - `grid.Power` - Aktuelle Netz-Einspeisung(-) oder -Abnahme(+) in Watt (_float_)
   - `homePower` - Aktuelle Haus-Abnahmeleistung (ohne Wallboxverbrauch) in Watt (_float_)
   - `pvPower` - Aktuelle Solaranlagen-Leistung in Watt (_float_)
