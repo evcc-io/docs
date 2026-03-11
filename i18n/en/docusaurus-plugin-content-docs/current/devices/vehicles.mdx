@@ -12,7 +12,15 @@ import DeviceConfig from "/src/components/DeviceConfig";
 To limit vehicle charging to a given State of Charge (SoC), which most Chargers do not have the capability to read,
 evcc can directly communicate with the Vehicle, usually via its manufacturer.
 
-The configuration is formatted as follows:
+## Setup
+
+**Recommended:** Set up your vehicle directly via the web interface under **Configuration** → **Vehicles**.
+Setup is done via a guided wizard.
+All devices listed here are selectable via the interface.
+After entering all required data, you can test the connection and see which data evcc reads from the device.
+
+**Alternative:** You can also set up your vehicle via the configuration file.
+On this page you'll find the YAML configurations for all vehicles currently supported by evcc.
 
 ```yaml
 vehicles:
@@ -20,9 +28,9 @@ vehicles:
     type: ...
 ```
 
-All of the Vehicles listed on this page are supported by evcc.
-Once you have adapted the code samples to suit your Vehicle(s) in `evcc.yaml`, you can test the connection using the `evcc vehicle` command, which returns the current status of all connected vehicles.
-If you just want to test one meter at a time, use `evcc vehicle --name my_swanky_ev`.
+Once you have adapted the code sample for your vehicle and added it to `evcc.yaml`, you can test the connection using the `evcc vehicle` command.
+This tests all configured vehicles.
+With the command `evcc vehicle --name my_ev` you can test selectively using the assigned name.
 
 ```
 $ ./evcc vehicle
@@ -69,6 +77,7 @@ The availability and general quality of Vehicle data can vary greatly by manufac
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -101,6 +110,7 @@ The availability and general quality of Vehicle data can vary greatly by manufac
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -131,23 +141,24 @@ Data will be updated on restart and when received using streaming. This only hap
     - name: my_car
       type: template
       template: cardata
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: WBMW... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
-      clientid: # Client ID`}
+      clientid: # Client ID
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: cardata
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: WBMW... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
       clientid: # Client ID
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       coarsecurrent: # 1A current control, Vehicle supports 1A current steps only (optional)
@@ -165,27 +176,28 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
     - name: my_car
       type: template
       template: citroen
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: citroen
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -218,6 +230,7 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
@@ -236,27 +249,28 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
     - name: my_car
       type: template
       template: ds
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: ds
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -291,6 +305,7 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
@@ -300,36 +315,68 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
-## Ford
+## Ford (FordConnect Query)
 
 <DeviceConfig
   code={`vehicles:
     - name: my_car
       type: template
-      template: ford-connect
+      template: ford-connect-query
+      clientid: # FordConnect Query Client ID, Setup at https://developer.ford.com/developer-eu
+      clientsecret: # FordConnect Query Client Secret, Setup at https://developer.ford.com/developer-eu
+      redirecturi: # FordConnect Query Redirect URL, Setup at https://developer.ford.com/developer-eu
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      clientid: # FordConnect API Client ID, Setup at https://developer.ford.com
-      clientsecret: # FordConnect API Client Secret, Setup at https://developer.ford.com
-      accessToken: # Access token
-      refreshToken: # Refresh token
       vin: WF0FXX... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
-      template: ford-connect
+      template: ford-connect-query
+      clientid: # FordConnect Query Client ID, Setup at https://developer.ford.com/developer-eu
+      clientsecret: # FordConnect Query Client Secret, Setup at https://developer.ford.com/developer-eu
+      redirecturi: # FordConnect Query Redirect URL, Setup at https://developer.ford.com/developer-eu
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      clientid: # FordConnect API Client ID, Setup at https://developer.ford.com
-      clientsecret: # FordConnect API Client Secret, Setup at https://developer.ford.com
-      accessToken: # Access token
-      refreshToken: # Refresh token
       vin: WF0FXX... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
+      identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
+      priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
+      cache: 15m # Cache, Time interval for data refresh (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+## Hyundai (US) Bluelink
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: hyundai-us
+      user: # Username, e.g. email address, user id, etc.
+      password: # Password, Use single quotes in case of leading zeros
+      vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: hyundai-us
+      user: # Username, e.g. email address, user id, etc.
+      password: # Password, Use single quotes in case of leading zeros
+      vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
+      mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
+      minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
+      maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -368,6 +415,7 @@ Some models (e.g. Kona) switch internally to 2 phases at low charging currents (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -402,6 +450,7 @@ Some models (e.g. Kona) switch internally to 2 phases at low charging currents (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
@@ -443,6 +492,7 @@ Some models (e.g. Niro EV) switch internally to 2 phases at low charging current
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -458,29 +508,30 @@ Requires `access` and `refresh` tokens. Documentation here: https://tinyurl.com/
     - name: my_car
       type: template
       template: mercedes
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       region: EMEA # Region, [EMEA, APAC, NORAM]
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: mercedes
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       region: EMEA # Region, [EMEA, APAC, NORAM]
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -497,6 +548,7 @@ Requires `access` and `refresh` tokens. Documentation here: https://tinyurl.com/
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
+      region: EU # Region, [EU, AU]
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional`}
   advanced={`vehicles:
@@ -506,6 +558,7 @@ Requires `access` and `refresh` tokens. Documentation here: https://tinyurl.com/
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
+      region: EU # Region, [EU, AU]
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
@@ -513,10 +566,10 @@ Requires `access` and `refresh` tokens. Documentation here: https://tinyurl.com/
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
-      cache: 15m # Cache, Time interval for data refresh (optional)
-      region: EU # Region, [EU, AU]`}
+      cache: 15m # Cache, Time interval for data refresh (optional)`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -544,23 +597,24 @@ Data will be updated on restart and when received using streaming. This only hap
     - name: my_car
       type: template
       template: cardata
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: WBMW... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
-      clientid: # Client ID`}
+      clientid: # Client ID
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: cardata
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: WBMW... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
       clientid: # Client ID
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       coarsecurrent: # 1A current control, Vehicle supports 1A current steps only (optional)
@@ -597,6 +651,7 @@ Data will be updated on restart and when received using streaming. This only hap
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -629,6 +684,7 @@ Data will be updated on restart and when received using streaming. This only hap
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -661,6 +717,7 @@ Data will be updated on restart and when received using streaming. This only hap
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -676,27 +733,28 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
     - name: my_car
       type: template
       template: opel
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: opel
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -712,27 +770,28 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
     - name: my_car
       type: template
       template: peugeot
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: peugeot
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: V... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -765,6 +824,7 @@ Requires `access` and `refresh` tokens. These can be generated with command `evc
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -799,6 +859,7 @@ Renault Zoe and Twingo Electric require a minimum charging current of 8A at 3p (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
@@ -837,6 +898,7 @@ Renault Zoe and Twingo Electric require a minimum charging current of 8A at 3p (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -869,6 +931,7 @@ Renault Zoe and Twingo Electric require a minimum charging current of 8A at 3p (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
@@ -906,6 +969,7 @@ Renault Zoe and Twingo Electric require a minimum charging current of 8A at 3p (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -938,12 +1002,48 @@ Renault Zoe and Twingo Electric require a minimum charging current of 8A at 3p (
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
       coarsecurrent: # 1A current control, Vehicle supports 1A current steps only (optional)
       streaming: # Supports streaming, Streaming data is received asynchronously (optional)
       welcomecharge: # Charge on connection, Charger will enable charging for short time when vehicle is connected, irrespective of configured charge mode. This is useful for vehicles that require power supply when connecting. (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+## Subaru
+
+Requires Subaru Connected Services Account
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: subaru
+      user: # Username, e.g. email address, user id, etc.
+      password: # Password, Use single quotes in case of leading zeros
+      vin: JF... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: subaru
+      user: # Username, e.g. email address, user id, etc.
+      password: # Password, Use single quotes in case of leading zeros
+      vin: JF... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
+      mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
+      minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
+      maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
+      identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
+      priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
+      cache: 15m # Cache, Time interval for data refresh (optional)`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -969,27 +1069,28 @@ More information and alternatives can be found in [our blog post](https://docs.e
     - name: my_car
       type: template
       template: tesla
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       clientId: # Client ID, from [Tesla Developer App](https://developer.tesla.com/dashboard).
       accessToken: # Access token, from [myteslamate.com](https://app.myteslamate.com/).
       refreshToken: # Refresh token, from [myteslamate.com](https://app.myteslamate.com/).
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tesla
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       clientId: # Client ID, from [Tesla Developer App](https://developer.tesla.com/dashboard).
       accessToken: # Access token, from [myteslamate.com](https://app.myteslamate.com/).
       refreshToken: # Refresh token, from [myteslamate.com](https://app.myteslamate.com/).
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       commandProxy: https://api.myteslamate.com # Command Proxy, When using a TWC3 (or other 'dumb' charger not capable of control), evcc can manage the charge directly by communicating with the vehicle through a Command Proxy. By default the [myteslamate.com](https://app.myteslamate.com/) proxy is used. With this parameter, you set the base URL of a custom Command Proxy. See for example [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy) for a proxy sending commands via bluetooth. (optional)
@@ -1007,25 +1108,26 @@ Requires Toyota Connected Services Account.
     - name: my_car
       type: template
       template: toyota
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: JT... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: toyota
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: JT... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -1062,6 +1164,7 @@ e-Golf, e-Up, ID family
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)
@@ -1089,29 +1192,30 @@ To use with evcc, you need a Volvo account and a Volvo Connected Car API Key.
     - name: my_car
       type: template
       template: volvo-connected
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
-      vccapikey: # VCC API Key, from [Volvo Developer App](https://developer.volvocars.com/).
-      clientId: # Client ID, from [Volvo Developer App](https://developer.volvocars.com/).
-      clientSecret: # Client Secret, from [Volvo Developer App](https://developer.volvocars.com/).
-      redirectUri: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect URI of your evcc instance. Must match the redirect URI set in your Volvo Developer App.
-      vin: WF0FXX... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer`}
-  advanced={`vehicles:
-    - name: my_car
-      type: template
-      template: volvo-connected
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vccapikey: # VCC API Key, from [Volvo Developer App](https://developer.volvocars.com/).
       clientId: # Client ID, from [Volvo Developer App](https://developer.volvocars.com/).
       clientSecret: # Client Secret, from [Volvo Developer App](https://developer.volvocars.com/).
       redirectUri: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect URI of your evcc instance. Must match the redirect URI set in your Volvo Developer App.
       vin: WF0FXX... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: volvo-connected
+      vccapikey: # VCC API Key, from [Volvo Developer App](https://developer.volvocars.com/).
+      clientId: # Client ID, from [Volvo Developer App](https://developer.volvocars.com/).
+      clientSecret: # Client Secret, from [Volvo Developer App](https://developer.volvocars.com/).
+      redirectUri: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect URI of your evcc instance. Must match the redirect URI set in your Volvo Developer App.
+      vin: WF0FXX... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1143,6 +1247,7 @@ To use with evcc, you need a Volvo account and a Volvo Connected Car API Key.
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -1209,6 +1314,7 @@ vehicles:
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1234,6 +1340,7 @@ vehicles:
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       coarsecurrent: # 1A current control, Vehicle supports 1A current steps only (optional)
@@ -1241,20 +1348,19 @@ vehicles:
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
-### Home Assistant Vehicle
+### Home Assistant
 
-Requires a running Home Assistant instance with suitable vehicle entities and services. All values are Home Assistant entity IDs (e.g. sensor._, binary_sensor._, number._, script._)
+Home Assistant instances in your network will be auto-discovered and suitable vehicle entities and services (e.g. `sensor.*`) will be suggested.
 
 <DeviceConfig
   code={`vehicles:
     - name: my_car
       type: template
       template: homeassistant
+      uri: http://homeassistant.local:8123 # Home Assistant URI
+      soc: sensor.vehicle_soc # State of charge [%]
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      uri: http://homeassistant.local:8123 # URI, HTTP(S) address
-      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
-      soc: sensor.vehicle_soc # State of charge [%]
       range: sensor.vehicle_range # Remaining range [km], optional
       status: sensor.vehicle_charging # Charging status, optional
       limitSoc: number.vehicle_target_state_of_charge # Target state of charge [%], optional
@@ -1269,11 +1375,10 @@ Requires a running Home Assistant instance with suitable vehicle entities and se
     - name: my_car
       type: template
       template: homeassistant
+      uri: http://homeassistant.local:8123 # Home Assistant URI
+      soc: sensor.vehicle_soc # State of charge [%]
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      uri: http://homeassistant.local:8123 # URI, HTTP(S) address
-      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
-      soc: sensor.vehicle_soc # State of charge [%]
       range: sensor.vehicle_range # Remaining range [km], optional
       status: sensor.vehicle_charging # Charging status, optional
       limitSoc: number.vehicle_target_state_of_charge # Target state of charge [%], optional
@@ -1289,8 +1394,45 @@ Requires a running Home Assistant instance with suitable vehicle entities and se
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
+      coarsecurrent: # 1A current control, Vehicle supports 1A current steps only (optional)
+      streaming: true # Supports streaming, Streaming data is received asynchronously (optional)
+      welcomecharge: # Charge on connection, Charger will enable charging for short time when vehicle is connected, irrespective of configured charge mode. This is useful for vehicles that require power supply when connecting. (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+### ioBroker.bmw
+
+ioBroker BMW Adapter. Requires ioBroker.bmw and ioBroker.simple-api
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: ioBroker.bmw
+      vin: WBA8E9G50GM091234 # Vehicle Identification Number, BMW VehicleIdentificationNumber
+      uri: # ioBroker URL, including ioBroker.simple-api Port
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: ioBroker.bmw
+      vin: WBA8E9G50GM091234 # Vehicle Identification Number, BMW VehicleIdentificationNumber
+      uri: # ioBroker URL, including ioBroker.simple-api Port
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
+      mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
+      minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
+      maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
+      identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
+      priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
+      id: 0 # Instance ID, optional
       coarsecurrent: # 1A current control, Vehicle supports 1A current steps only (optional)
       streaming: true # Supports streaming, Streaming data is received asynchronously (optional)
       welcomecharge: # Charge on connection, Charger will enable charging for short time when vehicle is connected, irrespective of configured charge mode. This is useful for vehicles that require power supply when connecting. (optional)`}
@@ -1322,6 +1464,7 @@ Otherwise the vehicle cannot be put into sleep mode.
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1355,38 +1498,9 @@ Required MQTT broker configuration and a SAIC/MQTT Gateway (https://github.com/S
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
-/>
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
-
-### mz2mqtt
-
-myMazda to MQTT. Required MQTT broker configuration and a mz2mqtt installation https://github.com/C64Axel/mz2mqtt.
-
-<DeviceConfig
-  code={`vehicles:
-    - name: my_car
-      type: template
-      template: mz2mqtt
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
-      vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer`}
-  advanced={`vehicles:
-    - name: my_car
-      type: template
-      template: mz2mqtt
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
-      vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer
-      icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
-      phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
-      mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
-      minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
-      maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
-      identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
-      priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
-      timeout: 720h # Timeout, optional`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -1399,29 +1513,60 @@ Support for all vehicles via ODB2 adapter in the vehicle. More info at [Open Veh
     - name: my_car
       type: template
       template: ovms
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
-      vehicleid: # Vehicle ID`}
+      vehicleid: # Vehicle ID
+      server: dexters-web.de # Server URL
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: ovms
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
       vehicleid: # Vehicle ID
+      server: dexters-web.de # Server URL
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
-      server: dexters-web.de # Server URL
       cache: 15m # Cache, Time interval for data refresh (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+### phev2mqtt
+
+Support for Mitsubishi Outlander PHEV via [github.com/buxtronix/phev2mqtt](https://github.com/buxtronix/phev2mqtt). MQTT broker required.
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: outlanderphev
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: outlanderphev
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
+      mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
+      minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
+      maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
+      identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
+      priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
+      timeout: 600s # Timeout, optional`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -1451,6 +1596,7 @@ Remote Control of PSA car https://github.com/flobz/psa_car_controller
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       wakeup_alt: false # Alternative wakeup code, Can lead to increased discharge of the 12V battery. (optional)`}
@@ -1459,32 +1605,35 @@ Remote Control of PSA car https://github.com/flobz/psa_car_controller
 
 ### Tesla BLE
 
-Open Source Tesla BLE HTTP Proxy https://github.com/wimaha/TeslaBleHttpProxy
+Open Source Tesla BLE HTTP Proxy [github.com/wimaha/TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy)
 
 <DeviceConfig
   code={`vehicles:
     - name: my_car
       type: template
       template: tesla-ble
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle Identification Number, Required for BLE connection
       url: http://192.168.178.27 # URL, URL of the Tesla BLE HTTP Proxy
-      port: 8080 # Port, Port of the Tesla BLE HTTP Proxy (optional)`}
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
+      port: 8080 # Port, Port of the Tesla BLE HTTP Proxy (optional)
+      timeout: 30s # Timeout, optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tesla-ble
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle Identification Number, Required for BLE connection
       url: http://192.168.178.27 # URL, URL of the Tesla BLE HTTP Proxy
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       port: 8080 # Port, Port of the Tesla BLE HTTP Proxy (optional)
+      timeout: 30s # Timeout, optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1499,21 +1648,22 @@ Connect your Tesla using the TeslaFi API. TeslaFi is a Tesla data logging servic
     - name: my_car
       type: template
       template: teslafi
+      apikey: # API Key
       title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
-      apikey: # API Key`}
+      capacity: 50 # Battery capacity (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: teslafi
+      apikey: # API Key
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      apikey: # API Key
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
@@ -1529,25 +1679,26 @@ Open source Tesla data logger https://github.com/bassmaster187/TeslaLogger
     - name: my_car
       type: template
       template: teslalogger
+      url: http://192.0.2.2 # URL
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
       id: 1 # TeslaLogger CarID, optional
-      url: http://192.0.2.2 # URL
       port: 5000 # Port, optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: teslalogger
+      url: http://192.0.2.2 # URL
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
       id: 1 # TeslaLogger CarID, optional
-      url: http://192.0.2.2 # URL
       port: 5000 # Port, optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1555,7 +1706,7 @@ Open source Tesla data logger https://github.com/bassmaster187/TeslaLogger
 
 ### TeslaMate
 
-Open source Tesla data logger https://github.com/adriankumpf/teslamate. MQTT broker required.
+Open source Tesla data logger [github.com/adriankumpf/teslamate](https://github.com/adriankumpf/teslamate). MQTT broker required.
 
 <DeviceConfig
   code={`vehicles:
@@ -1564,7 +1715,8 @@ Open source Tesla data logger https://github.com/adriankumpf/teslamate. MQTT bro
       template: teslamate
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
-      id: 1 # Vehicle ID, optional`}
+      id: 1 # Vehicle ID, optional
+      timeout: 720h # Timeout, optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
@@ -1572,11 +1724,13 @@ Open source Tesla data logger https://github.com/adriankumpf/teslamate. MQTT bro
       title: # Title, Will be displayed in the user interface (optional)
       capacity: 50 # Battery capacity (kWh), optional
       id: 1 # Vehicle ID, optional
+      timeout: 720h # Timeout, optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1591,23 +1745,24 @@ Connect your Tesla using the Tessie API. This will never wake up the car, pollin
     - name: my_car
       type: template
       template: tessie
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle VIN, If you own multiple vehicles from the same manufacturer
-      token: # Tessie API Token`}
+      token: # Tessie API Token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tessie
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle VIN, If you own multiple vehicles from the same manufacturer
       token: # Tessie API Token
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)`}
 />
@@ -1620,25 +1775,26 @@ Connect your Tesla using the Tessie API. This will never wake up the car, pollin
     - name: my_car
       type: template
       template: tronity
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       clientid: # Tronity API Client ID, Setup at https://app.tronity.tech
       clientsecret: # Tronity API Client Secret, Setup at https://app.tronity.tech
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tronity
-      title: # Title, Will be displayed in the user interface (optional)
-      capacity: 50 # Battery capacity (kWh), optional
       clientid: # Tronity API Client ID, Setup at https://app.tronity.tech
       clientsecret: # Tronity API Client Secret, Setup at https://app.tronity.tech
+      title: # Title, Will be displayed in the user interface (optional)
+      capacity: 50 # Battery capacity (kWh), optional
       vin: W... # Vehicle Identification Number, If you own multiple vehicles from the same manufacturer (optional)
       icon: car # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximum number of phases, The maximum number of phases which can be used (optional)
       mode: # Default charging mode, Used when a vehicle is connected. Possible values are Off, Now, MinPV and PV, or empty if none should be set (optional)
       minCurrent: 6 # Minimum amperage (A), The minimum amperage per connected phase that can be used (optional)
       maxCurrent: 16 # Maximum amperage (A), The maximum amperage per connected phase that can be used (optional)
+      maxPower: # Maximum charging power hint (W), Defines the maximum charging power of the vehicle. Helps improve charge plan accuracy when the vehicle typically uses less than the offered current or supports higher single-phase current compared to three-phase. _The offered current of the loadpoint is not affected._ (optional)
       identifiers: # Identification, Mostly this can be added later, see: https://docs.evcc.io/en/docs/features/vehicle (optional)
       priority: # Priority, Priority of the loadpoint or vehicle in relation to other loadpoints or vehicles for allocating pv energy (optional)
       cache: 15m # Cache, Time interval for data refresh (optional)`}
@@ -1655,10 +1811,10 @@ Connect your Tesla using the Tessie API. This will never wake up the car, pollin
     - name: my_car
       type: template
       template: niu-e-scooter
-      title: # Title, Will be displayed in the user interface (optional)
-      icon: scooter # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       user: # Username, e.g. email address, user id, etc.
       password: # Password, Use single quotes in case of leading zeros
       serial: # Scooter serial number like shown in NIU app
+      title: # Title, Will be displayed in the user interface (optional)
+      icon: scooter # Icon, Will be displayed in the user interface [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       capacity: 4 # Battery capacity (kWh), optional`}
 />

@@ -4,6 +4,8 @@ product:
   brand: SMA
   description: Smart Energy Hybrid Inverter
 capabilities: ["battery-control"]
+description: |
+  When using active battery control by evcc, the 'Forecast-based Charging' function in the SMA portal must not be active. Otherwise, conflicts may arise when controlling the battery.
 render:
   - usage: pv
     default: |
@@ -38,6 +40,9 @@ render:
       id: 3
       host:  # Hostname
       port: 502 # Port
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
       template: sma-hybrid
@@ -49,8 +54,32 @@ render:
       host:  # Hostname
       port: 502 # Port
       capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       maxchargepower: 4200 # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
       watchdog: 60s # Watchdog, optional
+  - usage: grid
+    default: |
+      type: template
+      template: sma-hybrid
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+    advanced: |
+      type: template
+      template: sma-hybrid
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
 params:
   - name: modbus
     example:
@@ -60,7 +89,7 @@ params:
     description: Modbus Type
     help: ModbusTCP server needs to be enabled.
     advanced: false
-    optional: true
+    optional: false
   - name: capacity
     example: 50
     default:
@@ -68,7 +97,25 @@ params:
     unit: kWh
     description: Battery capacity
     help:
-    advanced: true
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default:
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit when discharging the battery in normal operation
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default:
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit when charging the battery from the grid
+    advanced: false
     optional: true
   - name: maxacpower
     example: 5000
@@ -86,6 +133,15 @@ params:
     unit: W
     description: Maximum charge power
     help: For forced charging of the battery.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
     advanced: true
     optional: true
   - name: watchdog

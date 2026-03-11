@@ -54,4 +54,4 @@ Falls du mehr über die Funktionsweise von Wallboxen und E-Auto-Laden erfahren m
   />
 </NavCardGrid>
 
-Nach der Installation: [evcc.yaml erstellen](./installation/configuration)
+Nach der Installation: [evcc einrichten](./installation/configuration)

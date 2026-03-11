@@ -23,7 +23,15 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      capacity: 5.12 # Battery capacity (kWh), Venus-E 5.12 kWh, Venus-C 2.56 kWh (optional)
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity (kWh), Venus-E 5.12 kWh, Venus-C 2.56 kWh (optional)
+      minsoc: 11 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
       template: marstek-venus
@@ -41,24 +49,31 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      capacity: 5.12 # Battery capacity (kWh), Venus-E 5.12 kWh, Venus-C 2.56 kWh (optional)
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity (kWh), Venus-E 5.12 kWh, Venus-C 2.56 kWh (optional)
       minsoc: 11 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 100 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
-      maxchargepower: 2500 # Maximum charge power (W), 2500W is the maximum for Venus. (optional)
+      maxchargepower: 2500 # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
       work_mode_normal: 1 # Work mode for Normal state, 0=manual, 1=anti-feed, 2=trade mode. (optional)
 params:
   - name: modbus
     example:
     default:
-    choice: ['rs485']
+    choice: ['rs485', 'tcpip']
     unit:
     description: Modbus Type
     help:
     advanced: false
-    optional: true
+    optional: false
   - name: capacity
     example: 50
-    default: 5.12
+    default:
     choice: []
     unit: kWh
     description: Battery capacity
@@ -72,7 +87,7 @@ params:
     unit: '%'
     description: Minimum charge
     help: Lower limit when discharging the battery in normal operation
-    advanced: true
+    advanced: false
     optional: true
   - name: maxsoc
     example: 95
@@ -81,7 +96,7 @@ params:
     unit: '%'
     description: Maximum charge
     help: Upper limit when charging the battery from the grid
-    advanced: true
+    advanced: false
     optional: true
   - name: maxchargepower
     example:
@@ -89,7 +104,16 @@ params:
     choice: []
     unit: W
     description: Maximum charge power
-    help: 2500W is the maximum for Venus.
+    help: For forced charging of the battery.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
     advanced: true
     optional: true
   - name: work_mode_normal
@@ -110,3 +134,4 @@ modbus:
   port: 502
   rs485serial: true
   rs485tcpip: true
+  tcpip: true

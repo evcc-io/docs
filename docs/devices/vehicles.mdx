@@ -11,7 +11,15 @@ import DeviceConfig from "/src/components/DeviceConfig";
 
 Um die Ladung auf einen bestimmten Ladestand (SoC) zu begrenzen, und die meisten Wallboxen diesen nicht kennen, kann evcc direkt mit dem Fahrzeug über den Fahrzeughersteller kommunizieren.
 
-In der Konfigurationsdatei gibt es hierzu den folgenden Bereich:
+## Einrichtung
+
+**Empfohlen:** Richte dein Fahrzeug direkt über die Weboberfläche unter **Konfiguration** → **Fahrzeuge** ein.
+Die Einrichtung erfolgt über einen geführten Assistenten.
+Alle hier aufgelisteten Geräte sind über die Oberfläche auswählbar.
+Nach Eingabe aller benötigten Daten kannst du die Verbindung prüfen und siehst welche Daten evcc vom Gerät ausliest.
+
+**Alternativ:** Du kannst dein Fahrzeug auch über die Konfigurationsdatei einrichten.
+Auf dieser Seite findest du die YAML-Konfigurationen für alle derzeit von evcc unterstützten Fahrzeuge.
 
 ```yaml
 vehicles:
@@ -19,8 +27,9 @@ vehicles:
     type: ...
 ```
 
-Auf dieser Seite findest du die Konfigurationen für alle von evcc unterstützten Fahrzeuge.
-Nachdem du das Code-Beispiel für dein Fahrzeug angepasst und in die `evcc.yaml` übernommen hast, kannst du die Verbindung mit dem Befehl `evcc vehicle` testen. Dabei werden alle konfigurierten Fahrzeuge getestet. Mit dem Befehl `evcc vehicle --name my_ev` kann man mittels des vergebenen Namens selektiv testen.
+Nachdem du das Code-Beispiel für dein Fahrzeug angepasst und in die `evcc.yaml` übernommen hast, kannst du die Verbindung mit dem Befehl `evcc vehicle` testen.
+Dabei werden alle konfigurierten Fahrzeuge getestet.
+Mit dem Befehl `evcc vehicle --name my_ev` kann man mittels des vergebenen Namens selektiv testen.
 
 ```
 $ ./evcc vehicle
@@ -67,6 +76,7 @@ Die Qualität und Verfügbarkeit der Fahrzeugschnittstellen variiert von Herstel
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -99,6 +109,7 @@ Die Qualität und Verfügbarkeit der Fahrzeugschnittstellen variiert von Herstel
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -130,23 +141,24 @@ wenn das Fahrzeug aktiv Daten erzeugt.
     - name: my_car
       type: template
       template: cardata
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: WBMW... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
-      clientid: # Client ID`}
+      clientid: # Client ID
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: cardata
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: WBMW... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
       clientid: # Client ID
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
@@ -164,27 +176,28 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
     - name: my_car
       type: template
       template: citroen
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: citroen
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -217,6 +230,7 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
@@ -235,27 +249,28 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
     - name: my_car
       type: template
       template: ds
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: ds
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -290,6 +305,7 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
@@ -299,36 +315,68 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
-## Ford
+## Ford (FordConnect Query)
 
 <DeviceConfig
   code={`vehicles:
     - name: my_car
       type: template
-      template: ford-connect
+      template: ford-connect-query
+      clientid: # FordConnect Query Client ID, Einrichtung unter https://developer.ford.com/developer-eu
+      clientsecret: # FordConnect Query Client Secret, Einrichtung unter https://developer.ford.com/developer-eu
+      redirecturi: # FordConnect Query Redirect URL, Einrichtung unter https://developer.ford.com/developer-eu
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      clientid: # FordConnect API Client ID, Einrichtung unter https://developer.ford.com
-      clientsecret: # FordConnect API Client Secret, Einrichtung unter https://developer.ford.com
-      accessToken: # Access token
-      refreshToken: # Refresh token
       vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
-      template: ford-connect
+      template: ford-connect-query
+      clientid: # FordConnect Query Client ID, Einrichtung unter https://developer.ford.com/developer-eu
+      clientsecret: # FordConnect Query Client Secret, Einrichtung unter https://developer.ford.com/developer-eu
+      redirecturi: # FordConnect Query Redirect URL, Einrichtung unter https://developer.ford.com/developer-eu
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      clientid: # FordConnect API Client ID, Einrichtung unter https://developer.ford.com
-      clientsecret: # FordConnect API Client Secret, Einrichtung unter https://developer.ford.com
-      accessToken: # Access token
-      refreshToken: # Refresh token
       vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
+      identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
+      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
+      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+## Hyundai (US) Bluelink
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: hyundai-us
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
+      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: hyundai-us
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
+      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
+      icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
+      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
+      minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -367,6 +415,7 @@ Manche Modelle (z.B. Kona) schalten bei geringen Ladeströmen (< 8A) intern auf 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -401,6 +450,7 @@ Manche Modelle (z.B. Kona) schalten bei geringen Ladeströmen (< 8A) intern auf 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
@@ -442,6 +492,7 @@ Manche Modelle (z.B. Niro EV) schalten bei geringen Ladeströmen (< 8A) intern a
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -457,29 +508,30 @@ Benötigt `access` und `refresh` Tokens. Anleitung zur Generierung hier: https:/
     - name: my_car
       type: template
       template: mercedes
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       region: EMEA # Region, [EMEA, APAC, NORAM]
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: mercedes
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       region: EMEA # Region, [EMEA, APAC, NORAM]
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -496,6 +548,7 @@ Benötigt `access` und `refresh` Tokens. Anleitung zur Generierung hier: https:/
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+      region: EU # Region, [EU, AU]
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional`}
   advanced={`vehicles:
@@ -505,6 +558,7 @@ Benötigt `access` und `refresh` Tokens. Anleitung zur Generierung hier: https:/
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+      region: EU # Region, [EU, AU]
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
@@ -512,10 +566,10 @@ Benötigt `access` und `refresh` Tokens. Anleitung zur Generierung hier: https:/
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
-      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
-      region: EU # Region, [EU, AU]`}
+      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -544,23 +598,24 @@ wenn das Fahrzeug aktiv Daten erzeugt.
     - name: my_car
       type: template
       template: cardata
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: WBMW... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
-      clientid: # Client ID`}
+      clientid: # Client ID
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: cardata
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: WBMW... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
       clientid: # Client ID
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
@@ -597,6 +652,7 @@ wenn das Fahrzeug aktiv Daten erzeugt.
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -629,6 +685,7 @@ wenn das Fahrzeug aktiv Daten erzeugt.
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -661,6 +718,7 @@ wenn das Fahrzeug aktiv Daten erzeugt.
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -676,27 +734,28 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
     - name: my_car
       type: template
       template: opel
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: opel
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -712,27 +771,28 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
     - name: my_car
       type: template
       template: peugeot
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: peugeot
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       accessToken: # Access token
       refreshToken: # Refresh token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: V... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -765,6 +825,7 @@ Benötigt `access` und `refresh` Tokens. Diese können über den Befehl `evcc to
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -799,6 +860,7 @@ Renault Zoe and Twingo Electric benötigen bei 3p einen minimalen Ladestrom von 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
@@ -837,6 +899,7 @@ Renault Zoe and Twingo Electric benötigen bei 3p einen minimalen Ladestrom von 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -869,6 +932,7 @@ Renault Zoe and Twingo Electric benötigen bei 3p einen minimalen Ladestrom von 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
@@ -906,6 +970,7 @@ Renault Zoe and Twingo Electric benötigen bei 3p einen minimalen Ladestrom von 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -938,12 +1003,48 @@ Renault Zoe and Twingo Electric benötigen bei 3p einen minimalen Ladestrom von 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
       coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
       streaming: # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
       welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+## Subaru
+
+Benötigt Subaru Connected Services Account
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: subaru
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
+      vin: JF... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: subaru
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
+      vin: JF... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
+      icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
+      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
+      minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
+      identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
+      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
+      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -969,27 +1070,28 @@ Weitere Informationen und Alternativen findest du in [unserem Blogbeitrag](https
     - name: my_car
       type: template
       template: tesla
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       clientId: # Client ID, von [Tesla Developer App](https://developer.tesla.com/dashboard).
       accessToken: # Access token, von [myteslamate.com](https://app.myteslamate.com/).
       refreshToken: # Refresh token, von [myteslamate.com](https://app.myteslamate.com/).
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tesla
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       clientId: # Client ID, von [Tesla Developer App](https://developer.tesla.com/dashboard).
       accessToken: # Access token, von [myteslamate.com](https://app.myteslamate.com/).
       refreshToken: # Refresh token, von [myteslamate.com](https://app.myteslamate.com/).
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       commandProxy: https://api.myteslamate.com # Command Proxy, Bei Verwendung eines TWC3 (oder eines anderen 'dummen' Ladegeräts, das nicht steuerbar ist) kann evcc die Ladung direkt verwalten, indem es über einen Command Proxy mit dem Fahrzeug kommuniziert. Standardmäßig wird der [myteslamate.com](https://app.myteslamate.com/) Proxy verwendet. Mit diesem Parameter kannst du die Basis-URL ändern. Siehe zum Beispiel [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy) für einen Proxy, der Kommandos über Bluetooth sendet. (optional)
@@ -1007,25 +1109,26 @@ Benötigt Toyota Connected Services Account.
     - name: my_car
       type: template
       template: toyota
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: JT... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: toyota
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: JT... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -1062,6 +1165,7 @@ e-Golf, e-Up, ID Familie
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
@@ -1089,29 +1193,30 @@ Für die Nutzung mit evcc benötigst du einen Volvo Account und einen Volvo Conn
     - name: my_car
       type: template
       template: volvo-connected
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
-      vccapikey: # VCC API Key, aus [Volvo Developer App](https://developer.volvocars.com/).
-      clientId: # Client ID, aus [Volvo Developer App](https://developer.volvocars.com/).
-      clientSecret: # Client Secret, aus [Volvo Developer App](https://developer.volvocars.com/).
-      redirectUri: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect-URI deiner evcc-Instanz. Muss mit der Redirect-URI übereinstimmen, die in deiner Volvo Developer App festgelegt ist.
-      vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind`}
-  advanced={`vehicles:
-    - name: my_car
-      type: template
-      template: volvo-connected
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vccapikey: # VCC API Key, aus [Volvo Developer App](https://developer.volvocars.com/).
       clientId: # Client ID, aus [Volvo Developer App](https://developer.volvocars.com/).
       clientSecret: # Client Secret, aus [Volvo Developer App](https://developer.volvocars.com/).
       redirectUri: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect-URI deiner evcc-Instanz. Muss mit der Redirect-URI übereinstimmen, die in deiner Volvo Developer App festgelegt ist.
       vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: volvo-connected
+      vccapikey: # VCC API Key, aus [Volvo Developer App](https://developer.volvocars.com/).
+      clientId: # Client ID, aus [Volvo Developer App](https://developer.volvocars.com/).
+      clientSecret: # Client Secret, aus [Volvo Developer App](https://developer.volvocars.com/).
+      redirectUri: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect-URI deiner evcc-Instanz. Muss mit der Redirect-URI übereinstimmen, die in deiner Volvo Developer App festgelegt ist.
+      vin: WF0FXX... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1143,6 +1248,7 @@ Für die Nutzung mit evcc benötigst du einen Volvo Account und einen Volvo Conn
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -1209,6 +1315,7 @@ vehicles:
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1234,6 +1341,7 @@ vehicles:
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
@@ -1241,20 +1349,19 @@ vehicles:
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
-### Home Assistant Fahrzeug
+### Home Assistant
 
-Erfordert eine laufende Home Assistant Instanz mit passenden Fahrzeug-Entities und Services. Alle Werte sind Home Assistant Entity IDs (z.B. sensor._, binary_sensor._, number._, script._)
+Home Assistant Instanzen in deinem Netzwerk werden automatisch erkannt und passende Entitäten und Services (z.B. `sensor.*`) werden vorgeschlagen.
 
 <DeviceConfig
   code={`vehicles:
     - name: my_car
       type: template
       template: homeassistant
+      uri: http://homeassistant.local:8123 # Home Assistant URI
+      soc: sensor.vehicle_soc # Ladezustand [%]
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      uri: http://homeassistant.local:8123 # URI, HTTP(S) Adresse
-      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
-      soc: sensor.vehicle_soc # Ladezustand [%]
       range: sensor.vehicle_range # Restreichweite [km], optional
       status: sensor.vehicle_charging # Ladestatus, optional
       limitSoc: number.vehicle_target_state_of_charge # Ziel-Ladezustand [%], optional
@@ -1269,11 +1376,10 @@ Erfordert eine laufende Home Assistant Instanz mit passenden Fahrzeug-Entities u
     - name: my_car
       type: template
       template: homeassistant
+      uri: http://homeassistant.local:8123 # Home Assistant URI
+      soc: sensor.vehicle_soc # Ladezustand [%]
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      uri: http://homeassistant.local:8123 # URI, HTTP(S) Adresse
-      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9... # Home Assistant Long-Lived Access Token
-      soc: sensor.vehicle_soc # Ladezustand [%]
       range: sensor.vehicle_range # Restreichweite [km], optional
       status: sensor.vehicle_charging # Ladestatus, optional
       limitSoc: number.vehicle_target_state_of_charge # Ziel-Ladezustand [%], optional
@@ -1289,8 +1395,45 @@ Erfordert eine laufende Home Assistant Instanz mit passenden Fahrzeug-Entities u
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
+      coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
+      streaming: true # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
+      welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+### ioBroker.bmw
+
+ioBroker BMW Adapter. Benötigt ioBroker.bmw und ioBroker.simple-api
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: ioBroker.bmw
+      vin: WBA8E9G50GM091234 # Fahrzeugidentifikationsnummer, BMW Fahrzeugidentifikationsnummer
+      uri: # ioBroker URL, einschliesslich ioBroker.simple-api Port
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: ioBroker.bmw
+      vin: WBA8E9G50GM091234 # Fahrzeugidentifikationsnummer, BMW Fahrzeugidentifikationsnummer
+      uri: # ioBroker URL, einschliesslich ioBroker.simple-api Port
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
+      icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
+      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
+      minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
+      identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
+      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
+      id: 0 # Instanz-ID, optional
       coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
       streaming: true # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
       welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)`}
@@ -1322,6 +1465,7 @@ angelegt sein und Direktladen deaktiviert. Anderenfalls kann das Fahrzeug nicht 
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1355,38 +1499,9 @@ Voraussetzung ist ein konfigurierter MQTT Broker und ein SAIC/MQTT Gateway (http
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
-/>
-<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
-
-### mz2mqtt
-
-myMazda zu MQTT. Voraussetzung ist ein konfigurierter MQTT Broker und eine mz2mqtt Installation https://github.com/C64Axel/mz2mqtt.
-
-<DeviceConfig
-  code={`vehicles:
-    - name: my_car
-      type: template
-      template: mz2mqtt
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
-      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind`}
-  advanced={`vehicles:
-    - name: my_car
-      type: template
-      template: mz2mqtt
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
-      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
-      icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
-      phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
-      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
-      minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
-      maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
-      identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
-      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
-      timeout: 720h # Zeitüberschreitung, optional`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -1399,29 +1514,60 @@ Unterstützung für alle Fahrzeuge via ODB2 Adapter im Fahrzeug. Mehr Infos bei 
     - name: my_car
       type: template
       template: ovms
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
-      vehicleid: # Vehicle ID`}
+      vehicleid: # Vehicle ID
+      server: dexters-web.de # Server URL
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: ovms
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
       vehicleid: # Vehicle ID
+      server: dexters-web.de # Server URL
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
-      server: dexters-web.de # Server URL
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
+/>
+<!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
+
+### phev2mqtt
+
+Unterstützung für Mitsubishi Outlander PHEV über [github.com/buxtronix/phev2mqtt](https://github.com/buxtronix/phev2mqtt). MQTT-Broker erforderlich.
+
+<DeviceConfig
+  code={`vehicles:
+    - name: my_car
+      type: template
+      template: outlanderphev
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
+  advanced={`vehicles:
+    - name: my_car
+      type: template
+      template: outlanderphev
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
+      icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
+      phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
+      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
+      minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
+      identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
+      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
+      timeout: 600s # Zeitüberschreitung, optional`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle  -->
 
@@ -1451,6 +1597,7 @@ Remote Control of PSA car https://github.com/flobz/psa_car_controller
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       wakeup_alt: false # Alternativer Wakeup-Code, Kann zu erhöhter Entladung der 12V-Batterie führen. (optional)`}
@@ -1459,32 +1606,35 @@ Remote Control of PSA car https://github.com/flobz/psa_car_controller
 
 ### Tesla BLE
 
-Open Source Tesla BLE HTTP Proxy https://github.com/wimaha/TeslaBleHttpProxy
+Open Source Tesla BLE HTTP Proxy [github.com/wimaha/TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy)
 
 <DeviceConfig
   code={`vehicles:
     - name: my_car
       type: template
       template: tesla-ble
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeugidentifikationsnummer, Erforderlich für BLE-Verbindung
       url: http://192.168.178.27 # URL, URL des Tesla BLE HTTP Proxy
-      port: 8080 # Port, Port des Tesla BLE HTTP Proxy (optional)`}
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
+      port: 8080 # Port, Port des Tesla BLE HTTP Proxy (optional)
+      timeout: 30s # Zeitüberschreitung, optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tesla-ble
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeugidentifikationsnummer, Erforderlich für BLE-Verbindung
       url: http://192.168.178.27 # URL, URL des Tesla BLE HTTP Proxy
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       port: 8080 # Port, Port des Tesla BLE HTTP Proxy (optional)
+      timeout: 30s # Zeitüberschreitung, optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1499,21 +1649,22 @@ Verbinden Sie Ihr Tesla-Fahrzeug über die TeslaFi-API. TeslaFi ist ein Tesla-Da
     - name: my_car
       type: template
       template: teslafi
+      apikey: # API Key
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
-      apikey: # API Key`}
+      capacity: 50 # Akkukapazität (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: teslafi
+      apikey: # API Key
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      apikey: # API Key
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
@@ -1529,25 +1680,26 @@ Open Source Tesla Datenlogger https://github.com/bassmaster187/TeslaLogger
     - name: my_car
       type: template
       template: teslalogger
+      url: http://192.0.2.2 # URL
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
       id: 1 # TeslaLogger CarID, optional
-      url: http://192.0.2.2 # URL
       port: 5000 # Port, optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: teslalogger
+      url: http://192.0.2.2 # URL
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
       id: 1 # TeslaLogger CarID, optional
-      url: http://192.0.2.2 # URL
       port: 5000 # Port, optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1555,7 +1707,7 @@ Open Source Tesla Datenlogger https://github.com/bassmaster187/TeslaLogger
 
 ### TeslaMate
 
-Open Source Tesla Datenlogger https://github.com/adriankumpf/teslamate. Voraussetzung ist konfigurierter MQTT Broker.
+Open Source Tesla Datenlogger [github.com/adriankumpf/teslamate](https://github.com/adriankumpf/teslamate). Voraussetzung ist konfigurierter MQTT Broker.
 
 <DeviceConfig
   code={`vehicles:
@@ -1564,7 +1716,8 @@ Open Source Tesla Datenlogger https://github.com/adriankumpf/teslamate. Vorausse
       template: teslamate
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
-      id: 1 # Fahrzeug-ID, optional`}
+      id: 1 # Fahrzeug-ID, optional
+      timeout: 720h # Zeitüberschreitung, optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
@@ -1572,11 +1725,13 @@ Open Source Tesla Datenlogger https://github.com/adriankumpf/teslamate. Vorausse
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
       id: 1 # Fahrzeug-ID, optional
+      timeout: 720h # Zeitüberschreitung, optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1591,23 +1746,24 @@ Verbinden Sie Ihr Tesla-Fahrzeug über die Tessie-API. Dies wird das Fahrzeug ni
     - name: my_car
       type: template
       template: tessie
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeug-VIN, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
-      token: # Tessie API Token`}
+      token: # Tessie API Token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tessie
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeug-VIN, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
       token: # Tessie API Token
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)`}
 />
@@ -1620,25 +1776,26 @@ Verbinden Sie Ihr Tesla-Fahrzeug über die Tessie-API. Dies wird das Fahrzeug ni
     - name: my_car
       type: template
       template: tronity
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       clientid: # Tronity API Client ID, Einrichtung unter https://app.tronity.tech
       clientsecret: # Tronity API Client Secret, Einrichtung unter https://app.tronity.tech
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)`}
   advanced={`vehicles:
     - name: my_car
       type: template
       template: tronity
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      capacity: 50 # Akkukapazität (kWh), optional
       clientid: # Tronity API Client ID, Einrichtung unter https://app.tronity.tech
       clientsecret: # Tronity API Client Secret, Einrichtung unter https://app.tronity.tech
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      capacity: 50 # Akkukapazität (kWh), optional
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
+      maxPower: # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)`}
@@ -1655,10 +1812,10 @@ Verbinden Sie Ihr Tesla-Fahrzeug über die Tessie-API. Dies wird das Fahrzeug ni
     - name: my_car
       type: template
       template: niu-e-scooter
-      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
-      icon: scooter # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Bei führenden Nullen bitte in einfache Hochkommata setzen
       serial: # Scooter Seriennummer, wie in der NIU app angegeben
+      title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
+      icon: scooter # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       capacity: 4 # Akkukapazität (kWh), optional`}
 />

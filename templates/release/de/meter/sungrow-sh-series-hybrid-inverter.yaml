@@ -31,7 +31,6 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      timeout: 10s # Zeitüberschreitung, optional
     advanced: |
       type: template
       template: sungrow-hybrid
@@ -55,7 +54,6 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      timeout: 10s # Zeitüberschreitung, optional
   - usage: pv
     default: |
       type: template
@@ -80,7 +78,6 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      timeout: 10s # Zeitüberschreitung, optional
     advanced: |
       type: template
       template: sungrow-hybrid
@@ -104,7 +101,6 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      timeout: 10s # Zeitüberschreitung, optional
       maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
   - usage: battery
     default: |
@@ -130,7 +126,11 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      timeout: 10s # Zeitüberschreitung, optional
+      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers.
+      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers.
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
+      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
     advanced: |
       type: template
       template: sungrow-hybrid
@@ -154,11 +154,11 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
-      timeout: 10s # Zeitüberschreitung, optional
+      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers.
+      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers.
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
       maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
-      maxchargepower: # Maximale Ladeleistung (W), Maximale Ladeleistung für erzwungenes Laden des Speichers in Watt. (0 um automatisch den Wert der maximalen BDC-Nennleistung einzustellen) (optional)
 params:
   - name: modbus
     example:
@@ -168,16 +168,25 @@ params:
     description: Modbus Typ
     help:
     advanced: false
-    optional: true
-  - name: timeout
-    example: 10s
+    optional: false
+  - name: maxchargepower
+    example:
     default:
     choice: []
-    unit:
-    description: Zeitüberschreitung
-    help:
+    unit: W
+    description: Maximale Ladeleistung
+    help: Für erzwungenes Laden des Speichers.
     advanced: false
-    optional: true
+    optional: false
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Entladeleistung
+    help: Maximale Entladeleistung des Speichers.
+    advanced: false
+    optional: false
   - name: capacity
     example: 50
     default:
@@ -185,16 +194,7 @@ params:
     unit: kWh
     description: Akkukapazität
     help:
-    advanced: true
-    optional: true
-  - name: maxacpower
-    example: 5000
-    default: 0
-    choice: []
-    unit: W
-    description: Maximale AC Leistung des Hybrid-Wechselrichters
-    help:
-    advanced: true
+    advanced: false
     optional: true
   - name: minsoc
     example: 25
@@ -203,7 +203,7 @@ params:
     unit: '%'
     description: Minimaler Ladestand
     help: Untere Grenze beim Entladen der Batterie im normalen Betrieb
-    advanced: true
+    advanced: false
     optional: true
   - name: maxsoc
     example: 95
@@ -212,15 +212,15 @@ params:
     unit: '%'
     description: Maximaler Ladestand
     help: Oberes Limit beim Laden der Batterie aus dem Netz
-    advanced: true
+    advanced: false
     optional: true
-  - name: maxchargepower
-    example:
-    default:
+  - name: maxacpower
+    example: 5000
+    default: 0
     choice: []
     unit: W
-    description: Maximale Ladeleistung
-    help: Maximale Ladeleistung für erzwungenes Laden des Speichers in Watt. (0 um automatisch den Wert der maximalen BDC-Nennleistung einzustellen)
+    description: Maximale AC Leistung des Hybrid-Wechselrichters
+    help:
     advanced: true
     optional: true
 modbus:

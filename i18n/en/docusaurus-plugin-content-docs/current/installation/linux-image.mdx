@@ -5,20 +5,13 @@ sidebar_position: 3
 # Raspberry Pi & Co.
 
 The easiest way to install evcc on a Raspberry Pi or similar single-board computers.
-Pre-configured and ready to go!
-
-:::warning Experimental
-With the evcc Linux images, you can set up evcc completely via the web UI.
-Usually, you don't need an `evcc.yaml` or console commands.
-However, the UI setup is still marked as experimental.
-In case of problems or for debugging, console commands may still be required.
-:::
+Pre-configured and ready to set up via the web UI!
 
 ## Quick Start
 
 ### Download File
 
-Go to the **[evcc Linux Images](https://github.com/evcc-io/images/releases)** and download the latest version for Raspberry Pi (`armbian_evcc-{version}_rpi4b.img.zip`).
+Go to the **[evcc Linux Images](https://github.com/evcc-io/images/releases)** and download the latest version for Raspberry Pi (`evcc_{version}_rpi.img.zip`).
 
 ### Flash SD Card
 
@@ -58,8 +51,9 @@ The evcc image can be found under
   - Alternatively via IP address, e.g., `https://192.168.1.123/` (determine IP in router)
 - Set administrator password (on first start)
 - Set up devices (wallbox, solar system, home battery, vehicles)
-  - activate "experimental"
-  - Note: At least one loadpoint must be created for evcc to run
+  - Note: At least one loadpoint must be created for evcc to run.
+
+More details on setup can be found in the [configuration guide](./configuration).
 
 ![evcc Welcome](screenshots/evcc-welcome.webp)
 
@@ -102,12 +96,13 @@ There is no "forgot password" function.
 - **System:** Overview of CPU, memory, and disk
 - **Logs:** View system logs
 - **Networking:** Configure network and WiFi
+- **Navigator:** File editor for configuration files
 - **Terminal:** Access to command line
 - **Software Updates:** Update system
 
-:::note
-The Linux user password and the evcc administrator password are different.
-One is for Linux system management, the other for evcc.
+:::warning
+**The Cockpit password is only for system management (incl. SSH).**
+You set a separate administrator password for the evcc Web UI.
 :::
 
 ## Hardware Recommendations
@@ -118,6 +113,7 @@ Even 1 GB RAM is completely sufficient.
 **Supported Devices:**
 
 - Raspberry Pi 3, 4, and 5 - all models work equally well
+- Raspberry Pi Zero 2 W - works well
 - NanoPi R3S - compact, affordable, and comes with case and integrated eMMC storage
 
 **Storage:**
@@ -137,18 +133,32 @@ WiFi is possible but often less stable.
 
 The evcc Linux image is based on [Armbian](https://www.armbian.com/) and offers some practical features:
 
-**Updates:**
+### Available Services
+
+| Service     | URL                                                    |
+| ----------- | ------------------------------------------------------ |
+| evcc Web UI | `https://evcc.local/`                                  |
+| OCPP Server | `wss://evcc.local:8887/<station-id>`                   |
+| Cockpit     | `https://evcc.local:9090/` (initial password: `admin`) |
+| SSH         | `ssh admin@evcc.local` (initial password: `admin`)     |
+
+The services use self-signed certificates.
+You need to accept the certificate warning in your browser, or disable certificate verification in your wallbox's OCPP configuration.
+If you have compatibility issues, you can use the unencrypted alternatives:
+
+| Service     | URL                                 |
+| ----------- | ----------------------------------- |
+| evcc Web UI | `http://evcc.local:7070/`           |
+| OCPP Server | `ws://evcc.local:8886/<station-id>` |
+
+### Updates
 
 - Operating system: Security updates are automatically installed
-- evcc: Updates can be performed via [Cockpit](#cockpit)
+- evcc: Updates can be performed manually via [Cockpit](#cockpit)
 
-**SSH Access:**
+### SSH Access
+
 You can connect via SSH with the `admin` user (same credentials as [Cockpit](#cockpit)).
-
-**Alternative Access:**
-
-- Encrypted: https://evcc.local/ (recommended)
-- Unencrypted: http://evcc.local:7070/ (if certificate warning bothers you)
 
 More technical details can be found in the [GitHub Repository](https://github.com/evcc-io/images).
 

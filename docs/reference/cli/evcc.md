@@ -32,15 +32,13 @@ evcc [flags]
 - [evcc checkconfig](evcc_checkconfig.md) - Check config file for errors
 - [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell
 - [evcc config](evcc_config.md) - Dump database configuration
-- [evcc configure](evcc_configure.md) - Create configuration (evcc.yaml)
 - [evcc detect](evcc_detect.md) - Auto-detect compatible hardware
 - [evcc device](evcc_device.md) - Query database-configured devices (debug only)
 - [evcc discuss](evcc_discuss.md) - Request support at Github Discussions (https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe)
 - [evcc dump](evcc_dump.md) - Dump configuration
 - [evcc eebus-cert](evcc_eebus-cert.md) - Generate EEBUS certificate for using EEBUS compatible chargers
-- [evcc health](evcc_health.md) - Check application health
 - [evcc meter](evcc_meter.md) - Query configured meters
-- [evcc migrate](evcc_migrate.md) - Migrate yaml to database (overwrites db settings)
+- [evcc migrate](evcc_migrate.md) - Migrate yaml to database (deprecated), reset only
 - [evcc password](evcc_password.md) - Password administration
 - [evcc settings](evcc_settings.md) - Manage configuration settings
 - [evcc sponsor](evcc_sponsor.md) - Validate sponsor token

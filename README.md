@@ -11,7 +11,7 @@ Official documentation repository of [evcc](https://evcc.io).
 
 First clone the repository, then follow with the following steps.
 
-**Requirement:** You need to have [`nodejs`](https://nodejs.org/en/) (version >= 22) and `npm` installed (comes with `nodejs`).
+**Requirement:** You need to have [`nodejs`](https://nodejs.org/en/) (version >= 24) and `npm` installed (comes with `nodejs`).
 
 ### Installation
 
