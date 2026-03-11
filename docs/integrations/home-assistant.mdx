@@ -2,80 +2,90 @@
 sidebar_position: 3
 ---
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
-
 # Home Assistant
 
-Hier erfährst du, wie du evcc-Daten in Home Assistant visualisieren und Automatisierungen erstellen kannst.
+Home Assistant sammelt und visualisiert Daten aus deinem Smart Home und bietet umfangreiche Automatisierungsmöglichkeiten.
+evcc ist auf intelligentes Laden und Heizen spezialisiert.
+Beide Systeme ergänzen sich und lassen sich auf verschiedene Arten miteinander verbinden.
 
-Diese Anleitung setzt voraus, dass du evcc und Home Assistant bereits installiert hast.
-Wenn du nach einer Installationsanleitung suchst, findest du diese unter [Installation → Home Assistant Addon](../installation/home-assistant).
+:::note
+evcc kann auch als Home Assistant Addon installiert werden. Die Anleitung dafür findest du [hier](../installation/home-assistant).
+:::
 
-## Schnittstellen
+## Visualisieren & Automatisieren {#control-evcc}
 
-Falls du Geräte, wie Chargers, Meters oder Fahrzeuge, in evcc integrieren möchtest die von Geräten stammen die evcc nicht
-unterstützt (z. B. Zigbee Smartplugs) kannst du dies über [MQTT](./mqtt-api) oder das
-[REST API](./rest-api) realisieren.
+evcc bringt viele Steuerungen für intelligentes Laden und Heizen mit, kann aber nicht alle Anwendungsfälle abdecken.
+Durch die Integration mit Home Assistant bekommst du mehr Flexibilität.
+Hier ein paar Beispiele:
 
-Dank der beiden evcc Schnittstellen können zusätzliche Ladepunkte für eine Vielzahl von verschiebbaren Lasten (Verbrauchern),
-wie Heizgeräte, Waschmaschinen, Geschirrspüler oder Elektro-Zweiräder realisiert werden.
+- Messwerte in Dashboards visualisieren
+- Ladepläne basierend auf Kalendereinträgen erstellen
+- Lademodus abhängig von Anwesenheit wechseln
+- ...
 
-## Option 1: ha-evcc Integration
+### Home Assistant evcc Integration (empfohlen) {#ha-evcc}
 
-Mit der [ha-evcc](https://github.com/marq24/ha-evcc) Integration von [marq24](https://github.com/marq24) kannst du evcc Daten und Funktionen einfach in Home Assistant integrieren.
-Unabhängig davon, ob du evcc in Home Assistant betreibst oder nicht.
+Die [ha-evcc](https://github.com/marq24/ha-evcc) Integration von [marq24](https://github.com/marq24) bringt evcc-Daten und -Funktionen direkt in Home Assistant.
+Das funktioniert unabhängig davon, ob du evcc als Home Assistant Addon betreibst oder nicht.
+Voraussetzung ist, dass Home Assistant und evcc im gleichen Netzwerk erreichbar sind.
 
-Die Integration unterstützt alle notwendigen von evcc via API bereitgestellten Entitäten, auch diese zur Anpassung der
-evcc Einstellungen, Ladepunkte und der entsprechenden Fahrzeuge.
+Die Integration stellt alle relevanten evcc-Entitäten bereit: Messwerte, Einstellungen, Ladepunkte und Fahrzeuge.
+Nach der Installation bekommst du eine umfangreiche Liste an Entitäten, die du in Dashboards und Automationen verwenden kannst.
 
-Nach der Installation bekommst du eine lange Liste aller Entitäten die du in Home Assistant nutzen kannst.
+**Installation über HACS:**
 
-## Option 2: manuelle MQTT-Integration
+1. [HACS](https://hacs.xyz/) in Home Assistant öffnen und nach „evcc" suchen.
+2. Den Eintrag **evcc☀️🚘- Solar Charging** von marq24 installieren.
+3. Home Assistant neu starten.
+4. Unter **Einstellungen → Geräte & Dienste → Integration hinzufügen** nach „evcc" suchen und die URL deiner evcc-Instanz angeben.
 
-MQTT ist ein einfaches Kommunikationsprotokoll, das für das Internet der Dinge (IoT) entwickelt wurde.
-Der Weg über MQTT ist etwas einfacher als über die REST-API, aber falls du noch nie mit MQTT gearbeitet hast,
-gilt es ein paar Punkte zu beachten.
+Weitere Installationsvarianten und Details findest du im [GitHub-Repository](https://github.com/marq24/ha-evcc).
 
-### Vorbereitung
+### Manuelle Integration {#manual}
 
-Du benötigst einen MQTT-Broker.
-Dieser ist ein zentraler Knoten, der Nachrichten zwischen verschiedenen Clients vermittelt.
-Ein sehr beliebter und einfacher Broker ist [Mosquitto](https://mosquitto.org/).
-Dieser lässt sich bspw. auch als Home Assistant Addon installieren (siehe [Anleitung](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger)).
+Alternativ kannst du evcc-Daten manuell über die REST API oder MQTT in Home Assistant einbinden.
 
-Hast du einen Broker installiert, kannst du mit einem Tool wie [MQTT Explorer](http://mqtt-explorer.com) die Nachrichten auf dem Broker ansehen und verfolgen.
+#### REST API {#rest}
 
-### evcc MQTT Konfiguration
+evcc bietet eine [REST API](/docs/integrations/rest-api) an.
+[Diese Anleitung](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) von [marq24](https://github.com/marq24) beschreibt die Einbindung in Home Assistant im Detail.
 
-Als nächste müssen wir evcc mitteilen, dass es seine Daten an diesen Broker schicken soll.
-Dazu müssen in der `evcc.yaml` Datei die entsprechenden Zugangsdaten hinzugefügt werden.
+#### MQTT {#mqtt}
 
-```yaml title="evcc.yaml"
-mqtt:
-  broker: <broker-ip>:1883
-  topic: evcc # root topic for publishing, set empty to disable
-  user: mosquitto
-  password: yourpassword
-```
+Du benötigst einen MQTT-Broker (z. B. [Mosquitto](https://mosquitto.org/), auch als Home Assistant Addon verfügbar).
 
-Nach einem Neustart von evcc solltest du im MQTT Explorer die bereitgestellten evcc Topics sehen können.
+Konfiguriere in evcc unter **Konfiguration → MQTT** die Verbindung zum Broker.
+In Home Assistant muss der gleiche Broker und das gleiche Topic konfiguriert sein, damit beide Systeme die Daten austauschen können.
 
-![Screenshot von MQTT Explorer mit evcc Topics](screenshots/mqtt-explorer.webp)
+Mit einem Tool wie [MQTT Explorer](http://mqtt-explorer.com) kannst du prüfen, ob die Daten korrekt ankommen.
+Eine Anleitung zur Einrichtung von MQTT-Sensoren in Home Assistant findest du im [Blog von Alkly](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
 
-Nun können wir diese Daten in Home Assistant integrieren.
+Die verfügbaren Topics sind in der [MQTT API](/docs/integrations/mqtt-api) dokumentiert.
 
-### Home Assistant MQTT Konfiguration
+## Home Assistant Entitäten nutzen {#ha-entities-in-evcc}
 
-Eine gute Anleitung, wie du MQTT in Home Assistant einrichtest, findest du im [Blog Artikel von Alkly](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
-Hier gibt es auch Beispiele, wie du aus bestimmten Messwerten (bspw. der Ladeleistung) eine Home Assistant Entität erstellen kannst.
+evcc kann sich direkt mit Home Assistant verbinden und dessen Entitäten (Sensoren, Schalter, Zahlenwerte) als Datenquelle verwenden.
+So lassen sich z. B. Geräte in evcc einbinden, die nicht direkt unterstützt werden, wie Zigbee-Smartplugs, Sensoren aus anderen Integrationen oder selbstgebaute Lösungen.
+Solange die Daten als Home Assistant Entität vorliegen, kann evcc damit arbeiten.
 
-## Option 3: manuelle REST Integration
+### Einrichtung {#setup}
 
-Du kannst evcc Daten auch über die REST API in Home Assistant integrieren.
-Die verfügbaren Endpunkte findest du unter [REST API](/docs/integrations/rest-api).
+1. In der evcc-Oberfläche ein neues Gerät anlegen (z. B. **Konfiguration → Zusätzlichen Zähler hinzufügen**)
+2. Als Hersteller „Home Assistant" auswählen
+3. evcc erkennt deine Home Assistant Instanz automatisch im Netzwerk
+4. Autorisierung von evcc in Home Assistant durchführen (neuer Tab)
+5. Den angezeigten Feldern (z. B. „Leistung") Home Assistant Entitäten zuweisen
+   - Du bekommst Vorschläge und Autovervollständigung (z. B. `sensor.inverter_power`)
+   - Entitäten müssen rein numerische Werte liefern (`1234`, nicht `1234 W`)
+   - Um das Vorzeichen zu invertieren, stelle dem Entitätsnamen ein `-` voran (`-sensor.inverter_power`)
 
-[Diese Anleitung](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) von [marq24](https://github.com/marq24) gibt dir detaillierte Informationen wie das geht.
+### Unterstützte Gerätetypen {#device-types}
+
+- **[Zähler](/docs/devices/meters#home-assistant)** (Netz, PV, Batterie, ...) mit Leistung, Energie, Strömen, Spannungen, SoC
+- **[Wallboxen](/docs/devices/chargers#home-assistant-charger)** mit Status, Ein-/Ausschalten und maximalem Ladestrom
+- **[Schaltbare Steckdosen](/docs/devices/smartswitches#home-assistant-switch)** mit einfacher Ein-/Aus-Steuerung (für Smartplugs, Relais)
+- **[Fahrzeuge](/docs/devices/vehicles#home-assistant)** mit SoC, Reichweite, Status, Kilometerstand; optional Skripte zum Starten/Stoppen
+- **[Benachrichtigungen](/docs/reference/configuration/messaging)** unter **Konfiguration → Benachrichtigungen** kannst du evcc-Meldungen über Home Assistant versenden
 
 ## Weitere Ressourcen (Videos)
 
