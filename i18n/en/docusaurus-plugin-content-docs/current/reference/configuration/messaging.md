@@ -50,168 +50,85 @@ title: Charge started
 
 ### `msg`
 
-`msg` defines the text for the message content. Various variables in the format `${<variable name>}` can be used to display evcc information in the text.
+`msg` defines the text for the message content.
+Various variables can be used to display evcc information in the text.
+
+There are two syntax options:
+
+- **Simple**: `${<variableName>}` — e.g. `${vehicleTitle}`, with optional formatting like `${pvPower:%.1fk}`
+- **Go template**: `{{.variableName}}` — enables calculations, conditions, and [sprig functions](http://masterminds.github.io/sprig/)
+
 :::note
 When using variables, make sure to use the correct capitalisation (uppercase/lowercase)!
 :::
 
-**Useful messages for use in evcc notifications**:
+#### Available Variables {#variables}
 
-| msg Variable             | Description                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| `${chargedEnergy:%.1fk}` | Energy amount charged in kWh                                                               |
-| `${chargeDuration}`      | Charging duration                                                                          |
-| `${connectedDuration}`   | Charger connection duration                                                                |
-| `${loadpoint}`           | Number of [`loadpoints`](loadpoints) (charging point) 1,2...                               |
-| `${mode}`                | Active charging mode (see [`mode`](loadpoints#mode) of [`loadpoints`](loadpoints))         |
-| `${pvPower:%.1fk}`       | Currently measured PV power in kW                                                          |
-| `${title}`               | Charging point: Text from [`loadpoints`](loadpoints) [`title`](loadpoints#title) parameter |
-| `${vehicleTitle}`        | Vehicle: Text from [`vehicles`](vehicles) [`title`](vehicles#title) parameter              |
+The available variables correspond to the data from the evcc REST API at `http://evcc.local:7070/api/state`.
+When sending a message, the data of the triggering loadpoint and the global data are merged into a flat structure.
+This means both global values (e.g. `pvPower`, `grid.Power`) and loadpoint-specific values (e.g. `mode`, `chargedEnergy`, `vehicleTitle`) are directly accessible.
 
-**For example**:
+A [selection of useful variables](#variable-reference) can be found at the bottom of this page.
+
+**Example** (simple syntax):
 
 ```yaml
-  # Message examples using evcc variables
-  # start
-  msg: Charger ${title} started charging ${vehicleTitle} in ${mode} mode
-  # stop
-  msg: Charger ${title} finished charging ${vehicleTitle} with ${chargedEnergy:%.1fk}kWh in ${chargeDuration}
-  # connect
-  msg: ${vehicleTitle} connected on Charger ${title} at ${pvPower:%.1fk}kW PV
-  # disconnect
-  msg: ${vehicleTitle} disconnected of Charger ${title} after ${connectedDuration}
+messaging:
+  events:
+    start:
+      title: Charging started
+      msg: >-
+        ${title} charging ${vehicleTitle} in ${mode} mode
+    stop:
+      title: Charging finished
+      msg: >-
+        ${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
+        Solar share: ${sessionSolarPercentage:%.0f}%
+    connect:
+      title: Vehicle connected
+      msg: >-
+        ${vehicleTitle} connected to ${title} at ${pvPower:%.1fk}kW solar
+    disconnect:
+      title: Vehicle disconnected
+      msg: >-
+        ${vehicleTitle} disconnected from ${title} after ${connectedDuration}
 ```
 
 :::note
 To render the `msg` texts, you can also use the [go text/template](https://pkg.go.dev/text/template) syntax in combination with [sprig functions](http://masterminds.github.io/sprig/).
+This enables calculations (e.g. converting W to kW) and conditional output.
 
 ```yaml
-# Message config using evcc go-text-template rendering, evcc variables and sprig-functions
 messaging:
   events:
-    start: # charge start event
-      title: Charge of {{.vehicleTitle}} started
+    start:
+      title: "{{.vehicleTitle}}: Charging started"
       msg: |
-        Charger {{.title}} started charging {{.vehicleTitle}} in {{ toString .mode | upper }} mode.
-        --------------------------
-        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Grid power: {{round (divf .gridPower 1000) 3 }} kW
-        Solar power: {{round (divf .pvPower 1000) 3 }} kW
-        Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
-    stop: # charge stop event
-      title: Charge of {{.vehicleTitle}} finished
+        {{.title}} charging {{.vehicleTitle}} in {{ toString .mode | upper }} mode.
+        Solar: {{round (divf .pvPower 1000) 1 }} kW
+        Grid: {{round (divf .grid.Power 1000) 1 }} kW
+        {{if .battery}}Battery: {{round (divf .battery.Power 1000) 1 }} kW ({{.battery.Soc }} %){{end}}
+    stop:
+      title: "{{.vehicleTitle}}: Charging finished"
       msg: |
-        Charger {{.title}} finished charging {{.vehicleTitle}}
-        with {{round (divf .chargedEnergy 1000) 2 }} kWh in {{.chargeDuration}}.
-        --------------------------
-        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Grid power: {{round (divf .gridPower 1000) 3 }} kW
-        Solar power: {{round (divf .pvPower 1000) 3 }} kW
-        Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
-    connect: # vehicle connect event
-      title: "{{.vehicleTitle}} connected on Charger {{.title}}"
+        {{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
+        Solar share: {{round .sessionSolarPercentage 0 }}%
+        {{- if .sessionPrice}}
+        Cost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
+        {{- end}}
+    connect:
+      title: "{{.vehicleTitle}} connected"
       msg: |
-        {{.vehicleTitle}} connected on Charger {{.title}} at {{round (divf .pvPower 1000) 2 }} kW PV.
-        --------------------------
-        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Grid power: {{round (divf .gridPower 1000) 3 }} kW
-        Solar power: {{round (divf .pvPower 1000) 3 }} kW
-        Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
-    disconnect: # vehicle connected event
-      title: "{{.vehicleTitle}} disconnected of Charger {{.title}}"
+        {{.vehicleTitle}} connected to {{.title}}.
+        SoC: {{.vehicleSoc }}% ({{.vehicleRange }} km)
+        Solar: {{round (divf .pvPower 1000) 1 }} kW
+    disconnect:
+      title: "{{.vehicleTitle}} disconnected"
       msg: |
-        {{.vehicleTitle}} disconnected of Charger {{.title}} after {{.connectedDuration}}.
-        --------------------------
-        evcc Status {{printf `(%d-%02d-%02d %02d:%02d:%02d)` now.Year now.Month now.Day now.Hour now.Minute now.Second}}
-        Grid power: {{round (divf .gridPower 1000) 3 }} kW
-        Solar power: {{round (divf .pvPower 1000) 3 }} kW
-
-
-        Home consumption: {{round (divf .homePower 1000) 3 }} kW
-        {{if .batteryConfigured}}Battery storage status: {{round (divf .battery.Power 1000) 3 }} kW ({{.battery.Soc }} %){{end}}
+        {{.vehicleTitle}} disconnected from {{.title}} after {{.connectedDuration}}.
 ```
 
 :::
-
-**List of all evcc-provided variables**:
-
-The variables provided by evcc (also see /api/state) must be defined as `${<VariableName>}` or in the go-template format `{{<VariableName>}}` in the message text. Multiple variables in the message text are possible.
-
-- Site
-  - Configuration
-    - [`siteTitle`](site) - Main headline of the evcc app (_string_)
-    - `prioritySoc` - Minimum Powerwall state of charge in percent before [PV mode](loadpoints#mode) release (_integer_)
-  - Information
-    - `batteryConfigured` - Indicator, home battery/Powerwall meter configured (_bool_)
-    - `gridConfigured` - Indicator, smart/grid meter configured (_bool_)
-    - `pvConfigured` - Indicator, solar panels/photovoltaic meter configured (_bool_)
-- Tariff Information
-  - [`currency`](tariffs) - Tariff currency (_string_)
-  - [`tariffFeedIn`](tariffs) - PV feed-in remuneration per kWh in tariff currency (float)
-  - [`tariffGrid`](tariffs) - Grid consumption price per kWh in tariff currency (float)
-- Meter Information
-  - `battery.Power` - Current home battery/Powerwall power in watts (_float_)
-  - `battery.Soc` - Current state of charge of home battery/Powerwall in percent (_integer_)
-  - `gridPower` - Current grid feed-in(-) or consumption(+) in watts (_float_)
-  - `homePower` - Current home consumption power (excluding Charger consumption) in watts (_float_)
-  - `pvPower` - Current solar panels power in watts (_float_)
-- Charging Point (loadpoint)
-  - Configuration
-    - [`loadpoint`](loadpoints) - Loadpoint index (_integer_)
-    - `maxCurrent` - Maximum charging current in amperes (_float_)
-    - `minCurrent` - Minimum charging current in amperes (_float_)
-    - [`mode`](loadpoints#mode) - Initial mode of the charging point after evcc start `off`/`now`/`min`/`pv` (_string_)
-    - [`phases`](loadpoints#phases) - Initial active number of phases of the charging point after evcc start (_integer_)
-    - [`title`](loadpoints#title) - Label of the charging point in the evcc app (_string_)
-  - Information
-    - `activePhases`- Currently active number of phases of the charging point (_integer_)
-    - `chargeCurrent` - Current total charging current in amperes (_float_)
-    - `chargeCurrents` - Current charging current per active phase in amperes (_float_)
-    - `chargeDuration` - Charging duration in nanoseconds (_integer_)
-    - `chargePower` - Current charging power in watts (_float_)
-    - `chargeRemainingDuration` - Charging time in nanoseconds until the target state of charge (_integer_)
-    - `chargeRemainingEnergy` - Required energy until the target state of charge in watt-hours (_float_)
-    - `chargedEnergy` - Energy charged so far in watt-hours (_float_)
-    - `charging` - Indicator, charging process active (_bool_)
-    - `enabled` - Indicator, charging enabled (_bool_)
-    - `hasVehicle` - Indicator, vehicle definitions assigned to the charging point (_bool_)
-    - `targetTime` - Target charging time in nanoseconds since 1970 UTC (_integer_)
-    - `pvAction` - Control variable for PV timer control `enable`/`disable` (_string_)
-    - `pvRemaining` - Required PV remaining charging time with activated timer control in nanoseconds (_integer_)
-- Vehicles (vehicles)
-  - Configuration
-    - [`vehicleName`](vehicles#name) - Name/id of the vehicle (_string_)
-    - [`vehicleTitle`](vehicles#title) - Label of the vehicle in the evcc app (_string_)
-    - [`vehicleCapacity`](vehicles#capacity)- Capacity of the vehicle battery in watt-hours (_float_)
-  - Information
-    - `climater` - Status of vehicle climatisation `on`/`off`/`heating`/`cooling` (_string_)
-    - `connected` - Indicator, vehicle connected to the charging point (_bool_)
-    - `connectedDuration` - Duration of vehicle connection in nanoseconds (_integer_)
-    - `vehicleOdometer` - Current vehicle odometer reading in kilometers (_float_)
-    - `vehiclePresent` - Indicator, evcc can access vehicle data (_bool_)
-    - `vehicleRange` - Current vehicle range in kilometers (_float_)
-    - `vehicleSoc` - Current state of charge of the vehicle battery in percent (_integer_)
-- Savings Efficiency Information
-  - `savingsAmount` - Sum of evcc savings (_float_)
-  - `savingsEffectivePrice` - Calculated savings price (_float_)
-  - `savingsGridCharged` - Consumed grid energy in Wh (_float_)
-  - `savingsSelfConsumptionCharged` - Consumed solar energy in Wh (_float_)
-  - `savingsSelfConsumptionPercent` - Percentage of consumed solar energy in Wh (_float_)
-  - `savingsSince` - Time period of savings calculation in nanoseconds (_integer_)
-  - `savingsTotalCharged` - Total energy consumed in Wh (_float_)
-- Charging Session Information
-  - `sessionSolarPercentage` - Solar percentage of the session
-  - `sessionPrice` - Price of the charged energy of the session
-  - `sessionPricePerKWh` - Average price of energy per kWh of the session
-  - `sessionCO<sub>2</sub>PerKWh` - Average CO<sub>2</sub> emissions per kWh
-- Sponsor
-  - Configuration
-    - [`auth`](sponsortoken) - Authentication token of the evcc sponsor (_string_)
-  - Information
-    - `sponsor` - Name of the evcc sponsor (_string_)
 
 ## `services`
 
@@ -370,3 +287,57 @@ messaging:
 ```
 
 In this example, a shell script (`cmd`) is invoked with the argument `{"title": "...", "msg": "...."}`.
+
+## Variable Reference {#variable-reference}
+
+The following list shows a selection of commonly used variables.
+The complete list of all available fields can be found in the API response at `http://evcc.local:7070/api/state`.
+
+### Loadpoint
+
+The loadpoint data comes from the `loadpoints` array in the API response but is provided directly (without prefix) in messages.
+
+- `title` - Loadpoint name
+- `loadpoint` - Loadpoint number 1, 2, ...
+- `mode` - Charge mode: `off`/`now`/`minpv`/`pv`
+- `charging` - Charging active
+- `enabled` - Charging enabled
+- `connected` - Vehicle connected
+- `chargedEnergy` - Energy charged in session in Wh
+- `chargeDuration` - Charging duration
+- `chargePower` - Current charge power in W
+- `connectedDuration` - Connection duration
+- `chargeRemainingDuration` - Remaining charge time until target
+- `chargeRemainingEnergy` - Remaining energy until target in Wh
+- `phasesActive` - Currently active phases
+- `vehicleTitle` - Vehicle name
+- `vehicleName` - Technical vehicle name
+- `vehicleSoc` - Vehicle state of charge in %
+- `vehicleRange` - Vehicle range in km
+- `vehicleOdometer` - Odometer reading in km
+- `sessionSolarPercentage` - Solar share of charging session in %
+- `sessionPrice` - Cost of charging session
+- `sessionPricePerKWh` - Average price per kWh
+- `sessionCo2PerKWh` - Average CO₂ emissions per kWh
+- `planActive` - Charge plan active
+- `smartCostActive` - Smart cost charging active
+
+### Global (Site)
+
+The global data comes from the top level of the API response.
+
+- `siteTitle` - Name of the evcc instance
+- `pvPower` - Current solar power in W
+- `homePower` - Current home consumption in W
+- `grid.Power` - Grid import (+) / export (-) in W
+- `battery.Power` - Battery power in W
+- `battery.Soc` - Battery state of charge in %
+- `currency` - Tariff currency
+- `tariffGrid` - Current grid price per kWh
+- `tariffFeedIn` - Feed-in tariff per kWh
+- `tariffCo2` - Current CO₂ intensity
+- `statistics` - Charging statistics, available for time periods `30d`, `365d`, `thisYear`, and `total`
+  - `statistics.<period>.avgCo2` - Average CO₂ emissions per kWh
+  - `statistics.<period>.avgPrice` - Average price per kWh
+  - `statistics.<period>.chargedKWh` - Energy charged in kWh
+  - `statistics.<period>.solarPercentage` - Solar share in %
