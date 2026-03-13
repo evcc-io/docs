@@ -37,6 +37,7 @@ Zusätzlich können Plugins auch für die in [Messaging](/docs/reference/configu
 - [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
 - [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den angeschlossenen (_plugged_) und ladenden (_charging_) Zustand zu einem einzigen Ladestatus zu kombinieren.
 - [Const Plugin](#const) - Spezielles Plugin das einfach einen konstanten Wert zurückliefert.
+- [Error Plugin](#error) - Spezielles Plugin das einen bekannten Fehlerwert zurückgibt.
 - [Convert Plugin](#convert) - Meta-Plugin zur Datentyp-Konvertierung beim Schreiben (z. B. float zu int).
 - [Delta Plugin](#delta) - Meta-Plugin zur Umwandlung von absoluten Werten in Änderungswerte (Deltas) beim Schreiben.
 - [Ignore Plugin](#ignore) - Meta-Plugin zum Unterdrücken spezifischer Fehlermeldungen.
@@ -94,6 +95,19 @@ Mögliche Parameter für die Datenextraktion sind:
 - `quote`: Boolean-Wert, der die Eingabedaten in Anführungszeichen einschließt, bevor sie an jq weitergegeben werden. Dies ermöglicht es jq, unquotierte Strings (z. B. von MQTT) zu verarbeiten. Bei einem MQTT-Wert wie `Charging` kann man `quote: true` und `jq: '. == "Charging"'` verwenden.
 - `unpack`: Konvertiert Werte aus anderen Zahlenrepräsentationen, z. B. `hex`.
 - `decode`: Dekodiert Binärformate wie `uint32`, `float32` etc.
+
+##### Bekannte Fehlerwerte {#known-errors}
+
+[HTTP](#http)-, [MQTT](#mqtt)- und [Websocket](#websocket)-Plugins können spezielle Fehlerwerte als String zurückgeben.
+evcc erkennt diese und wandelt sie in interne Fehlercodes um, anstatt sie als Daten zu behandeln.
+Das ist z. B. nützlich für eigene Fahrzeugintegrationen, bei denen die Datenquelle den Zustand des Fahrzeugs kennt.
+
+- `ErrAsleep` — Fahrzeug schläft. evcc kann entscheiden, ob das Fahrzeug geweckt werden soll.
+- `ErrMustRetry` — Vorgang soll erneut versucht werden (z. B. bei Rate-Limiting).
+- `ErrNotAvailable` — Wert ist nicht verfügbar. evcc behandelt dies als permanenten Fehler bis zum nächsten Neustart.
+
+Wenn ein Plugin z. B. den String `ErrAsleep` als Antwort liefert, erzeugt evcc intern den entsprechenden Fehler.
+Das [Error Plugin](#error) nutzt denselben Mechanismus, um einen festen Fehlerwert als Konstante zurückzugeben.
 
 #### Schreiben
 
@@ -780,6 +794,8 @@ Das `websocket`-Plugin bietet einen WebSocket-Listener.
 Es beinhaltet auch die Fähigkeit, JSON-Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen.
 Dies kann z. B. verwendet werden, um Daten von Volkszählers Push Server zu empfangen.
 
+Für die Datenextraktion stehen die unter [Lesen](#lesen) beschriebenen Pipeline-Parameter zur Verfügung (`regex`, `jq`, `quote`, etc.).
+
 **Beispiel Lesen**:
 
 ```yaml
@@ -869,6 +885,25 @@ Es eignet sich z. B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte
 ```yaml
 source: const
 value: -16247
+```
+
+### Error <Tag label="lesen" category="read" /> {#error}
+
+Das `error` Plugin gibt immer einen [bekannten Fehlerwert](#known-errors) zurück.
+Es ist nützlich, um ein nicht implementiertes Attribut als explizit nicht verfügbar zu kennzeichnen.
+
+**Parameter**:
+
+| Parameter | Typ    | Erfordert | Beschreibung                                                    |
+| --------- | ------ | --------- | --------------------------------------------------------------- |
+| error     | string | ja        | Fehlerwert (`ErrAsleep`, `ErrMustRetry` oder `ErrNotAvailable`) |
+
+**Beispiel**:
+
+```yaml
+soc:
+  source: error
+  error: ErrNotAvailable
 ```
 
 ### Convert <Tag label="schreiben" category="write" /> {#convert}

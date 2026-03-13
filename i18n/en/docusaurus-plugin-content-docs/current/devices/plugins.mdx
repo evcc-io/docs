@@ -37,6 +37,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
 - [Const Plugin](#const) - Special plugin that simply returns a constant value.
+- [Error Plugin](#error) - Special plugin that returns a known error value.
 - [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
 - [Delta Plugin](#delta) - Meta-plugin for converting absolute values to delta/increment values when writing.
 - [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
@@ -94,6 +95,19 @@ Possible parameters for data extraction are:
 - `quote`: Boolean value that wraps the input data in quotes before passing it to jq. This allows jq to process unquoted strings (e.g. from MQTT). For an MQTT value like `Charging`, you can use `quote: true` and `jq: '. == "Charging"'`.
 - `unpack`: Converts values from other number representations, e.g. `hex`.
 - `decode`: Decodes binary formats like `uint32`, `float32` etc.
+
+##### Known Error Values {#known-errors}
+
+[HTTP](#http), [MQTT](#mqtt), and [Websocket](#websocket) plugins can return special error strings.
+evcc recognises these and converts them into internal error codes instead of treating them as data.
+This is useful e.g. for custom vehicle integrations where the data source knows the vehicle's state.
+
+- `ErrAsleep` — Vehicle is asleep. evcc may choose to wake up the vehicle and retry.
+- `ErrMustRetry` — Operation should be retried (e.g. due to rate limiting).
+- `ErrNotAvailable` — Value is not available. evcc treats this as a permanent error until the next restart.
+
+If a plugin returns the string `ErrAsleep` as its response, evcc generates the corresponding internal error.
+The [Error Plugin](#error) uses the same mechanism to return a fixed error value as a constant.
 
 #### Writing
 
@@ -780,6 +794,8 @@ The `websocket` plugin provides a WebSocket listener.
 It also includes the ability to read or parse JSON data structures via jq-like queries.
 This can be used, for example, to receive data from Volkszähler's push server.
 
+For data extraction, the pipeline parameters described in [Reading](#reading) are available (`regex`, `jq`, `quote`, etc.).
+
 **Reading Example**:
 
 ```yaml
@@ -869,6 +885,25 @@ It's suitable, for example, to apply fixed correction values (offset) to a varia
 ```yaml
 source: const
 value: -16247
+```
+
+### Error <Tag label="read" category="read" /> {#error}
+
+The `error` plugin always returns a [known error value](#known-errors).
+It is useful to explicitly mark an unimplemented attribute as not available.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                                    |
+| --------- | ------ | -------- | -------------------------------------------------------------- |
+| error     | string | yes      | Error value (`ErrAsleep`, `ErrMustRetry` or `ErrNotAvailable`) |
+
+**Example**:
+
+```yaml
+soc:
+  source: error
+  error: ErrNotAvailable
 ```
 
 ### Convert <Tag label="write" category="write" /> {#convert}
