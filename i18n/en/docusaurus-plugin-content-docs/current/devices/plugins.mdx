@@ -484,9 +484,15 @@ charger:
         // maxcurrent variable is automatically available
 ```
 
-#### Using Input Transformations
+#### Input and Output Transformations {#transformations}
+
+The `go` and `js` plugins support `in` and `out` parameters to use values from other sources as variables in the script or to forward the script result to other plugins.
+
+##### Input Transformations (`in`)
 
 The `in` parameter allows you to use values from other sources as variables in your script.
+Each entry requires `name` (variable name in the script), `type` (`bool`, `int`, `float`, `string`) and `config` (plugin configuration).
+
 This example shows conditional logic that cannot be achieved with simple Calc operations:
 
 ```yaml
@@ -512,6 +518,29 @@ power:
       config:
         source: const
         value: false
+```
+
+##### Output Transformations (`out`)
+
+The `out` parameter forwards the script result to other plugins.
+This is particularly useful in a writing context, e.g. when the script result should be further processed via MQTT or HTTP.
+Each entry requires `name`, `type` and `config` — analogous to `in`.
+
+```yaml
+chargers:
+  - name: smart-heater
+    type: custom
+    maxcurrent:
+      source: go
+      script: |
+        watts := maxcurrent * 230
+        watts
+      out:
+        - name: watts
+          type: float
+          config:
+            source: mqtt
+            topic: heater/target_power
 ```
 
 ### HTTP <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#http}
@@ -640,6 +669,8 @@ charger:
       script: |
         console.log(maxcurrent);
 ```
+
+The `js` plugin supports the same [input and output transformations](#transformations) (`in`/`out`) as the `go` plugin.
 
 ### Modbus <Tag label="read" category="read" /> <Tag label="write" category="write" /> {#modbus}
 
