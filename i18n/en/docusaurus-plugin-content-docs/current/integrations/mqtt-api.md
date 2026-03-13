@@ -46,7 +46,7 @@ All API IDs (e.g. the loadpoint ID) begin at `1`.
 - `evcc/loadpoints/<id>/limitSoc`: limit SoC in % (writable) - only applicable for online vehicles
 - `evcc/loadpoints/<id>/limitEnergy`: limit energy in kWh (writable) - only applicable for offline vehicles
 - `evcc/loadpoints/<id>/plan/energy`: plan energy (writable using JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
-- `evcc/loadpoints/<id>/phases`: enabled phases (writable)
+- `evcc/loadpoints/<id>/phasesConfigured`: configured phases (writable)
 - `evcc/loadpoints/<id>/minCurrent`: current minCurrent value (writable)
 - `evcc/loadpoints/<id>/maxCurrent`: current maxCurrent value (writable)
 - `evcc/loadpoints/<id>/enableThreshold`: threshold value (writable)
@@ -60,8 +60,8 @@ All API IDs (e.g. the loadpoint ID) begin at `1`.
 To set any of the writable values, add a `/set` at the end of the topic for which a
 change should be made.
 
-Example: `mosquitto_pub -t "evcc/loadpoints/1/phases/set" -m "3"` to set the number of
-phases for the first loadpoint to `3`.
+Example: `mosquitto_pub -t "evcc/loadpoints/1/phasesConfigured/set" -m "3"` to set the number of
+configured phases for the first loadpoint to `3`.
 :::
 
 :::info
