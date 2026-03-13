@@ -6,7 +6,7 @@ Generate EEBUS certificate for using EEBUS compatible chargers
 evcc eebus-cert [flags]
 ```
 
-## Options inherited from parent commands
+# Options inherited from parent commands
 
 ```
   -c, --config string          Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
@@ -21,6 +21,6 @@ evcc eebus-cert [flags]
       --template-type string   Custom template type (charger, meter, tariff, vehicle) (debug only)
 ```
 
-## See also
+# See also
 
 - [evcc](evcc.md) - evcc - open source solar charging
