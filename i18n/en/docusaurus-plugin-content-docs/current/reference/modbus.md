@@ -193,7 +193,7 @@ The definition of a register requires the following parameters:
 
 - `address`: the register address
 - `type`: The register type, allowed are `coil`, `input`, `holding`
-- `decode`: The type of encoding of the data. Allowed are: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. For type `coil` the encoding is ignored, but must still be specified.
+- `decode`: The type of encoding of the data. Allowed are: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. For type `coil` the encoding is ignored, but must still be specified. For type `writecoil`, `bool8` must be specified.
 - `bitmask`: An optional specification. The specified value is ANDed with the read value to extract individual bits.
 
 Other allowed parameters of a manual configuration are:
@@ -221,7 +221,7 @@ For the `int32s/uint32s` decodings, the byte order is swapped, which is useful f
 
 Both holding registers and coils can be written. For this, either `type: writeholding` for holding registers or `type: writecoil` for coils must be specified.
 `type: writeholding` always writes a 16-bit register (int or bool16). Therefore, for `decode`, `uint16` must always be specified.
-`type: writecoil` writes a coil. Specifications for `decode` are ignored.
+`type: writecoil` writes a coil. For `decode`, `bool8` must be specified.
 
 **For example**:
 
@@ -271,7 +271,7 @@ chargers:
       register:
         address: 400
         type: writecoil # Write a coil
-        decode: uint8 # Doesn't matter but required
+        decode: bool8
     maxcurrent:
       # Set the maximum current
       source: modbus
