@@ -36,7 +36,6 @@ evcc [flags]
 - [evcc device](evcc_device.md) - Query database-configured devices (debug only)
 - [evcc discuss](evcc_discuss.md) - Request support at Github Discussions (https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe)
 - [evcc dump](evcc_dump.md) - Dump configuration
-- [evcc eebus-cert](evcc_eebus-cert.md) - Generate EEBUS certificate for using EEBUS compatible chargers
 - [evcc meter](evcc_meter.md) - Query configured meters
 - [evcc migrate](evcc_migrate.md) - Migrate yaml to database (deprecated), reset only
 - [evcc password](evcc_password.md) - Password administration
