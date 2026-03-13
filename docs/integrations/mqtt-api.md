@@ -4,85 +4,114 @@ sidebar_position: 2
 
 # MQTT API
 
-:::note
-Die Dokumentation ist noch nicht vollständig.
-Die meisten der über die [REST API](./rest-api) verfügbaren Daten und Funktionen sind auch via MQTT verfügbar.
-Nutze Tools wie [MQTT Explorer](https://mqtt-explorer.com/) um die Daten zu visualisieren.
+Alle Daten des [REST API](./rest-api) Endpunkts `/api/state` werden auch per MQTT veröffentlicht.
+Listen werden dabei in einzelne Sub-Topics aufgelöst (Index beginnt bei `1`).
+
+## Lesbare Topics {#read}
+
+### Site {#site-read}
+
+- `evcc/site/siteTitle`: Seitentitel
+- `evcc/site/currency`: konfigurierte Währung
+- `evcc/site/homePower`: aktueller Hausverbrauch (W)
+- `evcc/site/pvPower`: aktuelle PV-Erzeugung (W)
+- `evcc/site/grid/power`: aktuelle Netzleistung (W, positiv = Bezug)
+- `evcc/site/battery/power`: Batterieleistung (W, positiv = Entladung)
+- `evcc/site/battery/soc`: Batterie-Ladestand (%)
+- `evcc/site/greenShareHome`: Eigenerzeugungs-Anteil am Hausverbrauch (0–1)
+- `evcc/site/greenShareLoadpoints`: Eigenerzeugungs-Anteil am Ladepunktverbrauch (0–1)
+- `evcc/site/tariffGrid`: aktueller Netztarif
+- `evcc/site/tariffFeedIn`: aktuelle Einspeisevergütung
+- `evcc/site/tariffCo2`: aktuelle CO₂-Intensität
+- `evcc/site/batteryGridChargeActive`: Netzladen der Batterie aktiv (true/false)
+
+### Loadpoints {#loadpoint-read}
+
+Alle Loadpoint IDs beginnen bei `1`.
+
+- `evcc/loadpoints`: Anzahl der verfügbaren Ladepunkte
+- `evcc/loadpoints/<id>/title`: Ladepunkt-Titel
+- `evcc/loadpoints/<id>/connected`: Fahrzeug verbunden (true/false)
+- `evcc/loadpoints/<id>/charging`: lädt gerade (true/false)
+- `evcc/loadpoints/<id>/enabled`: Ladepunkt aktiviert (true/false)
+- `evcc/loadpoints/<id>/chargePower`: aktuelle Ladeleistung (W)
+- `evcc/loadpoints/<id>/chargedEnergy`: geladene Energie in Sitzung (Wh)
+- `evcc/loadpoints/<id>/chargeDuration`: Ladedauer (ns)
+- `evcc/loadpoints/<id>/chargeRemainingDuration`: verbleibende Ladedauer (ns)
+- `evcc/loadpoints/<id>/chargeRemainingEnergy`: verbleibende Energie (Wh)
+- `evcc/loadpoints/<id>/chargeTotalImport`: Zählerstand Ladezähler (Wh)
+- `evcc/loadpoints/<id>/vehicleName`: Fahrzeug-Bezeichner
+- `evcc/loadpoints/<id>/vehicleTitle`: Fahrzeug-Anzeigename
+- `evcc/loadpoints/<id>/vehicleSoc`: Fahrzeug-SoC (%)
+- `evcc/loadpoints/<id>/vehicleRange`: Fahrzeug-Reichweite (km)
+- `evcc/loadpoints/<id>/phasesActive`: aktive Phasen
+- `evcc/loadpoints/<id>/planActive`: Plan aktiv (true/false)
+- `evcc/loadpoints/<id>/sessionEnergy`: Sitzungsenergie (Wh)
+- `evcc/loadpoints/<id>/sessionSolarPercentage`: Eigenerzeugungs-Anteil der Sitzung (%)
+- `evcc/loadpoints/<id>/smartCostActive`: Smart Cost aktiv (true/false)
+- `evcc/loadpoints/<id>/effectivePriority`: effektive Priorität
+
+:::warning Weitere Topics
+Diese Liste ist nicht vollständig.
+Alle verfügbaren Topics kannst du mit [MQTT Explorer](https://mqtt-explorer.com/) einsehen.
 :::
 
-Die MQTT API folgt der [REST API](./rest-api) Struktur.
-Alle API IDs (z. B. die Loadpoint ID) beginnen bei `1`.
+## Schreibbare Topics {#write}
 
-- `evcc`: root topic
-- `evcc/status`: status (`online`/`offline`)
-- `evcc/updated`: timestamp of last update
+Um schreibbare Topics zu ändern, hänge `/set` an das Topic an und sende den neuen Wert.
 
-## Site
+```bash
+mosquitto_pub -t "evcc/loadpoints/1/phasesConfigured/set" -m "3"
+```
 
-- `evcc/site`: site dynamic state
-- `evcc/site/prioritySoc`: battery priority SoC (writable)
-- `evcc/site/bufferSoc`: battery buffer SoC (writable)
-- `evcc/site/bufferStartSoc`: battery buffer start SoC (writable)
-- `evcc/site/residualPower`: grid residual power (writable)
-- `evcc/site/batteryGridChargeLimit`: smart charging cost limit (previously known as "cheap" tariff) (writable)
-- `evcc/site/batteryDischargeControl`: enable/disable battery discharge control (true/false) (writable)
-- `evcc/site/batteryMode`: external battery mode (writable: `normal`, `hold`, `charge`) - directly controls all controllable batteries, overrules other evcc modes, resets after 60s
+Zeitangaben erfolgen in UTC im Format `yyyy-mm-ddThh:mm:ssZ`, z. B. `2023-03-05T07:00:00Z` (= 5. März 2023, 8:00 MEZ).
 
-## Vehicles
+Folgende Zeichenfolgen werden als leere Werte erkannt: `nil`, `null`, `none`, `-`.
+Damit lassen sich z. B. gesetzte Schwellenwerte zurücksetzen:
 
-**Note**: for vehicle names see `evcc/vehicles`.
+```bash
+mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
+```
 
-- `evcc/vehicles`: number of vehicles
-- `evcc/vehicles/<name>/minSoc`: minimum soc in % (writable)
-- `evcc/vehicles/<name>/limitSoc`: limit soc in % (writable)
-- `evcc/vehicles/<name>/planSoc`: plan soc (writable using JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+### Site {#site-write}
 
-## Loadpoints
+- `evcc/site/prioritySoc`: Batterie-Prioritäts-SoC
+- `evcc/site/bufferSoc`: Batterie-Puffer-SoC
+- `evcc/site/bufferStartSoc`: Batterie-Puffer-Start-SoC
+- `evcc/site/residualPower`: Netz-Residualleistung
+- `evcc/site/batteryGridChargeLimit`: Preisschwelle für Netzladen
+- `evcc/site/batteryDischargeControl`: Entladeregelung aktivieren/deaktivieren (true/false)
+- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `hold`, `charge`) – steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi, wird nach 60 s zurückgesetzt
+- `evcc/site/smartCostLimit`: Smart-Cost-Limit für alle Ladepunkte
+- `evcc/site/smartFeedInPriorityLimit`: Einspeise-Prioritäts-Limit für alle Ladepunkte
 
-- `evcc/loadpoints`: number of available loadpoints
-- `evcc/loadpoints/<id>`: dynamic state
-- `evcc/loadpoints/<id>/mode`: charge mode (writable)
-- `evcc/loadpoints/<id>/minSoc`: minimum SoC (writable)
-- `evcc/loadpoints/<id>/limitSoc`: limit SoC in % (writable) - only applicable for online vehicles
-- `evcc/loadpoints/<id>/limitEnergy`: limit energy in kWh (writable) - only applicable for offline vehicles
-- `evcc/loadpoints/<id>/plan/energy`: plan energy (writable using JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
-- `evcc/loadpoints/<id>/phasesConfigured`: configured phases (writable)
-- `evcc/loadpoints/<id>/minCurrent`: current minCurrent value (writable)
-- `evcc/loadpoints/<id>/maxCurrent`: current maxCurrent value (writable)
-- `evcc/loadpoints/<id>/enableThreshold`: threshold value (writable)
-- `evcc/loadpoints/<id>/enableDelay`: delay value (s) (writable)
-- `evcc/loadpoints/<id>/disableThreshold`: threshold value (writable)
-- `evcc/loadpoints/<id>/disableDelay`: delay value (s) (writable)
-- `evcc/loadpoints/<id>/batteryboost`: battery boost enabled (writeable: [1/0])
-- `evcc/loadpoints/<id>/priority`: priority value (writable)
+### Loadpoints {#loadpoint-write}
 
-:::note
-Um schreibbare Einstellungen durchzuführen, muss ein `/set` am Ende des Topics hinzugefügt werden an welches der neue Wert gesendet wird.
-Beispiel: `mosquitto_pub -t "evcc/loadpoints/1/phasesConfigured/set" -m "3"` um die Anzahl der netzseitigen Phasen am 1. Ladepunkt auf `3` festzulegen.
-:::
+- `evcc/loadpoints/<id>/mode`: Lademodus
+- `evcc/loadpoints/<id>/minSoc`: minimaler SoC
+- `evcc/loadpoints/<id>/limitSoc`: Limit-SoC in % – nur für Online-Fahrzeuge
+- `evcc/loadpoints/<id>/limitEnergy`: Limit-Energie in kWh – nur für Offline-Fahrzeuge
+- `evcc/loadpoints/<id>/planEnergy`: Planenergie (JSON-Payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+- `evcc/loadpoints/<id>/phasesConfigured`: konfigurierte Phasen
+- `evcc/loadpoints/<id>/minCurrent`: minimaler Ladestrom
+- `evcc/loadpoints/<id>/maxCurrent`: maximaler Ladestrom
+- `evcc/loadpoints/<id>/enableThreshold`: Einschaltschwelle
+- `evcc/loadpoints/<id>/enableDelay`: Einschaltverzögerung (s)
+- `evcc/loadpoints/<id>/disableThreshold`: Ausschaltschwelle
+- `evcc/loadpoints/<id>/disableDelay`: Ausschaltverzögerung (s)
+- `evcc/loadpoints/<id>/batteryboost`: Battery Boost aktiviert (1/0)
+- `evcc/loadpoints/<id>/batteryBoostLimit`: Battery Boost SoC-Limit
+- `evcc/loadpoints/<id>/priority`: Priorität
+- `evcc/loadpoints/<id>/smartCostLimit`: Smart-Cost-Limit
+- `evcc/loadpoints/<id>/smartFeedInPriorityLimit`: Einspeise-Prioritäts-Limit
+- `evcc/loadpoints/<id>/planStrategy`: Planstrategie (JSON)
+- `evcc/loadpoints/<id>/vehicle`: Fahrzeug setzen (Fahrzeugname)
 
-:::info
-\*\* Zeitangabe efolgt in UTC im Format `yyyy-mm-ddThh:mm:ssZ`
+### Vehicles {#vehicle-write}
 
-Beispiele:
+Fahrzeugnamen siehe `evcc/vehicles`.
 
-`2023-03-05T07:00:00Z` = 5. März 2023 um 8:00 Uhr MEZ
-
-`2023-08-17T19:30:00Z` = 17. August 2023 um 21:30 Uhr MESZ
-:::
-
-:::note
-\*\* Unterstützung leerer Werte:
-Folgende Zeichenfolgen werden als leere Werte erkannt:
-
-- `nil`
-- `null`
-- `none`
-- `-`
-
-Beispiele:
-
-- `evcc/site/batteryGridChargeLimit/set`: 'none'
-
-Um die Preisschwelle zum Laden der Batterie auf 'none' zu setzten, bzw. zu löschen.
-:::
+- `evcc/vehicles/<name>/minSoc`: minimaler SoC in %
+- `evcc/vehicles/<name>/limitSoc`: Limit-SoC in %
+- `evcc/vehicles/<name>/planSoc`: Plan-SoC (JSON-Payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+- `evcc/vehicles/<name>/planStrategy`: Planstrategie (JSON)
