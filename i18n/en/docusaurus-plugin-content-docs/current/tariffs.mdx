@@ -243,6 +243,40 @@ tariffs:
 
 In this example, there is a fixed feed-in tariff of 7 ct/kWh, except in the case of negative day-ahead market prices.
 
+### Combining Multiple Tariff Sources {#merged}
+
+The `merged` tariff type allows you to combine two tariff sources to leverage longer forecast horizons.
+This is especially useful when you want to combine real prices from a primary source with forecasts from a secondary source.
+
+The **primary source** should provide current and accurate prices (e.g., realized market prices), while the **secondary source** provides forecasts for time periods that the primary source does not cover.
+
+```yaml
+tariffs:
+  grid:
+    type: merged
+    primary:
+      type: template
+      template: energy-charts-api
+      bzn: DE-LU # Bidding zone
+      charges: 0.22 # Surcharge (EUR/kWh)
+      tax: 0.19 # VAT (%)
+    secondary:
+      type: template
+      template: epex-predictor
+      region: DE
+      charges: 0.22 # Surcharge (EUR/kWh)
+      tax: 0.19 # VAT (%)
+```
+
+evcc combines the data automatically:
+prices from the primary source are used as long as available.
+This is followed by forecasts from the secondary source for future time periods.
+
+:::info
+Both tariff sources must be of compatible types.
+For example, you can combine two exchange price sources, two price APIs, or a template based on current prices with a forecast source.
+:::
+
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
