@@ -242,6 +242,40 @@ tariffs:
 
 In diesem Beispiel gibt es eine fixe Einspeisevergütung von 7 ct/kWh, außer bei negativen Börsenpreisen.
 
+### Mehrere Tarifquellen kombinieren {#merged}
+
+Die `merged`-Tariffart ermöglicht es, zwei Tarifquellen zu kombinieren, um längere Vorhersagehorizonte zu nutzen.
+Dies ist besonders nützlich, wenn du Echtpreise von einer primären Quelle mit Prognosen von einer sekundären Quelle verbinden möchtest.
+
+Die **primäre Quelle** sollte aktuelle und genaue Preise liefern (z. B. realisierte Börsenpreise), während die **sekundäre Quelle** Vorhersagen für Zeiträume bereitstellt, die von der primären Quelle nicht abgedeckt werden.
+
+```yaml
+tariffs:
+  grid:
+    type: merged
+    primary:
+      type: template
+      template: energy-charts-api
+      bzn: DE-LU # Gebotszone
+      charges: 0.22 # Aufschlag (EUR/kWh)
+      tax: 0.19 # MwSt. (%)
+    secondary:
+      type: template
+      template: epex-predictor
+      region: DE
+      charges: 0.22 # Aufschlag (EUR/kWh)
+      tax: 0.19 # MwSt. (%)
+```
+
+evcc kombiniert die Daten automatisch:
+Die Preise der primären Quelle werden verwendet, soweit verfügbar.
+Danach folgen die Prognosen der sekundären Quelle für zukünftige Zeiträume.
+
+:::info
+Beide Tarifquellen müssen kompatible Typen sein.
+Beispielsweise können zwei Börsenpreis-Quellen, zwei Preis-APIs oder ein auf aktuellen Preisen basierendes Template mit einer Prognose-Quelle kombiniert werden.
+:::
+
 <!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->
 
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff  -->
