@@ -119,6 +119,7 @@ Everything else is manually maintained:
 #### UI Elements & Technical Terms
 
 - **Bold** for UI elements and modes: **PV-Modus**, **Min+PV**
+- **Bold with `→` separator** for UI navigation paths: **Konfiguration → Externe Steuerung**, **Configuration → EEBus**
 - `Code formatting` for configuration keys: `residualPower`, `evcc.yaml`
 - _Italics_ for technical terms when introducing concepts
 

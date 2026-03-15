@@ -4,17 +4,19 @@ sidebar_position: 7
 
 # `hems`
 
-evcc kann in bestehende Home Energy Management Systeme (HEMS) integriert werden. Momentan wird der SMA Sunny Home Manager 2.0 (SHM) unterstützt!
+Unter `hems` wird die externe Steuerung von Verbrauchsleistung und Einspeisung konfiguriert.
+Dies wird z. B. für die Umsetzung von §14a EnWG oder §9 EEG benötigt.
+Details zu Hintergrund und Einrichtung findest du unter [Externe Steuerung](../../features/external-control).
 
-**Beispiel**:
+:::info Hinweis
+Wenn `hems` konfiguriert ist, wird automatisch ein "Externe Begrenzung" Stromkreis (`gridcontrol`) erstellt.
+Eine manuelle Konfiguration von Stromkreisen ist dafür nicht erforderlich.
+:::
 
-```yaml
-hems:
-  type: sma
-  ...
-```
-
-Im folgenden werden nun alle möglichen Parameter erklärt.
+:::info SMA Sunny Home Manager & SEMP-Protokoll
+Die Integration mit dem SMA Sunny Home Manager (SHM) ist standardmäßig aktiv und muss nicht mehr unter `hems:` konfiguriert werden.
+Details und Konfigurationsmöglichkeiten findest du unter **Konfiguration > Sunny Home Manager**.
+:::
 
 ---
 
@@ -22,109 +24,88 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ### `type`
 
-Definiert das HEMS System.
+Definiert den Typ der externen Steuerung.
 
 **Mögliche Werte**:
 
-- `sma`: Für den SMA Sunny Home Manager 2.0. Siehe [`sma`](#sma) Definition
-
-**Beispiel**:
-
-```yaml
-type: sma
-```
+- `relay`: Anbindung über Schaltkontakt
+- `eebus`: Anbindung über das EEBus-Protokoll
 
 ---
 
-## Optionale SMA Parameter
+## `type: relay`
 
-evcc meldet jeden Ladepunkt an den SHM als eigenständiges Device. Die Device ID wird dabei von evcc generiert.
-
-Die Device ID ist ein HEX-String und setzt sich wie folgt zusammen
-
-```text
-F-AAAAAAAA-BBBBBBBBBBBB-00
-```
-
-- F: Vendor ID Type, fest definiert
-- AAAAAAAA: Siehe `vendorid`
-- BBBBBBBBBBBB: Siehe `deviceid`
-- 00: Sub Device ID, fest definiert
-
----
-
-### `vendorid`
-
-Definiert die VendorID die für die Erstellung der Device ID verwendet wird. Wenn in der Konfiguration keine Vendor ID angegeben wird, wird eine fest definierte ID verwendet.
-Normalerweise wird diese nicht manuell konfiguriert.
-
-HEX-String, Länge 8 Zeichen
-
-**Beispiel**:
+Anbindung über einen Schaltkontakt (z. B. Steuerbox).
+Der Kontakt signalisiert, ob eine Leistungsbegrenzung aktiv ist.
 
 ```yaml
 hems:
-  type: sma
-  vendorid: "AAAAAAAA"
-  ...
+  type: relay
+  maxPower: 8400 # Gesamtleistungslimit bei aktivem Signal (in Watt)
+  limit:
+    source: gpio
+    function: read
+    pin: 17
 ```
+
+### Parameter
+
+#### `maxPower`
+
+Gesamtleistungslimit in Watt, das bei aktivem Signal gesetzt wird.
+
+#### `limit`
+
+[Plugin](../../devices/plugins)-Konfiguration zum Auslesen des Schaltkontakts.
+Erwarteter Rückgabewert: `true`/`1` = begrenzt, `false`/`0` = normal.
+
+#### `passthrough`
+
+Optionale [Plugin](../../devices/plugins)-Konfiguration zum Durchreichen des Begrenzungssignals an ein externes System.
+
+#### `interval`
+
+Abfrageintervall für den Schaltkontakt.
+Standard: `10s`.
+
+Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-relais).
 
 ---
 
-### `deviceid`
+## `type: eebus`
 
-Definiert die Geräte ID, die für die Erstellung der Device ID des ersten Ladepunkts verwendet wird. Wenn keine Geräte ID angegeben wird, generiert evcc eine zufällige Geräte ID in Abhängigkeit auf den aktuellen Computer.
-
-HEX-String, Länge: 12 Zeichen
-
-**Beispiel**:
+Anbindung über das EEBus-Protokoll.
+Die Steuerbox übermittelt das Leistungslimit automatisch.
 
 ```yaml
 hems:
-  type: sma
-  deviceid: "BBBBBBBBBBBB"
-  ...
+  type: eebus
+  ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
 ```
 
-:::info Docker Container
-Wenn evcc als Docker Container ausgeführt wird, muss zu diesem Zweck die `machine-id` gemounted werden. Siehe auch [Docker Konfiguration](../../installation/docker)
-:::
+### Parameter
 
-#### Bisherige DeviceID herausfinden
+#### `ski`
 
-Wenn evcc auf einen anderen Computer umgezogen wird, ändert sich dadurch auch die zufällig erzeugte Geräte ID. Der SHM wird evcc in diesem Fall als neues Gerät erkannt und die bisherigen Geräte werden im SMA Portal nicht erkannt.
+SKI (Subject Key Identifier) der Steuerbox.
+Wird für das Pairing benötigt.
 
-Um dies zu verhindern, sollte die Geräte ID vom bisherigen System übernommen werden:
+#### Erweiterte Limits
 
-- Öffne in einem Browser die Adresse `http://IP-ADRESSE-BISHERIGER-EVCC-HOST:7070/semp`
-- Es wird ein Text im XML Format angezeigt. Der Text beginnt in dieser Form:
+Folgende optionale Parameter können für die EEBus-Kommunikation gesetzt werden:
 
-  ```xml
-  <Device2EM xmlns="http://www.sma.de/communication/schema/SEMP/v1">
-    <DeviceInfo>
-      <Identification>
-        <DeviceId>F-AAAAAAAA-BBBBBBBBBBBB-00</DeviceId>
-  ```
+- `contractualConsumptionNominalMax`: Vertragliche maximale Verbrauchsleistung (in Watt)
+- `failsafeConsumptionActivePowerLimit`: Failsafe-Limit für Verbrauchsleistung (in Watt)
+- `failsafeProductionActivePowerLimit`: Failsafe-Limit für Einspeiseleistung (in Watt)
+- `failsafeDurationMinimum`: Minimale Failsafe-Dauer (z. B. `2h`)
 
-- Die Zeichenkette an der Stelle von `AAAAAAAA` ist die VendorID
-- Die Zeichenkette an der Stelle von `BBBBBBBBBBBB` entspricht der DeviceID des ersten Ladepunkts
-- Diese Zeichenkette muss nun in der Konfiguration für `deviceid` im neuen System übernommen werden
-- Wurde die `vendorid` zuvor ebenfalls manuell konfiguriert muss auch diese auf das neue System übertragen werden
+#### `passthrough`
 
----
+Optionale [Plugin](../../devices/plugins)-Konfiguration zum Durchreichen des Begrenzungssignals an ein externes System.
 
-## Unterstützte HEMS
+#### `interval`
 
-### `sma`
+Abfrageintervall.
+Standard: `10s`.
 
-Bietet Unterstützung für den SMA Sunny Home Manager 2.0 (SHM).
-
-Durch die Integration können die [Ladepunkte](loadpoints) dem SHM hinzugefügt werden und erscheinen im Sunny Portal.
-Die Ladesteuerung erfolgt ausschließlich durch evcc.
-
-**Beispiel**:
-
-```yaml
-hems:
-  type: sma
-```
+Details zur Einrichtung und zum Pairing findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-eebus).
