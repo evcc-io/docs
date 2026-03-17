@@ -1,0 +1,85 @@
+---
+sidebar_position: 12
+---
+
+import Screenshot from "../../src/components/Screenshot";
+
+# Optimizer 🧪
+
+:::warning Experimentell
+Der Optimizer befindet sich in einer frühen Entwicklungsphase.
+Die angezeigten Daten sind aktuell rein informativ.
+Steuerungsaktionen folgen in zukünftigen Versionen.
+:::
+
+Der Optimizer analysiert Prognosen, Verbrauchsdaten und den aktuellen Zustand deines Energiesystems, um kostenoptimale Entscheidungen zu treffen.
+Er ergänzt die regelbasierte Steuerung von evcc um eine vorausschauende Optimierung.
+
+## Warum ein Optimizer?
+
+evcc arbeitet regelbasiert und deterministisch.
+Das funktioniert hervorragend für viele Setups.
+Z. B. mit PV-Anlage, Batterie und einem Fahrzeug.
+
+Bei komplexeren Szenarien stößt dieser Ansatz an Grenzen:
+
+- **Mehrere Fahrzeuge:** Welches soll zuerst geladen werden?
+- **Batterie oder Fahrzeug:** Wohin soll die verfügbare Energie fließen?
+- **Dynamische Tarife:** Lohnt sich Netzladen heute Nacht oder reicht die Sonne morgen?
+
+Der Optimizer kann diese Fragen beantworten.
+Aktuell legst du Einstellungen wie Preislimits oder Batterieprioritäten selbst fest.
+Perspektivisch kannst du diese Entscheidungen dem Optimizer überlassen.
+Er findet dann automatisch die optimalen Werte.
+Wir arbeiten Schritt für Schritt daran.
+
+## Was macht der Optimizer? {#how-it-works}
+
+Der Optimizer sammelt verschiedene Daten:
+
+- **Prognosedaten:** PV-Ertrag, Strompreise, Einspeisetarife
+- **Historische Daten:** typisches Verbrauchsprofil deines Haushalts
+- **Aktueller Zustand:** Ladestand der Batterie, angeschlossene Fahrzeuge, Wärmebedarf
+
+Auf Basis dieser Daten berechnet ein Optimierungsalgorithmus das voraussichtliche Verhalten deines Energiesystems.
+Er identifiziert kostenoptimale Aktionen: effiziente [Ladepläne](./plans), Batteriesteuerung (Halten, Netzladen).
+Außerdem prognostiziert er, wann die Hausbatterie voll oder leer sein wird.
+
+Ziel: **Energiekosten minimieren.**
+
+## Optimizer nutzen {#setup}
+
+Aktivierung über die Benutzeroberfläche:
+
+1. **Konfiguration → Experimentell** → aktivieren
+2. **Konfiguration → Optimizer 🧪** → aktivieren
+
+Der Optimizer erfordert ein aktives [Sponsoring](/docs/sponsorship).
+Bei neuen Installationen kann es bis zu 24 Stunden dauern, bis genug Daten gesammelt wurden, um erste Ergebnisse anzuzeigen.
+
+- **Menü → Optimizer:** Diagramme, die zeigen, wie sich Hausbatterie und Ladepunkte in den nächsten Stunden verhalten sollen und wie viel Geld gespart werden kann.
+- **Hauptansicht → Energiefluss (aufklappen):** Zeigt an, wann die Hausbatterie voraussichtlich voll oder leer sein wird.
+
+## Aktueller Stand und Ausblick {#status}
+
+Der Optimizer ist aktuell rein informativ.
+Er zeigt Prognosen und Einsparpotenziale an, greift aber noch nicht aktiv in die Steuerung ein.
+
+Nächste Schritte:
+
+- Aktionen integrieren: Hausbatterie aktiv steuern
+- [Ladepläne](./plans) durch den Optimizer optimieren lassen
+- Nutzern ermöglichen, spezifische Einstellungen an den Optimizer zu übergeben
+
+## Technischer Hintergrund {#technical}
+
+Der Optimizer ist Python-basiert und nutzt das starke Ökosystem für mathematische Optimierung und Statistik.
+Er ist kein Teil von evcc selbst, sondern ein eigenständiger Dienst.
+
+Bei Aktivierung wird der Cloud-Service `optimizer.evcc.io` aufgerufen.
+Der Dienst arbeitet **zustandslos**.
+Es werden keine Daten gespeichert.
+
+Der Optimizer ist wie evcc selbst Open Source: [github.com/evcc-io/optimizer](https://github.com/evcc-io/optimizer).
+Du kannst dir das fertige Docker Image [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer) auch lokal installieren.
+Über die Umgebungsvariable `OPTIMIZER_URI` gibst du dann deinen eigenen Endpunkt an.
