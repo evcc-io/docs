@@ -196,7 +196,7 @@ Dazu bedarf es neben den allgemeinen 'modbus' Einstellungen (siehe oben) auch de
 Die Definition eines Registers benötigt folgende Parameter:
 
 - `address`: die Registeradresse
-- `type`: Der Registertyp, zulässig sind `coil`, `input`, `holding`
+- `type`: Der Registertyp, zulässig sind lesend `coil`, `input`, `holding` sowie schreibend `writeholding`,  `writeholdings`, `writecoil`
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden. Beim Typ `writecoil` muss `bool8` angegeben werden.
 - `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen UND verknüpft, um so einzelne Bits extrahieren zu können.
 
@@ -223,7 +223,8 @@ Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und s
 
 ### Schreiben von Registern
 
-Es können sowohl Holding-Register als auch Coils beschrieben werden. Dazu muss entweder `type: writeholding` für Holding-Register oder `type: writecoil` für Coils angegeben werden.
+Es können sowohl Holding-Register als auch Coils beschrieben werden. Dazu muss entweder `type: writeholding` für Holding-Register oder `type: writecoil` für Coils angegeben werden. Für das Schreiben multipler Register (Funktionscode 16) gibt es den Typ `writeholdings`.
+
 `type: writeholding` schreibt immer ein 16Bit Register (int oder bool16). Für `decode` muss hier daher immer `uint16` angegeben werden.
 `type: writecoil` schreibt ein Coil. Für `decode` muss `bool8` angegeben werden.
 
@@ -234,7 +235,7 @@ source: modbus
 ---
 register:
   address: 40070
-  type: writeholding # writeholding oder writecoil
+  type: writeholding # writeholding, writeholdings oder writecoil
 ```
 
 ### Gesamtbeispiel
