@@ -133,6 +133,11 @@ import { themes as prismThemes } from "prism-react-renderer";
               title: "About",
               items: [
                 {
+                  label: "Status",
+                  href: "https://status.evcc.io",
+                  target: "_self",
+                },
+                {
                   label: "Impressum",
                   href: "https://evcc.io/impressum/",
                   target: "_self",
