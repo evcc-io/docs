@@ -196,7 +196,7 @@ Dazu bedarf es neben den allgemeinen 'modbus' Einstellungen (siehe oben) auch de
 Die Definition eines Registers benötigt folgende Parameter:
 
 - `address`: die Registeradresse
-- `type`: Der Registertyp, zulässig sind lesend `coil`, `input`, `holding` sowie schreibend `writeholding`,  `writeholdings`, `writecoil`
+- `type`: Der Registertyp, zulässig sind lesend `coil`, `input`, `holding` sowie schreibend `writeholding`, `writeholdings`, `writecoil`
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden. Beim Typ `writecoil` muss `bool8` angegeben werden.
 - `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen UND verknüpft, um so einzelne Bits extrahieren zu können.
 
