@@ -192,7 +192,7 @@ For this purpose, in addition to the general 'modbus' settings (see above), a `r
 The definition of a register requires the following parameters:
 
 - `address`: the register address
-- `type`: The register type, allowed are `coil`, `input`, `holding`
+- `type`: The register type, allowed read types are `coil`, `input`, `holding`, write types are `writeholding`, `writeholdings`, `writecoil`
 - `decode`: The type of encoding of the data. Allowed are: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. For type `coil` the encoding is ignored, but must still be specified. For type `writecoil`, `bool8` must be specified.
 - `bitmask`: An optional specification. The specified value is ANDed with the read value to extract individual bits.
 
@@ -219,7 +219,8 @@ For the `int32s/uint32s` decodings, the byte order is swapped, which is useful f
 
 ### Writing Registers
 
-Both holding registers and coils can be written. For this, either `type: writeholding` for holding registers or `type: writecoil` for coils must be specified.
+Both holding registers and coils can be written. For this, either `type: writeholding` for holding registers or `type: writecoil` for coils must be specified. For writing multiple registers (function code 16) the type `writeholdings` is available.
+
 `type: writeholding` always writes a 16-bit register (int or bool16). Therefore, for `decode`, `uint16` must always be specified.
 `type: writecoil` writes a coil. For `decode`, `bool8` must be specified.
 
@@ -230,7 +231,7 @@ source: modbus
 ---
 register:
   address: 40070
-  type: writeholding # writeholding or writecoil
+  type: writeholding # writeholding, writeholdings or writecoil
 ```
 
 ### Complete Example
