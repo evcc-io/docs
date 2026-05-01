@@ -5,9 +5,16 @@ product:
   description: SUN2000 Hybrid Inverter
 capabilities: ["battery-control"]
 description: |
-  Grid and Battery require the PowerSensor.
-  Modbus/TCP requires activation using "maintenance access" within the communication settings of the inverter.
-  See https://forum.huawei.com/enterprise/en/modbus-tcp-guide/thread/667250677153415168-667213868771979264
+  Grid and Battery require the Huawei Smart Power Sensor (DDSU/DTSU666 or SmartPS).
+
+  Modbus TCP requires activation within the communication settings of the inverter using an "installer account", see [Modbus TCP Activation Guide](https://forum.huawei.com/enterprise/en/modbus-tcp-guide/thread/667250677153415168-667213868771979264).
+
+
+  ##### WARNING!
+  Please beware that the following circumstances may lead to Modbus communication interruptions:
+  - outdated firmware
+  - altering inverter/battery configuration settings via Huawei FusionSolar portal
+  - other applications (e.g. Home Assistant) accessing the inverter via Modbus proxy (also depending on plant complexity, e.g. number of cascaded inverters)
 
 render:
   - usage: grid
@@ -134,6 +141,7 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxchargepower: # Maximum charge power (W), For forced charging of the battery.
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage.
       timeout: 15s # Timeout, optional
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
@@ -162,13 +170,13 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxchargepower: # Maximum charge power (W), For forced charging of the battery.
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage.
       timeout: 15s # Timeout, optional
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       storageunit: 1 # Battery storage unit index, optional
-      forceaccharging: false # Inverter cascade, Keep AC charging active to charge the storage from other inverters via AC. Prevents stand-by. (optional)
-      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      forceaccharging: false # Inverter cascade, Keep AC charging active to charge the storage from other inverters via AC. May prevent standby with older firmware versions. (optional)
 params:
   - name: modbus
     example:
@@ -186,6 +194,15 @@ params:
     unit: W
     description: Maximum charge power
     help: For forced charging of the battery.
+    advanced: false
+    optional: false
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
     advanced: false
     optional: false
   - name: timeout
@@ -248,16 +265,7 @@ params:
     choice: []
     unit:
     description: Inverter cascade
-    help: Keep AC charging active to charge the storage from other inverters via AC. Prevents stand-by.
-    advanced: true
-    optional: true
-  - name: maxdischargepower
-    example:
-    default:
-    choice: []
-    unit: W
-    description: Maximum discharge power
-    help: Maximum discharge power of the storage.
+    help: Keep AC charging active to charge the storage from other inverters via AC. May prevent standby with older firmware versions.
     advanced: true
     optional: true
 modbus:

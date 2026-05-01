@@ -5,9 +5,16 @@ product:
   description: SUN2000 Hybrid-Wechselrichter
 capabilities: ["battery-control"]
 description: |
-  Grid und Batterie erfordern den PowerSensor.
-  "Modbus/TCP" erfordert Freischaltung via "Errichterzugang" in den Kommunikationseinstellungen des Wechselrichters.
-  Siehe https://forum.huawei.com/enterprise/en/modbus-tcp-guide/thread/667250677153415168-667213868771979264
+  Netz und Batterie erfordern den Huawei Smart Power Sensor (DDSU/DTSU666 or SmartPS).
+
+  Modbus TCP erfordert die Freischaltung in den Kommunikationseinstellungen des Wechselrichters via "Installateur Zugang", siehe [Modbus TCP Aktivierungs-Anleitung](https://forum.huawei.com/enterprise/en/modbus-tcp-guide/thread/667250677153415168-667213868771979264).
+
+
+  ##### WARNUNG!
+  Die folgendenden Gegebenheiten können zu Unterbrechungen in der Modbus-Kommunikation führen:
+  - veraltete Firmware
+  - Änderung von Wechselrichter/Speicher-Einstellungen über das Huawei FusionSolar-Portal
+  - weitere Anwendungen (z.B. Home Assistant) greifen über einen Modbus Proxy auf die Anlage zu (auch abhängig von der Anlagenkomplexität, z.B. Anzahl kaskadierter Wechselrichter)
 
 render:
   - usage: grid
@@ -134,6 +141,7 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers.
+      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers.
       timeout: 15s # Zeitüberschreitung, optional
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
@@ -162,13 +170,13 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers.
+      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers.
       timeout: 15s # Zeitüberschreitung, optional
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
       maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
       storageunit: 1 # Nummer des Batteriespeichers, optional
-      forceaccharging: false # Wechselrichterkaskade, AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert Stand-by. (optional)
-      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
+      forceaccharging: false # Wechselrichterkaskade, AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert u.U. den Standby mit älteren Firmware-Versionen. (optional)
 params:
   - name: modbus
     example:
@@ -186,6 +194,15 @@ params:
     unit: W
     description: Maximale Ladeleistung
     help: Für erzwungenes Laden des Speichers.
+    advanced: false
+    optional: false
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Entladeleistung
+    help: Maximale Entladeleistung des Speichers.
     advanced: false
     optional: false
   - name: timeout
@@ -248,16 +265,7 @@ params:
     choice: []
     unit:
     description: Wechselrichterkaskade
-    help: AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert Stand-by.
-    advanced: true
-    optional: true
-  - name: maxdischargepower
-    example:
-    default:
-    choice: []
-    unit: W
-    description: Maximale Entladeleistung
-    help: Maximale Entladeleistung des Speichers.
+    help: AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert u.U. den Standby mit älteren Firmware-Versionen.
     advanced: true
     optional: true
 modbus:
