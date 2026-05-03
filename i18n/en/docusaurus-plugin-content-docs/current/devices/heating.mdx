@@ -410,21 +410,22 @@ For heatpumps with Luxtronik 2.1 controller. Uses modbus-tcp. Requires software 
 
 #### Altherma 4 (SG Ready)
 
-Works with air 2 air heat pumps that support 4th gen WLAN-adapters (BRP069C4). With a maximum of 5 units.
+Works with Altherma 3 versions 0775, 0793, 0223, 0774, 29C1.
 
-Homehub (EKRHH) needs to be configured in mode 4 (Modbus TCP/IP for air2air heat pumps).
+In combination with a HomeHub (EKRHH) configured in mode 3 (Modbus TCP/IP).
 
 <DeviceConfig
   code={`chargers:
     - name: my_heating
       type: template
-      template: daikin-altherma
+      template: daikin-homehub
       
       # Modbus TCP
       modbus: tcpip
       id: 1
       host:  # Hostname
-      port: 502 # Port`}
+      port: 502 # Port
+      tempsource: # Temperature source, [warmwater, buffer] (optional)`}
 />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
 
@@ -735,6 +736,11 @@ For the heating rod from my-PV without a display. Use the local web interface of
 #### AC•THOR
 
 Use the local web interface of AC•THOR to set the value "Power timeout" to a value slightly higher (e.g. + 5s) than the interval time of evcc.
+If the heating element at the controlled output has < 9 kW, the scaling factor has to be calculated as follows: `scale = 9000 / nominal power` of the connected heater.
+
+Operation mode M3: 9 + 9 kW with an additional heater connected to the relay output is supported. Without load measurement using my-PV meter, the "Load at relay" setting in the local web interface of the AC•THOR must be set to match the nominal power of the heating element at the relay.
+If the heater at the controlled output has < 9 kW, AC•THOR firmware a0022200 or higher is required and the value for "Load at relay" must be converted using the scaling factor as follows:
+Load at relay = nominal power of the heater at the relay \* scale factor
 
 <DeviceConfig
   code={`chargers:
@@ -748,7 +754,7 @@ Use the local web interface of AC•THOR to set the value "Power timeout" to a v
       host:  # Hostname
       port: 502 # Port
       tempsource: 1 # Temperature source, [1, 2, 3] (optional)
-      scale: 1 # Scale factor for power limit, optional`}
+      scale: 1 # Scale factor for power target value, optional`}
 />
 <SponsorshipRequired />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
@@ -756,6 +762,11 @@ Use the local web interface of AC•THOR to set the value "Power timeout" to a v
 #### AC•THOR 9s
 
 Use the local web interface of AC•THOR to set the value "Power timeout" to a value slightly higher (e.g. + 5s) than the interval time of evcc.
+If the heating element at the controlled output has < 9 kW, the scaling factor has to be calculated as follows: `scale = 9000 / nominal power` of the connected heater.
+
+Operation mode M3: 9 + 9 kW with an additional heater connected to the relay output is supported. Without load measurement using my-PV meter, the "Load at relay" setting in the local web interface of the AC•THOR must be set to match the nominal power of the heating element at the relay.
+If the heater at the controlled output has < 9 kW, AC•THOR firmware a0022200 or higher is required and the value for "Load at relay" must be converted using the scaling factor as follows:
+Load at relay = nominal power of the heater at the relay \* scale factor
 
 <DeviceConfig
   code={`chargers:
@@ -769,7 +780,7 @@ Use the local web interface of AC•THOR to set the value "Power timeout" to a v
       host:  # Hostname
       port: 502 # Port
       tempsource: 1 # Temperature source, [1, 2, 3] (optional)
-      scale: 1 # Scale factor for power limit, optional`}
+      scale: 1 # Scale factor for power target value, optional`}
 />
 <SponsorshipRequired />
 <!-- AUTO-GENERATED FROM TEMPLATE - PLEASE EDIT HERE https://github.com/evcc-io/evcc/tree/master/templates/definition/heating  -->
@@ -811,9 +822,12 @@ For heatpumps with Luxtronik 2.1 controller. Uses modbus-tcp. Requires software 
 
 Modbus connection to the NIBE S heat pump.
 Firmware version 4.7.5 or newer is required.
-In the indoor unit, Modbus must be enabled in menu 7.5.9
-To use the power control function, external power limitation must be selected under Menu 7.4, item AUX from modbus.
-The value `1` (uint8) must be written once to holding register 3032.
+Required settings in the control unit:
+
+- In the indoor unit, Modbus must be enabled in menu 7.5.9
+- To use power control, “external power limitation via Modbus” must be selected under AUX in menu 7.4. In the charging point settings, a minimum power of 1.2 kW (single-phase) must be configured. If the base load is higher, it must be set as the minimum power.
+- In menu 7.4, the options “SG-Ready A” and “SG-Ready B” must not be assigned.
+- The value `1` (uint8) must be written once to holding register 3032.
 
 <DeviceConfig
   code={`chargers:
@@ -1008,7 +1022,7 @@ The boost function heats hot water or a boost zone. The boost zone is identified
       type: template
       template: vaillant
       user: # Username, e.g. email address, user id, etc. (optional)
-      password: # Password, Use single quotes in case of leading zeros (optional)
+      password: # Password, Service account password (optional)
       realm: germany # Region, [albania, austria, belgium, bosnia, bulgaria, croatia, cyprus, czechrepublic, denmark, estonia, finland, france, georgia, germany, greece, hungary, ireland, italy, kosovo, latvia, lithuania, luxembourg, moldavia, netherlands, new-zealand, north-macedonia, norway, poland, portugal, romania, serbia, slovakia, slovenia, spain, sweden, switzerland, turkiye, ukraine, unitedkingdom, uzbekistan] (optional)
       zone: # Boost zone ID, optional
       setpoint: # Boost temperature, optional
