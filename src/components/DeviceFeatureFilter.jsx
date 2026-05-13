@@ -43,8 +43,9 @@ function filterByFeatures(features) {
     });
   };
 
-  // Iterate through all child nodes of main
-  const firstElement = document.querySelector("main h2");
+  // Iterate through the auto-generated device list (everything after the <hr>
+  // that separates the introductory Einrichtung section from the devices).
+  const firstElement = document.querySelector("main hr ~ h2");
   let node = firstElement;
   let nodesToHideOrShow = [];
   let h2Nodes = [];
@@ -96,20 +97,14 @@ function filterByFeatures(features) {
   updateTableOfContents();
 }
 
-const currentFilters = [];
-
 function toggleFilter(feature) {
   const htmlClasslist = document.querySelector(":root").classList;
+  htmlClasslist.toggle(`feature-${feature}`);
 
-  const filterClass = `feature-${feature}`;
-  htmlClasslist.toggle(filterClass);
-  const index = currentFilters.indexOf(filterClass);
-  if (index === -1) {
-    currentFilters.push(filterClass);
-  } else {
-    currentFilters.splice(index, 1);
-  }
-  filterByFeatures(currentFilters);
+  const activeFilters = Array.from(htmlClasslist).filter((c) =>
+    c.startsWith("feature-"),
+  );
+  filterByFeatures(activeFilters);
 }
 
 export default ({ device }) => {
