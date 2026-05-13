@@ -215,27 +215,43 @@ In addition to plugin attributes, the following configuration options can be set
 
 The `features` array can be used to activate special charger properties:
 
-| Feature          | Description                                                                                                                            |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| heating          | Treat device as heating (e.g. heat pump, heating rod). Affects display in the user interface.                                          |
-| integrateddevice | Device without charging sessions and without connected vehicle (e.g. smart switch, permanently installed consumers).                   |
-| coarsecurrent    | Charging current can only be set in 1 A steps (considered in the control logic).                                                       |
-| welcomecharge    | Enable Welcome Charge function. Charger briefly supplies power when connecting, so the vehicle recognises that the charger is working. |
+| Feature          | Description                                                                                                                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| integrateddevice | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                        |
+| heating          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                         |
+| continuous       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". |
+| switchdevice     | Device can only be switched on/off (no continuous current control). Min/max current settings and the `Min+PV` mode are hidden.                                                                                    |
 
-**Example with Features**:
+##### Common Combinations {#charger-feature-combinations}
+
+You can use the following combinations as a starting point for your own `type: custom` configurations.
+They mirror the preconfigured templates in evcc.
+
+**Electric heater**:
 
 ```yaml
-chargers:
-  - name: heating-rod
-    type: custom
-    features:
-      - heating
-      - integrateddevice
-    icon: heater
-    status:
-      source: mqtt
-      topic: heater/status
-    # ... additional attributes
+features:
+  - integrateddevice
+  - heating
+```
+
+**Socket**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Heat pump**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
 ```
 
 **Example**
@@ -246,6 +262,8 @@ This example shows how to query the charging status (charging/not charging) of a
 chargers:
   - name: icharge
     type: custom
+    features:
+      - integrateddevice
     enabled:
       source: modbus
       id: 4711
@@ -303,11 +321,20 @@ Vehicle parameters can also be read via plugins.
 
 The following configuration options can be set directly on the vehicle:
 
-| Attribute | Type   | Required | Description                                       |
-| --------- | ------ | -------- | ------------------------------------------------- |
-| title     | string | no       | Display name of the vehicle in the user interface |
-| icon      | string | no       | Icon for display in the user interface            |
-| capacity  | float  | no       | Battery capacity in kWh                           |
+| Attribute | Type     | Required | Description                                              |
+| --------- | -------- | -------- | -------------------------------------------------------- |
+| title     | string   | no       | Display name of the vehicle in the user interface        |
+| icon      | string   | no       | Icon for display in the user interface                   |
+| capacity  | float    | no       | Battery capacity in kWh                                  |
+| features  | []string | no       | Feature flags for special vehicle properties (see below) |
+
+##### Feature Flags {#vehicle-features}
+
+| Feature       | Description                                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coarsecurrent | Vehicle accepts charging current only in whole 1 A steps. The control logic is constrained to coarse 1 A steps even when the charger could regulate more finely. |
+| streaming     | Vehicle pushes data instead of being polled (e.g. BMW Cardata). SOC updates outside active charging are treated as reliable.                                     |
+| welcomecharge | Vehicle expects the wallbox to be active on connect to register the link as working. Otherwise it reports an error.                                              |
 
 **Example**
 
@@ -319,6 +346,8 @@ vehicles:
     type: custom
     title: Green Mazda
     capacity: 50
+    features:
+      - coarsecurrent
     range:
       source: mqtt
       topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
@@ -367,7 +396,23 @@ Available modes are: `off`, `now`, `minpv`, `pv`.
 
 ### Tariffs & Forecasts
 
-See [Tariffs & Forecasts > Custom Plugin](../tariffs#plugin) for more details.
+See [Tariffs & Forecasts > Custom Plugin](../tariffs#plugin) for the full configuration.
+
+#### Feature Flags {#tariff-features}
+
+| Feature   | Description                                                                                    |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| average   | Smooths fine-grained price slots (e.g. 15-minute values) into hourly averages.                 |
+| cacheable | Persists fetched values. Used as fallback after a restart or provider outage (up to 24 hours). |
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    features:
+      - cacheable
+    # ... additional attributes
+```
 
 ### Load Management
 
