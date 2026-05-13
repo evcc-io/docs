@@ -182,25 +182,26 @@ Neben den Attributen, die Plugins zur lesenden Auswertung bereitstellen, werden 
 
 ### Charger {#charger}
 
-Wallboxen und Ladegeräte haben folgende Attribute die ausgelesen werden können:
+Wallboxen vom Typ `custom` haben folgende Attribute die ausgelesen werden können:
 
-| Attribut    | Typ                 | Erfordert | Beschreibung                                                                             |
-| ----------- | ------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| status      | string              | ja        | Status (A..F)                                                                            |
-| enabled     | bool                | ja        | Ist Ladung freigegeben?                                                                  |
-| power       | float               | nein      | Ladeleistung in W                                                                        |
-| energy      | float               | nein      | Zählerstand in kWh                                                                       |
-| identify    | string              | nein      | Aktuelle RFID-Kennung                                                                    |
-| soc         | int                 | nein      | Ladestand in %                                                                           |
-| finishtime  | string              | nein      | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
-| phases      | int                 | nein      | Anzahl der physischen Phasen (1..3)                                                      |
-| powers      | [float,float,float] | nein      | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen.              |
-| currents    | [float,float,float] | nein      | Phasenströme in A. Zur Erkennung aktiver Phasen.                                         |
-| voltages    | [float,float,float] | nein      | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                                   |
-| temp        | float               | nein      | Aktuelle Temperatur in °C (Heizung)                                                      |
-| templimit   | int                 | nein      | Temperaturlimit in °C (Heizung)                                                          |
-| getmode     | int                 | nein      | SG-Ready Modus (Wärmepumpe)                                                              |
-| getmaxpower | float               | nein      | Maximale Heizleistung in W (Heizung)                                                     |
+| Attribut   | Typ                 | Erfordert | Beschreibung                                                                             |
+| ---------- | ------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| status     | string              | ja        | Status (A..F)                                                                            |
+| enabled    | bool                | ja        | Ist Ladung freigegeben?                                                                  |
+| power      | float               | nein      | Ladeleistung in W                                                                        |
+| energy     | float               | nein      | Zählerstand in kWh                                                                       |
+| identify   | string              | nein      | Aktuelle RFID-Kennung                                                                    |
+| soc        | int                 | nein      | Ladestand in %                                                                           |
+| limitsoc   | int                 | nein      | Ladelimit in %                                                                           |
+| temp       | float               | nein      | Aktuelle Temperatur in °C (Heizung, Alias für `soc`)                                     |
+| limittemp  | int                 | nein      | Temperaturlimit in °C (Heizung, Alias für `limitsoc`)                                    |
+| finishtime | string              | nein      | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
+| phases     | int                 | nein      | Anzahl der physischen Phasen (1..3)                                                      |
+| powers     | [float,float,float] | nein      | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen.              |
+| currents   | [float,float,float] | nein      | Phasenströme in A. Zur Erkennung aktiver Phasen.                                         |
+| voltages   | [float,float,float] | nein      | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                                   |
+
+Für Wärmepumpen-spezifische Charger-Typen (`heatpump`, `sgready`, `sgready-relay`) gelten andere Plugin-Attribute, siehe [Wärmepumpen](#charger-heating).
 
 #### Allgemeine Konfigurationsoptionen {#charger-config}
 
@@ -278,15 +279,13 @@ chargers:
 
 Neben den read-only Werten können über Plugins auch Aktionen getriggert oder Konfigurationswerte gesetzt werden:
 
-| Attribut        | Typ   | Erfordert | Beschreibung                                            |
-| --------------- | ----- | --------- | ------------------------------------------------------- |
-| enable          | bool  | ja        | Ladung freigeben / sperren                              |
-| maxcurrent      | int   | ja        | Setze maximalen Ladestrom in A                          |
-| maxcurrentmilis | float | nein      | Setze maximalen Ladestrom in A                          |
-| phases1p3p      | int   | nein      | Phasenumschaltung durchführen (erfordert `tos: true`)   |
-| wakeup          | bool  | nein      | Wecke Fahrzeug auf                                      |
-| setmode         | int   | nein      | Ändere SG-Ready Modus (1: reduced, 2: normal, 3: boost) |
-| setmaxpower     | int   | nein      | Setze maximale Heizleistung in W (Heizung)              |
+| Attribut         | Typ   | Erfordert | Beschreibung                                          |
+| ---------------- | ----- | --------- | ----------------------------------------------------- |
+| enable           | bool  | ja        | Ladung freigeben / sperren                            |
+| maxcurrent       | int   | ja        | Setze maximalen Ladestrom in A                        |
+| maxcurrentmillis | float | nein      | Setze maximalen Ladestrom in A (mit Nachkommastellen) |
+| phases1p3p       | int   | nein      | Phasenumschaltung durchführen (erfordert `tos: true`) |
+| wakeup           | bool  | nein      | Wecke Fahrzeug auf                                    |
 
 **Beispiel**
 
@@ -302,6 +301,43 @@ chargers:
       topic: cmd/unu-switch/Power
       payload: ON
 ```
+
+#### Wärmepumpen {#charger-heating}
+
+Für Wärmepumpen und vergleichbare Heizgeräte gibt es eigene Charger-Typen mit jeweils eigenen Plugin-Attributen.
+Die vollständige Einrichtung ist unter [Wärmepumpen, Heizstäbe](./heating) beschrieben.
+
+Allen drei Typen gemeinsam sind die optionalen Mess-Attribute:
+
+| Attribut  | Typ   | Erfordert | Beschreibung                          |
+| --------- | ----- | --------- | ------------------------------------- |
+| power     | float | nein      | Aktuelle Leistung in W                |
+| energy    | float | nein      | Zählerstand in kWh                    |
+| temp      | float | nein      | Aktuelle Temperatur in °C             |
+| limittemp | int   | nein      | Geräte-internes Temperaturlimit in °C |
+
+**`type: heatpump`**: Wärmepumpe mit Leistungsvorgabe.
+
+| Attribut    | Typ   | Erfordert | Beschreibung                        |
+| ----------- | ----- | --------- | ----------------------------------- |
+| setmaxpower | int   | ja        | Setze maximale Heizleistung in W    |
+| getmaxpower | float | nein      | Aktuelle maximale Heizleistung in W |
+
+**`type: sgready`**: Wärmepumpe mit SG-Ready Schnittstelle.
+
+| Attribut    | Typ | Erfordert | Beschreibung                                            |
+| ----------- | --- | --------- | ------------------------------------------------------- |
+| setmode     | int | ja        | Ändere SG-Ready Modus (1: reduced, 2: normal, 3: boost) |
+| getmode     | int | nein      | Aktueller SG-Ready Modus (1, 2, 3)                      |
+| setmaxpower | int | nein      | Setze maximale Heizleistung in W                        |
+
+**`type: sgready-relay`**: Wärmepumpe gesteuert über Relais-Kontakte.
+Die Sub-Charger werden über typisierte Verweise statt Plugins eingebunden.
+
+| Attribut | Typ           | Erfordert | Beschreibung                          |
+| -------- | ------------- | --------- | ------------------------------------- |
+| boost    | charger-typed | ja        | Relais für den SG-Ready Boost-Kontakt |
+| dim      | charger-typed | nein      | Relais für den SG-Ready Dim-Kontakt   |
 
 ### Vehicle {#vehicle}
 
