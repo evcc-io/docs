@@ -30,19 +30,20 @@ import { themes as prismThemes } from "prism-react-renderer";
       },
     },
     markdown: {
+      mermaid: true,
       mdx1Compat: {
         headingIds: true,
         comments: true,
         admonitions: true,
       },
     },
+    themes: ["@docusaurus/theme-mermaid"],
     presets: [
       [
         "@docusaurus/preset-classic",
         /** @type {import('@docusaurus/preset-classic').Options} */
         ({
           docs: {
-            remarkPlugins: [require("mdx-mermaid")],
             sidebarPath: require.resolve("./sidebars.js"),
             editUrl: "https://github.com/evcc-io/docs/tree/main",
             editLocalizedFiles: true,
