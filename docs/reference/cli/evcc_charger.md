@@ -10,7 +10,9 @@ evcc charger [name] [flags]
 
 ```
   -i, --current float          Set maximum current
+  -u, --curtail int            Curtail (0/1 to switch, only available if supported by device) (default -1)
       --diagnose               Diagnose
+  -m, --dim int                Dim (0/1 to switch, only available if supported by device) (default -1)
   -d, --disable                Disable
   -e, --enable                 Enable
       --heartbeat              After command, continue running device heartbeats (if any) until interrupted
