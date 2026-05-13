@@ -8,7 +8,13 @@ _Meters_ (Strommessgeräte) ist eine Liste von in der Hausinstallation vorhanden
 
 Wallboxen können intern ein Messgerät eingebaut haben, oder es kann auch extern angeschlossen sein. Falls eine Wallbox ein internes Strommessgerät hat, dann muss in `meters` **kein** Eintrag dafür angelegt werden. Falls die Wallbox keinen solchen Zähler hat, wird evcc den hier konfigurierten und der Wallbox im Ladepunkt unter [`meter`](loadpoints#meter) zugewiesenen Zähler verwenden, oder annehmen dass die eingestellte Ladeleistung auch tatsächlich genutzt wird.
 
-evcc benutzt positive (+) Werte für eingehende Ströme (Netzbezug, PV Erzeugung, Hausbatterie-Entladung) und negative (-) Werte für ausgehende Ströme (Netzeinspeisung, PV Wechselrichter Ruhestrombedarf oder Hausbatterie-Ladung). Jeder anderweitiger Strombedarf, inklusive der Wallbox, ist immer ein positiver (+) Wert.
+evcc verwendet eine einheitliche Vorzeichen-Konvention für Leistungs- und Stromwerte (`power`, `powers`, `currents`):
+
+- **Positiv (+)** für eingehende Energie: Netzbezug, PV-Erzeugung, Hausbatterie-Entladung
+- **Negativ (-)** für ausgehende Energie: Netzeinspeisung, PV-Wechselrichter Ruhestrombedarf, Hausbatterie-Ladung
+- **Verbraucher** (Wallbox, Aux-Zähler) sind immer **positiv (+)**
+
+Liefert das Gerät die Werte mit umgekehrtem Vorzeichen, kann dies in der [Plugin-Konfiguration](/docs/devices/plugins) über `scale: -1` korrigiert werden.
 
 Die `meters` Konfiguration ist eine Liste von verschiedenen vorhandenen Geräten.
 
@@ -382,6 +388,20 @@ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/docs/
       ...
     - source: # Phase 3 Plugin Typ
       ...
+  powers: # Leistung (W) pro Phase
+    - source: # Phase 1 Plugin Typ
+      ...
+    - source: # Phase 2 Plugin Typ
+      ...
+    - source: # Phase 3 Plugin Typ
+      ...
+  voltages: # Spannung (V) pro Phase
+    - source: # Phase 1 Plugin Typ
+      ...
+    - source: # Phase 2 Plugin Typ
+      ...
+    - source: # Phase 3 Plugin Typ
+      ...
   ...
 ```
 
@@ -443,12 +463,50 @@ Dient dazu, den Gesamt-SOC zu ermittlen.
 
 #### `currents`
 
-Eine Liste von Plugin Definitionen um die Stromstärke in A pro Phase zurückzugeben
+Eine Liste von Plugin Definitionen um die Stromstärke in A pro Phase zurückzugeben.
 
 **Beispiel**:
 
 ```yaml
   currents: # Stromstärke (A) pro Phase
+    - source: # Phase 1 Plugin Typ
+      ...
+    - source: # Phase 2 Plugin Typ
+      ...
+    - source: # Phase 3 Plugin Typ
+      ...
+  ...
+```
+
+---
+
+#### `powers`
+
+Eine Liste von Plugin Definitionen um die Leistung in W pro Phase zurückzugeben.
+
+**Beispiel**:
+
+```yaml
+  powers: # Leistung (W) pro Phase
+    - source: # Phase 1 Plugin Typ
+      ...
+    - source: # Phase 2 Plugin Typ
+      ...
+    - source: # Phase 3 Plugin Typ
+      ...
+  ...
+```
+
+---
+
+#### `voltages`
+
+Eine Liste von Plugin Definitionen um die Spannung in V pro Phase zurückzugeben.
+
+**Beispiel**:
+
+```yaml
+  voltages: # Spannung (V) pro Phase
     - source: # Phase 1 Plugin Typ
       ...
     - source: # Phase 2 Plugin Typ

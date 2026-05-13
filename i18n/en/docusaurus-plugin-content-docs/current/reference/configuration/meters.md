@@ -8,7 +8,13 @@ _Meters_ (current measurement devices) is a list of devices in the house that ca
 
 Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meters`](loadpoints#meter) in the charging point configuration, or assume that the charging power set is actually being used.
 
-evcc uses positive (+) values for incoming currents (grid consumption, PV generation, house battery discharge) and negative (-) values for outgoing currents (grid feed-in, PV inverter standby consumption, or house battery charging). Any other current consumption, including from the charger, is always a positive (+) value.
+evcc uses a consistent sign convention for power and current values (`power`, `powers`, `currents`):
+
+- **Positive (+)** for incoming energy: grid consumption, PV generation, house battery discharge
+- **Negative (-)** for outgoing energy: grid feed-in, PV inverter standby consumption, house battery charging
+- **Consumers** (charger, aux meters) are always **positive (+)**
+
+If the device returns values with the opposite sign, this can be corrected in the [plugin configuration](/docs/devices/plugins) using `scale: -1`.
 
 The `meters` configuration is a list of different available devices.
 
@@ -378,6 +384,20 @@ Standard implementation, in which individual values are defined via [plugins](/d
       ...
     - source: # Phase 3 Plugin Type
       ...
+  powers: # Power (W) per phase
+    - source: # Phase 1 Plugin Type
+      ...
+    - source: # Phase 2 Plugin Type
+      ...
+    - source: # Phase 3 Plugin Type
+      ...
+  voltages: # Voltage (V) per phase
+    - source: # Phase 1 Plugin Type
+      ...
+    - source: # Phase 2 Plugin Type
+      ...
+    - source: # Phase 3 Plugin Type
+      ...
   ...
 ```
 
@@ -443,6 +463,44 @@ A list of plugin definitions to return current in amperes (A) per phase.
 
 ```yaml
   currents: # Current (A) per phase
+    - source: # Phase 1 Plugin Type
+      ...
+    - source: # Phase 2 Plugin Type
+      ...
+    - source: # Phase 3 Plugin Type
+      ...
+  ...
+```
+
+---
+
+#### `powers`
+
+A list of plugin definitions to return power in watts (W) per phase.
+
+**For example**:
+
+```yaml
+  powers: # Power (W) per phase
+    - source: # Phase 1 Plugin Type
+      ...
+    - source: # Phase 2 Plugin Type
+      ...
+    - source: # Phase 3 Plugin Type
+      ...
+  ...
+```
+
+---
+
+#### `voltages`
+
+A list of plugin definitions to return voltage in volts (V) per phase.
+
+**For example**:
+
+```yaml
+  voltages: # Voltage (V) per phase
     - source: # Phase 1 Plugin Type
       ...
     - source: # Phase 2 Plugin Type
