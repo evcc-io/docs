@@ -182,25 +182,26 @@ In addition to the attributes that plugins provide for reading evaluation, the f
 
 ### Charger {#charger}
 
-Wallboxes and chargers have the following attributes that can be read:
+Chargers of `type: custom` have the following attributes that can be read:
 
-| Attribute   | Type                | Required | Description                                                                                 |
-| ----------- | ------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| status      | string              | yes      | Status (A..F)                                                                               |
-| enabled     | bool                | yes      | Is charging enabled?                                                                        |
-| power       | float               | no       | Charging power in W                                                                         |
-| energy      | float               | no       | Meter reading in kWh                                                                        |
-| identify    | string              | no       | Current RFID identifier                                                                     |
-| soc         | int                 | no       | State of charge in %                                                                        |
-| finishtime  | string              | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
-| phases      | int                 | no       | Number of physical phases (1..3)                                                            |
-| powers      | [float,float,float] | no       | Phase powers in W. For sign detection of unsigned currents.                                 |
-| currents    | [float,float,float] | no       | Phase currents in A. For detecting active phases.                                           |
-| voltages    | [float,float,float] | no       | Phase voltages in V. For connection detection (1p/3p).                                      |
-| temp        | float               | no       | Current temperature in °C (heating)                                                         |
-| templimit   | int                 | no       | Temperature limit in °C (heating)                                                           |
-| getmode     | int                 | no       | SG-Ready mode (heat pump)                                                                   |
-| getmaxpower | float               | no       | Maximum heating power in W (heating)                                                        |
+| Attribute  | Type                | Required | Description                                                                                 |
+| ---------- | ------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| status     | string              | yes      | Status (A..F)                                                                               |
+| enabled    | bool                | yes      | Is charging enabled?                                                                        |
+| power      | float               | no       | Charging power in W                                                                         |
+| energy     | float               | no       | Meter reading in kWh                                                                        |
+| identify   | string              | no       | Current RFID identifier                                                                     |
+| soc        | int                 | no       | State of charge in %                                                                        |
+| limitsoc   | int                 | no       | Charge limit in %                                                                           |
+| temp       | float               | no       | Current temperature in °C (heating, alias for `soc`)                                        |
+| limittemp  | int                 | no       | Temperature limit in °C (heating, alias for `limitsoc`)                                     |
+| finishtime | string              | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
+| phases     | int                 | no       | Number of physical phases (1..3)                                                            |
+| powers     | [float,float,float] | no       | Phase powers in W. For sign detection of unsigned currents.                                 |
+| currents   | [float,float,float] | no       | Phase currents in A. For detecting active phases.                                           |
+| voltages   | [float,float,float] | no       | Phase voltages in V. For connection detection (1p/3p).                                      |
+
+For heat-pump-specific charger types (`heatpump`, `sgready`, `sgready-relay`), different plugin attributes apply, see [Heat pumps](#charger-heating).
 
 #### General Configuration Options {#charger-config}
 
@@ -278,15 +279,13 @@ chargers:
 
 In addition to read-only values, actions can also be triggered or configuration values set via plugins:
 
-| Attribute       | Type  | Required | Description                                            |
-| --------------- | ----- | -------- | ------------------------------------------------------ |
-| enable          | bool  | yes      | Enable / disable charging                              |
-| maxcurrent      | int   | yes      | Set maximum charging current in A                      |
-| maxcurrentmilis | float | no       | Set maximum charging current in A                      |
-| phases1p3p      | int   | no       | Perform phase switching (requires `tos: true`)         |
-| wakeup          | bool  | no       | Wake up vehicle                                        |
-| setmode         | int   | no       | Change SG-Ready mode (1: reduced, 2: normal, 3: boost) |
-| setmaxpower     | int   | no       | Set maximum heating power in W (heating)               |
+| Attribute        | Type  | Required | Description                                       |
+| ---------------- | ----- | -------- | ------------------------------------------------- |
+| enable           | bool  | yes      | Enable / disable charging                         |
+| maxcurrent       | int   | yes      | Set maximum charging current in A                 |
+| maxcurrentmillis | float | no       | Set maximum charging current in A (with decimals) |
+| phases1p3p       | int   | no       | Perform phase switching (requires `tos: true`)    |
+| wakeup           | bool  | no       | Wake up vehicle                                   |
 
 **Example**
 
@@ -302,6 +301,43 @@ chargers:
       topic: cmd/unu-switch/Power
       payload: ON
 ```
+
+#### Heat Pumps {#charger-heating}
+
+Heat pumps and similar heating devices use dedicated charger types, each with its own plugin attributes.
+The full setup is described under [Heat pumps, heating rods](../heating).
+
+All three types share the following optional measurement attributes:
+
+| Attribute | Type  | Required | Description                             |
+| --------- | ----- | -------- | --------------------------------------- |
+| power     | float | no       | Current power in W                      |
+| energy    | float | no       | Meter reading in kWh                    |
+| temp      | float | no       | Current temperature in °C               |
+| limittemp | int   | no       | Device-internal temperature limit in °C |
+
+**`type: heatpump`**: heat pump with power setpoint.
+
+| Attribute   | Type  | Required | Description                        |
+| ----------- | ----- | -------- | ---------------------------------- |
+| setmaxpower | int   | yes      | Set maximum heating power in W     |
+| getmaxpower | float | no       | Current maximum heating power in W |
+
+**`type: sgready`**: heat pump with SG-Ready interface.
+
+| Attribute   | Type | Required | Description                                            |
+| ----------- | ---- | -------- | ------------------------------------------------------ |
+| setmode     | int  | yes      | Change SG-Ready mode (1: reduced, 2: normal, 3: boost) |
+| getmode     | int  | no       | Current SG-Ready mode (1, 2, 3)                        |
+| setmaxpower | int  | no       | Set maximum heating power in W                         |
+
+**`type: sgready-relay`**: heat pump controlled via relay contacts.
+Sub-chargers are referenced by type instead of via plugins.
+
+| Attribute | Type          | Required | Description                          |
+| --------- | ------------- | -------- | ------------------------------------ |
+| boost     | charger-typed | yes      | Relay for the SG-Ready boost contact |
+| dim       | charger-typed | no       | Relay for the SG-Ready dim contact   |
 
 ### Vehicle {#vehicle}
 
