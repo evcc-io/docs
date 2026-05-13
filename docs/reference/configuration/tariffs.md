@@ -39,3 +39,23 @@ tariffs:
 ```
 
 Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Stromtarife](/docs/tariffs).
+
+## Feature-Flags {#features}
+
+Bei eigenen Tarifen vom Typ `custom` kannst du über `features` das Verhalten beeinflussen:
+
+| Feature   | Beschreibung                                                                                                                |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| average   | Glättet feingranulare Preisstufen (z. B. 15-Minuten-Werte) zu Stundenmittelwerten.                                          |
+| cacheable | Speichert abgerufene Werte persistent. Bei Neustart oder Ausfall des Anbieters dienen sie als Fallback (bis zu 24 Stunden). |
+
+**Beispiel**:
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    features:
+      - cacheable
+    # ... weitere Attribute
+```

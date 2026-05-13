@@ -215,27 +215,43 @@ Zusätzlich zu den Plugin-Attributen können folgende Konfigurationsoptionen dir
 
 Über das `features` Array können spezielle Eigenschaften des Chargers aktiviert werden:
 
-| Feature          | Beschreibung                                                                                                                                 |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| heating          | Behandelt das Gerät als Heizung (z. B. Wärmepumpe, Heizstab). Beeinflusst die Darstellung in der Benutzeroberfläche.                         |
-| integrateddevice | Gerät ohne Ladesitzungen und ohne angeschlossenes Fahrzeug (z. B. Smartes Schalter, fest installierte Verbraucher).                          |
-| coarsecurrent    | Ladestrom kann nur in 1 A Schritten eingestellt werden (wird in der Regelung berücksichtigt).                                                |
-| welcomecharge    | Aktiviert Welcome Charge Funktion. Ladegerät liefert beim Anschließen kurz Strom, damit das Fahrzeug erkennt, dass der Charger funktioniert. |
+| Feature          | Beschreibung                                                                                                                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| integrateddevice | Gerät ohne angeschlossenes Fahrzeug und ohne Ladesitzungen (z. B. Wärmepumpe, Heizstab, fest installierter Verbraucher). Keine Fahrzeugauswahl.                                                                                                           |
+| heating          | Behandelt das Gerät als Heizung: SOC und Limits werden in °C statt in % dargestellt.                                                                                                                                                                      |
+| continuous       | Gerät läuft im "deaktivierten" Zustand eigenständig in seinem Normalbetrieb weiter. Statt "Standby" wird "Normalbetrieb" angezeigt. Eine Empfehlung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Strom) wird als "Boost" gekennzeichnet. |
+| switchdevice     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Min/Max-Strom-Einstellungen und der `Min+PV`-Modus werden ausgeblendet.                                                                                                    |
 
-**Beispiel mit Features**:
+##### Häufige Kombinationen {#charger-feature-combinations}
+
+Folgende Kombinationen kannst du als Vorlage für eigene `type: custom` Konfigurationen nutzen.
+Sie entsprechen den vorkonfigurierten Templates in evcc.
+
+**Heizstab**:
 
 ```yaml
-chargers:
-  - name: heizstab
-    type: custom
-    features:
-      - heating
-      - integrateddevice
-    icon: heater
-    status:
-      source: mqtt
-      topic: heater/status
-    # ... weitere Attribute
+features:
+  - integrateddevice
+  - heating
+```
+
+**Steckdose**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, wenn die Steckdose einen festen Verbraucher schaltet
+  - heating # optional, wenn ein Heizgerät geschaltet wird
+```
+
+**Wärmepumpe**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, wenn keine Stromregelung vorhanden (SG Ready)
 ```
 
 **Beispiel**
@@ -246,6 +262,8 @@ Dieses Beispiel zeigt, wie man über das Modbus-Plugin den Ladestatus (ladend/ni
 chargers:
   - name: icharge
     type: custom
+    features:
+      - integrateddevice
     enabled:
       source: modbus
       id: 4711
@@ -303,11 +321,20 @@ Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 
 Folgende Konfigurationsoptionen können direkt am Fahrzeug gesetzt werden:
 
-| Attribut | Typ    | Erfordert | Beschreibung                                        |
-| -------- | ------ | --------- | --------------------------------------------------- |
-| title    | string | nein      | Anzeigename des Fahrzeugs in der Benutzeroberfläche |
-| icon     | string | nein      | Icon für die Darstellung in der Benutzeroberfläche  |
-| capacity | float  | nein      | Batteriekapazität in kWh                            |
+| Attribut | Typ      | Erfordert | Beschreibung                                                     |
+| -------- | -------- | --------- | ---------------------------------------------------------------- |
+| title    | string   | nein      | Anzeigename des Fahrzeugs in der Benutzeroberfläche              |
+| icon     | string   | nein      | Icon für die Darstellung in der Benutzeroberfläche               |
+| capacity | float    | nein      | Batteriekapazität in kWh                                         |
+| features | []string | nein      | Feature-Flags für spezielle Fahrzeug-Eigenschaften (siehe unten) |
+
+##### Feature-Flags {#vehicle-features}
+
+| Feature       | Beschreibung                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coarsecurrent | Fahrzeug akzeptiert den Ladestrom nur in ganzen 1 A Schritten. Die Regelung wird auf grobe 1 A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
+| streaming     | Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). SOC-Updates außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.           |
+| welcomecharge | Fahrzeug erwartet beim Anschließen eine aktive Wallbox, um die Verbindung als funktionierend zu erkennen. Andernfalls meldet das Fahrzeug einen Fehler.       |
 
 **Beispiel**
 
@@ -319,6 +346,8 @@ vehicles:
     type: custom
     title: Grüner Mazda
     capacity: 50
+    features:
+      - coarsecurrent
     range:
       source: mqtt
       topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
@@ -367,7 +396,23 @@ Verfügbare Modi sind: `off`, `now`, `minpv`, `pv`.
 
 ### Tarife & Vorhersagen
 
-Siehe [Tarife & Vorhersagen > Eigenes Plugin](../tariffs#plugin) für mehr Details.
+Siehe [Tarife & Vorhersagen > Eigenes Plugin](../tariffs#plugin) für die vollständige Konfiguration.
+
+#### Feature-Flags {#tariff-features}
+
+| Feature   | Beschreibung                                                                                                                |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| average   | Glättet feingranulare Preisstufen (z. B. 15-Minuten-Werte) zu Stundenmittelwerten.                                          |
+| cacheable | Speichert abgerufene Werte persistent. Bei Neustart oder Ausfall des Anbieters dienen sie als Fallback (bis zu 24 Stunden). |
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    features:
+      - cacheable
+    # ... weitere Attribute
+```
 
 ### Lastmanagement
 

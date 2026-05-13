@@ -37,3 +37,23 @@ tariffs:
 ```
 
 More examples and a list of available providers can be found in the section [Tariffs](/docs/tariffs).
+
+## Feature Flags {#features}
+
+For custom tariffs (`type: custom`) you can influence behaviour via `features`:
+
+| Feature   | Description                                                                                    |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| average   | Smooths fine-grained price slots (e.g. 15-minute values) into hourly averages.                 |
+| cacheable | Persists fetched values. Used as fallback after a restart or provider outage (up to 24 hours). |
+
+**Example**:
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    features:
+      - cacheable
+    # ... additional attributes
+```
