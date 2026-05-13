@@ -96,12 +96,14 @@ Everything else is manually maintained:
 - Use "solar" instead of "PV" or "photovoltaic"
 - Use UK English spelling (e.g., "optimise" not "optimize")
 - Use abbreviations: "e.g." not "for example"
+- Use "sponsor token" as two words, lowercase in body text, title case only in headings
 
 #### German
 
 - Use "PV-Anlage" with hyphen (follow Duden rules for compound words)
 - Be consistent with hyphens: "PV-Überschuss", "PV-Modus"
 - Use abbreviations: "z. B." not "beispielsweise"
+- Use "Sponsortoken" as one word, not "Sponsor Token" or "Sponsor-Token"
 
 ### Formatting Conventions
 
