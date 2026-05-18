@@ -91,9 +91,7 @@ export function renderMarkdownInline(md: string | undefined | null): string {
 
 export function indent(code: string, list = false): string {
   if (list) {
-    return code
-      .replace(/^/, "      - ")
-      .replace(/\n/gm, "\n        ");
+    return code.replace(/^/, "      - ").replace(/\n/gm, "\n        ");
   }
   return code.replace(/^/gm, "      ");
 }
@@ -155,13 +153,10 @@ export function groupBy<T extends DeviceEntry>(devices: T[]): Map<string, T[]> {
   return out;
 }
 
-export function filterMetersByUsage<T extends DeviceEntry & { data: { render: Array<{ usage?: string }> } }>(
-  meters: T[],
-  usage: "grid" | "pv" | "battery" | "charge" | "aux",
-): T[] {
-  return meters.filter((m) =>
-    m.data.render.some((r) => r.usage === usage),
-  );
+export function filterMetersByUsage<
+  T extends DeviceEntry & { data: { render: Array<{ usage?: string }> } },
+>(meters: T[], usage: "grid" | "pv" | "battery" | "charge" | "aux"): T[] {
+  return meters.filter((m) => m.data.render.some((r) => r.usage === usage));
 }
 
 export function filterByType<T extends DeviceEntry>(
@@ -181,7 +176,9 @@ export function filterByType<T extends DeviceEntry>(
   // charger: exclude smartswitch + heating
   return devices.filter((d) => {
     const g = d.data.product.group ?? "";
-    return CHARGER_GROUPS[g] !== "smartswitch" && HEATING_GROUPS[g] !== "heating";
+    return (
+      CHARGER_GROUPS[g] !== "smartswitch" && HEATING_GROUPS[g] !== "heating"
+    );
   });
 }
 
@@ -213,7 +210,9 @@ export function nightlyDiffersFromRelease(
     params: stripParams((e.data as any).params),
     render: (e.data as any).render ?? [],
   });
-  return stableStringify(snapshot(release)) !== stableStringify(snapshot(nightly));
+  return (
+    stableStringify(snapshot(release)) !== stableStringify(snapshot(nightly))
+  );
 }
 
 export function featuresFor(

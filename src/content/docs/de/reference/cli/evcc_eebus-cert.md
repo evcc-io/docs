@@ -3,6 +3,7 @@ title: "evcc eebus-cert"
 sidebar:
   label: "evcc eebus-cert"
 ---
+
 Generate EEBUS certificate for using EEBUS compatible chargers
 
 ```

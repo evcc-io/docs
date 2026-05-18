@@ -29,7 +29,6 @@ modbusproxy:
 :::note
 _Incoming_ (from third-party systems such as home automation, loggers), the proxy function exclusively supports Modbus TCP.
 
-
 _Outgoing_ towards the target device to be queried (e.g., inverter, energy meter), the protocol may be translated according to the target device's configuration.
 :::
 

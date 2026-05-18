@@ -13,7 +13,10 @@ const TYPE_MAP: Record<string, string> = {
 type IconLoader = () => Promise<{ default: string }>;
 const REGISTRY = registry as unknown as Record<string, IconLoader>;
 
-export async function deviceIconSvg(categoryType: string, slug: string): Promise<string | null> {
+export async function deviceIconSvg(
+  categoryType: string,
+  slug: string,
+): Promise<string | null> {
   const iconType = TYPE_MAP[categoryType];
   if (!iconType) return null;
   const loader = REGISTRY[`${iconType}/${slug}`];

@@ -1,6 +1,7 @@
 ---
 title: "evcc completion bash"
 ---
+
 Generate the autocompletion script for bash
 
 ## Synopsis

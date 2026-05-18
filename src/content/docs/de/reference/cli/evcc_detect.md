@@ -1,6 +1,7 @@
 ---
 title: "evcc detect"
 ---
+
 Auto-detect compatible hardware
 
 ## Synopsis

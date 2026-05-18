@@ -1,6 +1,7 @@
 ---
 title: "evcc vehicle"
 ---
+
 Query configured vehicles
 
 ```

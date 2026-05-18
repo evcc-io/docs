@@ -1,6 +1,7 @@
 ---
 title: "evcc completion fish"
 ---
+
 Generate the autocompletion script for fish
 
 ## Synopsis

@@ -1,6 +1,7 @@
 ---
 title: "evcc completion zsh"
 ---
+
 Generate the autocompletion script for zsh
 
 ## Synopsis

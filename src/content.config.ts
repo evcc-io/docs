@@ -12,10 +12,22 @@ const renderSchema = z.object({
 });
 
 const productSchema = z.object({
-  brand: z.union([z.string(), z.number()]).optional().transform((v) => v == null ? undefined : String(v)),
-  identifier: z.union([z.string(), z.number()]).optional().transform((v) => v == null ? undefined : String(v)),
-  description: z.union([z.string(), z.number()]).optional().transform((v) => v == null ? "" : String(v)),
-  group: z.union([z.string(), z.number()]).optional().transform((v) => v == null ? "" : String(v)),
+  brand: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v == null ? undefined : String(v))),
+  identifier: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v == null ? undefined : String(v))),
+  description: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v == null ? "" : String(v))),
+  group: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((v) => (v == null ? "" : String(v))),
 });
 
 const paramSchema = z

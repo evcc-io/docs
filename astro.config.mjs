@@ -90,18 +90,44 @@ export default defineConfig({
         { label: "Introduction", translations: { de: "Einführung" }, slug: "" },
         {
           label: "Installation",
-          items: [{ autogenerate: { directory: "installation", collapsed: true } }],
+          items: [
+            { autogenerate: { directory: "installation", collapsed: true } },
+          ],
         },
         {
           label: "Devices",
           translations: { de: "Geräte" },
           items: [
-            { label: "Chargers", translations: { de: "Wallboxen" }, link: "/chargers" },
-            { label: "PV, Battery, Grid, Meter", translations: { de: "PV, Batterie, Netz, Zähler" }, link: "/meters" },
-            { label: "Vehicles", translations: { de: "Fahrzeuge" }, link: "/vehicles" },
-            { label: "Smart switches", translations: { de: "Schaltbare Steckdosen" }, link: "/smartswitches" },
-            { label: "Heating", translations: { de: "Heizgeräte" }, link: "/heating" },
-            { label: "User-defined", translations: { de: "Benutzerdefiniert" }, link: "/plugins" },
+            {
+              label: "Chargers",
+              translations: { de: "Wallboxen" },
+              link: "/chargers",
+            },
+            {
+              label: "PV, Battery, Grid, Meter",
+              translations: { de: "PV, Batterie, Netz, Zähler" },
+              link: "/meters",
+            },
+            {
+              label: "Vehicles",
+              translations: { de: "Fahrzeuge" },
+              link: "/vehicles",
+            },
+            {
+              label: "Smart switches",
+              translations: { de: "Schaltbare Steckdosen" },
+              link: "/smartswitches",
+            },
+            {
+              label: "Heating",
+              translations: { de: "Heizgeräte" },
+              link: "/heating",
+            },
+            {
+              label: "User-defined",
+              translations: { de: "Benutzerdefiniert" },
+              link: "/plugins",
+            },
           ],
         },
         {
@@ -129,13 +155,24 @@ export default defineConfig({
             {
               label: "evcc.yaml",
               collapsed: true,
-              items: [{ autogenerate: { directory: "reference/configuration", collapsed: true } }],
+              items: [
+                {
+                  autogenerate: {
+                    directory: "reference/configuration",
+                    collapsed: true,
+                  },
+                },
+              ],
             },
             { label: "Modbus", slug: "reference/modbus" },
             {
               label: "CLI",
               collapsed: true,
-              items: [{ autogenerate: { directory: "reference/cli", collapsed: true } }],
+              items: [
+                {
+                  autogenerate: { directory: "reference/cli", collapsed: true },
+                },
+              ],
             },
           ],
         },

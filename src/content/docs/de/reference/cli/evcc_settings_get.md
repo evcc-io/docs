@@ -1,6 +1,7 @@
 ---
 title: "evcc settings get"
 ---
+
 Get configuration settings
 
 ```

@@ -1,6 +1,7 @@
 ---
 title: "evcc device"
 ---
+
 Query database-configured devices (debug only)
 
 ```

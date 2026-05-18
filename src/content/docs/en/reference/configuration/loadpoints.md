@@ -210,7 +210,6 @@ threshold: 0
 :::note
 If a residual power offset for the desired operating point of the surplus regulation is defined for the evcc site using the `residualPower` parameter, this value must be considered when setting the `threshold` value.
 
-
 For example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W feed-in), then setting an `enable` `threshold` value of 100 doesn't mean that charging will start at 100W grid consumption. Instead, the remaining feed-in power will be reduced by 100W, starting the charging at 100W feed-in.
 
 To start charging at 100W grid consumption in this case, the `threshold` value should be set to 300.
