@@ -103,19 +103,19 @@ Die Einstellmöglichkeiten bitte der Beschreibung der jeweiligen Parameter entne
 
 Eine _Site_ beschreibt den Standort mit den vorhandenen und benötigten Geräten der Hausinstallation und ist für das Regeln der verfügbaren Leistung zuständig.
 
-[Weiterlesen...](./configuration/site)
+[Weiterlesen...](/de/reference/configuration/site)
 
 ### Loadpoints
 
 _Loadpoints_ (Ladepunkte) beschreiben die Ladeinfrastruktur und kombinieren vorhandene _Charger_ (Wallboxen), _Vehicle_ (Fahrzeuge) und alles weitere was ein Ladepunkt benötigt.
 
-[Weiterlesen...](./configuration/loadpoints)
+[Weiterlesen...](/de/reference/configuration/loadpoints)
 
 ### Chargers
 
 _Chargers_ (Wallboxen) beinhaltet eine Liste von Wallboxen und deren Eigenschaften, z. B. wie sie angesprochen werden.
 
-[Weiterlesen...](./configuration/chargers)
+[Weiterlesen...](/de/reference/configuration/chargers)
 
 ### Meters
 
@@ -126,22 +126,22 @@ _Meters_ (Hausinstallation) ist eine Liste von Geräten welche verschiedene Stro
 - Ladestrom des EV (falls die Wallbox dies nicht direkt unterstützt)
 - Ströme der Hausbatterie(n)
 
-[Weiterlesen...](./configuration/meters)
+[Weiterlesen...](/de/reference/configuration/meters)
 
 ### Vehicles
 
 Um die Ladung auf einen bestimmten Ladestand (Soc) in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.
 
-[Weiterlesen...](./configuration/vehicles)
+[Weiterlesen...](/de/reference/configuration/vehicles)
 
 ### HEMS
 
 evcc kann die Ladepunkte und deren Ladeströme an ein anderes Home Energy Management System (HEMS) weitergeben, damit dieses die Informationen z.b. zur Steuerung der Hausbatterie nutzen kann.
 
-[Weiterlesen...](./configuration/hems)
+[Weiterlesen...](/de/reference/configuration/hems)
 
 ### Messaging
 
 In diesem Bereich können Ereignisse definiert werden, bei welchen man informiert werden will. Zur Informationsübermittlung werden eine Reihe von unterschiedlichen Systemen unterstützt.
 
-[Weiterlesen...](./configuration/messaging)
+[Weiterlesen...](/de/reference/configuration/messaging)

@@ -85,7 +85,7 @@ this is sufficient, the charging process is started.
 
 The minimum power required to charge is calculated from the values `minCurrent`
 and `phases`, defined per `loadpoint` (a group of colocated chargers)
-See [`loadpoints`](./configuration/loadpoints) for more
+See [`loadpoints`](/en/reference/configuration/loadpoints) for more
 information.
 
 For example: `phases: 1` und `minCurrent: 8`
@@ -108,27 +108,27 @@ several parameters. These are:
 Please refer to the description of each respective parameter for the available
 settings.
 
-- [Site Configuration Parameters](./configuration/site)
-- [Loadpoint Configuration Parameters](./configuration/loadpoints)
+- [Site Configuration Parameters](/en/reference/configuration/site)
+- [Loadpoint Configuration Parameters](/en/reference/configuration/loadpoints)
 
 ### Site
 
-A [Site](./configuration/site) describes the location with the existing and required devices of
+A [Site](/en/reference/configuration/site) describes the location with the existing and required devices of
 the home installation and is responsible for regulating the available power.
 
 ### Loadpoint
 
-A [Loadpoint](./configuration/loadpoints) describes the charging infrastructure and combines
+A [Loadpoint](/en/reference/configuration/loadpoints) describes the charging infrastructure and combines
 existing _Chargers_, _Vehicles_, and anything else a charging point needs.
 
 ### Chargers
 
-[Chargers](./configuration/chargers) include a list of chargers and their properties, such as
+[Chargers](/en/reference/configuration/chargers) include a list of chargers and their properties, such as
 how they are addressed.
 
 ### Meters
 
-[Meters](./configuration/meters) are a list of devices that measure various power flows. These
+[Meters](/en/reference/configuration/meters) are a list of devices that measure various power flows. These
 include:
 
 - Imported, Exported power
@@ -139,12 +139,12 @@ include:
 ### Vehicles
 
 To limit the state of charge (SoC) of EVs to a specific level, you can specify
-the existing [vehicles](./configuration/vehicles) and online access data here.
+the existing [vehicles](/en/reference/configuration/vehicles) and online access data here.
 
 ### HEMS
 
 evcc can forward the charging points and their charging currents to another
-[Home Energy Management System (HEMS)](./configuration/hems) so that it can use this
+[Home Energy Management System (HEMS)](/en/reference/configuration/hems) so that it can use this
 information, for example, to control the house battery.
 
 ### Messaging
@@ -152,4 +152,4 @@ information, for example, to control the house battery.
 In this section, you can define events for which you want to be informed. A
 variety of different systems are supported for message delivery.
 
-[More information](./configuration/messaging)
+[More information](/en/reference/configuration/messaging)
