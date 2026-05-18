@@ -185,6 +185,37 @@ export function filterByType<T extends DeviceEntry>(
   });
 }
 
+function stableStringify(value: any): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(",")}]`;
+  }
+  const keys = Object.keys(value).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(",")}}`;
+}
+
+// Compare release and nightly entries on the fields the user actually sees:
+// description, capabilities + requirements, params, and render (the YAML
+// config block). Deprecated params are dropped from both sides — DeviceParams
+// hides them anyway, so a nightly-only `deprecated: true` row shouldn't
+// surface the toggle.
+export function nightlyDiffersFromRelease(
+  release: DeviceEntry,
+  nightly: DeviceEntry | undefined,
+): boolean {
+  if (!nightly) return false;
+  const stripParams = (params: any[] | undefined) =>
+    (params ?? []).filter((p) => p && p.name && !p.deprecated);
+  const snapshot = (e: DeviceEntry) => ({
+    description: e.data.description ?? "",
+    capabilities: [...(e.data.capabilities ?? [])].sort(),
+    requirements: [...(e.data.requirements ?? [])].sort(),
+    params: stripParams((e.data as any).params),
+    render: (e.data as any).render ?? [],
+  });
+  return stableStringify(snapshot(release)) !== stableStringify(snapshot(nightly));
+}
+
 export function featuresFor(
   type: "charger" | "meter" | "tariff" | "vehicle" | "smartswitch" | "heating",
   entry: DeviceEntry,

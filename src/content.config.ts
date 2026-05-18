@@ -58,11 +58,15 @@ const deviceSchema = z.object({
   params: z.array(paramSchema).optional(),
 });
 
-function deviceCollection(locale: "de" | "en", type: string) {
+function deviceCollection(
+  locale: "de" | "en",
+  type: string,
+  channel: "release" | "nightly" = "release",
+) {
   return defineCollection({
     loader: glob({
       pattern: "**/*.yaml",
-      base: `./templates/release/${locale}/${type}`,
+      base: `./templates/${channel}/${locale}/${type}`,
     }),
     schema: deviceSchema,
   });
@@ -83,4 +87,12 @@ export const collections = {
   "vehicles-en": deviceCollection("en", "vehicle"),
   "tariffs-de": deviceCollection("de", "tariff"),
   "tariffs-en": deviceCollection("en", "tariff"),
+  "chargers-nightly-de": deviceCollection("de", "charger", "nightly"),
+  "chargers-nightly-en": deviceCollection("en", "charger", "nightly"),
+  "meters-nightly-de": deviceCollection("de", "meter", "nightly"),
+  "meters-nightly-en": deviceCollection("en", "meter", "nightly"),
+  "vehicles-nightly-de": deviceCollection("de", "vehicle", "nightly"),
+  "vehicles-nightly-en": deviceCollection("en", "vehicle", "nightly"),
+  "tariffs-nightly-de": deviceCollection("de", "tariff", "nightly"),
+  "tariffs-nightly-en": deviceCollection("en", "tariff", "nightly"),
 };
