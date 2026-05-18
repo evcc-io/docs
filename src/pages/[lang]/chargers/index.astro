@@ -1,0 +1,52 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import ChargersIntro from "@components/intros/ChargersIntro.astro";
+import { sortDevices, filterByType } from "@utils/devices";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
+}
+
+const lang = Astro.params.lang as "de" | "en";
+const coll = await getCollection(`chargers-${lang}` as any);
+const allDevices = sortDevices(filterByType(coll as any, "charger"));
+
+const branded = allDevices.filter((d: any) => (d.data.product.brand || "").trim());
+const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim());
+
+const title = lang === "de" ? "Wallboxen" : "Chargers";
+const description =
+  lang === "de"
+    ? "Übersicht aller unterstützten Wallboxen und Ladestationen."
+    : "Overview of all supported chargers and charging stations.";
+
+const genericTitle = lang === "de" ? "Generische Unterstützung" : "Generic support";
+
+const headings = lang === "de"
+  ? [
+      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
+      { depth: 2, slug: "features", text: "Eigenschaften" },
+      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
+      { depth: 2, slug: "generic", text: genericTitle },
+    ]
+  : [
+      { depth: 2, slug: "setup", text: "Setup" },
+      { depth: 2, slug: "features", text: "Features" },
+      { depth: 2, slug: "supported", text: "Supported devices" },
+      { depth: 2, slug: "generic", text: genericTitle },
+    ];
+---
+
+<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
+  <ChargersIntro lang={lang} />
+  <DeviceCardList devices={branded as any} lang={lang} basePath={`/${lang}/chargers`} showSponsorship />
+
+  {generic.length > 0 && (
+    <>
+      <h2 id="generic">{genericTitle}</h2>
+      <DeviceCardList devices={generic as any} lang={lang} basePath={`/${lang}/chargers`} showSponsorship flat />
+    </>
+  )}
+</StarlightPage>

@@ -1,0 +1,116 @@
+---
+title: "chargers"
+sidebar:
+  order: 4
+---
+
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+Zur Steuerung der Ladung muss evcc mit einer Wallbox kommunizieren können.
+
+Eine Wallbox hat mindestens folgende Konfiguration:
+
+```yaml
+chargers:
+  - name: wallbox1 # reference name
+    type: ...
+    ...
+```
+
+Im folgenden werden nun alle möglichen Parameter erklärt.
+
+---
+
+## Erforderliche Parameter
+
+### `name`
+
+Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenzierung der Wallbox in der Konfiguration des [Ladepunktes](loadpoints#charger) verwendet.
+
+**Beispiel**:
+
+```yaml
+name: wallbox1
+```
+
+---
+
+### `type`
+
+Dies ist der evcc spezifische Wallbox Typ, mit Hilfe dessen mit der Wallbox kommuniziert werden kann. Bekannte Wallboxen könne über den Typ `template` eingebunden werden. Den passenden (Template)Typ findet man unter [Geräte - Wallboxen](/de/chargers).
+
+Für unbekannte Wallboxen (oder aus anderen individuellen Gründen) kann die Standard Implementierung über [Plugins](/de/plugins) genutzt werden.
+
+**Beispiel**:
+
+```yaml
+type: custom
+```
+
+---
+
+## Optionale Parameter
+
+### `integrateddevice`
+
+Dieser Parameter bewirkt, dass bei Ladegeräten, die ohne "Fahrzeug" betrieben werden (z. B. Wärmepumpe, eBike) kein Fahrzeug angezeigt wird und dadurch auch die Fahrzeugerkennung ausbleibt.
+
+In Zusammenhang mit diesem Parameter kann auch ein Icon vergeben werden (siehe [`vehicle.icon`](/de/reference/configuration/vehicles#icon)), welches dann am Ladepunkt angezeigt wird.
+
+**Beispiel**:
+
+```yaml
+features:
+  - integrateddevice
+icon: bike
+```
+
+---
+
+### `heating`
+
+Dieser Parameter bewirkt, dass bei Ladegeräten der Gruppe "schaltbare Steckdosen (switchsockets)" der Ladestand nicht in Prozent sondern in Grad angezeigt wird.
+
+**Beispiel**:
+
+```yaml
+features:
+  - heating
+```
+
+---
+
+### `continuous`
+
+Markiert ein Gerät, das im deaktivierten Zustand eigenständig in seinem Normalbetrieb weiterläuft.
+Statt "Standby" wird der Status "Normalbetrieb" angezeigt.
+Eine Empfehlung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Strom) wird als "Boost" gekennzeichnet.
+
+Setze dieses Feature, wenn dein Gerät auch ohne aktive Ansteuerung in seinem Regelbetrieb weiterläuft.
+Typischer Anwendungsfall sind Wärmepumpen, hier wird das Feature in den vorkonfigurierten Typen und passenden Templates bereits gesetzt.
+
+**Beispiel**:
+
+```yaml
+features:
+  - continuous
+```
+
+---
+
+### `switchdevice`
+
+Markiert ein Gerät, das nur ein- und ausgeschaltet werden kann und keine stufenlose Stromregelung unterstützt (z. B. schaltende Wärmepumpen, schaltbare Steckdosen).
+In der Oberfläche werden dadurch die Min/Max-Strom-Einstellungen und der `Min+PV`-Modus am Ladepunkt ausgeblendet.
+
+Bei passenden Templates und vorkonfigurierten Typen ist dieses Feature bereits gesetzt.
+Bei eigenen Konfigurationen über `type: custom` ohne stufenlose Stromregelung solltest du dieses Feature setzen.
+
+**Beispiel**:
+
+```yaml
+features:
+  - switchdevice
+```
+
+---

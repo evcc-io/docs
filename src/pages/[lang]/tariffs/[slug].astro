@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import DeviceDetailLayout from "@components/DeviceDetailLayout.astro";
+import { CODE_PREAMBLES, TARIFF_GROUPS, indent, featuresFor } from "@utils/devices";
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const lang of ["en", "de"] as const) {
+    const coll = await getCollection(`tariffs-${lang}` as any);
+    for (const entry of coll as any[]) {
+      paths.push({ params: { lang, slug: entry.id }, props: { entry, lang } });
+    }
+  }
+  return paths;
+}
+
+const { entry, lang } = Astro.props as { entry: any; lang: "de" | "en" };
+
+const features = featuresFor("tariff", entry, lang);
+const editUrl = entry.data.template
+  ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff/${entry.data.template}.yaml`
+  : undefined;
+
+const codeBlocks = (entry.data.render as any[] ?? []).map((render) => {
+  const groupKey = TARIFF_GROUPS[entry.data.product.group ?? ""] ?? "price";
+  const preamble = CODE_PREAMBLES[groupKey];
+  const list = groupKey === "solar";
+  const src = render.advanced ?? render.default;
+  return `${preamble}\n${indent(src, list).trimEnd()}`;
+});
+---
+
+<DeviceDetailLayout
+  entry={entry}
+  lang={lang}
+  type="tariffs"
+  categoryLabel={lang === "de" ? "Tarife & Vorhersagen" : "Tariffs & forecasts"}
+  brandKey="provider"
+  features={features}
+  codeBlocks={codeBlocks}
+  editUrl={editUrl}
+/>

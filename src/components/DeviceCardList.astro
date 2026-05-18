@@ -1,0 +1,257 @@
+---
+import { featureShortLabel } from "./features";
+import UsageIcons from "./UsageIcons.astro";
+import { usageLabel } from "@utils/usages";
+
+interface Device {
+  id: string;
+  data: {
+    product: {
+      brand?: string;
+      description?: string;
+      group?: string;
+    };
+    capabilities?: string[];
+    requirements?: string[];
+    countries?: string[];
+    render: Array<{ usage?: string }>;
+  };
+}
+
+interface Props {
+  devices: Device[];
+  lang: "de" | "en";
+  basePath: string;
+  /** Whether to include the meter usage tags (grid, pv, battery, …). */
+  showUsages?: boolean;
+  /** Whether to surface feature tags (1P/3P, mA, RFID, …). */
+  showFeatures?: boolean;
+  /** Whether to show country/region tags after each row. */
+  showCountries?: boolean;
+  /** Render every device as its own top-level row (no brand grouping). */
+  flat?: boolean;
+  /** Surface a coloured sponsor-token chip per device (required / free). */
+  showSponsorship?: boolean;
+}
+
+const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorship = false } = Astro.props;
+
+const HIDDEN_FEATURES = new Set([
+  "sponsorship",
+  "sponsorfree",
+  "skiptest",
+  "eebus",
+]);
+
+const NO_BRAND = lang === "de" ? "Sonstige" : "Other";
+
+function brandKey(d: Device): string {
+  return (d.data.product.brand || "").trim() || NO_BRAND;
+}
+
+function descLabel(d: Device): string {
+  return (d.data.product.description || "").trim();
+}
+
+const byBrand = new Map<string, Device[]>();
+for (const d of devices) {
+  const b = brandKey(d);
+  if (!byBrand.has(b)) byBrand.set(b, []);
+  byBrand.get(b)!.push(d);
+}
+const brands = [...byBrand.keys()].sort((a, b) => {
+  if (a === NO_BRAND) return 1;
+  if (b === NO_BRAND) return -1;
+  return a.localeCompare(b, lang);
+});
+
+function usages(d: Device): string[] {
+  const out = new Set<string>();
+  for (const r of d.data.render) if (r.usage) out.add(r.usage);
+  return [...out];
+}
+
+function features(d: Device): string[] {
+  const base = [
+    ...(d.data.capabilities ?? []),
+    ...(d.data.requirements ?? []),
+  ].filter((f) => !HIDDEN_FEATURES.has(f));
+  // Only surface a chip when sponsorship is NOT required — the gray
+  // "Sponsor free" badge is a positive signal worth highlighting; chargers
+  // requiring a token stay quiet in the overview.
+  if (showSponsorship && !(d.data.requirements ?? []).includes("sponsorship")) {
+    base.push("sponsorfree");
+  }
+  return base;
+}
+
+function featureClass(f: string): string {
+  if (f === "sponsorship") return "tag tag-sponsorship";
+  if (f === "sponsorfree") return "tag tag-sponsorfree";
+  return "tag tag-feature";
+}
+
+function countriesFor(d: Device): string[] {
+  return (d.data.countries ?? []).map((c) => c.toUpperCase());
+}
+
+function singleRowLabel(d: Device): string {
+  const brand = brandKey(d);
+  const desc = descLabel(d);
+  if (brand === NO_BRAND) return desc || d.id;
+  if (!desc) return brand;
+  if (desc.toLowerCase().startsWith(brand.toLowerCase())) return desc;
+  return `${brand} ${desc}`;
+}
+
+type TagKind = "usages" | "feature" | "country" | "sponsorship";
+type Slot = { kind: TagKind; value: string; label: string };
+
+const SPONSOR_KEYS = new Set(["sponsorship", "sponsorfree"]);
+
+/** Slots for a single device, used only to build the column union. */
+function slotsFor(d: Device): Slot[] {
+  const _ = usageLabel; // ensure import is preserved for label tooling
+  const slots: Slot[] = [];
+  if (showUsages && usages(d).length > 0) {
+    slots.push({ kind: "usages", value: "usages", label: "" });
+  }
+  if (showFeatures) {
+    for (const f of features(d)) {
+      const kind: TagKind = SPONSOR_KEYS.has(f) ? "sponsorship" : "feature";
+      slots.push({ kind, value: f, label: featureShortLabel(f, lang) });
+    }
+  }
+  if (showCountries) {
+    for (const c of countriesFor(d)) {
+      slots.push({ kind: "country", value: c, label: c });
+    }
+  }
+  return slots;
+}
+
+/**
+ * Stable column union across a brand group: usages → features → countries
+ * → sponsorship (sponsorship column is last so the coloured chip sits at
+ * the right edge of every row).
+ */
+function brandColumns(list: Device[]): Slot[] {
+  const seen = new Map<string, Slot>();
+  const kindOrder: Record<TagKind, number> = { usages: 0, feature: 1, country: 2, sponsorship: 3 };
+  for (const d of list) {
+    for (const s of slotsFor(d)) {
+      const key = `${s.kind}:${s.value}`;
+      if (!seen.has(key)) seen.set(key, s);
+    }
+  }
+  return [...seen.values()].sort((a, b) => {
+    const k = kindOrder[a.kind] - kindOrder[b.kind];
+    return k !== 0 ? k : a.label.localeCompare(b.label, lang);
+  });
+}
+---
+
+<div class="device-brand-list not-content">
+  {flat && devices.map((d) => {
+    const u = showUsages ? usages(d) : [];
+    const f = showFeatures ? features(d) : [];
+    const c = showCountries ? countriesFor(d) : [];
+    const label = descLabel(d) || singleRowLabel(d);
+    return (
+      <div class="group group-leaf">
+        <a class="row row-brand" href={`${basePath}/${d.id}`}>
+          <span class="name">{label}</span>
+          {(u.length > 0 || f.length > 0 || c.length > 0) && (
+            <span class="tags">
+              {u.length > 0 && (
+                <span class="tag tag-usages"><UsageIcons usages={u} lang={lang} /></span>
+              )}
+              {f.map((feat) => (
+                <span class={featureClass(feat)}>{featureShortLabel(feat, lang)}</span>
+              ))}
+              {c.map((country) => (
+                <span class="tag tag-country">{country}</span>
+              ))}
+            </span>
+          )}
+        </a>
+      </div>
+    );
+  })}
+  {!flat &&
+    brands.map((brand) => {
+      const list = byBrand.get(brand)!;
+      const only = list.length === 1 ? list[0] : null;
+      const isLeafBrand =
+        only !== null && brand !== NO_BRAND && !descLabel(only);
+
+      if (isLeafBrand) {
+        const u = showUsages ? usages(only) : [];
+        const f = showFeatures ? features(only) : [];
+        const c = showCountries ? countriesFor(only) : [];
+        return (
+          <div class="group group-leaf">
+            <a class="row row-brand" href={`${basePath}/${only.id}`}>
+              <span class="name">{brand}</span>
+              {(u.length > 0 || f.length > 0 || c.length > 0) && (
+                <span class="tags">
+                  {u.length > 0 && (
+                    <span class="tag tag-usages"><UsageIcons usages={u} lang={lang} /></span>
+                  )}
+                  {f.map((feat) => (
+                    <span class="tag tag-feature">{featureShortLabel(feat, lang)}</span>
+                  ))}
+                  {c.map((country) => (
+                    <span class="tag tag-country">{country}</span>
+                  ))}
+                </span>
+              )}
+            </a>
+          </div>
+        );
+      }
+
+      const columns = brandColumns(list);
+      return (
+        <div
+          class="group group-aligned"
+          style={`--tag-cols: ${columns.length}`}
+        >
+          <div class="group-header">{brand}</div>
+          {list.map((d) => {
+            const devUsages = showUsages ? usages(d) : [];
+            const devFeatureSet = new Set(showFeatures ? features(d) : []);
+            const devCountrySet = new Set(showCountries ? countriesFor(d) : []);
+            const label = descLabel(d) || singleRowLabel(d);
+            return (
+              <a class="row row-child" href={`${basePath}/${d.id}`}>
+                <span class="name">{label}</span>
+                {columns.map((s) => {
+                  if (s.kind === "usages") {
+                    return devUsages.length > 0 ? (
+                      <span class="tag tag-usages"><UsageIcons usages={devUsages} lang={lang} /></span>
+                    ) : (
+                      <span class="tag-empty" aria-hidden="true"></span>
+                    );
+                  }
+                  if (s.kind === "feature" || s.kind === "sponsorship") {
+                    return devFeatureSet.has(s.value) ? (
+                      <span class={featureClass(s.value)}>{s.label}</span>
+                    ) : (
+                      <span class="tag-empty" aria-hidden="true"></span>
+                    );
+                  }
+                  return devCountrySet.has(s.value) ? (
+                    <span class="tag tag-country">{s.label}</span>
+                  ) : (
+                    <span class="tag-empty" aria-hidden="true"></span>
+                  );
+                })}
+              </a>
+            );
+          })}
+        </div>
+      );
+    })
+  }
+</div>

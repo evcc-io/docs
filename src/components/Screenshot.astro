@@ -1,0 +1,53 @@
+---
+interface Props {
+  /** Path beneath /img/, e.g. "features/screenshots/solar-mode" */
+  name?: string;
+  /** Backwards-compat alias for `name`. */
+  img?: string;
+  alt?: string;
+  caption?: string;
+  width?: number;
+}
+
+const { name, img, alt, caption, width } = Astro.props;
+const base = name ?? img;
+const src = base ? `/img/${base.replace(/^\/+/, "")}` : "";
+const altText = alt ?? caption ?? "Screenshot";
+---
+
+{
+  src && (
+    <figure class="screenshot">
+      <picture>
+        <source
+          media="(prefers-color-scheme: dark)"
+          srcset={`${src}-dark-1x.webp 1x, ${src}-dark-2x.webp 2x`}
+        />
+        <img
+          src={`${src}-light-1x.webp`}
+          srcset={`${src}-light-1x.webp 1x, ${src}-light-2x.webp 2x`}
+          alt={altText}
+          width={width}
+          loading="lazy"
+        />
+      </picture>
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  )
+}
+
+<style>
+  .screenshot {
+    margin: 1rem 0;
+  }
+  .screenshot img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+  }
+  .screenshot figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--sl-color-gray-3);
+  }
+</style>

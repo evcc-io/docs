@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+import DeviceDetailLayout from "@components/DeviceDetailLayout.astro";
+import { CODE_PREAMBLES, filterByType, indent, featuresFor } from "@utils/devices";
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const lang of ["en", "de"] as const) {
+    const coll = await getCollection(`chargers-${lang}` as any);
+    const filtered = filterByType(coll as any, "charger");
+    for (const entry of filtered) {
+      paths.push({ params: { lang, slug: entry.id }, props: { entry, lang } });
+    }
+  }
+  return paths;
+}
+
+const { entry, lang } = Astro.props as { entry: any; lang: "de" | "en" };
+
+const features = featuresFor("charger", entry, lang);
+const editUrl = entry.data.template
+  ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/charger/${entry.data.template}.yaml`
+  : undefined;
+
+const codeBlocks = (entry.data.render as any[] ?? []).map((render) => {
+  const preamble = CODE_PREAMBLES[render.usage ?? "charger"] ?? CODE_PREAMBLES.charger;
+  const src = render.advanced ?? render.default;
+  return `${preamble}\n${indent(src).trimEnd()}`;
+});
+---
+
+<DeviceDetailLayout
+  entry={entry}
+  lang={lang}
+  type="chargers"
+  categoryLabel={lang === "de" ? "Wallboxen" : "Chargers"}
+  brandKey="manufacturer"
+  features={features}
+  codeBlocks={codeBlocks}
+  editUrl={editUrl}
+/>

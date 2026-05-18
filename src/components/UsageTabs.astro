@@ -1,0 +1,46 @@
+---
+import { Code } from "@astrojs/starlight/components";
+import UsageIcons from "./UsageIcons.astro";
+
+interface Tab {
+  usage: string;
+  label: string;
+  code: string;
+}
+
+interface Props {
+  tabs: Tab[];
+  lang: "de" | "en";
+  /** Stable id used to scope radio inputs on the page. */
+  groupId: string;
+}
+
+const { tabs, lang, groupId } = Astro.props;
+const name = `usage-tabs-${groupId}`;
+---
+
+<div class="usage-tabs not-content">
+  {tabs.map((tab, i) => (
+    <input
+      type="radio"
+      class="usage-tabs-input"
+      name={name}
+      id={`${name}-${tab.usage}-${i}`}
+      checked={i === 0}
+      aria-label={tab.label}
+    />
+  ))}
+  <div class="usage-tabs-bar" role="tablist">
+    {tabs.map((tab, i) => (
+      <label class="usage-tabs-label" for={`${name}-${tab.usage}-${i}`}>
+        <UsageIcons usages={[tab.usage]} lang={lang} />
+        <span>{tab.label}</span>
+      </label>
+    ))}
+  </div>
+  {tabs.map((tab, i) => (
+    <div class={`usage-tabs-panel usage-tabs-panel-${i}`}>
+      <Code lang="yaml" code={tab.code} />
+    </div>
+  ))}
+</div>

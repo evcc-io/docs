@@ -1,0 +1,100 @@
+---
+title: "Solar Surplus Charging"
+sidebar:
+  order: 1
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Use excess solar energy to charge the electric car.
+This is the core function of evcc.
+
+## Solar mode
+
+The function can be activated at the charging point via **Solar mode**.
+
+<Screenshot
+  name="features/screenshots/solar-mode"
+  caption="Screenshot of a charging point. Cursor clicks on the Solar mode."
+/>
+
+In this mode, charging starts automatically as soon as the PV system delivers **enough power**.
+The charging power is continuously adjusted so that **no power is drawn from the grid** if possible.
+If the PV system no longer delivers enough power or if household consumption increases, charging is paused and continued later.
+
+### When does charging start?
+
+All electric cars have a **minimum charging power**.
+This is determined by the minimum current of 6 A specified in the charging standard [IEC 61851](https://en.wikipedia.org/wiki/IEC_61851).
+The minimum charging power depends on the number of phases that the car and wallbox use for charging.
+
+| Phases              | Minimum charging power (6 A)             | Maximum charging power (16 A / 32 A)                           |
+| :------------------ | :--------------------------------------- | :------------------------------------------------------------- |
+| 1-phase             | **1,4 kW** (1 x 6 A x 230 V)             | **3,7 kW** (1 x 16 A x 230 V)                                  |
+| 2-phase             | **2,8 kW** (2 x 6 A x 230 V)             | **7,4 kW** (2 x 16 A x 230 V)                                  |
+| 3-phase<br />&nbsp; | **4,1 kW** (3 x 6 A x 230 V)<br />&nbsp; | **11 kW** (3 x 16 A x 230 V)<br />**22 kW** (3 x 32 A x 230 V) |
+
+Most wallboxes today are connected three-phase (11 kW or 22 kW).
+This means that the minimum charging power is 4.1 kW.
+For [wallboxes with automatic phase switching](../chargers#features) (1P/3P), evcc can switch between single-phase and three-phase as required and start charging at just 1.4 kW.
+
+The feed-in power is shown in the **energy flow diagram**.
+If the surplus is above the minimum charging power for a certain period of time, charging starts.
+
+<Screenshot
+  name="features/screenshots/energyflow-surplus"
+  caption="Energy flow diagram shows 3.4 kW feed-in."
+/>
+
+Note: The value on the grid meter is the decisive factor.
+**Solar mode** does not work for systems with regulated grid feed-in ("zero feed-in").
+
+### Not enough surplus?
+
+By default, the system tries to avoid drawing any power from the grid.
+This behavior can be adjusted via the configuration at the charging point.
+The parameters `delay` and `threshold` are relevant for this.
+They can be used to set the switch-on/switch-off delay and the surplus limit.
+
+```yaml
+loadpoints:
+  - title: Garage
+    enable:
+      # switch on when there is at least 2000 W surplus for 1 minute
+      delay: 1m
+      threshold: -2000
+    disable:
+      # switch off if more than 2000 W are drawn from the mains for 30 minutes
+      delay: 30m
+      threshold: 2000
+```
+
+This can be particularly useful for small PV systems or in the winter months, in order to at least partially cover your own charging needs with PV energy.
+
+The `enable` and `disable` parameters should be selected so that charging is not switched on and off too often.
+Some vehicles refuse to charge if it is interrupted too often and must be made to charge again, for example by unlocking or plugging/unplugging the charging cable.
+
+### Interaction with the home battery
+
+Battery systems have their own, fast regulation.
+In the standard case, the home battery has priority.
+The **Solar mode** only starts charging the vehicle when it can no longer absorb any power.
+
+You can find out how to adjust this behavior under [Home battery](./battery).
+
+## Min+Solar mode
+
+The **Min+Solar mode** is a variation of the **Solar mode**.
+
+<Screenshot
+  name="features/screenshots/min-solar-mode"
+  caption="Screenshot of a charging point. Cursor clicks on the Min+Solar mode."
+/>
+
+Here, charging begins immediately with minimal charging power - even if there is no or insufficient surplus.
+If surplus is available, the charging power is increased accordingly.
+
+In contrast to **Solar mode**, charging is not interrupted.
+This is primarily useful for vehicles that do not like regular starting and stopping of charging.
+
+Even in very changeable weather conditions, **Min+Solar mode** can be a good alternative to **Solar mode**.

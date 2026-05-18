@@ -1,0 +1,70 @@
+---
+title: "CO₂-Optimized Charging"
+sidebar:
+  order: 2
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Self-produced energy is not always enough to cover your own charging needs, and you have to fall back on mains electricity. In this case,
+it makes sense to start the charging process when there is as much CO₂-neutral energy as possible in the public power grid.
+
+Even if you have a green electricity tariff that advertises 0 gCO₂/kWh, optimized charging still makes sense.
+Although these tariffs are CO₂-neutral in terms of the national balance sheet, you will be using the local electricity mix.
+If there is little renewable energy available in the power grid, the additional electricity demand must be covered by fossil fuels.
+
+## Configuring the Data Source
+
+In order to charge in a CO₂-optimised way, evcc needs forecast data about CO₂ emissions in your region.
+The configuration must be done via evcc.yaml
+
+```yaml
+tariffs:
+  co2:
+    type: template
+    template: grünstromindex # example GrünstromIndex (Germany only)
+    zip: 12349 # ZIP code
+```
+
+In this example, we'll use data from GrünstromIndex.
+See [tariffs](../tariffs) for a list of all supported data sources.
+
+## Clean web charging
+
+Open the settings dialog at the charging point.
+
+<Screenshot
+  name="features/screenshots/co2-loadpoint-settings"
+  caption="Settings at the charging point"
+/>
+
+The CO₂ forecast data is displayed in the bar chart.
+Each bar represents an hour.
+You can select your desired CO₂ limit via the selection field or by clicking on a bar.
+
+<Screenshot
+  name="features/screenshots/co2-modal"
+  caption="Screenshot of the Smart Grid Charging dialog with set CO₂ limit"
+/>
+
+This limit applies in the PV mode of the current charging point.
+By clicking on "apply everywhere", the limit for all charging points is applied.
+In addition to PV surplus charging, fast charging is now activated during the hours with low CO₂ emissions (green bars).
+This setting is useful to ensure a fully charged battery in the winter months, whilst still relieving the power grid.
+
+## Load planning
+
+By using [charging plans](./plans), you can control CO₂-optimised charging even more precisely.
+All you have to do is enter your amount of energy (kWh) or your destination charge level (%) and the desired departure time.
+When a CO₂ data source is configured, the scheduling algorithm automatically selects the hours with the lowest CO₂ emissions.
+
+<Screenshot
+  name="features/screenshots/co2-plan"
+  caption="Screenshot of the charging plan dialogue with optimised CO₂ charging"
+/>
+
+:::note[Tip]
+If you have configured a [dynamic electricity tariff](./dynamic-prices), it will be preferred.
+The CO₂ data will continue to be collected at your charging sessions.
+However, the planning algorithm and the "Cheap Grid Charging" function now optimize for price instead of CO₂
+:::

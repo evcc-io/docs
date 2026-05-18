@@ -1,0 +1,114 @@
+---
+import { Code, Aside } from "@astrojs/starlight/components";
+
+interface Props {
+  lang: "de" | "en";
+}
+const { lang } = Astro.props;
+
+const chargingDe = `chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50`;
+
+const staticDe = `chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000`;
+---
+
+{lang === "de" ? (
+  <>
+    <p>
+      evcc unterstützt smarte Steckdosen und steuerbare Schalter.
+      Diese Schalter funktionieren ähnlich wie Wallboxen, jedoch ohne Regelung der Ladeleistung.
+      Hier steuert evcc lediglich den Ein-/Aus-Zustand der Steckdose.
+      Ist genügend <a href="/de/features/solar-charging">Überschuss</a> oder <a href="/de/features/dynamic-prices">günstige Energie</a> aus dem Netz verfügbar, wird automatisch geschaltet.
+    </p>
+
+    <h2 id="einrichtung">Einrichtung</h2>
+    <p>
+      <strong>Empfohlen:</strong> Richte deine smarten Schalter über die Weboberfläche unter <strong>Konfiguration → Laden & Heizen</strong> ein.
+    </p>
+    <p>
+      <strong>Alternativ:</strong> Du kannst deine Schalter auch über die Konfigurationsdatei einrichten.
+    </p>
+
+    <h2 id="modus">Modus</h2>
+    <p>
+      Abhängig vom Anwendungsfall gibt es zwei Modi.
+      Diese werden implizit über den Parameter <code>standbypower</code> festgelegt.
+    </p>
+
+    <h3>Lademodus (Standard)</h3>
+    <p>
+      Geeignet für die Verwendung von Steckdosen als Ladesteuerung für akkubetriebene Fahrzeuge (E-Motorrad, E-Bikes, Werkzeugakkus …).
+      Die gemessene Leistung wird als Ladeleistung gewertet.
+      Fällt diese Leistung unter <code>standbypower</code> (Standard: 15&nbsp;W), betrachtet evcc das Gerät als geladen.
+      Dieser Modus ist aktiv, wenn <code>standbypower</code> nicht negativ ist.
+    </p>
+    <Code lang="yaml" code={chargingDe} />
+
+    <h3>Statischer Modus</h3>
+    <p>
+      Für allgemeine Verbraucher wie Wärmepumpen, Klimaanlagen oder Heizlüfter geeignet.
+      Wird durch einen negativen Wert für <code>standbypower</code> aktiviert.
+    </p>
+    <Code lang="yaml" code={staticDe} />
+
+    <Aside type="note">
+      Der Lademodus setzt voraus, dass der Schalter einen eingebauten Energiezähler hat.
+      Mit einem zusätzlichen <a href="/de/meters">Energiezähler</a> am Ladepunkt ist dieses Verhalten aktuell nicht erreichbar.
+    </Aside>
+
+    <h2 id="supported">Unterstützte Geräte</h2>
+  </>
+) : (
+  <>
+    <p>
+      evcc supports smart sockets and controllable switches.
+      They work similarly to chargers but without power control — evcc only switches the socket on or off.
+      If enough <a href="/en/features/solar-charging">surplus</a> or <a href="/en/features/dynamic-prices">cheap energy</a> is available, the socket is switched automatically.
+    </p>
+
+    <h2 id="setup">Setup</h2>
+    <p>
+      <strong>Recommended:</strong> Set up your smart switches via the web interface under <strong>Configuration → Charging & Heating</strong>.
+    </p>
+    <p>
+      <strong>Alternative:</strong> You can also set up your switches via the configuration file.
+    </p>
+
+    <h2 id="modes">Modes</h2>
+    <p>
+      Depending on the application there are two modes, implicitly chosen via the <code>standbypower</code> parameter.
+    </p>
+
+    <h3>Charging mode (default)</h3>
+    <p>
+      Suitable for sockets that control battery-powered vehicles (e-motorcycles, e-bikes, tool batteries …).
+      The measured power at the switch is treated as charging power.
+      If it falls below <code>standbypower</code> (default 15&nbsp;W), evcc treats the device as charged.
+      This mode is active whenever <code>standbypower</code> is not negative.
+    </p>
+    <Code lang="yaml" code={chargingDe} />
+
+    <h3>Static mode</h3>
+    <p>
+      Suitable for general consumers such as heat pumps, air conditioners or heaters.
+      Activated by a negative <code>standbypower</code> value.
+    </p>
+    <Code lang="yaml" code={staticDe} />
+
+    <Aside type="note">
+      Charging mode assumes the switch has a built-in energy meter.
+      It's currently not possible to get this behaviour with an additional external <a href="/en/meters">energy meter</a>.
+    </Aside>
+
+    <h2 id="supported">Supported devices</h2>
+  </>
+)}

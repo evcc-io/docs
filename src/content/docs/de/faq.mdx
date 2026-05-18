@@ -1,0 +1,445 @@
+---
+title: "Häufige Fragen"
+toc_max_heading_level: 2
+sidebar:
+  order: 8
+---
+
+## Einrichtung
+
+### Soll ich evcc über die Weboberfläche oder mit der Konfigurationsdatei einrichten?
+
+Wir empfehlen die Einrichtung über die **Weboberfläche**.
+Nach der Installation von evcc öffnest du die Oberfläche im Browser und konfigurierst deine Geräte direkt dort.
+Die Einstellungen werden automatisch in der Datenbank gespeichert.
+
+Die **Konfigurationsdatei** (`evcc.yaml`) ist die traditionelle Methode und wird weiterhin unterstützt.
+
+**Wichtig**: Einige neuere Features sind ausschließlich über die Weboberfläche verfügbar.
+Beide Methoden können auch parallel genutzt werden.
+
+Mehr Informationen findest du unter [Einrichtung](./installation/configuration).
+
+### Ich habe eine evcc.yaml Konfiguration. Wie migriere ich zur Weboberfläche?
+
+Du kannst beide Konfigurationsmethoden parallel nutzen und schrittweise migrieren.
+
+**Vorgehen:**
+
+1. Konfiguriere ein neues Gerät direkt über die Weboberfläche unter **Konfiguration**.
+2. Entferne den entsprechenden Eintrag aus deiner `evcc.yaml`.
+3. Wiederhole dies für alle Geräte, bis deine `evcc.yaml` leer ist.
+
+**Zusammenführung von Geräten:**
+
+Ladepunkte, Netzzähler, PV-Anlagen, Batterien, Fahrzeuge und weitere Zähler werden aus beiden Quellen zusammengeführt.
+Auf der Konfigurationsseite sind Geräte aus der `evcc.yaml` sichtbar, aber nicht bearbeitbar.
+Du kannst Geräte sowohl aus der `evcc.yaml` als auch aus der UI gleichzeitig nutzen.
+
+**Vorrang der UI-Konfiguration:**
+
+Bei anderen Einstellungen (MQTT, Benachrichtigungen, InfluxDB, Tarife, ...) haben Werte aus der Weboberfläche Vorrang gegenüber Werten aus der `evcc.yaml`.
+Wir empfehlen immer nur eine Quelle zu nutzen, um Verwirrung zu vermeiden.
+
+**Hinweis:** An einigen Stellen (HEMS, Sponsortoken) ist die UI-Konfiguration gesperrt, falls bereits über `evcc.yaml` konfiguriert wurde.
+Lösche den Eintrag aus der `evcc.yaml`, um die UI-Bearbeitung zu ermöglichen.
+
+**Fazit:**
+
+Eine vollständige Migration ist nicht zwingend erforderlich.
+Du kannst die `evcc.yaml` auch weiterhin für bestimmte Konfigurationen nutzen und neue Features über die Weboberfläche hinzufügen.
+
+:::note[Es gibt keine automatische Migration.]
+Der früher vorhandene `evcc migrate` Befehl wurde aufgrund hoher Komplexität entfernt.
+Bitte migriere händisch.
+:::
+
+### Kann ich evcc ohne Netzzähler betreiben?
+
+Der Netzzähler ist das Kernstück für evcc und sollte, wenn möglich, eingebunden werden.
+Es ist jedoch ebenso möglich, sonnengeführtes Laden ausschließlich auf der Grundlage der PV-Leistung zu betreiben.
+In dieser Konstellation kann nicht mit PV-Überschuss geladen werden, da der dazu notwendige Messpunkt (Zähler) fehlt.
+Stattdessen wird in den Lademodi **PV** und **Min+PV** mit der PV-Erzeugungsleistung gearbeitet.
+Als Optimierung kann über die Einstellung [`residualPower`](./reference/configuration/site#residualpower) ein typischer mittlerer Hausverbrauch angegeben werden.
+
+**Beispiel**:
+
+```yaml
+site:
+  residualPower: 250 # 250W Hausverbrauch
+```
+
+### Ich habe keine PV Anlage, kann ich evcc trotzdem sinnvoll einsetzen?
+
+Hier gibt es verschiedene Nutzungsmöglichkeiten.
+Notwendig ist auf jeden Fall ein auslesbarer Netzzähler.
+Bei einem [variablen Stromtarif](./features/dynamic-prices) (z. B. Nachtstrom, Tibber, Awattar) ist automatisches preisabhängiges Laden möglich.
+Ansonsten kann man evcc zur Fernsteuerung (start/stop) der Wallbox nutzen.
+Darüber hinaus kann man die Ladung einer Fahrzeugbatterie auf einen bestimmten Ladestand (SoC) begrenzen. In diesem Fall ist es aber zwingend notwendig, dass das Fahrzeug in die Konfiguration mit aufgenommen wird.
+
+### Kann ich evcc ausprobieren ohne alle Bestandteile (PV-Anlage, Wallbox, ...) zu haben?
+
+Wenn einige Komponenten noch nicht vorhanden sind, lassen sich "Demo" Komponenten einsetzen.
+Dazu sind entsprechende Template eingerichtet.
+
+[Zähler](https://docs.evcc.io/docs/meters#demoz%C3%A4hler)
+
+[Wallbox](https://docs.evcc.io/docs/chargers#demowallbox)
+
+### Kann ich evcc ohne Einbindung des PV-Wechselrichters betreiben?
+
+Ja, wenn ein Netzzähler und eine steuerbare Wallbox vorhanden sind, reicht dies für alle wesentlichen Funktionen von evcc inkl. Überschussladung aus. Es fehlt dann nur die Visualisierung der PV-Erzeugung sowie einige der daraus abgeleiteten Berechnungen und Statistiken.
+Darüber hinaus besteht aber die Möglichkeit, die PV-Erzeugungsleistung mit einem nachgerüsteten Erzeugungszähler direkt zu erfassen und somit alle Features wie bei einer direkten Anbindung des PV-Wechselrichters zu nutzen.
+
+### Kann ich mehrere Wallboxen nutzen?
+
+Mehrere Wallboxen und damit Ladepunkte können in evcc verwendet werden. Es ist jedoch heute noch **kein** Lastmanagement möglich. Das ist auf unserer langen Liste für die weitere Entwicklung.
+
+### Meine Wallbox hat keine Phasenumschaltung. Kann ich trotzdem 1-phasig laden?
+
+Bei kleinen PV-Anlagen und/oder im Winter macht es Sinn nur 1-phasig zu laden, um den vorhandenen Überschuss bestmöglich ohne Netzbezug zu nutzen.
+
+Bei Wallboxen die keine automatische Phasenumschaltung beherrschen, kann man in der Zuleitung zur Wallbox mittels eines Lasttrennschalters (z. B. Hager HAB304) die Phasen 2 & 3 abschalten. Wenn die volle Leistung benötigt wird, schaltet man die Phasen wieder zu.
+
+:::danger[Achtung]
+Dieses manuelle Umschalten darf nur erfolgen, wenn das Fahrzeug **NICHT** mit der Wallbox verbunden ist.
+:::
+
+Alternativ kann im Winter auch einfach ein einphasiges Ladekabel verwendet werden.
+
+Damit evcc weiß, dass nicht mehr 3-phasig geladen werden kann muss die entsprechende Einstellung am Ladepunkt über die UI angepasst werden.
+
+## Fehlersuche
+
+### Etwas funktioniert nicht. Was nun?
+
+Schau zuerst im [Community Forum](https://github.com/evcc-io/evcc/discussions) nach, ob dein Problem bereits diskutiert wurde.
+Hier helfen sowohl Entwickler als auch Anwender bei verschiedenen Problemen.
+
+Die einfachste Möglichkeit um Hilfe zu bekommen ist die **Problem melden** Funktion in der evcc Weboberfläche.
+Klicke in der Oberfläche auf das Menü (oben rechts) und wähle **Hilfe benötigt?** → **Problem melden**.
+Hier werden Details zu deiner Konfiguration, Datenbank, Logs und dem Zustand der Anwendung angezeigt.
+Daraus kannst du direkt einen [GitHub Discussions](https://github.com/evcc-io/evcc/discussions) Beitrag oder ein [GitHub Issue](https://github.com/evcc-io/evcc/issues) erstellen.
+
+Wenn du selbst einen Beitrag erstellst, gib bitte genaue Informationen an:
+
+- Beschreibung des Problems mit reproduzierbaren Schritten.
+- Welche Geräte (Fahrzeug, Hausinstallation, Wallbox) verwendet werden.
+
+Eine gute Problembeschreibung führt zu schnellerer und besserer Hilfe.
+
+### Syntax-Fehler in der evcc.yaml finden
+
+yaml ist sehr syntax-empfindlich.
+Fehler fallen nicht immer sofort ins Auge.
+
+Eine schnelle Hilfe bieten yaml-Tester wie z. B. (https://onlineyamltools.com/validate-yaml)
+
+### Wie kann ich ein Logfile zur Fehleranalyse erstellen?
+
+Die einfachste Möglichkeit ist das **Log in der Weboberfläche** einzusehen und herunterzuladen.
+Klicke im Menü (oben rechts) auf "Logs".
+Dort kannst du auch nach verschiedenen Level und Bereichen filtern.
+
+Das Log umfasst die letzten 10k Zeilen.
+
+**Erweiterte Log-Optionen:**
+
+Wird evcc als Linux Systemdienst ausgeführt, können die log-Nachrichten über folgende Befehle verfolgt werden:
+
+- Kontinuierliche Anzeige der evcc log Meldungen
+  `sudo journalctl -fau evcc`
+- Anzeige der evcc log Meldungen seit dem letzten Start des evcc Services (Abbruch mit Strg-c)
+  `sudo journalctl -u evcc -q`
+- Speichern der Log-Ausgabe in eine Datei im Home-Verzeichnis
+  `sudo journalctl -u evcc -q > ~/evcc.log`
+- Ergänzend kann auch noch Start- (`-S`) und Endzeitpunkt (`-U`) der Log-Ausgabe bestimmt werden
+  `sudo journalctl -u evcc -S "2023-03-21 07:00:00" -U "2023-03-21 08:00:00" -q > ~/evcc.log`
+
+Weiterführende Hilfe: [wiki.ubuntuusers.de/systemd/journalctl](https://wiki.ubuntuusers.de/systemd/journalctl/)
+
+Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/).
+
+### Weiterführende Hilfe bei der Geräteerkennung
+
+`evcc detect` ist ein spezielles Kommando, welches eine Art Hardwareerkennung und Netzwerksuche für bestimmte Geräte ermöglicht.
+Insbesondere hilft es manchmal bei der ersten Einschätzung von "neuen" SunSpec-kompatiblen Modbus-Geräten und bei der Validierung von IP-Konfigurationen.
+Es ist aber mehr ein Entwickler- und Supporttool zu Diagnosezwecken und erkennt auch nur einen nicht näher definierbaren Gerätetypenkreis.
+
+## Fehlermeldungen
+
+### Charger out of sync: expected disabled, got enabled<br/>Charger logic error: disabled but charging
+
+evcc erwartet nach einem Intervallzyklus bereits den neuen korrekten Status.
+Wenn manche Geräte etwas zu langsam auf Anweisungen reagieren, kommt es kurzzeitig zu einem undefinierten Zustand, der mit diesen Fehlern quittiert wird.
+Sollten ansonsten keine Probleme auftreten, kann die Meldung ignoriert werden.
+Abhilfe schafft ein größeres [`interval`](./reference/configuration/interval).
+
+### connection refused
+
+Die IP-Verbindung zum betreffenden Gerät ist prinzipiell vorhanden, jedoch wird der Verbindungsaufbau von diesem Gerät zum angegebenen Port abgewiesen.
+
+Die Gründe dafür können vielfältig sein. Typisch sind:
+
+- Der am Gerät offene Port stimmt nicht mit dem in der evcc-Konfiguration angegebenen Zielport überein.
+- Der externe Zugriff auf das Gerät ist nicht aktiviert (z. B. bei Solaredge-Wechselrichtern im Auslieferungszustand).
+- Die maximal mögliche Anzahl an parallelen Verbindungen, die das Zielgerät verwalten kann, ist erschöpft. Andere Verbindungen z. B. von Hausautomationen, Skripten oder weiteren Instanzen von evcc müssen ggf. zunächst beendet werden, bevor eine neue Verbindung möglich ist. Im ungünstigsten Fall lässt das Zielsystem nur eine einzige Verbindung zu.
+- Blockade durch eine Firewall.
+
+### i/o timeout
+
+Hier ist eine Verbindung zum Gerät ggf. vorhanden, jedoch antwortet das Zielsystem nicht innerhalb der vorgesehenen Zeit.
+Entweder kommt die Anfrage gar nicht beim Zielsystem an, geht auf dem Rückweg verloren oder die Antwort dauert zu lange.
+
+Typische Gründe sind:
+
+- Langsame oder schlechte Netzwerkverbindung (insbesondere bei Verbindungen über WiFi oder PowerLAN)
+- Fehlerhafte oder ungeeignete Verkabelung oder (bei RS485) falsche Terminierung
+- Das Zielgerät ist überlastet oder ausgefallen
+- Bestimmte Funktionen des Geräts sind nicht wie von evcc erwartet verfügbar (z. B. durch veraltete Firmware oder abweichende Konfigurationseinstellungen)
+- Zu kurze Timeout- oder Abfragezykluszeiten seitens evcc
+
+### /tmp/evcc: operation not permitted<br/>bind: address already in use
+
+Diese Fehlermeldung erscheint, wenn z B. evcc bereits als Dienst läuft und evcc zusätzlich ein weiteres Mal auf der Kommandozeile (durch Eingabe `evcc`) gestartet wird, ggf. auch noch mit unterschiedlichen Benutzerberechtigungen.
+Es darf immer nur eine einzige Instanz von evcc zur gleichen Zeit laufen.
+
+Eine Prüfung, ob mehrere evcc Prozesse laufen, kann unter Linux mithilfe von `htop` erfolgen.
+
+Sollte es Gründe geben, evcc auf der Kommandoebene zu starten, sollte vorher der Dienst mit `sudo systemctl stop evcc` beendet werden.
+
+### evcc UI ist nicht erreichbar
+
+Schaue ins Log, um die Fehlerursache zu finden.
+Wie du das Log aufrufst, findest du in der [Installation](/de/installation) unter deiner jeweiligen Installationsmethode.
+
+### MQTT plugin gibt `outdated` Warnung
+
+Bei der Nutzung des [MQTT plugins](devices/plugins#mqtt) kann über den `timeout` parameter gesteuert werden, wie lange ein Wert der per MQTT erhalten wurde, gültig ist.
+Wenn kein neuer Wert innerhalb dieser Zeit kommt, ist der Wert für evcc `outdated`.
+Wichtig ist, dass hier eine Einheit mit angegeben werden muss, also z.B. `timeout: 30s`
+
+## Laden
+
+### Auto lädt beim Einstecken obwohl kein Überschuss vorhanden ist
+
+Bei einigen Wallboxen wird die Ladung sofort nach dem Einstecken gestartet oder durch das Präsentieren einer RFID-Karte ausgelöst.
+Das Startverhalten können wir leider nicht immer beeinflussen.
+evcc erkannt dieses Fehlverhalten aber und stoppt die Ladung nach kurzer Zeit.
+
+### PV-Erzeugung im Winter nutzen
+
+In den Wintermonaten ist die PV Erzeugung meist unterhalb oder im Bereich der [Mindestleistung](/de/features/solar-charging#wann-startet-die-ladung).
+Um dennoch möglichst viel eigenen Strom ins Fahrzeug zu laden, kann man folgende "Tricks" anwenden:
+
+#### mittels `residualpower`
+
+In der Konfiguration unter [`site`](/de/reference/configuration/site) setzt man [`residualPower`](/de/reference/configuration/site#residualpower) auf einen negativen Wert. Dieser bestimmt dann wieviel Netzbezug im PV Modus noch erlaubt ist. Eine Änderung ist per API möglich.
+
+**Beispiel**:
+
+```yaml
+site:
+  residualPower: -1000 # 1000W Netzbezug im PV Modus erlaubt
+```
+
+"Nachteil" dieser Lösung ist, dass auch bei ausreichendem Überschuss dieser erlaubte Netzbezug ausgenutzt wird.
+
+#### mittels `enable/disable`
+
+In der Konfiguration unter [`loadpoints`](/de/reference/configuration/loadpoints) stellt man bei `enable`und `disable` das gewünschte Verhalten ein. Eine Änderung der `threshold` Werte ist per API möglich.
+
+**Beispiel**:
+
+```yaml
+loadpoints:
+  enable:
+      delay: 1m
+      threshold: -200 # es wird eingeschaltet, wenn 1 Minute lang 200 W Einspeisung vorhanden sind
+    disable:
+      delay: 30m
+      threshold: 1200 # es wird ausgeschaltet, wenn 30 Minuten lang mehr als 1200 W Netzstrom bezogen wurde
+```
+
+### PSA: Bei meinem Peugeot/Opel wird der Ladezustand nur aktualisiert, wenn ich die Hersteller-App benutze
+
+Das ist leider eine Einschränkung der Herstellerschnittstelle. PSA liefert veraltete Werte aus, solange diese nicht über die App erneuert werden. Leider ist bislang noch keine Schnittstelle bekannt, um diese Erneuerung programmatisch anzustoßen.
+
+## Passwort
+
+### Ich habe mein Passwort vergessen. Wie kann ich es ändern?
+
+Das Passwort wird verschlüsselt gespeichert, daher kann es nicht ausgelesen werden.
+Du kannst über die Kommandozeile ein neues Passwort setzen.
+Stelle sicher, dass du evcc stoppst, bevor du das Passwort änderst.
+
+```bash
+service evcc stop
+EVCC_DATABASE_DSN=/var/lib/evcc/evcc.db evcc password set
+service evcc start
+```
+
+Alternativ kannst du das Passwort auch zurücksetzen.
+Dann wirst du beim nächsten Aufruf der evcc UI aufgefordert ein neues Passwort zu vergeben.
+
+```bash
+service evcc stop
+EVCC_DATABASE_DSN=/var/lib/evcc/evcc.db evcc password reset
+service evcc start
+```
+
+### Wie kann ich meine Konfiguration sichern und wiederherstellen?
+
+In der evcc Weboberfläche findest du unter **Konfiguration** → **Sichern & Wiederherstellen** folgende Optionen:
+
+**Sichern:**
+Lädt eine Kopie deiner Datenbank (evcc.db) herunter.
+Diese enthält alle konfigurierten Geräte, Dienste, Pläne, Ladevorgänge, usw.
+
+**Wiederherstellen:**
+Stellt eine zuvor heruntergeladene Datenbank wieder her.
+Vor dem Überschreiben wird automatisch eine lokale Sicherung (`evcc.db.bak`) angelegt.
+
+:::caution[Achtung]
+Alle Aktionen sind passwortgeschützt.
+Beim Wiederherstellen werden die aktuellen Daten komplett überschrieben.
+:::
+
+**Zurücksetzen:**
+Du kannst einzelne Bereiche deiner Datenbank löschen:
+
+- **Ladevorgänge:** Löscht den Verlauf deiner Ladevorgänge.
+- **Konfiguration & Einstellungen:** Löscht alle konfigurierten Geräte, Dienste, Pläne, Caches, usw.
+
+:::caution[Achtung]
+Nach dem Zurücksetzen der Konfiguration musst du alle Geräte neu konfigurieren.
+Deine `evcc.yaml` (falls vorhanden) bleibt dabei unverändert.
+:::
+
+Alternativ kannst du einzelne Caches über die Kommandozeile löschen:
+
+```bash
+evcc cache get
+
+# Alle Caches löschen
+evcc cache clear
+```
+
+## PV Vorhersage
+
+Du kannst in evcc verschiedene [PV-Vorhersagen](/de/tariffs#pv-vorhersage) nutzen, um die geschätzte Restproduktion für den aktuellen Tag und die nächsten Tage zu sehen.
+Als experimentelles Feature haben wir auch die Möglichkeit eingebaut, die Vorhersagen an deine tatsächliche Produktion anzupassen.
+
+### Anpassung der Vorhersage
+
+Neben der Vorhersage protokolliert evcc auch die aktuelle PV-Leistung und akkumuliert diese über den Lauf der Zeit.
+Das passiert auch für die Vorhersagedaten.
+Durch den Vergleich der beiden Werte über die Zeit kann evcc die Vorhersagen an die Werte deiner tatsächlichen Produktion anpassen.
+Du kannst diese Anpassung im Vorhersage-Dialog im UI ein- und ausschalten.
+
+#### Zurücksetzen der Anpassungsdaten
+
+Sollten die Anpassungswerte nicht korrekt sein, kannst du diese zurücksetzen.
+
+Vorgehensweise:
+
+1. evcc stoppen
+2. Run the following command via the CLI
+   ```bash
+   # Anpassungshistorie zurücksetzen. Mit `y` bestätigen.
+   evcc settings set solarAccForecast 0
+   evcc settings set solarAccYield "{}"
+   ```
+3. evcc wieder starten
+
+Jetzt beginnt evcc wieder von null an die Vorhersagen zu akkumulieren.
+
+## Statistische Daten
+
+### Telemetry & Community Daten
+
+Auf der [evcc Webseite](https://evcc.io/#live) und im "Auswertung Ladeenergie" Dialog der evcc-UI zeigen wir aggregierte Live-Ladedaten der evcc-Installationen an. Wir sammeln diese Daten auf unserer zentralen api.evcc.io Instanz. Die Teilnahme daran ist selbstverständlich freiwillig.
+
+**Wie kann ich teilnehmen?**
+
+Im "Auswertung Ladeenergie" Dialog kannst du unter "Live-Community" deine Daten teilen.
+
+Für die Teilnahme ist ein 💚 Sponsor Token erforderlich. Der Hauptgrund dafür ist die Datenqualität hoch zu halten und Fake-Daten zu minimieren.
+
+**Was wird aktuell übertragen?**
+
+- aktuelle Ladeleistung
+- aktueller Anteil an Sonnenstrom
+- geladene Energiemenge
+- geladener Anteil an Sonnenenergie
+
+Möglicherweise werden wir zukünftig noch weitere Daten hinzufügen. Dies werden aber auf keinen Fall personenbezogene Daten oder private Installationsdaten (Adresse, Zugänge) sein. Eure Privatsphäre ist uns wichtig!
+
+**Was passiert mit den Daten?**
+
+Wir speichern die Energiemengen aggregiert pro evcc-Instanz. Wir bilden keine Nutzerprofile über Zeit und haben auch kein Interesse daran dies zukünftig zu tun.
+
+Unser Ziel ist es durch diese Daten mehr neue Nutzer für evcc zu begeistern, selbst mehr über das Nutzungsverhalten von evcc zu erfahren und vor allem das durch evcc nutzbar gemachte Potenzial regenerativer Sonnenenergie zu visualisieren.
+
+Die dargestellten aggregierten Gesamtdaten können auch frei über https://api.evcc.io/v1/total abgerufen werden. Wenn ihr also Ideen für eigene kreative Visualisierungen habt, baut gerne was und erzählt uns davon.
+
+Mehr Informationen findest du auch auf unserer [Datenschutzseite](https://sponsor.evcc.io/privacy).
+
+### Ersparnisberechnung
+
+In der evcc Oberfläche wird dir unten rechts angezeigt wieviel Prozent deiner geladenen Energie aus eigenem Sonnenstrom stammt (Beispiel: **85% Sonnenenergie**).
+Beim Klick darauf öffnet sich ein Dialog der mehr Details zur Ladenergie und deinen eingesparten Kosten zeigt.
+Damit diese Werte korrekt sind, musst du deinen Energie- und Einspeisepreis in der Konfiguration hinterlegen.
+Hier ein Beispiel:
+
+**Beispiel**:
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [currency]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [currency]/kWh
+```
+
+Mehr Details zur Konfiguration findest du in [`tariffs`](/de/tariffs).
+
+Für die Berechnung der Einsparungen erfasst evcc grob die Gesamtmenge der geladenen Energie und die verwendeten Energiequellen (Netz, Batterie, PV).
+
+**Was ist Sonnenenergie?**
+
+Die direkte PV-Nutzung und die vom Batteriesystem bereitgestellte Energie werden bei dieser Berechnung gleich behandelt.
+evcc geht davon aus, dass der Hausspeicher primär zur Speicherung von überschüssigem, selbstproduzierten Sonnenstrom verwendet wird.
+Erfüllt der Speicher auch netzdienliche Leistungen (bspw. Sonnen) oder führt eine Kalibrierung mit Netzstrom durch, ist diese Annahme nicht immer korrekt.
+Batterieverluste durch die Umwandlung werden nicht berücksichtigt.
+
+**Berechnung von Ersparnis und effektivem Energiepreis**
+
+Der Algorithmus unterscheidet zwischen Netzstrom und selbst erzeugter Sonnenenergie (PV, Batterie).
+Der Kostenvorteil deiner Sonnenenergie ergibt sich aus der Differenz zwischen deinem Netzbezugspreis (z. B. 30 ct/kWh) und deinem Einspeisetarif (z. B. 8 ct/kWh).
+Jede geladene kWh selbst produzierter Energie ist in diesem Beispiel 22 ct (30 ct - 8 ct) günstiger als der Netzbezug.
+Hast du 2 kWh eigene Energie geladen entspricht das einer **Ersparnis** von 44 ct.
+
+Würdest du dein Auto zu 100% mit eigener Sonnenenergie laden, entspricht der angezeigte **effektive Energiepreis** deiner, nicht eingenommenen, Einspeisevergütung (bspw. 8 ct/kWh).
+Lädst du dein Auto zu 50% aus Sonnenenergie und zu 50% aus Netzstrom passt sich der Energiepreis entsprechend an (bspw. 19 ct/kWh).
+
+Wenn du keine Einspeisevergütung erhältst, kannst du den Einspeisepreis auf 0 setzen.
+Die Sonnenenergie wird dann als kostenlos gerechnet.
+
+Uns ist klar, dass diese Einsparung nicht allein evcc zuzuschreiben ist.
+Steckst du dein Auto an einem sonnigen Tag an eine _dumme_ Wallbox, wird ein Teil der geladenen Energie auch Sonnenstrom sein.
+evcc hilft dir aber den Anteil der geladenen Sonnenenergie zu maximieren.
+
+**Berechnung des Sonnenenergieanteils**
+
+Wenn du gleichzeitig Energie aus verschiedenen Quellen beziehst (z. B. 50% PV, 50% Netzbezug), wird die selbst erzeugte Energie zuerst dem Haus, also allen nicht von evcc gesteuerten Verbrauchern, zugeordnet.
+Der verbleibende Anteil wird dann auf die Ladevorgänge aufgeteilt.
+Beispiel: Deine PV-Anlage erzeugt 3 kW. Diese 3 kW werden komplett vom Haus verbraucht (bspw. Waschmaschine).
+Parallel lädst du dein Auto mit 3 kW (bspw. Modus = schnell).
+Das Haus wird in diesem Fall mit 100% Sonnenanteil gerechnet, das Auto mit 0%.
+
+Flexible Preise (Octopus Energy, Awattar, Tibber, etc) werden für die Ermittlung des effektiven Energiepreises berücksichtigt.

@@ -1,0 +1,39 @@
+---
+import { getCollection } from "astro:content";
+import DeviceDetailLayout from "@components/DeviceDetailLayout.astro";
+import { CODE_PREAMBLES, indent, featuresFor } from "@utils/devices";
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const lang of ["en", "de"] as const) {
+    const coll = await getCollection(`vehicles-${lang}` as any);
+    for (const entry of coll as any[]) {
+      paths.push({ params: { lang, slug: entry.id }, props: { entry, lang } });
+    }
+  }
+  return paths;
+}
+
+const { entry, lang } = Astro.props as { entry: any; lang: "de" | "en" };
+
+const features = featuresFor("vehicle", entry, lang);
+const editUrl = entry.data.template
+  ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/vehicle/${entry.data.template}.yaml`
+  : undefined;
+
+const codeBlocks = (entry.data.render as any[] ?? []).map((render) => {
+  const src = render.advanced ?? render.default;
+  return `${CODE_PREAMBLES.vehicle}\n${indent(src).trimEnd()}`;
+});
+---
+
+<DeviceDetailLayout
+  entry={entry}
+  lang={lang}
+  type="vehicles"
+  categoryLabel={lang === "de" ? "Fahrzeuge" : "Vehicles"}
+  brandKey="make"
+  features={features}
+  codeBlocks={codeBlocks}
+  editUrl={editUrl}
+/>

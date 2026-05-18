@@ -1,0 +1,204 @@
+---
+title: "site"
+sidebar:
+  order: 2
+---
+
+import prioritySoc from "./img/prioritysoc.webp";
+import bufferSoc from "./img/buffersoc.webp";
+import bufferStartSoc from "./img/bufferstartsoc.webp";
+
+Describes the location with the existing and required devices of the home installation and is responsible for regulating the available power.
+
+To regulate charging with PV surplus, a readable meter directly behind the grid connection point is necessary. In addition, devices for PV power and house battery(ies) can also be specified. Several devices are automatically added in terms of power or, in the case of battery storage, the average state of charge is calculated.
+
+**For example**:
+
+```yaml
+site:
+  title: Home # display name for UI
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv:
+      - mypv1 # first pv meter reference
+      - mypv9 # second pv meter reference
+    battery:
+      - mybat5 # battery meter reference
+    aux:
+      - myaux1 # self-regulating consumer
+    ext:
+      - myext1 # for data logging, load management, etc.
+  residualPower: 100
+```
+
+---
+
+## Required Parameters
+
+### `title`
+
+The description of the charging point is also displayed in the UI.
+
+**For example**:
+
+```yaml
+title: Home
+```
+
+---
+
+### `meters`
+
+Defines which configured meter (current measurement devices) are to be used as what type of measurement point. This logically links the device definition with its intended use. A initially universal meter is thus assigned a purpose based on its location within the home installation.
+
+:::note
+At least the configuration of one `grid` or at least one `pv` element is necessary!
+
+evcc cannot be used without at least one of these entries!
+:::
+
+**For example**:
+
+```yaml
+site:
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv: mypv1 # pv meter reference
+    battery: mybat2 # battery meter reference
+    aux: myaux1
+```
+
+---
+
+## Optional Parameters
+
+### `meters.grid`
+
+Defines the [`meter`](meters) (current measurement device) that provides the measurements of the grid connection point.
+
+**Possible values**: Value of a `name` parameter in the [`meters`](#meters) configuration.
+
+**For example**:
+
+```yaml
+grid: mygridmeter # grid meter reference
+```
+
+---
+
+### `meters.pv`
+
+Defines [`meter`](meters) (current measurement devices), from which evcc fetches PV generation measurements.
+Multiple devices can be specified. Power data is automatically added.
+
+**Possible values**: A single value or a list of values of a name parameter in the [`meters`](#meters) configuration. The list version can also be used with single values.
+
+**For example**:
+
+```yaml
+pv: myonlypv # single pv meter reference
+```
+
+or
+
+```yaml
+pv: # (pvs = deprecated)
+  - myoldpv # first pv meter reference
+  - mynewestpv # second pv meter reference
+```
+
+---
+
+### `meters.battery`
+
+Defines the [`meter`](meters) (current measurement devices) that provide measurement data from the battery(ies).
+Multiple devices can be specified. Power data is automatically added, and an average is calculated from the battery state of charge.
+
+**Possible values**: A single value or a list of values of a `name` parameter in the [`meters`](#meters) configuration. The list version can also be used with single values.
+
+**For example**:
+
+```yaml
+battery: myonlybat # single battery meter reference
+```
+
+or
+
+```yaml
+battery: # (batteries = deprecated)
+  - mysmallbat # first battery meter reference
+  - myhugebat # second battery meter reference
+```
+
+### `meters.aux`
+
+Defines the meters (current measurement devices) that provide measurement data from external devices that have their own surplus control but are not directly controlled by evcc. Multiple devices can be specified. Power data is automatically added.
+
+In evcc, this power contributes to the calculation of the available surplus power for vehicle charging. It is assumed that devices measured using auxiliary meters will autonomously and promptly reduce or completely interrupt their power consumption when the measured auxiliary power is allocated to vehicle charging by evcc.
+
+Positive value: additional available surplus power (allocated to vehicle charging)
+
+Negative value: insufficient surplus power (not available for vehicle charging)
+
+Examples:
+
+    An immersion heater for hot water production that is autonomously regulated based on PV surplus at the grid connection point. When the power consumption of this immersion heater is measured and configured as an aux meter, the entire surplus power (power of the immersion heater plus any remaining grid feed-in) is always preferentially allocated to vehicle charging. If the vehicle charging accesses it, the autonomous regulation of the immersion heater ensures that its power is reduced accordingly.
+
+**Possible values**: A single value or a list of values of a `name` parameter in the [`meters`](#meters) configuration. The list version can also be used with single values.
+
+**Example**:
+
+```yaml
+aux: myaux # single aux meter reference
+```
+
+or
+
+yaml
+
+```yaml
+aux:
+  - myaux1 # first aux meter reference
+  - myaux2 # second aux meter reference
+```
+
+### `residualPower`
+
+Sets the target operating point of the surplus regulation at the grid connection (grid meter). The default value is 0 W.
+Positive values shift the target value towards grid feed-in, while negative values shift it towards grid consumption.
+Ultimately, this value sets the "idle state" of the control loop that needs to be adjusted by the controller.
+
+Especially in combination with other independent surplus regulation systems like a battery storage, this value must be adjusted to achieve a defined system behaviour with clear priorities.
+
+If a certain proportion of grid consumption should remain or be allowed in PV mode, a negative value corresponding to the maximum proportion of grid consumption can be configured.
+
+#### `grid` `meter` present
+
+- Positive value: Remaining grid feed-in power
+- Negative value: Remaining grid consumption power
+
+#### Only `pv` `meter` present
+
+- Positive value: Typical household consumption, used to estimate PV surplus.
+- Negative value: The specified power is added to PV power and increases available charging power (Attention: grid consumption)
+
+:::note
+When a battery storage is present, it is strongly recommended to enter a small value, e.g. between 100 to 300 W here, allowing battery charging according to configured priorities (see `prioritySoc`). Otherwise, the independent regulation of the storage will not see usable surplus. Likewise, this prevents temporary grid consumption even without a battery during rapid generation and load changes.
+:::
+
+**Example "Battery Storage"**:
+
+```yaml
+residualPower: 100
+```
+
+**For example "Grid Consumption Proportion"**:
+
+Charging should start in PV mode with at least 6A (single-phase) even with only 50% PV surplus (rest from grid).
+Minimum charging power: 1 phase _ 6A _ 230V = 1380 W, 50% of it: 690 W
+
+See also the [alternative using enable/disable to allow proportional PV and grid consumption](/en/features/solar-charging).
+
+```yaml
+residualPower: -690
+```

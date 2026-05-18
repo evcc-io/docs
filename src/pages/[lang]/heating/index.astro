@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import HeatingIntro from "@components/intros/HeatingIntro.astro";
+import { sortDevices, filterByType } from "@utils/devices";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
+}
+
+const lang = Astro.params.lang as "de" | "en";
+const coll = await getCollection(`chargers-${lang}` as any);
+const devices = sortDevices(filterByType(coll as any, "heating"));
+
+const title = lang === "de" ? "Wärmepumpen, Heizstäbe" : "Heat pumps, electric heaters";
+const description =
+  lang === "de"
+    ? "Wärmeerzeuger und SG-Ready-Geräte."
+    : "Heat generators and SG-Ready devices.";
+
+const headings = lang === "de"
+  ? [
+      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
+      { depth: 2, slug: "waermepumpen", text: "Wärmepumpen" },
+      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
+    ]
+  : [
+      { depth: 2, slug: "setup", text: "Setup" },
+      { depth: 2, slug: "heat-pumps", text: "Heat pumps" },
+      { depth: 2, slug: "supported", text: "Supported devices" },
+    ];
+---
+
+<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
+  <HeatingIntro lang={lang} />
+  <DeviceCardList devices={devices as any} lang={lang} basePath={`/${lang}/heating`} />
+</StarlightPage>

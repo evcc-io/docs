@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import VehiclesIntro from "@components/intros/VehiclesIntro.astro";
+import { sortDevices } from "@utils/devices";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
+}
+
+const lang = Astro.params.lang as "de" | "en";
+const coll = await getCollection(`vehicles-${lang}` as any);
+const allDevices = sortDevices(coll as any);
+
+const branded = allDevices.filter((d: any) => (d.data.product.brand || "").trim());
+const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim());
+
+const title = lang === "de" ? "Fahrzeuge" : "Vehicles";
+const description =
+  lang === "de"
+    ? "Übersicht aller unterstützten Fahrzeuge."
+    : "Overview of all supported vehicles.";
+
+const genericTitle = lang === "de" ? "Generische Unterstützung" : "Generic support";
+
+const headings = lang === "de"
+  ? [
+      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
+      { depth: 2, slug: "supported", text: "Unterstützte Fahrzeuge" },
+      { depth: 2, slug: "generic", text: genericTitle },
+    ]
+  : [
+      { depth: 2, slug: "setup", text: "Setup" },
+      { depth: 2, slug: "supported", text: "Supported vehicles" },
+      { depth: 2, slug: "generic", text: genericTitle },
+    ];
+---
+
+<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
+  <VehiclesIntro lang={lang} />
+  <DeviceCardList devices={branded as any} lang={lang} basePath={`/${lang}/vehicles`} />
+
+  {generic.length > 0 && (
+    <>
+      <h2 id="generic">{genericTitle}</h2>
+      <DeviceCardList devices={generic as any} lang={lang} basePath={`/${lang}/vehicles`} flat />
+    </>
+  )}
+</StarlightPage>

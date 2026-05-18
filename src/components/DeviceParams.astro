@@ -1,0 +1,504 @@
+---
+import UsageIcons from "./UsageIcons.astro";
+import { renderMarkdown } from "@utils/devices";
+
+interface Param {
+  name?: string;
+  description?: string | Record<string, string>;
+  help?: string | Record<string, string> | null;
+  default?: string | number | boolean | null;
+  example?: string | number | boolean | null;
+  unit?: string | null;
+  choice?: (string | number)[];
+  required?: boolean;
+  advanced?: boolean;
+  deprecated?: boolean;
+  type?: string;
+  valuetype?: string;
+  usages?: string[];
+}
+
+interface Props {
+  params: Param[];
+  lang: "de" | "en";
+}
+
+const { params, lang } = Astro.props;
+
+function localized(
+  v: string | Record<string, string> | null | undefined,
+  l: "de" | "en",
+): string {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  return v[l] ?? v.en ?? v.de ?? "";
+}
+
+function valueChoices(p: Param): (string | number)[] {
+  return p.choice ?? [];
+}
+
+function valueType(p: Param): string {
+  return p.valuetype ?? p.type ?? "";
+}
+
+const visible = (params ?? []).filter((p) => p.name && !p.deprecated);
+
+// Modbus is a virtual meta-param. When a device exposes the `modbus` param,
+// each choice (a "group") expands to one or more concrete connection types,
+// each using a different set of fields. We render a radio selector for the
+// concrete types and toggle the dependent rows via CSS :has().
+// We collapse the underlying modbus types into two categories for the
+// params table: "serial" (USB-RS485 adapter) and "network" (RS485 via
+// Ethernet bridge or native Modbus TCP — both use host/port).
+const MODBUS_GROUP_TO_CATEGORIES: Record<string, string[]> = {
+  rs485: ["serial", "network"],
+  tcpip: ["network"],
+};
+const MODBUS_CATEGORY_LABELS: Record<string, Record<"de" | "en", string>> = {
+  serial: { de: "Seriell", en: "Serial" },
+  network: { de: "Netzwerk", en: "Network" },
+};
+type ConnectionField = {
+  name: string;
+  description: Record<"de" | "en", string>;
+  help?: Record<"de" | "en", string>;
+  defaultValue?: string | number;
+  example?: string | number;
+  type?: string;
+  unit?: string;
+  choices?: (string | number)[];
+  categories: string[];
+};
+const MODBUS_CONNECTION_FIELDS: ConnectionField[] = [
+  {
+    name: "id",
+    description: { de: "Modbus ID", en: "Modbus ID" },
+    type: "int",
+    defaultValue: 1,
+    categories: ["serial", "network"],
+  },
+  {
+    name: "device",
+    description: { de: "Gerätename", en: "Device name" },
+    help: { de: "USB-RS485 Adapter", en: "USB-RS485 adapter" },
+    example: "/dev/ttyUSB0",
+    categories: ["serial"],
+  },
+  {
+    name: "baudrate",
+    description: { de: "Baudrate", en: "Baudrate" },
+    defaultValue: 9600,
+    choices: [1200, 9600, 19200, 38400, 57600, 115200],
+    categories: ["serial"],
+  },
+  {
+    name: "comset",
+    description: { de: "ComSet", en: "ComSet" },
+    help: {
+      de: "Kommunikationsparameter des Adapters",
+      en: "Communication parameter for the adapter",
+    },
+    defaultValue: "8N1",
+    choices: ["8N1", "8E1", "8N2"],
+    categories: ["serial"],
+  },
+  {
+    name: "host",
+    description: { de: "IP-Adresse oder Hostname", en: "IP address or hostname" },
+    example: "192.0.2.2",
+    categories: ["network"],
+  },
+  {
+    name: "port",
+    description: { de: "Port", en: "Port" },
+    defaultValue: 502,
+    type: "int",
+    categories: ["network"],
+  },
+];
+
+const modbusParam = visible.find((p) => p.name === "modbus");
+const modbusCategories: string[] = modbusParam?.choice
+  ? [
+      ...new Set(
+        (modbusParam.choice as (string | number)[]).flatMap(
+          (c) => MODBUS_GROUP_TO_CATEGORIES[String(c)] ?? [],
+        ),
+      ),
+    ]
+  : [];
+const hasModbus = modbusCategories.length > 0;
+const hasModbusFilter = modbusCategories.length > 1;
+const filterGroupId = `modbus-filter-${Math.random().toString(36).slice(2, 8)}`;
+
+const synthesizedConnectionParams: Param[] = hasModbus
+  ? MODBUS_CONNECTION_FIELDS.filter((f) =>
+      f.categories.some((c) => modbusCategories.includes(c)),
+    ).map((f) => ({
+      name: f.name,
+      description: f.description,
+      help: f.help ?? null,
+      default: f.defaultValue ?? null,
+      example: f.example ?? null,
+      unit: f.unit ?? null,
+      type: f.type,
+      choice: f.choices,
+      required: true,
+      usages: undefined,
+    }))
+  : [];
+
+function paramModbusCategories(name: string): string[] | null {
+  const def = MODBUS_CONNECTION_FIELDS.find((f) => f.name === name);
+  if (!def) return null;
+  const applicable = def.categories.filter((c) => modbusCategories.includes(c));
+  if (applicable.length === 0) return null;
+  if (applicable.length === modbusCategories.length) return null; // shown for every choice
+  return applicable;
+}
+
+// Drop the placeholder `modbus` row — its choices live in the radio group
+// above (and the synthesized connection rows replace it).
+const rowParams: Param[] = hasModbus
+  ? [
+      ...synthesizedConnectionParams,
+      ...visible.filter(
+        (p) =>
+          p.name !== "modbus" &&
+          !MODBUS_CONNECTION_FIELDS.some((f) => f.name === p.name),
+      ),
+    ]
+  : visible;
+
+const labels =
+  lang === "de"
+    ? {
+        title: "Parameter",
+        name: "Name",
+        desc: "Beschreibung",
+        value: "Wert",
+        level: "Stufe",
+        levelRequired: "erforderlich",
+        levelOptional: "optional",
+        levelAdvanced: "erweitert",
+        usages: "Verfügbar für",
+        defaultLbl: "Standard",
+        exampleLbl: "Beispiel",
+        options: "Optionen",
+      }
+    : {
+        title: "Parameters",
+        name: "Name",
+        desc: "Description",
+        value: "Value",
+        level: "Level",
+        levelRequired: "required",
+        levelOptional: "optional",
+        levelAdvanced: "advanced",
+        usages: "Available for",
+        defaultLbl: "Default",
+        exampleLbl: "Example",
+        options: "options",
+      };
+
+const CHOICE_INLINE_LIMIT = 8;
+
+function paramLevel(p: Param): { order: number; label: string; key: "required" | "optional" | "advanced" } {
+  if (p.required) return { order: 0, label: labels.levelRequired, key: "required" };
+  if (p.advanced) return { order: 2, label: labels.levelAdvanced, key: "advanced" };
+  return { order: 1, label: labels.levelOptional, key: "optional" };
+}
+
+const rows = rowParams
+  .map((p, i) => ({
+    p,
+    i,
+    level: paramLevel(p),
+  }))
+  .sort((a, b) => a.level.order - b.level.order || a.i - b.i)
+  .map(({ p, level }) => ({
+    name: p.name ?? "",
+    unit: p.unit ?? "",
+    description: localized(p.description, lang),
+    help: localized(p.help ?? null, lang),
+    choices: valueChoices(p),
+    valueType: valueType(p),
+    levelLabel: level.label,
+    levelKey: level.key,
+    hasDefault: p.default != null && p.default !== "",
+    defaultStr: p.default != null ? String(p.default) : "",
+    hasExample: p.example != null && p.example !== "",
+    exampleStr: p.example != null ? String(p.example) : "",
+    usages: p.usages ?? [],
+    modbusCategories: hasModbusFilter ? paramModbusCategories(p.name ?? "") : null,
+  }));
+
+const showUsagesCol = rows.some((r) => r.usages.length > 0);
+---
+
+{
+  rows.length > 0 && (
+    <section class={`device-params${hasModbusFilter ? " device-params-modbus" : ""}`}>
+      <h2>{labels.title}</h2>
+      {hasModbusFilter && (
+        <div class="modbus-filter" role="radiogroup" aria-label="Modbus">
+          <span class="modbus-filter-legend">Modbus</span>
+          <div class="modbus-filter-options">
+            {modbusCategories.map((cat, i) => (
+              <>
+                <input
+                  type="radio"
+                  class="modbus-filter-input"
+                  name={filterGroupId}
+                  id={`${filterGroupId}-${cat}`}
+                  value={cat}
+                  checked={i === 0}
+                />
+                <label class="modbus-filter-label" for={`${filterGroupId}-${cat}`}>
+                  {MODBUS_CATEGORY_LABELS[cat]?.[lang] ?? cat}
+                </label>
+              </>
+            ))}
+          </div>
+        </div>
+      )}
+      <table>
+        <thead>
+          <tr>
+            <th>{labels.name}</th>
+            <th>{labels.desc}</th>
+            <th>{labels.value}</th>
+            <th>{labels.level}</th>
+            {showUsagesCol && <th>{labels.usages}</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr data-mb={r.modbusCategories ? r.modbusCategories.join(" ") : "all"}>
+              <td class="param-name-cell">
+                <code>{r.name}</code>
+                {r.unit ? <span class="param-unit">&nbsp;[{r.unit}]</span> : null}
+              </td>
+              <td>
+                {r.description}
+                {r.help ? <div class="param-help" set:html={renderMarkdown(r.help)} /> : null}
+                {r.hasDefault ? (
+                  <div class="param-meta">
+                    {labels.defaultLbl}: <code>{r.defaultStr}</code>
+                  </div>
+                ) : null}
+                {r.hasExample ? (
+                  <div class="param-meta">
+                    {labels.exampleLbl}: <code>{r.exampleStr}</code>
+                  </div>
+                ) : null}
+              </td>
+              <td class="param-value">
+                {r.choices.length > 0 ? (
+                  <select class="param-choices-select" aria-label={r.name}>
+                    {r.choices.map((c) => (
+                      <option selected={r.hasDefault && String(c) === r.defaultStr}>
+                        {String(c)}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  r.valueType
+                )}
+              </td>
+              <td><span class={`param-level param-level-${r.levelKey}`}>{r.levelLabel}</span></td>
+              {showUsagesCol && (
+                <td>
+                  {r.usages.length > 0 ? (
+                    <span class="tag tag-usages">
+                      <UsageIcons usages={r.usages} lang={lang} />
+                    </span>
+                  ) : null}
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
+<style>
+  .device-params {
+    margin: 2rem 0;
+  }
+  .device-params h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+  }
+  .device-params table {
+    display: table !important;
+    width: 100% !important;
+    min-width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .device-params thead {
+    display: table-header-group !important;
+  }
+  .device-params tbody {
+    display: table-row-group !important;
+    width: 100%;
+  }
+  .device-params tr {
+    display: table-row !important;
+  }
+  .device-params td,
+  .device-params th {
+    display: table-cell !important;
+  }
+  /* Param name column: enforce a minimum so short names stay readable. */
+  .device-params td:nth-child(1),
+  .device-params th:nth-child(1) {
+    min-width: 100px;
+  }
+  /* Description column absorbs extra horizontal space. */
+  .device-params td:nth-child(2),
+  .device-params th:nth-child(2) {
+    width: 100%;
+  }
+  .device-params th,
+  .device-params td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    vertical-align: top;
+  }
+  .device-params th {
+    font-weight: 600;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .device-params code {
+    font-size: 0.85em;
+  }
+  .param-name-cell {
+    white-space: nowrap;
+  }
+  /* Modbus filter — CSS-only radio toggle, depends on :has() support. */
+  /* Sits above the table; left edge aligns with the NAME column. */
+  .modbus-filter {
+    margin: 0 0 0.75rem;
+    padding-left: 0.75rem;
+  }
+  .modbus-filter-legend {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--sl-color-gray-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .modbus-filter-options {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .modbus-filter-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .modbus-filter-label {
+    display: inline-block;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 999rem;
+    cursor: pointer;
+    color: var(--sl-color-gray-3);
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .modbus-filter-label:hover {
+    color: var(--sl-color-white);
+    border-color: var(--sl-color-gray-3);
+  }
+  .modbus-filter-input:checked + .modbus-filter-label {
+    background: var(--sl-color-accent-low);
+    color: var(--sl-color-text-accent);
+    border-color: var(--sl-color-accent-low);
+  }
+  .modbus-filter-input:focus-visible + .modbus-filter-label {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 2px;
+  }
+  /* Hide modbus-specific rows by default; show the ones matching the
+     currently checked filter. Rows with data-mb="all" are always visible.
+     `!important` is needed to beat the table-row override above. */
+  .device-params-modbus tbody tr[data-mb]:not([data-mb="all"]) {
+    display: none !important;
+  }
+  .device-params-modbus:has(.modbus-filter-input[value="serial"]:checked) tbody tr[data-mb~="serial"],
+  .device-params-modbus:has(.modbus-filter-input[value="network"]:checked) tbody tr[data-mb~="network"] {
+    display: table-row !important;
+  }
+  .param-choices-select {
+    font-family: var(--__sl-font-mono, ui-monospace, monospace);
+    font-size: 0.85em;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.3rem;
+    background: var(--sl-color-bg);
+    color: var(--sl-color-text);
+    max-width: 100%;
+  }
+  .param-unit {
+    color: var(--sl-color-gray-3);
+    font-size: 0.85em;
+    white-space: nowrap;
+  }
+  .param-help,
+  .param-meta {
+    font-size: 0.85em;
+    color: var(--sl-color-gray-3);
+    margin-top: 0.25rem;
+  }
+  .param-help :global(p) {
+    margin: 0;
+  }
+  .param-help :global(p + p) {
+    margin-top: 0.35rem;
+  }
+  .param-help :global(a) {
+    color: var(--sl-color-text-accent);
+  }
+  .param-help :global(code) {
+    font-size: 0.85em;
+  }
+  /* Long unbroken example strings (e.g. comma-separated identifiers without
+     spaces) must wrap so they don't blow the table column out. */
+  .device-params td :global(code) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .param-level {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+  .param-level-required {
+    color: var(--sl-color-text);
+    font-weight: 600;
+  }
+  .param-level-optional {
+    color: var(--sl-color-gray-3);
+  }
+  .param-level-advanced {
+    color: var(--sl-color-gray-3);
+    font-style: italic;
+  }
+</style>
