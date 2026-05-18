@@ -1,0 +1,58 @@
+---
+import config from "virtual:starlight/user-config";
+
+const currentLocale = Astro.locals.starlightRoute.locale ?? "";
+const entries = Object.entries(config.locales ?? {});
+
+function localizedPathname(targetLocale: string): string {
+  const segments = Astro.url.pathname.split("/").filter(Boolean);
+  if (segments.length > 0 && segments[0] in (config.locales ?? {})) {
+    segments[0] = targetLocale;
+  } else {
+    segments.unshift(targetLocale);
+  }
+  return "/" + segments.join("/");
+}
+---
+
+{
+  config.isMultilingual && (
+    <div class="lang-switcher">
+      {entries.map(([code], i) => (
+        <Fragment>
+          {i > 0 && <span class="lang-sep"> | </span>}
+          <a
+            href={localizedPathname(code)}
+            class:list={["lang-link", { active: code === currentLocale }]}
+          >
+            {code.toUpperCase()}
+          </a>
+        </Fragment>
+      ))}
+    </div>
+  )
+}
+
+<style>
+  .lang-switcher {
+    display: inline-flex;
+    align-items: baseline;
+    font-size: 1.125rem;
+  }
+  .lang-link {
+    color: inherit;
+    text-decoration: none;
+    padding: 0 0.1em;
+  }
+  .lang-link.active {
+    text-decoration: underline;
+  }
+  .lang-link:hover,
+  .lang-link:focus {
+    text-decoration: underline;
+  }
+  .lang-sep {
+    opacity: 0.6;
+    padding: 0 0.1em;
+  }
+</style>

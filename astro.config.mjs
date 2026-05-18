@@ -3,6 +3,7 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
 import starlightBlog from "starlight-blog";
+import starlightLlmsTxt from "starlight-llms-txt";
 import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
 import mermaid from "astro-mermaid";
 export default defineConfig({
@@ -35,6 +36,9 @@ export default defineConfig({
       description: "evcc Dokumentation",
       components: {
         SiteTitle: "./src/components/SiteTitle.astro",
+        SocialIcons: "./src/components/SocialIcons.astro",
+        LanguageSelect: "./src/components/LanguageSelect.astro",
+        ThemeSelect: "./src/components/ThemeSelect.astro",
       },
       logo: {
         light: "./src/assets/logo-light.svg",
@@ -61,6 +65,7 @@ export default defineConfig({
       plugins: [
         starlightBlog({
           title: "Blog",
+          navigation: "none",
           postCount: 100,
           recentPostCount: 100,
           authors: {
@@ -85,6 +90,9 @@ export default defineConfig({
             schema: "./public/openapi.yaml",
           },
         ]),
+        starlightLlmsTxt({
+          exclude: ["**/blog/**"],
+        }),
       ],
       sidebar: [
         { label: "Introduction", translations: { de: "Einführung" }, slug: "" },
@@ -144,8 +152,14 @@ export default defineConfig({
           label: "Integrations",
           translations: { de: "Integrationen" },
           items: [
-            { autogenerate: { directory: "integrations", collapsed: true } },
             ...openAPISidebarGroups,
+            { label: "MQTT API", slug: "integrations/mqtt-api" },
+            { label: "Home Assistant", slug: "integrations/home-assistant" },
+            { label: "MCP-Server", slug: "integrations/mcp" },
+            {
+              label: "Sunny Home Manager",
+              slug: "integrations/sma-sunny-home-manager",
+            },
           ],
         },
         {

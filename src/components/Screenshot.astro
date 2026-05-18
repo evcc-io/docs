@@ -1,6 +1,8 @@
 ---
+import type { ImageMetadata } from "astro";
+
 interface Props {
-  /** Path beneath /img/, e.g. "features/screenshots/solar-mode" */
+  /** Path beneath `src/assets/`, e.g. "features/screenshots/solar-mode" */
   name?: string;
   /** Backwards-compat alias for `name`. */
   img?: string;
@@ -9,23 +11,36 @@ interface Props {
   width?: number;
 }
 
+const images = import.meta.glob<ImageMetadata>(
+  "/src/assets/**/*.{webp,png,jpg,jpeg}",
+  { eager: true, import: "default" },
+);
+
+function url(base: string, theme: "light" | "dark", dpr: 1 | 2) {
+  const key = `/src/assets/${base}-${theme}-${dpr}x.webp`;
+  const img = images[key];
+  if (!img) {
+    throw new Error(`Screenshot: missing asset ${key}`);
+  }
+  return img.src;
+}
+
 const { name, img, alt, caption, width } = Astro.props;
-const base = name ?? img;
-const src = base ? `/img/${base.replace(/^\/+/, "")}` : "";
+const base = (name ?? img)?.replace(/^\/+/, "");
 const altText = alt ?? caption ?? "Screenshot";
 ---
 
 {
-  src && (
+  base && (
     <figure class="screenshot">
       <picture>
         <source
           media="(prefers-color-scheme: dark)"
-          srcset={`${src}-dark-1x.webp 1x, ${src}-dark-2x.webp 2x`}
+          srcset={`${url(base, "dark", 1)} 1x, ${url(base, "dark", 2)} 2x`}
         />
         <img
-          src={`${src}-light-1x.webp`}
-          srcset={`${src}-light-1x.webp 1x, ${src}-light-2x.webp 2x`}
+          src={url(base, "light", 1)}
+          srcset={`${url(base, "light", 1)} 1x, ${url(base, "light", 2)} 2x`}
           alt={altText}
           width={width}
           loading="lazy"

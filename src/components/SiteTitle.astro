@@ -1,10 +1,16 @@
 ---
 import { logos } from "virtual:starlight/user-images";
 import config from "virtual:starlight/user-config";
-const lang = Astro.params.lang === "de" ? "de" : "en";
+const lang =
+  Astro.locals.starlightRoute?.locale ??
+  (Astro.params.lang === "de" ? "de" : "en");
 const label = lang === "de" ? "Doku" : "Docs";
 const logoHref = "https://evcc.io/";
 const labelHref = `/${lang}`;
+const blogPrefix = `/${lang}/blog`;
+const isDocs =
+  Astro.url.pathname !== blogPrefix &&
+  !Astro.url.pathname.startsWith(`${blogPrefix}/`);
 ---
 
 <div class="site-title sl-flex">
@@ -32,7 +38,10 @@ const labelHref = `/${lang}`;
       )
     }
   </a>
-  <a href={labelHref} class="site-title-label" translate="no">{label}</a>
+  <a
+    href={labelHref}
+    class:list={["site-title-label", { active: isDocs }]}
+    translate="no">{label}</a>
 </div>
 
 <style>
@@ -61,6 +70,7 @@ const labelHref = `/${lang}`;
     text-decoration: none;
     white-space: nowrap;
   }
+  .site-title-label.active,
   .site-title-label:hover,
   .site-title-label:focus {
     text-decoration: underline;
