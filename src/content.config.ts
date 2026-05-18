@@ -57,7 +57,7 @@ const paramSchema = z
     valuetype: z.string().optional(),
     usages: z.array(z.string()).optional(),
   })
-  .passthrough();
+  .loose();
 
 const deviceSchema = z.object({
   template: z.string().optional(),
