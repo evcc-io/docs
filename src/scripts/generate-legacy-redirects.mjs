@@ -34,6 +34,15 @@ function makeRedirectHtml(target) {
 }
 
 let count = 0;
+
+function writeRedirect(legacyPath, target) {
+  const legacyFile = path.join(DIST, legacyPath.slice(1), "index.html");
+  if (fs.existsSync(legacyFile)) return false;
+  fs.mkdirSync(path.dirname(legacyFile), { recursive: true });
+  fs.writeFileSync(legacyFile, makeRedirectHtml(target));
+  return true;
+}
+
 for (const file of walkHtml(DIST)) {
   const url = urlFor(file); // e.g. /en/features/solar-charging or /de/...
   // Match /en/<slug> → legacy /en/docs/<slug>
@@ -41,14 +50,18 @@ for (const file of walkHtml(DIST)) {
   if (url.startsWith("/en/") && url !== "/en") {
     legacy = "/en/docs" + url.slice(3);
   } else if (url.startsWith("/de/") && url !== "/de") {
+    // German was the default locale on the old site (no /de prefix)
+    // and lived under /docs/<slug>
     legacy = "/docs" + url.slice(3);
   } else continue;
 
-  const legacyFile = path.join(DIST, legacy.slice(1), "index.html");
-  if (fs.existsSync(legacyFile)) continue;
-  fs.mkdirSync(path.dirname(legacyFile), { recursive: true });
-  fs.writeFileSync(legacyFile, makeRedirectHtml(url));
-  count++;
+  if (writeRedirect(legacy, url)) count++;
+
+  // German blog also lived at /blog/<path> (no /docs prefix) on the old site
+  if (url.startsWith("/de/blog")) {
+    const blogLegacy = url.slice(3); // "/de/blog/..." → "/blog/..."
+    if (writeRedirect(blogLegacy, url)) count++;
+  }
 }
 
 // Also map locale-prefixed REST API URLs to the flat OpenAPI URLs
@@ -57,31 +70,47 @@ for (const file of walkHtml(DIST)) {
   const url = urlFor(file);
   if (!url.startsWith("/integrations/rest-api")) continue;
   for (const lang of ["en", "de"]) {
-    const localePath = `/${lang}${url}`;
-    const localeFile = path.join(DIST, localePath.slice(1), "index.html");
-    if (fs.existsSync(localeFile)) continue;
-    fs.mkdirSync(path.dirname(localeFile), { recursive: true });
-    fs.writeFileSync(localeFile, makeRedirectHtml(url));
-    count++;
-    // Also add a /docs-prefixed legacy variant for the EN locale
-    if (lang === "en") {
-      const docsPath = `/en/docs${url}`;
-      const docsFile = path.join(DIST, docsPath.slice(1), "index.html");
-      if (!fs.existsSync(docsFile)) {
-        fs.mkdirSync(path.dirname(docsFile), { recursive: true });
-        fs.writeFileSync(docsFile, makeRedirectHtml(url));
-        count++;
-      }
-    } else {
-      const docsPath = `/docs${url}`;
-      const docsFile = path.join(DIST, docsPath.slice(1), "index.html");
-      if (!fs.existsSync(docsFile)) {
-        fs.mkdirSync(path.dirname(docsFile), { recursive: true });
-        fs.writeFileSync(docsFile, makeRedirectHtml(url));
-        count++;
-      }
-    }
+    if (writeRedirect(`/${lang}${url}`, url)) count++;
+    // Also add a /docs-prefixed legacy variant
+    const docsLegacy = lang === "en" ? `/en/docs${url}` : `/docs${url}`;
+    if (writeRedirect(docsLegacy, url)) count++;
   }
+}
+
+// Old site had device listing pages nested under /docs/devices/<type>.
+// The new structure is flat — /<lang>/<type>.
+const DEVICE_TYPES = [
+  "chargers",
+  "meters",
+  "vehicles",
+  "smartswitches",
+  "heating",
+  "plugins",
+];
+for (const type of DEVICE_TYPES) {
+  if (writeRedirect(`/docs/devices/${type}`, `/de/${type}`)) count++;
+  if (writeRedirect(`/en/docs/devices/${type}`, `/en/${type}`)) count++;
+}
+
+// One blog post had a period in its old slug that Astro strips.
+// /blog/2024/02/01/v0.124-new-tesla-api → /<lang>/blog/2024/02/01/v0124-new-tesla-api
+{
+  const oldSlug = "/blog/2024/02/01/v0.124-new-tesla-api";
+  const newSlug = "/blog/2024/02/01/v0124-new-tesla-api";
+  if (writeRedirect(oldSlug, `/de${newSlug}`)) count++;
+  if (writeRedirect(`/en${oldSlug}`, `/en${newSlug}`)) count++;
+}
+
+// Docusaurus-only blog index pages (tags, archive, authors). Fall back to /de/blog.
+for (const stub of ["archive", "authors", "tags"]) {
+  if (writeRedirect(`/blog/${stub}`, "/de/blog")) count++;
+  if (writeRedirect(`/en/blog/${stub}`, "/en/blog")) count++;
+}
+
+// Docusaurus stubs that had inbound links but no replacement page.
+for (const stub of ["/search", "/markdown-page"]) {
+  if (writeRedirect(stub, "/de")) count++;
+  if (writeRedirect(`/en${stub}`, "/en")) count++;
 }
 
 console.log(`[legacy-redirects] wrote ${count} redirect pages`);
