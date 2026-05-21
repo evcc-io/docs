@@ -8,6 +8,8 @@ export const USAGE_LABELS: Record<string, Record<Lang, string>> = {
   aux: { de: "Intelligenter Verbraucher", en: "Smart consumer" },
 };
 
+export const USAGE_KEYS = Object.keys(USAGE_LABELS);
+
 export function usageLabel(usage: string, lang: Lang): string {
   return USAGE_LABELS[usage]?.[lang] ?? usage;
 }

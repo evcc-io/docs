@@ -1,5 +1,6 @@
 ---
 import { featureShortLabel } from "./features";
+import { overviewFeaturesFor } from "@utils/devices";
 import UsageIcons from "./UsageIcons.astro";
 
 interface Device {
@@ -31,16 +32,11 @@ interface Props {
   flat?: boolean;
   /** Surface a coloured sponsor-token chip per device (required / free). */
   showSponsorship?: boolean;
+  /** Stable identifier so the device filter can target this list (`data-device-list="…"`). */
+  filterId?: string;
 }
 
-const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorship = false } = Astro.props;
-
-const HIDDEN_FEATURES = new Set([
-  "sponsorship",
-  "sponsorfree",
-  "skiptest",
-  "eebus",
-]);
+const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorship = false, filterId } = Astro.props;
 
 const NO_BRAND = lang === "de" ? "Sonstige" : "Other";
 
@@ -71,17 +67,7 @@ function usages(d: Device): string[] {
 }
 
 function features(d: Device): string[] {
-  const base = [
-    ...(d.data.capabilities ?? []),
-    ...(d.data.requirements ?? []),
-  ].filter((f) => !HIDDEN_FEATURES.has(f));
-  // Only surface a chip when sponsorship is NOT required — the gray
-  // "Sponsor free" badge is a positive signal worth highlighting; chargers
-  // requiring a token stay quiet in the overview.
-  if (showSponsorship && !(d.data.requirements ?? []).includes("sponsorship")) {
-    base.push("sponsorfree");
-  }
-  return base;
+  return overviewFeaturesFor(d as any, { showSponsorship });
 }
 
 function featureClass(f: string): string {
@@ -149,14 +135,15 @@ function brandColumns(list: Device[]): Slot[] {
 }
 ---
 
-<div class="device-brand-list not-content">
+<div class="device-brand-list not-content" data-device-list={filterId}>
   {flat && devices.map((d) => {
     const u = showUsages ? usages(d) : [];
     const f = showFeatures ? features(d) : [];
     const c = showCountries ? countriesFor(d) : [];
     const label = descLabel(d) || singleRowLabel(d);
+    const brand = brandKey(d);
     return (
-      <div class="group group-leaf">
+      <div class="group group-leaf" data-device-row data-device-name={`${brand === NO_BRAND ? "" : brand} ${label}`.trim().toLowerCase()} data-device-features={f.join(" ")} data-device-usages={u.join(" ")}>
         <a class="row row-brand" href={`${basePath}/${d.id}`}>
           <span class="name">{label}</span>
           {(u.length > 0 || f.length > 0 || c.length > 0) && (
@@ -188,7 +175,7 @@ function brandColumns(list: Device[]): Slot[] {
         const f = showFeatures ? features(only) : [];
         const c = showCountries ? countriesFor(only) : [];
         return (
-          <div class="group group-leaf">
+          <div class="group group-leaf" data-device-row data-device-name={`${brand} ${descLabel(only)}`.trim().toLowerCase()} data-device-features={f.join(" ")} data-device-usages={u.join(" ")}>
             <a class="row row-brand" href={`${basePath}/${only.id}`}>
               <span class="name">{brand}</span>
               {(u.length > 0 || f.length > 0 || c.length > 0) && (
@@ -213,16 +200,26 @@ function brandColumns(list: Device[]): Slot[] {
       return (
         <div
           class="group group-aligned"
+          data-device-group
+          data-device-group-brand={brand}
           style={`--tag-cols: ${columns.length}`}
         >
           <div class="group-header">{brand}</div>
           {list.map((d) => {
             const devUsages = showUsages ? usages(d) : [];
-            const devFeatureSet = new Set(showFeatures ? features(d) : []);
+            const devFeatures = showFeatures ? features(d) : [];
+            const devFeatureSet = new Set(devFeatures);
             const devCountrySet = new Set(showCountries ? countriesFor(d) : []);
             const label = descLabel(d) || singleRowLabel(d);
             return (
-              <a class="row row-child" href={`${basePath}/${d.id}`}>
+              <a
+                class="row row-child"
+                href={`${basePath}/${d.id}`}
+                data-device-row
+                data-device-name={`${brand} ${label}`.toLowerCase()}
+                data-device-features={devFeatures.join(" ")}
+                data-device-usages={devUsages.join(" ")}
+              >
                 <span class="name">{label}</span>
                 {columns.map((s) => {
                   if (s.kind === "usages") {

@@ -215,6 +215,46 @@ export function nightlyDiffersFromRelease(
   );
 }
 
+/**
+ * Features surfaced on a device-overview row (chargers/meters/etc.).
+ * Mirrors the chip set rendered by `DeviceCardList`.
+ */
+const OVERVIEW_HIDDEN = new Set(["sponsorship", "sponsorfree", "skiptest", "eebus"]);
+
+export function overviewFeaturesFor(d: DeviceEntry, opts: { showSponsorship?: boolean } = {}): string[] {
+  const base = [
+    ...(d.data.capabilities ?? []),
+    ...(d.data.requirements ?? []),
+  ].filter((f) => !OVERVIEW_HIDDEN.has(f));
+  if (opts.showSponsorship && !(d.data.requirements ?? []).includes("sponsorship")) {
+    base.push("sponsorfree");
+  }
+  return base;
+}
+
+import { FEATURE_KEYS } from "@components/features";
+
+export function availableOverviewFeatures(devices: DeviceEntry[], opts: { showSponsorship?: boolean } = {}): string[] {
+  const seen = new Set<string>();
+  for (const d of devices) for (const f of overviewFeaturesFor(d, opts)) seen.add(f);
+  return [...seen].sort((a, b) => {
+    const ia = FEATURE_KEYS.indexOf(a);
+    const ib = FEATURE_KEYS.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+}
+
+import { USAGE_KEYS } from "@utils/usages";
+
+export function availableUsages(devices: Array<DeviceEntry & { data: { render: Array<{ usage?: string }> } }>): string[] {
+  const seen = new Set<string>();
+  for (const d of devices) for (const r of d.data.render) if (r.usage) seen.add(r.usage);
+  return [...seen].sort((a, b) => USAGE_KEYS.indexOf(a) - USAGE_KEYS.indexOf(b));
+}
+
 export function featuresFor(
   type: "charger" | "meter" | "tariff" | "vehicle" | "smartswitch" | "heating",
   entry: DeviceEntry,

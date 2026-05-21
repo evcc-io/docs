@@ -76,3 +76,5 @@ export function featureDescription(feature: string, lang: Lang): string | null {
   if (entry && entry[lang]) return entry[lang]!;
   return null;
 }
+
+export const FEATURE_KEYS = Object.keys(labels);

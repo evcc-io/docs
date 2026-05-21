@@ -2,8 +2,9 @@
 import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
+import DeviceFilter from "@components/DeviceFilter.astro";
 import MetersIntro from "@components/intros/MetersIntro.astro";
-import { sortDevices } from "@utils/devices";
+import { sortDevices, availableOverviewFeatures, availableUsages } from "@utils/devices";
 
 export async function getStaticPaths() {
   return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
@@ -16,12 +17,16 @@ const allDevices = sortDevices(coll as any);
 const branded = allDevices.filter((d: any) => (d.data.product.brand || "").trim());
 const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim());
 
+const filterFeatures = availableOverviewFeatures(allDevices as any);
+const filterUsages = availableUsages(allDevices as any);
+
 const title = lang === "de" ? "PV, Batterie, Netz, Zähler" : "PV, Battery, Grid, Meter";
 const description =
   lang === "de"
     ? "Übersicht aller unterstützten Zähler, Wechselrichter und Batteriespeicher."
     : "Overview of all supported meters, inverters and battery storage devices.";
 
+const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
 const genericTitle = lang === "de" ? "Generische Unterstützung" : "Generic support";
 
 const headings = lang === "de"
@@ -45,11 +50,14 @@ const headings = lang === "de"
 
 <StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
   <MetersIntro lang={lang} />
+  <DeviceFilter lang={lang} features={filterFeatures} usages={filterUsages} />
+  <h2 id="supported">{supportedTitle}</h2>
   <DeviceCardList
     devices={branded as any}
     lang={lang}
     basePath={`/${lang}/meters`}
     showUsages={true}
+    filterId="branded"
   />
 
   {generic.length > 0 && (
@@ -61,6 +69,7 @@ const headings = lang === "de"
         basePath={`/${lang}/meters`}
         showUsages={true}
         flat
+        filterId="generic"
       />
     </>
   )}

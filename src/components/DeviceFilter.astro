@@ -1,0 +1,230 @@
+---
+import { featureShortLabel } from "./features";
+import { usageLabel } from "@utils/usages";
+import UsageIcons from "./UsageIcons.astro";
+
+interface Props {
+  lang: "de" | "en";
+  features?: string[];
+  usages?: string[];
+}
+
+const { lang, features = [], usages = [] } = Astro.props;
+
+const labels = lang === "de"
+  ? {
+      heading: "Filter",
+      searchPlaceholder: "Marke oder Modell suchen…",
+      reset: "Zurücksetzen",
+      empty: "Keine Treffer.",
+      filterByPrefix: "Filter:",
+    }
+  : {
+      heading: "Filter",
+      searchPlaceholder: "Search brand or model…",
+      reset: "Reset",
+      empty: "No matches.",
+      filterByPrefix: "Filter by",
+    };
+---
+
+<div class="device-filter not-content" data-device-filter>
+  <div class="device-filter__head">
+    <span class="device-filter__title">{labels.heading}</span>
+    <button type="button" class="device-filter__reset" data-device-filter-reset hidden>{labels.reset}</button>
+  </div>
+
+  <div class="device-filter__body">
+    <label class="device-filter__search">
+      <span class="device-filter__search-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      </span>
+      <input
+        type="search"
+        data-device-filter-search
+        placeholder={labels.searchPlaceholder}
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="button" class="device-filter__clear" data-device-filter-clear hidden aria-label="Clear search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </label>
+
+    {usages.map((u) => (
+      <button
+        type="button"
+        class="tag tag-usages"
+        data-device-filter-usage={u}
+        aria-pressed="false"
+        aria-label={`${labels.filterByPrefix} ${usageLabel(u, lang)}`}
+        title={usageLabel(u, lang)}
+      >
+        <UsageIcons usages={[u]} lang={lang} />
+      </button>
+    ))}
+
+    {features.map((f) => (
+      <button
+        type="button"
+        class="tag tag-feature"
+        data-device-filter-feature={f}
+        aria-pressed="false"
+      >{featureShortLabel(f, lang)}</button>
+    ))}
+  </div>
+</div>
+
+<template data-device-filter-empty-template>
+  <p class="device-filter-empty">{labels.empty}</p>
+</template>
+
+<script is:inline>
+  function __deviceFilterInit() {
+    const filter = document.querySelector("[data-device-filter]");
+    if (!filter) return;
+
+    const lists = Array.from(document.querySelectorAll("[data-device-list]"));
+    if (lists.length === 0) return;
+
+    const emptyTemplate = document.querySelector("[data-device-filter-empty-template]");
+    const searchInput = filter.querySelector("[data-device-filter-search]");
+    const searchClear = filter.querySelector("[data-device-filter-clear]");
+    const resetBtn = filter.querySelector("[data-device-filter-reset]");
+    const featureBtns = Array.from(filter.querySelectorAll("[data-device-filter-feature]"));
+    const usageBtns = Array.from(filter.querySelectorAll("[data-device-filter-usage]"));
+
+    const state = { q: "", features: new Set(), usages: new Set() };
+
+    function readUrl() {
+      const params = new URLSearchParams(window.location.search);
+      state.q = params.get("q") || "";
+      state.features = new Set((params.get("f") || "").split(",").filter(Boolean));
+      state.usages = new Set((params.get("u") || "").split(",").filter(Boolean));
+    }
+
+    function writeUrl() {
+      const params = new URLSearchParams(window.location.search);
+      state.q ? params.set("q", state.q) : params.delete("q");
+      state.features.size ? params.set("f", [...state.features].join(",")) : params.delete("f");
+      state.usages.size ? params.set("u", [...state.usages].join(",")) : params.delete("u");
+      const qs = params.toString();
+      const url = window.location.pathname + (qs ? "?" + qs : "") + window.location.hash;
+      window.history.replaceState(null, "", url);
+    }
+
+    function activeCount() {
+      return state.features.size + state.usages.size + (state.q ? 1 : 0);
+    }
+
+    function syncUi() {
+      searchInput.value = state.q;
+      searchClear.hidden = !state.q;
+      featureBtns.forEach((b) => {
+        const on = state.features.has(b.dataset.deviceFilterFeature);
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      usageBtns.forEach((b) => {
+        const on = state.usages.has(b.dataset.deviceFilterUsage);
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+      const any = activeCount() > 0;
+      filter.classList.toggle("is-filtering", any);
+      filter.classList.toggle("has-active-feature", state.features.size > 0);
+      filter.classList.toggle("has-active-usage", state.usages.size > 0);
+      resetBtn.hidden = !any;
+    }
+
+    function rowMatches(row) {
+      const name = row.dataset.deviceName || "";
+      if (state.q && !name.includes(state.q.toLowerCase())) return false;
+      const rowFeatures = new Set((row.dataset.deviceFeatures || "").split(/\s+/).filter(Boolean));
+      for (const f of state.features) if (!rowFeatures.has(f)) return false;
+      const rowUsages = new Set((row.dataset.deviceUsages || "").split(/\s+/).filter(Boolean));
+      for (const u of state.usages) if (!rowUsages.has(u)) return false;
+      return true;
+    }
+
+    function apply() {
+      lists.forEach((list) => {
+        const rows = list.querySelectorAll("[data-device-row]");
+        let listMatched = 0;
+        rows.forEach((row) => {
+          const ok = rowMatches(row);
+          row.classList.toggle("hidden-by-feature-filter", !ok);
+          if (ok) listMatched++;
+        });
+
+        list.querySelectorAll("[data-device-group]").forEach((g) => {
+          const visible = g.querySelectorAll("[data-device-row]:not(.hidden-by-feature-filter)").length;
+          g.classList.toggle("hidden-by-feature-filter", visible === 0);
+        });
+
+        let empty = list.nextElementSibling;
+        const hasEmpty = empty && empty.classList && empty.classList.contains("device-filter-empty");
+        if (listMatched === 0 && activeCount() > 0) {
+          if (!hasEmpty) {
+            const node = emptyTemplate.content.firstElementChild.cloneNode(true);
+            list.insertAdjacentElement("afterend", node);
+          }
+          list.classList.add("hidden-by-feature-filter");
+        } else {
+          list.classList.remove("hidden-by-feature-filter");
+          if (hasEmpty) empty.remove();
+        }
+      });
+    }
+
+    function reset() {
+      state.q = "";
+      state.features.clear();
+      state.usages.clear();
+      writeUrl();
+      syncUi();
+      apply();
+    }
+
+    searchInput.addEventListener("input", (e) => {
+      state.q = e.target.value;
+      writeUrl();
+      syncUi();
+      apply();
+    });
+    searchClear.addEventListener("click", () => {
+      state.q = "";
+      writeUrl();
+      syncUi();
+      apply();
+    });
+    resetBtn.addEventListener("click", reset);
+    featureBtns.forEach((b) =>
+      b.addEventListener("click", () => {
+        const id = b.dataset.deviceFilterFeature;
+        state.features.has(id) ? state.features.delete(id) : state.features.add(id);
+        writeUrl();
+        syncUi();
+        apply();
+      })
+    );
+    usageBtns.forEach((b) =>
+      b.addEventListener("click", () => {
+        const id = b.dataset.deviceFilterUsage;
+        state.usages.has(id) ? state.usages.delete(id) : state.usages.add(id);
+        writeUrl();
+        syncUi();
+        apply();
+      })
+    );
+
+    readUrl();
+    syncUi();
+    apply();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", __deviceFilterInit);
+  } else {
+    __deviceFilterInit();
+  }
+</script>

@@ -2,9 +2,10 @@
 import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
+import DeviceFilter from "@components/DeviceFilter.astro";
 import HeatingIntro from "@components/intros/HeatingIntro.astro";
 import HeatingOutro from "@components/intros/HeatingOutro.astro";
-import { sortDevices, filterByType } from "@utils/devices";
+import { sortDevices, filterByType, availableOverviewFeatures } from "@utils/devices";
 
 export async function getStaticPaths() {
   return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
@@ -13,7 +14,9 @@ export async function getStaticPaths() {
 const lang = Astro.params.lang as "de" | "en";
 const coll = await getCollection(`chargers-${lang}` as any);
 const devices = sortDevices(filterByType(coll as any, "heating"));
+const filterFeatures = availableOverviewFeatures(devices as any);
 
+const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
 const title = lang === "de" ? "Wärmepumpen, Heizstäbe" : "Heat pumps, electric heaters";
 const description =
   lang === "de"
@@ -41,6 +44,8 @@ const headings = lang === "de"
 
 <StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
   <HeatingIntro lang={lang} />
-  <DeviceCardList devices={devices as any} lang={lang} basePath={`/${lang}/heating`} />
+  {filterFeatures.length > 0 && <DeviceFilter lang={lang} features={filterFeatures} />}
+  <h2 id="supported">{supportedTitle}</h2>
+  <DeviceCardList devices={devices as any} lang={lang} basePath={`/${lang}/heating`} filterId="branded" />
   <HeatingOutro lang={lang} />
 </StarlightPage>
