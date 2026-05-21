@@ -1,74 +1,64 @@
-template: cardata
+template: myalpine
 product:
-  identifier: bmw-cardata-eu-data-act
-  brand: BMW
-  description: CarData (EU Data Act)
-description: |
-  Benötigt CarData Einrichtung im BMW/Mini portal. Die folgenden Datenpunkte müssen für Streaming konfiguriert werden:
-
-  ```
-  vehicle.body.chargingPort.status
-  vehicle.cabin.infotainment.navigation.currentLocation.latitude
-  vehicle.cabin.infotainment.navigation.currentLocation.longitude
-  vehicle.cabin.hvac.preconditioning.status.comfortState
-  vehicle.drivetrain.batteryManagement.header
-  vehicle.drivetrain.electricEngine.charging.hvStatus
-  vehicle.drivetrain.electricEngine.charging.status
-  vehicle.drivetrain.electricEngine.charging.timeRemaining
-  vehicle.drivetrain.electricEngine.kombiRemainingElectricRange
-  vehicle.powertrain.electric.battery.stateOfCharge.target
-  vehicle.vehicle.preConditioning.activity
-  vehicle.vehicle.travelledDistance
-  ```
-
-  Aktualisierung der Daten erfolgt einmalig bei Neustart und wenn Streamingdaten eingehen. Dies ist ausschließlich der Fall,
-  wenn das Fahrzeug aktiv Daten erzeugt.
-
+  identifier: alpine
+  brand: Alpine
 render:
   - default: |
       type: template
-      template: cardata
-      vin: WBMW... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
-      clientid: # Client ID
+      template: myalpine
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Zugangspasswort des Dienstes
+      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
     advanced: |
       type: template
-      template: cardata
-      vin: WBMW... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
-      clientid: # Client ID
+      template: myalpine
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Zugangspasswort des Dienstes
+      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
-      phases: 3 # Maximale Phasenanzahl, Die maximale Anzahl der Phasen welche genutzt werden können (optional)
-      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll (optional)
+      phases: # Maximale Phasenanzahl, Wird für die Bestimmung des minimalen Solar-Überschusses und der Planungsdauer verwendet. [1, 2, 3] (optional)
+      mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs gesetzt. Leer lassen, um den aktuellen Modus beizubehalten. (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxCurrent: 16 # Maximale Stromstärke (A), Definiert die maximale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
       maxPower: 10000 # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
-      identifiers: # Identifikation, Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle (optional)
-      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie (optional)
+      identifiers: # RFID-Identifikation, Für die Zuordnung des Fahrzeugs an einen Ladepunkt via RFID-Karte. Die Kennung wird am Ladepunkt angezeigt. Übernehme den Wert von dort. [Mehr erfahren.](https://docs.evcc.io/docs/features/vehicle) (optional)
+      priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität). (optional)
+      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
       coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
-      streaming: # Unterstützt Streaming, Aktivieren falls das Fahrzeug Streaming Updates während des Ladevorgangs schickt. (optional)
+      streaming: # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
       welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)
 params:
+  - name: user
+    example:
+    default:
+    choice: []
+    unit:
+    description: Benutzerkonto
+    help: bspw. E-Mail Adresse, User Id, etc.
+    advanced: false
+    optional: false
+  - name: password
+    example:
+    default:
+    choice: []
+    unit:
+    description: Passwort
+    help: Zugangspasswort des Dienstes
+    advanced: false
+    optional: false
   - name: vin
-    example: WBMW...
+    example: W...
     default:
     choice: []
     unit:
     description: Fahrzeugidentifikationsnummer
     help: Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
     advanced: false
-    optional: false
-  - name: clientid
-    example:
-    default:
-    choice: []
-    unit:
-    description: Client ID
-    help:
-    advanced: false
-    optional: false
+    optional: true
   - name: title
     example:
     default:
@@ -97,12 +87,12 @@ params:
     advanced: true
     optional: true
   - name: phases
-    example: 3
+    example:
     default:
-    choice: []
+    choice: ['1', '2', '3']
     unit:
     description: Maximale Phasenanzahl
-    help: Die maximale Anzahl der Phasen welche genutzt werden können
+    help: Wird für die Bestimmung des minimalen Solar-Überschusses und der Planungsdauer verwendet.
     advanced: true
     optional: true
   - name: mode
@@ -111,7 +101,7 @@ params:
     choice: []
     unit:
     description: Standardlademodus
-    help: Wird beim Anschließen eines Fahrzeugs verwendet. Möglich sind Off, Now, MinPV und PV, oder leer wenn keiner definiert werden soll
+    help: Wird beim Anschließen eines Fahrzeugs gesetzt. Leer lassen, um den aktuellen Modus beizubehalten.
     advanced: true
     optional: true
   - name: minCurrent
@@ -146,8 +136,8 @@ params:
     default:
     choice: []
     unit:
-    description: Identifikation
-    help: 'Kann meist erst später eingetragen werden, siehe: https://docs.evcc.io/docs/features/vehicle'
+    description: RFID-Identifikation
+    help: Für die Zuordnung des Fahrzeugs an einen Ladepunkt via RFID-Karte. Die Kennung wird am Ladepunkt angezeigt. Übernehme den Wert von dort. [Mehr erfahren.](https://docs.evcc.io/docs/features/vehicle)
     advanced: true
     optional: true
   - name: priority
@@ -156,7 +146,16 @@ params:
     choice: []
     unit:
     description: Priorität
-    help: Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von PV-Energie
+    help: Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität).
+    advanced: true
+    optional: true
+  - name: cache
+    example: 5m
+    default: 15m
+    choice: []
+    unit:
+    description: Cache
+    help: Zeitintervall für erneute Datenabfrage
     advanced: true
     optional: true
   - name: coarsecurrent
@@ -174,7 +173,7 @@ params:
     choice: []
     unit:
     description: Unterstützt Streaming
-    help: Aktivieren falls das Fahrzeug Streaming Updates während des Ladevorgangs schickt.
+    help: Streaming Datenempfang erfolgt asynchron
     advanced: true
     optional: true
   - name: welcomecharge
