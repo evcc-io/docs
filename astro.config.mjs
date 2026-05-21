@@ -46,7 +46,12 @@ export default defineConfig({
         replacesTitle: true,
       },
       favicon: "/favicon.ico",
-      customCss: ["./src/styles/custom.css"],
+      customCss: [
+        "./src/styles/custom.css",
+        "./src/styles/evcc-tokens.css",
+        "./src/styles/evcc-admonitions.css",
+        "./src/styles/evcc-chrome.css",
+      ],
       defaultLocale: "en",
       locales: {
         en: { label: "English", lang: "en" },
