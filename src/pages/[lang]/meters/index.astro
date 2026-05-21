@@ -1,0 +1,76 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import DeviceFilter from "@components/DeviceFilter.astro";
+import MetersIntro from "@components/intros/MetersIntro.astro";
+import { sortDevices, availableOverviewFeatures, availableUsages } from "@utils/devices";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
+}
+
+const lang = Astro.params.lang as "de" | "en";
+const coll = await getCollection(`meters-${lang}` as any);
+const allDevices = sortDevices(coll as any);
+
+const branded = allDevices.filter((d: any) => (d.data.product.brand || "").trim());
+const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim());
+
+const filterFeatures = availableOverviewFeatures(allDevices as any);
+const filterUsages = availableUsages(allDevices as any);
+
+const title = lang === "de" ? "PV, Batterie, Netz, Zähler" : "PV, Battery, Grid, Meter";
+const description =
+  lang === "de"
+    ? "Übersicht aller unterstützten Zähler, Wechselrichter und Batteriespeicher."
+    : "Overview of all supported meters, inverters and battery storage devices.";
+
+const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
+const genericTitle = lang === "de" ? "Generische Unterstützung" : "Generic support";
+
+const headings = lang === "de"
+  ? [
+      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
+      { depth: 2, slug: "einsatzbereiche", text: "Einsatzbereiche" },
+      { depth: 2, slug: "hybridwechselrichter", text: "Hybridwechselrichter" },
+      { depth: 2, slug: "features", text: "Eigenschaften" },
+      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
+      { depth: 2, slug: "generic", text: genericTitle },
+    ]
+  : [
+      { depth: 2, slug: "setup", text: "Setup" },
+      { depth: 2, slug: "usage-areas", text: "Usage areas" },
+      { depth: 2, slug: "hybrid-inverters", text: "Hybrid inverters" },
+      { depth: 2, slug: "features", text: "Features" },
+      { depth: 2, slug: "supported", text: "Supported devices" },
+      { depth: 2, slug: "generic", text: genericTitle },
+    ];
+---
+
+<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
+  <MetersIntro lang={lang} />
+  <DeviceFilter lang={lang} features={filterFeatures} usages={filterUsages} />
+  <h2 id="supported">{supportedTitle}</h2>
+  <DeviceCardList
+    devices={branded as any}
+    lang={lang}
+    basePath={`/${lang}/meters`}
+    showUsages={true}
+    filterId="branded"
+  />
+
+  {generic.length > 0 && (
+    <>
+      <h2 id="generic">{genericTitle}</h2>
+      <DeviceCardList
+        devices={generic as any}
+        lang={lang}
+        basePath={`/${lang}/meters`}
+        showUsages={true}
+        flat
+        filterId="generic"
+      />
+    </>
+  )}
+</StarlightPage>

@@ -1,0 +1,3 @@
+```text title="trial token, valid until 2026-05-31" wrap
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJldmNjLmlvIiwic3ViIjoidHJpYWwiLCJleHAiOjE3ODAyNDY4MDAsImlhdCI6MTc3OTM4MjgwMCwic3BlIjp0cnVlLCJzcmMiOiJtYSJ9.zd1SeL_DYZ4ztw5sJq5ZGAXBomdPX8pgCm9Z04PLiTs
+```

@@ -1,0 +1,1579 @@
+---
+title: Plugins
+tableOfContents:
+  maxHeadingLevel: 4
+---
+
+import { Badge } from "@astrojs/starlight/components";
+
+Plugins can be used to integrate devices and external data sources into evcc for which there is no direct support.
+Plugins can be used for the following categories:
+
+- `meter`: [PV, battery, grid, meters](./meters)
+- `charger`: [Wallboxes](./chargers), [Smart switches](./smartswitches), [Heat pumps, heating rods](./heating)
+- `vehicle`: [Vehicles](./vehicles)
+- `tariff`: [Tariffs, forecasts](../tariffs)
+- `circuit`: [Load management](../features/loadmanagement)
+
+Additionally, plugins can also be used for the endpoints described in [Messaging](/en/reference/configuration/messaging) for sending lifecycle events.
+
+## Overview
+
+### Plugins
+
+- [GPIO Plugin](#gpio) - Plugin for direct access to GPIO pins (Linux only).
+- [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
+- [HTTP Plugin](#http) - Plugin that communicates with end devices via HTTP API.
+- [JavaScript Plugin](#javascript) - Plugin that provides or receives values via a JavaScript script.
+- [Modbus Plugin](#modbus) - Plugin for reading from a Modbus-capable device.
+- [MQTT Plugin](#mqtt) - Plugin for indirectly communicating with MQTT-capable devices via MQTT.
+- [Prometheus Plugin](#prometheus) - Plugin for reading metrics from Prometheus using PromQL.
+- [Shell Plugin](#shell) - Plugin that can execute a shell script to extract data or receive data for writing.
+- [SMA/Speedwire Plugin](#speedwire) - Plugin specifically for SMA devices that can communicate with the Speedwire protocol.
+- [Websocket Plugin](#websocket) - Plugin for receiving device data via its own web server. Can only be used for reading data.
+
+### Helpers
+
+- [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
+- [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
+- [Const Plugin](#const) - Special plugin that simply returns a constant value.
+- [Error Plugin](#error) - Special plugin that returns a known error value.
+- [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
+- [Delta Plugin](#delta) - Meta-plugin for converting absolute values to delta/increment values when writing.
+- [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
+- [Map Plugin](#map) - Meta-plugin for translating integer values (e.g., device-specific modes to evcc modes).
+- [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
+- [Sequence Plugin](#sequence) - Meta-plugin for sequential execution of multiple write operations.
+- [Sleep Plugin](#sleep) - Helper plugin for delaying actions (usually used with Sequence).
+- [Switch Plugin](#switch) - Meta-plugin for conditional write operations based on input values (like switch/case).
+- [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
+- [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
+
+### Syntax
+
+Each plugin has an individual configuration schema.
+It's important to know whether the plugin is used in a **reading** or **writing** context.
+Some configuration parameters only make sense in a reading context, others only when used in writing mode.
+
+For example, the following configuration can be used to integrate an MQTT plugin as a `meter`, where the current power consumption is read via the specified MQTT topic:
+
+```yaml title="Example: MQTT Plugin for power values of a power meter"
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: "home/current/imsys/chn2/raw"
+```
+
+The plugin configuration schema always has the following structure:
+
+```yaml {3,5-6,8}
+- name: <name>
+  type: custom
+  <attr1>:
+    source: <plugin>
+    <p-attr1>: ...
+    <p-attr2>: ...
+    ....
+  <attr2>:
+    ....
+```
+
+Where `<name>` stands for the device name, `<attr1>` and `<attr2>` for one of the device-specific attributes described below, `<plugin>` for the plugin type and `<p-attr1>`, `<p-attr2>` for plugin-specific configurations (e.g. `source`, `topic` for plugins of type `mqtt`)
+
+#### Reading
+
+When reading data using a plugin, so-called _pipelines_ can be used.
+These allow data to be extracted in a fine-grained manner from the plugin's output.
+This makes it possible to process complex data structures such as JSON or XML and filter out the required information.
+Possible parameters for data extraction are:
+
+- `regex`: A regular expression to extract values from the received text.
+- `jq`: A [jq](https://jqlang.github.io/jq/)-expression to extract values from JSON structures.
+  The full syntax and possibilities can be found in the jq documentation.
+- `quote`: Boolean value that wraps the input data in quotes before passing it to jq. This allows jq to process unquoted strings (e.g. from MQTT). For an MQTT value like `Charging`, you can use `quote: true` and `jq: '. == "Charging"'`.
+- `unpack`: Converts values from other number representations, e.g. `hex`.
+- `decode`: Decodes binary formats like `uint32`, `float32` etc.
+
+##### Known Error Values
+
+[HTTP](#http), [MQTT](#mqtt), and [Websocket](#websocket) plugins can return special error strings.
+evcc recognises these and converts them into internal error codes instead of treating them as data.
+This is useful e.g. for custom vehicle integrations where the data source knows the vehicle's state.
+
+- `ErrAsleep` — Vehicle is asleep. evcc may choose to wake up the vehicle and retry.
+- `ErrMustRetry` — Operation should be retried (e.g. due to rate limiting).
+- `ErrNotAvailable` — Value is not available. evcc treats this as a permanent error until the next restart.
+
+If a plugin returns the string `ErrAsleep` as its response, evcc generates the corresponding internal error.
+The [Error Plugin](#error) uses the same mechanism to return a fixed error value as a constant.
+
+#### Writing
+
+When writing, parameters in the configuration can be replaced by placeholders.
+The data is provided in the form `${var[:format]}`.
+If format is not specified, the data is provided in the standard %v Go format.
+The variables are replaced with the corresponding value before the plugin is executed.
+Additionally, all functions of the Go Template Library can be used to perform more complex data transformations.
+
+Depending on the device ([`meter`](#meter), [`charger`](#charger) or [`vehicle`](#vehicle)), different attributes can be read or set with plugins.
+
+### Meter
+
+Power meters are configured in the configuration section [`meters`](/en/reference/configuration/meters).
+Meters defined under `meters:` can be used at various places within the `site` configuration:
+
+- `grid`: Grid meter
+- `pv`: PV meter
+- `battery`: Home battery meter
+- `charge`: Meter for the charging power of the wallbox
+- `aux`: Consumption meter for intelligent consumers
+- `ext`: Additional meter, e.g. for load management or data collection
+
+`power` is the only mandatory attribute that must be present in every `meter` definition, all other attributes are optional.
+
+However, not all meter types support all plugin attributes:
+
+- `limitsoc` and `batterymode` are used exclusively for battery meters (i.e. for `meter` referenced in `site.battery`).
+- `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin configurations each (in a YAML array) and can be used for grid meters (`grid`) and wallboxes (`charge`).
+
+The following tables contain all attributes that can be provided by plugins when configured for `meter`.
+When using the plugins, it's also important that they return the correct data type.
+To convert to the required data type, the pipelines described in [Reading](#reading) can be used.
+
+| Attribute | Type                | Required | Context       | Description                                                 |
+| --------- | ------------------- | -------- | ------------- | ----------------------------------------------------------- |
+| power     | float               | yes      | all           | Current power in W                                          |
+| energy    | float               | no       | all           | Meter reading in kWh                                        |
+| maxpower  | int                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
+| soc       | int                 | no       | `battery`     | State of charge in %                                        |
+| capacity  | float               | no       | `battery`     | Capacity in kWh                                             |
+| powers    | [float,float,float] | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
+| currents  | [float,float,float] | no       | all           | Phase currents in A. For detecting active phases.           |
+| voltages  | [float,float,float] | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
+
+**Example**
+
+In this example, the configuration of a meter is queried for the current electrical grid power via an HTTP call:
+
+```yaml
+meters:
+  - name: volkszaehler
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+
+site:
+  meters:
+    grid: volkszaehler
+    ...
+  ...
+```
+
+In addition to the attributes that plugins provide for reading evaluation, the following attributes are used by evcc to trigger actions:
+
+| Attribute   | Type | Required | Context   | Description                                                                                                                                                       |
+| ----------- | ---- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| limitsoc    | int  | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
+| batterymode | int  | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                                        |
+
+### Charger
+
+Chargers of `type: custom` have the following attributes that can be read:
+
+| Attribute  | Type                | Required | Description                                                                                 |
+| ---------- | ------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| status     | string              | yes      | Status (A..F)                                                                               |
+| enabled    | bool                | yes      | Is charging enabled?                                                                        |
+| power      | float               | no       | Charging power in W                                                                         |
+| energy     | float               | no       | Meter reading in kWh                                                                        |
+| identify   | string              | no       | Current RFID identifier                                                                     |
+| soc        | int                 | no       | State of charge in %                                                                        |
+| limitsoc   | int                 | no       | Charge limit in %                                                                           |
+| temp       | float               | no       | Current temperature in °C (heating, alias for `soc`)                                        |
+| limittemp  | int                 | no       | Temperature limit in °C (heating, alias for `limitsoc`)                                     |
+| finishtime | string              | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
+| phases     | int                 | no       | Number of physical phases (1..3)                                                            |
+| powers     | [float,float,float] | no       | Phase powers in W. For sign detection of unsigned currents.                                 |
+| currents   | [float,float,float] | no       | Phase currents in A. For detecting active phases.                                           |
+| voltages   | [float,float,float] | no       | Phase voltages in V. For connection detection (1p/3p).                                      |
+
+For heat-pump-specific charger types (`heatpump`, `sgready`, `sgready-relay`), different plugin attributes apply, see [Heat pumps](#charger-heating).
+
+#### General Configuration Options
+
+In addition to plugin attributes, the following configuration options can be set directly on the charger:
+
+| Attribute    | Type     | Required | Description                                              |
+| ------------ | -------- | -------- | -------------------------------------------------------- |
+| icon         | string   | no       | Icon for display in the user interface                   |
+| features     | []string | no       | Feature flags for special charger properties (see below) |
+| standbypower | int      | no       | Standby power in W (for `switchsocket` type)             |
+
+##### Feature Flags
+
+The `features` array can be used to activate special charger properties:
+
+| Feature          | Description                                                                                                                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| integrateddevice | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                        |
+| heating          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                         |
+| continuous       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". |
+| switchdevice     | Device can only be switched on/off (no continuous current control). Min/max current settings and the `Min+PV` mode are hidden.                                                                                    |
+
+##### Common Combinations
+
+You can use the following combinations as a starting point for your own `type: custom` configurations.
+They mirror the preconfigured templates in evcc.
+
+**Electric heater**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Socket**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Heat pump**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
+```
+
+**Example**
+
+This example shows how to query the charging status (charging/not charging) of a charger via the Modbus plugin:
+
+```yaml
+chargers:
+  - name: icharge
+    type: custom
+    features:
+      - integrateddevice
+    enabled:
+      source: modbus
+      id: 4711
+      uri: modbus.local:502
+      rtu: false
+      register:
+        address: 100
+        type: holding
+        decode: uint16
+```
+
+In addition to read-only values, actions can also be triggered or configuration values set via plugins:
+
+| Attribute        | Type  | Required | Description                                       |
+| ---------------- | ----- | -------- | ------------------------------------------------- |
+| enable           | bool  | yes      | Enable / disable charging                         |
+| maxcurrent       | int   | yes      | Set maximum charging current in A                 |
+| maxcurrentmillis | float | no       | Set maximum charging current in A (with decimals) |
+| phases1p3p       | int   | no       | Perform phase switching (requires `tos: true`)    |
+| wakeup           | bool  | no       | Wake up vehicle                                   |
+
+**Example**
+
+This example switches a Tasmota socket via an MQTT message:
+
+```yaml
+chargers:
+  - name: unu-charger
+    type: custom
+    enable:
+      source: mqtt
+      broker: mosquitto.local:883
+      topic: cmd/unu-switch/Power
+      payload: ON
+```
+
+#### Heat Pumps
+
+Heat pumps and similar heating devices use dedicated charger types, each with its own plugin attributes.
+The full setup is described under [Heat pumps, heating rods](./heating).
+
+All three types share the following optional measurement attributes:
+
+| Attribute | Type  | Required | Description                             |
+| --------- | ----- | -------- | --------------------------------------- |
+| power     | float | no       | Current power in W                      |
+| energy    | float | no       | Meter reading in kWh                    |
+| temp      | float | no       | Current temperature in °C               |
+| limittemp | int   | no       | Device-internal temperature limit in °C |
+
+**`type: heatpump`**: heat pump with power setpoint.
+
+| Attribute   | Type  | Required | Description                        |
+| ----------- | ----- | -------- | ---------------------------------- |
+| setmaxpower | int   | yes      | Set maximum heating power in W     |
+| getmaxpower | float | no       | Current maximum heating power in W |
+
+**`type: sgready`**: heat pump with SG-Ready interface.
+
+| Attribute   | Type | Required | Description                                            |
+| ----------- | ---- | -------- | ------------------------------------------------------ |
+| setmode     | int  | yes      | Change SG-Ready mode (1: reduced, 2: normal, 3: boost) |
+| getmode     | int  | no       | Current SG-Ready mode (1, 2, 3)                        |
+| setmaxpower | int  | no       | Set maximum heating power in W                         |
+
+**`type: sgready-relay`**: heat pump controlled via relay contacts.
+Sub-chargers are referenced by type instead of via plugins.
+
+| Attribute | Type          | Required | Description                          |
+| --------- | ------------- | -------- | ------------------------------------ |
+| boost     | charger-typed | yes      | Relay for the SG-Ready boost contact |
+| dim       | charger-typed | no       | Relay for the SG-Ready dim contact   |
+
+### Vehicle
+
+Vehicle parameters can also be read via plugins.
+
+| Attribute     | Type   | Required | Description                                                                                 |
+| ------------- | ------ | -------- | ------------------------------------------------------------------------------------------- |
+| soc           | int    | yes      | State of charge in %                                                                        |
+| limitsoc      | int    | no       | Charge limit in %                                                                           |
+| status        | string | no       | Status (A..F)                                                                               |
+| range         | int    | no       | Range in km                                                                                 |
+| odometer      | int    | no       | Odometer reading in km                                                                      |
+| climater      | bool   | no       | Climate control active?                                                                     |
+| getmaxcurrent | float  | no       | Maximum charging current in A                                                               |
+| finishtime    | string | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
+
+#### General Configuration Options
+
+The following configuration options can be set directly on the vehicle:
+
+| Attribute | Type     | Required | Description                                              |
+| --------- | -------- | -------- | -------------------------------------------------------- |
+| title     | string   | no       | Display name of the vehicle in the user interface        |
+| icon      | string   | no       | Icon for display in the user interface                   |
+| capacity  | float    | no       | Battery capacity in kWh                                  |
+| features  | []string | no       | Feature flags for special vehicle properties (see below) |
+
+##### Feature Flags
+
+| Feature       | Description                                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coarsecurrent | Vehicle accepts charging current only in whole 1 A steps. The control logic is constrained to coarse 1 A steps even when the charger could regulate more finely. |
+| streaming     | Vehicle pushes data instead of being polled (e.g. BMW Cardata). SOC updates outside active charging are treated as reliable.                                     |
+| welcomecharge | Vehicle expects the wallbox to be active on connect to register the link as working. Otherwise it reports an error.                                              |
+
+**Example**
+
+In the following example, the current range of the vehicle is read from MQTT messages:
+
+```yaml
+vehicles:
+  - name: mazda
+    type: custom
+    title: Green Mazda
+    capacity: 50
+    features:
+      - coarsecurrent
+    range:
+      source: mqtt
+      topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Additionally, special commands can be sent to the vehicle via plugins:
+
+| Attribute    | Type | Required | Description                       |
+| ------------ | ---- | -------- | --------------------------------- |
+| wakeup       | bool | no       | Wake up vehicle                   |
+| chargeenable | bool | no       | Start/stop charging process       |
+| maxcurrent   | int  | no       | Set maximum charging current in A |
+
+**Example**
+
+To wake up a car via an HTTP ping to send further queries, the HTTP plugin can be used as in the following example:
+
+```yaml
+vehicles:
+  - name: model-y
+    type: custom
+    wakeup:
+      source: http
+      uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+#### Charge Mode on Vehicle Identification
+
+For user-defined vehicles, the charge mode can be configured with `onIdentify` to be set automatically when the vehicle is identified.
+This is useful when you want the desired charge mode to be set automatically as soon as the vehicle is detected.
+
+**Example**:
+
+```yaml
+vehicles:
+  - name: my-car
+    type: custom
+    soc:
+      source: mqtt
+      topic: car/soc
+    onIdentify:
+      mode: pv
+```
+
+Available modes are: `off`, `now`, `minpv`, `pv`.
+
+### Tariffs & Forecasts
+
+See [Tariffs & Forecasts > Custom Plugin](../tariffs#plugin) for the full configuration.
+
+#### Feature Flags
+
+| Feature   | Description                                                                                    |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| average   | Smooths fine-grained price slots (e.g. 15-minute values) into hourly averages.                 |
+| cacheable | Persists fetched values. Used as fallback after a restart or provider outage (up to 24 hours). |
+
+```yaml
+tariffs:
+  grid:
+    type: custom
+    features:
+      - cacheable
+    # ... additional attributes
+```
+
+### Load Management
+
+:::note[Work in Progress]
+...
+:::
+
+### Messaging
+
+:::note[Work in Progress]
+...
+:::
+
+## Plugins
+
+The following plugins are available and can be configured for the above-described attributes to enable flexible integration with various systems.
+
+### GPIO <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `gpio` plugin enables direct access to GPIO pins (General Purpose Input/Output) on Linux systems.
+It is particularly suitable for Raspberry Pi and similar single-board computers.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                              |
+| --------- | ------ | -------- | ---------------------------------------- |
+| function  | string | yes      | Mode: `read` (input) or `write` (output) |
+| pin       | int    | yes      | Pin number (BCM numbering, e.g. GPIO 17) |
+
+**How it works**:
+
+- **Reading** (`function: read`): Reads the state of a GPIO pin as a boolean value (`true` = HIGH, `false` = LOW)
+- **Writing** (`function: write`): Sets a GPIO pin to HIGH (`true`) or LOW (`false`)
+
+Pin numbering follows the BCM scheme (Broadcom numbers, not the physical pin position).
+For a Raspberry Pi pinout, see e.g. [pinout.xyz](https://pinout.xyz/).
+
+**Reading Example**:
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM pin number
+```
+
+**Writing Example**:
+
+```yaml
+source: gpio
+function: write
+pin: 27 # BCM pin number
+```
+
+:::note
+This plugin only works on Linux systems with access to `/dev/gpiomem`.
+:::
+
+### Go <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `go` plugin uses the [Yaegi](https://github.com/traefik/yaegi) interpreter to execute Go code at runtime.
+It's particularly useful for type-safe calculations and complex data processing logic.
+
+#### Available Go Standard Libraries
+
+The following Go packages are automatically available and don't need to be imported:
+
+- `fmt` - Formatted I/O
+- `math` - Mathematical functions
+- `strings` - String manipulation
+- `time` - Time and date functions
+
+**Reading Example**:
+
+```yaml
+source: go
+script: |
+  res := 500.0
+  res * 2 // returns 1000.0
+```
+
+**Example with Time Functions**:
+
+```yaml
+source: go
+script: |
+  hour := time.Now().Hour()
+  price := 50.0 // Night tariff
+  if hour >= 9 && hour < 17 {
+    price = 100.0 // Tariff price during business hours
+  }
+  price
+```
+
+**Example with String Processing**:
+
+```yaml
+source: go
+script: |
+  text := "hello world"
+  strings.ToUpper(text) // returns "HELLO WORLD"
+```
+
+When the `go` plugin is used for writing, the value to be written is passed to the script as a variable:
+
+**Writing Example**:
+
+```yaml
+charger:
+  - type: custom
+    maxcurrent:
+      source: go
+      script: |
+        fmt.Printf("Setting charge current: %d A\n", maxcurrent)
+        // maxcurrent variable is automatically available
+```
+
+#### Input and Output Transformations
+
+The `go` and `js` plugins support `in` and `out` parameters to use values from other sources as variables in the script or to forward the script result to other plugins.
+
+##### Input Transformations (`in`)
+
+The `in` parameter allows you to use values from other sources as variables in your script.
+Each entry requires `name` (variable name in the script), `type` (`bool`, `int`, `float`, `string`) and `config` (plugin configuration).
+
+This example shows conditional logic that cannot be achieved with simple Calc operations:
+
+```yaml
+power:
+  source: go
+  script: |
+    // Power based on SoC and standby
+    power := 5000.0 // normal
+    if standby {
+      power = 0.0 // no load in standby
+    } else if soc < 20.0 {
+      power = 1000.0 // low
+    }
+    power
+  in:
+    - name: soc
+      type: float
+      config:
+        source: const
+        value: 85.0
+    - name: standby
+      type: bool
+      config:
+        source: const
+        value: false
+```
+
+##### Output Transformations (`out`)
+
+The `out` parameter forwards the script result to other plugins.
+This is particularly useful in a writing context, e.g. when the script result should be further processed via MQTT or HTTP.
+Each entry requires `name`, `type` and `config` — analogous to `in`.
+
+```yaml
+chargers:
+  - name: smart-heater
+    type: custom
+    maxcurrent:
+      source: go
+      script: |
+        watts := maxcurrent * 230
+        watts
+      out:
+        - name: watts
+          type: float
+          config:
+            source: mqtt
+            topic: heater/target_power
+```
+
+### HTTP <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `http` plugin performs HTTP calls to read or update data.
+It also includes the ability to read or perform simple transformations on JSON data structures via jq queries (e.g. for REST APIs).
+The full functionality can be found in the [official jq documentation](https://jqlang.github.io/jq/manual/).
+
+Authentication methods are `basic`, `bearer` and `digest`.
+The names of the respective parameters can be found [here](https://github.com/evcc-io/evcc/blob/master/plugin/http_auth.go#L23).
+
+#### Authentication
+
+Various authentication methods are available for HTTP requests:
+
+**Basic Authentication**:
+
+```yaml
+auth:
+  type: basic
+  user: <username>
+  password: <password>
+```
+
+**Bearer Token** (e.g. for JWT):
+
+```yaml
+auth:
+  type: bearer
+  token: <token>
+```
+
+**Digest Authentication**:
+
+```yaml
+auth:
+  type: digest
+  user: <username>
+  password: <password>
+```
+
+**Custom Authentication**:
+
+For more complex authentication scenarios, custom authentication plugins can be developed.
+These are integrated via the `source` parameter:
+
+```yaml
+auth:
+  source: <plugin-name>
+  user: <username>
+  password: <password>
+  # additional plugin-specific parameters
+```
+
+This allows integration of devices with special authentication requirements without having to modify the entire HTTP plugin code.
+
+:::caution[Important]
+XML documents are automatically converted to JSON format internally, which can then be filtered with jq like a native JSON response.
+Attributes get the prefix `attr`.
+:::
+
+:::tip
+For testing jq queries, online tools like [jqplay.org](https://jqplay.org/) are useful.
+For regex tests, [regex101.com](https://regex101.com/) is a good option.
+:::
+
+**Reading Example**:
+
+```yaml
+source: http
+uri: https://volkszaehler/api/data/<uuid>.json?from=now
+method: GET # default HTTP method
+headers:
+  - content-type: application/json
+auth: # basic authentication
+  type: basic
+  user: foo
+  password: bar
+insecure: false # set to true to trust self-signed certificates
+jq: .data.tuples[0][1] # parse response json
+scale: 0.001 # factor applied to result, e.g. for kW to W conversion
+cache: 60s # response cache duration
+timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+```
+
+```yaml
+source: http
+uri: http://charger/status
+jq: .total_power > 10 # Converts a json integer to a boolean value
+```
+
+**Writing Example**:
+
+```yaml
+body: %v # only applicable for PUT or POST requests
+```
+
+```yaml
+enable:
+  source: http
+  uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
+```
+
+### JavaScript <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+evcc integrates a JavaScript interpreter with the [Underscore.js](https://underscorejs.org) library, which is directly accessible via `_.`, e.g. `_.random(0,5)`.
+The `js` plugin can execute JavaScript code via the `script` parameter. Very helpful for rapid prototyping:
+
+**Reading Example**:
+
+```yaml
+source: js
+script: |
+  var res = 500;
+  2 * res; // returns 1000
+```
+
+When the `js` plugin is used for writing, the value to be written is passed to the script as a variable:
+
+**Writing Example**:
+
+```yaml
+charger:
+  - type: custom
+    maxcurrent:
+      source: js
+      script: |
+        console.log(maxcurrent);
+```
+
+The `js` plugin supports the same [input and output transformations](#transformations) (`in`/`out`) as the `go` plugin.
+
+### Modbus <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `modbus` plugin can read data from any Modbus-capable device or SunSpec-compatible inverter.
+Many power meters are already pre-configured (see [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
+It's also possible to write Modbus registers to integrate additional wallboxes.
+
+**Example**:
+
+```yaml
+source: modbus
+id: 1
+uri: 192.168.1.10:502
+register:
+  address: 300
+  type: holding
+  decode: uint16
+```
+
+See the [Modbus Documentation](/en/reference/modbus) for more details.
+
+### MQTT <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `mqtt` plugin enables reading values via MQTT topics.
+This is particularly useful for power meters, e.g. when they already provide their data via MQTT.
+See the [MBMD Documentation](https://github.com/volkszaehler/mbmd) for an example of how to get Modbus measurement data into MQTT.
+
+**Parameters (Reading)**:
+
+| Parameter | Type     | Required | Description                                                     |
+| --------- | -------- | -------- | --------------------------------------------------------------- |
+| topic     | string   | yes      | MQTT topic to read from                                         |
+| timeout   | duration | no       | Maximum age of received values                                  |
+| scale     | float    | no       | Scaling factor for result (e.g. 0.001 for Wh to kWh conversion) |
+
+The plugin returns an error if no new value has been received within the `timeout` duration.
+If `timeout` is not set, values of any age are accepted once the first message has been received.
+It is recommended to set a timeout to detect when the source is no longer providing current data.
+
+For data extraction, the pipeline parameters described under [Reading](#reading) are available (`regex`, `jq`, `quote`, etc.).
+
+**Reading Example**:
+
+```yaml
+source: mqtt
+topic: mbmd/sdm1-1/Power
+timeout: 30s # don't accept values older than timeout
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+```
+
+**Parameters (Writing)**:
+
+| Parameter | Type   | Required | Description                                                |
+| --------- | ------ | -------- | ---------------------------------------------------------- |
+| topic     | string | yes      | MQTT topic to write to                                     |
+| payload   | string | no       | Payload template (uses value in default format if not set) |
+
+For write access, the data is provided with the `payload` attribute.
+If this parameter is missing from the configuration, the value is written in the default format.
+
+**Writing Example**:
+
+```yaml
+source: mqtt
+topic: mbmd/charger/maxcurrent
+payload: ${var:%d}
+```
+
+### Prometheus <Badge text="read" variant="tip" size="small" />
+
+The `prometheus` plugin reads metrics from a Prometheus instance using PromQL queries.
+This is useful when monitoring data is already available in Prometheus and should be used in evcc.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                  |
+| --------- | -------- | -------- | ---------------------------- |
+| uri       | string   | yes      | Prometheus server URL        |
+| query     | string   | yes      | PromQL query                 |
+| timeout   | duration | no       | Timeout (default: 2 minutes) |
+
+**Supported query results**:
+
+- **Scalar**: A single numerical value
+- **Vector**: A vector with exactly one metric entry
+
+**Example**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Example with time range**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+The query must return a single numerical value.
+For vector results, exactly one metric must be included.
+
+### Shell Script <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `script` plugin executes external scripts to read or update data. The plugin is useful for integrating any kind of external functionality.
+
+**Reading Example**:
+
+```yaml
+source: script
+cmd: /bin/bash -c "cat /dev/urandom"
+timeout: 5s
+```
+
+**Writing Example**:
+
+```yaml
+source: script
+cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
+timeout: 5s
+```
+
+### SMA/Speedwire <Badge text="read" variant="tip" size="small" />
+
+The `sma` plugin provides an interface to SMA devices that support the Speedwire protocol.
+
+**Reading Example**:
+
+```yaml
+source: sma
+uri: 192.168.4.51 # alternative to serial
+serial: 123456 # alternative to uri
+value: ActivePowerPlus # ID of value to read
+password: "0000" # optional (default: 0000)
+interface: eth0 # optional
+scale: 1 # optional scale factor for value
+```
+
+Supported values for `value` can be found in the diagnostic output using the `evcc meter` command (with configured SMA `meter` devices).
+
+All possible values can be found as constants [here](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (use the constant name for `value`).
+
+### Websocket <Badge text="read" variant="tip" size="small" />
+
+The `websocket` plugin provides a WebSocket listener.
+It also includes the ability to read or parse JSON data structures via jq-like queries.
+This can be used, for example, to receive data from Volkszähler's push server.
+
+For data extraction, the pipeline parameters described in [Reading](#reading) are available (`regex`, `jq`, `quote`, etc.).
+
+**Reading Example**:
+
+```yaml
+source: http
+uri: ws://<volkszaehler host:port>/socket
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+timeout: 30s # error if no update received in 30 seconds
+```
+
+## Helpers
+
+### Calc <Badge text="read" variant="tip" size="small" />
+
+The `calc` plugin allows mathematical processing of multiple individual values:
+
+**Reading Example**:
+
+```yaml
+source: calc
+add:
+- source: ...
+  ...
+- source: ...
+  ...
+```
+
+```yaml
+source: calc
+mul:
+- source: calc
+  sign:
+    source: ... (power)
+  ...
+- source: ... (current)
+  ...
+```
+
+The basic arithmetic operations addition (add), multiplication (mul), division (div), sign inversion (sign), absolute value (abs), minimum value (min) and maximum value (max) are supported as operands.
+
+With `scale: -1` on one of the values, simple subtraction can be performed, with `scale: 0.001` division, e.g. for converting kWh to Wh.
+
+With `sign:` (every positive number becomes +1, every negative number becomes -1, 0 remains 0), signs can be transferred to other values (in conjunction with `mul`).
+E.g. to transfer the "direction" of power (feed-in or consumption) to the measured currents for meters.
+
+With `abs:`, the absolute value of a number is calculated.
+
+With `min:` and `max:` the minimum value respectively the maximum value will be calculated.
+
+The `calc` plugin is helpful for e.g.
+
+- Summing power values from individual PV strings (addition)
+- Calculating apparent power from voltage and current (multiplication)
+- Combining separate power values for import and export into a signed single value (subtraction).
+- Calculating percentage fill levels (division)
+- Determining the correct direction of current flow (sign)
+- Eliminating known offsets (addition with `const` plugin)
+
+:::tip
+Constant auxiliary values (e.g. for offsets) can be generated as operands using the `const` plugin.
+:::
+
+### Combined <Badge text="read" variant="tip" size="small" />
+
+The `combined` status plugin is used to convert mixed boolean status values of `Plugged` (connected) / `Charging` (charging) into an evcc-compatible charging status of A..F.
+It's used, for example, with an OpenWB MQTT integration.
+
+**Reading Example**:
+
+```yaml
+source: combined
+plugged:
+  source: mqtt
+  topic: openWB/lp/1/boolPlugStat
+charging:
+  source: mqtt
+  topic: openWB/lp/1/boolChargeStat
+```
+
+### Const <Badge text="read" variant="tip" size="small" />
+
+The `const` plugin returns a constant value.
+It's suitable, for example, to apply fixed correction values (offset) to a variable value in conjunction with the `calc` plugin or to simulate measurement and status values for testing purposes.
+
+**Reading Example**:
+
+```yaml
+source: const
+value: -16247
+```
+
+### Error <Badge text="read" variant="tip" size="small" />
+
+The `error` plugin always returns a [known error value](#known-errors).
+It is useful to explicitly mark an unimplemented attribute as not available.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                                    |
+| --------- | ------ | -------- | -------------------------------------------------------------- |
+| error     | string | yes      | Error value (`ErrAsleep`, `ErrMustRetry` or `ErrNotAvailable`) |
+
+**Example**:
+
+```yaml
+soc:
+  source: error
+  error: ErrNotAvailable
+```
+
+### Convert <Badge text="write" variant="caution" size="small" />
+
+The `convert` plugin converts data types when writing.
+It is used when a plugin expects a different data type than evcc provides.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                         |
+| --------- | ------ | -------- | ----------------------------------- |
+| convert   | string | yes      | Conversion type                     |
+| set       | config | yes      | Plugin for writing after conversion |
+
+**Supported conversions**:
+
+| Conversion | Description                                    |
+| ---------- | ---------------------------------------------- |
+| float2int  | Float64 → Int64 (decimal places are truncated) |
+| int2float  | Int64 → Float64                                |
+| int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
+
+**Example** (evcc provides float, device expects int):
+
+```yaml
+limitsoc:
+  source: convert
+  convert: float2int
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 41009
+      type: writesingle
+      encoding: uint16
+```
+
+In this example, evcc converts a float value like `85.5` to `85` before writing it to the modbus register.
+
+### Delta <Badge text="write" variant="caution" size="small" />
+
+The `delta` plugin converts absolute values to delta/increment values.
+It's used for devices that add written values to an internal sum instead of setting them directly.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                      |
+| --------- | ------ | -------- | ------------------------------------------------ |
+| get       | config | no       | Plugin for reading the current total from device |
+| set       | config | yes      | Plugin for writing the calculated delta          |
+
+**How it works**:
+
+1. Input value is received (e.g., `1000`)
+2. If `get` is configured, the current total is read from the device
+3. Delta is calculated: `delta = new_value - current_total`
+4. Delta is written via the `set` plugin
+5. Internal state is updated
+
+Without the `get` parameter, the plugin tracks the total internally (starts at 0).
+When evcc restarts, synchronisation with the device is lost.
+Therefore, it's recommended to configure `get` if the device provides a readable total register.
+
+**Supported data types**: `int64`, `float64`
+
+**Use case**:
+
+Some heat pumps (e.g., Ochsner) have registers that expect delta values instead of absolute values.
+When writing `500`, the device adds 500 W to the internal value instead of setting it to 500 W.
+To increase from 1000 W to 1500 W, you must write `+500`.
+To decrease, negative values are written (e.g., `-300`).
+
+**Writing Example**:
+
+```yaml
+setmaxpower:
+  source: delta
+  get: # Read current total from device
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2012 # Device's internal sum register
+      type: input
+      decode: uint16
+  set: # Write calculated delta
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2201 # Delta register
+      type: writeholding
+      decode: uint16
+```
+
+**Example with Watchdog**:
+
+The delta plugin is often combined with the [watchdog plugin](#watchdog) when the device requires periodic updates:
+
+```yaml
+setmaxpower:
+  source: watchdog
+  timeout: 60s # Resend every 30 seconds
+  set:
+    source: delta # Convert absolute values to deltas
+    get: # Read current total
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2012 # Total register
+        type: input
+        decode: uint16
+    set: # Write delta
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2201 # Delta register
+        type: writeholding
+        decode: uint16
+```
+
+### Ignore <Badge text="write" variant="caution" size="small" />
+
+The `ignore` plugin suppresses specific error messages when writing.
+It is used when a device returns harmless errors that can be ignored.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | -------- | --------------------------- |
+| error     | string | yes      | Error text prefix to ignore |
+| set       | config | yes      | Plugin for writing          |
+
+**How it works**:
+
+1. The nested `set` plugin is executed
+2. If an error occurs, it checks whether the error message starts with the `error` string
+3. If yes, the error is ignored and success is returned
+4. If no, the error is passed through normally
+
+**Supported data types**: `int64`, `float64`, `bool`, `[]byte`
+
+**Example**:
+
+```yaml
+batterymode:
+  source: switch
+  switch:
+    - case: 1 # normal
+      set:
+        source: const
+        value: 2
+        set:
+          source: ignore
+          error: "modbus: response data size '18' does not match count '4'"
+          set:
+            source: modbus
+            uri: 192.168.1.10:502
+            id: 1
+            register:
+              address: 0x1110
+              type: writemultiple
+              encoding: int16
+```
+
+In this example, the device returns a harmless modbus error that is ignored.
+
+### Map <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
+
+The `map` plugin translates integer values to other integer values using a lookup table.
+It is often used to convert device-specific values to evcc standard values and vice versa.
+
+**Parameters**:
+
+| Parameter | Type            | Required | Description                                     |
+| --------- | --------------- | -------- | ----------------------------------------------- |
+| values    | map[int64]int64 | yes      | Lookup table with input → output mapping        |
+| get       | config          | no       | Plugin for reading (only required when reading) |
+| set       | config          | no       | Plugin for writing (only required when writing) |
+
+**How it works**:
+
+**When reading**:
+
+1. `get` plugin returns a value (e.g., `0`)
+2. Value is looked up in the `values` table
+3. The mapped value is returned (e.g., `0` → `2`)
+
+**When writing**:
+
+1. Input value is received (e.g., `3`)
+2. Value is looked up in the `values` table
+3. The mapped value is passed to the `set` plugin (e.g., `3` → `6`)
+
+If no matching value is found in the table, an error occurs.
+
+**Supported data types**: `int64` (integer values only)
+
+**Reading example** (device value → evcc):
+
+```yaml
+getmode:
+  source: map
+  values:
+    0: 2 # Device "Free" → evcc "normal"
+    1: 1 # Device "Forced off" → evcc "reduced"
+    2: 3 # Device "Recommended on" → evcc "boost"
+    3: 3 # Device "Forced on" → evcc "boost"
+  get:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: holding
+      encoding: int16
+```
+
+**Writing example** (evcc → device value):
+
+```yaml
+setmode:
+  source: map
+  values:
+    1: 1 # evcc "reduced" → Device "Forced off"
+    2: 0 # evcc "normal" → Device "Free"
+    3: 3 # evcc "boost" → Device "Forced on"
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: writeholding
+      encoding: int16
+```
+
+### Meter <Badge text="read" variant="tip" size="small" />
+
+The `meter` plugin allows using another meter as a data source.
+This is useful when you want to use an existing device for multiple measurements or when you need different methods of a device for different attributes.
+
+The `config` section contains the complete template configuration of the meter to be embedded.
+
+**Reading Example**:
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    power:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: power
+      scale: -1
+    energy:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: energy
+    soc:
+      source: mqtt
+      topic: Haus/Batterie
+      jq: .soc
+      timeout: 60s
+```
+
+In this example, a Shelly 1PM device is used as a data source for power and energy of a battery, while the state of charge (SoC) is retrieved via MQTT.
+
+### Sequence <Badge text="write" variant="caution" size="small" />
+
+The `sequence` plugin executes multiple write operations sequentially.
+All nested plugins receive the same input value and are executed in the defined order.
+Execution stops immediately on error.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                           |
+| --------- | -------- | -------- | ------------------------------------- |
+| set       | [config] | yes      | Array of nested plugin configurations |
+
+**How it works**:
+
+1. Input value is received
+2. Each plugin in the `set` list is called sequentially with this value
+3. On error, the sequence is aborted and the error is returned
+4. Successful execution means all plugins executed successfully
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Use cases**:
+
+- Execute multiple HTTP calls sequentially
+- Combine with `sleep` plugin for time-delayed actions
+- Write multiple modbus registers simultaneously
+- Propagate values to multiple targets
+
+**Example 1: Multiple HTTP calls**
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/pin1
+      method: POST
+      body: '{"value": "on"}'
+    - source: http
+      uri: http://device.local/api/pin4
+      method: POST
+      body: '{"value": "off"}'
+```
+
+**Example 2: Combination with switch**
+
+```yaml
+batterymode:
+  source: sequence
+  set:
+    - source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            body: "automatic"
+        - case: 3 # charge
+          set:
+            source: sequence
+            set:
+              - source: sleep
+                duration: 1s
+              - source: http
+                uri: http://battery.local/api/charge
+                body: "5000" # 5 kW
+    - source: mqtt
+      topic: home/battery/status
+      payload: "mode_${batterymode}"
+```
+
+**Flow for `batterymode: 1` (normal)**:
+
+1. Outer `sequence` receives value `1`
+2. First step: `switch` checks value `1`
+   - Case `1` matches → HTTP call to `/api/mode` with body `automatic`
+3. Second step: `mqtt` sends message to `home/battery/status` with payload `mode_1`
+4. Done
+
+**Flow for `batterymode: 3` (charge)**:
+
+1. Outer `sequence` receives value `3`
+2. First step: `switch` checks value `3`
+   - Case `3` matches → Inner `sequence` is executed:
+     - Wait 1 second (`sleep`)
+     - HTTP call to `/api/charge` with body `5000`
+3. Second step: `mqtt` sends message to `home/battery/status` with payload `mode_3`
+4. Done
+
+The value flows through all plugins, with `switch` executing different actions based on the value and `mqtt` always notifying at the end.
+
+### Sleep <Badge text="write" variant="caution" size="small" />
+
+The `sleep` plugin adds a delay.
+Typically used within a `sequence` plugin to create time intervals between actions.
+
+**Parameters**:
+
+| Parameter | Type     | Required | Description                                        |
+| --------- | -------- | -------- | -------------------------------------------------- |
+| duration  | duration | yes      | Wait time (e.g., `1s`, `500ms`, `0s` for no delay) |
+
+**Example**:
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/prepare
+      method: POST
+    - source: sleep
+      duration: 500ms
+    - source: http
+      uri: http://device.local/api/activate
+      method: POST
+```
+
+### Switch <Badge text="write" variant="caution" size="small" />
+
+The `switch` plugin performs conditional write operations, similar to a switch/case statement in programming languages.
+Based on the input value, the corresponding action is executed.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                        |
+| --------- | ------ | -------- | -------------------------------------------------- |
+| switch    | [case] | yes      | Array of cases with `case` and `set` configuration |
+| default   | config | no       | Fallback plugin if no case matches                 |
+
+**How it works**:
+
+1. Input value is compared with the `case` values
+2. On match, the corresponding `set` plugin is executed
+3. If no case matches and `default` is defined, it is executed
+4. If no case matches and no `default` is defined, an error occurs
+
+**Supported data types**: `int64` (integer values only)
+
+**Example**:
+
+```yaml
+setmode:
+  source: switch
+  switch:
+    - case: 1 # reduced
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "eco"
+    - case: 2 # normal
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "normal"
+    - case: 3 # boost
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "boost"
+```
+
+### Valid <Badge text="read" variant="tip" size="small" />
+
+The `valid` plugin allows providing plugin values based on boolean validation.
+It separates the validity of a value from its actual content.
+If the validation returns `false`, the value is considered unavailable.
+
+This is particularly useful for integrations like ioBroker that provide validity and value separately.
+
+**Reading Example**:
+
+```yaml
+source: valid
+valid:
+  source: mqtt
+  topic: iobroker/wallbox/power/valid
+value:
+  source: mqtt
+  topic: iobroker/wallbox/power/value
+```
+
+In this example, the value is only used when the `valid` topic returns `true`.
+If it returns `false`, the value is marked as unavailable.
+
+### Watchdog <Badge text="write" variant="caution" size="small" />
+
+The `watchdog` plugin is a wrapper plugin that automatically repeats write operations at regular intervals.
+Some devices (e.g. battery storage systems, inverters) expect control commands to be repeated regularly to stay active.
+The watchdog plugin monitors write operations and automatically repeats them at half the configured timeout interval.
+
+**Parameters**:
+
+| Parameter | Type               | Required | Description                                                           |
+| --------- | ------------------ | -------- | --------------------------------------------------------------------- |
+| timeout   | duration           | yes      | Time interval for repetitions (value is rewritten every timeout/2)    |
+| reset     | string \| [string] | no       | Value(s) at which repetitions are stopped                             |
+| initial   | string             | no       | Value that is written once at startup                                 |
+| defer     | bool               | no       | Defers updates instead of executing them immediately (default: false) |
+| set       | config             | yes      | Nested plugin for the actual write operation                          |
+
+**How it works**:
+
+1. **Start**: If `initial` is configured, this value is written once at startup
+2. **Write**: When a value is written, the plugin checks whether it is in the `reset` list
+3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value every `timeout/2` seconds
+4. **Watchdog stops**: If the value is in `reset`, no repetitions are performed
+
+**reset parameter**:
+
+- Defines values at which the watchdog is stopped
+- Can be a single value (`reset: 0`) or multiple values (`reset: [0, 1]`)
+- Typically used for "safe" or "default" states that don't need continuous repetition
+
+**initial parameter**:
+
+- Optional value that is written once when the plugin starts
+- Useful for setting a defined initial state
+- Executed before all other write operations
+
+**defer parameter**:
+
+- Ensures that timeouts between updates are respected
+- The watchdog is stopped during the delay and restarted with the new value after expiry
+- Useful when devices require a minimum wait time between mode changes
+- The delay is calculated based on the time since the last update
+- Reset values are always written immediately (without delay)
+
+**Supported data types**: `int64`, `float64`, `bool`
+
+**Example Write**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+In this example, values are automatically repeated every 30 s, except when the value `0` is written.
+
+**Flow example** with `timeout: 60s`, `reset: 0`:
+
+- Plugin starts
+- Write value `100` → Watchdog **runs**, value is repeated every 30 s
+- After 2 minutes: Value `100` has been written 4x (0s, 30s, 60s, 90s, 120s)
+- Write value `200` → Watchdog **continues** running, now with new value `200` every 30 s
+- Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
+- No further repetitions until a new value != `0` is written
+
+**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Stop repetitions in normal operation
+  set:
+    source: switch
+    switch:
+      - case: 1 # normal
+        set:
+          source: modbus
+          # ... Modbus configuration for normal operation
+      - case: 2 # hold
+        set:
+          source: modbus
+          # ... Modbus configuration for hold mode
+      - case: 3 # charge
+        set:
+          source: modbus
+          # ... Modbus configuration for charge mode
+```

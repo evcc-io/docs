@@ -1,0 +1,138 @@
+---
+const label = Astro.locals.t("themeSelect.accessibleLabel");
+---
+
+<starlight-theme-cycle>
+  <button type="button" class="theme-cycle" aria-label={label}>
+    <span class="theme-icon theme-icon-auto" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="1.5em" height="1.5em">
+        <path d="M31.778,5.57C19.011-0.101,3.713,9.985,4,24c-0.286,14.012,15.01,24.104,27.778,18.429C47.975,35.677,47.974,12.321,31.778,5.57z M24,40c-8.822,0-16-7.178-16-16C7.936,14.519,16.447,6.958,25.85,8.105c-10.394,7.727-10.392,24.064,0,31.789C25.24,39.965,24.623,40,24,40z M31.01,38.387c-11.949-5.74-11.944-23.038,0-28.774C42.925,15.307,42.92,32.696,31.01,38.387z" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="theme-icon theme-icon-light" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="1.5em" height="1.5em" fill="currentColor">
+        <path d="M24,34c5.514,0,10-4.486,10-10s-4.486-10-10-10c-5.514,0-10,4.486-10,10S18.486,34,24,34z M30,24c0,3.309-2.691,6-6,6s-6-2.691-6-6s2.691-6,6-6S30,20.691,30,24z"/>
+        <rect x="22" y="4" width="4" height="6"/>
+        <rect x="22" y="38" width="4" height="6"/>
+        <rect x="4" y="22" width="6" height="4"/>
+        <rect x="38" y="22" width="6" height="4"/>
+        <rect x="13.5" y="6.278" transform="matrix(0.866 -0.5 0.5 0.866 -2.5623 8.9935)" width="4" height="6"/>
+        <rect x="30.5" y="35.722" transform="matrix(0.866 -0.5 0.5 0.866 -15.0067 21.4372)" width="4.001" height="6"/>
+        <rect x="6.277" y="30.5" transform="matrix(0.866 -0.5 0.5 0.866 -15.0068 8.9926)" width="6" height="4.001"/>
+        <rect x="35.722" y="13.5" transform="matrix(0.8661 -0.4999 0.4999 0.8661 -2.5628 21.4339)" width="6" height="4.001"/>
+        <rect x="7.277" y="12.5" transform="matrix(0.4999 -0.8661 0.8661 0.4999 -8.7847 15.7861)" width="4.001" height="6"/>
+        <rect x="36.722" y="29.5" transform="matrix(0.5 -0.866 0.866 0.5 -8.7845 49.7849)" width="4.001" height="6"/>
+        <rect x="12.5" y="36.722" transform="matrix(0.5 -0.866 0.866 0.5 -25.7843 32.7831)" width="6" height="4"/>
+        <rect x="29.5" y="7.277" transform="matrix(0.5001 -0.866 0.866 0.5001 8.2139 32.7828)" width="5.999" height="4.001"/>
+      </svg>
+    </span>
+    <span class="theme-icon theme-icon-dark" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="1.5em" height="1.5em" fill="currentColor">
+        <polygon points="26,4 26,8.001 21.999,8.001 21.999,12.001 26,12.001 26,16.001 30,16.001 30,12.001 34,12.001 34,8.001 30,8.001 30,4"/>
+        <path d="M22.585,25.415c-4.559-4.56-5.938-11.366-3.512-17.342l-2.605-2.605C3.431,10.489-0.255,28.434,9.858,38.143c9.864,10.092,27.519,6.511,32.674-6.609l-2.605-2.606C33.951,31.353,27.145,29.975,22.585,25.415z M35.314,35.314c-6.238,6.238-16.388,6.238-22.628,0c-6.75-6.66-6.076-18.023,1.382-23.861c-1.912,12.79,9.689,24.4,22.479,22.479C36.165,34.413,35.754,34.874,35.314,35.314z"/>
+        <rect x="33.172" y="19.172" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -5.0127 31.8997)" width="5.657" height="5.657"/>
+      </svg>
+    </span>
+  </button>
+</starlight-theme-cycle>
+
+<script is:inline>
+  (function () {
+    try {
+      var t = localStorage.getItem("starlight-theme");
+      if (t !== "light" && t !== "dark") t = "auto";
+      var el = document.querySelector("starlight-theme-cycle");
+      if (el) el.setAttribute("data-theme", t);
+    } catch (e) {}
+  })();
+</script>
+
+<script>
+  type Theme = "auto" | "light" | "dark";
+  const order: Theme[] = ["auto", "dark", "light"];
+  const storageKey = "starlight-theme";
+
+  const parse = (v: unknown): Theme =>
+    v === "light" || v === "dark" || v === "auto" ? v : "auto";
+
+  const load = (): Theme =>
+    parse(typeof localStorage !== "undefined" && localStorage.getItem(storageKey));
+
+  function store(theme: Theme) {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(storageKey, theme === "auto" ? "" : theme);
+  }
+
+  const preferredColorScheme = (): "light" | "dark" =>
+    matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+
+  function apply(theme: Theme) {
+    document.documentElement.dataset.theme =
+      theme === "auto" ? preferredColorScheme() : theme;
+  }
+
+  function syncEl(el: HTMLElement, theme: Theme) {
+    el.dataset.theme = theme;
+  }
+
+  matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+    if (load() === "auto") apply("auto");
+  });
+
+  class StarlightThemeCycle extends HTMLElement {
+    constructor() {
+      super();
+      const initial = load();
+      apply(initial);
+      syncEl(this, initial);
+
+      this.querySelector("button")?.addEventListener("click", () => {
+        const current = load();
+        const next = order[(order.indexOf(current) + 1) % order.length] ?? "auto";
+        apply(next);
+        store(next);
+        syncEl(this, next);
+      });
+    }
+  }
+  customElements.define("starlight-theme-cycle", StarlightThemeCycle);
+</script>
+
+<style>
+  starlight-theme-cycle {
+    display: inline-flex;
+    align-items: center;
+  }
+  .theme-cycle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    padding: 0.25em;
+    margin: -0.25em;
+    color: inherit;
+    cursor: pointer;
+    line-height: 0;
+    /* Reserve the icon footprint so the button never collapses while the
+       inline script picks the matching icon. */
+    min-width: calc(1.5em + 0.5em);
+    min-height: calc(1.5em + 0.5em);
+  }
+  .theme-cycle:hover,
+  .theme-cycle:focus-visible {
+    color: var(--sl-color-text-accent);
+  }
+  .theme-icon {
+    display: none;
+    line-height: 0;
+    width: 1.5em;
+    height: 1.5em;
+  }
+  starlight-theme-cycle[data-theme="auto"] .theme-icon-auto,
+  starlight-theme-cycle[data-theme="light"] .theme-icon-light,
+  starlight-theme-cycle[data-theme="dark"] .theme-icon-dark {
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

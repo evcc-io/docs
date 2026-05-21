@@ -1,0 +1,67 @@
+---
+import UsageIcons from "./UsageIcons.astro";
+import { usageLabel } from "@utils/usages";
+
+interface RenderEntry {
+  usage?: string;
+}
+
+interface Props {
+  renders: RenderEntry[];
+  lang: "de" | "en";
+}
+
+const { renders, lang } = Astro.props;
+
+const ORDER = ["grid", "pv", "battery", "charge", "aux"];
+const usages = [
+  ...new Set(renders.map((r) => r.usage).filter((u): u is string => !!u)),
+].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+
+const title = lang === "de" ? "Einsatzbereiche" : "Usage areas";
+---
+
+{
+  usages.length > 0 && (
+    <section class="device-usages">
+      <h2>{title}</h2>
+      <ul>
+        {usages.map((u) => (
+          <li>
+            <span class="tag tag-usages">
+              <UsageIcons usages={[u]} lang={lang} />
+            </span>
+            <span class="device-usage-label">{usageLabel(u, lang)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .device-usages {
+    margin: 2rem 0;
+  }
+  .device-usages h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+  }
+  .device-usages ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+  .device-usages li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .device-usage-label {
+    font-size: 0.95rem;
+    color: var(--sl-color-text);
+  }
+</style>

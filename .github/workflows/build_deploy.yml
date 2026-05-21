@@ -8,11 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-commit-upload:
-    name: Build, Commit and Upload
+  build:
+    name: Build
     runs-on: depot-ubuntu-24.04-arm-8
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -25,18 +23,14 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v6
-        with:
-          commit_message: Generate docs from templates
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: build
+          path: dist
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: build-commit-upload
+    needs: build
     permissions:
       pages: write
       id-token: write

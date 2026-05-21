@@ -3,91 +3,94 @@
 ## Project Overview
 
 This is the documentation repository for evcc (Electric Vehicle Charge Controller).
-The documentation is generated from templates and synchronized with the main evcc repository.
+The site is built with [Astro](https://astro.build/) and the [Starlight](https://starlight.astro.build/) docs theme.
+Device pages are generated from YAML templates that are synchronised with the main evcc repository.
 
 ## Repository Structure
 
 ```
-/docs                               # German documentation (default locale)
-/blog                               # German blog posts (default locale)
-/templates                          # YAML device templates
-/i18n/en                            # English translations
-  /docusaurus-plugin-content-docs   # English docs (maps to /docs)
-  /docusaurus-plugin-content-blog   # English blog (maps to /blog)
-  /docusaurus-theme-classic         # UI strings, navigation
-/static                             # Images, logos, API specs
-/src                                # React components, utilities
+/astro.config.mjs                   # Astro + Starlight config (sidebar, locales, plugins)
+/src/content.config.ts              # Content collections (docs + device templates)
+/src/content/docs/en                # English documentation (default locale)
+/src/content/docs/de                # German documentation
+/src/content/docs/{lang}/blog       # Blog posts per locale
+/src/pages/[lang]/...               # Auto-generated device list & detail pages
+/src/components                     # Astro components (.astro)
+/src/utils                          # Shared TS helpers (devices, usages, icons)
+/src/styles/custom.css              # Theme overrides
+/src/scripts                        # Build-time scripts (legacy redirect emitter)
+/templates                          # YAML device templates (input for device pages)
+/public                             # Static assets served as-is (favicon, openapi.yaml, …)
 ```
 
-### Documentation (`/docs`)
+### Documentation content (`/src/content/docs/{en,de}`)
 
-Main documentation content.
 Most content is **manually written**, except for:
 
-- `docs/devices/*.mdx` - Device lists auto-generated from templates
-- `docs/tariffs.mdx` - Tariff providers auto-generated from templates
-- `docs/reference/cli/*.md` - CLI documentation auto-generated from main evcc repo
+- **Device list pages** — `chargers`, `meters`, `vehicles`, `smartswitches`, `heating`, `tariffs` — rendered by routes under `src/pages/[lang]/` using `src/utils/devices.ts` against the YAML templates.
+- **Device detail pages** — same routes, one per template.
+- **CLI reference** — `reference/cli/*.md` generated from the main evcc repository (English only, German falls back automatically).
+- **REST API** — generated from `public/openapi.yaml` by `starlight-openapi`.
 
 ### Templates (`/templates`)
 
-YAML device templates organized by:
+YAML device templates organised by:
 
-- `nightly/` and `release/` versions
-- Language subdirectories (`de/`, `en/`)
-- Device categories:
-  - `charger/` - Wallboxes and charging stations
-  - `meter/` - Energy meters, inverters, batteries
-  - `vehicle/` - Vehicle integrations
-  - `tariff/` - Dynamic tariff and forecast providers
+- Channel: `nightly/` and `release/`
+- Language: `de/`, `en/`
+- Category: `charger/`, `meter/`, `vehicle/`, `tariff/`
 
-### Internationalization (`/i18n`)
+The nightly/release toggle in the UI switches which collection is used at runtime.
 
-- **German is the default locale** (main content in `/docs` and `/blog`)
-- English translations in `/i18n/en/`
-- UI strings and navigation labels in `docusaurus-theme-classic/`
-- Some blog posts have English versions, others remain German-only
+### Internationalization
 
-### Content Workflows
+- **English is the default locale** (`defaultLocale: "en"` in `astro.config.mjs`).
+- German content lives under `src/content/docs/de/`.
+- Pages missing in one locale fall back to the default locale (English) automatically; the URL still reflects the requested locale.
+- Sidebar group labels are translated via the `translations` field in the sidebar config in `astro.config.mjs`.
+- Header UI strings come from Starlight's built-in i18n; only locale-specific overrides go in our components (e.g. `src/components/SiteTitle.astro`, `LanguageSelect.astro`).
 
-#### Auto-Generated Content
+### Auto-generated content
 
-##### Device & Tariff Pages
+#### Device & tariff pages
 
-1. Templates in `/templates/{version}/{lang}/{category}/`
-2. Processed by `src/generateFromTemplate.js`
-3. Output to `docs/devices/*.mdx` and `docs/tariffs.mdx`
-4. Marked with `<!-- AUTO-GENERATED CONTENT BELOW THIS LINE -->`
+1. Templates in `/templates/{channel}/{lang}/{category}/`
+2. Loaded via content collections defined in `src/content.config.ts`
+3. Rendered by routes in `src/pages/[lang]/{chargers,meters,vehicles,smartswitches,heating,tariffs}/`
+4. Shared layout & helpers in `src/components/DeviceDetailLayout.astro` and `src/utils/devices.ts`
 
-##### CLI Documentation
+#### CLI documentation
 
-1. Generated from main evcc repository
-2. Output to `docs/reference/cli/*.md`
-3. See README.md section "Update CLI docs" for generation instructions
+1. Generated from the main evcc repository — see "Update CLI docs" in `README.md`
+2. Output to `src/content/docs/en/reference/cli/*.md` (English only; German falls back)
 
-#### Manual Content
+#### REST API
 
-Everything else is manually maintained:
+1. Spec at `public/openapi.yaml`
+2. `starlight-openapi` plugin (configured in `astro.config.mjs`) renders the pages under `integrations/rest-api`
 
-- Core documentation pages
-- Installation guides
-- Feature descriptions
+### Manual content
+
+Everything else is hand-written:
+
+- Introduction, installation, features, integrations, reference (config & Modbus), FAQ, sponsorship
 - Blog posts
-- FAQ and troubleshooting
 
 ## Writing Style Guide
 
 ### Product Name
 
-- **Always write "evcc" in lowercase** - even at the beginning of sentences
+- **Always write "evcc" in lowercase** — even at the beginning of sentences
 - Never use "EVCC", "Evcc", or other variations
+- Prefer "your evcc instance" over a bare "evcc" when referring to a running instance
 
 ### Language & Tone
 
-- **Be informal and casual** - address readers directly with "you" (English) or "du" (German)
+- **Be informal and casual** — address readers directly with "you" (English) or "du" (German)
 - Write for individual professionals, not businesses
 - Avoid corporate or marketing language (e.g. don't use words like "bequem", "convenient", "seamlessly")
-- Be concise and direct
-- Use simple, factual language without embellishment
+- Be concise and direct; describe behaviour, not internals (no libraries / quotas / internal naming schemes in user-facing docs)
+- Don't pitch the absence of analytics/telemetry as a feature — frame it as the default
 
 ### Terminology
 
@@ -109,7 +112,7 @@ Everything else is manually maintained:
 
 #### Document Structure
 
-- Keep document structure flat where possible - avoid excessive nesting
+- Keep document structure flat where possible — avoid excessive nesting
 - Use clear, descriptive section headings
 - Consider restructuring if sections become too granular
 
@@ -144,55 +147,60 @@ Everything else is manually maintained:
 - **English**: Use "English quotes" for actual quotations
 - Prefer _italics_ over quotes for technical terms
 
+#### Prose style
+
+- No em-dashes or en-dashes as sentence connectors
+- No history lessons / deprecated aliases in user-facing docs
+- Don't add Docker bullets to setup instructions
+
 #### Markdown Formatting
 
 - **Put each sentence on a separate line** to improve diff handling
 - This doesn't affect the rendered HTML output
 - Makes reviewing changes much easier in git
 - Use standard **prettier** formatting for final formatting
-- Run `npx prettier --write .` to format all files
+- Run `npm run format` (or `npx prettier --write .`) to format all files
 
-#### Docusaurus Features
+### Starlight / MDX Features
 
-- Use **MDX** format for advanced features (React components in markdown)
-- Import components: `import Screenshot from "../../src/components/Screenshot"`
-- Tabs for multi-language/multi-platform content: `<Tabs>` and `<TabItem>`
-- Admonitions: `:::note`, `:::tip`, `:::info`, `:::warning`, `:::danger`
-  - Use sparingly - prefer integrating information into main text
-  - `:::warning` for important cautions about functionality
-  - `:::tip` only for genuinely helpful tips that save users time
-- Code blocks with syntax highlighting: ` ```yaml `, ` ```javascript `
-- Frontmatter for metadata: `sidebar_position`, `title`, `tags`
-- Images automatically optimized from `/static/img/`
+- Use **`.mdx`** for pages that need components; plain `.md` works for prose-only pages
+- Component imports use Astro path aliases:
+  - `import Screenshot from "@components/Screenshot.astro";`
+  - `import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";`
+- **Same import path in both locales** — no `../../../../../` gymnastics like Docusaurus had
+- **Frontmatter** uses Starlight's schema:
+  ```yaml
+  ---
+  title: "Solar Surplus Charging"
+  sidebar:
+    order: 1
+  ---
+  ```
+  Don't use Docusaurus' `sidebar_position`.
+- **Tabs**: `<Tabs>` + `<TabItem label="…">` from `@astrojs/starlight/components`
+- **Admonitions** (Starlight set, slightly different from Docusaurus):
+  - `:::note` — general note
+  - `:::tip` — only for genuinely helpful tips that save users time
+  - `:::caution` — important cautions about functionality (replaces Docusaurus' `:::warning`)
+  - `:::danger` — actual data-loss / safety risks
+  - Use sparingly — prefer integrating information into main text
+  - Optional custom title in brackets: `:::caution[Important]`
+- **Code blocks** with syntax highlighting: ` ```yaml `, ` ```javascript `
+- **Sidebar configuration** is defined centrally in `astro.config.mjs` under `starlight({ sidebar: [...] })` — there are no per-folder `_category_.json` files
 
 #### Internal Linking
 
 ##### Link Formats
 
-- **Absolute links**: `/docs/features/solar-charging` - Always from root
-- **Relative links**: `../features/vehicle` or `./configuration` - For nearby pages
-- **Anchors**: `/docs/reference/configuration/site#residualpower` - For specific sections
+- **Locale-prefixed absolute links**: `/en/features/solar-charging` or `/de/features/solar-charging`
+- Astro's router preserves the prefix, so use the locale-prefixed form for clarity
+- **Anchors**: `/en/reference/configuration/site#residualpower`
 - **Never include** `.md` or `.mdx` extensions in links
-
-##### German/English Considerations
-
-- **German docs** (`/docs`): Use standard paths like `/docs/features/solar-charging`
-- **English docs** (`/i18n/en`): Use the **same paths** - Docusaurus handles locale routing
-- Links automatically switch to the current language version
-- If English page doesn't exist, link falls back to German
-
-##### Component Import Paths
-
-- **German**: `import Screenshot from "../../src/components/Screenshot"`
-- **English**: `import Screenshot from "../../../../../src/components/Screenshot"`
-- Path depth differs due to i18n folder structure
 
 ##### Best Practices
 
-- Prefer absolute paths (`/docs/...`) for clarity and consistency
-- Use relative paths (`../`) only within the same section
-- Always test links in both language versions
-- Keep anchor names (#section) consistent between translations
+- Use locale-prefixed absolute paths (`/en/...`, `/de/...`) for clarity
+- Keep anchor names (`#section`) consistent between translations
 - **Create explicit anchors** with `{#anchor-name}` on headings instead of relying on auto-generated ones
   - Auto-generated anchors change with heading text and differ between languages
   - Example: `### Vehicle Detection {#vehicle}` ensures stable, language-independent linking
@@ -203,8 +211,8 @@ Everything else is manually maintained:
 2. Maintain consistency with existing documentation style
 3. Use clear, concise language suitable for technical documentation
 4. Include code examples where appropriate
-5. **Update both German and English versions together** to prevent divergence
-6. Test your changes locally with `npm run start` (German) or `npm run start:en` (English)
+5. **Update both English and German versions together** to prevent divergence
+6. Test changes locally with `npm run dev` (serves both locales at `/en/...` and `/de/...`)
 
 ## Git Workflow
 
@@ -215,14 +223,15 @@ Everything else is manually maintained:
 
 ## Common Tasks
 
-- Updating documentation: Edit templates in `/templates` directory
-- Adding new features: Create corresponding documentation templates
-- Fixing issues: Check both templates and generated output
-- Testing: Verify template processing and output formatting
+- Updating device docs: edit YAML in `/templates`, rebuild
+- Updating prose docs: edit the relevant `.md`/`.mdx` under `src/content/docs/{en,de}/`
+- Adding a new sidebar entry: update `astro.config.mjs`
+- Adding a new component: drop a `.astro` file into `src/components/`, import via `@components/...`
+- Fixing issues: check both templates and rendered output (`npm run build`)
 
 ## Important Notes
 
 - This repository is primarily for documentation
-- Code changes should be made in the main evcc repository
-- Documentation is automatically synchronized with releases
-- Always preserve existing template structure and variables
+- Source code for evcc itself lives in the main evcc repository
+- Device templates are kept in sync with releases of the main repo
+- Preserve template structure and variables when editing YAML

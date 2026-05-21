@@ -1,0 +1,71 @@
+---
+import { featureLabel, featureDescription } from "./features";
+import { renderMarkdownInline } from "@utils/devices";
+
+interface Props {
+  features: string[];
+  lang: "de" | "en";
+}
+
+const { features, lang } = Astro.props;
+
+const described = features
+  .map((f) => ({ key: f, label: featureLabel(f, lang), desc: featureDescription(f, lang) }))
+  .filter((f) => f.desc !== null);
+
+const undescribed = features.filter((f) => featureDescription(f, lang) === null);
+
+const heading = lang === "de" ? "Unterstützte Funktionen" : "Supported features";
+---
+
+{described.length > 0 && (
+  <section class="device-features">
+    <h2>{heading}</h2>
+    <ul>
+      {described.map((f) => (
+        <li><strong>{f.label}:</strong>{" "}<span set:html={renderMarkdownInline(f.desc)} /></li>
+      ))}
+    </ul>
+  </section>
+)}
+
+{undescribed.length > 0 && (
+  <div class="features">
+    {undescribed.map((f) => (
+      <span class={`feature filter-${f}`}>{featureLabel(f, lang)}</span>
+    ))}
+  </div>
+)}
+
+<style>
+  .device-features {
+    margin: 1.5rem 0;
+  }
+  .device-features h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .device-features ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+  .device-features li {
+    margin: 0.25rem 0;
+  }
+  .features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+  }
+  .feature {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    border-radius: 0.5rem;
+    border: 1px solid var(--sl-color-gray-4);
+    color: var(--sl-color-text);
+    background: var(--sl-color-gray-6);
+  }
+</style>

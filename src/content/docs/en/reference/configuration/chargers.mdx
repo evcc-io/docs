@@ -1,0 +1,116 @@
+---
+title: "chargers"
+sidebar:
+  order: 4
+---
+
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+To control the charging process, evcc must be able to communicate with a charger.
+
+A charger must have at least the following configuration:
+
+```yaml
+chargers:
+  - name: charger1 # reference name
+    type: ...
+    ...
+```
+
+Below, the possible parameters are explained.
+
+---
+
+## Required Parameters
+
+### `name`
+
+A short designation of the charger defined here. The value is used when referencing the charger in the configuration of the [charger](loadpoints#charger).
+
+**For example**:
+
+```yaml
+name: charger1
+```
+
+---
+
+### `type`
+
+This is the evcc-specific charger type that allows communication with the charger. Known chargers can be integrated using the `template` type. The appropriate (template) type can be found under [devices - chargers](/en/chargers).
+
+For unknown chargers (or for other individual reasons), the default implementation can be used through [Plugins](/en/plugins).
+
+**For example**:
+
+```yaml
+type: custom
+```
+
+---
+
+## Optional Parameters
+
+### `integrateddevice`
+
+This parameter causes chargers that operate without a "vehicle" (e.g. heat pump, eBike) to not display a vehicle, thus omitting vehicle detection.
+
+In connection with this parameter, an icon can also be assigned (see [`vehicle.icon`](/en/reference/configuration/vehicles#icon)), which will then be displayed at the charger.
+
+**For example**:
+
+```yaml
+features:
+  - integrateddevice
+icon: bike
+```
+
+---
+
+### `heating`
+
+This parameter causes the state of charge for chargers in the "switchable sockets (switchsockets)" group to be displayed in degrees instead of percent.
+
+**Example**:
+
+```yaml
+features:
+  - heating
+```
+
+---
+
+### `continuous`
+
+Marks a device that keeps running in its own normal operation when "disabled".
+The UI shows "Normal operation" instead of "Standby".
+A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost".
+
+Set this feature when your device keeps running in its regular mode without active control.
+The typical use case is a heat pump; preconfigured heat pump types and matching templates already set the feature.
+
+**Example**:
+
+```yaml
+features:
+  - continuous
+```
+
+---
+
+### `switchdevice`
+
+Marks a device that can only be switched on/off and does not support continuous current control (e.g. on/off heat pumps, switch sockets).
+The UI hides the min/max current settings and the `Min+PV` mode for this loadpoint.
+
+Matching templates and preconfigured types already set this feature.
+For custom configurations via `type: custom` without continuous current control, set this feature.
+
+**Example**:
+
+```yaml
+features:
+  - switchdevice
+```
+
+---

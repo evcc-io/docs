@@ -1,0 +1,239 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceConfig from "@components/DeviceConfig.astro";
+import DeviceFeatures from "@components/DeviceFeatures.astro";
+import DeviceParams from "@components/DeviceParams.astro";
+import SponsorshipBadge from "@components/SponsorshipBadge.astro";
+import { renderMarkdown } from "@utils/devices";
+import { deviceIconSvg } from "@utils/deviceIcon";
+
+interface Props {
+  entry: any;
+  lang: "de" | "en";
+  /** Path segment used for the back link and overview URL (e.g. "chargers"). */
+  type: string;
+  /** Label shown in the back-link breadcrumb, e.g. "PV, Battery, Grid, Meter". */
+  categoryLabel: string;
+  /** Already-resolved features list. */
+  features: string[];
+  /** Pre-rendered YAML blocks; used as fallback when no "config" slot provided. */
+  codeBlocks?: string[];
+  editUrl?: string;
+  /** When the nightly version differs, pass the nightly entry + its features
+      and (optionally) its YAML blocks to enable the channel toggle. */
+  nightlyEntry?: any;
+  nightlyFeatures?: string[];
+  nightlyCodeBlocks?: string[];
+}
+
+const {
+  entry,
+  lang,
+  type,
+  categoryLabel,
+  features,
+  codeBlocks = [],
+  editUrl,
+  nightlyEntry,
+  nightlyFeatures,
+  nightlyCodeBlocks = [],
+} = Astro.props;
+
+const product = entry.data.product;
+const title = product.brand
+  ? `${product.brand} ${product.description ?? ""}`.trim()
+  : product.description || entry.id;
+const requiresSponsorship = entry.data.requirements?.includes("sponsorship");
+const isSponsorFree = !requiresSponsorship && features.includes("sponsorfree");
+const iconSvg = await deviceIconSvg(type, entry.id);
+// "sponsorfree" is a synthetic feature added by featuresFor() for chargers.
+// It's surfaced as a header badge here, so drop it from the bullet list.
+const visibleFeatures = features.filter((f) => f !== "sponsorfree");
+const visibleNightlyFeatures = (nightlyFeatures ?? []).filter(
+  (f) => f !== "sponsorfree",
+);
+
+const hasNightly = !!nightlyEntry;
+// Stable per-page id so multiple devices on a multi-page nav don't collide.
+const toggleId = `nightly-${entry.id.replace(/[^a-z0-9]/gi, "-")}`;
+
+const t = lang === "de"
+  ? {
+      config: "Konfigurationsbeispiel für evcc.yaml",
+      configHelp: "Falls du die Konfiguration nicht über die Oberfläche vornehmen möchtest, kannst du alternativ diesen YAML-Block verwenden.",
+      params: "Parameter",
+      nightlyToggleShow: "Nightly-Änderungen anzeigen",
+      nightlyToggleHide: "Nightly-Änderungen ausblenden",
+    }
+  : {
+      config: "Configuration example for evcc.yaml",
+      configHelp: "If you don't want to configure via the UI, you can alternatively use this YAML block.",
+      params: "Parameters",
+      nightlyToggleShow: "Show nightly changes",
+      nightlyToggleHide: "Hide nightly changes",
+    };
+---
+
+<StarlightPage
+  frontmatter={{
+    title,
+    description: entry.data.description,
+    template: "doc",
+    editUrl,
+    tableOfContents: false,
+  }}
+>
+  <div class={`device-detail${hasNightly ? " has-nightly" : ""}`}>
+    <div class="device-header">
+      <a class="device-back" href={`/${lang}/${type}`}>← {categoryLabel}</a>
+      {requiresSponsorship && <SponsorshipBadge variant="required" />}
+      {isSponsorFree && <SponsorshipBadge variant="free" />}
+    </div>
+
+    {iconSvg && <div class="device-icon" aria-hidden="true" set:html={iconSvg} />}
+
+    <div data-channel="release">
+      {entry.data.description && (
+        <div class="device-description" set:html={renderMarkdown(entry.data.description)} />
+      )}
+
+      <DeviceFeatures features={visibleFeatures} lang={lang} />
+
+      <slot name="after-features" />
+    </div>
+
+    {hasNightly && (
+      <div data-channel="nightly">
+        {nightlyEntry.data.description && (
+          <div class="device-description" set:html={renderMarkdown(nightlyEntry.data.description)} />
+        )}
+
+        <DeviceFeatures features={visibleNightlyFeatures} lang={lang} />
+
+        <slot name="after-features-nightly" />
+      </div>
+    )}
+
+    <div class="params-block">
+      <div class="params-header">
+        <h2 class="params-title">{t.params}</h2>
+        {hasNightly && (
+          <p class="nightly-toggle">
+            <input type="checkbox" id={toggleId} class="nightly-toggle-input" />
+            <label for={toggleId} class="nightly-toggle-label">
+              <svg class="nightly-toggle-icon" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M24,44c8.002,0.093,15.587-5.043,18.532-12.469l-2.605-2.605C26.94,34.271,13.732,21.053,19.073,8.073l-2.604-2.605C-3.688,14,2.123,43.714,24,44z M12.686,12.687c0.44-0.44,0.902-0.852,1.382-1.233c-1.911,12.792,9.688,24.394,22.479,22.478c-5.602,7.419-17.442,8.117-23.862,1.383C6.448,29.075,6.448,18.925,12.686,12.687z" />
+              </svg>
+              <span class="nightly-toggle-show">{t.nightlyToggleShow}</span>
+              <span class="nightly-toggle-hide">{t.nightlyToggleHide}</span>
+            </label>
+          </p>
+        )}
+      </div>
+
+      <div data-channel="release">
+        <DeviceParams params={entry.data.params ?? []} lang={lang} hideTitle />
+      </div>
+
+      {hasNightly && (
+        <div data-channel="nightly">
+          <DeviceParams params={nightlyEntry.data.params ?? []} lang={lang} hideTitle />
+        </div>
+      )}
+    </div>
+
+    <details class="device-config-section">
+      <summary>{t.config}</summary>
+      <p class="device-config-help">{t.configHelp}</p>
+      <div data-channel="release">
+        <slot name="config">
+          {codeBlocks.map((code) => <DeviceConfig code={code} />)}
+        </slot>
+      </div>
+      {hasNightly && (
+        <div data-channel="nightly">
+          <slot name="nightly-config">
+            {nightlyCodeBlocks.map((code) => <DeviceConfig code={code} />)}
+          </slot>
+        </div>
+      )}
+    </details>
+  </div>
+</StarlightPage>
+
+<style>
+  /* Channel toggle — CSS-only via :has(). The release content is the
+     default; ticking the checkbox swaps in the nightly content. */
+  .device-detail.has-nightly:not(:has(.nightly-toggle-input:checked)) [data-channel="nightly"] {
+    display: none;
+  }
+  .device-detail.has-nightly:has(.nightly-toggle-input:checked) [data-channel="release"] {
+    display: none;
+  }
+
+  /* Params heading row — matches the original section margin so the channel
+     swap doesn't shift the rest of the page. wrap-reverse: on narrow screens
+     the toggle wraps onto its own line ABOVE the heading. */
+  .params-block {
+    clear: right;
+  }
+  .params-header {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 2rem 0 0.75rem;
+  }
+  .params-title {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  /* We own the heading via .params-header now — strip the section's top
+     margin so the table sits flush under our heading row. */
+  .params-block :global(.device-params) {
+    margin-top: 0;
+  }
+  .nightly-toggle {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .nightly-toggle-input {
+    /* Visually hidden but still keyboard-focusable via the label. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .nightly-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--sl-color-gray-2);
+    text-decoration: underline;
+    text-decoration-color: var(--sl-color-gray-4);
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+  .nightly-toggle-label:hover {
+    color: var(--sl-color-white);
+    text-decoration-color: currentColor;
+  }
+  .nightly-toggle-icon {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+  .nightly-toggle-input:focus-visible + .nightly-toggle-label {
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* Swap visible label text based on checked state. */
+  .nightly-toggle-hide { display: none; }
+  .nightly-toggle-input:checked + .nightly-toggle-label .nightly-toggle-show { display: none; }
+  .nightly-toggle-input:checked + .nightly-toggle-label .nightly-toggle-hide { display: inline; }
+</style>

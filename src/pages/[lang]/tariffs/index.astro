@@ -1,0 +1,81 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import TariffsIntro from "@components/intros/TariffsIntro.astro";
+import { sortDevices, TARIFF_GROUPS } from "@utils/devices";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
+}
+
+const lang = Astro.params.lang as "de" | "en";
+const coll = await getCollection(`tariffs-${lang}` as any);
+const devices = sortDevices(coll as any);
+
+const title = lang === "de" ? "Tarife & Vorhersagen" : "Tariffs & forecasts";
+const description =
+  lang === "de"
+    ? "Dynamische Stromtarife sowie CO₂- und PV-Vorhersage-Anbieter."
+    : "Dynamic electricity tariffs and CO₂ / solar forecast providers.";
+
+function bucketFor(d: any): "price" | "co2" | "solar" {
+  const group = d.data.product.group ?? "";
+  return TARIFF_GROUPS[group] ?? "price";
+}
+
+const buckets: Record<"price" | "co2" | "solar", any[]> = {
+  price: [],
+  co2: [],
+  solar: [],
+};
+for (const d of devices) buckets[bucketFor(d)].push(d);
+
+const sectionLabels = lang === "de"
+  ? {
+      price: { id: "preis", title: "Strompreise" },
+      co2: { id: "co2", title: "CO₂-Vorhersagen" },
+      solar: { id: "solar", title: "Solar-Vorhersagen" },
+    }
+  : {
+      price: { id: "price", title: "Electricity prices" },
+      co2: { id: "co2", title: "CO₂ forecasts" },
+      solar: { id: "solar", title: "Solar forecasts" },
+    };
+
+const sectionOrder = ["price", "co2", "solar"] as const;
+
+const headings = [
+  ...(lang === "de"
+    ? [
+        { depth: 2, slug: "kinds", text: "Tarifarten" },
+        { depth: 2, slug: "forecasts", text: "Vorhersagen" },
+      ]
+    : [
+        { depth: 2, slug: "kinds", text: "Tariff kinds" },
+        { depth: 2, slug: "forecasts", text: "Forecasts" },
+      ]),
+  ...sectionOrder
+    .filter((k) => buckets[k].length > 0)
+    .map((k) => ({ depth: 2, slug: sectionLabels[k].id, text: sectionLabels[k].title })),
+];
+---
+
+<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
+  <TariffsIntro lang={lang} />
+  {
+    sectionOrder.map((k) =>
+      buckets[k].length > 0 ? (
+        <>
+          <h2 id={sectionLabels[k].id}>{sectionLabels[k].title}</h2>
+          <DeviceCardList
+            devices={buckets[k] as any}
+            lang={lang}
+            basePath={`/${lang}/tariffs`}
+            showCountries={true}
+          />
+        </>
+      ) : null
+    )
+  }
+</StarlightPage>
