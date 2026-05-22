@@ -6,20 +6,20 @@ tableOfContents:
 
 import { Badge } from "@astrojs/starlight/components";
 
-Plugins can be used to integrate devices and external data sources into evcc for which there is no direct support.
+Plugins read and write individual values on a device, e.g. a single power reading, a target current, an enable command.
+They power the bundled device templates and are referenced directly when you build a [user-defined device](/en/user-defined-devices) of `type: custom`.
+
 Plugins can be used for the following categories:
 
-- `meter`: [PV, battery, grid, meters](./meters)
-- `charger`: [Wallboxes](./chargers), [Smart switches](./smartswitches), [Heat pumps, heating rods](./heating)
-- `vehicle`: [Vehicles](./vehicles)
-- `tariff`: [Tariffs, forecasts](../tariffs)
-- `circuit`: [Load management](../features/loadmanagement)
+- `meter`: [PV, battery, grid, meters](/en/meters)
+- `charger`: [Wallboxes](/en/chargers), [Smart switches](/en/smartswitches), [Heat pumps, electric heaters](/en/heating)
+- `vehicle`: [Vehicles](/en/vehicles)
+- `tariff`: [Tariffs, forecasts](/en/tariffs)
+- `circuit`: [Load management](/en/features/loadmanagement)
 
-Additionally, plugins can also be used for the endpoints described in [Messaging](/en/reference/configuration/messaging) for sending lifecycle events.
+Plugins are also used by the endpoints described in [Messaging](/en/reference/configuration/messaging) to send lifecycle events.
 
-## Overview
-
-### Plugins
+### Plugin list
 
 - [GPIO Plugin](#gpio) - Plugin for direct access to GPIO pins (Linux only).
 - [Go Plugin](#go) - Plugin that provides or receives values via a Go script.
@@ -32,7 +32,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [SMA/Speedwire Plugin](#speedwire) - Plugin specifically for SMA devices that can communicate with the Speedwire protocol.
 - [Websocket Plugin](#websocket) - Plugin for receiving device data via its own web server. Can only be used for reading data.
 
-### Helpers
+### Helper list
 
 - [Calc Plugin](#calc) - Meta-plugin for arithmetically linking outputs from other plugins.
 - [Combined Plugin](#combined) - Meta-plugin specifically for `charger` to combine the boolean status values for the connected (_plugged_) and charging (_charging_) state into a single charging status.
@@ -50,40 +50,24 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [Valid Plugin](#valid) - Meta-plugin for providing plugin values based on boolean validation.
 - [Watchdog Plugin](#watchdog) - Meta-plugin for automatically repeating write operations at regular intervals.
 
-### Syntax
+## Syntax
 
-Each plugin has an individual configuration schema.
-It's important to know whether the plugin is used in a **reading** or **writing** context.
-Some configuration parameters only make sense in a reading context, others only when used in writing mode.
+A plugin attaches to an attribute of a device.
+The attribute name (e.g. `power`, `enable`, `soc`) determines the role; the `source` selects the plugin type; the remaining keys are plugin-specific parameters.
 
-For example, the following configuration can be used to integrate an MQTT plugin as a `meter`, where the current power consumption is read via the specified MQTT topic:
-
-```yaml title="Example: MQTT Plugin for power values of a power meter"
-meters:
-  - name: imsys
-    type: custom
-    power:
-      source: mqtt
-      topic: "home/current/imsys/chn2/raw"
+```yaml
+<attribute>:
+  source: <plugin>
+  <p-attr1>: ...
+  <p-attr2>: ...
 ```
 
-The plugin configuration schema always has the following structure:
+Each plugin is used in either a **reading** or a **writing** context. Some parameters only make sense in one of the two.
+For the full attribute lists of meters, chargers, vehicles and tariffs, see [user-defined devices](/en/user-defined-devices).
 
-```yaml {3,5-6,8}
-- name: <name>
-  type: custom
-  <attr1>:
-    source: <plugin>
-    <p-attr1>: ...
-    <p-attr2>: ...
-    ....
-  <attr2>:
-    ....
-```
+<a id="reading"></a>
 
-Where `<name>` stands for the device name, `<attr1>` and `<attr2>` for one of the device-specific attributes described below, `<plugin>` for the plugin type and `<p-attr1>`, `<p-attr2>` for plugin-specific configurations (e.g. `source`, `topic` for plugins of type `mqtt`)
-
-#### Reading
+### Reading
 
 When reading data using a plugin, so-called _pipelines_ can be used.
 These allow data to be extracted in a fine-grained manner from the plugin's output.
@@ -97,20 +81,24 @@ Possible parameters for data extraction are:
 - `unpack`: Converts values from other number representations, e.g. `hex`.
 - `decode`: Decodes binary formats like `uint32`, `float32` etc.
 
-##### Known Error Values
+<a id="known-errors"></a>
+
+#### Known error values
 
 [HTTP](#http), [MQTT](#mqtt), and [Websocket](#websocket) plugins can return special error strings.
 evcc recognises these and converts them into internal error codes instead of treating them as data.
 This is useful e.g. for custom vehicle integrations where the data source knows the vehicle's state.
 
-- `ErrAsleep` — Vehicle is asleep. evcc may choose to wake up the vehicle and retry.
-- `ErrMustRetry` — Operation should be retried (e.g. due to rate limiting).
-- `ErrNotAvailable` — Value is not available. evcc treats this as a permanent error until the next restart.
+- `ErrAsleep`: Vehicle is asleep. evcc may choose to wake up the vehicle and retry.
+- `ErrMustRetry`: Operation should be retried (e.g. due to rate limiting).
+- `ErrNotAvailable`: Value is not available. evcc treats this as a permanent error until the next restart.
 
 If a plugin returns the string `ErrAsleep` as its response, evcc generates the corresponding internal error.
 The [Error Plugin](#error) uses the same mechanism to return a fixed error value as a constant.
 
-#### Writing
+<a id="writing"></a>
+
+### Writing
 
 When writing, parameters in the configuration can be replaced by placeholders.
 The data is provided in the form `${var[:format]}`.
@@ -118,355 +106,7 @@ If format is not specified, the data is provided in the standard %v Go format.
 The variables are replaced with the corresponding value before the plugin is executed.
 Additionally, all functions of the Go Template Library can be used to perform more complex data transformations.
 
-Depending on the device ([`meter`](#meter), [`charger`](#charger) or [`vehicle`](#vehicle)), different attributes can be read or set with plugins.
-
-### Meter
-
-Power meters are configured in the configuration section [`meters`](/en/reference/configuration/meters).
-Meters defined under `meters:` can be used at various places within the `site` configuration:
-
-- `grid`: Grid meter
-- `pv`: PV meter
-- `battery`: Home battery meter
-- `charge`: Meter for the charging power of the wallbox
-- `aux`: Consumption meter for intelligent consumers
-- `ext`: Additional meter, e.g. for load management or data collection
-
-`power` is the only mandatory attribute that must be present in every `meter` definition, all other attributes are optional.
-
-However, not all meter types support all plugin attributes:
-
-- `limitsoc` and `batterymode` are used exclusively for battery meters (i.e. for `meter` referenced in `site.battery`).
-- `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin configurations each (in a YAML array) and can be used for grid meters (`grid`) and wallboxes (`charge`).
-
-The following tables contain all attributes that can be provided by plugins when configured for `meter`.
-When using the plugins, it's also important that they return the correct data type.
-To convert to the required data type, the pipelines described in [Reading](#reading) can be used.
-
-| Attribute | Type                | Required | Context       | Description                                                 |
-| --------- | ------------------- | -------- | ------------- | ----------------------------------------------------------- |
-| power     | float               | yes      | all           | Current power in W                                          |
-| energy    | float               | no       | all           | Meter reading in kWh                                        |
-| maxpower  | int                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
-| soc       | int                 | no       | `battery`     | State of charge in %                                        |
-| capacity  | float               | no       | `battery`     | Capacity in kWh                                             |
-| powers    | [float,float,float] | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
-| currents  | [float,float,float] | no       | all           | Phase currents in A. For detecting active phases.           |
-| voltages  | [float,float,float] | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
-
-**Example**
-
-In this example, the configuration of a meter is queried for the current electrical grid power via an HTTP call:
-
-```yaml
-meters:
-  - name: volkszaehler
-    type: custom
-    power:
-      source: http
-      uri: http://zaehler.network.local:8080/api/data.json?from=now
-      jq: .data.tuples[0][1]
-
-site:
-  meters:
-    grid: volkszaehler
-    ...
-  ...
-```
-
-In addition to the attributes that plugins provide for reading evaluation, the following attributes are used by evcc to trigger actions:
-
-| Attribute   | Type | Required | Context   | Description                                                                                                                                                       |
-| ----------- | ---- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| limitsoc    | int  | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
-| batterymode | int  | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                                        |
-
-### Charger
-
-Chargers of `type: custom` have the following attributes that can be read:
-
-| Attribute  | Type                | Required | Description                                                                                 |
-| ---------- | ------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| status     | string              | yes      | Status (A..F)                                                                               |
-| enabled    | bool                | yes      | Is charging enabled?                                                                        |
-| power      | float               | no       | Charging power in W                                                                         |
-| energy     | float               | no       | Meter reading in kWh                                                                        |
-| identify   | string              | no       | Current RFID identifier                                                                     |
-| soc        | int                 | no       | State of charge in %                                                                        |
-| limitsoc   | int                 | no       | Charge limit in %                                                                           |
-| temp       | float               | no       | Current temperature in °C (heating, alias for `soc`)                                        |
-| limittemp  | int                 | no       | Temperature limit in °C (heating, alias for `limitsoc`)                                     |
-| finishtime | string              | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
-| phases     | int                 | no       | Number of physical phases (1..3)                                                            |
-| powers     | [float,float,float] | no       | Phase powers in W. For sign detection of unsigned currents.                                 |
-| currents   | [float,float,float] | no       | Phase currents in A. For detecting active phases.                                           |
-| voltages   | [float,float,float] | no       | Phase voltages in V. For connection detection (1p/3p).                                      |
-
-For heat-pump-specific charger types (`heatpump`, `sgready`, `sgready-relay`), different plugin attributes apply, see [Heat pumps](#charger-heating).
-
-#### General Configuration Options
-
-In addition to plugin attributes, the following configuration options can be set directly on the charger:
-
-| Attribute    | Type     | Required | Description                                              |
-| ------------ | -------- | -------- | -------------------------------------------------------- |
-| icon         | string   | no       | Icon for display in the user interface                   |
-| features     | []string | no       | Feature flags for special charger properties (see below) |
-| standbypower | int      | no       | Standby power in W (for `switchsocket` type)             |
-
-##### Feature Flags
-
-The `features` array can be used to activate special charger properties:
-
-| Feature          | Description                                                                                                                                                                                                       |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| integrateddevice | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                        |
-| heating          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                         |
-| continuous       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". |
-| switchdevice     | Device can only be switched on/off (no continuous current control). Min/max current settings and the `Min+PV` mode are hidden.                                                                                    |
-
-##### Common Combinations
-
-You can use the following combinations as a starting point for your own `type: custom` configurations.
-They mirror the preconfigured templates in evcc.
-
-**Electric heater**:
-
-```yaml
-features:
-  - integrateddevice
-  - heating
-```
-
-**Socket**:
-
-```yaml
-features:
-  - switchdevice
-  - integrateddevice # optional, when the socket drives a fixed load
-  - heating # optional, when it controls a heating device
-```
-
-**Heat pump**:
-
-```yaml
-features:
-  - integrateddevice
-  - heating
-  - continuous
-  - switchdevice # optional, when no current control is available (SG Ready)
-```
-
-**Example**
-
-This example shows how to query the charging status (charging/not charging) of a charger via the Modbus plugin:
-
-```yaml
-chargers:
-  - name: icharge
-    type: custom
-    features:
-      - integrateddevice
-    enabled:
-      source: modbus
-      id: 4711
-      uri: modbus.local:502
-      rtu: false
-      register:
-        address: 100
-        type: holding
-        decode: uint16
-```
-
-In addition to read-only values, actions can also be triggered or configuration values set via plugins:
-
-| Attribute        | Type  | Required | Description                                       |
-| ---------------- | ----- | -------- | ------------------------------------------------- |
-| enable           | bool  | yes      | Enable / disable charging                         |
-| maxcurrent       | int   | yes      | Set maximum charging current in A                 |
-| maxcurrentmillis | float | no       | Set maximum charging current in A (with decimals) |
-| phases1p3p       | int   | no       | Perform phase switching (requires `tos: true`)    |
-| wakeup           | bool  | no       | Wake up vehicle                                   |
-
-**Example**
-
-This example switches a Tasmota socket via an MQTT message:
-
-```yaml
-chargers:
-  - name: unu-charger
-    type: custom
-    enable:
-      source: mqtt
-      broker: mosquitto.local:883
-      topic: cmd/unu-switch/Power
-      payload: ON
-```
-
-#### Heat Pumps
-
-Heat pumps and similar heating devices use dedicated charger types, each with its own plugin attributes.
-The full setup is described under [Heat pumps, heating rods](./heating).
-
-All three types share the following optional measurement attributes:
-
-| Attribute | Type  | Required | Description                             |
-| --------- | ----- | -------- | --------------------------------------- |
-| power     | float | no       | Current power in W                      |
-| energy    | float | no       | Meter reading in kWh                    |
-| temp      | float | no       | Current temperature in °C               |
-| limittemp | int   | no       | Device-internal temperature limit in °C |
-
-**`type: heatpump`**: heat pump with power setpoint.
-
-| Attribute   | Type  | Required | Description                        |
-| ----------- | ----- | -------- | ---------------------------------- |
-| setmaxpower | int   | yes      | Set maximum heating power in W     |
-| getmaxpower | float | no       | Current maximum heating power in W |
-
-**`type: sgready`**: heat pump with SG-Ready interface.
-
-| Attribute   | Type | Required | Description                                            |
-| ----------- | ---- | -------- | ------------------------------------------------------ |
-| setmode     | int  | yes      | Change SG-Ready mode (1: reduced, 2: normal, 3: boost) |
-| getmode     | int  | no       | Current SG-Ready mode (1, 2, 3)                        |
-| setmaxpower | int  | no       | Set maximum heating power in W                         |
-
-**`type: sgready-relay`**: heat pump controlled via relay contacts.
-Sub-chargers are referenced by type instead of via plugins.
-
-| Attribute | Type          | Required | Description                          |
-| --------- | ------------- | -------- | ------------------------------------ |
-| boost     | charger-typed | yes      | Relay for the SG-Ready boost contact |
-| dim       | charger-typed | no       | Relay for the SG-Ready dim contact   |
-
-### Vehicle
-
-Vehicle parameters can also be read via plugins.
-
-| Attribute     | Type   | Required | Description                                                                                 |
-| ------------- | ------ | -------- | ------------------------------------------------------------------------------------------- |
-| soc           | int    | yes      | State of charge in %                                                                        |
-| limitsoc      | int    | no       | Charge limit in %                                                                           |
-| status        | string | no       | Status (A..F)                                                                               |
-| range         | int    | no       | Range in km                                                                                 |
-| odometer      | int    | no       | Odometer reading in km                                                                      |
-| climater      | bool   | no       | Climate control active?                                                                     |
-| getmaxcurrent | float  | no       | Maximum charging current in A                                                               |
-| finishtime    | string | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
-
-#### General Configuration Options
-
-The following configuration options can be set directly on the vehicle:
-
-| Attribute | Type     | Required | Description                                              |
-| --------- | -------- | -------- | -------------------------------------------------------- |
-| title     | string   | no       | Display name of the vehicle in the user interface        |
-| icon      | string   | no       | Icon for display in the user interface                   |
-| capacity  | float    | no       | Battery capacity in kWh                                  |
-| features  | []string | no       | Feature flags for special vehicle properties (see below) |
-
-##### Feature Flags
-
-| Feature       | Description                                                                                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coarsecurrent | Vehicle accepts charging current only in whole 1 A steps. The control logic is constrained to coarse 1 A steps even when the charger could regulate more finely. |
-| streaming     | Vehicle pushes data instead of being polled (e.g. BMW Cardata). SOC updates outside active charging are treated as reliable.                                     |
-| welcomecharge | Vehicle expects the wallbox to be active on connect to register the link as working. Otherwise it reports an error.                                              |
-
-**Example**
-
-In the following example, the current range of the vehicle is read from MQTT messages:
-
-```yaml
-vehicles:
-  - name: mazda
-    type: custom
-    title: Green Mazda
-    capacity: 50
-    features:
-      - coarsecurrent
-    range:
-      source: mqtt
-      topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
-```
-
-Additionally, special commands can be sent to the vehicle via plugins:
-
-| Attribute    | Type | Required | Description                       |
-| ------------ | ---- | -------- | --------------------------------- |
-| wakeup       | bool | no       | Wake up vehicle                   |
-| chargeenable | bool | no       | Start/stop charging process       |
-| maxcurrent   | int  | no       | Set maximum charging current in A |
-
-**Example**
-
-To wake up a car via an HTTP ping to send further queries, the HTTP plugin can be used as in the following example:
-
-```yaml
-vehicles:
-  - name: model-y
-    type: custom
-    wakeup:
-      source: http
-      uri: http://teslalogger.local:5000/command/08154711/wake_up
-```
-
-#### Charge Mode on Vehicle Identification
-
-For user-defined vehicles, the charge mode can be configured with `onIdentify` to be set automatically when the vehicle is identified.
-This is useful when you want the desired charge mode to be set automatically as soon as the vehicle is detected.
-
-**Example**:
-
-```yaml
-vehicles:
-  - name: my-car
-    type: custom
-    soc:
-      source: mqtt
-      topic: car/soc
-    onIdentify:
-      mode: pv
-```
-
-Available modes are: `off`, `now`, `minpv`, `pv`.
-
-### Tariffs & Forecasts
-
-See [Tariffs & Forecasts > Custom Plugin](../tariffs#plugin) for the full configuration.
-
-#### Feature Flags
-
-| Feature   | Description                                                                                    |
-| --------- | ---------------------------------------------------------------------------------------------- |
-| average   | Smooths fine-grained price slots (e.g. 15-minute values) into hourly averages.                 |
-| cacheable | Persists fetched values. Used as fallback after a restart or provider outage (up to 24 hours). |
-
-```yaml
-tariffs:
-  grid:
-    type: custom
-    features:
-      - cacheable
-    # ... additional attributes
-```
-
-### Load Management
-
-:::note[Work in Progress]
-...
-:::
-
-### Messaging
-
-:::note[Work in Progress]
-...
-:::
-
 ## Plugins
-
-The following plugins are available and can be configured for the above-described attributes to enable flexible integration with various systems.
 
 ### GPIO <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
 
@@ -558,14 +198,14 @@ When the `go` plugin is used for writing, the value to be written is passed to t
 **Writing Example**:
 
 ```yaml
-charger:
-  - type: custom
-    maxcurrent:
-      source: go
-      script: |
-        fmt.Printf("Setting charge current: %d A\n", maxcurrent)
-        // maxcurrent variable is automatically available
+maxcurrent:
+  source: go
+  script: |
+    fmt.Printf("Setting charge current: %d A\n", maxcurrent)
+    // maxcurrent variable is automatically available
 ```
+
+<a id="transformations"></a>
 
 #### Input and Output Transformations
 
@@ -607,23 +247,20 @@ power:
 
 The `out` parameter forwards the script result to other plugins.
 This is particularly useful in a writing context, e.g. when the script result should be further processed via MQTT or HTTP.
-Each entry requires `name`, `type` and `config` — analogous to `in`.
+Each entry requires `name`, `type` and `config`, analogous to `in`.
 
 ```yaml
-chargers:
-  - name: smart-heater
-    type: custom
-    maxcurrent:
-      source: go
-      script: |
-        watts := maxcurrent * 230
-        watts
-      out:
-        - name: watts
-          type: float
-          config:
-            source: mqtt
-            topic: heater/target_power
+maxcurrent:
+  source: go
+  script: |
+    watts := maxcurrent * 230
+    watts
+  out:
+    - name: watts
+      type: float
+      config:
+        source: mqtt
+        topic: heater/target_power
 ```
 
 ### HTTP <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
@@ -746,12 +383,10 @@ When the `js` plugin is used for writing, the value to be written is passed to t
 **Writing Example**:
 
 ```yaml
-charger:
-  - type: custom
-    maxcurrent:
-      source: js
-      script: |
-        console.log(maxcurrent);
+maxcurrent:
+  source: js
+  script: |
+    console.log(maxcurrent);
 ```
 
 The `js` plugin supports the same [input and output transformations](#transformations) (`in`/`out`) as the `go` plugin.
@@ -863,6 +498,8 @@ energy:
 The query must return a single numerical value.
 For vector results, exactly one metric must be included.
 
+<a id="shell"></a>
+
 ### Shell Script <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
 
 The `script` plugin executes external scripts to read or update data. The plugin is useful for integrating any kind of external functionality.
@@ -882,6 +519,8 @@ source: script
 cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
 timeout: 5s
 ```
+
+<a id="speedwire"></a>
 
 ### SMA/Speedwire <Badge text="read" variant="tip" size="small" />
 
@@ -1293,6 +932,8 @@ setmode:
       type: writeholding
       encoding: int16
 ```
+
+<a id="meter-plugin"></a>
 
 ### Meter <Badge text="read" variant="tip" size="small" />
 

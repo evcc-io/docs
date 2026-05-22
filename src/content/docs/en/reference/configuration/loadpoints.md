@@ -245,7 +245,7 @@ disable:
 
 Defines the power threshold at the grid connection point in watts (W).
 
-**Possible values**: A positive value for grid consumption, a negative value for grid export.
+**Possible values**: A positive value for grid consumption. When set to `0`, charging stops once surplus no longer covers the minimum charging power.
 
 **Default value:** `0`
 
@@ -257,6 +257,10 @@ threshold: 200 # Maximum grid consumption of 200W is allowed
 
 :::note
 If a residual power offset for the desired operating point of the surplus regulation is defined for the evcc site using the `residualPower` parameter, this value must be considered when setting the `threshold` value. Refer to the example in the [`enable`](#enable) `threshold` info.
+:::
+
+:::caution
+Negative values have no effect: while surplus is available evcc keeps charging and never checks the threshold.
 :::
 
 #### `delay`

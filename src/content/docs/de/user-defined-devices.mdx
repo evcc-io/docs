@@ -1,0 +1,502 @@
+---
+title: Benutzerdefinierte Geräte
+tableOfContents:
+  maxHeadingLevel: 4
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Batterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs oder eines Benachrichtigungsdienstes lässt sich in der Geräteliste der Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
+
+So lassen sich auch Geräte einbinden, die nicht von einem eingebauten Template abgedeckt sind, z. B. die aktuelle Leistung über einen HTTP-Endpunkt lesen oder einen Zielstrom per Modbus schreiben.
+
+## Ein Gerät definieren
+
+In der Benutzeroberfläche steht bei jedem Gerätetyp der Eintrag **Benutzerdefiniertes Gerät** in der Template-Auswahl bereit.
+Damit öffnet sich der Editor für die eigene Konfiguration.
+Standardmäßig wird ein Gerät mit `type: custom` angelegt. Der Typ lässt sich bei Bedarf mit einem anderen Wert überschreiben (z. B. `type: heatpump`).
+
+```yaml
+power:
+  source: mqtt
+  topic: home/current/imsys/chn2/raw
+```
+
+Alternativ lässt sich die vollständige Konfiguration direkt in die `evcc.yaml` schreiben, mit `name`, `type: custom` und den Attributen darunter:
+
+```yaml
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: home/current/imsys/chn2/raw
+```
+
+Alle weiteren Beispiele auf dieser Seite verwenden die flache Attribut-Block-Form, wie sie in der UI eingegeben wird.
+
+Die Liste der verfügbaren Plugin-Quellen (`http`, `mqtt`, `modbus`, …) und Helper (`calc`, `map`, `watchdog`, …) steht in der [Plugins-Referenz](/de/reference/plugins).
+
+## Attribute und Features
+
+Jedes benutzerdefinierte Gerät besteht aus drei Arten von Feldern:
+
+- **Lese-Attribute** — Plugins, die evcc regelmäßig abfragt, um einen Wert zu erhalten (z. B. `power`, `soc`, `status`).
+- **Schreib-Attribute** — Plugins, die evcc aufruft, um einen Wert zu setzen oder eine Aktion auszulösen (z. B. `enable`, `maxcurrent`, `wakeup`). Der zu schreibende Wert steht im Plugin zur Verfügung.
+- **Features** — `features`-Liste, die abweichendes Verhalten freischaltet. Verfügbare Flags hängen vom Gerätetyp ab.
+
+Allgemeine Form:
+
+```yaml
+# Lese-Attribute
+power:
+  source: http
+  uri: http://meter.local/power
+soc:
+  source: mqtt
+  topic: battery/soc
+
+# Schreib-Attribute
+enable:
+  source: http
+  uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
+maxcurrent:
+  source: mqtt
+  topic: charger/maxcurrent
+  payload: ${maxcurrent:%d}
+
+# Features
+features:
+  - heating
+  - integrateddevice
+```
+
+Welche Attribut-Namen und Feature-Flags verfügbar sind, hängt vom Gerätetyp ab und steht in den nachfolgenden Abschnitten.
+
+<a id="meter"></a>
+
+## Zähler
+
+Stromzähler werden in der Sektion [`meters`](/de/reference/configuration/meters) konfiguriert.
+Zähler unter `meters:` können an verschiedenen Stellen innerhalb der `site` Konfiguration referenziert werden:
+
+- `grid`: Netzzähler
+- `pv`: PV-Zähler
+- `battery`: Hausbatteriezähler
+- `charge`: Zähler für die Ladeleistung der Wallbox
+- `aux`: Verbrauchszähler für intelligente Verbraucher
+- `ext`: Weiterer Zähler, z. B. für Lastmanagement oder Datenerfassung
+
+`power` ist das einzig erforderliche Attribut.
+Nicht alle Zählerrollen unterstützen alle Attribute:
+
+- `limitsoc` und `batterymode` werden ausschließlich für Batteriezähler genutzt (referenziert in `site.battery`).
+- `currents`, `voltages` und `powers` sind Phasen-Attribute, die mit genau drei Plugin-Konfigurationen (als YAML-Array) konfiguriert werden müssen und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
+
+Plugins müssen den richtigen Datentyp zurückliefern.
+Zur Konvertierung dienen die [Lese-Pipelines](/de/reference/plugins#reading).
+
+### Lese-Attribute
+
+| Attribut   | Typ                   | Erfordert | Kontext       | Beschreibung                                                                |
+| ---------- | --------------------- | --------- | ------------- | --------------------------------------------------------------------------- |
+| `power`    | `float`               | ja        | alle          | Aktuelle Leistung in W                                                      |
+| `energy`   | `float`               | nein      | alle          | Zählerstand in kWh                                                          |
+| `maxpower` | `int`                 | nein      | `pv` (hybrid) | Maximale AC-Leistung in W                                                   |
+| `soc`      | `int`                 | nein      | `battery`     | Ladestand in %                                                              |
+| `capacity` | `float`               | nein      | `battery`     | Kapazität in kWh                                                            |
+| `powers`   | `[float,float,float]` | nein      | alle          | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen. |
+| `currents` | `[float,float,float]` | nein      | alle          | Phasenströme in A. Zur Erkennung aktiver Phasen.                            |
+| `voltages` | `[float,float,float]` | nein      | alle          | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                      |
+
+### Schreib-Attribute
+
+| Attribut      | Typ   | Erfordert | Kontext   | Beschreibung                                                                                                                                          |
+| ------------- | ----- | --------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet. |
+| `batterymode` | `int` | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge)                                                                                                |
+
+### Beispiel
+
+Lese die aktuelle Netzleistung über einen HTTP-Endpunkt.
+
+```yaml
+power:
+  source: http
+  uri: http://zaehler.network.local:8080/api/data.json?from=now
+  jq: .data.tuples[0][1]
+```
+
+<a id="charger"></a>
+
+## Wallbox
+
+Der Standardtyp `type: custom` deckt Wallboxen mit stufenloser Stromregelung ab.
+Für andere Geräte stehen spezialisierte Charger-Typen unter [Switchsocket](#charger-switchsocket) und [Wärmepumpen](#charger-heating) bereit.
+
+### Lese-Attribute
+
+| Attribut     | Typ                   | Erfordert | Beschreibung                                                                             |
+| ------------ | --------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `status`     | `string`              | ja        | Status (A..F)                                                                            |
+| `enabled`    | `bool`                | ja        | Ist Ladung freigegeben?                                                                  |
+| `power`      | `float`               | nein      | Ladeleistung in W                                                                        |
+| `energy`     | `float`               | nein      | Zählerstand in kWh                                                                       |
+| `identify`   | `string`              | nein      | Aktuelle RFID-Kennung                                                                    |
+| `soc`        | `int`                 | nein      | Ladestand in %                                                                           |
+| `limitsoc`   | `int`                 | nein      | Ladelimit in %                                                                           |
+| `temp`       | `float`               | nein      | Aktuelle Temperatur in °C (Heizung, Alias für `soc`)                                     |
+| `limittemp`  | `int`                 | nein      | Temperaturlimit in °C (Heizung, Alias für `limitsoc`)                                    |
+| `finishtime` | `string`              | nein      | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
+| `phases`     | `int`                 | nein      | Anzahl der physischen Phasen (1..3)                                                      |
+| `powers`     | `[float,float,float]` | nein      | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen.              |
+| `currents`   | `[float,float,float]` | nein      | Phasenströme in A. Zur Erkennung aktiver Phasen.                                         |
+| `voltages`   | `[float,float,float]` | nein      | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                                   |
+
+### Schreib-Attribute
+
+| Attribut           | Typ     | Erfordert | Beschreibung                                          |
+| ------------------ | ------- | --------- | ----------------------------------------------------- |
+| `enable`           | `bool`  | ja        | Ladung freigeben / sperren                            |
+| `maxcurrent`       | `int`   | ja        | Setze maximalen Ladestrom in A                        |
+| `maxcurrentmillis` | `float` | nein      | Setze maximalen Ladestrom in A (mit Nachkommastellen) |
+| `phases1p3p`       | `int`   | nein      | Phasenumschaltung durchführen (erfordert `tos: true`) |
+| `wakeup`           | `bool`  | nein      | Wecke Fahrzeug auf                                    |
+
+<a id="charger-features"></a>
+
+### Features
+
+| Feature            | Beschreibung                                                                                                                                                                                                                                              |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Gerät ohne angeschlossenes Fahrzeug und ohne Ladesitzungen (z. B. Wärmepumpe, Heizstab, fest installierter Verbraucher). Keine Fahrzeugauswahl.                                                                                                           |
+| `heating`          | Behandelt das Gerät als Heizung: SOC und Limits werden in °C statt in % dargestellt.                                                                                                                                                                      |
+| `continuous`       | Gerät läuft im "deaktivierten" Zustand eigenständig in seinem Normalbetrieb weiter. Statt "Standby" wird "Normalbetrieb" angezeigt. Eine Empfehlung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Strom) wird als "Boost" gekennzeichnet. |
+| `switchdevice`     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Min/Max-Strom-Einstellungen und der `Min+PV`-Modus werden ausgeblendet.                                                                                                    |
+
+Häufige Feature-Kombinationen aus den vorkonfigurierten Templates:
+
+**Heizstab**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Steckdose**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, wenn die Steckdose einen festen Verbraucher schaltet
+  - heating # optional, wenn ein Heizgerät geschaltet wird
+```
+
+**Wärmepumpe**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, wenn keine Stromregelung vorhanden (SG Ready)
+```
+
+### Beispiele
+
+Frage den Ladestatus einer Wallbox per Modbus ab.
+
+```yaml
+features:
+  - integrateddevice
+enabled:
+  source: modbus
+  id: 4711
+  uri: modbus.local:502
+  rtu: false
+  register:
+    address: 100
+    type: holding
+    decode: uint16
+```
+
+Schalte eine Tasmota-Steckdose per MQTT-Nachricht.
+
+```yaml
+enable:
+  source: mqtt
+  broker: mosquitto.local:883
+  topic: cmd/unu-switch/Power
+  payload: ON
+```
+
+<a id="charger-switchsocket"></a>
+
+### Switchsocket
+
+**`type: switchsocket`**
+
+Für schaltbare Steckdosen und vergleichbare Relais-Geräte, die nur ein-/ausgeschaltet werden können, ohne stufenlose Stromregelung.
+Der Ladestatus wird aus der aktuellen Leistung abgeleitet (oberhalb `standbypower` gilt als Laden).
+Vollständige Einrichtung unter [Schaltbare Steckdosen](/de/smartswitches).
+
+| Attribut       | Typ     | Erfordert | Beschreibung                                                                                            |
+| -------------- | ------- | --------- | ------------------------------------------------------------------------------------------------------- |
+| `enabled`      | `bool`  | ja        | Status der Steckdose (an/aus)                                                                           |
+| `power`        | `float` | ja        | Aktuelle Leistung in W                                                                                  |
+| `energy`       | `float` | nein      | Zählerstand in kWh                                                                                      |
+| `soc`          | `float` | nein      | Ladestand in %                                                                                          |
+| `enable`       | `bool`  | ja        | Steckdose ein-/ausschalten                                                                              |
+| `standbypower` | `float` | nein      | Schwellwert in W. Darüber: Laden, darunter: Standby. Negativ: statisch (keine Leistungsmessung möglich) |
+
+<a id="charger-heating"></a>
+
+### Wärmepumpen
+
+Für Wärmepumpen und vergleichbare Heizgeräte gibt es eigene Charger-Typen mit jeweils eigenen Attributen.
+Die vollständige Einrichtung ist unter [Wärmepumpen, Heizstäbe](/de/heating) beschrieben.
+
+<Tabs>
+  <TabItem label="Wärmepumpe">
+
+**`type: heatpump`**
+
+Für wechselrichtergesteuerte Wärmepumpen, die einen kontinuierlichen Leistungs-Sollwert per Modbus, HTTP o. Ä. annehmen.
+Die Ziel-Heizleistung wird direkt über `setmaxpower` geschrieben.
+
+| Attribut      | Typ     | Erfordert | Beschreibung                          |
+| ------------- | ------- | --------- | ------------------------------------- |
+| `power`       | `float` | nein      | Aktuelle Leistung in W                |
+| `energy`      | `float` | nein      | Zählerstand in kWh                    |
+| `temp`        | `float` | nein      | Aktuelle Temperatur in °C             |
+| `limittemp`   | `int`   | nein      | Geräte-internes Temperaturlimit in °C |
+| `setmaxpower` | `int`   | ja        | Setze maximale Heizleistung in W      |
+| `getmaxpower` | `float` | nein      | Aktuelle maximale Heizleistung in W   |
+
+  </TabItem>
+  <TabItem label="SG-Ready">
+
+**`type: sgready`**
+
+Für Wärmepumpen mit klassischer SG-Ready-Schnittstelle, gesteuert über einen einzelnen Modus-Wert.
+Drei Modi werden unterstützt: `1` reduziert, `2` normal, `3` boost.
+
+| Attribut      | Typ     | Erfordert | Beschreibung                                            |
+| ------------- | ------- | --------- | ------------------------------------------------------- |
+| `power`       | `float` | nein      | Aktuelle Leistung in W                                  |
+| `energy`      | `float` | nein      | Zählerstand in kWh                                      |
+| `temp`        | `float` | nein      | Aktuelle Temperatur in °C                               |
+| `limittemp`   | `int`   | nein      | Geräte-internes Temperaturlimit in °C                   |
+| `setmode`     | `int`   | ja        | Ändere SG-Ready-Modus (1: reduced, 2: normal, 3: boost) |
+| `getmode`     | `int`   | nein      | Aktueller SG-Ready-Modus (1, 2, 3)                      |
+| `setmaxpower` | `int`   | nein      | Setze maximale Heizleistung in W                        |
+
+  </TabItem>
+  <TabItem label="SG-Ready über Relais">
+
+**`type: sgready-relay`**
+
+Für Wärmepumpen, deren SG-Ready-Eingang als zwei potentialfreie Relais-Kontakte (boost + dim) ausgeführt ist.
+Jeder Kontakt wird über einen eigenen Sub-Charger geschaltet, referenziert per Typ statt per Plugin.
+
+| Attribut    | Typ             | Erfordert | Beschreibung                          |
+| ----------- | --------------- | --------- | ------------------------------------- |
+| `power`     | `float`         | nein      | Aktuelle Leistung in W                |
+| `energy`    | `float`         | nein      | Zählerstand in kWh                    |
+| `temp`      | `float`         | nein      | Aktuelle Temperatur in °C             |
+| `limittemp` | `int`           | nein      | Geräte-internes Temperaturlimit in °C |
+| `boost`     | `charger-typed` | ja        | Relais für den SG-Ready Boost-Kontakt |
+| `dim`       | `charger-typed` | nein      | Relais für den SG-Ready Dim-Kontakt   |
+
+  </TabItem>
+</Tabs>
+
+<a id="vehicle"></a>
+
+## Fahrzeug
+
+Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
+
+### Lese-Attribute
+
+| Attribut        | Typ      | Erfordert | Beschreibung                                                                             |
+| --------------- | -------- | --------- | ---------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | ja        | Ladestand in %                                                                           |
+| `limitsoc`      | `int`    | nein      | Ladelimit in %                                                                           |
+| `status`        | `string` | nein      | Status (A..F)                                                                            |
+| `range`         | `int`    | nein      | Reichweite in km                                                                         |
+| `odometer`      | `int`    | nein      | Kilometerstand in km                                                                     |
+| `climater`      | `bool`   | nein      | Klimatisierung aktiv?                                                                    |
+| `getmaxcurrent` | `float`  | nein      | Maximaler Ladestrom in A                                                                 |
+| `finishtime`    | `string` | nein      | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
+
+### Schreib-Attribute
+
+| Attribut       | Typ    | Erfordert | Beschreibung                   |
+| -------------- | ------ | --------- | ------------------------------ |
+| `wakeup`       | `bool` | nein      | Fahrzeug aufwecken             |
+| `chargeenable` | `bool` | nein      | Starte/stoppe den Ladevorgang  |
+| `maxcurrent`   | `int`  | nein      | Setze maximalen Ladestrom in A |
+
+### Konfiguration
+
+| Attribut   | Typ      | Erfordert | Beschreibung                   |
+| ---------- | -------- | --------- | ------------------------------ |
+| `title`    | `string` | nein      | Anzeigename des Fahrzeugs      |
+| `capacity` | `float`  | nein      | Batteriekapazität in kWh       |
+| `icon`     | `string` | nein      | Icon in der Benutzeroberfläche |
+
+<a id="vehicle-features"></a>
+
+### Features
+
+| Feature         | Beschreibung                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coarsecurrent` | Fahrzeug akzeptiert den Ladestrom nur in ganzen 1 A Schritten. Die Regelung wird auf grobe 1 A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
+| `streaming`     | Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). SOC-Updates außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.           |
+| `welcomecharge` | Fahrzeug erwartet beim Anschließen eine aktive Wallbox, um die Verbindung als funktionierend zu erkennen. Andernfalls meldet das Fahrzeug einen Fehler.       |
+
+### Beispiele
+
+Lese die aktuelle Reichweite aus MQTT-Nachrichten.
+
+```yaml
+title: Grüner Mazda # Anzeigename (optional)
+capacity: 50 # Batteriekapazität in kWh (optional)
+features:
+  - coarsecurrent
+range:
+  source: mqtt
+  topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Ein Auto per HTTP-Ping aufwecken, bevor weitere Abfragen folgen.
+
+```yaml
+wakeup:
+  source: http
+  uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+<a id="onidentify"></a>
+
+`onIdentify` setzt den Lademodus automatisch, sobald das Fahrzeug erkannt wird.
+
+```yaml
+soc:
+  source: mqtt
+  topic: car/soc
+onIdentify:
+  mode: pv
+```
+
+Verfügbare Modi sind: `off`, `now`, `minpv`, `pv`.
+
+<a id="tariff"></a>
+
+## Tarif und Vorhersage
+
+Ein benutzerdefinierter Tarif bindet eine eigene Wertquelle über den Plugin-Mechanismus an.
+Das Attribut `tariff` legt fest, was die Quelle liefert und in welcher Einheit.
+
+### Lese-Attribute
+
+Die Attribute `price` und `forecast` schließen sich gegenseitig aus. Genau eines der beiden ist erforderlich.
+
+| Attribut   | Typ      | Beschreibung                                                                                                 |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `price`    | `float`  | Aktueller Wert. Float-Wert des Plugins.                                                                      |
+| `forecast` | `string` | Vorhersage als JSON-String mit einer Liste von Zeiträumen und Werten (siehe Schema unten). Stündlich geholt. |
+
+### Konfiguration
+
+| Attribut   | Typ        | Erfordert | Beschreibung                                                                                                                                                                     |
+| ---------- | ---------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`   | `string`   | nein      | `price` (Standard), `co2` oder `solar`. Bestimmt die Einheit der zurückgegebenen Werte: Preis in konfigurierter Währung pro kWh, CO₂-Intensität in g/kWh, Solar-Vorhersage in W. |
+| `charges`  | `float`    | nein      | Fester Aufschlag pro kWh, der zu jedem Wert addiert wird. Standard `0`.                                                                                                          |
+| `tax`      | `float`    | nein      | Prozentualer Steuersatz auf das Ergebnis, z. B. `0.2` für 20 %. Standard `0`.                                                                                                    |
+| `formula`  | `string`   | nein      | Go-Ausdruck für eine eigene Berechnung, mit `price`, `charges` und `tax` im Scope. Siehe [Beispiele](#formula-examples).                                                         |
+| `interval` | `duration` | nein      | Abfrageintervall für `forecast`. Standard `1h`.                                                                                                                                  |
+| `cache`    | `duration` | nein      | Cache-Dauer für `price`. Standard `15m`.                                                                                                                                         |
+
+<a id="tariff-features"></a>
+
+### Features
+
+| Feature     | Beschreibung                                                                                                                |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `average`   | Glättet feingranulare Preisstufen (z. B. 15-Minuten-Werte) zu Stundenmittelwerten.                                          |
+| `cacheable` | Speichert abgerufene Werte persistent. Bei Neustart oder Ausfall des Anbieters dienen sie als Fallback (bis zu 24 Stunden). |
+
+### Beispiele
+
+**Aktueller Preis via HTTP**:
+
+```yaml
+price:
+  source: http
+  uri: https://example.com/api/price
+```
+
+**Vorhersage via HTTP**:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+  jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "value": .[1] }) | tostring'
+```
+
+Das Plugin muss eine JSON-Struktur mit einer Liste von Zeiträumen und Preisen zurückgeben.
+Die Datumsfelder müssen in der Form `YYYY-MM-DDTHH:MM:SSZ` vorliegen, der Preis in der korrekten Währungseinheit (z. B. EUR).
+evcc arbeitet intern mit 15-Minuten-Intervallen; Plugins können auch stündliche Daten liefern, die automatisch in 15-Minuten-Intervalle umgerechnet werden.
+
+```json
+[
+  {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-01T00:15:00Z",
+    "value": 25.0
+  },
+  {
+    "start": "2025-01-01T00:15:00Z",
+    "end": "2025-01-01T00:30:00Z",
+    "value": 26.5
+  },
+  {
+    "start": "2025-01-01T00:30:00Z",
+    "end": "2025-01-01T00:45:00Z",
+    "value": 24.8
+  },
+  {
+    "start": "2025-01-01T00:45:00Z",
+    "end": "2025-01-01T01:00:00Z",
+    "value": 27.2
+  }
+]
+```
+
+<a id="formula-examples"></a>
+
+Das `formula`-Feld akzeptiert einen Go-Ausdruck mit `price`, `charges`, `tax` und dem Slot-Zeitstempel `ts` im Scope.
+Die [`math`-Bibliothek](https://pkg.go.dev/math) und [`time.Time`](https://pkg.go.dev/time#Time)-Methoden auf `ts` stehen zur Verfügung.
+Die Formel wird für den aktuellen Preis und jeden Forecast-Slot ausgeführt.
+
+**Preisobergrenze**:
+
+```yaml
+charges: 0.22
+tax: 0.19
+formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Deckelt das Ergebnis bei 50 ct/kWh.
+
+**Keine Einspeisevergütung bei negativen Börsenpreisen** (deutsche PV-Anlagen, Inbetriebnahme ab 25. Februar 2025):
+
+```yaml
+formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
+```
+
+Zahlt eine feste Einspeisevergütung von 7 ct/kWh, außer wenn der Börsenstrompreis negativ ist.

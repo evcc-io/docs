@@ -83,6 +83,7 @@ Everything else is hand-written:
 - **Always write "evcc" in lowercase** — even at the beginning of sentences
 - Never use "EVCC", "Evcc", or other variations
 - Prefer "your evcc instance" over a bare "evcc" when referring to a running instance
+- Don't mention "evcc" unless necessary for context — within evcc docs the reader already knows. Drop self-referential fluff like "another strength of evcc", "evcc ships with", "the evcc UI"
 
 ### Language & Tone
 
@@ -201,9 +202,16 @@ Everything else is hand-written:
 
 - Use locale-prefixed absolute paths (`/en/...`, `/de/...`) for clarity
 - Keep anchor names (`#section`) consistent between translations
-- **Create explicit anchors** with `{#anchor-name}` on headings instead of relying on auto-generated ones
+- **Create explicit anchors** on headings instead of relying on auto-generated ones
   - Auto-generated anchors change with heading text and differ between languages
-  - Example: `### Vehicle Detection {#vehicle}` ensures stable, language-independent linking
+  - In `.md` files use the compact form: `### Vehicle Detection {#vehicle}`
+  - In `.mdx` files use a raw HTML anchor element on the line above (MDX parses `{...}` as a JSX expression, so the compact form breaks the build):
+
+    ```mdx
+    <a id="vehicle"></a>
+
+    ### Vehicle Detection
+    ```
 
 ### Documentation Best Practices
 

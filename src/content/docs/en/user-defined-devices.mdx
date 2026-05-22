@@ -1,0 +1,502 @@
+---
+title: User-defined Devices
+tableOfContents:
+  maxHeadingLevel: 4
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+When creating a charger, heater, grid meter, battery, solar system, other consumer, vehicle, tariff or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
+
+That way you can integrate devices that aren't covered by a built-in template, e.g. read the current power from an HTTP endpoint, or write a target current via Modbus.
+
+## How to define a device
+
+In the UI, every device type lists a **User-defined device** entry in the template selector.
+Picking it opens the editor for your own configuration.
+A device with `type: custom` is created by default. The type can be overridden with another value when needed (e.g. `type: heatpump`).
+
+```yaml
+power:
+  source: mqtt
+  topic: home/current/imsys/chn2/raw
+```
+
+Alternatively, write the full configuration directly in `evcc.yaml` with `name`, `type: custom` and the attribute block underneath:
+
+```yaml
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: home/current/imsys/chn2/raw
+```
+
+All other examples on this page use the flat attribute-block form you enter in the UI.
+
+For the list of available plugin sources (`http`, `mqtt`, `modbus`, …) and helpers (`calc`, `map`, `watchdog`, …) see the [plugins reference](/en/reference/plugins).
+
+## Attributes and features
+
+Every user-defined device is described by three kinds of fields:
+
+- **Read attributes** — plugins evcc polls to obtain a value (e.g. `power`, `soc`, `status`).
+- **Write attributes** — plugins evcc invokes to set a value or trigger an action (e.g. `enable`, `maxcurrent`, `wakeup`). The value to be written is available in the plugin.
+- **Features** — `features` list toggling non-default behaviour. Available flags depend on the device type.
+
+Generic shape:
+
+```yaml
+# read attributes
+power:
+  source: http
+  uri: http://meter.local/power
+soc:
+  source: mqtt
+  topic: battery/soc
+
+# write attributes
+enable:
+  source: http
+  uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
+maxcurrent:
+  source: mqtt
+  topic: charger/maxcurrent
+  payload: ${maxcurrent:%d}
+
+# features
+features:
+  - heating
+  - integrateddevice
+```
+
+The available attribute names and feature flags differ per device type and are listed in the sections below.
+
+<a id="meter"></a>
+
+## Meter
+
+Power meters are configured in the [`meters`](/en/reference/configuration/meters) section.
+Meters defined under `meters:` can be referenced from `site`:
+
+- `grid`: Grid meter
+- `pv`: PV meter
+- `battery`: Home battery meter
+- `charge`: Meter for the charging power of the wallbox
+- `aux`: Consumption meter for intelligent consumers
+- `ext`: Additional meter, e.g. for load management or data collection
+
+`power` is the only required attribute.
+Not all meter roles support all attributes:
+
+- `limitsoc` and `batterymode` are used exclusively for battery meters (referenced from `site.battery`).
+- `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin entries each (as a YAML array) and apply to grid meters (`grid`) and wallboxes (`charge`).
+
+Return the correct data type from each plugin.
+To convert, use the [reading pipelines](/en/reference/plugins#reading).
+
+### Read attributes
+
+| Attribute  | Type                  | Required | Context       | Description                                                 |
+| ---------- | --------------------- | -------- | ------------- | ----------------------------------------------------------- |
+| `power`    | `float`               | yes      | all           | Current power in W                                          |
+| `energy`   | `float`               | no       | all           | Meter reading in kWh                                        |
+| `maxpower` | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
+| `soc`      | `int`                 | no       | `battery`     | State of charge in %                                        |
+| `capacity` | `float`               | no       | `battery`     | Capacity in kWh                                             |
+| `powers`   | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
+| `currents` | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.           |
+| `voltages` | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
+
+### Write attributes
+
+| Attribute     | Type  | Required | Context   | Description                                                                                                                                                       |
+| ------------- | ----- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
+| `batterymode` | `int` | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                                        |
+
+### Example
+
+Read the current grid power from an HTTP endpoint.
+
+```yaml
+power:
+  source: http
+  uri: http://zaehler.network.local:8080/api/data.json?from=now
+  jq: .data.tuples[0][1]
+```
+
+<a id="charger"></a>
+
+## Charger
+
+The default `type: custom` covers wallboxes with continuous current control.
+For other devices, specialised charger types are described under [Switchsocket](#charger-switchsocket) and [Heat pumps](#charger-heating).
+
+### Read attributes
+
+| Attribute    | Type                  | Required | Description                                                                                 |
+| ------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `status`     | `string`              | yes      | Status (A..F)                                                                               |
+| `enabled`    | `bool`                | yes      | Is charging enabled?                                                                        |
+| `power`      | `float`               | no       | Charging power in W                                                                         |
+| `energy`     | `float`               | no       | Meter reading in kWh                                                                        |
+| `identify`   | `string`              | no       | Current RFID identifier                                                                     |
+| `soc`        | `int`                 | no       | State of charge in %                                                                        |
+| `limitsoc`   | `int`                 | no       | Charge limit in %                                                                           |
+| `temp`       | `float`               | no       | Current temperature in °C (heating, alias for `soc`)                                        |
+| `limittemp`  | `int`                 | no       | Temperature limit in °C (heating, alias for `limitsoc`)                                     |
+| `finishtime` | `string`              | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
+| `phases`     | `int`                 | no       | Number of physical phases (1..3)                                                            |
+| `powers`     | `[float,float,float]` | no       | Phase powers in W. For sign detection of unsigned currents.                                 |
+| `currents`   | `[float,float,float]` | no       | Phase currents in A. For detecting active phases.                                           |
+| `voltages`   | `[float,float,float]` | no       | Phase voltages in V. For connection detection (1p/3p).                                      |
+
+### Write attributes
+
+| Attribute          | Type    | Required | Description                                       |
+| ------------------ | ------- | -------- | ------------------------------------------------- |
+| `enable`           | `bool`  | yes      | Enable / disable charging                         |
+| `maxcurrent`       | `int`   | yes      | Set maximum charging current in A                 |
+| `maxcurrentmillis` | `float` | no       | Set maximum charging current in A (with decimals) |
+| `phases1p3p`       | `int`   | no       | Perform phase switching (requires `tos: true`)    |
+| `wakeup`           | `bool`  | no       | Wake up vehicle                                   |
+
+<a id="charger-features"></a>
+
+### Features
+
+| Feature            | Description                                                                                                                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                        |
+| `heating`          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                         |
+| `continuous`       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". |
+| `switchdevice`     | Device can only be switched on/off (no continuous current control). Min/max current settings and the `Min+PV` mode are hidden.                                                                                    |
+
+Common feature combinations seen in built-in templates:
+
+**Electric heater**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Socket**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Heat pump**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
+```
+
+### Examples
+
+Query the charging status of a charger via Modbus.
+
+```yaml
+features:
+  - integrateddevice
+enabled:
+  source: modbus
+  id: 4711
+  uri: modbus.local:502
+  rtu: false
+  register:
+    address: 100
+    type: holding
+    decode: uint16
+```
+
+Switch a Tasmota socket via an MQTT message.
+
+```yaml
+enable:
+  source: mqtt
+  broker: mosquitto.local:883
+  topic: cmd/unu-switch/Power
+  payload: ON
+```
+
+<a id="charger-switchsocket"></a>
+
+### Switchsocket
+
+**`type: switchsocket`**
+
+For smart sockets and similar relay devices that can only be switched on/off without continuous current control.
+The charging status is derived from the current power (above `standbypower` means charging).
+Full setup details are under [Smart switches](/en/smartswitches).
+
+| Attribute      | Type    | Required | Description                                                                              |
+| -------------- | ------- | -------- | ---------------------------------------------------------------------------------------- |
+| `enabled`      | `bool`  | yes      | Read socket state (on/off)                                                               |
+| `power`        | `float` | yes      | Current power in W                                                                       |
+| `energy`       | `float` | no       | Meter reading in kWh                                                                     |
+| `soc`          | `float` | no       | State of charge in %                                                                     |
+| `enable`       | `bool`  | yes      | Switch socket on/off                                                                     |
+| `standbypower` | `float` | no       | Power threshold in W. Above it: charging; below: standby. Negative: static (no metering) |
+
+<a id="charger-heating"></a>
+
+### Heat pumps
+
+Heat pumps and similar heating devices use dedicated charger types, each with its own attributes.
+The full setup is described under [Heat pumps, electric heaters](/en/heating).
+
+<Tabs>
+  <TabItem label="Heat pump">
+
+**`type: heatpump`**
+
+For inverter-controlled heat pumps that accept a continuous power setpoint over Modbus, HTTP or similar.
+The target heating power is written directly via `setmaxpower`.
+
+| Attribute     | Type    | Required | Description                             |
+| ------------- | ------- | -------- | --------------------------------------- |
+| `power`       | `float` | no       | Current power in W                      |
+| `energy`      | `float` | no       | Meter reading in kWh                    |
+| `temp`        | `float` | no       | Current temperature in °C               |
+| `limittemp`   | `int`   | no       | Device-internal temperature limit in °C |
+| `setmaxpower` | `int`   | yes      | Set maximum heating power in W          |
+| `getmaxpower` | `float` | no       | Current maximum heating power in W      |
+
+  </TabItem>
+  <TabItem label="SG-Ready">
+
+**`type: sgready`**
+
+For heat pumps that expose the standard SG-Ready interface as a single mode value.
+Three modes are supported: `1` reduced, `2` normal, `3` boost.
+
+| Attribute     | Type    | Required | Description                                            |
+| ------------- | ------- | -------- | ------------------------------------------------------ |
+| `power`       | `float` | no       | Current power in W                                     |
+| `energy`      | `float` | no       | Meter reading in kWh                                   |
+| `temp`        | `float` | no       | Current temperature in °C                              |
+| `limittemp`   | `int`   | no       | Device-internal temperature limit in °C                |
+| `setmode`     | `int`   | yes      | Change SG-Ready mode (1: reduced, 2: normal, 3: boost) |
+| `getmode`     | `int`   | no       | Current SG-Ready mode (1, 2, 3)                        |
+| `setmaxpower` | `int`   | no       | Set maximum heating power in W                         |
+
+  </TabItem>
+  <TabItem label="SG-Ready via relays">
+
+**`type: sgready-relay`**
+
+For heat pumps whose SG-Ready input is wired as two dry relay contacts (boost + dim).
+Each contact is driven by a separate sub-charger referenced by type, not via plugins.
+
+| Attribute   | Type            | Required | Description                             |
+| ----------- | --------------- | -------- | --------------------------------------- |
+| `power`     | `float`         | no       | Current power in W                      |
+| `energy`    | `float`         | no       | Meter reading in kWh                    |
+| `temp`      | `float`         | no       | Current temperature in °C               |
+| `limittemp` | `int`           | no       | Device-internal temperature limit in °C |
+| `boost`     | `charger-typed` | yes      | Relay for the SG-Ready boost contact    |
+| `dim`       | `charger-typed` | no       | Relay for the SG-Ready dim contact      |
+
+  </TabItem>
+</Tabs>
+
+<a id="vehicle"></a>
+
+## Vehicle
+
+Vehicle parameters can also be read via plugins.
+
+### Read attributes
+
+| Attribute       | Type     | Required | Description                                                                                 |
+| --------------- | -------- | -------- | ------------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | yes      | State of charge in %                                                                        |
+| `limitsoc`      | `int`    | no       | Charge limit in %                                                                           |
+| `status`        | `string` | no       | Status (A..F)                                                                               |
+| `range`         | `int`    | no       | Range in km                                                                                 |
+| `odometer`      | `int`    | no       | Odometer reading in km                                                                      |
+| `climater`      | `bool`   | no       | Climate control active?                                                                     |
+| `getmaxcurrent` | `float`  | no       | Maximum charging current in A                                                               |
+| `finishtime`    | `string` | no       | Estimated charging finish time (RFC3339, Go duration, Unix timestamp, or remaining seconds) |
+
+### Write attributes
+
+| Attribute      | Type   | Required | Description                       |
+| -------------- | ------ | -------- | --------------------------------- |
+| `wakeup`       | `bool` | no       | Wake up vehicle                   |
+| `chargeenable` | `bool` | no       | Start/stop charging process       |
+| `maxcurrent`   | `int`  | no       | Set maximum charging current in A |
+
+### Configuration
+
+| Attribute  | Type     | Required | Description                      |
+| ---------- | -------- | -------- | -------------------------------- |
+| `title`    | `string` | no       | Display name of the vehicle      |
+| `capacity` | `float`  | no       | Battery capacity in kWh          |
+| `icon`     | `string` | no       | Icon shown in the user interface |
+
+<a id="vehicle-features"></a>
+
+### Features
+
+| Feature         | Description                                                                                                                                                      |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coarsecurrent` | Vehicle accepts charging current only in whole 1 A steps. The control logic is constrained to coarse 1 A steps even when the charger could regulate more finely. |
+| `streaming`     | Vehicle pushes data instead of being polled (e.g. BMW Cardata). SOC updates outside active charging are treated as reliable.                                     |
+| `welcomecharge` | Vehicle expects the wallbox to be active on connect to register the link as working. Otherwise it reports an error.                                              |
+
+### Examples
+
+Read the current range from MQTT messages.
+
+```yaml
+title: Green Mazda # display name (optional)
+capacity: 50 # battery capacity in kWh (optional)
+features:
+  - coarsecurrent
+range:
+  source: mqtt
+  topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Wake a car via an HTTP ping before sending further queries.
+
+```yaml
+wakeup:
+  source: http
+  uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+<a id="onidentify"></a>
+
+`onIdentify` sets the charge mode automatically when the vehicle is detected.
+
+```yaml
+soc:
+  source: mqtt
+  topic: car/soc
+onIdentify:
+  mode: pv
+```
+
+Available modes: `off`, `now`, `minpv`, `pv`.
+
+<a id="tariff"></a>
+
+## Tariff and forecast
+
+A user-defined tariff connects evcc to a custom value source via the plugin mechanism.
+The `tariff` attribute selects what the source represents and which unit the values use.
+
+### Read attributes
+
+Exactly one of `price` or `forecast` must be configured.
+
+| Attribute  | Type     | Description                                                                                       |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Current value. Float returned by the plugin.                                                      |
+| `forecast` | `string` | Forecast as JSON string with a list of time periods and values (see schema below). Polled hourly. |
+
+### Configuration
+
+| Attribute  | Type       | Required | Description                                                                                                                                                   |
+| ---------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`   | `string`   | no       | `price` (default), `co2` or `solar`. Sets the unit of the returned values: price in configured currency per kWh, CO₂ intensity in g/kWh, solar forecast in W. |
+| `charges`  | `float`    | no       | Fixed additional charge per kWh added to every value. Default `0`.                                                                                            |
+| `tax`      | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20 %. Default `0`.                                                                                       |
+| `formula`  | `string`   | no       | Go expression for a custom calculation, with `price`, `charges` and `tax` in scope. See [examples](#formula-examples).                                        |
+| `interval` | `duration` | no       | Polling interval for `forecast`. Default `1h`.                                                                                                                |
+| `cache`    | `duration` | no       | Cache duration for `price`. Default `15m`.                                                                                                                    |
+
+<a id="tariff-features"></a>
+
+### Features
+
+| Feature     | Description                                                                                    |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| `average`   | Smooths fine-grained price slots (e.g. 15-minute values) into hourly averages.                 |
+| `cacheable` | Persists fetched values. Used as fallback after a restart or provider outage (up to 24 hours). |
+
+### Examples
+
+**Current price via HTTP**:
+
+```yaml
+price:
+  source: http
+  uri: https://example.com/api/price
+```
+
+**Forecast via HTTP**:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+  jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "value": .[1] }) | tostring'
+```
+
+The plugin must return a JSON structure containing a list of time periods and prices.
+Date fields must be in the form `YYYY-MM-DDTHH:MM:SSZ` and the price in the correct currency unit (e.g. EUR).
+evcc works internally with 15-minute intervals; plugins may return hourly data, which is converted automatically.
+
+```json
+[
+  {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-01T00:15:00Z",
+    "value": 25.0
+  },
+  {
+    "start": "2025-01-01T00:15:00Z",
+    "end": "2025-01-01T00:30:00Z",
+    "value": 26.5
+  },
+  {
+    "start": "2025-01-01T00:30:00Z",
+    "end": "2025-01-01T00:45:00Z",
+    "value": 24.8
+  },
+  {
+    "start": "2025-01-01T00:45:00Z",
+    "end": "2025-01-01T01:00:00Z",
+    "value": 27.2
+  }
+]
+```
+
+<a id="formula-examples"></a>
+
+The `formula` field accepts a Go expression with `price`, `charges`, `tax` and the slot timestamp `ts` in scope.
+The [`math` library](https://pkg.go.dev/math) and [`time.Time`](https://pkg.go.dev/time#Time) methods on `ts` are available.
+The formula runs for the current price and each forecast slot.
+
+**Price cap**:
+
+```yaml
+charges: 0.22
+tax: 0.19
+formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Caps the result at 50 ct/kWh.
+
+**No feed-in tariff on negative day-ahead prices** (German PV systems commissioned after February 25, 2025):
+
+```yaml
+formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
+```
+
+Pays a fixed feed-in tariff of 7 ct/kWh, except when the day-ahead market price is negative.

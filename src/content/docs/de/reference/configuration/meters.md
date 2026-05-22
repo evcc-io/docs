@@ -14,7 +14,7 @@ evcc verwendet eine einheitliche Vorzeichen-Konvention für Leistungs- und Strom
 - **Negativ (-)** für ausgehende Energie: Netzeinspeisung, PV-Wechselrichter Ruhestrombedarf, Hausbatterie-Ladung
 - **Verbraucher** (Wallbox, Aux-Zähler) sind immer **positiv (+)**
 
-Liefert das Gerät die Werte mit umgekehrtem Vorzeichen, kann dies in der [Plugin-Konfiguration](/de/plugins) über `scale: -1` korrigiert werden.
+Liefert das Gerät die Werte mit umgekehrtem Vorzeichen, kann dies in der [Plugin-Konfiguration](/de/reference/plugins) über `scale: -1` korrigiert werden.
 
 Die `meters` Konfiguration ist eine Liste von verschiedenen vorhandenen Geräten.
 
@@ -365,7 +365,7 @@ password: "DasPasswort"
 
 ### `custom`
 
-Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/de/plugins) definiert werden.
+Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/de/user-defined-devices#meter) definiert werden.
 
 **Beispiel**:
 

@@ -14,7 +14,7 @@ evcc uses a consistent sign convention for power and current values (`power`, `p
 - **Negative (-)** for outgoing energy: grid feed-in, PV inverter standby consumption, house battery charging
 - **Consumers** (charger, aux meters) are always **positive (+)**
 
-If the device returns values with the opposite sign, this can be corrected in the [plugin configuration](/en/plugins) using `scale: -1`.
+If the device returns values with the opposite sign, this can be corrected in the [plugin configuration](/en/reference/plugins) using `scale: -1`.
 
 The `meters` configuration is a list of different available devices.
 
@@ -361,7 +361,7 @@ password: "ThePassword"
 
 ### `custom`
 
-Standard implementation, in which individual values are defined via [plugins](/en/plugins).
+Standard implementation, in which individual values are defined via [plugins](/en/user-defined-devices#meter).
 
 **For example**:
 
