@@ -1,0 +1,110 @@
+---
+title: "FreeBSD"
+sidebar:
+  order: 9
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Diese Anleitung beschreibt die Installation auf FreeBSD über das offizielle [Paket aus den FreeBSD Ports](https://cgit.freebsd.org/ports/tree/www/evcc).
+
+## Erstinstallation
+
+<Steps>
+
+1. ### Installieren
+
+   Öffne ein Terminal als root und installiere evcc:
+
+   ```sh
+   pkg install evcc
+   ```
+
+2. ### Starten
+
+   Aktiviere den Dienst beim Systemstart und starte ihn:
+
+   ```sh
+   sysrc evcc_enable="YES"
+   service evcc start
+   ```
+
+3. ### Einrichten
+
+   Öffne die evcc Oberfläche in deinem Browser: [http://localhost:7070](http://localhost:7070).
+   Vergib ein Administrator-Passwort und richte deine Geräte direkt über die Weboberfläche ein.
+
+</Steps>
+
+## Konfiguration
+
+:::tip[Empfohlen]
+Richte evcc direkt im Browser ein.
+:::
+
+Nach dem ersten Start kannst du deine evcc Instanz unter [http://localhost:7070](http://localhost:7070) konfigurieren.
+Die Einstellungen werden automatisch in der Datenbank gespeichert.
+
+Alternativ kannst du eine `evcc.yaml` Konfigurationsdatei unter `/usr/local/etc/evcc.yaml` ablegen.
+Details findest du unter [Einrichtung](./configuration).
+
+## Aktualisierung
+
+Um auf eine neue Version zu aktualisieren, führe folgende Schritte durch:
+
+- Prüfe die [Releases](https://github.com/evcc-io/evcc/releases) auf Breaking Changes (BC), die deine Installation betreffen
+- Öffne ein Terminal als root
+- Aktualisiere evcc:
+
+  ```sh
+  pkg upgrade evcc
+  ```
+
+- Starte den Dienst neu:
+
+  ```sh
+  service evcc restart
+  ```
+
+## Weitere Befehle
+
+- Status des evcc-Servers prüfen:
+
+  ```sh
+  service evcc status
+  ```
+
+- Logs anzeigen:
+
+  ```sh
+  tail -f /var/log/evcc.log
+  ```
+
+## nginx als Reverse Proxy
+
+Wenn bereits ein nginx läuft, kann dieser mit einem neuen Virtualhost-Eintrag ergänzt werden:
+
+```nginx
+server {
+  ...
+  server_name evcc.<your-domain>
+  ...
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Host $http_host;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_redirect off;
+    proxy_read_timeout 240s;
+
+    proxy_http_version 1.1;
+
+    proxy_pass http://127.0.0.1:7070;
+  }
+}
+```
+
+Anschließend ist die evcc Oberfläche unter `http://evcc.<your-domain>/` erreichbar.
