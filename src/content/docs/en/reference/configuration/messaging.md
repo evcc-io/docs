@@ -158,7 +158,7 @@ The following sections will now explain all the required parameters.
 - `email`: Email. See [`email`](#email) definition
 - `shout`: [shoutrrr](https://containrrr.dev/shoutrrr/). See [`shout`](#shout) definition
 - `ntfy`: [ntfy](https://ntfy.sh). See [`ntfy`](#ntfy) definition
-- `custom`: Allows the usage of any [plugin](/en/plugins) that supports write access. See [`custom`](#custom) definition.
+- `custom`: Allows the usage of any [plugin](/en/reference/plugins) that supports write access. See [`custom`](#custom) definition.
 
 ---
 
@@ -255,7 +255,7 @@ Further information can be found in the [ntfy documentation](https://docs.ntfy.s
 
 ### `custom`
 
-The `custom` type allows the use of any [plugin](/en/plugins) to process messages. The plugin must support write mode. The message itself is provided in the plugin configuration using the parameter `${send}` (or as a template parameter `{{.send}}`).
+The `custom` type allows the use of any [plugin](/en/reference/plugins) to process messages. The plugin must support write mode. The message itself is provided in the plugin configuration using the parameter `${send}` (or as a template parameter `{{.send}}`).
 
 **Possible Values**:
 

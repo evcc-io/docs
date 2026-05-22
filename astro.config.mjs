@@ -6,11 +6,15 @@ import starlightBlog from "starlight-blog";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
 import mermaid from "astro-mermaid";
+import remarkHeadingId from "remark-heading-id";
 export default defineConfig({
   site: "https://docs.evcc.io",
   trailingSlash: "never",
   build: {
     format: "directory",
+  },
+  markdown: {
+    remarkPlugins: [remarkHeadingId],
   },
   redirects: {
     "/": "/en",
@@ -20,8 +24,6 @@ export default defineConfig({
     "/en/docs/Home": "/en",
     "/docs/reference/api": "/en/integrations/rest-api",
     "/en/docs/reference/api": "/en/integrations/rest-api",
-    "/de/reference/plugins": "/de/plugins",
-    "/en/reference/plugins": "/en/plugins",
   },
   integrations: [
     mermaid({
@@ -137,20 +139,21 @@ export default defineConfig({
               link: "/heating",
             },
             {
-              label: "Plugins",
-              link: "/plugins",
+              label: "User-defined devices",
+              translations: { de: "Benutzerdefinierte Geräte" },
+              link: "/user-defined-devices",
             },
           ],
-        },
-        {
-          label: "Features",
-          translations: { de: "Funktionen" },
-          items: [{ autogenerate: { directory: "features", collapsed: true } }],
         },
         {
           label: "Tariffs & forecasts",
           translations: { de: "Tarife & Vorhersagen" },
           link: "/tariffs",
+        },
+        {
+          label: "Features",
+          translations: { de: "Funktionen" },
+          items: [{ autogenerate: { directory: "features", collapsed: true } }],
         },
         {
           label: "Integrations",
@@ -182,6 +185,7 @@ export default defineConfig({
                 },
               ],
             },
+            { label: "Plugins", slug: "reference/plugins" },
             { label: "Modbus", slug: "reference/modbus" },
             {
               label: "CLI",
