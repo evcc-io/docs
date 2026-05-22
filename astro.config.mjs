@@ -137,8 +137,7 @@ export default defineConfig({
               link: "/heating",
             },
             {
-              label: "User-defined",
-              translations: { de: "Benutzerdefiniert" },
+              label: "Plugins",
               link: "/plugins",
             },
           ],

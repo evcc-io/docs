@@ -41,6 +41,7 @@ Zusätzlich können Plugins auch für die in [Messaging](/de/reference/configura
 - [Convert Plugin](#convert) - Meta-Plugin zur Datentyp-Konvertierung beim Schreiben (z. B. float zu int).
 - [Delta Plugin](#delta) - Meta-Plugin zur Umwandlung von absoluten Werten in Änderungswerte (Deltas) beim Schreiben.
 - [Ignore Plugin](#ignore) - Meta-Plugin zum Unterdrücken spezifischer Fehlermeldungen.
+- [IfElse Plugin](#ifelse) - Meta-Plugin für bedingte Schreibvorgänge mit zwei Zweigen (if/else).
 - [Map Plugin](#map) - Meta-Plugin zur Übersetzung von Integer-Werten (z. B. gerätespezifische Modi in evcc-Modi).
 - [Meter Plugin](#meter-plugin) - Plugin um ein anderes Messgerät als Datenquelle zu verwenden.
 - [Sequence Plugin](#sequence) - Meta-Plugin zur sequentiellen Ausführung mehrerer Schreibvorgänge.
@@ -1039,6 +1040,7 @@ Es wird verwendet, wenn ein Plugin einen anderen Datentyp erwartet als evcc lief
 | float2int     | Float64 → Int64 (Nachkommastellen werden abgeschnitten) |
 | int2float     | Int64 → Float64                                         |
 | int2bytes     | Int64 → Byte-Array (Big Endian, 8 Bytes)                |
+| bool2int      | Bool → Int64 (true=1, false=0)                          |
 
 **Beispiel** (evcc liefert float, Gerät erwartet int):
 
@@ -1187,6 +1189,40 @@ batterymode:
 ```
 
 In diesem Beispiel gibt das Gerät einen harmlosen Modbus-Fehler zurück, der ignoriert wird.
+
+### IfElse <Badge text="schreiben" variant="caution" size="small" />
+
+Das `ifelse` Plugin führt bedingte Schreibvorgänge mit zwei Zweigen aus.
+Je nach Eingabewert wird entweder das `if` oder das `else` Plugin ausgeführt.
+
+**Parameter**:
+
+| Parameter | Typ    | Erfordert | Beschreibung                                              |
+| --------- | ------ | --------- | --------------------------------------------------------- |
+| if        | config | ja        | Plugin, das bei erfüllter Bedingung ausgeführt wird       |
+| else      | config | ja        | Plugin, das bei nicht erfüllter Bedingung ausgeführt wird |
+
+**Funktionsweise**:
+
+- Bei `bool` Werten: `true` führt `if` aus, `false` führt `else` aus
+- Bei `int64` Werten: `> 0` führt `if` aus, sonst `else`
+
+**Unterstützte Datentypen**: `int64`, `bool`
+
+**Beispiel** (unterschiedliche Endpunkte für An- und Ausschalten):
+
+```yaml
+enable:
+  source: ifelse
+  if:
+    source: http
+    uri: http://device.local/api/on
+    method: POST
+  else:
+    source: http
+    uri: http://device.local/api/off
+    method: POST
+```
 
 ### Map <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" />
 
