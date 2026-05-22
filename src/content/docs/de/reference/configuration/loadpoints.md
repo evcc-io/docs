@@ -250,7 +250,7 @@ disable:
 
 Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
 
-**Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export.
+**Mögliche Werte**: Ein positiver Wert für Netzbezug. Bei `0` stoppt die Ladung, sobald der Überschuss nicht mehr für die Mindestladeleistung reicht.
 
 **Standardwert:** `0`
 
@@ -264,6 +264,10 @@ threshold: 200 # Ein maximaler Netzbezug von 200W ist erlaubt
 Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
 
 Vergleiche dazu auch das Beispiel in der Info zu [`enable`](#enable) `threshold`.
+:::
+
+:::caution
+Negative Werte sind wirkungslos: solange Überschuss vorhanden ist, lädt evcc weiter und prüft die Schwelle gar nicht.
 :::
 
 #### `delay`
