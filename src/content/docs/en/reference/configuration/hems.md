@@ -56,12 +56,12 @@ Total power limit in watts that is applied when the signal is active.
 
 #### `limit`
 
-[Plugin](../../plugins) configuration for reading the switch contact.
+[Plugin](/en/reference/plugins) configuration for reading the switch contact.
 Expected return value: `true`/`1` = limited, `false`/`0` = normal.
 
 #### `passthrough`
 
-Optional [plugin](../../plugins) configuration for passing the limitation signal through to an external system.
+Optional [plugin](/en/reference/plugins) configuration for passing the limitation signal through to an external system.
 
 #### `interval`
 
@@ -101,7 +101,7 @@ The following optional parameters can be set for EEBus communication:
 
 #### `passthrough`
 
-Optional [plugin](../../plugins) configuration for passing the limitation signal through to an external system.
+Optional [plugin](/en/reference/plugins) configuration for passing the limitation signal through to an external system.
 
 #### `interval`
 

@@ -56,12 +56,12 @@ Gesamtleistungslimit in Watt, das bei aktivem Signal gesetzt wird.
 
 #### `limit`
 
-[Plugin](../../plugins)-Konfiguration zum Auslesen des Schaltkontakts.
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Schaltkontakts.
 Erwarteter Rückgabewert: `true`/`1` = begrenzt, `false`/`0` = normal.
 
 #### `passthrough`
 
-Optionale [Plugin](../../plugins)-Konfiguration zum Durchreichen des Begrenzungssignals an ein externes System.
+Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Begrenzungssignals an ein externes System.
 
 #### `interval`
 
@@ -101,7 +101,7 @@ Folgende optionale Parameter können für die EEBus-Kommunikation gesetzt werden
 
 #### `passthrough`
 
-Optionale [Plugin](../../plugins)-Konfiguration zum Durchreichen des Begrenzungssignals an ein externes System.
+Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Begrenzungssignals an ein externes System.
 
 #### `interval`
 

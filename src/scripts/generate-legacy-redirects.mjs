@@ -85,12 +85,16 @@ const DEVICE_TYPES = [
   "vehicles",
   "smartswitches",
   "heating",
-  "plugins",
 ];
 for (const type of DEVICE_TYPES) {
   if (writeRedirect(`/docs/devices/${type}`, `/de/${type}`)) count++;
   if (writeRedirect(`/en/docs/devices/${type}`, `/en/${type}`)) count++;
 }
+
+// /docs/devices/plugins was the Docusaurus-era plugin reference.
+// Map it to the new reference location.
+if (writeRedirect(`/docs/devices/plugins`, `/de/reference/plugins`)) count++;
+if (writeRedirect(`/en/docs/devices/plugins`, `/en/reference/plugins`)) count++;
 
 // One blog post had a period in its old slug that Astro strips.
 // /blog/2024/02/01/v0.124-new-tesla-api → /<lang>/blog/2024/02/01/v0124-new-tesla-api
