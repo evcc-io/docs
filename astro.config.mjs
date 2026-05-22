@@ -1,4 +1,5 @@
 // @ts-check
+import fs from "node:fs";
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import sitemap from "@astrojs/sitemap";
@@ -7,6 +8,12 @@ import starlightLlmsTxt from "starlight-llms-txt";
 import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
 import mermaid from "astro-mermaid";
 import remarkHeadingId from "remark-heading-id";
+
+const langRedirectScript = fs.readFileSync(
+  new URL("./src/scripts/lang-redirect.js", import.meta.url),
+  "utf8",
+);
+
 export default defineConfig({
   site: "https://docs.evcc.io",
   trailingSlash: "never",
@@ -59,6 +66,7 @@ export default defineConfig({
         en: { label: "English", lang: "en" },
         de: { label: "Deutsch", lang: "de" },
       },
+      head: [{ tag: "script", content: langRedirectScript }],
       social: [
         {
           icon: "github",
