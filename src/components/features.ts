@@ -8,6 +8,8 @@ const labels: Record<string, Partial<Record<Lang, string>>> = {
   "battery-control": { de: "Batteriesteuerung", en: "Battery control" },
   iso151182: { de: "ISO 15118-2", en: "ISO 15118-2" },
   "iso15118-2": { de: "ISO 15118-2", en: "ISO 15118-2" },
+  dim: { de: "Dimmbar", en: "Dimmable" },
+  curtail: { de: "Abregelbar", en: "Curtailable" },
   sponsorship: { de: "Sponsortoken", en: "Sponsor token" },
   sponsorfree: { de: "Kein Sponsortoken", en: "No sponsor token" },
   skiptest: { de: "", en: "" },
@@ -17,11 +19,14 @@ const labels: Record<string, Partial<Record<Lang, string>>> = {
 
 const shortLabels: Record<string, Partial<Record<Lang, string>>> = {
   mA: { de: "mA", en: "mA" },
-  meter: { de: "Zähler", en: "Meter" },
+  meter: { de: "Zähler", en: "meter" },
+  "battery-control": { de: "Batteriesteuerung", en: "battery control" },
   iso151182: { de: "ISO", en: "ISO" },
   "iso15118-2": { de: "ISO", en: "ISO" },
-  sponsorship: { de: "Sponsor", en: "Sponsor" },
-  sponsorfree: { de: "Sponsor-frei", en: "Sponsor free" },
+  dim: { de: "dimmbar", en: "dimmable" },
+  curtail: { de: "abregelbar", en: "curtailable" },
+  sponsorship: { de: "Sponsor", en: "sponsor" },
+  sponsorfree: { de: "sponsorfrei", en: "sponsor free" },
 };
 
 const descriptions: Record<string, Partial<Record<Lang, string>>> = {
@@ -52,6 +57,14 @@ const descriptions: Record<string, Partial<Record<Lang, string>>> = {
   "battery-control": {
     de: "Externe Steuerung von Hausbatterie-Lade- und Entladevorgängen durch evcc.",
     en: "External control of home battery charging and discharging via evcc.",
+  },
+  dim: {
+    de: "Verbrauchsleistung kann reduziert werden (bspw. §14a EnWG). Siehe [Externe Steuerung](/de/features/external-control).",
+    en: "Power consumption can be reduced (e.g. §14a EnWG). See [External Control](/en/features/external-control).",
+  },
+  curtail: {
+    de: "Wechselrichter-Erzeugung kann reduziert werden (bspw. §9 EEG). Siehe [Externe Steuerung](/de/features/external-control).",
+    en: "Inverter production can be reduced (e.g. §9 EEG). See [External Control](/en/features/external-control).",
   },
   ocpp: {
     de: "Kommunikation über das offene OCPP-Protokoll.",
