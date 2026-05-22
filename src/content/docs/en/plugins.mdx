@@ -41,6 +41,7 @@ Additionally, plugins can also be used for the endpoints described in [Messaging
 - [Convert Plugin](#convert) - Meta-plugin for data type conversion when writing (e.g., float to int).
 - [Delta Plugin](#delta) - Meta-plugin for converting absolute values to delta/increment values when writing.
 - [Ignore Plugin](#ignore) - Meta-plugin for suppressing specific error messages.
+- [IfElse Plugin](#ifelse) - Meta-plugin for conditional write operations with two branches (if/else).
 - [Map Plugin](#map) - Meta-plugin for translating integer values (e.g., device-specific modes to evcc modes).
 - [Meter Plugin](#meter-plugin) - Plugin to use another meter as a data source.
 - [Sequence Plugin](#sequence) - Meta-plugin for sequential execution of multiple write operations.
@@ -1039,6 +1040,7 @@ It is used when a plugin expects a different data type than evcc provides.
 | float2int  | Float64 → Int64 (decimal places are truncated) |
 | int2float  | Int64 → Float64                                |
 | int2bytes  | Int64 → Byte array (Big Endian, 8 bytes)       |
+| bool2int   | Bool → Int64 (true=1, false=0)                 |
 
 **Example** (evcc provides float, device expects int):
 
@@ -1187,6 +1189,40 @@ batterymode:
 ```
 
 In this example, the device returns a harmless modbus error that is ignored.
+
+### IfElse <Badge text="write" variant="caution" size="small" />
+
+The `ifelse` plugin performs conditional write operations with two branches.
+Depending on the input value, either the `if` or the `else` plugin is executed.
+
+**Parameters**:
+
+| Parameter | Type   | Required | Description                                   |
+| --------- | ------ | -------- | --------------------------------------------- |
+| if        | config | yes      | Plugin executed when the condition is met     |
+| else      | config | yes      | Plugin executed when the condition is not met |
+
+**How it works**:
+
+- For `bool` values: `true` runs `if`, `false` runs `else`
+- For `int64` values: `> 0` runs `if`, otherwise runs `else`
+
+**Supported data types**: `int64`, `bool`
+
+**Example** (different endpoints for enabling and disabling):
+
+```yaml
+enable:
+  source: ifelse
+  if:
+    source: http
+    uri: http://device.local/api/on
+    method: POST
+  else:
+    source: http
+    uri: http://device.local/api/off
+    method: POST
+```
 
 ### Map <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" />
 
