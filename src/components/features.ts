@@ -43,8 +43,8 @@ const descriptions: Record<string, Partial<Record<Lang, string>>> = {
     en: "Integrated RFID card reader for [vehicle identification](/en/features/vehicle).",
   },
   meter: {
-    de: "Unterstützung für einen integrierten Zähler. Verfügbarkeit kann je nach Modell variieren.",
-    en: "Support for an integrated meter. Availability may vary between models.",
+    de: "Unterstützung für einen integrierten Zähler.",
+    en: "Support for an integrated meter.",
   },
   iso151182: {
     de: "Plug & Charge (Fahrzeugerkennung, SoC-Übermittlung).",
