@@ -1,0 +1,103 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import TariffsIntro from "@components/intros/TariffsIntro.astro";
+import UserDefinedHint from "@components/UserDefinedHint.astro";
+import ChannelListNav from "@components/ChannelListNav.astro";
+import {
+  sortDevices,
+  TARIFF_GROUPS,
+  collectionName,
+  nightlyPageHead,
+} from "@utils/devices";
+import type { Channel } from "@utils/devices";
+
+interface Props {
+  lang: "de" | "en";
+  channel: Channel;
+}
+const { lang, channel } = Astro.props;
+const isNightly = channel === "nightly";
+
+const coll = await getCollection(collectionName("tariffs", lang, channel) as any);
+const devices = sortDevices(coll as any);
+const basePath = `/${lang}${isNightly ? "/nightly" : ""}/tariffs`;
+
+const title = lang === "de" ? "Tarife & Vorhersagen" : "Tariffs & forecasts";
+const description =
+  lang === "de"
+    ? "Dynamische Stromtarife sowie CO₂- und PV-Vorhersage-Anbieter."
+    : "Dynamic electricity tariffs and CO₂ / solar forecast providers.";
+
+function bucketFor(d: any): "price" | "co2" | "solar" {
+  const group = d.data.product.group ?? "";
+  return TARIFF_GROUPS[group] ?? "price";
+}
+
+const buckets: Record<"price" | "co2" | "solar", any[]> = {
+  price: [],
+  co2: [],
+  solar: [],
+};
+for (const d of devices) buckets[bucketFor(d)].push(d);
+
+const sectionLabels = lang === "de"
+  ? {
+      price: { id: "preis", title: "Strompreise" },
+      co2: { id: "co2", title: "CO₂-Vorhersagen" },
+      solar: { id: "solar", title: "Solar-Vorhersagen" },
+    }
+  : {
+      price: { id: "price", title: "Electricity prices" },
+      co2: { id: "co2", title: "CO₂ forecasts" },
+      solar: { id: "solar", title: "Solar forecasts" },
+    };
+
+const sectionOrder = ["price", "co2", "solar"] as const;
+
+const headings = [
+  ...(lang === "de"
+    ? [
+        { depth: 2, slug: "kinds", text: "Tarifarten" },
+        { depth: 2, slug: "forecasts", text: "Vorhersagen" },
+      ]
+    : [
+        { depth: 2, slug: "kinds", text: "Tariff kinds" },
+        { depth: 2, slug: "forecasts", text: "Forecasts" },
+      ]),
+  ...sectionOrder
+    .filter((k) => buckets[k].length > 0)
+    .map((k) => ({ depth: 2, slug: sectionLabels[k].id, text: sectionLabels[k].title })),
+];
+
+const frontmatter = {
+  title,
+  description,
+  template: "doc",
+  ...(isNightly ? { pagefind: false, head: nightlyPageHead } : {}),
+};
+---
+
+<StarlightPage frontmatter={frontmatter} headings={headings}>
+  {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="tariffs" />}
+  <TariffsIntro lang={lang} />
+  {
+    sectionOrder.map((k) =>
+      buckets[k].length > 0 ? (
+        <>
+          <h2 id={sectionLabels[k].id}>{sectionLabels[k].title}</h2>
+          <DeviceCardList
+            devices={buckets[k] as any}
+            lang={lang}
+            basePath={basePath}
+            showCountries={true}
+          />
+        </>
+      ) : null
+    )
+  }
+  {channel === "release" && (
+    <UserDefinedHint lang={lang} kind="service" nightlyHref={`/${lang}/nightly/tariffs`} />
+  )}
+</StarlightPage>

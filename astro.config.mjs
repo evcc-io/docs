@@ -210,6 +210,9 @@ export default defineConfig({
         { slug: "sponsorship" },
       ],
     }),
-    sitemap(),
+    sitemap({
+      // Nightly device pages are noindex and must stay out of the sitemap.
+      filter: (page) => !/\/nightly(\/|$)/.test(page),
+    }),
   ],
 });

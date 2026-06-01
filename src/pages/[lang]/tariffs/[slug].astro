@@ -1,68 +1,21 @@
 ---
-import { getCollection } from "astro:content";
 import DeviceDetailLayout from "@components/DeviceDetailLayout.astro";
-import {
-  CODE_PREAMBLES,
-  TARIFF_GROUPS,
-  indent,
-  featuresFor,
-  nightlyDiffersFromRelease,
-} from "@utils/devices";
+import { deviceDetailPaths, featuresFor, buildCodeBlocks, templateEditUrl } from "@utils/devices";
 
-export async function getStaticPaths() {
-  const paths: any[] = [];
-  for (const lang of ["en", "de"] as const) {
-    const coll = await getCollection(`tariffs-${lang}` as any);
-    const nightlyColl = await getCollection(`tariffs-nightly-${lang}` as any);
-    const nightlyById = new Map(nightlyColl.map((e: any) => [e.id, e]));
-    for (const entry of coll as any[]) {
-      const nightlyEntry = nightlyById.get(entry.id);
-      paths.push({
-        params: { lang, slug: entry.id },
-        props: { entry, lang, nightlyEntry },
-      });
-    }
-  }
-  return paths;
-}
+export const getStaticPaths = () =>
+  deviceDetailPaths({ prefix: "tariffs", urlType: "tariffs", channel: "release" });
 
-const { entry, lang, nightlyEntry } = Astro.props as {
-  entry: any;
-  lang: "de" | "en";
-  nightlyEntry: any | undefined;
-};
-
-const features = featuresFor("tariff", entry, lang);
-const editUrl = entry.data.template
-  ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/tariff/${entry.data.template}.yaml`
-  : undefined;
-
-function buildCodeBlocks(e: any): string[] {
-  const groupKey = TARIFF_GROUPS[e.data.product.group ?? ""] ?? "price";
-  const preamble = CODE_PREAMBLES[groupKey];
-  const list = groupKey === "solar";
-  return (e.data.render as any[] ?? []).map((render) => {
-    const src = render.advanced ?? render.default;
-    return `${preamble}\n${indent(src, list).trimEnd()}`;
-  });
-}
-
-const codeBlocks = buildCodeBlocks(entry);
-
-const hasNightly = nightlyDiffersFromRelease(entry, nightlyEntry);
-const nightlyFeatures = hasNightly ? featuresFor("tariff", nightlyEntry, lang) : undefined;
-const nightlyCodeBlocks = hasNightly ? buildCodeBlocks(nightlyEntry) : undefined;
+const { entry, lang, counterpartHref } = Astro.props as any;
 ---
 
 <DeviceDetailLayout
   entry={entry}
   lang={lang}
+  channel="release"
   type="tariffs"
   categoryLabel={lang === "de" ? "Tarife & Vorhersagen" : "Tariffs & forecasts"}
-  features={features}
-  codeBlocks={codeBlocks}
-  editUrl={editUrl}
-  nightlyEntry={hasNightly ? nightlyEntry : undefined}
-  nightlyFeatures={nightlyFeatures}
-  nightlyCodeBlocks={nightlyCodeBlocks}
+  features={featuresFor("tariff", entry, lang)}
+  codeBlocks={buildCodeBlocks(entry, "tariff")}
+  editUrl={templateEditUrl(entry, "tariff")}
+  counterpartHref={counterpartHref}
 />

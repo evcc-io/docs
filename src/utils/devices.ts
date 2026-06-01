@@ -1,3 +1,4 @@
+import { getCollection } from "astro:content";
 import { marked } from "marked";
 import countries from "i18n-iso-countries";
 // @ts-ignore
@@ -262,7 +263,7 @@ export function availableOverviewFeatures(
   });
 }
 
-import { USAGE_KEYS } from "@utils/usages";
+import { USAGE_KEYS, usageLabel } from "@utils/usages";
 
 export function availableUsages(
   devices: Array<DeviceEntry & { data: { render: Array<{ usage?: string }> } }>,
@@ -301,4 +302,124 @@ export function featuresFor(
   if (eebusIdx > -1) features.splice(eebusIdx, 1);
 
   return features;
+}
+
+export type Channel = "release" | "nightly";
+
+/**
+ * Content-collection key for a device category, e.g.
+ * `collectionName("chargers", "en", "nightly")` → `"chargers-nightly-en"`.
+ * The prefix matches the collection keys in `content.config.ts` (plural).
+ * Smart switches and heating use the `chargers` collection.
+ */
+export function collectionName(
+  prefix: "chargers" | "meters" | "vehicles" | "tariffs",
+  lang: "de" | "en",
+  channel: Channel,
+): string {
+  return `${prefix}-${channel === "nightly" ? "nightly-" : ""}${lang}`;
+}
+
+/**
+ * StarlightPage frontmatter fragment that keeps a page out of search engines
+ * (noindex meta) and the local Pagefind index (`pagefind: false` makes
+ * Starlight drop the `data-pagefind-body` marker). Spread into nightly pages.
+ */
+export const nightlyPageHead = [
+  { tag: "meta" as const, attrs: { name: "robots", content: "noindex" } },
+];
+
+/** Link to the device's source template in the evcc repo (undefined if none). */
+export function templateEditUrl(
+  entry: DeviceEntry,
+  dir: "charger" | "meter" | "vehicle" | "tariff",
+): string | undefined {
+  return entry.data.template
+    ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/${dir}/${entry.data.template}.yaml`
+    : undefined;
+}
+
+/** YAML config blocks for a device detail page (non-meter categories). */
+export function buildCodeBlocks(
+  entry: DeviceEntry,
+  type: "charger" | "vehicle" | "smartswitch" | "heating" | "tariff",
+): string[] {
+  const render = (entry.data.render as any[]) ?? [];
+  if (type === "tariff") {
+    const groupKey = TARIFF_GROUPS[entry.data.product.group ?? ""] ?? "price";
+    const preamble = CODE_PREAMBLES[groupKey];
+    const list = groupKey === "solar";
+    return render.map((r) => {
+      const src = r.advanced ?? r.default;
+      return `${preamble}\n${indent(src, list).trimEnd()}`;
+    });
+  }
+  return render.map((r) => {
+    const preamble =
+      type === "charger"
+        ? (CODE_PREAMBLES[r.usage ?? "charger"] ?? CODE_PREAMBLES.charger)
+        : CODE_PREAMBLES[type];
+    const src = r.advanced ?? r.default;
+    return `${preamble}\n${indent(src).trimEnd()}`;
+  });
+}
+
+/**
+ * Static paths for a device detail route. Loads the channel's collection plus
+ * its counterpart, and resolves a cross-channel link: release pages link to
+ * nightly only when it differs, nightly pages link back to release when a
+ * same-id entry exists.
+ */
+export async function deviceDetailPaths(opts: {
+  prefix: "chargers" | "meters" | "vehicles" | "tariffs";
+  /** URL segment, e.g. "smartswitches" (may differ from the collection prefix). */
+  urlType: string;
+  channel: Channel;
+  filterType?: "charger" | "smartswitch" | "heating";
+}) {
+  const { prefix, urlType, channel, filterType } = opts;
+  const other: Channel = channel === "nightly" ? "release" : "nightly";
+  const paths: any[] = [];
+  for (const lang of ["en", "de"] as const) {
+    const coll = await getCollection(
+      collectionName(prefix, lang, channel) as any,
+    );
+    const otherColl = await getCollection(
+      collectionName(prefix, lang, other) as any,
+    );
+    const otherById = new Map(otherColl.map((e: any) => [e.id, e]));
+    const list = filterType
+      ? filterByType(coll as any, filterType)
+      : (coll as any[]);
+    for (const entry of list) {
+      const otherEntry = otherById.get(entry.id);
+      const counterpartHref =
+        channel === "release"
+          ? nightlyDiffersFromRelease(entry, otherEntry)
+            ? `/${lang}/nightly/${urlType}/${entry.id}`
+            : undefined
+          : otherEntry
+            ? `/${lang}/${urlType}/${entry.id}`
+            : undefined;
+      paths.push({
+        params: { lang, slug: entry.id },
+        props: { entry, lang, counterpartHref },
+      });
+    }
+  }
+  return paths;
+}
+
+/** Usage-tab descriptors for a meter detail page. */
+export function buildMeterTabs(entry: DeviceEntry, lang: "de" | "en") {
+  return ((entry.data.render as any[]) ?? []).map((render) => {
+    const usage = render.usage ?? "meter";
+    const preamble = CODE_PREAMBLES[usage] ?? CODE_PREAMBLES.meter;
+    const src = render.advanced ?? render.default;
+    return {
+      usage,
+      label: usageLabel(usage, lang),
+      code: `${preamble}\n${indent(src).trimEnd()}`,
+    };
+  });
 }

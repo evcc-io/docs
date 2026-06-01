@@ -1,45 +1,11 @@
 ---
-import { getCollection } from "astro:content";
-import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import DeviceCardList from "@components/DeviceCardList.astro";
-import DeviceFilter from "@components/DeviceFilter.astro";
-import SmartswitchesIntro from "@components/intros/SmartswitchesIntro.astro";
-import UserDefinedHint from "@components/UserDefinedHint.astro";
-import { sortDevices, filterByType, availableOverviewFeatures } from "@utils/devices";
+import SmartswitchesList from "@components/lists/SmartswitchesList.astro";
 
 export async function getStaticPaths() {
   return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
 }
 
 const lang = Astro.params.lang as "de" | "en";
-const coll = await getCollection(`chargers-${lang}` as any);
-const devices = sortDevices(filterByType(coll as any, "smartswitch"));
-const filterFeatures = availableOverviewFeatures(devices as any);
-
-const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
-const title = lang === "de" ? "Smarte Schalter" : "Smart switches";
-const description =
-  lang === "de"
-    ? "Schaltbare Steckdosen für Geräte ohne dedizierte evcc-Integration."
-    : "Smart sockets for devices without a dedicated evcc integration.";
-
-const headings = lang === "de"
-  ? [
-      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
-      { depth: 2, slug: "modus", text: "Modus" },
-      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
-    ]
-  : [
-      { depth: 2, slug: "setup", text: "Setup" },
-      { depth: 2, slug: "modes", text: "Modes" },
-      { depth: 2, slug: "supported", text: "Supported devices" },
-    ];
 ---
 
-<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
-  <SmartswitchesIntro lang={lang} />
-  {filterFeatures.length > 0 && <DeviceFilter lang={lang} features={filterFeatures} />}
-  <h2 id="supported">{supportedTitle}</h2>
-  <DeviceCardList devices={devices as any} lang={lang} basePath={`/${lang}/smartswitches`} filterId="branded" />
-  <UserDefinedHint lang={lang} />
-</StarlightPage>
+<SmartswitchesList lang={lang} channel="release" />

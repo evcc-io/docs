@@ -1,53 +1,11 @@
 ---
-import { getCollection } from "astro:content";
-import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
-import DeviceCardList from "@components/DeviceCardList.astro";
-import DeviceFilter from "@components/DeviceFilter.astro";
-import HeatingIntro from "@components/intros/HeatingIntro.astro";
-import HeatingOutro from "@components/intros/HeatingOutro.astro";
-import UserDefinedHint from "@components/UserDefinedHint.astro";
-import { sortDevices, filterByType, availableOverviewFeatures } from "@utils/devices";
+import HeatingList from "@components/lists/HeatingList.astro";
 
 export async function getStaticPaths() {
   return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
 }
 
 const lang = Astro.params.lang as "de" | "en";
-const coll = await getCollection(`chargers-${lang}` as any);
-const devices = sortDevices(filterByType(coll as any, "heating"));
-const filterFeatures = availableOverviewFeatures(devices as any);
-
-const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
-const title = lang === "de" ? "Wärmepumpen, Heizstäbe" : "Heat pumps, electric heaters";
-const description =
-  lang === "de"
-    ? "Wärmeerzeuger und SG-Ready-Geräte."
-    : "Heat generators and SG-Ready devices.";
-
-const headings = lang === "de"
-  ? [
-      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
-      { depth: 2, slug: "waermepumpen", text: "Wärmepumpen" },
-      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
-      { depth: 2, slug: "sgready-konfiguration", text: "Konfiguration über SG-Ready Relais" },
-      { depth: 2, slug: "statusanzeige", text: "Statusanzeige" },
-      { depth: 2, slug: "heizstaebe", text: "Heizstäbe" },
-    ]
-  : [
-      { depth: 2, slug: "setup", text: "Setup" },
-      { depth: 2, slug: "heat-pumps", text: "Heat pumps" },
-      { depth: 2, slug: "supported", text: "Supported devices" },
-      { depth: 2, slug: "sgready-configuration", text: "SG-Ready relay configuration" },
-      { depth: 2, slug: "status-display", text: "Status display" },
-      { depth: 2, slug: "electric-water-heaters", text: "Electric water heaters" },
-    ];
 ---
 
-<StarlightPage frontmatter={{ title, description, template: "doc" }} headings={headings}>
-  <HeatingIntro lang={lang} />
-  {filterFeatures.length > 0 && <DeviceFilter lang={lang} features={filterFeatures} />}
-  <h2 id="supported">{supportedTitle}</h2>
-  <DeviceCardList devices={devices as any} lang={lang} basePath={`/${lang}/heating`} filterId="branded" />
-  <HeatingOutro lang={lang} />
-  <UserDefinedHint lang={lang} />
-</StarlightPage>
+<HeatingList lang={lang} channel="release" />
