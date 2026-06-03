@@ -390,7 +390,9 @@ export async function deviceDetailPaths(opts: {
     const otherColl = await getCollection(
       collectionName(prefix, lang, other) as any,
     );
-    const otherById = new Map(otherColl.map((e: any) => [e.id, e]));
+    const otherById = new Map<string, any>(
+      otherColl.map((e: any) => [e.id, e] as [string, any]),
+    );
     const list = filterType
       ? filterByType(coll as any, filterType)
       : (coll as any[]);
