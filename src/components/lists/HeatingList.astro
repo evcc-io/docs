@@ -7,6 +7,7 @@ import HeatingIntro from "@components/intros/HeatingIntro.astro";
 import HeatingOutro from "@components/intros/HeatingOutro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
+import SponsorInfoBox from "@components/SponsorInfoBox.astro";
 import {
   sortDevices,
   filterByType,
@@ -27,6 +28,10 @@ const coll = await getCollection(collectionName("chargers", lang, channel) as an
 const devices = sortDevices(filterByType(coll as any, "heating"));
 const basePath = `/${lang}${isNightly ? "/nightly" : ""}/heating`;
 const filterFeatures = availableOverviewFeatures(devices as any);
+
+const hasSponsorship = devices.some((d: any) =>
+  (d.data.requirements ?? []).includes("sponsorship"),
+);
 
 const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
 const title = lang === "de" ? "Wärmepumpen, Heizstäbe" : "Heat pumps, electric heaters";
@@ -64,9 +69,10 @@ const frontmatter = {
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="heating" />}
   <HeatingIntro lang={lang} />
+  {hasSponsorship && <SponsorInfoBox lang={lang} />}
   {filterFeatures.length > 0 && <DeviceFilter lang={lang} features={filterFeatures} />}
   <h2 id="supported">{supportedTitle}</h2>
-  <DeviceCardList devices={devices as any} lang={lang} basePath={basePath} filterId="branded" />
+  <DeviceCardList devices={devices as any} lang={lang} basePath={basePath} showSponsorRequired filterId="branded" />
   <HeatingOutro lang={lang} />
   {channel === "release" && (
     <UserDefinedHint lang={lang} nightlyHref={`/${lang}/nightly/heating`} />

@@ -30,13 +30,15 @@ interface Props {
   showCountries?: boolean;
   /** Render every device as its own top-level row (no brand grouping). */
   flat?: boolean;
-  /** Surface a coloured sponsor-token chip per device (required / free). */
-  showSponsorship?: boolean;
+  /** Surface the grey "sponsor free" chip on devices that need no token. */
+  showSponsorFree?: boolean;
+  /** Surface the green "sponsoring" chip on token-required devices. */
+  showSponsorRequired?: boolean;
   /** Stable identifier so the device filter can target this list (`data-device-list="…"`). */
   filterId?: string;
 }
 
-const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorship = false, filterId } = Astro.props;
+const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorFree = false, showSponsorRequired = false, filterId } = Astro.props;
 
 const NO_BRAND = lang === "de" ? "Sonstige" : "Other";
 
@@ -67,7 +69,7 @@ function usages(d: Device): string[] {
 }
 
 function features(d: Device): string[] {
-  return overviewFeaturesFor(d as any, { showSponsorship });
+  return overviewFeaturesFor(d as any, { showSponsorFree, showSponsorRequired });
 }
 
 function featureClass(f: string): string {
@@ -184,7 +186,7 @@ function brandColumns(list: Device[]): Slot[] {
                     <span class="tag tag-usages"><UsageIcons usages={u} lang={lang} /></span>
                   )}
                   {f.map((feat) => (
-                    <span class="tag tag-feature">{featureShortLabel(feat, lang)}</span>
+                    <span class={featureClass(feat)}>{featureShortLabel(feat, lang)}</span>
                   ))}
                   {c.map((country) => (
                     <span class="tag tag-country">{country}</span>

@@ -6,6 +6,7 @@ import DeviceFilter from "@components/DeviceFilter.astro";
 import MetersIntro from "@components/intros/MetersIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
+import SponsorInfoBox from "@components/SponsorInfoBox.astro";
 import {
   sortDevices,
   availableOverviewFeatures,
@@ -31,6 +32,10 @@ const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim
 
 const filterFeatures = availableOverviewFeatures(allDevices as any);
 const filterUsages = availableUsages(allDevices as any);
+
+const hasSponsorship = allDevices.some((d: any) =>
+  (d.data.requirements ?? []).includes("sponsorship"),
+);
 
 const title = lang === "de" ? "PV, Batterie, Netz, Zähler" : "PV, Battery, Grid, Meter";
 const description =
@@ -70,6 +75,7 @@ const frontmatter = {
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="meters" />}
   <MetersIntro lang={lang} />
+  {hasSponsorship && <SponsorInfoBox lang={lang} />}
   <DeviceFilter lang={lang} features={filterFeatures} usages={filterUsages} />
   <h2 id="supported">{supportedTitle}</h2>
   <DeviceCardList
@@ -77,6 +83,7 @@ const frontmatter = {
     lang={lang}
     basePath={basePath}
     showUsages={true}
+    showSponsorRequired={true}
     filterId="branded"
   />
 
@@ -88,6 +95,7 @@ const frontmatter = {
         lang={lang}
         basePath={basePath}
         showUsages={true}
+        showSponsorRequired={true}
         flat
         filterId="generic"
       />
