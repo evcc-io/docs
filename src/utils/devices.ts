@@ -229,18 +229,19 @@ const OVERVIEW_HIDDEN = new Set([
 
 export function overviewFeaturesFor(
   d: DeviceEntry,
-  opts: { showSponsorship?: boolean } = {},
+  opts: { showSponsorFree?: boolean; showSponsorRequired?: boolean } = {},
 ): string[] {
   const base = [
     ...(d.data.capabilities ?? []),
     ...(d.data.requirements ?? []),
   ].filter((f) => !OVERVIEW_HIDDEN.has(f));
-  if (
-    opts.showSponsorship &&
-    !(d.data.requirements ?? []).includes("sponsorship")
-  ) {
-    base.push("sponsorfree");
-  }
+  const requiresSponsorship = (d.data.requirements ?? []).includes(
+    "sponsorship",
+  );
+  // The two sponsor chips are independent: enable the green "sponsorship" chip,
+  // the grey "sponsorfree" inverse, or both.
+  if (opts.showSponsorRequired && requiresSponsorship) base.push("sponsorship");
+  if (opts.showSponsorFree && !requiresSponsorship) base.push("sponsorfree");
   return base;
 }
 
@@ -248,11 +249,13 @@ import { FEATURE_KEYS } from "@components/features";
 
 export function availableOverviewFeatures(
   devices: DeviceEntry[],
-  opts: { showSponsorship?: boolean } = {},
+  opts: { showSponsorFree?: boolean; showSponsorRequired?: boolean } = {},
 ): string[] {
   const seen = new Set<string>();
   for (const d of devices)
     for (const f of overviewFeaturesFor(d, opts)) seen.add(f);
+  // "sponsorship" is surfaced as a coloured row badge, not a filter toggle.
+  seen.delete("sponsorship");
   return [...seen].sort((a, b) => {
     const ia = FEATURE_KEYS.indexOf(a);
     const ib = FEATURE_KEYS.indexOf(b);
@@ -292,11 +295,11 @@ export function featuresFor(
     ...countryList,
   ].filter((f) => f !== "skiptest");
 
-  if (type === "charger") {
-    const idx = features.indexOf("sponsorship");
-    if (idx > -1) features.splice(idx, 1);
-    else features.push("sponsorfree");
-  }
+  // "sponsorship" is surfaced via the info box (and, for chargers, the grey
+  // "sponsorfree" inverse badge) — never as a plain feature chip.
+  const sponsorshipIdx = features.indexOf("sponsorship");
+  if (sponsorshipIdx > -1) features.splice(sponsorshipIdx, 1);
+  else if (type === "charger") features.push("sponsorfree");
 
   const eebusIdx = features.indexOf("eebus");
   if (eebusIdx > -1) features.splice(eebusIdx, 1);
@@ -387,7 +390,9 @@ export async function deviceDetailPaths(opts: {
     const otherColl = await getCollection(
       collectionName(prefix, lang, other) as any,
     );
-    const otherById = new Map(otherColl.map((e: any) => [e.id, e]));
+    const otherById = new Map<string, any>(
+      otherColl.map((e: any) => [e.id, e] as [string, any]),
+    );
     const list = filterType
       ? filterByType(coll as any, filterType)
       : (coll as any[]);

@@ -6,6 +6,7 @@ import DeviceFilter from "@components/DeviceFilter.astro";
 import VehiclesIntro from "@components/intros/VehiclesIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
+import SponsorInfoBox from "@components/SponsorInfoBox.astro";
 import {
   sortDevices,
   availableOverviewFeatures,
@@ -29,6 +30,10 @@ const branded = allDevices.filter((d: any) => (d.data.product.brand || "").trim(
 const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim());
 
 const filterFeatures = availableOverviewFeatures(allDevices as any);
+
+const hasSponsorship = allDevices.some((d: any) =>
+  (d.data.requirements ?? []).includes("sponsorship"),
+);
 
 const title = lang === "de" ? "Fahrzeuge" : "Vehicles";
 const description =
@@ -62,14 +67,15 @@ const frontmatter = {
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="vehicles" />}
   <VehiclesIntro lang={lang} />
+  {hasSponsorship && <SponsorInfoBox lang={lang} />}
   <DeviceFilter lang={lang} features={filterFeatures} />
   <h2 id="supported">{supportedTitle}</h2>
-  <DeviceCardList devices={branded as any} lang={lang} basePath={basePath} filterId="branded" />
+  <DeviceCardList devices={branded as any} lang={lang} basePath={basePath} showSponsorRequired filterId="branded" />
 
   {generic.length > 0 && (
     <>
       <h2 id="generic">{genericTitle}</h2>
-      <DeviceCardList devices={generic as any} lang={lang} basePath={basePath} flat filterId="generic" />
+      <DeviceCardList devices={generic as any} lang={lang} basePath={basePath} showSponsorRequired flat filterId="generic" />
     </>
   )}
   {channel === "release" && (
