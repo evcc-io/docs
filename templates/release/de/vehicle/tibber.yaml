@@ -1,25 +1,32 @@
-template: cupra
+template: tibber
 product:
-  identifier: seat-cupraconnect-gen4-born-formentor-tavascan
-  brand: Seat
-  description: CupraConnect Gen4 (Born, Formentor, Tavascan)
+  identifier: tibber
+  brand: Tibber
+description: |
+  Liest Fahrzeugdaten (Ladestand, Reichweite) über die offizielle Tibber Data API.
+  Benötigt einen OAuth2-Client (Client-ID und Secret), der unter https://data-api.tibber.com/clients/manage angelegt wird.
+  Die unten angezeigte Redirect-URI muss beim Anlegen des Clients hinterlegt werden.
+  Ein Tibber-Stromvertrag ist nicht erforderlich, das Fahrzeug muss im Tibber-Konto verbunden sein.
+
 render:
   - default: |
       type: template
-      template: cupra
-      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
-      password: # Passwort, Zugangspasswort des Dienstes
-      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      template: tibber
+      clientid: # Client ID
+      clientsecret: # Client Secret
+      redirecturi: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect-URI der evcc-Instanz. Muss mit der im Tibber Data API Client hinterlegten Redirect URI übereinstimmen.
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
+      vin: WVW... # Fahrzeugidentifikationsnummer, Optional, wählt das Fahrzeug aus, wenn das Konto mehrere besitzt. (optional)
     advanced: |
       type: template
-      template: cupra
-      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
-      password: # Passwort, Zugangspasswort des Dienstes
-      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      template: tibber
+      clientid: # Client ID
+      clientsecret: # Client Secret
+      redirecturi: https://evcc.example.org/providerauth/callback # Redirect URI, Redirect-URI der evcc-Instanz. Muss mit der im Tibber Data API Client hinterlegten Redirect URI übereinstimmen.
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
+      vin: WVW... # Fahrzeugidentifikationsnummer, Optional, wählt das Fahrzeug aus, wenn das Konto mehrere besitzt. (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: # Maximale Phasenanzahl, Wird für die Bestimmung des minimalen Solar-Überschusses und der Planungsdauer verwendet. [1, 2, 3] (optional)
       mode: # Standardlademodus, Wird beim Anschließen eines Fahrzeugs gesetzt. Leer lassen, um den aktuellen Modus beizubehalten. (optional)
@@ -29,37 +36,34 @@ render:
       identifiers: # RFID-Identifikation, Für die Zuordnung des Fahrzeugs an einen Ladepunkt via RFID-Karte. Die Kennung wird am Ladepunkt angezeigt. Übernehme den Wert von dort. [Mehr erfahren.](https://docs.evcc.io/docs/features/vehicle) (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität). (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
-      coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
-      streaming: # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
-      welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)
 params:
-  - name: user
+  - name: clientid
     example:
     default:
     choice: []
     unit:
-    description: Benutzerkonto
-    help: bspw. E-Mail Adresse, User Id, etc.
+    description: Client ID
+    help:
     advanced: false
     optional: false
-  - name: password
+  - name: clientsecret
     example:
     default:
     choice: []
     unit:
-    description: Passwort
-    help: Zugangspasswort des Dienstes
+    description: Client Secret
+    help:
     advanced: false
     optional: false
-  - name: vin
-    example: W...
+  - name: redirecturi
+    example: https://evcc.example.org/providerauth/callback
     default:
     choice: []
     unit:
-    description: Fahrzeugidentifikationsnummer
-    help: Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+    description: Redirect URI
+    help: Redirect-URI der evcc-Instanz. Muss mit der im Tibber Data API Client hinterlegten Redirect URI übereinstimmen.
     advanced: false
-    optional: true
+    optional: false
   - name: title
     example:
     default:
@@ -76,6 +80,15 @@ params:
     unit: kWh
     description: Akkukapazität
     help:
+    advanced: false
+    optional: true
+  - name: vin
+    example: WVW...
+    default:
+    choice: []
+    unit:
+    description: Fahrzeugidentifikationsnummer
+    help: Optional, wählt das Fahrzeug aus, wenn das Konto mehrere besitzt.
     advanced: false
     optional: true
   - name: icon
@@ -157,32 +170,5 @@ params:
     unit:
     description: Cache
     help: Zeitintervall für erneute Datenabfrage
-    advanced: true
-    optional: true
-  - name: coarsecurrent
-    example:
-    default:
-    choice: []
-    unit:
-    description: 1A Ladestromvorgabe
-    help: Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe
-    advanced: true
-    optional: true
-  - name: streaming
-    example:
-    default:
-    choice: []
-    unit:
-    description: Unterstützt Streaming
-    help: Streaming Datenempfang erfolgt asynchron
-    advanced: true
-    optional: true
-  - name: welcomecharge
-    example:
-    default:
-    choice: []
-    unit:
-    description: Laden bei Verbindung
-    help: Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden.
     advanced: true
     optional: true

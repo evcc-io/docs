@@ -1,22 +1,35 @@
-template: nissan-ariya
+template: drivesomethinggreater
 product:
-  identifier: nissan-micra
-  brand: Nissan
-  description: Micra
+  identifier: audi-eu-data-act
+  brand: Audi
+  description: EU Data Act
+description: |
+  Nutzt die im Rahmen des EU Data Act bereitgestellten Fahrzeugdaten über das
+  [VW-Konzern-Portal](https://eu-data-act.drivesomethinggreater.com). Die Anmeldung
+  erfolgt mit den Zugangsdaten der jeweiligen Marken-App (We Connect, myAudi,
+  MyŠkoda, SEAT/CUPRA Connect).
+
+  Voraussetzung (einmalig im Browser): im Portal anmelden, die Einwilligung
+  bestätigen, das Fahrzeug verknüpfen und eine fortlaufende Datenanfrage
+  (alle 15 Minuten) aktivieren. Ohne diese Aktivierung liefert das Portal
+  keine Daten. Die Daten werden ca. alle 15 Minuten aktualisiert.
+
 render:
   - default: |
       type: template
-      template: nissan-ariya
+      template: drivesomethinggreater
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Zugangspasswort des Dienstes
+      brand: # Marke, [Volkswagen, Audi, Skoda, Seat, Cupra]
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
     advanced: |
       type: template
-      template: nissan-ariya
+      template: drivesomethinggreater
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
       password: # Passwort, Zugangspasswort des Dienstes
+      brand: # Marke, [Volkswagen, Audi, Skoda, Seat, Cupra]
       vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
@@ -29,7 +42,9 @@ render:
       identifiers: # RFID-Identifikation, Für die Zuordnung des Fahrzeugs an einen Ladepunkt via RFID-Karte. Die Kennung wird am Ladepunkt angezeigt. Übernehme den Wert von dort. [Mehr erfahren.](https://docs.evcc.io/docs/features/vehicle) (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität). (optional)
       cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
-      expiry: 5m # Ablauf, Maximales Alter der Daten vor erneuter Abfrage (optional)
+      coarsecurrent: # 1A Ladestromvorgabe, Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe (optional)
+      streaming: # Unterstützt Streaming, Streaming Datenempfang erfolgt asynchron (optional)
+      welcomecharge: # Laden bei Verbindung, Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden. (optional)
 params:
   - name: user
     example:
@@ -47,6 +62,15 @@ params:
     unit:
     description: Passwort
     help: Zugangspasswort des Dienstes
+    advanced: false
+    optional: false
+  - name: brand
+    example:
+    default:
+    choice: ['Volkswagen', 'Audi', 'Skoda', 'Seat', 'Cupra']
+    unit:
+    description: Marke
+    help:
     advanced: false
     optional: false
   - name: vin
@@ -157,12 +181,30 @@ params:
     help: Zeitintervall für erneute Datenabfrage
     advanced: true
     optional: true
-  - name: expiry
-    example: 5m
+  - name: coarsecurrent
+    example:
     default:
     choice: []
     unit:
-    description: Ablauf
-    help: Maximales Alter der Daten vor erneuter Abfrage
+    description: 1A Ladestromvorgabe
+    help: Fahrzeug unterstützt nur 1A Schritte der Ladestromvorgabe
+    advanced: true
+    optional: true
+  - name: streaming
+    example:
+    default:
+    choice: []
+    unit:
+    description: Unterstützt Streaming
+    help: Streaming Datenempfang erfolgt asynchron
+    advanced: true
+    optional: true
+  - name: welcomecharge
+    example:
+    default:
+    choice: []
+    unit:
+    description: Laden bei Verbindung
+    help: Wallbox gibt kurzzeitige Ladefreigabe bei Fahrzeugverbindung. Das ermöglicht es Fahrzeugen, die eine Stromversorgung beim Anschließen benötigen, einen Fehlerzustand zu vermeiden.
     advanced: true
     optional: true
