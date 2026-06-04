@@ -1,0 +1,91 @@
+---
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  /** Asset base paths beneath `src/assets/`, e.g. "index/main-large" */
+  large: string;
+  small: string;
+  altLarge?: string;
+  altSmall?: string;
+}
+
+const images = import.meta.glob<ImageMetadata>(
+  "/src/assets/**/*.{webp,png,jpg,jpeg}",
+  { eager: true, import: "default" },
+);
+
+function asset(base: string, theme: "light" | "dark", dpr: 1 | 2) {
+  const key = `/src/assets/${base}-${theme}-${dpr}x.webp`;
+  const img = images[key];
+  if (!img) {
+    throw new Error(`HeroScreenshots: missing asset ${key}`);
+  }
+  return img;
+}
+
+const { large, small, altLarge = "Screenshot", altSmall = "Screenshot" } =
+  Astro.props;
+
+const shots = [
+  { base: small, alt: altSmall, class: "hero-small" },
+  { base: large, alt: altLarge, class: "hero-large" },
+];
+---
+
+<div class="hero-screenshots">
+  {
+    shots.map(({ base, alt, class: className }) => {
+      const light1 = asset(base, "light", 1);
+      const aspect = light1.width / light1.height;
+      return (
+        <picture class={className} style={`flex: ${aspect} 1 0%;`}>
+          <source
+            media="(prefers-color-scheme: dark)"
+            srcset={`${asset(base, "dark", 1).src} 1x, ${asset(base, "dark", 2).src} 2x`}
+          />
+          <img
+            src={light1.src}
+            srcset={`${light1.src} 1x, ${asset(base, "light", 2).src} 2x`}
+            alt={alt}
+            width={light1.width}
+            height={light1.height}
+            loading="eager"
+          />
+        </picture>
+      );
+    })
+  }
+</div>
+
+<style>
+  .hero-screenshots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 0;
+  }
+  .hero-screenshots picture {
+    /* min-width: auto would keep flex items at intrinsic image width,
+       breaking the proportional equal-height sizing */
+    min-width: 0;
+    /* Starlight's markdown flow spacing (`* + *`) adds margin-top to the
+       second picture and to img (sibling of source) — breaks alignment */
+    margin: 0 !important;
+  }
+  .hero-screenshots img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 !important;
+  }
+  @media (max-width: 30rem) {
+    .hero-screenshots .hero-large {
+      display: none;
+    }
+    .hero-screenshots .hero-small {
+      flex: 0 1 auto;
+      width: 70%;
+    }
+  }
+</style>

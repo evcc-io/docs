@@ -82,6 +82,7 @@ Everything else is hand-written:
 
 - **Always write "evcc" in lowercase** — even at the beginning of sentences
 - Never use "EVCC", "Evcc", or other variations
+- Also lowercase "evcc" in external titles (e.g. the media list): rewrite "EVCC" → "evcc" even if the original title uses uppercase
 - Prefer "your evcc instance" over a bare "evcc" when referring to a running instance
 - Don't mention "evcc" unless necessary for context — within evcc docs the reader already knows. Drop self-referential fluff like "another strength of evcc", "evcc ships with", "the evcc UI"
 

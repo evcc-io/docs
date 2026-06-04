@@ -110,7 +110,22 @@ export default defineConfig({
         }),
       ],
       sidebar: [
-        { label: "Introduction", translations: { de: "Einführung" }, slug: "" },
+        {
+          label: "Introduction",
+          translations: { de: "Einführung" },
+          items: [
+            {
+              label: "Overview",
+              translations: { de: "Überblick" },
+              slug: "",
+            },
+            {
+              label: "Talks, Videos & Blogs",
+              translations: { de: "Vorträge, Videos & Blogs" },
+              slug: "media",
+            },
+          ],
+        },
         {
           label: "Installation",
           items: [
