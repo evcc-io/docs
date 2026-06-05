@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import starlightBlog from "starlight-blog";
 import starlightLlmsTxt from "starlight-llms-txt";
@@ -228,6 +229,10 @@ export default defineConfig({
         { slug: "sponsorship" },
       ],
     }),
+    // Starlight bundles its own (older) @astrojs/mdx that ignores `markdown.processor`,
+    // which breaks GFM tables and remark plugins in .mdx files.
+    // Registering our own copy makes Starlight skip its bundled one.
+    mdx({ optimize: true }),
     sitemap({
       // Nightly device pages are noindex and must stay out of the sitemap.
       filter: (page) => !/\/nightly(\/|$)/.test(page),
