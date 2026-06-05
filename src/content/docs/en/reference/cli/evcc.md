@@ -37,7 +37,9 @@ evcc [flags]
 - [evcc device](evcc_device.md) - Query database-configured devices (debug only)
 - [evcc discuss](evcc_discuss.md) - Request support at Github Discussions (https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe)
 - [evcc dump](evcc_dump.md) - Dump configuration
+- [evcc easee-ocpp](evcc_easee-ocpp.md) - Manage Easee local OCPP configuration
 - [evcc meter](evcc_meter.md) - Query configured meters
+- [evcc metrics](evcc_metrics.md) - Inspect stored energy metrics
 - [evcc migrate](evcc_migrate.md) - Migrate yaml to database (deprecated), reset only
 - [evcc password](evcc_password.md) - Password administration
 - [evcc settings](evcc_settings.md) - Manage configuration settings
