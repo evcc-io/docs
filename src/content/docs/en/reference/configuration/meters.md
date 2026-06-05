@@ -373,6 +373,9 @@ Standard implementation, in which individual values are defined via [plugins](/e
   energy: # Energy (kWh)
     source: # Plugin Type
     ...
+  returnenergy: # Energy in reverse direction (kWh)
+    source: # Plugin Type
+    ...
   soc: # Battery SOC (%)
     source: # Plugin Type
     ...
@@ -429,6 +432,20 @@ Plugin definition to return consumed energy in kilowatt-hours (kWh).
 
 ```yaml
   energy: ... # Energy (kWh)
+    source: # Plugin Type
+    ...
+```
+
+---
+
+##### `returnenergy`
+
+Plugin definition to return energy in reverse direction in kilowatt-hours (kWh), e.g. grid feed-in.
+
+**For example**:
+
+```yaml
+  returnenergy: ... # Energy in reverse direction (kWh)
     source: # Plugin Type
     ...
 ```

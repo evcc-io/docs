@@ -377,6 +377,9 @@ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/de/us
   energy: # Energiemenge (kWh)
     source: # Plugin Typ
     ...
+  returnenergy: # Energiemenge in Gegenrichtung (kWh)
+    source: # Plugin Typ
+    ...
   soc: # Batterie SOC (%)
     source: # Plugin Typ
     ...
@@ -433,6 +436,20 @@ Plugin Definition um die geladene Energiemenge in kWh zurückzugeben.
 
 ```yaml
   energy: ... # Energiemenge (kWh)
+    source: # Plugin Typ
+    ...
+```
+
+---
+
+##### `returnenergy`
+
+Plugin Definition um die Energiemenge in Gegenrichtung in kWh zurückzugeben, z. B. Netzeinspeisung.
+
+**Beispiel**:
+
+```yaml
+  returnenergy: ... # Energiemenge in Gegenrichtung (kWh)
     source: # Plugin Typ
     ...
 ```
