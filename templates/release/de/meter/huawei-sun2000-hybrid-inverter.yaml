@@ -3,7 +3,7 @@ product:
   identifier: huawei-sun2000-hybrid-inverter
   brand: Huawei
   description: SUN2000 Hybrid-Wechselrichter
-capabilities: ["battery-control"]
+capabilities: ["battery-control", "curtail", "dim"]
 description: |
   Netz und Batterie erfordern den Huawei Smart Power Sensor (DDSU/DTSU666 or SmartPS).
 
@@ -116,6 +116,7 @@ render:
       port: 502 # Port
       timeout: 15s # Zeitüberschreitung, optional
       maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
+      curtailpercent: # Wirkleistungsbegrenzung in Prozent, optional
   - usage: battery
     default: |
       type: template
@@ -176,7 +177,7 @@ render:
       minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
       maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
       storageunit: 1 # Nummer des Batteriespeichers, optional
-      forceaccharging: false # Wechselrichterkaskade, AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert u.U. den Standby mit älteren Firmware-Versionen. (optional)
+      forceaccharging: false # Wechselrichterkaskade, AC-Laden bleibt aktiv (außer bei einer aktiven Leistungsreduzierung) zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert u.U. den Standby mit älteren Firmware-Versionen. (optional)
 params:
   - name: modbus
     example:
@@ -250,6 +251,15 @@ params:
     help:
     advanced: true
     optional: true
+  - name: curtailpercent
+    example:
+    default:
+    choice: []
+    unit:
+    description: Wirkleistungsbegrenzung in Prozent
+    help:
+    advanced: true
+    optional: true
   - name: storageunit
     example:
     default: 1
@@ -265,7 +275,7 @@ params:
     choice: []
     unit:
     description: Wechselrichterkaskade
-    help: AC-Laden bleibt aktiv zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert u.U. den Standby mit älteren Firmware-Versionen.
+    help: AC-Laden bleibt aktiv (außer bei einer aktiven Leistungsreduzierung) zum Laden des Speichers aus anderen AC Quellen für Wechselrichterkaskaden. Verhindert u.U. den Standby mit älteren Firmware-Versionen.
     advanced: true
     optional: true
 modbus:

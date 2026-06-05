@@ -6,6 +6,7 @@ import DeviceFilter from "@components/DeviceFilter.astro";
 import SmartswitchesIntro from "@components/intros/SmartswitchesIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
+import SponsorInfoBox from "@components/SponsorInfoBox.astro";
 import {
   sortDevices,
   filterByType,
@@ -26,6 +27,10 @@ const coll = await getCollection(collectionName("chargers", lang, channel) as an
 const devices = sortDevices(filterByType(coll as any, "smartswitch"));
 const basePath = `/${lang}${isNightly ? "/nightly" : ""}/smartswitches`;
 const filterFeatures = availableOverviewFeatures(devices as any);
+
+const hasSponsorship = devices.some((d: any) =>
+  (d.data.requirements ?? []).includes("sponsorship"),
+);
 
 const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
 const title = lang === "de" ? "Smarte Schalter" : "Smart switches";
@@ -57,9 +62,10 @@ const frontmatter = {
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="smartswitches" />}
   <SmartswitchesIntro lang={lang} />
+  {hasSponsorship && <SponsorInfoBox lang={lang} />}
   {filterFeatures.length > 0 && <DeviceFilter lang={lang} features={filterFeatures} />}
   <h2 id="supported">{supportedTitle}</h2>
-  <DeviceCardList devices={devices as any} lang={lang} basePath={basePath} filterId="branded" />
+  <DeviceCardList devices={devices as any} lang={lang} basePath={basePath} showSponsorRequired filterId="branded" />
   {channel === "release" && (
     <UserDefinedHint lang={lang} nightlyHref={`/${lang}/nightly/smartswitches`} />
   )}
