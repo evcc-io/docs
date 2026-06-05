@@ -25,7 +25,7 @@ const shortLabels: Record<string, Partial<Record<Lang, string>>> = {
   "iso15118-2": { de: "ISO", en: "ISO" },
   dim: { de: "dimmbar", en: "dimmable" },
   curtail: { de: "abregelbar", en: "curtailable" },
-  sponsorship: { de: "Sponsor", en: "sponsor" },
+  sponsorship: { de: "Sponsoring", en: "sponsoring" },
   sponsorfree: { de: "sponsorfrei", en: "sponsor free" },
 };
 

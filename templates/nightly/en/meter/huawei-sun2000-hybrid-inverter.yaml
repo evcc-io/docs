@@ -3,7 +3,7 @@ product:
   identifier: huawei-sun2000-hybrid-inverter
   brand: Huawei
   description: SUN2000 Hybrid Inverter
-capabilities: ["battery-control"]
+capabilities: ["battery-control", "curtail", "dim"]
 description: |
   Grid and Battery require the Huawei Smart Power Sensor (DDSU/DTSU666 or SmartPS).
 
@@ -116,6 +116,7 @@ render:
       port: 502 # Port
       timeout: 15s # Timeout, optional
       maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      curtailpercent: # Active power limit in percent, optional
   - usage: battery
     default: |
       type: template
@@ -176,7 +177,7 @@ render:
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       storageunit: 1 # Battery storage unit index, optional
-      forceaccharging: false # Inverter cascade, Keep AC charging active to charge the storage from other inverters via AC. May prevent standby with older firmware versions. (optional)
+      forceaccharging: false # Inverter cascade, Keep AC charging active (except for when being dimmed) to charge the storage from other inverters via AC. May prevent standby with older firmware versions. (optional)
 params:
   - name: modbus
     example:
@@ -250,6 +251,15 @@ params:
     help:
     advanced: true
     optional: true
+  - name: curtailpercent
+    example:
+    default:
+    choice: []
+    unit:
+    description: Active power limit in percent
+    help:
+    advanced: true
+    optional: true
   - name: storageunit
     example:
     default: 1
@@ -265,7 +275,7 @@ params:
     choice: []
     unit:
     description: Inverter cascade
-    help: Keep AC charging active to charge the storage from other inverters via AC. May prevent standby with older firmware versions.
+    help: Keep AC charging active (except for when being dimmed) to charge the storage from other inverters via AC. May prevent standby with older firmware versions.
     advanced: true
     optional: true
 modbus:
