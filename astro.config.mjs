@@ -7,6 +7,7 @@ import starlightBlog from "starlight-blog";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
 import mermaid from "astro-mermaid";
+import { unified } from "@astrojs/markdown-remark";
 import remarkHeadingId from "remark-heading-id";
 
 const langRedirectScript = fs.readFileSync(
@@ -21,7 +22,9 @@ export default defineConfig({
     format: "directory",
   },
   markdown: {
-    remarkPlugins: [remarkHeadingId],
+    processor: unified({
+      remarkPlugins: [remarkHeadingId],
+    }),
   },
   redirects: {
     "/": "/en",
