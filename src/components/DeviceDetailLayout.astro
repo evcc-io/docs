@@ -5,7 +5,7 @@ import DeviceFeatures from "@components/DeviceFeatures.astro";
 import DeviceParams from "@components/DeviceParams.astro";
 import SponsorshipBadge from "@components/SponsorshipBadge.astro";
 import NightlyIcon from "@components/NightlyIcon.astro";
-import { renderMarkdown, nightlyPageHead } from "@utils/devices";
+import { renderMarkdown, renderMarkdownInline, nightlyPageHead } from "@utils/devices";
 import type { Channel } from "@utils/devices";
 import { deviceIconSvg } from "@utils/deviceIcon";
 
@@ -70,6 +70,8 @@ const t =
         sponsorTitle: "Sponsortoken erforderlich",
         sponsorBody:
           "Dieses Gerät steht Unterstützern des Projekts zur Verfügung. Mehr zu unserem [Sponsoring-Modell](/de/sponsorship).",
+        caveatsTitle: "Bekannte Einschränkungen",
+        caveatsMore: "Mehr Details",
       }
     : {
         config: "Configuration example for evcc.yaml",
@@ -80,6 +82,8 @@ const t =
         sponsorTitle: "Sponsor token required",
         sponsorBody:
           "This device is available to sponsors of the project. Read more about our [sponsorship model](/en/sponsorship).",
+        caveatsTitle: "Known limitations",
+        caveatsMore: "More details",
       };
 
 const nightlyBannerText =
@@ -147,6 +151,29 @@ const frontmatter = {
       )
     }
 
+    {
+      entry.data.caveats?.length > 0 && (
+        <aside
+          class="starlight-aside starlight-aside--note device-caveats"
+          aria-label={t.caveatsTitle}
+        >
+          <p class="starlight-aside__title">🐜 {t.caveatsTitle}</p>
+          <div class="starlight-aside__content">
+            {entry.data.caveats.map((c: { description?: string; link?: string }) => (
+              <p
+                set:html={
+                  renderMarkdownInline(c.description) +
+                  (c.link
+                    ? ` <a href="${c.link}" target="_blank" rel="noopener noreferrer">${t.caveatsMore}</a>`
+                    : "")
+                }
+              />
+            ))}
+          </div>
+        </aside>
+      )
+    }
+
     <div class="params-block">
       <div class="params-header">
         <h2 class="params-title">{t.params}</h2>
@@ -177,6 +204,15 @@ const frontmatter = {
 </StarlightPage>
 
 <style>
+  /* Tighten spacing between individual caveats so it matches the
+     title-to-content gap rather than the default paragraph margin. */
+  .device-caveats :global(.starlight-aside__content p) {
+    margin: 0;
+  }
+  .device-caveats :global(.starlight-aside__content p + p) {
+    margin-top: 0.35rem;
+  }
+
   .params-block {
     clear: right;
   }

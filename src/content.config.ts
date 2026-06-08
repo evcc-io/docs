@@ -59,6 +59,11 @@ const paramSchema = z
   })
   .loose();
 
+const caveatSchema = z.object({
+  description: z.string().optional(),
+  link: z.string().optional(),
+});
+
 const deviceSchema = z.object({
   template: z.string().optional(),
   product: productSchema,
@@ -66,6 +71,7 @@ const deviceSchema = z.object({
   render: z.array(renderSchema),
   capabilities: z.array(z.string()).optional(),
   requirements: z.array(z.string()).optional(),
+  caveats: z.array(caveatSchema).optional(),
   countries: z.array(z.string()).optional(),
   params: z.array(paramSchema).optional(),
 });
