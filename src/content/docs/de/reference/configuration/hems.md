@@ -9,8 +9,9 @@ Dies wird z. B. für die Umsetzung von §14a EnWG oder §9 EEG benötigt.
 Details zu Hintergrund und Einrichtung findest du unter [Externe Steuerung](../../features/external-control).
 
 :::note[Hinweis]
-Wenn `hems` konfiguriert ist, wird automatisch ein "Externe Begrenzung" Stromkreis (`gridcontrol`) erstellt.
-Eine manuelle Konfiguration von Stromkreisen ist dafür nicht erforderlich.
+Abregelung und das Dimmen steuerbarer Verbraucher wirken direkt am Gerät, dafür sind keine Stromkreise erforderlich.
+Damit das Verbrauchslimit Ladepunkte begrenzt, konfiguriere [Lastmanagement](../../features/loadmanagement)-Stromkreise.
+Ein aktives Limit begrenzt dann den obersten Stromkreis.
 :::
 
 :::note[SMA Sunny Home Manager & SEMP-Protokoll]
@@ -29,6 +30,7 @@ Definiert den Typ der externen Steuerung.
 **Mögliche Werte**:
 
 - `relay`: Anbindung über Schaltkontakt
+- `fnn`: Anbindung über FNN-Steuerbox mit mehreren Schaltkontakten
 - `eebus`: Anbindung über das EEBus-Protokoll
 
 ---
@@ -69,6 +71,78 @@ Abfrageintervall für den Schaltkontakt.
 Standard: `10s`.
 
 Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-relais).
+
+---
+
+## `type: fnn`
+
+Anbindung über eine FNN-Steuerbox mit separaten Schaltkontakten.
+Dimmen des Verbrauchs (W4) und Abregelung der Einspeisung (W3, S2, S1) werden über einzelne Kontakte signalisiert.
+
+```yaml
+hems:
+  type: fnn
+  maxDimPower: 4200 # Verbrauchslimit während Dimmung (in Watt)
+  maxCurtailPower: 10000 # Installierte PV-Leistung, Basis für Abregelungsstufen (in Watt)
+  w4:
+    source: gpio
+    function: read
+    pin: 17 # GPIO-Pin 17 auslesen
+    # Rückgabewert: false = normal, true = aktiv
+  w3:
+    source: gpio
+    function: read
+    pin: 27
+  s2:
+    source: gpio
+    function: read
+    pin: 22
+  s1:
+    source: gpio
+    function: read
+    pin: 23
+```
+
+### Parameter
+
+Mindestens eines der Signale `w4` oder `w3` muss konfiguriert sein.
+
+#### `maxDimPower`
+
+Verbrauchslimit in Watt, das gesetzt wird, solange das Dimm-Signal (W4) aktiv ist.
+Erforderlich, wenn `w4` konfiguriert ist.
+
+#### `maxCurtailPower`
+
+Installierte PV-Leistung in Watt.
+Basiswert für die Abregelungsstufen (W3, S2, S1).
+
+#### `w4`
+
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Dimm-Signals.
+Bei aktivem Signal wird der Verbrauch auf `maxDimPower` begrenzt.
+
+#### `w3`
+
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "0 %".
+Bei aktivem Signal wird die Einspeisung auf 0 % von `maxCurtailPower` begrenzt.
+
+#### `s2`
+
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "30 %".
+Bei aktivem Signal wird die Einspeisung auf 30 % von `maxCurtailPower` begrenzt.
+
+#### `s1`
+
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "60 %".
+Bei aktivem Signal wird die Einspeisung auf 60 % von `maxCurtailPower` begrenzt.
+
+#### `interval`
+
+Abfrageintervall für die Schaltkontakte.
+Standard: `10s`.
+
+Details zur Einrichtung findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-fnn-steuerbox).
 
 ---
 

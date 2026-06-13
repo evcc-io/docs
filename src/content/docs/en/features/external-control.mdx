@@ -33,19 +33,20 @@ Supported devices are marked with "Curtailable" in the [device overview](/en/met
 According to §9 of the Renewable Energy Act (EEG), grid operators can curtail the feed-in of renewable energy installations in the event of imminent grid overload.
 This mainly affects larger solar installations, but can also become relevant in the residential sector.
 
-When evcc receives a curtailment signal, inverter production is limited to 0 W directly at the device.
-Curtailment is currently a binary signal (on/off) without a dynamic setpoint.
+When evcc receives a curtailment signal, inverter production is reduced directly at the device.
+FNN control boxes can signal staged limits (60 %, 30 %, 0 %); the active limit is shown in the UI.
 Full production resumes once the signal clears.
 
 ### Connection Options
 
-Connection is established via **Relay** (via a switch contact) or **EEBus** (via the EEBus protocol).
+Connection is established via **Relay** (a single switch contact), **FNN Control Box** (multiple switch contacts) or **EEBus** (the EEBus protocol).
 
 ## Setup
 
 Configuration is done via **Configuration → External Control**.
-Limits are enforced via [Load Management](./loadmanagement).
-An "External Limit" circuit (`gridcontrol`) is automatically created and placed as the top level above any existing circuits.
+Active limits are shown on the **External Control** card and on the main page.
+For the consumption limit to apply to charging points, configure [Load Management](./loadmanagement) circuits.
+An active limit then caps the top-level circuit, indicated by a "Consumption limited" hint on the Load Management card.
 
 ## Configuration via Relay
 
@@ -139,6 +140,46 @@ limit:
 </TabItem>
 </Tabs>
 
+## Configuration via FNN Control Box
+
+Control boxes following the FNN standard signal dimming and curtailment via separate switch contacts.
+Consumption dimming (W4) and feed-in curtailment (W3, S2, S1) operate independently.
+
+```yaml title="External Control"
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed PV power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+The signals have the following meaning:
+
+| Signal | Effect when active                           |
+| ------ | -------------------------------------------- |
+| `w4`   | Limit consumption to `maxDimPower`           |
+| `w3`   | Curtail feed-in to 0 % of `maxCurtailPower`  |
+| `s2`   | Curtail feed-in to 30 % of `maxCurtailPower` |
+| `s1`   | Curtail feed-in to 60 % of `maxCurtailPower` |
+
+At least one of the signals `w4` or `w3` must be configured.
+Each signal is read via a [plugin](/en/reference/plugins) configuration (GPIO, MQTT, HTTP, Modbus), analogous to the relay examples above.
+
 ## Configuration via EEBus
 
 The digital connection via EEBus is the future-proof and preferred solution.
@@ -195,9 +236,10 @@ The charging points operate with their normal configuration and are coordinated 
 When the grid operator sends a reduction signal:
 
 1. **Relay**: The contact is closed, evcc activates the configured `maxPower` limit
-2. **EEBus**: The control box digitally transmits the calculated total limit
+2. **FNN Control Box**: The W4 contact is closed, evcc activates the configured `maxDimPower` limit
+3. **EEBus**: The control box digitally transmits the calculated total limit
 
-All charging points assigned to the "External Limit" circuit (`gridcontrol`) are reduced according to the limit.
+The limit caps the top-level [Load Management](./loadmanagement) circuit; all charging points assigned to circuits are reduced accordingly.
 If total consumption is too high, charging processes can also be stopped.
 The control affects all modes (Solar, Min+Solar, Fast).
 
@@ -208,6 +250,7 @@ Charging the battery from solar surplus is usually still possible.
 After the power reduction ends, [grid charging](./battery#gridcharge) automatically resumes.
 
 When a control limit is active, a **banner with control notice** is displayed on the main page in evcc.
+Consumption limit and feed-in curtailment are shown separately.
 
 ## Logging
 
@@ -235,7 +278,7 @@ The system operator is responsible for proper operation and must keep the log fo
 In addition to charging points, other controllable consumers can also be integrated into German §14a load management.
 This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with an additional relay output.
 
-The control takes into account the current power consumption of all consumers assigned to the "External Limit" circuit (`gridcontrol`).
+The control takes into account the current power consumption of all controllable consumers.
 This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
 
 First, all other consumers are dimmed.
