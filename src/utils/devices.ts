@@ -116,6 +116,7 @@ export interface DeviceEntry {
     }>;
     capabilities?: string[];
     requirements?: string[];
+    caveats?: Array<{ description?: string; link?: string }>;
     countries?: string[];
   };
 }
