@@ -40,6 +40,45 @@ tariffs:
 
 Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Stromtarife](/de/tariffs).
 
+## Zeitabhängige Netzentgelte {#charges-zones}
+
+Über `charges` kannst du einen festen Aufschlag pro kWh auf jeden Preiswert addieren.
+Berechnet dein Netzbetreiber zeitvariable Netzentgelte (z. B. nach § 14a EnWG), kannst du über `chargesZones` den Standardaufschlag `charges` für bestimmte Zeiträume überschreiben.
+Das funktioniert mit jedem Netztarif, egal ob Anbieter-Template, `fixed`-Preis oder `custom`-Quelle.
+
+Jede Zone hat folgende Felder:
+
+| Feld      | Erfordert | Beschreibung                                                      |
+| --------- | --------- | ----------------------------------------------------------------- |
+| `charges` | ja        | Aufschlag pro kWh in dieser Zone. Ersetzt den Standard-`charges`. |
+| `months`  | nein      | z. B. `Nov-Mär` oder `Jun`. Leer bedeutet ganzjährig.             |
+| `days`    | nein      | z. B. `Mo-Fr` oder `Sa,So`. Leer bedeutet täglich.                |
+| `hours`   | nein      | z. B. `17-20` oder `15:30-21`. Leer bedeutet ganztägig.           |
+
+**Beispiel**:
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: tibber
+    token: "..."
+    charges: 0.0941 # Standard-Netzentgelt pro kWh
+    chargesZones:
+      - months: Nov-Mär
+        days: Mo-Fr
+        hours: 17-20
+        charges: 0.1838 # Hochtarif
+      - hours: 0-6
+        charges: 0.0299 # Niedrigtarif
+```
+
+Trifft keine Zone zu, gilt der Standardaufschlag `charges`.
+Überlappen sich Zonen, gewinnt die letzte zutreffende Zone.
+Ist eine `formula` konfiguriert, enthält die Variable `charges` den Zonenwert des jeweiligen Zeitfensters.
+
+Ein `fixed`-Tarif mit `chargesZones` wird wie ein dynamischer Tarif behandelt: Der Planer bevorzugt günstige Zeiträume und das Preisdiagramm wird angezeigt.
+
 ## Feature-Flags
 
 Bei eigenen Tarifen vom Typ `custom` kannst du über `features` das Verhalten beeinflussen:
