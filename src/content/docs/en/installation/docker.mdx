@@ -41,6 +41,24 @@ Create the database directory on your host system.
 In this guide we use the path `/home/user/.evcc/` as an example.
 If you're using file-based configuration, also use `/home/user/evcc.yaml`
 
+### User and permissions
+
+evcc runs as a non-root user (uid `1000`) inside the container. The entrypoint fixes ownership of the database directory on every start, so existing installations keep working after an update without manual steps. On the first start the mounted `.evcc` directory is re-owned to `1000:1000`, a one-time ownership change visible on the host.
+
+To match a different host ownership (common on NAS systems), set the `PUID` and `PGID` environment variables (default `1000`):
+
+```yaml
+environment:
+  - PUID=1026
+  - PGID=100
+```
+
+Please note:
+
+- A mounted `evcc.yaml` must be readable by this user (file permission `644`). It is no longer read as root and may contain secrets.
+- Setting Docker's own `user:` instead of `PUID`/`PGID` disables the automatic ownership fix. The mounted directory must then already be owned by that user.
+- For serial/USB devices (RS485) the runtime user must be a member of the device's group. Set `PUID`/`PGID` accordingly or use `group_add`.
+
 ## Installation
 
 This section describes three ways to install evcc using Docker:
@@ -165,8 +183,10 @@ services:
       - /home/user/.evcc:/root/.evcc
       - /home/user/evcc.yaml:/etc/evcc.yaml # optional
     restart: unless-stopped
-    # optional:
-    #user: <UID>:<GID>
+    # optional: match host ownership (default 1000)
+    #environment:
+    #  - PUID=1000
+    #  - PGID=1000
 ```
 
   </TabItem>
@@ -191,8 +211,10 @@ services:
       - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
     network_mode: host
     restart: unless-stopped
-    # optional:
-    #user: <UID>:<GID>
+    # optional: match host ownership (default 1000)
+    #environment:
+    #  - PUID=1000
+    #  - PGID=1000
 ```
 
   </TabItem>
