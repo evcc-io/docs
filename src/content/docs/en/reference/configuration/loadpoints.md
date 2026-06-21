@@ -381,9 +381,34 @@ priorityStrategy: soc
 
 ---
 
+### `priorityBasis`
+
+Determines whether the `soc` and `deficit` sub-ordering selected via `priorityStrategy` compares loadpoints by charge level percentage or by absolute energy. This avoids over-prioritizing a smaller battery just because its percentage is lower even though it needs less energy (e.g. a 25 kWh second car at 40 % needs less energy than a 75 kWh car at 50 %).
+
+Possible values:
+
+- `percent`: Rank by the soc-% gap (`100 − soc` for `soc`, `limitSoc − soc` for `deficit`). This is the default behaviour.
+- `energy`: Scale the soc-% gap by the vehicle [`capacity`](/en/reference/configuration/vehicles#capacity), so loadpoints are ranked by **absolute energy (kWh)** rather than percentage — the loadpoint that needs the most energy is charged first.
+
+When a vehicle's capacity is unknown, the `energy` basis falls back to the percentage gap for that loadpoint, so a missing `capacity` does not break the ordering.
+
+This option has no effect with `priorityStrategy: static`.
+
+**Default value:** `percent`
+
+**For example**:
+
+```yaml
+priorityBasis: energy
+```
+
+---
+
 ### `priorityHysteresis`
 
-A deadband (in soc-%) for the `soc` and `deficit` sub-ordering selected via `priorityStrategy`. A loadpoint only outranks another of the same `priority` when it is ahead by **more** than this many soc-%. This prevents two near-equal loadpoints from leapfrogging each other (swapping priority every time their soc crosses); instead they tie and share the available surplus.
+A deadband for the `soc` and `deficit` sub-ordering selected via `priorityStrategy`. A loadpoint only outranks another of the same `priority` when it is ahead by **more** than this amount. This prevents two near-equal loadpoints from leapfrogging each other (swapping priority every time their soc crosses); instead they tie and share the available surplus.
+
+The unit follows [`priorityBasis`](#prioritybasis): soc-% with the `percent` basis (the default) and kWh with the `energy` basis.
 
 Valid values range from `0` to `99`. The default `0` disables the deadband. Values around `5`–`10` are a good starting point.
 
