@@ -40,6 +40,25 @@ Erstelle das Datenbank-Verzeichnis auf deinem Host-System.
 In dieser Anleitung verwenden wir exemplarisch den Pfad `/home/user/.evcc/`.
 Falls du die dateibasierte Konfiguration nutzt, verwende zusätzlich `/home/user/evcc.yaml`
 
+### Benutzer und Berechtigungen
+
+evcc läuft im Container als nicht-root Benutzer (uid `1000`). Das Entrypoint korrigiert bei jedem Start die Eigentümerschaft des Datenbank-Verzeichnisses, sodass bestehende Installationen nach einem Update ohne manuelle Schritte weiterlaufen. Beim ersten Start wird das gemountete `.evcc` Verzeichnis einmalig auf `1000:1000` umgestellt, was auf dem Host als Eigentümerwechsel sichtbar ist.
+
+Um eine abweichende Eigentümerschaft auf dem Host abzubilden (häufig bei NAS-Systemen), setze die Umgebungsvariablen `PUID` und `PGID` (Standard `1000`):
+
+```yaml
+environment:
+  - PUID=1026
+  - PGID=100
+```
+
+Bitte beachten:
+
+- Eine gemountete `evcc.yaml` muss für diesen Benutzer lesbar sein (Dateirecht `644`). Sie wird nicht mehr als root gelesen und kann Geheimnisse enthalten.
+- Wird stattdessen Dockers eigenes `user:` gesetzt, ist die automatische Korrektur der Eigentümerschaft deaktiviert. Das gemountete Verzeichnis muss dann bereits diesem Benutzer gehören.
+- Serielle/USB-Geräte (RS485, P1/SML) funktionieren ohne zusätzliche Einrichtung. Beim Start erkennt evcc gemountete `--device` Schnittstellen (`/dev/ttyUSB*`, `/dev/ttyACM*`, ...) und fügt den Laufzeit-Benutzer deren Gruppe hinzu. Wird ein Gerät erst nach dem Start angeschlossen, starte den Container neu. Für Pfade, die die Erkennung nicht erfasst, setze `EVCC_DEVICE_GIDS` auf die Gruppen-ID(s) des Geräts, z. B. `EVCC_DEVICE_GIDS=20`.
+- Diese automatische Erkennung läuft nur, wenn evcc als root startet und anschließend auf `PUID`/`PGID` wechselt. Wenn du stattdessen Dockers eigenes `user:` setzt, musst du die Gruppen-ID des Geräts manuell über `group_add` ergänzen.
+
 ## Installation
 
 In diesem Abschnitt werden drei Möglichkeiten zur Installation von evcc über Docker beschrieben.
@@ -195,8 +214,10 @@ services:
       - /home/user/.evcc:/root/.evcc
       - /home/user/evcc.yaml:/etc/evcc.yaml # optional
     restart: unless-stopped
-    # optional:
-    #user: <UID>:<GID>
+    # optional: an Host-Eigentümerschaft anpassen (Standard 1000)
+    #environment:
+    #  - PUID=1000
+    #  - PGID=1000
 ```
 
   </TabItem>
@@ -222,8 +243,10 @@ services:
       - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
     network_mode: host
     restart: unless-stopped
-    # optional:
-    #user: <UID>:<GID>
+    # optional: an Host-Eigentümerschaft anpassen (Standard 1000)
+    #environment:
+    #  - PUID=1000
+    #  - PGID=1000
 ```
 
   </TabItem>
