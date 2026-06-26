@@ -214,6 +214,7 @@ export default defineConfig({
             },
             { label: "Plugins", slug: "reference/plugins" },
             { label: "Modbus", slug: "reference/modbus" },
+            { label: "evcc App", slug: "reference/app" },
             {
               label: "CLI",
               collapsed: true,
