@@ -358,3 +358,68 @@ priority: 2
 ```
 
 ---
+
+### `priorityStrategy`
+
+Determines how loadpoints that share the same integer `priority` are sub-ordered when PV surplus is distributed. This only breaks ties between equal-priority loadpoints; it never changes the ordering between loadpoints of different `priority`.
+
+Possible values:
+
+- `static`: Rank by `priority` only. This is the current default behaviour and keeps the order between equal-priority loadpoints unchanged.
+- `soc`: Among equal-priority loadpoints, prefer the one whose vehicle has the **lower** soc, i.e. charge the emptier car first. Only applies when a positive vehicle soc is known.
+- `deficit`: Among equal-priority loadpoints, prefer the one with the **larger** gap between vehicle soc and its limit soc (`limitSoc − soc`), i.e. the one furthest from its target.
+
+The default is `static`, so existing configurations are unaffected unless this option is set explicitly.
+
+**Default value:** `static`
+
+**For example**:
+
+```yaml
+priorityStrategy: soc
+```
+
+---
+
+### `priorityBasis`
+
+Determines whether the `soc` and `deficit` sub-ordering selected via `priorityStrategy` compares loadpoints by charge level percentage or by absolute energy. This avoids over-prioritizing a smaller battery just because its percentage is lower even though it needs less energy (e.g. a 25 kWh second car at 40 % needs less energy than a 75 kWh car at 50 %).
+
+Possible values:
+
+- `percent`: Rank by the soc-% gap (`100 − soc` for `soc`, `limitSoc − soc` for `deficit`). This is the default behaviour.
+- `energy`: Scale the soc-% gap by the vehicle [`capacity`](/en/reference/configuration/vehicles#capacity), so loadpoints are ranked by **absolute energy (kWh)** rather than percentage — the loadpoint that needs the most energy is charged first.
+
+When a vehicle's capacity is unknown, the `energy` basis falls back to the percentage gap for that loadpoint, so a missing `capacity` does not break the ordering.
+
+This option has no effect with `priorityStrategy: static`.
+
+**Default value:** `percent`
+
+**For example**:
+
+```yaml
+priorityBasis: energy
+```
+
+---
+
+### `priorityHysteresis`
+
+A deadband for the `soc` and `deficit` sub-ordering selected via `priorityStrategy`. A loadpoint only outranks another of the same `priority` when it is ahead by **more** than this amount. This prevents two near-equal loadpoints from leapfrogging each other (swapping priority every time their soc crosses); instead they tie and share the available surplus.
+
+The unit follows [`priorityBasis`](#prioritybasis): soc-% with the `percent` basis (the default) and kWh with the `energy` basis.
+
+Valid values range from `0` to `99`. The default `0` disables the deadband. Values around `5`–`10` are a good starting point.
+
+This option has no effect with `priorityStrategy: static`, and it never affects the ordering between loadpoints of different `priority`.
+
+**Default value:** `0`
+
+**For example**:
+
+```yaml
+priorityHysteresis: 5
+```
+
+---
