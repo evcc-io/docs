@@ -7,7 +7,7 @@ sidebar:
 :::note[deprecated in yaml]
 EEBUS can now be configured more conveniently and self-explanatory via the UI settings dialog. Simply comment out the `eebus:` block in your yaml — evcc will generate a new certificate on the next start.
 
-Alternatively, you can import your existing public and private certificate under *Advanced Settings* in the UI, taken from your commented-out yaml block. This is useful if the SKI (part of the public certificate) has already been registered with your metering operator for [External Control](https://docs.evcc.io/en/features/external-control/).
+Alternatively, you can import your existing public and private certificate under *EEBUS > Show advanced settings* in the UI, taken from your commented-out yaml block. This is useful if the SKI (part of the public certificate) has already been registered with your metering operator for [External Control](https://docs.evcc.io/en/features/external-control/).
 :::
 
 **For example**:
