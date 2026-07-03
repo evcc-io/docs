@@ -4,6 +4,10 @@ sidebar:
   order: 13
 ---
 
+:::note[veraltet in yaml]
+Komfortabler und selbsterklärend kann inzwischen EEBUS im UI Einstellungsdialog konfiguriert werden. Dafür den `eebus:` Block im yaml einfach auskommentieren. Dann generiert evcc beim nächsten start ein neues Zertifikat. Alternativ kannst im UI unter Erweiterte Einstellungen dein bisheriges public und private certificate bei importieren, aus deinem auskommentierten yaml Block. Das kann z.B. sinnvoll sein wenn die SKI, ein fester Bestandteil des public certificate, bereits für https://docs.evcc.io/de/features/external-control/ bei deinem Messstellenbetreiber hinterlegt wurde.
+:::
+
 **Beispiel**:
 
 ```yaml
