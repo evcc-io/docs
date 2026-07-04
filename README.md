@@ -12,7 +12,7 @@ The site is built with [Astro](https://astro.build/) and the [Starlight](https:/
 
 First clone the repository, then follow with the steps below.
 
-**Requirement:** [`nodejs`](https://nodejs.org/en/) (version ≥ 22) and `npm` (comes with `nodejs`).
+**Requirement:** [`nodejs`](https://nodejs.org/en/) (version ≥ 26) and `npm` (comes with `nodejs`).
 
 ### Installation
 
