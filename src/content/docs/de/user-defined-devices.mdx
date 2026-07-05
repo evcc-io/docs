@@ -85,6 +85,7 @@ Zähler unter `meters:` können an verschiedenen Stellen innerhalb der `site` Ko
 - `battery`: Hausbatteriezähler
 - `charge`: Zähler für die Ladeleistung der Wallbox
 - `aux`: Verbrauchszähler für intelligente Verbraucher
+- `consumer`: Zähler für einen regulären Verbraucher, erfasst für die Verbrauchsstatistik
 - `ext`: Weiterer Zähler, z. B. für Lastmanagement oder Datenerfassung
 
 `power` ist das einzig erforderliche Attribut.
@@ -102,13 +103,37 @@ Zur Konvertierung dienen die [Lese-Pipelines](/de/reference/plugins#reading).
 | -------------- | --------------------- | --------- | ------------- | --------------------------------------------------------------------------- |
 | `power`        | `float`               | ja        | alle          | Aktuelle Leistung in W                                                      |
 | `energy`       | `float`               | nein      | alle          | Zählerstand in kWh                                                          |
-| `returnenergy` | `float`               | nein      | alle          | Zählerstand in Gegenrichtung in kWh (z. B. Netzeinspeisung)                 |
+| `returnenergy` | `float`               | nein      | alle          | Zählerstand in Gegenrichtung in kWh (siehe unten)                           |
 | `maxpower`     | `int`                 | nein      | `pv` (hybrid) | Maximale AC-Leistung in W                                                   |
 | `soc`          | `int`                 | nein      | `battery`     | Ladestand in %                                                              |
 | `capacity`     | `float`               | nein      | `battery`     | Kapazität in kWh                                                            |
 | `powers`       | `[float,float,float]` | nein      | alle          | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen. |
 | `currents`     | `[float,float,float]` | nein      | alle          | Phasenströme in A. Zur Erkennung aktiver Phasen.                            |
 | `voltages`     | `[float,float,float]` | nein      | alle          | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                      |
+
+<a id="signs-and-directions"></a>
+
+### Vorzeichen und Richtungen
+
+Was ein positiver `power`-Wert und die beiden Energierichtungen bedeuten, hängt von der Zählerrolle ab:
+
+| Rolle                    | `power` positiv           | `energy`   | `returnenergy`      |
+| ------------------------ | ------------------------- | ---------- | ------------------- |
+| `grid`                   | Netzbezug                 | Bezogen    | Eingespeist         |
+| `pv`                     | Erzeugung                 | Erzeugt    | Verbraucht (selten) |
+| `battery`                | Entladen (negativ: Laden) | Entladen   | Geladen             |
+| `charge`                 | Laden                     | Geladen    | Entladen (V2X)      |
+| `aux`, `ext`, `consumer` | Verbrauch                 | Verbraucht | Erzeugt (selten)    |
+
+`energy` und `returnenergy` sind steigende Zählerstände in kWh, idealerweise Gesamtwerte wie die Bezugs- und Einspeiseregister eines Stromzählers.
+Die Differenzen zwischen den Zählerständen werden automatisch berechnet.
+Das Plugin muss deshalb einen Zählerstand liefern und keine Verbrauchswerte pro Intervall.
+Auch ein Zähler, der sich regelmäßig zurücksetzt (z. B. täglich), funktioniert, da der Rücksprung automatisch erkannt wird.
+Ein Zählerstand von `0` wird als nicht verfügbar behandelt.
+
+Beide Attribute sind optional.
+Ohne sie wird die Energiehistorie aus dem zeitlichen Verlauf von `power` abgeleitet.
+Echte Zählerstände liefern genauere Langzeitstatistiken.
 
 ### Schreib-Attribute
 
@@ -143,7 +168,7 @@ Für andere Geräte stehen spezialisierte Charger-Typen unter [Switchsocket](#ch
 | `enabled`      | `bool`                | ja        | Ist Ladung freigegeben?                                                                  |
 | `power`        | `float`               | nein      | Ladeleistung in W                                                                        |
 | `energy`       | `float`               | nein      | Zählerstand in kWh                                                                       |
-| `returnenergy` | `float`               | nein      | Zählerstand in Gegenrichtung in kWh                                                      |
+| `returnenergy` | `float`               | nein      | Zählerstand in Gegenrichtung in kWh (Entladeenergie, V2X)                                |
 | `identify`     | `string`              | nein      | Aktuelle RFID-Kennung                                                                    |
 | `soc`          | `int`                 | nein      | Ladestand in %                                                                           |
 | `limitsoc`     | `int`                 | nein      | Ladelimit in %                                                                           |

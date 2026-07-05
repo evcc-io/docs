@@ -85,6 +85,7 @@ Meters defined under `meters:` can be referenced from `site`:
 - `battery`: Home battery meter
 - `charge`: Meter for the charging power of the wallbox
 - `aux`: Consumption meter for intelligent consumers
+- `consumer`: Meter for a regular consumer, recorded for consumption statistics
 - `ext`: Additional meter, e.g. for load management or data collection
 
 `power` is the only required attribute.
@@ -98,17 +99,40 @@ To convert, use the [reading pipelines](/en/reference/plugins#reading).
 
 ### Read attributes
 
-| Attribute      | Type                  | Required | Context       | Description                                                   |
-| -------------- | --------------------- | -------- | ------------- | ------------------------------------------------------------- |
-| `power`        | `float`               | yes      | all           | Current power in W                                            |
-| `energy`       | `float`               | no       | all           | Meter reading in kWh                                          |
-| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (e.g. grid feed-in) |
-| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                         |
-| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                          |
-| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                               |
-| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents.   |
-| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.             |
-| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).        |
+| Attribute      | Type                  | Required | Context       | Description                                                 |
+| -------------- | --------------------- | -------- | ------------- | ----------------------------------------------------------- |
+| `power`        | `float`               | yes      | all           | Current power in W                                          |
+| `energy`       | `float`               | no       | all           | Meter reading in kWh                                        |
+| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)       |
+| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
+| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                        |
+| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                             |
+| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
+| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.           |
+| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
+
+<a id="signs-and-directions"></a>
+
+### Signs and Directions
+
+What a positive `power` value and the two energy directions mean depends on the meter role:
+
+| Role                     | `power` positive                 | `energy`   | `returnenergy`     |
+| ------------------------ | -------------------------------- | ---------- | ------------------ |
+| `grid`                   | Grid import                      | Imported   | Exported (feed-in) |
+| `pv`                     | Production                       | Produced   | Consumed (rare)    |
+| `battery`                | Discharging (negative: charging) | Discharged | Charged            |
+| `charge`                 | Charging                         | Charged    | Discharged (V2X)   |
+| `aux`, `ext`, `consumer` | Consumption                      | Consumed   | Produced (rare)    |
+
+`energy` and `returnenergy` are increasing meter readings in kWh, ideally lifetime totals like the import and export registers of a grid meter.
+The differences between readings are calculated automatically, so the plugin must return a meter reading and not consumption values per interval.
+A counter that resets periodically (e.g. daily) also works, as the reset is detected automatically.
+A reading of `0` is treated as not available.
+
+Both attributes are optional.
+Without them, the energy history is derived from `power` over time.
+Real meter readings give more accurate long-term statistics.
 
 ### Write attributes
 
@@ -143,7 +167,7 @@ For other devices, specialised charger types are described under [Switchsocket](
 | `enabled`      | `bool`                | yes      | Is charging enabled?                                                                        |
 | `power`        | `float`               | no       | Charging power in W                                                                         |
 | `energy`       | `float`               | no       | Meter reading in kWh                                                                        |
-| `returnenergy` | `float`               | no       | Meter reading in reverse direction in kWh                                                   |
+| `returnenergy` | `float`               | no       | Meter reading in reverse direction in kWh (discharged energy, V2X)                          |
 | `identify`     | `string`              | no       | Current RFID identifier                                                                     |
 | `soc`          | `int`                 | no       | State of charge in %                                                                        |
 | `limitsoc`     | `int`                 | no       | Charge limit in %                                                                           |
