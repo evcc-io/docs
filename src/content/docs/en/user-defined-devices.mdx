@@ -442,7 +442,7 @@ Exactly one of `price` or `forecast` must be configured.
 | `tariff`       | `string`   | no       | `price` (default), `co2` or `solar`. Sets the unit of the returned values: price in configured currency per kWh, CO₂ intensity in g/kWh, solar forecast in W.    |
 | `charges`      | `float`    | no       | Fixed additional charge per kWh added to every value. Default `0`.                                                                                               |
 | `chargesZones` | `list`     | no       | Time-based charges (e.g. grid fees) that override `charges` for specific periods. See [time-based grid fees](/en/reference/configuration/tariffs#charges-zones). |
-| `tax`          | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20 %. Default `0`.                                                                                          |
+| `tax`          | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20%. Default `0`.                                                                                           |
 | `formula`      | `string`   | no       | Go expression for a custom calculation, with `price`, `charges` and `tax` in scope. See [examples](#formula-examples).                                           |
 | `interval`     | `duration` | no       | Polling interval for `forecast`. Default `1h`.                                                                                                                   |
 | `cache`        | `duration` | no       | Cache duration for `price`. Default `15m`.                                                                                                                       |
@@ -527,3 +527,165 @@ formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 ```
 
 Pays a fixed feed-in tariff of 7 ct/kWh, except when the day-ahead market price is negative.
+
+<a id="external-limit"></a>
+
+## External Limit
+
+A user-defined integration for the [External Limit](/en/external-limit) feature connects a control box or energy management system that isn't covered by a built-in integration.
+In the UI, pick **User-defined integration** under **Configuration → External Limit**.
+
+Unlike other device types, there is no `type: custom` here.
+Instead, one of three types describes how the limit signal is received: `relay` (single switch contact), `fnn` (FNN control box with multiple switch contacts) or `eebus` (EEBus protocol).
+Each signal is read via a [plugin](/en/reference/plugins) configuration (GPIO, MQTT, HTTP, Modbus).
+See also the [`hems` configuration reference](/en/reference/configuration/hems).
+
+### Relay
+
+The connection via a single switch contact is the simplest solution.
+The control box activates a contact which is evaluated by your evcc instance.
+
+| Attribute     | Type       | Required | Description                                                                                      |
+| ------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `maxPower`    | `int` (W)  | yes      | Total power limit applied while the signal is active.                                            |
+| `limit`       | plugin     | yes      | Plugin configuration for reading the switch contact. `true`/`1` = limited, `false`/`0` = normal. |
+| `passthrough` | plugin     | no       | Passes the limitation signal through to an external system.                                      |
+| `interval`    | `duration` | no       | Polling interval for the switch contact. Default `10s`.                                          |
+
+The power limit is communicated to you by the grid operator.
+For multiple controllable consumption devices (SteuVE), the simultaneity factor is taken into account.
+You can also calculate the limit yourself using the formula: **Total limit = Number of SteuVE × 4.2 kW × Simultaneity factor**. Details on the calculation can be found [here](https://www.inexogy.com/blog/14a-enwg/).
+
+<Tabs>
+<TabItem label="Raspberry Pi GPIO">
+
+When using a Raspberry Pi, the GPIO pin can be read directly:
+
+```yaml
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+For more details on the GPIO plugin, see the [plugin documentation](/en/reference/plugins#gpio).
+
+</TabItem>
+<TabItem label="MQTT">
+
+If the control box or gateway sends MQTT messages:
+
+```yaml
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem label="HTTP API">
+
+For control boxes with REST API:
+
+```yaml
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+If the control box or a gateway provides the power limit via Modbus:
+
+```yaml
+type: relay
+maxPower: 4200 # Example for 1 SteuVE
+limit:
+  source: modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
+  timeout: 5s
+  register:
+    type: holding
+    decode: uint16
+    address: 8056
+  # Return value: 0 = not limited, 1 = limited
+```
+
+</TabItem>
+</Tabs>
+
+<a id="external-limit-fnn"></a>
+
+### FNN Control Box
+
+Control boxes following the FNN standard signal dimming and curtailment via separate switch contacts.
+Consumption dimming (W4) and feed-in curtailment (W3, S2, S1) operate independently.
+At least one of the signals `w4` or `w3` must be configured.
+
+| Attribute         | Type       | Required | Description                                                               |
+| ----------------- | ---------- | -------- | ------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | yes¹     | Consumption limit while the dim signal (W4) is active.                    |
+| `maxCurtailPower` | `int` (W)  | yes²     | Installed solar power, base value for the curtailment steps.              |
+| `w4`              | plugin     | no       | Reads the dim signal. Limits consumption to `maxDimPower`.                |
+| `w3`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 0% of `maxCurtailPower`.  |
+| `s2`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 30% of `maxCurtailPower`. |
+| `s1`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 60% of `maxCurtailPower`. |
+| `interval`        | `duration` | no       | Polling interval for the switch contacts. Default `10s`.                  |
+
+¹ required when `w4` is configured, ² required when `w3` is configured.
+
+```yaml
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+<a id="external-limit-eebus"></a>
+
+### EEBus
+
+The digital connection via the EEBus protocol.
+The control box communicates directly with your evcc instance and automatically transmits the power limit.
+Control box and evcc need to be [paired](/en/external-limit#eebus-pairing) once.
+
+| Attribute                             | Type       | Required | Description                                                 |
+| ------------------------------------- | ---------- | -------- | ----------------------------------------------------------- |
+| `ski`                                 | `string`   | yes      | SKI (Subject Key Identifier) of the control box.            |
+| `contractualConsumptionNominalMax`    | `int` (W)  | no       | Contractual maximum consumption power.                      |
+| `failsafeConsumptionActivePowerLimit` | `int` (W)  | no       | Failsafe limit for consumption power.                       |
+| `productionNominalMax`                | `int` (W)  | no       | Installed generator power (Wp).                             |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | no       | Failsafe limit for feed-in power.                           |
+| `failsafeDurationMinimum`             | `duration` | no       | Minimum failsafe duration, e.g. `2h`.                       |
+| `passthrough`                         | plugin     | no       | Passes the limitation signal through to an external system. |
+
+```yaml
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```

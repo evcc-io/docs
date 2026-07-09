@@ -113,6 +113,7 @@ Everything else is hand-written:
 - Be consistent with hyphens: "PV-Überschuss", "PV-Modus"
 - Use abbreviations: "z. B." not "beispielsweise"
 - Use "Sponsortoken" as one word, not "Sponsor Token" or "Sponsor-Token"
+- UI panels are „Kacheln", not „Karten" (e.g. „Lastmanagement-Kachel"); English uses "card"
 
 ### Formatting Conventions
 
@@ -144,6 +145,8 @@ Everything else is hand-written:
 #### Numbers & Units
 
 - **Always use a space** between number and unit: `11 kW`, `230 V`
+- **Percent is the exception**: no space between number and `%`: `50%`, `60%` (both languages)
+- **Paragraph signs**: space between `§` and number in body text: `§ 14a EnWG`, `§ 9 EEG` (matches the device templates). Only navigation labels and page titles use the compact short form: `§14a, §9`
 - **German**: Use comma for decimals, period for thousands: `1,4 kW`, `11.200 W`
 - **English**: Use period for decimals, comma for thousands: `1.4 kW`, `11,200 W`
 

@@ -105,6 +105,8 @@ export const collections = {
   "vehicles-en": deviceCollection("en", "vehicle"),
   "tariffs-de": deviceCollection("de", "tariff"),
   "tariffs-en": deviceCollection("en", "tariff"),
+  "hems-de": deviceCollection("de", "hems"),
+  "hems-en": deviceCollection("en", "hems"),
   "chargers-nightly-de": deviceCollection("de", "charger", "nightly"),
   "chargers-nightly-en": deviceCollection("en", "charger", "nightly"),
   "meters-nightly-de": deviceCollection("de", "meter", "nightly"),
@@ -113,4 +115,6 @@ export const collections = {
   "vehicles-nightly-en": deviceCollection("en", "vehicle", "nightly"),
   "tariffs-nightly-de": deviceCollection("de", "tariff", "nightly"),
   "tariffs-nightly-en": deviceCollection("en", "tariff", "nightly"),
+  "hems-nightly-de": deviceCollection("de", "hems", "nightly"),
+  "hems-nightly-en": deviceCollection("en", "hems", "nightly"),
 };

@@ -35,6 +35,8 @@ export default defineConfig({
     "/en/docs/Home": "/en",
     "/docs/reference/api": "/en/integrations/rest-api",
     "/en/docs/reference/api": "/en/integrations/rest-api",
+    "/en/features/external-control": "/en/external-limit",
+    "/de/features/external-control": "/de/external-limit",
   },
   integrations: [
     mermaid({
@@ -176,6 +178,11 @@ export default defineConfig({
           label: "Tariffs & forecasts",
           translations: { de: "Tarife & Vorhersagen" },
           link: "/tariffs",
+        },
+        {
+          label: "External Limit (§14a, §9)",
+          translations: { de: "Externe Begrenzung (§14a, §9)" },
+          link: "/external-limit",
         },
         {
           label: "Features",
