@@ -180,14 +180,16 @@ export default defineConfig({
           link: "/tariffs",
         },
         {
-          label: "External Limit (§14a, §9)",
-          translations: { de: "Externe Begrenzung (§14a, §9)" },
-          link: "/external-limit",
-        },
-        {
           label: "Features",
           translations: { de: "Funktionen" },
-          items: [{ autogenerate: { directory: "features", collapsed: true } }],
+          items: [
+            { autogenerate: { directory: "features", collapsed: true } },
+            {
+              label: "External Limit (§14a, §9)",
+              translations: { de: "Externe Begrenzung (§14a, §9)" },
+              link: "/external-limit",
+            },
+          ],
         },
         {
           label: "Integrations",
@@ -200,6 +202,11 @@ export default defineConfig({
             {
               label: "Sunny Home Manager",
               slug: "integrations/sma-sunny-home-manager",
+            },
+            {
+              label: "Notifications",
+              translations: { de: "Benachrichtigungen" },
+              link: "/notifications",
             },
           ],
         },

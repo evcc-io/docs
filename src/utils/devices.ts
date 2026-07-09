@@ -52,6 +52,7 @@ export const CODE_PREAMBLES: Record<string, string> = {
   co2: "tariffs:\n    co2:",
   solar: "tariffs:\n    solar:",
   hems: "hems:",
+  messenger: "messaging:\n  services:",
 };
 
 const TRANSLATIONS_DE: Record<string, string> = {
@@ -289,7 +290,8 @@ export function featuresFor(
     | "vehicle"
     | "smartswitch"
     | "heating"
-    | "hems",
+    | "hems"
+    | "messenger",
   entry: DeviceEntry,
   lang: "de" | "en",
 ): string[] {
@@ -325,7 +327,8 @@ export type Channel = "release" | "nightly";
  * Smart switches and heating use the `chargers` collection.
  */
 export function collectionName(
-  prefix: "chargers" | "meters" | "vehicles" | "tariffs" | "hems",
+  prefix:
+    "chargers" | "meters" | "vehicles" | "tariffs" | "hems" | "messengers",
   lang: "de" | "en",
   channel: Channel,
 ): string {
@@ -344,7 +347,7 @@ export const nightlyPageHead = [
 /** Link to the device's source template in the evcc repo (undefined if none). */
 export function templateEditUrl(
   entry: DeviceEntry,
-  dir: "charger" | "meter" | "vehicle" | "tariff" | "hems",
+  dir: "charger" | "meter" | "vehicle" | "tariff" | "hems" | "messenger",
 ): string | undefined {
   return entry.data.template
     ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/${dir}/${entry.data.template}.yaml`
@@ -354,7 +357,14 @@ export function templateEditUrl(
 /** YAML config blocks for a device detail page (non-meter categories). */
 export function buildCodeBlocks(
   entry: DeviceEntry,
-  type: "charger" | "vehicle" | "smartswitch" | "heating" | "tariff" | "hems",
+  type:
+    | "charger"
+    | "vehicle"
+    | "smartswitch"
+    | "heating"
+    | "tariff"
+    | "hems"
+    | "messenger",
 ): string[] {
   const render = (entry.data.render as any[]) ?? [];
   if (type === "hems") {
@@ -362,6 +372,14 @@ export function buildCodeBlocks(
     return render.map((r) => {
       const src = r.advanced ?? r.default;
       return `${CODE_PREAMBLES.hems}\n${src.replace(/^/gm, "  ").trimEnd()}`;
+    });
+  }
+  if (type === "messenger") {
+    // messengers are list entries under messaging.services (depth 2)
+    return render.map((r) => {
+      const src = r.advanced ?? r.default;
+      const item = src.replace(/^/, "    - ").replace(/\n/gm, "\n      ");
+      return `${CODE_PREAMBLES.messenger}\n${item.trimEnd()}`;
     });
   }
   if (type === "tariff") {
@@ -390,7 +408,8 @@ export function buildCodeBlocks(
  * same-id entry exists.
  */
 export async function deviceDetailPaths(opts: {
-  prefix: "chargers" | "meters" | "vehicles" | "tariffs" | "hems";
+  prefix:
+    "chargers" | "meters" | "vehicles" | "tariffs" | "hems" | "messengers";
   /** URL segment, e.g. "smartswitches" (may differ from the collection prefix). */
   urlType: string;
   channel: Channel;
