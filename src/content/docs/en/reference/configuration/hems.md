@@ -5,12 +5,12 @@ sidebar:
 ---
 
 The `hems` section configures external control of consumption and feed-in power.
-This is used e.g. for implementing German §14a EnWG or §9 EEG regulations.
-For background and setup details, see [External Control](../../features/external-control).
+This is used e.g. for implementing German § 14a EnWG or § 9 EEG regulations.
+For background and setup details, see [External Limit](/en/external-limit).
 
 :::note[Note]
 Curtailment and dimming of controllable consumers act directly on the device, no circuit configuration is required.
-For the consumption limit to apply to charging points, configure [Load Management](../../features/loadmanagement) circuits.
+To apply the consumption limit to charging points, circuits must be set up in [Load Management](../../features/loadmanagement).
 An active limit then caps the top-level circuit.
 :::
 
@@ -70,7 +70,7 @@ Optional [plugin](/en/reference/plugins) configuration for passing the limitatio
 Polling interval for the switch contact.
 Default: `10s`.
 
-For more examples of different connections (GPIO, MQTT, HTTP), see [External Control](../../features/external-control#configuration-via-relay).
+For more examples of different connections (GPIO, MQTT, HTTP), see [user-defined integrations](/en/user-defined-devices#external-limit).
 
 ---
 
@@ -124,25 +124,25 @@ When active, consumption is limited to `maxDimPower`.
 
 #### `w3`
 
-[Plugin](/en/reference/plugins) configuration for reading the curtailment signal "0 %".
-When active, feed-in is limited to 0 % of `maxCurtailPower`.
+[Plugin](/en/reference/plugins) configuration for reading the curtailment signal "0%".
+When active, feed-in is limited to 0% of `maxCurtailPower`.
 
 #### `s2`
 
-[Plugin](/en/reference/plugins) configuration for reading the curtailment signal "30 %".
-When active, feed-in is limited to 30 % of `maxCurtailPower`.
+[Plugin](/en/reference/plugins) configuration for reading the curtailment signal "30%".
+When active, feed-in is limited to 30% of `maxCurtailPower`.
 
 #### `s1`
 
-[Plugin](/en/reference/plugins) configuration for reading the curtailment signal "60 %".
-When active, feed-in is limited to 60 % of `maxCurtailPower`.
+[Plugin](/en/reference/plugins) configuration for reading the curtailment signal "60%".
+When active, feed-in is limited to 60% of `maxCurtailPower`.
 
 #### `interval`
 
 Polling interval for the switch contacts.
 Default: `10s`.
 
-For setup details, see [External Control](../../features/external-control#configuration-via-fnn-control-box).
+For setup details, see [External Limit](/en/external-limit).
 
 ---
 
@@ -170,6 +170,7 @@ The following optional parameters can be set for EEBus communication:
 
 - `contractualConsumptionNominalMax`: Contractual maximum consumption power (in watts)
 - `failsafeConsumptionActivePowerLimit`: Failsafe limit for consumption power (in watts)
+- `productionNominalMax`: Installed generator power (Wp, in watts)
 - `failsafeProductionActivePowerLimit`: Failsafe limit for feed-in power (in watts)
 - `failsafeDurationMinimum`: Minimum failsafe duration (e.g. `2h`)
 
@@ -182,4 +183,4 @@ Optional [plugin](/en/reference/plugins) configuration for passing the limitatio
 Polling interval.
 Default: `10s`.
 
-For setup and pairing details, see [External Control](../../features/external-control#configuration-via-eebus).
+For setup and pairing details, see [External Limit](/en/external-limit#eebus-pairing).
