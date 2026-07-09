@@ -27,18 +27,8 @@ Unter [Ladevorgänge](./sessions) wird diese Ladung dem Gastfahrzeug zugeordnet.
 ### Fahrzeuge ohne API (Offline)
 
 Hat dein Fahrzeug keine Online-Schnittstelle oder am Ladepunkt keine Internetverbindung, kannst du es als Offline-Fahrzeug konfigurieren.
-Dies erfolgt aktuell über die `evcc.yaml`:
-
-```yaml
-vehicles:
-  - name: my_honda
-    title: grüner Honda e
-    type: template
-    template: offline
-    capacity: 28.5 # in kWh
-```
-
-Damit erscheint das Fahrzeug als "grüner Honda e" in der UI.
+Gehe zu **Konfiguration → Fahrzeuge → Fahrzeug hinzufügen** und wähle im Feld **Hersteller** die Option **Generisches Fahrzeug (ohne API)**.
+Gib dem Fahrzeug einen **Titel** (z. B. „grüner Honda e“) und trage die **Kapazität** des Akkus ein.
 Durch die nun bekannte Akkukapazität kann bspw. der Ladefortschritt und das Ladelimit auch in Prozent (bspw. +25%) dargestellt werden.
 
 Hinweis: Diese Funktion kannst du auch für Fremdfahrzeuge nutzen (Freunde, Familie, Miet- oder Firmenwagen), zu denen du keinen API-Zugriff hast.
@@ -46,19 +36,9 @@ Hinweis: Diese Funktion kannst du auch für Fremdfahrzeuge nutzen (Freunde, Fami
 ### Fahrzeuge mit API (Online)
 
 Hat dein Fahrzeug eine Online-Schnittstelle, ist es sinnvoll, diese auch in evcc zu konfigurieren.
-Unter [Fahrzeuge](../vehicles) findest du eine Liste aller unterstützten Hersteller.
-Die empfohlene Konfiguration erfolgt auch hier über die `evcc.yaml`. Hier ein Beispiel für einen Audi:
-
-```yaml
-vehicles:
-  - name: my_audi
-    title: roter Audi Q4 e-tron
-    type: template
-    template: audi
-    user: info@example.org
-    password: ***
-    capacity: 77 # in kWh
-```
+Unter [Fahrzeuge](/de/vehicles) findest du eine Liste aller unterstützten Hersteller.
+Gehe zu **Konfiguration → Fahrzeuge → Fahrzeug hinzufügen** und wähle deinen **Hersteller**, z. B. Audi.
+Abhängig vom Hersteller trägst du dann die Zugangsdaten deines Fahrzeugkontos ein, wie Benutzername und Passwort.
 
 evcc hat jetzt Zugriff auf den aktuellen Ladestand (SoC).
 Abhängig vom Hersteller sind auch weitere Informationen wie Ladestatus, Fahrzeuglimits, Kilometerstand, Klimatisierung und geschätzte Reichweite verfügbar.
@@ -66,7 +46,7 @@ Abhängig vom Hersteller sind auch weitere Informationen wie Ladestatus, Fahrzeu
 :::note[Hinweis]
 Um den Fahrzeugakku zu schonen, aktualisiert evcc den Ladestand nur, wenn ein Fahrzeug am Ladepunkt angeschlossen ist.
 Je nach Hersteller kann ein API-Zugriff zum Aufwecken des Fahrzeugs führen und den Standby-Verbrauch signifikant erhöhen.
-Dieses Verhalten kannst du über den [`poll` Parameter](../reference/configuration/loadpoints#poll) am Ladepunkt verändern.
+Dieses Verhalten kannst du über den [`poll` Parameter](/de/reference/configuration/loadpoints#poll) am Ladepunkt verändern.
 :::
 
 ## Mehrere Fahrzeuge
@@ -78,15 +58,10 @@ Für die Zuordnung von Fahrzeugen zu Ladepunkten gibt es verschiedene Möglichke
 
 Hat jedes Fahrzeug einen eigenen Ladepunkt, kannst du das Fahrzeug als Standardfahrzeug am Ladepunkt konfigurieren.
 Das ist die einfachste und empfohlene Konfiguration.
+Gehe zu **Konfiguration → Laden & Heizen → [Mein Ladepunkt]**.
+Wähle im Abschnitt **Fahrzeuge** dein Fahrzeug als **Standard-Fahrzeug** aus.
 evcc geht bei einem neuen Ladevorgang davon aus, dass es sich um das Standardfahrzeug handelt.
 Ist dies einmal nicht der Fall (bspw. Gastfahrzeug), kannst du das Fahrzeug in der UI umschalten.
-
-```yaml
-loadpoints:
-  - title: Garage
-    vehicle: my_audi # Standardfahrzeug
-    ...
-```
 
 ### Zuordnung über die UI
 
@@ -113,16 +88,9 @@ Jedes Mal, wenn das Fahrzeug wieder an die Wallbox angeschlossen wird, muss der 
 
 evcc bekommt von der Wallbox eine eindeutige Identifikationskennung.
 Abhängig vom Hersteller ist das direkt die RFID-Kennung oder eine abgeleitete interne Kennung wie bspw. ein Benutzername aus der Wallboxkonfiguration.
-Über den `evcc charger` Befehl kannst du den aktuellen `Identifier` deiner Wallbox auslesen.
-Diese hinterlegst du dann in der `evcc.yaml` am gewünschten Fahrzeug:
-
-```yaml
-vehicles:
-  - name: vehicle_one
-    ...
-    identifiers:
-      - 1234567890 # über `evcc charger` ermittelt
-```
+Nach dem Freischalten mit der Karte wird die aktuelle Kennung am Ladepunkt unter **Konfiguration → Laden & Heizen** angezeigt.
+Trage diesen Wert im Feld **RFID-Identifikation** des gewünschten Fahrzeugs unter **Konfiguration → Fahrzeuge** ein.
+Pro Fahrzeug kannst du mehrere Kennungen hinterlegen.
 
 ### Erkennung via Plug & Charge
 
@@ -135,30 +103,14 @@ In der Wallbox muss das Feature "PLC-Verbindung zum Fahrzeug" aktiviert sein.
 
 Die Einrichtung erfolgt hier ähnlich wie bei der RFID-Erkennung.
 Das Fahrzeug muss mit der Wallbox verbunden sein.
-Über den `evcc charger` Befehl kannst du den aktuellen `Identifier` deiner Wallbox auslesen.
-Diesen kannst du dann in der `evcc.yaml` einem Fahrzeug zuordnen:
-
-```yaml
-vehicles:
-  - name: vehicle_one
-    ...
-    identifiers:
-      - 01:23:45:67:89:00 # über `evcc charger` ermittelt
-```
+Die Kennung (z. B. `01:23:45:67:89:00`) wird dann am Ladepunkt unter **Konfiguration → Laden & Heizen** angezeigt.
+Trage diesen Wert im Feld **RFID-Identifikation** des Fahrzeugs ein.
 
 :::note[Hinweis]
 Wenn das Fahrzeug und die Wallbox kein Plug & Charge unterstützen, dann liefern die Fahrzeuge eine eigentlich eindeutige Hardware-Adresse (MAC-Adresse) zurück.
 Manche Hersteller wie VW und Audi ändern diese aber jeden Tag auf einen anderen Zufallswert.
 
-Für diesen Fall kann man eine Wildcard verwenden und nur den sich nicht ändernden Teil angeben:
-
-```yaml
-vehicles:
-- name: vehicle_one
-    ...
-    identifiers:
-    - 01:23:45:*
-```
+Für diesen Fall kann man eine Wildcard verwenden und nur den sich nicht ändernden Teil angeben, z. B. `01:23:45:*`.
 
 Dies funktioniert natürlich nur, wenn dies nicht bei mehreren vorhandenen Fahrzeugen auftritt und sich der angegebene Anfangsteil des Wertes jeweils unterscheidet.
 :::
