@@ -1,7 +1,7 @@
 ---
 interface Props {
   lang: "de" | "en";
-  kind?: "device" | "service" | "hems";
+  kind?: "device" | "tariff" | "hems" | "messenger";
   /** When set, the hint also points at the nightly version of the list. */
   nightlyHref?: string;
 }
@@ -11,11 +11,13 @@ const { lang, kind = "device", nightlyHref } = Astro.props;
 const issuesUrl = "https://github.com/evcc-io/evcc/issues/new/choose";
 const userDefinedUrl = `/${lang}/user-defined-devices`;
 const userDefinedAnchor =
-  kind === "service"
+  kind === "tariff"
     ? `${userDefinedUrl}#tariff`
     : kind === "hems"
       ? `${userDefinedUrl}#external-limit`
-      : userDefinedUrl;
+      : kind === "messenger"
+        ? `${userDefinedUrl}#notification-service`
+        : userDefinedUrl;
 
 const featureRequest =
   lang === "de"
@@ -24,12 +26,12 @@ const featureRequest =
 
 const userDefined =
   lang === "de"
-    ? kind === "service"
+    ? kind === "tariff" || kind === "messenger"
       ? `einen <a href="${userDefinedAnchor}">eigenen Dienst</a> über das Plugin-System`
       : kind === "hems"
         ? `eine <a href="${userDefinedAnchor}">eigene Integration</a> über das Plugin-System`
         : `ein <a href="${userDefinedAnchor}">eigenes Gerät</a> über das Plugin-System`
-    : kind === "service"
+    : kind === "tariff" || kind === "messenger"
       ? `your own <a href="${userDefinedAnchor}">user-defined service</a> via the plugin system`
       : kind === "hems"
         ? `your own <a href="${userDefinedAnchor}">user-defined integration</a> via the plugin system`
@@ -54,12 +56,12 @@ if (lang === "de") {
 
 const title =
   lang === "de"
-    ? kind === "service"
+    ? kind === "tariff" || kind === "messenger"
       ? "Dein Dienst nicht dabei?"
       : kind === "hems"
         ? "Deine Integration nicht dabei?"
         : "Dein Gerät nicht dabei?"
-    : kind === "service"
+    : kind === "tariff" || kind === "messenger"
       ? "Service not in the list?"
       : kind === "hems"
         ? "Integration not in the list?"

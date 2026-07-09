@@ -689,3 +689,50 @@ Control box and evcc need to be [paired](/en/external-limit#eebus-pairing) once.
 type: eebus
 ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ```
+
+<a id="notification-service"></a>
+
+## Notification Service
+
+A user-defined notification service processes [notification](/en/notifications) messages via any [plugin](/en/reference/plugins) with write access, e.g. a shell script, HTTP request, or MQTT message.
+In the UI, pick **User-defined service** under **Configuration → Notifications → Services**.
+
+The message is provided to the plugin in the `${send}` parameter (or as a template parameter `{{.send}}`).
+
+### Configuration
+
+| Attribute  | Type     | Required | Description                                                 |
+| ---------- | -------- | -------- | ----------------------------------------------------------- |
+| `send`     | plugin   | yes      | Plugin invoked for each message. Must support write access. |
+| `encoding` | `string` | no       | Format of the value provided in `${send}`. See below.       |
+
+The possible `encoding` values are:
+
+| Encoding | Content of `${send}`                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| `json`   | JSON object `{ "msg": msg, "title": title }`. The `title` field is only added if defined for the event. |
+| `csv`    | `title` and `msg` as a comma-separated list                                                             |
+| `tsv`    | Like `csv`, but tab-separated                                                                           |
+| `title`  | Only the title                                                                                          |
+| (none)   | Only the message (`msg`)                                                                                |
+
+### Example
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} connected"
+      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # plugin type
+        source: script
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+In this example, a shell script (`cmd`) is invoked with the argument `{"title": "...", "msg": "..."}`.

@@ -690,3 +690,50 @@ Steuerbox und evcc müssen einmalig [gekoppelt](/de/external-limit#eebus-pairing
 type: eebus
 ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
 ```
+
+<a id="notification-service"></a>
+
+## Benachrichtigungsdienst
+
+Ein benutzerdefinierter Benachrichtigungsdienst verarbeitet [Benachrichtigungen](/de/notifications) über ein beliebiges [Plugin](/de/reference/plugins) mit Schreibzugriff, z. B. ein Shell-Skript, einen HTTP-Aufruf oder eine MQTT-Nachricht.
+Wähle dazu in der Oberfläche unter **Konfiguration → Benachrichtigungen → Dienste** die Option **Benutzerdefinierter Dienst**.
+
+Die Nachricht wird dem Plugin im Parameter `${send}` (bzw. als Template-Parameter `{{.send}}`) bereitgestellt.
+
+### Konfiguration
+
+| Attribut   | Typ      | Erforderlich | Beschreibung                                                                      |
+| ---------- | -------- | ------------ | --------------------------------------------------------------------------------- |
+| `send`     | Plugin   | ja           | Plugin, das für jede Nachricht aufgerufen wird. Muss Schreibzugriff unterstützen. |
+| `encoding` | `string` | nein         | Format des Werts in `${send}`. Siehe unten.                                       |
+
+Die möglichen Werte für `encoding` sind:
+
+| Encoding | Inhalt von `${send}`                                                                                                         |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `json`   | JSON-Objekt `{ "msg": msg, "title": title }`. Das Feld `title` wird nur hinzugefügt, wenn es für das Ereignis definiert ist. |
+| `csv`    | `title` und `msg` als kommaseparierte Liste                                                                                  |
+| `tsv`    | Wie `csv`, jedoch mit Tabulator als Trennzeichen                                                                             |
+| `title`  | Nur der Titel                                                                                                                |
+| (keins)  | Nur die Nachricht (`msg`)                                                                                                    |
+
+### Beispiel
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} verbunden"
+      msg: "${vehicleTitle} wurde verbunden (Lademodus: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # Plugin-Typ
+        source: script
+        # Plugin-spezifische Konfiguration;
+        # {{.send}} enthält die JSON-Nachricht
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+In diesem Beispiel wird ein Shell-Skript (`cmd`) mit dem Argument `{"title": "...", "msg": "..."}` aufgerufen.
