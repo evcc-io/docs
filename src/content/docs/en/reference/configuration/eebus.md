@@ -4,6 +4,11 @@ sidebar:
   order: 13
 ---
 
+:::tip[Recommendation]
+Configure EEBus in the UI under **Configuration → EEBus**.
+Certificate and identifiers are generated automatically on first start.
+:::
+
 **For example**:
 
 ```yaml
@@ -22,6 +27,14 @@ eebus:
       -----END EC PRIVATE KEY-----
 ```
 
+:::note[Migration from YAML to UI]
+Remove the `eebus:` block from your `evcc.yaml` and restart.
+A new certificate is generated automatically and all EEBus devices must be paired again.
+
+To keep your existing certificate, enter it in the EEBus dialog under **Show advanced settings**.
+This is useful if the SKI (part of the public certificate) is already registered with your grid operator for [external control](/en/features/external-control).
+:::
+
 ---
 
 ## Required Parameters
@@ -30,7 +43,7 @@ eebus:
 
 Defines the certificate and its private key to be used for the required HTTPS connection.
 
-This can be generated using `evcc eebus-cert`.
+When configuring in the UI, the certificate is generated automatically.
 
 **For example**:
 
@@ -82,7 +95,7 @@ private: |
 
 ### `interfaces`
 
-Defines a list of network interfaces through which EEBUS should communicate. By default, all interfaces are used, but this might lead to communication issues.
+Defines a list of network interfaces through which EEBus should communicate. By default, all interfaces are used, but this might lead to communication issues.
 
 **For example**:
 

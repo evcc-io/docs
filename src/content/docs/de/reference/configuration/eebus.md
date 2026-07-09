@@ -4,6 +4,11 @@ sidebar:
   order: 13
 ---
 
+:::tip[Empfehlung]
+Konfiguriere EEBus im UI unter **Konfiguration → EEBus**.
+Zertifikat und Kennungen werden beim ersten Start automatisch generiert.
+:::
+
 **Beispiel**:
 
 ```yaml
@@ -22,6 +27,14 @@ eebus:
       -----END EC PRIVATE KEY-----
 ```
 
+:::note[Migration von YAML zum UI]
+Entferne den `eebus:`-Block aus deiner `evcc.yaml` und starte neu.
+Ein neues Zertifikat wird automatisch generiert und alle EEBus-Geräte müssen neu gekoppelt werden.
+
+Wenn du dein bisheriges Zertifikat behalten möchtest, trage es im EEBus-Dialog unter **Erweiterte Einstellungen anzeigen** ein.
+Das ist sinnvoll, wenn die SKI (Bestandteil des öffentlichen Zertifikats) bereits für die [externe Steuerung](/de/features/external-control) beim Netzbetreiber hinterlegt ist.
+:::
+
 ---
 
 ## Erforderliche Parameter
@@ -30,7 +43,7 @@ eebus:
 
 Definiert das zu verwendende Zertifikat und dessen privaten Schlüssel für die vorgeschriebene HTTPS Verbindung.
 
-Dieses kann über `evcc eebus-cert` erstellt werden.
+Bei der Konfiguration im UI wird das Zertifikat automatisch generiert.
 
 **Beispiel**:
 
@@ -82,7 +95,7 @@ private: |
 
 ### `interfaces`
 
-Definiert eine Liste von Netzwerkschnittstellen, über welche EEBUS kommunizieren soll. Standardmäßig werden alle Schnittstellen verwendet, dies kann jedoch zu Kommunikationsproblemen führen.
+Definiert eine Liste von Netzwerkschnittstellen, über welche EEBus kommunizieren soll. Standardmäßig werden alle Schnittstellen verwendet, dies kann jedoch zu Kommunikationsproblemen führen.
 
 **Beispiel**:
 
