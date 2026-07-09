@@ -4,10 +4,9 @@ sidebar:
   order: 13
 ---
 
-:::note[veraltet in yaml]
-Komfortabler und selbsterklärend kann EEBUS inzwischen im UI-Einstellungsdialog konfiguriert werden. Dafür den `eebus:`-Block im yaml einfach auskommentieren. Dann generiert evcc beim nächsten Start ein neues Zertifikat.
-
-Alternativ kannst du im UI unter _EEBUS > Erweiterte Einstellungen anzeigen_ dein bisheriges public und private Zertifikat importieren, aus deinem auskommentierten yaml-Block. Das kann sinnvoll sein wenn die SKI (ein fester Bestandteil des public Zertifikats) bereits für [External Control](https://docs.evcc.io/de/features/external-control/) bei deinem Messstellenbetreiber hinterlegt wurde.
+:::tip[Empfehlung]
+Konfiguriere EEBus im UI unter **Konfiguration → EEBus**.
+Zertifikat und Kennungen werden beim ersten Start automatisch generiert.
 :::
 
 **Beispiel**:
@@ -28,6 +27,14 @@ eebus:
       -----END EC PRIVATE KEY-----
 ```
 
+:::note[Migration von YAML zum UI]
+Entferne den `eebus:`-Block aus deiner `evcc.yaml` und starte neu.
+Ein neues Zertifikat wird automatisch generiert und alle EEBus-Geräte müssen neu gekoppelt werden.
+
+Wenn du dein bisheriges Zertifikat behalten möchtest, trage es im EEBus-Dialog unter **Erweiterte Einstellungen anzeigen** ein.
+Das ist sinnvoll, wenn die SKI (Bestandteil des öffentlichen Zertifikats) bereits für die [externe Steuerung](/de/features/external-control) beim Netzbetreiber hinterlegt ist.
+:::
+
 ---
 
 ## Erforderliche Parameter
@@ -36,7 +43,7 @@ eebus:
 
 Definiert das zu verwendende Zertifikat und dessen privaten Schlüssel für die vorgeschriebene HTTPS Verbindung.
 
-Dieses kann über `evcc eebus-cert` erstellt werden.
+Bei der Konfiguration im UI wird das Zertifikat automatisch generiert.
 
 **Beispiel**:
 
@@ -88,7 +95,7 @@ private: |
 
 ### `interfaces`
 
-Definiert eine Liste von Netzwerkschnittstellen, über welche EEBUS kommunizieren soll. Standardmäßig werden alle Schnittstellen verwendet, dies kann jedoch zu Kommunikationsproblemen führen.
+Definiert eine Liste von Netzwerkschnittstellen, über welche EEBus kommunizieren soll. Standardmäßig werden alle Schnittstellen verwendet, dies kann jedoch zu Kommunikationsproblemen führen.
 
 **Beispiel**:
 
