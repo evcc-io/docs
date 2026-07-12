@@ -1,0 +1,182 @@
+---
+interface Props {
+  lang: "de" | "en";
+}
+const { lang } = Astro.props;
+---
+
+{lang === "de" ? (
+  <>
+    <h2 id="how-it-works">Funktionsweise</h2>
+    <p>
+      Im Normalbetrieb lädt evcc ohne externe Leistungsbegrenzung.
+      Die Ladepunkte arbeiten mit ihrer normalen Konfiguration und werden ggf. durch weitere <a href="/de/features/loadmanagement">Lastmanagement</a>-Einschränkungen koordiniert.
+    </p>
+    <p>Wenn der Netzbetreiber ein Reduzierungssignal sendet:</p>
+    <ol>
+      <li><strong>FNN-Steuerbox</strong>: Der W4-Kontakt wird geschlossen, evcc aktiviert das konfigurierte Verbrauchslimit</li>
+      <li><strong>EEBus</strong>: Die Steuerbox übermittelt das berechnete Gesamtlimit digital</li>
+      <li><strong>Relais</strong>: Der Kontakt wird geschlossen, evcc aktiviert das konfigurierte Leistungslimit</li>
+    </ol>
+    <p>
+      Das Limit begrenzt den obersten <a href="/de/features/loadmanagement">Lastmanagement</a>-Stromkreis; alle den Stromkreisen zugeordneten Ladepunkte werden entsprechend heruntergeregelt.
+      Bei zu hohem Gesamtverbrauch können Ladevorgänge auch gestoppt werden.
+      Die Regelung betrifft alle Modi (PV, Min+PV, Schnell).
+    </p>
+    <p>
+      <strong>Batteriesteuerung während der Reduzierung:</strong>
+      Ist <a href="/de/features/battery#battery-control">aktive Batteriesteuerung</a> konfiguriert und ein <a href="/de/features/battery#gridcharge">Netzladevorgang</a> der Hausbatterie aktiv, wird dieser automatisch pausiert.
+      Die Batterie wird in den „Hold"-Modus versetzt, sodass sie nicht mehr entlädt.
+      Das Laden der Batterie bei PV-Überschuss ist idR. weiterhin möglich.
+      Nach Ende der Leistungsreduzierung wird das <a href="/de/features/battery#gridcharge">Netzladen</a> automatisch fortgesetzt.
+    </p>
+    <p>
+      Wenn ein Regellimit aktiv ist, wird ein <strong>Banner mit Regelhinweis</strong> auf der Hauptseite in evcc angezeigt.
+      Verbrauchslimit und Einspeisebegrenzung werden separat dargestellt.
+    </p>
+
+    <h2 id="logging">Protokollierung</h2>
+    <p>
+      Alle Limitierungsanfragen durch den Netzbetreiber werden automatisch dokumentiert.
+      Die Protokolldaten können unter <strong>Konfiguration → Externe Begrenzung</strong> als CSV-Datei heruntergeladen werden.
+    </p>
+    <p>Jeder Eintrag enthält:</p>
+    <ul>
+      <li>Start- und Endzeitpunkt der Limitierung</li>
+      <li>Art der Steuerung (Verbrauchsreduzierung oder Einspeisebegrenzung)</li>
+      <li>Gemessene Netzleistung zu Beginn der Limitierung</li>
+      <li>Gesetztes Leistungslimit</li>
+    </ul>
+    <p>
+      Diese Dokumentation kann auf Anfrage dem Netzbetreiber vorgelegt werden, um die Einhaltung der Steueranfragen nachzuweisen.
+    </p>
+    <aside class="starlight-aside starlight-aside--note" aria-label="Verantwortung (§ 14a, § 9)">
+      <p class="starlight-aside__title" aria-hidden="true">Verantwortung (§ 14a, § 9)</p>
+      <div class="starlight-aside__content">
+        <p>
+          Die Elektrofachkraft muss nach der Einrichtung überprüfen, dass die externe Begrenzung wie vorgesehen funktioniert.
+          Der Anlagenbetreiber ist für den ordnungsgemäßen Betrieb verantwortlich und muss das Protokoll für mindestens 2 Jahre aufbewahren.
+        </p>
+      </div>
+    </aside>
+
+    <h2 id="additional-consumers">Steuerung weiterer Verbraucher</h2>
+    <p>
+      Neben Ladepunkten können auch weitere steuerbare Verbraucher in das § 14a Lastmanagement einbezogen werden.
+      Dies betrifft z.&nbsp;B. Wärmepumpen oder Batteriespeicher, die über EEBus angebunden oder als Zähler mit zusätzlichem Relaisausgang konfiguriert sind.
+    </p>
+    <p>
+      Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller steuerbaren Verbraucher.
+      Dazu zählen automatisch alle Ladepunkte und alle Zähler mit entsprechenden Schaltausgängen oder EEBus-Schnittstelle mit LPC Use Case als sonstige Verbraucher.
+    </p>
+    <p>
+      Zunächst werden alle sonstigen Verbraucher gedimmt.
+      Die verbleibende Leistung wird dann auf die aktiven Ladepunkte verteilt.
+      Durch pauschale Dimmung der sonstigen Verbraucher kann die verfügbare Ladeleistung für aktive Ladepunkte in Ausnahmefällen sogar höher sein als im Normalzustand.
+      Reicht die Drosselung der Ladepunkte einschließlich der Dimmung aller sonstigen Verbraucher nicht aus, werden Ladevorgänge an Ladepunkten unterbrochen.
+    </p>
+    <aside class="starlight-aside starlight-aside--note" aria-label="Verfügbarkeit">
+      <p class="starlight-aside__title" aria-hidden="true">Verfügbarkeit</p>
+      <div class="starlight-aside__content">
+        <p>
+          Aktuell existiert nur ein dimmbarer Zähler (EEBus Verbraucher).
+          Diese Funktion wird weiter ausgebaut und entsprechende Zähler werden in der <a href="/de/meters">Gerätedokumentation</a> markiert.
+        </p>
+      </div>
+    </aside>
+
+    <h2 id="further-information">Weiterführende Informationen</h2>
+    <ul>
+      <li><a href="/de/features/loadmanagement">Lastmanagement</a>: Grundlagen der Lastverteilung</li>
+      <li><a href="/de/user-defined-devices#external-limit">Benutzerdefinierte Integration</a>: Anbindung über Relais oder eigene Datenquellen</li>
+      <li><a href="/de/reference/plugins">Plugins</a>: Erweiterte Plugin-Konfigurationen</li>
+    </ul>
+  </>
+) : (
+  <>
+    <h2 id="how-it-works">How It Works</h2>
+    <p>
+      In normal operation, evcc charges without external power limitation.
+      The charging points operate with their normal configuration and are coordinated by additional <a href="/en/features/loadmanagement">Load Management</a> restrictions if applicable.
+    </p>
+    <p>When the grid operator sends a reduction signal:</p>
+    <ol>
+      <li><strong>FNN control box</strong>: The W4 contact is closed, evcc activates the configured consumption limit</li>
+      <li><strong>EEBus</strong>: The control box digitally transmits the calculated total limit</li>
+      <li><strong>Relay</strong>: The contact is closed, evcc activates the configured power limit</li>
+    </ol>
+    <p>
+      The limit caps the top-level <a href="/en/features/loadmanagement">Load Management</a> circuit; all charging points assigned to circuits are reduced accordingly.
+      If total consumption is too high, charging processes can also be stopped.
+      The control affects all modes (Solar, Min+Solar, Fast).
+    </p>
+    <p>
+      <strong>Battery control during reduction:</strong>
+      If <a href="/en/features/battery#battery-control">active battery control</a> is configured and <a href="/en/features/battery#gridcharge">grid charging</a> of the home battery is active, this is automatically paused.
+      The battery is set to "hold" mode so that it no longer discharges.
+      Charging the battery from solar surplus is usually still possible.
+      After the power reduction ends, <a href="/en/features/battery#gridcharge">grid charging</a> automatically resumes.
+    </p>
+    <p>
+      When a control limit is active, a <strong>banner with control notice</strong> is displayed on the main page in evcc.
+      Consumption limit and feed-in curtailment are shown separately.
+    </p>
+
+    <h2 id="logging">Logging</h2>
+    <p>
+      All limitation requests from the grid operator are automatically documented.
+      The log data can be downloaded as a CSV file under <strong>Configuration → External Limit</strong>.
+    </p>
+    <p>Each entry contains:</p>
+    <ul>
+      <li>Start and end time of the limitation</li>
+      <li>Type of control (consumption reduction or feed-in curtailment)</li>
+      <li>Measured grid power at the start of the limitation</li>
+      <li>Set power limit</li>
+    </ul>
+    <p>
+      This documentation can be provided to the grid operator upon request to verify compliance with control requests.
+    </p>
+    <aside class="starlight-aside starlight-aside--note" aria-label="Responsibility (German regulations § 14a, § 9)">
+      <p class="starlight-aside__title" aria-hidden="true">Responsibility (German regulations § 14a, § 9)</p>
+      <div class="starlight-aside__content">
+        <p>
+          The qualified electrician must verify after installation that the external limit is working as expected.
+          The system operator is responsible for proper operation and must keep the log for at least 2 years.
+        </p>
+      </div>
+    </aside>
+
+    <h2 id="additional-consumers">Controlling Additional Consumers</h2>
+    <p>
+      In addition to charging points, other controllable consumers can also be integrated into German § 14a load management.
+      This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with an additional relay output.
+    </p>
+    <p>
+      The control takes into account the current power consumption of all controllable consumers.
+      This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
+    </p>
+    <p>
+      First, all other consumers are dimmed.
+      The remaining power is then distributed to the active charging points.
+      Due to flat dimming of other consumers, the available charging power for active charging points can in exceptional cases even be higher than in normal state.
+      If throttling the charging points including dimming all other consumers is not sufficient, charging processes at charging points are interrupted.
+    </p>
+    <aside class="starlight-aside starlight-aside--note" aria-label="Availability">
+      <p class="starlight-aside__title" aria-hidden="true">Availability</p>
+      <div class="starlight-aside__content">
+        <p>
+          Currently, only one dimmable meter (EEBus consumer) exists.
+          This feature is being expanded and compatible meters will be marked in the <a href="/en/meters">device documentation</a>.
+        </p>
+      </div>
+    </aside>
+
+    <h2 id="further-information">Further Information</h2>
+    <ul>
+      <li><a href="/en/features/loadmanagement">Load Management</a>: Basics of load distribution</li>
+      <li><a href="/en/user-defined-devices#external-limit">User-defined integration</a>: Connection via relay or custom data sources</li>
+      <li><a href="/en/reference/plugins">Plugins</a>: Advanced plugin configurations</li>
+    </ul>
+  </>
+)}

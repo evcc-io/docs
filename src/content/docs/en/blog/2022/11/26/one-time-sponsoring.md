@@ -38,7 +38,7 @@ Zusätzlich zum Sponsortoken um Funktionen freizuschalten schicken wir allen Unt
 Wir haben schon mehrfach das Feedback bekommen, dass Nutzer Bauchschmerzen mit monatlichen Zahlungen haben und sich eine Möglichkeit der Einmalzahlung wünschen, um ein Sponsortoken zu erhalten. Dies ist nun möglich. Auf der [GitHub Sponsoring Seite](https://github.com/sponsors/evcc-io?frequency=one-time) gibt es jetzt neben den monatlichen auch One-time-Stufen. Folgende Preisstufen haben wir uns überlegt:
 
 - **🌱 $100 - Nachhaltige Entwicklung**<br />Du trägst dazu bei, dass wir auch zukünftig viel Energie in die Weiterentwicklung von evcc investieren können. Außerdem bekommst du **ein unbefristetes Sponsortoken**, mit dem du alle evcc Funktionen nutzen kannst.
-- ~**☀️ $150 - Friends & Family**<br />Du bekommst **drei unbefristete Sponsortoken**. Eins für dich und zwei weitere, die du an Freunde oder Familie weitergeben kannst. Du wirst als Sponsor auf [evcc.io](https://evcc.io) erwähnt.~
+- ~~**☀️ $150 - Friends & Family**<br />Du bekommst **drei unbefristete Sponsortoken**. Eins für dich und zwei weitere, die du an Freunde oder Familie weitergeben kannst. Du wirst als Sponsor auf [evcc.io](https://evcc.io) erwähnt.~~
 - **🚛 $1.000 - Multiplikator**<br />Für Elektriker und Solarteure. Du möchtest evcc für mehrere Kunde einsetzen? Schreib uns an [info@evcc.io](mailto:info@evcc.io) und wir finden eine gute Lösung.
 
 Die Ausstellung für die unbefristeten Sponsortoken funktioniert genauso wie der aktuelle Prozess über [sponsor.evcc.io](https://sponsor.evcc.io). Einziger Unterschied ist, dass das Token nicht abläuft.

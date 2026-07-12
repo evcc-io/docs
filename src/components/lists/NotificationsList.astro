@@ -1,0 +1,78 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import NotificationsIntro from "@components/intros/NotificationsIntro.astro";
+import NotificationsOutro from "@components/intros/NotificationsOutro.astro";
+import UserDefinedHint from "@components/UserDefinedHint.astro";
+import ChannelListNav from "@components/ChannelListNav.astro";
+import { sortDevices, collectionName, nightlyPageHead } from "@utils/devices";
+import type { Channel } from "@utils/devices";
+
+interface Props {
+  lang: "de" | "en";
+  channel: Channel;
+}
+const { lang, channel } = Astro.props;
+const isNightly = channel === "nightly";
+
+const coll = await getCollection(
+  collectionName("messengers", lang, channel) as any,
+);
+const devices = sortDevices(coll as any);
+const basePath = `/${lang}${isNightly ? "/nightly" : ""}/notifications`;
+
+const title = lang === "de" ? "Benachrichtigungen" : "Notifications";
+const description =
+  lang === "de"
+    ? "Benachrichtigungen über Ladevorgänge per Telegram, Pushover, ntfy, E-Mail und mehr."
+    : "Notifications about your charging sessions via Telegram, Pushover, ntfy, email, and more.";
+
+const headings =
+  lang === "de"
+    ? [
+        { depth: 2, slug: "services", text: "Dienste" },
+        { depth: 2, slug: "events", text: "Ereignisse" },
+        { depth: 2, slug: "message-format", text: "Nachrichtenformat" },
+        { depth: 3, slug: "placeholders", text: "Platzhalter" },
+        { depth: 3, slug: "variables", text: "Verfügbare Variablen" },
+      ]
+    : [
+        { depth: 2, slug: "services", text: "Services" },
+        { depth: 2, slug: "events", text: "Events" },
+        { depth: 2, slug: "message-format", text: "Message Format" },
+        { depth: 3, slug: "placeholders", text: "Placeholders" },
+        { depth: 3, slug: "variables", text: "Available Variables" },
+      ];
+
+const frontmatter = {
+  title,
+  description,
+  template: "doc",
+  ...(isNightly ? { pagefind: false, head: nightlyPageHead } : {}),
+};
+---
+
+<StarlightPage frontmatter={frontmatter} headings={headings}>
+  {isNightly && <ChannelListNav lang={lang} channel={channel} category="notifications" />}
+  <NotificationsIntro lang={lang} />
+  <h2 id="services">{lang === "de" ? "Dienste" : "Services"}</h2>
+  {
+    lang === "de" ? (
+      <p>
+        Unter <strong>Dienste</strong> fügst du einen oder mehrere der
+        folgenden Dienste hinzu.
+      </p>
+    ) : (
+      <p>
+        Under <strong>Services</strong>, add one or more of the services listed
+        below.
+      </p>
+    )
+  }
+  <DeviceCardList devices={devices as any} lang={lang} basePath={basePath} flat />
+  {channel === "release" && (
+    <UserDefinedHint lang={lang} kind="messenger" nightlyHref={`/${lang}/nightly/notifications`} />
+  )}
+  <NotificationsOutro lang={lang} />
+</StarlightPage>

@@ -1,0 +1,158 @@
+---
+interface Props {
+  lang: "de" | "en";
+}
+const { lang } = Astro.props;
+---
+
+{lang === "de" ? (
+  <>
+    <p>
+      Netzbetreiber und übergeordnete Energiemanagementsysteme können den Leistungsbezug und die Einspeisung deiner Anlage extern begrenzen.
+      Folgende Anwendungsfälle werden abgedeckt:
+    </p>
+    <ul>
+      <li><strong>§ 14a EnWG</strong>: Temporäre Leistungsreduzierung und Dimmung von Verbrauchern durch den Netzbetreiber</li>
+      <li><strong>§ 9 EEG</strong>: Abregelung von PV-Anlagen bei Netzüberlastung</li>
+      <li><strong>EMS-Integration</strong>: Umsetzung von Limits anderer Energiemanagementsysteme</li>
+    </ul>
+
+    <h2 id="background">Hintergrund</h2>
+
+    <h3 id="dimming">Steuerbare Verbrauchseinrichtungen (§ 14a EnWG)</h3>
+    <p>
+      § 14a des Energiewirtschaftsgesetzes (EnWG) regelt die netzdienliche Steuerung von steuerbaren Verbrauchseinrichtungen (SteuVE).
+      Netzbetreiber können bei Netzüberlastung die Leistung großer Verbraucher wie Wallboxen, Wärmepumpen oder Batteriespeicher temporär reduzieren.
+    </p>
+    <p>Wichtige Punkte:</p>
+    <ul>
+      <li>Betrifft Verbraucher ab 4,2 kW Leistung</li>
+      <li>Steuerung erfolgt über Smart Meter Gateway und Steuerbox</li>
+    </ul>
+
+    <h3 id="curtailment">Einspeisemanagement (§ 9 EEG)</h3>
+    <p>
+      Nach § 9 des Erneuerbare-Energien-Gesetzes (EEG) können Netzbetreiber bei drohender Netzüberlastung die Einspeisung von Erneuerbare-Energien-Anlagen abregeln.
+      Dies betrifft hauptsächlich größere PV-Anlagen, kann aber auch im privaten Bereich relevant werden.
+    </p>
+    <p>
+      Erhält evcc ein Abregelungssignal, wird die Abregelungsstufe prozentual an alle abregelbaren Wechselrichter verteilt und direkt am Gerät umgesetzt.
+      FNN-Steuerboxen signalisieren gestufte Limits (60%, 30%, 0%), die direkt übernommen werden.
+      Watt-basierte Limits (z.&nbsp;B. über EEBus) werden anhand der installierten Generatorleistung in einen Prozentwert umgerechnet.
+      Wechselrichter ohne feingranulare Steuerung werden während des Limits komplett abgeschaltet.
+      Das aktive Limit wird in der Oberfläche angezeigt; nach Ende des Signals wird die volle Erzeugung wieder freigegeben.
+    </p>
+    <aside class="starlight-aside starlight-aside--caution" aria-label="Experimentell">
+      <p class="starlight-aside__title" aria-hidden="true">Experimentell</p>
+      <div class="starlight-aside__content">
+        <p>
+          Die Abregelung wird nur für ausgewählte Wechselrichter unterstützt.
+          Unterstützte Geräte sind in der <a href="/de/meters">Geräteübersicht</a> mit „Abregelbar" markiert.
+        </p>
+      </div>
+    </aside>
+
+    <h2 id="setup">Einrichtung</h2>
+    <p>
+      Die Einrichtung erfolgt über <strong>Konfiguration → Externe Begrenzung</strong>.
+      Dort wählst du eine der unten aufgeführten Integrationen aus und hinterlegst deren Parameter.
+      Alternativ kannst du eine <a href="/de/user-defined-devices#external-limit">benutzerdefinierte Integration</a> anlegen, z.&nbsp;B. für die Anbindung über einen einzelnen Schaltkontakt (Relais).
+    </p>
+    <p>
+      Damit das Verbrauchslimit auf deine Ladepunkte wirkt, richte Stromkreise im <a href="/de/features/loadmanagement">Lastmanagement</a> ein.
+      Ein aktives Limit begrenzt dann den obersten Stromkreis, erkennbar am Hinweis „Verbrauch begrenzt" auf der Lastmanagement-Kachel.
+      Aktive Limits werden auf der Kachel <strong>Externe Begrenzung</strong> und auf der Hauptseite angezeigt.
+    </p>
+
+    <h3 id="eebus-pairing">Pairing bei EEBus-Integrationen</h3>
+    <p>
+      Bei Integrationen über das EEBus-Protokoll kommuniziert die Steuerbox direkt mit evcc und übermittelt das Leistungslimit automatisch.
+      Steuerbox und evcc müssen dafür einmalig gekoppelt werden:
+    </p>
+    <ol>
+      <li>
+        <strong>In der Steuerbox</strong>: evcc als HEMS hinzufügen.
+        SKI und IP-Adresse von evcc findest du unter <strong>Konfiguration → EEBus</strong>.
+      </li>
+      <li>
+        <strong>In evcc</strong>: Die SKI der Steuerbox in der Integration eintragen.
+        Sie ist in der Dokumentation bzw. im Webinterface der Steuerbox einsehbar.
+      </li>
+    </ol>
+  </>
+) : (
+  <>
+    <p>
+      Grid operators and higher-level energy management systems can externally limit the power consumption and feed-in of your installation.
+      The following use cases are supported:
+    </p>
+    <ul>
+      <li><strong>§ 14a EnWG</strong> (German regulation): Temporary power reduction and dimming of consumers by the grid operator</li>
+      <li><strong>§ 9 EEG</strong> (German regulation): Curtailment of solar installations in case of grid overload</li>
+      <li><strong>EMS integration</strong>: Applying limits from other energy management systems</li>
+    </ul>
+
+    <h2 id="background">Background</h2>
+
+    <h3 id="dimming">Controllable Consumption Devices (§ 14a EnWG)</h3>
+    <p>
+      § 14a of the German Energy Industry Act (EnWG) regulates grid-friendly control of controllable consumption devices (SteuVE).
+      Grid operators can temporarily reduce the power of large consumers such as wallboxes, heat pumps or battery storage systems in the event of grid overload.
+    </p>
+    <p>Important points:</p>
+    <ul>
+      <li>Affects consumers from 4.2 kW power</li>
+      <li>Control via Smart Meter Gateway and control box</li>
+    </ul>
+
+    <h3 id="curtailment">Feed-in Management (§ 9 EEG)</h3>
+    <p>
+      According to § 9 of the Renewable Energy Act (EEG), grid operators can curtail the feed-in of renewable energy installations in the event of imminent grid overload.
+      This mainly affects larger solar installations, but can also become relevant in the residential sector.
+    </p>
+    <p>
+      When evcc receives a curtailment signal, the curtailment level is distributed to all curtailable inverters as a percentage and applied directly at the device.
+      FNN control boxes signal staged limits (60%, 30%, 0%), which are applied as-is.
+      Watt-based limits (e.g. via EEBus) are converted to a percentage based on the installed generator power.
+      Inverters without fine-grained control are switched off completely while the limit is active.
+      The active limit is shown in the UI; full production resumes once the signal clears.
+    </p>
+    <aside class="starlight-aside starlight-aside--caution" aria-label="Experimental">
+      <p class="starlight-aside__title" aria-hidden="true">Experimental</p>
+      <div class="starlight-aside__content">
+        <p>
+          Curtailment is only supported for selected inverters.
+          Supported devices are marked with "Curtailable" in the <a href="/en/meters">device overview</a>.
+        </p>
+      </div>
+    </aside>
+
+    <h2 id="setup">Setup</h2>
+    <p>
+      Configuration is done via <strong>Configuration → External Limit</strong>.
+      Pick one of the integrations listed below and enter its parameters.
+      Alternatively, you can create a <a href="/en/user-defined-devices#external-limit">user-defined integration</a>, e.g. for a connection via a single switch contact (relay).
+    </p>
+    <p>
+      To apply the consumption limit to your charging points, set up circuits in <a href="/en/features/loadmanagement">Load Management</a>.
+      An active limit then caps the top-level circuit, indicated by a "Consumption limited" hint on the Load Management card.
+      Active limits are shown on the <strong>External Limit</strong> card and on the main page.
+    </p>
+
+    <h3 id="eebus-pairing">Pairing for EEBus Integrations</h3>
+    <p>
+      With integrations using the EEBus protocol, the control box communicates directly with evcc and automatically transmits the power limit.
+      Control box and evcc need to be paired once:
+    </p>
+    <ol>
+      <li>
+        <strong>In the control box</strong>: Add evcc as HEMS.
+        The SKI and IP address of evcc are shown under <strong>Configuration → EEBus</strong>.
+      </li>
+      <li>
+        <strong>In evcc</strong>: Enter the control box SKI in the integration.
+        You can find it in the control box documentation or its web interface.
+      </li>
+    </ol>
+  </>
+)}

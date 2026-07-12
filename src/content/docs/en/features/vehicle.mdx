@@ -27,18 +27,8 @@ Under [Charging Sessions](./sessions), this charge is assigned to the guest vehi
 ### Vehicles without API (offline)
 
 If your vehicle does not have an online interface or no internet connection at the charging point, you can configure it as an offline vehicle.
-This is currently done via the `evcc.yaml`:
-
-```yaml
-vehicles:
-  - name: my_honda
-    title: Green Honda e
-    type: template
-    template: offline
-    capacity: 28.5 # in kWh
-```
-
-This means that the vehicle appears as a "green Honda e" in the UI.
+Go to **Configuration → Vehicles → Add vehicle** and choose **Generic vehicle (without API)** in the **Manufacturer** field.
+Give the vehicle a **Title** (e.g. "Green Honda e") and enter the **Capacity** of its battery.
 Now that the battery capacity is known, the charging progress and the charging limit can also be shown in percent (e.g. +25%).
 
 Note: You can also use this function for third-party vehicles (friends, family, rental or company cars) to which you do not have API access.
@@ -47,18 +37,8 @@ Note: You can also use this function for third-party vehicles (friends, family, 
 
 If your vehicle has an online interface, it makes sense to configure this in evcc as well.
 You can find a list of all supported manufacturers under [Vehicles](/en/vehicles).
-The recommended configuration is also done here via `evcc.yaml`. Here is an example for an Audi:
-
-```yaml
-vehicles:
-  - name: my_audi
-    title: Red Audi Q4 e-tron
-    type: template
-    template: audi
-    user: info@example.org
-    password: ***
-    capacity: 77 # in kWh
-```
+Go to **Configuration → Vehicles → Add vehicle** and choose your **Manufacturer**, e.g. Audi.
+Depending on the manufacturer, you then enter the access data of your vehicle account, such as user and password.
 
 evcc now has access to the current state of charge (SoC).
 Depending on the manufacturer, other information such as charging status, vehicle limits, mileage, climate control and estimated range are also available.
@@ -78,15 +58,10 @@ There are various options for assigning vehicles to charging points:
 
 If each vehicle has its own charging point, you can configure the vehicle as the standard vehicle at the charging point.
 This is the simplest and recommended configuration.
+Go to **Configuration → Charging & Heating → [My Charging Point]**.
+In the **Vehicles** section, select your vehicle as **Default vehicle**.
 When a new charging process starts, evcc assumes that it is the standard vehicle.
 If this is not the case (e.g. guest vehicle), you can switch the vehicle in the UI.
-
-```yaml
-loadpoints:
-  - title: Garage
-    vehicle: my_audi # Standard vehicle
-    ...
-```
 
 ### Assignment via the UI
 
@@ -113,16 +88,9 @@ Every time the vehicle is connected to the wallbox again, the charging process m
 
 evcc receives a unique identification code from the wallbox.
 Depending on the manufacturer, this is either the RFID code or a derived internal code such as a user name from the wallbox configuration.
-You can read the current identifier of your wallbox using the `evcc charger` command.
-You then store this in the `evcc.yaml` on the desired vehicle:
-
-```yaml
-vehicles:
-  - name: vehicle_one
-    ...
-    identifiers:
-      - 1234567890 # determined via `evcc charger`
-```
+After activating with the card, the current identifier is shown on the charging point card under **Configuration → Charging & Heating**.
+Enter this value in the **RFID identification** field of the desired vehicle under **Configuration → Vehicles**.
+You can store multiple identifiers per vehicle.
 
 ### Detection via Plug & Charge
 
@@ -135,30 +103,14 @@ The "PLC connection to the vehicle" feature must be activated in the wallbox.
 
 The setup is similar to RFID detection.
 The vehicle must be connected to the wallbox.
-You can use the `evcc charger` command to read the current `identifier` of your wallbox.
-You can then assign this to a vehicle in the `evcc.yaml`:
-
-```yaml
-vehicles:
-  - name: vehicle_one
-    ...
-    identifiers:
-      - 01:23:45:67:89:00 # determined via `evcc charger`
-```
+The identifier (e.g. `01:23:45:67:89:00`) is then shown on the charging point card under **Configuration → Charging & Heating**.
+Enter this value in the **RFID identification** field of the vehicle.
 
 :::note[Note]
 If the vehicle and the wallbox do not support Plug & Charge, the vehicles return a unique hardware address (MAC address).
 However, some manufacturers such as VW and Audi change this to a different random value every day.
 
-In this case, you can use a wildcard and only specify the part that does not change:
-
-```yaml
-vehicles:
-- name: vehicle_one
-    ...
-    identifiers:
-    - 01:23:45:*
-```
+In this case, you can use a wildcard and only specify the part that does not change, e.g. `01:23:45:*`.
 
 Of course, this only works if this does not occur in several existing vehicles and the specified initial part of the value is different in each case.
 :::

@@ -35,6 +35,8 @@ export default defineConfig({
     "/en/docs/Home": "/en",
     "/docs/reference/api": "/en/integrations/rest-api",
     "/en/docs/reference/api": "/en/integrations/rest-api",
+    "/en/features/external-control": "/en/external-limit",
+    "/de/features/external-control": "/de/external-limit",
   },
   integrations: [
     mermaid({
@@ -180,7 +182,14 @@ export default defineConfig({
         {
           label: "Features",
           translations: { de: "Funktionen" },
-          items: [{ autogenerate: { directory: "features", collapsed: true } }],
+          items: [
+            { autogenerate: { directory: "features", collapsed: true } },
+            {
+              label: "External Limit (§14a, §9)",
+              translations: { de: "Externe Begrenzung (§14a, §9)" },
+              link: "/external-limit",
+            },
+          ],
         },
         {
           label: "Integrations",
@@ -193,6 +202,11 @@ export default defineConfig({
             {
               label: "Sunny Home Manager",
               slug: "integrations/sma-sunny-home-manager",
+            },
+            {
+              label: "Notifications",
+              translations: { de: "Benachrichtigungen" },
+              link: "/notifications",
             },
           ],
         },
@@ -214,6 +228,7 @@ export default defineConfig({
             },
             { label: "Plugins", slug: "reference/plugins" },
             { label: "Modbus", slug: "reference/modbus" },
+            { label: "Web UI", slug: "reference/web-ui" },
             { label: "evcc App", slug: "reference/app" },
             {
               label: "CLI",

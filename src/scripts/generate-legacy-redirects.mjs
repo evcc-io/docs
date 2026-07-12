@@ -28,7 +28,7 @@ function makeRedirectHtml(target) {
 <title>Redirecting…</title>
 <meta http-equiv="refresh" content="0; url=${target}">
 <link rel="canonical" href="${target}">
-<script>window.location.replace(${JSON.stringify(target)})</script>
+<script>window.location.replace(${JSON.stringify(target)} + window.location.hash)</script>
 </head>
 <body><p>Redirecting to <a href="${target}">${target}</a></p></body></html>`;
 }

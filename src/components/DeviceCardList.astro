@@ -36,11 +36,15 @@ interface Props {
   showSponsorRequired?: boolean;
   /** Stable identifier so the device filter can target this list (`data-device-list="…"`). */
   filterId?: string;
+  /** Group label for devices without a brand (default "Other"/"Sonstige"). */
+  noBrandLabel?: string;
+  /** Sort the no-brand group first instead of last. */
+  unbrandedFirst?: boolean;
 }
 
-const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorFree = false, showSponsorRequired = false, filterId } = Astro.props;
+const { devices, lang, basePath, showUsages = false, showFeatures = true, showCountries = false, flat = false, showSponsorFree = false, showSponsorRequired = false, filterId, noBrandLabel, unbrandedFirst = false } = Astro.props;
 
-const NO_BRAND = lang === "de" ? "Sonstige" : "Other";
+const NO_BRAND = noBrandLabel ?? (lang === "de" ? "Sonstige" : "Other");
 
 function brandKey(d: Device): string {
   return (d.data.product.brand || "").trim() || NO_BRAND;
@@ -57,8 +61,8 @@ for (const d of devices) {
   byBrand.get(b)!.push(d);
 }
 const brands = [...byBrand.keys()].sort((a, b) => {
-  if (a === NO_BRAND) return 1;
-  if (b === NO_BRAND) return -1;
+  if (a === NO_BRAND) return unbrandedFirst ? -1 : 1;
+  if (b === NO_BRAND) return unbrandedFirst ? 1 : -1;
   return a.localeCompare(b, lang);
 });
 

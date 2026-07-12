@@ -89,12 +89,16 @@ Everything else is hand-written:
 ### Language & Tone
 
 - **Be informal and casual** — address readers directly with "you" (English) or "du" (German)
+- Direct address only for actions the reader actually performs (UI steps, setup instructions). For technical requirements use an impersonal subject: "Das Plugin muss den Zählerstand liefern", not "Liefere den Zählerstand"
+- Write complete, natural sentences — no telegraphic or clipped phrasing, no semicolon-jammed clauses
 - Write for individual professionals, not businesses
 - Avoid corporate or marketing language (e.g. don't use words like "bequem", "convenient", "seamlessly")
 - Be concise and direct; describe behaviour, not internals (no libraries / quotas / internal naming schemes in user-facing docs)
 - Don't pitch the absence of analytics/telemetry as a feature — frame it as the default
 
 ### Terminology
+
+- **Match the evcc UI wording** — check `../evcc/i18n/en.json` and `de.json` for existing terms before inventing new ones (e.g. grid: "imported/exported" / „bezogen/eingespeist", battery: "charged/discharged" / „geladen/entladen", PV: "production" / „Erzeugung")
 
 #### English
 
@@ -109,6 +113,7 @@ Everything else is hand-written:
 - Be consistent with hyphens: "PV-Überschuss", "PV-Modus"
 - Use abbreviations: "z. B." not "beispielsweise"
 - Use "Sponsortoken" as one word, not "Sponsor Token" or "Sponsor-Token"
+- UI panels are „Kacheln", not „Karten" (e.g. „Lastmanagement-Kachel"); English uses "card"
 
 ### Formatting Conventions
 
@@ -140,6 +145,8 @@ Everything else is hand-written:
 #### Numbers & Units
 
 - **Always use a space** between number and unit: `11 kW`, `230 V`
+- **Percent is the exception**: no space between number and `%`: `50%`, `60%` (both languages)
+- **Paragraph signs**: space between `§` and number in body text: `§ 14a EnWG`, `§ 9 EEG` (matches the device templates). Only navigation labels and page titles use the compact short form: `§14a, §9`
 - **German**: Use comma for decimals, period for thousands: `1,4 kW`, `11.200 W`
 - **English**: Use period for decimals, comma for thousands: `1.4 kW`, `11,200 W`
 
@@ -203,6 +210,7 @@ Everything else is hand-written:
 
 - Use locale-prefixed absolute paths (`/en/...`, `/de/...`) for clarity
 - Keep anchor names (`#section`) consistent between translations
+- **Anchor names are always English** in both locales, matching the English heading slug (e.g. `signs-and-directions`, not `vorzeichen-und-richtungen`) — this keeps anchors working when switching languages
 - **Create explicit anchors** on headings instead of relying on auto-generated ones
   - Auto-generated anchors change with heading text and differ between languages
   - In `.md` files use the compact form: `### Vehicle Detection {#vehicle}`

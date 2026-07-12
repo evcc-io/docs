@@ -51,6 +51,8 @@ export const CODE_PREAMBLES: Record<string, string> = {
   price: "tariffs:\n    grid:",
   co2: "tariffs:\n    co2:",
   solar: "tariffs:\n    solar:",
+  hems: "hems:",
+  messenger: "messaging:\n  services:",
 };
 
 const TRANSLATIONS_DE: Record<string, string> = {
@@ -281,7 +283,15 @@ export function availableUsages(
 }
 
 export function featuresFor(
-  type: "charger" | "meter" | "tariff" | "vehicle" | "smartswitch" | "heating",
+  type:
+    | "charger"
+    | "meter"
+    | "tariff"
+    | "vehicle"
+    | "smartswitch"
+    | "heating"
+    | "hems"
+    | "messenger",
   entry: DeviceEntry,
   lang: "de" | "en",
 ): string[] {
@@ -317,7 +327,8 @@ export type Channel = "release" | "nightly";
  * Smart switches and heating use the `chargers` collection.
  */
 export function collectionName(
-  prefix: "chargers" | "meters" | "vehicles" | "tariffs",
+  prefix:
+    "chargers" | "meters" | "vehicles" | "tariffs" | "hems" | "messengers",
   lang: "de" | "en",
   channel: Channel,
 ): string {
@@ -336,7 +347,7 @@ export const nightlyPageHead = [
 /** Link to the device's source template in the evcc repo (undefined if none). */
 export function templateEditUrl(
   entry: DeviceEntry,
-  dir: "charger" | "meter" | "vehicle" | "tariff",
+  dir: "charger" | "meter" | "vehicle" | "tariff" | "hems" | "messenger",
 ): string | undefined {
   return entry.data.template
     ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/${dir}/${entry.data.template}.yaml`
@@ -346,9 +357,31 @@ export function templateEditUrl(
 /** YAML config blocks for a device detail page (non-meter categories). */
 export function buildCodeBlocks(
   entry: DeviceEntry,
-  type: "charger" | "vehicle" | "smartswitch" | "heating" | "tariff",
+  type:
+    | "charger"
+    | "vehicle"
+    | "smartswitch"
+    | "heating"
+    | "tariff"
+    | "hems"
+    | "messenger",
 ): string[] {
   const render = (entry.data.render as any[]) ?? [];
+  if (type === "hems") {
+    // hems is a top-level single object, not a named list entry
+    return render.map((r) => {
+      const src = r.advanced ?? r.default;
+      return `${CODE_PREAMBLES.hems}\n${src.replace(/^/gm, "  ").trimEnd()}`;
+    });
+  }
+  if (type === "messenger") {
+    // messengers are list entries under messaging.services (depth 2)
+    return render.map((r) => {
+      const src = r.advanced ?? r.default;
+      const item = src.replace(/^/, "    - ").replace(/\n/gm, "\n      ");
+      return `${CODE_PREAMBLES.messenger}\n${item.trimEnd()}`;
+    });
+  }
   if (type === "tariff") {
     const groupKey = TARIFF_GROUPS[entry.data.product.group ?? ""] ?? "price";
     const preamble = CODE_PREAMBLES[groupKey];
@@ -375,7 +408,8 @@ export function buildCodeBlocks(
  * same-id entry exists.
  */
 export async function deviceDetailPaths(opts: {
-  prefix: "chargers" | "meters" | "vehicles" | "tariffs";
+  prefix:
+    "chargers" | "meters" | "vehicles" | "tariffs" | "hems" | "messengers";
   /** URL segment, e.g. "smartswitches" (may differ from the collection prefix). */
   urlType: string;
   channel: Channel;
