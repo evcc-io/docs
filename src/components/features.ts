@@ -59,12 +59,12 @@ const descriptions: Record<string, Partial<Record<Lang, string>>> = {
     en: "External control of home battery charging and discharging via evcc.",
   },
   dim: {
-    de: "Verbrauchsleistung kann reduziert werden (bspw. §14a EnWG). Siehe [Externe Steuerung](/de/features/external-control).",
-    en: "Power consumption can be reduced (e.g. §14a EnWG). See [External Control](/en/features/external-control).",
+    de: "Verbrauchsleistung kann reduziert werden (bspw. § 14a EnWG). Siehe [Externe Begrenzung](/de/external-limit).",
+    en: "Power consumption can be reduced (e.g. § 14a EnWG). See [External Limit](/en/external-limit).",
   },
   curtail: {
-    de: "Wechselrichter-Erzeugung kann reduziert werden (bspw. §9 EEG). Siehe [Externe Steuerung](/de/features/external-control).",
-    en: "Inverter production can be reduced (e.g. §9 EEG). See [External Control](/en/features/external-control).",
+    de: "Wechselrichter-Erzeugung kann reduziert werden (bspw. § 9 EEG). Siehe [Externe Begrenzung](/de/external-limit).",
+    en: "Inverter production can be reduced (e.g. § 9 EEG). See [External Limit](/en/external-limit).",
   },
   ocpp: {
     de: "Kommunikation über das offene OCPP-Protokoll.",

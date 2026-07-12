@@ -1,0 +1,238 @@
+---
+import { Code } from "@astrojs/starlight/components";
+
+interface Props {
+  lang: "de" | "en";
+}
+const { lang } = Astro.props;
+---
+
+{lang === "de" ? (
+  <>
+    <h2 id="events">Ereignisse</h2>
+    <p>Nachrichten können für folgende Ereignisse verschickt werden:</p>
+    <table>
+      <thead>
+        <tr><th>Ereignis</th><th>Wird ausgelöst, wenn …</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>start</code></td><td>das Laden beginnt</td></tr>
+        <tr><td><code>stop</code></td><td>das Laden beendet wird</td></tr>
+        <tr><td><code>connect</code></td><td>ein Fahrzeug angeschlossen wird</td></tr>
+        <tr><td><code>disconnect</code></td><td>ein Fahrzeug getrennt wird</td></tr>
+        <tr><td><code>soc</code></td><td>sich der Ladestand des Fahrzeugs ändert</td></tr>
+        <tr><td><code>guest</code></td><td>ein unbekanntes Fahrzeug erkannt wird</td></tr>
+        <tr><td><code>asleep</code></td><td>ein Fahrzeug trotz Ladefreigabe nicht lädt</td></tr>
+        <tr><td><code>planoverrun</code></td><td>ein Ladeplan sein Ziel voraussichtlich verfehlt</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Jedes Ereignis hat einen Titel und eine Nachricht.
+      Beide lassen sich mit <a href="#placeholders">Platzhaltern</a> individuell gestalten.
+    </p>
+
+    <h2 id="message-format">Nachrichtenformat</h2>
+    <p>Nachricht mit einfacher Syntax, z.&nbsp;B. für das Ereignis <code>stop</code>:</p>
+    <Code
+      lang="txt"
+      code={"${title}: ${vehicleTitle} geladen mit ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.\nSonnenanteil: ${sessionSolarPercentage:%.0f}%"}
+    />
+    <p>Dieselbe Nachricht mit Go-Template-Syntax, mit Berechnungen (z.&nbsp;B. Umrechnung W → kW) und Bedingungen:</p>
+    <Code
+      lang="txt"
+      code={"{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.\nSonnenanteil: {{round .sessionSolarPercentage 0 }}%\n{{- if .sessionPrice}}\nKosten: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)\n{{- end}}"}
+    />
+    <h3 id="placeholders">Platzhalter</h3>
+    <p>
+      In Titel und Nachricht können Variablen verwendet werden, um evcc-Informationen anzuzeigen.
+      Es gibt zwei Schreibweisen, die auch kombiniert werden können:
+    </p>
+    <ul>
+      <li>
+        <strong>Einfach</strong>: <code>{"${variablenName}"}</code>, z.&nbsp;B. <code>{"${vehicleTitle}"}</code>.
+        Optional mit Formatierung wie <code>{"${pvPower:%.1fk}"}</code>: neben den üblichen <code>printf</code>-Angaben teilt das Suffix <code>k</code> den Wert durch 1000 (z.&nbsp;B. Wh → kWh).
+        Zeitdauern wie <code>{"${chargeDuration}"}</code> werden automatisch sekundengenau ausgegeben (z.&nbsp;B. <code>1h23m4s</code>).
+      </li>
+      <li>
+        <strong>Go-Template</strong>: <code>{"{{.variablenName}}"}</code> — ermöglicht Berechnungen, Bedingungen und <a href="http://masterminds.github.io/sprig/">sprig-Funktionen</a>.
+      </li>
+    </ul>
+    <aside class="starlight-aside starlight-aside--note" aria-label="Hinweis">
+      <p class="starlight-aside__title" aria-hidden="true">Hinweis</p>
+      <div class="starlight-aside__content">
+        <p>Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!</p>
+      </div>
+    </aside>
+
+    <h3 id="variables">Verfügbare Variablen</h3>
+    <p>
+      Die verfügbaren Variablen entsprechen den Daten der <a href="/integrations/rest-api">REST API</a>.
+      Beim Versand einer Nachricht werden die Daten des auslösenden Ladepunkts und die globalen Daten in einer flachen Struktur zusammengeführt.
+      D.&nbsp;h. sowohl globale Werte (z.&nbsp;B. <code>pvPower</code>, <code>grid.Power</code>) als auch ladepunktspezifische Werte (z.&nbsp;B. <code>mode</code>, <code>chargedEnergy</code>, <code>vehicleTitle</code>) sind direkt verfügbar.
+      Verschachtelte Werte wie <code>grid.Power</code> oder <code>battery.Soc</code> sind nur mit der Go-Template-Syntax erreichbar; die Großschreibung der Feldnamen ist dabei erforderlich.
+    </p>
+    <p>Häufig genutzte Ladepunkt-Variablen:</p>
+    <ul>
+      <li><code>title</code>: Name des Ladepunkts</li>
+      <li><code>loadpoint</code>: Nummer des Ladepunkts 1, 2, …</li>
+      <li><code>mode</code>: Lademodus <code>off</code>/<code>now</code>/<code>minpv</code>/<code>pv</code></li>
+      <li><code>charging</code>: Ladevorgang aktiv</li>
+      <li><code>enabled</code>: Ladefreigabe erteilt</li>
+      <li><code>connected</code>: Fahrzeug angeschlossen</li>
+      <li><code>chargedEnergy</code>: Geladene Energie der Sitzung in Wh</li>
+      <li><code>chargeDuration</code>: Ladedauer</li>
+      <li><code>chargePower</code>: Aktuelle Ladeleistung in W</li>
+      <li><code>connectedDuration</code>: Anschlussdauer</li>
+      <li><code>chargeRemainingDuration</code>: Restladezeit bis Ziel</li>
+      <li><code>chargeRemainingEnergy</code>: Restenergie bis Ziel in Wh</li>
+      <li><code>phasesActive</code>: Aktuell aktive Phasen</li>
+      <li><code>vehicleTitle</code>: Name des Fahrzeugs</li>
+      <li><code>vehicleName</code>: Technischer Name des Fahrzeugs</li>
+      <li><code>vehicleSoc</code>: Fahrzeug-Ladestand in %</li>
+      <li><code>vehicleRange</code>: Fahrzeug-Reichweite in km</li>
+      <li><code>vehicleOdometer</code>: Kilometerstand in km</li>
+      <li><code>sessionSolarPercentage</code>: Sonnenanteil der Ladesitzung in %</li>
+      <li><code>sessionPrice</code>: Kosten der Ladesitzung</li>
+      <li><code>sessionPricePerKWh</code>: Durchschnittspreis pro kWh</li>
+      <li><code>sessionCo2PerKWh</code>: Durchschnittliche CO₂-Emissionen pro kWh</li>
+      <li><code>planActive</code>: Ladeplan aktiv</li>
+      <li><code>smartCostActive</code>: Günstiges Laden aktiv</li>
+    </ul>
+    <p>Häufig genutzte globale Variablen:</p>
+    <ul>
+      <li><code>siteTitle</code>: Name der evcc-Instanz</li>
+      <li><code>pvPower</code>: Aktuelle PV-Leistung in W</li>
+      <li><code>homePower</code>: Aktueller Hausverbrauch in W</li>
+      <li><code>grid.Power</code>: Netzbezug (+) / Einspeisung (−) in W</li>
+      <li><code>battery.Power</code>: Batterieleistung in W</li>
+      <li><code>battery.Soc</code>: Batterie-Ladestand in %</li>
+      <li><code>currency</code>: Tarif-Währung</li>
+      <li><code>tariffGrid</code>: Aktueller Netzpreis pro kWh</li>
+      <li><code>tariffFeedIn</code>: Einspeisevergütung pro kWh</li>
+      <li><code>tariffCo2</code>: Aktuelle CO₂-Intensität</li>
+      <li><code>statistics.&lt;zeitraum&gt;.*</code>: Ladestatistiken für die Zeiträume <code>30d</code>, <code>365d</code>, <code>thisYear</code> und <code>total</code> (<code>avgCo2</code>, <code>avgPrice</code>, <code>chargedKWh</code>, <code>solarPercentage</code>)</li>
+    </ul>
+    <p>
+      Die vollständige Liste aller verfügbaren Felder findest du in der API-Antwort unter <code>http://evcc.local:7070/api/state</code>.
+    </p>
+
+    <p>
+      Beide Schreibweisen funktionieren in den Titel- und Nachrichtenfeldern der Oberfläche.
+      Die Konfiguration über <code>evcc.yaml</code> ist in der <a href="/de/reference/configuration/messaging"><code>messaging</code>-Referenz</a> beschrieben.
+    </p>
+  </>
+) : (
+  <>
+    <h2 id="events">Events</h2>
+    <p>Messages can be sent for the following events:</p>
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Fires when …</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>start</code></td><td>charging starts</td></tr>
+        <tr><td><code>stop</code></td><td>charging finishes</td></tr>
+        <tr><td><code>connect</code></td><td>a vehicle is connected</td></tr>
+        <tr><td><code>disconnect</code></td><td>a vehicle is disconnected</td></tr>
+        <tr><td><code>soc</code></td><td>the vehicle state of charge changes</td></tr>
+        <tr><td><code>guest</code></td><td>an unknown vehicle is detected</td></tr>
+        <tr><td><code>asleep</code></td><td>a vehicle does not charge despite charge release</td></tr>
+        <tr><td><code>planoverrun</code></td><td>a charging plan is projected to miss its target</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Each event has a title and a message.
+      Both can be customised with <a href="#placeholders">placeholders</a>.
+    </p>
+
+    <h2 id="message-format">Message Format</h2>
+    <p>Message with simple syntax, e.g. for the <code>stop</code> event:</p>
+    <Code
+      lang="txt"
+      code={"${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.\nSolar share: ${sessionSolarPercentage:%.0f}%"}
+    />
+    <p>The same message with Go template syntax, with calculations (e.g. converting W to kW) and conditions:</p>
+    <Code
+      lang="txt"
+      code={"{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.\nSolar share: {{round .sessionSolarPercentage 0 }}%\n{{- if .sessionPrice}}\nCost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)\n{{- end}}"}
+    />
+    <h3 id="placeholders">Placeholders</h3>
+    <p>
+      Titles and messages can use variables to display evcc information.
+      There are two syntax options, which can also be combined:
+    </p>
+    <ul>
+      <li>
+        <strong>Simple</strong>: <code>{"${variableName}"}</code>, e.g. <code>{"${vehicleTitle}"}</code>.
+        Optionally with formatting like <code>{"${pvPower:%.1fk}"}</code>: besides the usual <code>printf</code> specifiers, the suffix <code>k</code> divides the value by 1000 (e.g. Wh → kWh).
+        Durations like <code>{"${chargeDuration}"}</code> render rounded to whole seconds (e.g. <code>1h23m4s</code>).
+      </li>
+      <li>
+        <strong>Go template</strong>: <code>{"{{.variableName}}"}</code> — enables calculations, conditions, and <a href="http://masterminds.github.io/sprig/">sprig functions</a>.
+      </li>
+    </ul>
+    <aside class="starlight-aside starlight-aside--note" aria-label="Note">
+      <p class="starlight-aside__title" aria-hidden="true">Note</p>
+      <div class="starlight-aside__content">
+        <p>When using variables, make sure to use the correct capitalisation (uppercase/lowercase)!</p>
+      </div>
+    </aside>
+
+    <h3 id="variables">Available Variables</h3>
+    <p>
+      The available variables correspond to the data from the <a href="/integrations/rest-api">REST API</a>.
+      When sending a message, the data of the triggering loadpoint and the global data are merged into a flat structure.
+      This means both global values (e.g. <code>pvPower</code>, <code>grid.Power</code>) and loadpoint-specific values (e.g. <code>mode</code>, <code>chargedEnergy</code>, <code>vehicleTitle</code>) are directly accessible.
+      Nested values like <code>grid.Power</code> or <code>battery.Soc</code> are only accessible with the Go template syntax; the capitalised field names are required there.
+    </p>
+    <p>Commonly used loadpoint variables:</p>
+    <ul>
+      <li><code>title</code>: Loadpoint name</li>
+      <li><code>loadpoint</code>: Loadpoint number 1, 2, …</li>
+      <li><code>mode</code>: Charge mode <code>off</code>/<code>now</code>/<code>minpv</code>/<code>pv</code></li>
+      <li><code>charging</code>: Charging active</li>
+      <li><code>enabled</code>: Charging enabled</li>
+      <li><code>connected</code>: Vehicle connected</li>
+      <li><code>chargedEnergy</code>: Energy charged in session in Wh</li>
+      <li><code>chargeDuration</code>: Charging duration</li>
+      <li><code>chargePower</code>: Current charge power in W</li>
+      <li><code>connectedDuration</code>: Connection duration</li>
+      <li><code>chargeRemainingDuration</code>: Remaining charge time until target</li>
+      <li><code>chargeRemainingEnergy</code>: Remaining energy until target in Wh</li>
+      <li><code>phasesActive</code>: Currently active phases</li>
+      <li><code>vehicleTitle</code>: Vehicle name</li>
+      <li><code>vehicleName</code>: Technical vehicle name</li>
+      <li><code>vehicleSoc</code>: Vehicle state of charge in %</li>
+      <li><code>vehicleRange</code>: Vehicle range in km</li>
+      <li><code>vehicleOdometer</code>: Odometer reading in km</li>
+      <li><code>sessionSolarPercentage</code>: Solar share of charging session in %</li>
+      <li><code>sessionPrice</code>: Cost of charging session</li>
+      <li><code>sessionPricePerKWh</code>: Average price per kWh</li>
+      <li><code>sessionCo2PerKWh</code>: Average CO₂ emissions per kWh</li>
+      <li><code>planActive</code>: Charge plan active</li>
+      <li><code>smartCostActive</code>: Smart cost charging active</li>
+    </ul>
+    <p>Commonly used global variables:</p>
+    <ul>
+      <li><code>siteTitle</code>: Name of the evcc instance</li>
+      <li><code>pvPower</code>: Current solar power in W</li>
+      <li><code>homePower</code>: Current home consumption in W</li>
+      <li><code>grid.Power</code>: Grid import (+) / export (−) in W</li>
+      <li><code>battery.Power</code>: Battery power in W</li>
+      <li><code>battery.Soc</code>: Battery state of charge in %</li>
+      <li><code>currency</code>: Tariff currency</li>
+      <li><code>tariffGrid</code>: Current grid price per kWh</li>
+      <li><code>tariffFeedIn</code>: Feed-in tariff per kWh</li>
+      <li><code>tariffCo2</code>: Current CO₂ intensity</li>
+      <li><code>statistics.&lt;period&gt;.*</code>: Charging statistics for the periods <code>30d</code>, <code>365d</code>, <code>thisYear</code>, and <code>total</code> (<code>avgCo2</code>, <code>avgPrice</code>, <code>chargedKWh</code>, <code>solarPercentage</code>)</li>
+    </ul>
+    <p>
+      The complete list of all available fields can be found in the API response at <code>http://evcc.local:7070/api/state</code>.
+    </p>
+
+    <p>
+      Both syntaxes work in the title and message fields of the UI.
+      Configuration via <code>evcc.yaml</code> is described in the <a href="/en/reference/configuration/messaging"><code>messaging</code> reference</a>.
+    </p>
+  </>
+)}

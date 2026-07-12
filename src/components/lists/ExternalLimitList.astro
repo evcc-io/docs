@@ -1,0 +1,82 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import DeviceCardList from "@components/DeviceCardList.astro";
+import ExternalLimitIntro from "@components/intros/ExternalLimitIntro.astro";
+import ExternalLimitOutro from "@components/intros/ExternalLimitOutro.astro";
+import UserDefinedHint from "@components/UserDefinedHint.astro";
+import ChannelListNav from "@components/ChannelListNav.astro";
+import { sortDevices, collectionName, nightlyPageHead } from "@utils/devices";
+import type { Channel } from "@utils/devices";
+
+interface Props {
+  lang: "de" | "en";
+  channel: Channel;
+}
+const { lang, channel } = Astro.props;
+const isNightly = channel === "nightly";
+
+const coll = await getCollection(collectionName("hems", lang, channel) as any);
+const devices = sortDevices(coll as any);
+const basePath = `/${lang}${isNightly ? "/nightly" : ""}/external-limit`;
+
+const title =
+  lang === "de"
+    ? "Externe Begrenzung (§14a, §9)"
+    : "External Limit (§14a, §9)";
+const description =
+  lang === "de"
+    ? "Leistungsbegrenzung durch Netzbetreiber oder übergeordnete Energiemanagementsysteme."
+    : "Power limitation by grid operators or higher-level energy management systems.";
+
+const headings =
+  lang === "de"
+    ? [
+        { depth: 2, slug: "background", text: "Hintergrund" },
+        { depth: 3, slug: "dimming", text: "Steuerbare Verbrauchseinrichtungen (§ 14a EnWG)" },
+        { depth: 3, slug: "curtailment", text: "Einspeisemanagement (§ 9 EEG)" },
+        { depth: 2, slug: "setup", text: "Einrichtung" },
+        { depth: 3, slug: "eebus-pairing", text: "Pairing bei EEBus-Integrationen" },
+        { depth: 2, slug: "integrations", text: "Integrationen" },
+        { depth: 2, slug: "how-it-works", text: "Funktionsweise" },
+        { depth: 2, slug: "logging", text: "Protokollierung" },
+        { depth: 2, slug: "additional-consumers", text: "Steuerung weiterer Verbraucher" },
+        { depth: 2, slug: "further-information", text: "Weiterführende Informationen" },
+      ]
+    : [
+        { depth: 2, slug: "background", text: "Background" },
+        { depth: 3, slug: "dimming", text: "Controllable Consumption Devices (§ 14a EnWG)" },
+        { depth: 3, slug: "curtailment", text: "Feed-in Management (§ 9 EEG)" },
+        { depth: 2, slug: "setup", text: "Setup" },
+        { depth: 3, slug: "eebus-pairing", text: "Pairing for EEBus Integrations" },
+        { depth: 2, slug: "integrations", text: "Integrations" },
+        { depth: 2, slug: "how-it-works", text: "How It Works" },
+        { depth: 2, slug: "logging", text: "Logging" },
+        { depth: 2, slug: "additional-consumers", text: "Controlling Additional Consumers" },
+        { depth: 2, slug: "further-information", text: "Further Information" },
+      ];
+
+const frontmatter = {
+  title,
+  description,
+  template: "doc",
+  ...(isNightly ? { pagefind: false, head: nightlyPageHead } : {}),
+};
+---
+
+<StarlightPage frontmatter={frontmatter} headings={headings}>
+  {isNightly && <ChannelListNav lang={lang} channel={channel} category="external-limit" />}
+  <ExternalLimitIntro lang={lang} />
+  <h2 id="integrations">{lang === "de" ? "Integrationen" : "Integrations"}</h2>
+  <DeviceCardList
+    devices={devices as any}
+    lang={lang}
+    basePath={basePath}
+    noBrandLabel={lang === "de" ? "Generische Integrationen" : "Generic integrations"}
+    unbrandedFirst
+  />
+  {channel === "release" && (
+    <UserDefinedHint lang={lang} kind="hems" nightlyHref={`/${lang}/nightly/external-limit`} />
+  )}
+  <ExternalLimitOutro lang={lang} />
+</StarlightPage>

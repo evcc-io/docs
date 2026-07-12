@@ -5,12 +5,12 @@ sidebar:
 ---
 
 Unter `hems` wird die externe Steuerung von Verbrauchsleistung und Einspeisung konfiguriert.
-Dies wird z. B. für die Umsetzung von §14a EnWG oder §9 EEG benötigt.
-Details zu Hintergrund und Einrichtung findest du unter [Externe Steuerung](../../features/external-control).
+Dies wird z. B. für die Umsetzung von § 14a EnWG oder § 9 EEG benötigt.
+Details zu Hintergrund und Einrichtung findest du unter [Externe Begrenzung](/de/external-limit).
 
 :::note[Hinweis]
 Abregelung und das Dimmen steuerbarer Verbraucher wirken direkt am Gerät, dafür sind keine Stromkreise erforderlich.
-Damit das Verbrauchslimit Ladepunkte begrenzt, konfiguriere [Lastmanagement](../../features/loadmanagement)-Stromkreise.
+Damit das Verbrauchslimit auf Ladepunkte wirkt, müssen Stromkreise im [Lastmanagement](../../features/loadmanagement) eingerichtet sein.
 Ein aktives Limit begrenzt dann den obersten Stromkreis.
 :::
 
@@ -70,7 +70,7 @@ Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Beg
 Abfrageintervall für den Schaltkontakt.
 Standard: `10s`.
 
-Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-relais).
+Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [Benutzerdefinierte Integrationen](/de/user-defined-devices#external-limit).
 
 ---
 
@@ -124,25 +124,25 @@ Bei aktivem Signal wird der Verbrauch auf `maxDimPower` begrenzt.
 
 #### `w3`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "0 %".
-Bei aktivem Signal wird die Einspeisung auf 0 % von `maxCurtailPower` begrenzt.
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "0%".
+Bei aktivem Signal wird die Einspeisung auf 0% von `maxCurtailPower` begrenzt.
 
 #### `s2`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "30 %".
-Bei aktivem Signal wird die Einspeisung auf 30 % von `maxCurtailPower` begrenzt.
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "30%".
+Bei aktivem Signal wird die Einspeisung auf 30% von `maxCurtailPower` begrenzt.
 
 #### `s1`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "60 %".
-Bei aktivem Signal wird die Einspeisung auf 60 % von `maxCurtailPower` begrenzt.
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "60%".
+Bei aktivem Signal wird die Einspeisung auf 60% von `maxCurtailPower` begrenzt.
 
 #### `interval`
 
 Abfrageintervall für die Schaltkontakte.
 Standard: `10s`.
 
-Details zur Einrichtung findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-fnn-steuerbox).
+Details zur Einrichtung findest du unter [Externe Begrenzung](/de/external-limit).
 
 ---
 
@@ -170,6 +170,7 @@ Folgende optionale Parameter können für die EEBus-Kommunikation gesetzt werden
 
 - `contractualConsumptionNominalMax`: Vertragliche maximale Verbrauchsleistung (in Watt)
 - `failsafeConsumptionActivePowerLimit`: Failsafe-Limit für Verbrauchsleistung (in Watt)
+- `productionNominalMax`: Installierte Generatorleistung (Wp, in Watt)
 - `failsafeProductionActivePowerLimit`: Failsafe-Limit für Einspeiseleistung (in Watt)
 - `failsafeDurationMinimum`: Minimale Failsafe-Dauer (z. B. `2h`)
 
@@ -182,4 +183,4 @@ Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Beg
 Abfrageintervall.
 Standard: `10s`.
 
-Details zur Einrichtung und zum Pairing findest du unter [Externe Steuerung](../../features/external-control#konfiguration-via-eebus).
+Details zur Einrichtung und zum Pairing findest du unter [Externe Begrenzung](/de/external-limit#eebus-pairing).

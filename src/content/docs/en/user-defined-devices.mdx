@@ -85,7 +85,8 @@ Meters defined under `meters:` can be referenced from `site`:
 - `battery`: Home battery meter
 - `charge`: Meter for the charging power of the wallbox
 - `aux`: Consumption meter for intelligent consumers
-- `ext`: Additional meter, e.g. for load management or data collection
+- `consumer`: Meter for a regular consumer, recorded for consumption statistics
+- `ext`: Additional meter not used for regulation or shown in the UI, only logged and exported
 
 `power` is the only required attribute.
 Not all meter roles support all attributes:
@@ -98,17 +99,40 @@ To convert, use the [reading pipelines](/en/reference/plugins#reading).
 
 ### Read attributes
 
-| Attribute      | Type                  | Required | Context       | Description                                                   |
-| -------------- | --------------------- | -------- | ------------- | ------------------------------------------------------------- |
-| `power`        | `float`               | yes      | all           | Current power in W                                            |
-| `energy`       | `float`               | no       | all           | Meter reading in kWh                                          |
-| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (e.g. grid feed-in) |
-| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                         |
-| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                          |
-| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                               |
-| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents.   |
-| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.             |
-| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).        |
+| Attribute      | Type                  | Required | Context       | Description                                                 |
+| -------------- | --------------------- | -------- | ------------- | ----------------------------------------------------------- |
+| `power`        | `float`               | yes      | all           | Current power in W                                          |
+| `energy`       | `float`               | no       | all           | Meter reading in kWh                                        |
+| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)       |
+| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
+| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                        |
+| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                             |
+| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
+| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.           |
+| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
+
+<a id="signs-and-directions"></a>
+
+### Signs and Directions
+
+What a positive `power` value and the two energy directions mean depends on the meter role:
+
+| Role                     | `power` positive                 | `energy`   | `returnenergy`     |
+| ------------------------ | -------------------------------- | ---------- | ------------------ |
+| `grid`                   | Grid import                      | Imported   | Exported (feed-in) |
+| `pv`                     | Production                       | Produced   | Consumed (rare)    |
+| `battery`                | Discharging (negative: charging) | Discharged | Charged            |
+| `charge`                 | Charging                         | Charged    | Discharged (V2X)   |
+| `aux`, `ext`, `consumer` | Consumption                      | Consumed   | Produced (rare)    |
+
+`energy` and `returnenergy` are increasing meter readings in kWh, ideally lifetime totals like the import and export registers of a grid meter.
+The differences between readings are calculated automatically, so the plugin must return a meter reading and not consumption values per interval.
+A counter that resets periodically (e.g. daily) also works, as the reset is detected automatically.
+A reading of `0` is treated as not available.
+
+Both attributes are optional.
+Without them, the energy history is derived from `power` over time.
+Real meter readings give more accurate long-term statistics.
 
 ### Write attributes
 
@@ -143,7 +167,7 @@ For other devices, specialised charger types are described under [Switchsocket](
 | `enabled`      | `bool`                | yes      | Is charging enabled?                                                                        |
 | `power`        | `float`               | no       | Charging power in W                                                                         |
 | `energy`       | `float`               | no       | Meter reading in kWh                                                                        |
-| `returnenergy` | `float`               | no       | Meter reading in reverse direction in kWh                                                   |
+| `returnenergy` | `float`               | no       | Meter reading in reverse direction in kWh (discharged energy, V2X)                          |
 | `identify`     | `string`              | no       | Current RFID identifier                                                                     |
 | `soc`          | `int`                 | no       | State of charge in %                                                                        |
 | `limitsoc`     | `int`                 | no       | Charge limit in %                                                                           |
@@ -174,7 +198,7 @@ For other devices, specialised charger types are described under [Switchsocket](
 | `integrateddevice` | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                        |
 | `heating`          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                         |
 | `continuous`       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". |
-| `switchdevice`     | Device can only be switched on/off (no continuous current control). Min/max current settings and the `Min+PV` mode are hidden.                                                                                    |
+| `switchdevice`     | Device can only be switched on/off (no continuous current control). Max current and the `Min+PV` mode are not shown. Min current and phases set the PV enable power.                                              |
 
 Common feature combinations seen in built-in templates:
 
@@ -418,7 +442,7 @@ Exactly one of `price` or `forecast` must be configured.
 | `tariff`       | `string`   | no       | `price` (default), `co2` or `solar`. Sets the unit of the returned values: price in configured currency per kWh, CO₂ intensity in g/kWh, solar forecast in W.    |
 | `charges`      | `float`    | no       | Fixed additional charge per kWh added to every value. Default `0`.                                                                                               |
 | `chargesZones` | `list`     | no       | Time-based charges (e.g. grid fees) that override `charges` for specific periods. See [time-based grid fees](/en/reference/configuration/tariffs#charges-zones). |
-| `tax`          | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20 %. Default `0`.                                                                                          |
+| `tax`          | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20%. Default `0`.                                                                                           |
 | `formula`      | `string`   | no       | Go expression for a custom calculation, with `price`, `charges` and `tax` in scope. See [examples](#formula-examples).                                           |
 | `interval`     | `duration` | no       | Polling interval for `forecast`. Default `1h`.                                                                                                                   |
 | `cache`        | `duration` | no       | Cache duration for `price`. Default `15m`.                                                                                                                       |
@@ -503,3 +527,212 @@ formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 ```
 
 Pays a fixed feed-in tariff of 7 ct/kWh, except when the day-ahead market price is negative.
+
+<a id="external-limit"></a>
+
+## External Limit
+
+A user-defined integration for the [External Limit](/en/external-limit) feature connects a control box or energy management system that isn't covered by a built-in integration.
+In the UI, pick **User-defined integration** under **Configuration → External Limit**.
+
+Unlike other device types, there is no `type: custom` here.
+Instead, one of three types describes how the limit signal is received: `relay` (single switch contact), `fnn` (FNN control box with multiple switch contacts) or `eebus` (EEBus protocol).
+Each signal is read via a [plugin](/en/reference/plugins) configuration (GPIO, MQTT, HTTP, Modbus).
+See also the [`hems` configuration reference](/en/reference/configuration/hems).
+
+### Relay
+
+The connection via a single switch contact is the simplest solution.
+The control box activates a contact which is evaluated by your evcc instance.
+
+| Attribute     | Type       | Required | Description                                                                                      |
+| ------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `maxPower`    | `int` (W)  | yes      | Total power limit applied while the signal is active.                                            |
+| `limit`       | plugin     | yes      | Plugin configuration for reading the switch contact. `true`/`1` = limited, `false`/`0` = normal. |
+| `passthrough` | plugin     | no       | Passes the limitation signal through to an external system.                                      |
+| `interval`    | `duration` | no       | Polling interval for the switch contact. Default `10s`.                                          |
+
+The power limit is communicated to you by the grid operator.
+For multiple controllable consumption devices (SteuVE), the simultaneity factor is taken into account.
+You can also calculate the limit yourself using the formula: **Total limit = Number of SteuVE × 4.2 kW × Simultaneity factor**. Details on the calculation can be found [here](https://www.inexogy.com/blog/14a-enwg/).
+
+<Tabs>
+<TabItem label="Raspberry Pi GPIO">
+
+When using a Raspberry Pi, the GPIO pin can be read directly:
+
+```yaml
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+For more details on the GPIO plugin, see the [plugin documentation](/en/reference/plugins#gpio).
+
+</TabItem>
+<TabItem label="MQTT">
+
+If the control box or gateway sends MQTT messages:
+
+```yaml
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem label="HTTP API">
+
+For control boxes with REST API:
+
+```yaml
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+If the control box or a gateway provides the power limit via Modbus:
+
+```yaml
+type: relay
+maxPower: 4200 # Example for 1 SteuVE
+limit:
+  source: modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
+  timeout: 5s
+  register:
+    type: holding
+    decode: uint16
+    address: 8056
+  # Return value: 0 = not limited, 1 = limited
+```
+
+</TabItem>
+</Tabs>
+
+<a id="external-limit-fnn"></a>
+
+### FNN Control Box
+
+Control boxes following the FNN standard signal dimming and curtailment via separate switch contacts.
+Consumption dimming (W4) and feed-in curtailment (W3, S2, S1) operate independently.
+At least one of the signals `w4` or `w3` must be configured.
+
+| Attribute         | Type       | Required | Description                                                               |
+| ----------------- | ---------- | -------- | ------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | yes¹     | Consumption limit while the dim signal (W4) is active.                    |
+| `maxCurtailPower` | `int` (W)  | yes²     | Installed solar power, base value for the curtailment steps.              |
+| `w4`              | plugin     | no       | Reads the dim signal. Limits consumption to `maxDimPower`.                |
+| `w3`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 0% of `maxCurtailPower`.  |
+| `s2`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 30% of `maxCurtailPower`. |
+| `s1`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 60% of `maxCurtailPower`. |
+| `interval`        | `duration` | no       | Polling interval for the switch contacts. Default `10s`.                  |
+
+¹ required when `w4` is configured, ² required when `w3` is configured.
+
+```yaml
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+<a id="external-limit-eebus"></a>
+
+### EEBus
+
+The digital connection via the EEBus protocol.
+The control box communicates directly with your evcc instance and automatically transmits the power limit.
+Control box and evcc need to be [paired](/en/external-limit#eebus-pairing) once.
+
+| Attribute                             | Type       | Required | Description                                                 |
+| ------------------------------------- | ---------- | -------- | ----------------------------------------------------------- |
+| `ski`                                 | `string`   | yes      | SKI (Subject Key Identifier) of the control box.            |
+| `contractualConsumptionNominalMax`    | `int` (W)  | no       | Contractual maximum consumption power.                      |
+| `failsafeConsumptionActivePowerLimit` | `int` (W)  | no       | Failsafe limit for consumption power.                       |
+| `productionNominalMax`                | `int` (W)  | no       | Installed generator power (Wp).                             |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | no       | Failsafe limit for feed-in power.                           |
+| `failsafeDurationMinimum`             | `duration` | no       | Minimum failsafe duration, e.g. `2h`.                       |
+| `passthrough`                         | plugin     | no       | Passes the limitation signal through to an external system. |
+
+```yaml
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+<a id="notification-service"></a>
+
+## Notification Service
+
+A user-defined notification service processes [notification](/en/notifications) messages via any [plugin](/en/reference/plugins) with write access, e.g. a shell script, HTTP request, or MQTT message.
+In the UI, pick **User-defined service** under **Configuration → Notifications → Services**.
+
+The message is provided to the plugin in the `${send}` parameter (or as a template parameter `{{.send}}`).
+
+### Configuration
+
+| Attribute  | Type     | Required | Description                                                 |
+| ---------- | -------- | -------- | ----------------------------------------------------------- |
+| `send`     | plugin   | yes      | Plugin invoked for each message. Must support write access. |
+| `encoding` | `string` | no       | Format of the value provided in `${send}`. See below.       |
+
+The possible `encoding` values are:
+
+| Encoding | Content of `${send}`                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| `json`   | JSON object `{ "msg": msg, "title": title }`. The `title` field is only added if defined for the event. |
+| `csv`    | `title` and `msg` as a comma-separated list                                                             |
+| `tsv`    | Like `csv`, but tab-separated                                                                           |
+| `title`  | Only the title                                                                                          |
+| (none)   | Only the message (`msg`)                                                                                |
+
+### Example
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} connected"
+      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # plugin type
+        source: script
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+In this example, a shell script (`cmd`) is invoked with the argument `{"title": "...", "msg": "..."}`.
