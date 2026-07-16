@@ -17,8 +17,8 @@ Inspect stored energy metrics
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
-- [evcc metrics battery](evcc_metrics_battery.md) - Compare battery charge and discharge energy
-- [evcc metrics data](evcc_metrics_data.md) - Export energy data as a table
-- [evcc metrics entities](evcc_metrics_entities.md) - List metric entities
-- [evcc metrics forecast](evcc_metrics_forecast.md) - Compare solar forecast against actual PV production
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc metrics battery](/en/reference/cli/evcc_metrics_battery) - Compare battery charge and discharge energy
+- [evcc metrics data](/en/reference/cli/evcc_metrics_data) - Export energy data as a table
+- [evcc metrics entities](/en/reference/cli/evcc_metrics_entities) - List metric entities
+- [evcc metrics forecast](/en/reference/cli/evcc_metrics_forecast) - Compare solar forecast against actual PV production

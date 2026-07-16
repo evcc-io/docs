@@ -21,4 +21,4 @@ evcc cache get [flags]
 
 ## See also
 
-- [evcc cache](evcc_cache.md) - Manage cache entries
+- [evcc cache](/en/reference/cli/evcc_cache) - Manage cache entries

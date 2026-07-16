@@ -40,4 +40,4 @@ evcc completion powershell [flags]
 
 ## See also
 
-- [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell
+- [evcc completion](/en/reference/cli/evcc_completion) - Generate the autocompletion script for the specified shell

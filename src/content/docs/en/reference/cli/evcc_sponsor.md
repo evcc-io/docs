@@ -21,4 +21,4 @@ evcc sponsor [name] [flags]
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging

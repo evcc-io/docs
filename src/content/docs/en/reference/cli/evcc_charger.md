@@ -12,7 +12,7 @@ evcc charger [name] [flags]
 
 ```
   -i, --current float          Set maximum current
-  -u, --curtail int            Curtail (0/1 to switch, only available if supported by device) (default -1)
+  -u, --curtail int            Curtail feed-in to percent (0-100, only available if supported by device) (default -1)
       --diagnose               Diagnose
   -m, --dim int                Dim (0/1 to switch, only available if supported by device) (default -1)
   -d, --disable                Disable
@@ -38,5 +38,5 @@ evcc charger [name] [flags]
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
-- [evcc charger ramp](evcc_charger_ramp.md) - Ramp current from 6..16A in configurable steps
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc charger ramp](/en/reference/cli/evcc_charger_ramp) - Ramp current from 6..16A in configurable steps

@@ -17,6 +17,6 @@ Manage cache entries
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
-- [evcc cache clear](evcc_cache_clear.md) - Clear all cache entries
-- [evcc cache get](evcc_cache_get.md) - Get cache entries
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc cache clear](/en/reference/cli/evcc_cache_clear) - Clear all cache entries
+- [evcc cache get](/en/reference/cli/evcc_cache_get) - Get cache entries

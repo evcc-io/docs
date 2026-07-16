@@ -24,6 +24,7 @@ evcc metrics data [entity ...] [flags]
       --group string       Limit output to an entity group
       --range string       Quick timeframe: day, month or year
       --to string          End date as YYYY-MM-DD, inclusive (default today)
+      --xlsx               Output XLSX instead of a table
 ```
 
 ## Options inherited from parent commands
@@ -39,4 +40,4 @@ evcc metrics data [entity ...] [flags]
 
 ## See also
 
-- [evcc metrics](evcc_metrics.md) - Inspect stored energy metrics
+- [evcc metrics](/en/reference/cli/evcc_metrics) - Inspect stored energy metrics

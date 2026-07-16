@@ -36,4 +36,4 @@ evcc metrics battery [name ...] [flags]
 
 ## See also
 
-- [evcc metrics](evcc_metrics.md) - Inspect stored energy metrics
+- [evcc metrics](/en/reference/cli/evcc_metrics) - Inspect stored energy metrics
