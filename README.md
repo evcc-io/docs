@@ -41,15 +41,6 @@ npm run build
 This builds the static site into `dist/` and runs the legacy-redirect generator.
 The output can be served by any static host.
 
-### Update CLI docs
-
-CLI documentation is auto-generated and pushed to this repository by the `documentation.yml` workflow in the main evcc repository on every release.
-It can also be triggered manually via workflow dispatch.
-Do not edit the files in `src/content/docs/en/reference/cli/` by hand.
-
-CLI docs only live in the English (default-locale) directory.
-German pages fall back to the English content automatically.
-
 ## Contributing
 
 ### Code formatting
