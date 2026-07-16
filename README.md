@@ -43,13 +43,9 @@ The output can be served by any static host.
 
 ### Update CLI docs
 
-CLI documentation is auto-generated.
-Generation needs to be triggered manually.
-Run this command inside the evcc core repository (e.g. `./evcc`):
-
-```sh
-go run main.go gendoc ../evcc-docs/src/content/docs/en/reference/cli/
-```
+CLI documentation is auto-generated and pushed to this repository by the `documentation.yml` workflow in the main evcc repository on every release.
+It can also be triggered manually via workflow dispatch.
+Do not edit the files in `src/content/docs/en/reference/cli/` by hand.
 
 CLI docs only live in the English (default-locale) directory.
 German pages fall back to the English content automatically.
