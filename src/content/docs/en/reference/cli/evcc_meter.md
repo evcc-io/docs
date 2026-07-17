@@ -11,9 +11,9 @@ evcc meter [name] [flags]
 ## Options
 
 ```
-  -b, --battery-mode string          Set battery mode (normal, hold, charge)
+  -b, --battery-mode string          Set battery mode (normal, hold, charge, holdcharge)
   -w, --battery-mode-wait duration   Wait given duration during which potential watchdogs are active
-  -u, --curtail int                  Curtail (0/1 to switch, only available if supported by device) (default -1)
+  -u, --curtail int                  Curtail feed-in to percent (0-100, only available if supported by device) (default -1)
       --diagnose                     Diagnose
   -m, --dim int                      Dim (0/1 to switch, only available if supported by device) (default -1)
       --heartbeat                    After command, continue running device heartbeats (if any) until interrupted
