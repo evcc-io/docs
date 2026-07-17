@@ -22,8 +22,8 @@ See each sub-command's help for details on how to use the generated script.
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
-- [evcc completion bash](evcc_completion_bash.md) - Generate the autocompletion script for bash
-- [evcc completion fish](evcc_completion_fish.md) - Generate the autocompletion script for fish
-- [evcc completion powershell](evcc_completion_powershell.md) - Generate the autocompletion script for powershell
-- [evcc completion zsh](evcc_completion_zsh.md) - Generate the autocompletion script for zsh
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc completion bash](/en/reference/cli/evcc_completion_bash) - Generate the autocompletion script for bash
+- [evcc completion fish](/en/reference/cli/evcc_completion_fish) - Generate the autocompletion script for fish
+- [evcc completion powershell](/en/reference/cli/evcc_completion_powershell) - Generate the autocompletion script for powershell
+- [evcc completion zsh](/en/reference/cli/evcc_completion_zsh) - Generate the autocompletion script for zsh

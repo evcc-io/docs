@@ -38,5 +38,5 @@ evcc charger [name] [flags]
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
-- [evcc charger ramp](evcc_charger_ramp.md) - Ramp current from 6..16A in configurable steps
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc charger ramp](/en/reference/cli/evcc_charger_ramp) - Ramp current from 6..16A in configurable steps

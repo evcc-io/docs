@@ -24,4 +24,4 @@ evcc easee-ocpp status [flags]
 
 ## See also
 
-- [evcc easee-ocpp](evcc_easee-ocpp.md) - Manage Easee local OCPP configuration
+- [evcc easee-ocpp](/en/reference/cli/evcc_easee-ocpp) - Manage Easee local OCPP configuration

@@ -7,6 +7,7 @@ import sitemap from "@astrojs/sitemap";
 import starlightBlog from "starlight-blog";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
+import starlightLinksValidator from "starlight-links-validator";
 import mermaid from "astro-mermaid";
 import { unified } from "@astrojs/markdown-remark";
 import remarkHeadingId from "remark-heading-id";
@@ -113,6 +114,22 @@ export default defineConfig({
         ]),
         starlightLlmsTxt({
           exclude: ["**/blog/**"],
+        }),
+        starlightLinksValidator({
+          // German pages fall back to English, links to them are valid
+          errorOnFallbackPages: false,
+          // installation guides intentionally link to http://localhost:7070
+          errorOnLocalLinks: false,
+          // device and integration pages are custom routes (src/pages) the validator cannot see
+          exclude: [
+            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}",
+            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}/**",
+            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}#*",
+            // starlight-openapi and starlight-blog routes are not visible to the validator
+            "/integrations/rest-api",
+            "/integrations/rest-api/**",
+            "/{en,de}/blog",
+          ],
         }),
       ],
       sidebar: [

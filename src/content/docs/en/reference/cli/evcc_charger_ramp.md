@@ -30,4 +30,4 @@ evcc charger ramp [name] [flags]
 
 ## See also
 
-- [evcc charger](evcc_charger.md) - Query configured chargers
+- [evcc charger](/en/reference/cli/evcc_charger) - Query configured chargers

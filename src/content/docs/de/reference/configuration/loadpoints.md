@@ -45,7 +45,7 @@ Referenz auf eine `charger` (Wallbox) Konfiguration.
 charger: wallbox
 ```
 
-Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox Definition](chargers#name) entspricht.
+Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox Definition](/de/reference/configuration/chargers#name) entspricht.
 
 ---
 
@@ -63,7 +63,7 @@ Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Stro
 meter: charge
 ```
 
-Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessgeräte Definition](meters#name) entspricht.
+Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessgeräte Definition](/de/reference/configuration/meters#name) entspricht.
 
 ---
 
@@ -81,7 +81,7 @@ Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z. B. Gastfah
 vehicle: renault
 ```
 
-Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](vehicles#name) entspricht.
+Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](/de/reference/configuration/vehicles#name) entspricht.
 
 ---
 

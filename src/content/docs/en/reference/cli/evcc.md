@@ -28,23 +28,23 @@ evcc [flags]
 
 ## See also
 
-- [evcc cache](evcc_cache.md) - Manage cache entries
-- [evcc charger](evcc_charger.md) - Query configured chargers
-- [evcc checkconfig](evcc_checkconfig.md) - Check config file for errors
-- [evcc completion](evcc_completion.md) - Generate the autocompletion script for the specified shell
-- [evcc config](evcc_config.md) - Dump database configuration
-- [evcc detect](evcc_detect.md) - Auto-detect compatible hardware
-- [evcc device](evcc_device.md) - Query database-configured devices (debug only)
-- [evcc discuss](evcc_discuss.md) - Request support at Github Discussions (https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe)
-- [evcc dump](evcc_dump.md) - Dump configuration
-- [evcc easee-ocpp](evcc_easee-ocpp.md) - Manage Easee local OCPP configuration
-- [evcc meter](evcc_meter.md) - Query configured meters
-- [evcc metrics](evcc_metrics.md) - Inspect stored energy metrics
-- [evcc migrate](evcc_migrate.md) - Migrate yaml to database (deprecated), reset only
-- [evcc password](evcc_password.md) - Password administration
-- [evcc settings](evcc_settings.md) - Manage configuration settings
-- [evcc sponsor](evcc_sponsor.md) - Validate sponsor token
-- [evcc sunspec](evcc_sunspec.md) - Dump SunSpec model information
-- [evcc tariff](evcc_tariff.md) - Query configured tariff
-- [evcc token](evcc_token.md) - Generate token credentials
-- [evcc vehicle](evcc_vehicle.md) - Query configured vehicles
+- [evcc cache](/en/reference/cli/evcc_cache) - Manage cache entries
+- [evcc charger](/en/reference/cli/evcc_charger) - Query configured chargers
+- [evcc checkconfig](/en/reference/cli/evcc_checkconfig) - Check config file for errors
+- [evcc completion](/en/reference/cli/evcc_completion) - Generate the autocompletion script for the specified shell
+- [evcc config](/en/reference/cli/evcc_config) - Dump database configuration
+- [evcc detect](/en/reference/cli/evcc_detect) - Auto-detect compatible hardware
+- [evcc device](/en/reference/cli/evcc_device) - Query database-configured devices (debug only)
+- [evcc discuss](/en/reference/cli/evcc_discuss) - Request support at Github Discussions (https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe)
+- [evcc dump](/en/reference/cli/evcc_dump) - Dump configuration
+- [evcc easee-ocpp](/en/reference/cli/evcc_easee-ocpp) - Manage Easee local OCPP configuration
+- [evcc meter](/en/reference/cli/evcc_meter) - Query configured meters
+- [evcc metrics](/en/reference/cli/evcc_metrics) - Inspect stored energy metrics
+- [evcc migrate](/en/reference/cli/evcc_migrate) - Migrate yaml to database (deprecated), reset only
+- [evcc password](/en/reference/cli/evcc_password) - Password administration
+- [evcc settings](/en/reference/cli/evcc_settings) - Manage configuration settings
+- [evcc sponsor](/en/reference/cli/evcc_sponsor) - Validate sponsor token
+- [evcc sunspec](/en/reference/cli/evcc_sunspec) - Dump SunSpec model information
+- [evcc tariff](/en/reference/cli/evcc_tariff) - Query configured tariff
+- [evcc token](/en/reference/cli/evcc_token) - Generate token credentials
+- [evcc vehicle](/en/reference/cli/evcc_vehicle) - Query configured vehicles

@@ -27,4 +27,4 @@ evcc password reset [flags]
 
 ## See also
 
-- [evcc password](evcc_password.md) - Password administration
+- [evcc password](/en/reference/cli/evcc_password) - Password administration

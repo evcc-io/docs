@@ -27,5 +27,5 @@ evcc config [flags]
 
 ## See also
 
-- [evcc](evcc.md) - evcc - open source solar charging
-- [evcc config delete](evcc_config_delete.md) - Delete device
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc config delete](/en/reference/cli/evcc_config_delete) - Delete device

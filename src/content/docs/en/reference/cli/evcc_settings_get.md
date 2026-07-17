@@ -21,4 +21,4 @@ evcc settings get [flags]
 
 ## See also
 
-- [evcc settings](evcc_settings.md) - Manage configuration settings
+- [evcc settings](/en/reference/cli/evcc_settings) - Manage configuration settings

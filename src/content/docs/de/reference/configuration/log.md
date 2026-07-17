@@ -38,9 +38,9 @@ Definiert den Detailgrad der Protokollierung für verschiedene evcc Komponenten
 **Mögliche Komponenten**:
 
 - `site`: Die zentrale evcc Komponente (Regelung, Berechnungen, ...)
-- `lp-X`: Der jeweilige Ladepunkt, wobei `X` in der Reihenfolge der Konfiguration der [`loadpoints`](loadpoints) (Ladepunkte) durchnummeriert ist, beginnend bei `1`
-- `sma`: Die SMA HEMS Komponente, falls der SMA Sunnay Home Manager 2.0 per [`hems`](hems) eingebunden ist
-- _`fahrzeug`_: Jedes definierte [`vehicle`](vehicles) (Fahrzeug), hier ist der jeweilige Wert des Parameters [`type`](vehicles#type) (bzw. des templates) anzugeben.
+- `lp-X`: Der jeweilige Ladepunkt, wobei `X` in der Reihenfolge der Konfiguration der [`loadpoints`](/de/reference/configuration/loadpoints) (Ladepunkte) durchnummeriert ist, beginnend bei `1`
+- `sma`: Die SMA HEMS Komponente, falls der SMA Sunnay Home Manager 2.0 per [`hems`](/de/reference/configuration/hems) eingebunden ist
+- _`fahrzeug`_: Jedes definierte [`vehicle`](/de/reference/configuration/vehicles) (Fahrzeug), hier ist der jeweilige Wert des Parameters [`type`](/de/reference/configuration/vehicles#type) (bzw. des templates) anzugeben.
 - Darüber hinaus können je nach Anwendungsfall noch weitere Komponenten spezifiziert werden (z. B. `cache`, `db`, `influx`, `mqtt`, ...)
 
 **Mögliche Werte jede Komponente**: Identisch zu den Werten von [`log`](#log)
