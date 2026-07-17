@@ -1,0 +1,257 @@
+---
+date: 2026-07-17
+title: "Highlights: Remote Access, iOS-Widgets, Optimizer und mehr"
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+---
+
+Ein halbes Jahr ist seit dem [letzten Highlights-Post](/de/blog/2026/01/01/highlights-browser-config-ready) vergangen.
+Mit den Releases [0.301 bis 0.311](https://github.com/evcc-io/evcc/releases) ist seitdem eine Menge passiert: eine neue Navigation, Widgets in der iOS-App, Remote Access, zeitbasierte Auswertungen und vieles mehr.
+In diesem Blogpost heben wir ein paar unserer Highlights hervor und geben einen kleinen Ausblick auf die weiteren Pläne.
+
+{/* TODO: Banner-Bild */}
+
+{/* excerpt */}
+
+## Umbau der Oberfläche
+
+Die Oberfläche hat eine neue Navigation am unteren Bildschirmrand bekommen.
+Über die Bereiche **Laden**, **Hausbatterie**, **Vorhersage**, **Ladevorgänge** und **Mehr** kommst du jetzt schneller an alle Funktionen.
+Batterie und Vorhersage haben dabei eigene Seiten erhalten, statt sich wie bisher in Modals im Hamburger-Menü zu verstecken.
+Die Batterie-Seite zeigt neben den aktuellen Werten auch die Prognose der Ladestandentwicklung (experimentell, später mehr zum Optimizer).
+Außerdem weist dich die Navigation dezent darauf hin, wenn eine neue evcc-Version verfügbar ist.
+Der oft gewünschte Update-Button direkt am Changelog ist noch nicht da.
+Steht aber auf unserer Liste.
+
+Nebenbei sind auch weitere Lücken der Browser-Konfiguration geschlossen: Tarife, Benachrichtigungen, EEBus und Externe Begrenzung lassen sich jetzt komplett im UI einrichten.
+Nur das Lastmanagement muss aktuell noch über einen großen YAML-Block konfiguriert werden.
+
+{/* TODO: Bild/Animation Bottom-Navigation */}
+
+## App: Widgets & mehrere Server
+
+Die [evcc App](/de/features/app) hat in den letzten Monaten einige neue Funktionen bekommen.
+
+**iOS-Widgets:** Ladepunkt-Status, Solarprognose, Netzbezugspreis, Einspeisevergütung und CO₂-Vorhersage gibt es jetzt als Widgets direkt auf dem Homescreen.
+Ein Tap bringt dich per Deep Link an die passende Stelle in der App.
+
+**Mehrere Server:** Du kannst jetzt mehrere evcc-Instanzen in der App verwalten, z. B. für Zuhause, deine Eltern oder das Ferienhaus.
+Der Wechsel geht über **Mehr → Server ändern**.
+
+**QR-Code-Setup:** Die Einrichtung einer neuen Instanz funktioniert per QR-Code-Scan direkt aus der Weboberfläche.
+Serveradresse und Zugangsdaten musst du damit nicht mehr von Hand eingeben.
+Das ist besonders hilfreich, wenn du die Installation für jemand anderen vorbereitest.
+Mehr zu den Möglichkeiten findest du in der [App-Referenz](/de/reference/app).
+
+{/* TODO: Bild iOS-Widgets */}
+
+## Remote Access 🧪
+
+Viele von euch wollen ihre Anlage auch unterwegs im Blick behalten.
+Unsere Empfehlung war bislang, dafür ein VPN einzurichten.
+Dabei haben wir oft den Wunsch nach einer einfacheren Lösung gehört.
+
+Das Thema beschäftigt uns schon lange.
+Über die letzten Jahre haben wir viele Prototypen gebaut und wieder verworfen.
+Unsere Anforderungen: hohe Sicherheit, keine Datenspeicherung auf unseren Servern, Transparenz, einfache Nutzung und ein hohes Maß an lokaler Kontrolle.
+
+Mit dem neuen, experimentellen [Remote Access](/de/features/remote-access) haben wir jetzt eine Lösung, die dazu passt.
+Deine Instanz bekommt eine eigene Domain auf `evcc.cloud`.
+Die Verbindung läuft über einen Tunnel, den deine Instanz selbst nach außen aufbaut.
+Eine Portfreigabe im Router ist nicht nötig.
+Das Schöne an der Lösung ist, dass sie technisch sehr simpel ist.
+Kern ist die [hashicorp/yamux](https://github.com/hashicorp/yamux)-Bibliothek, mit der wir eingehenden Internet-Traffic sicher an die richtige lokale evcc-Instanz leiten, transportverschlüsselt über TLS.
+Die eigentliche Authentifizierung findet auf deiner lokalen Instanz statt: Zugangsdaten werden ausschließlich dort gespeichert und geprüft, Nutzeraccounts in der Cloud gibt es nicht.
+Der Dienst steht Sponsoren zur Verfügung und lässt sich mit zwei Klicks unter **Konfiguration → Remote Access** aktivieren.
+
+{/* TODO: Diagramm/Screenshot Remote Access */}
+
+## Dimmen und Abregeln
+
+Die [externe Steuerung](/de/external-limit) durch den Netzbetreiber haben wir grundlegend überarbeitet.
+Die Signale einer FNN-Steuerbox können per EEBus oder über Schaltkontakte eingelesen werden.
+
+**Dimmen:** Die Begrenzung von steuerbaren Verbrauchern nach § 14a EnWG unterstützen wir schon länger.
+Sie ist jetzt besser geworden: Aktive Begrenzungen werden prozentual auf alle steuerbaren Geräte verteilt und im UI angezeigt.
+
+**Abregeln:** Neu ist die Reduzierung der Erzeugungsleistung nach § 9 EEG.
+Wechselrichter von Huawei, Enphase, Sungrow und generische SunSpec-Geräte lassen sich bereits abregeln.
+Eine Übersicht der abregelbaren Geräte findest du in der [Geräteliste](/de/meters?f=curtail).
+Hier arbeiten wir an breiterer Geräteunterstützung.
+Wenn du dich mit einem weiteren Gerät auskennst, freuen wir uns über deinen Beitrag.
+
+{/* TODO: Bild Dimmen/Abregeln */}
+
+<a id="heating"></a>
+
+## Wärmepumpen & Heizen
+
+Immer mehr von euch steuern neben dem Auto auch Wärmepumpe oder Heizstab mit ihrem PV-Überschuss.
+Auch hier hat sich einiges getan.
+
+Temperaturen werden jetzt als Bereich mit eigenem Blau-zu-Rot-Farbverlauf dargestellt und unterscheiden sich damit klarer von Ladepunkten.
+Den Temperaturbereich kannst du dabei selbst konfigurieren.
+
+Mit **kontinuierlich** gibt es einen neuen konzeptionellen Modus für Wärmepumpen: Statt hartem Ein- und Ausschalten läuft das Gerät eigenständig weiter, was die Natur dieser Gerätekategorie besser abbildet.
+Über EEBus unterstützen wir die Kompressor-Flexibilität (OHPCF), mit der sich Wärmepumpen gezielt mit Überschuss betreiben lassen.
+
+Dazu kommen viele [neue Geräte](/de/heating#supported), von der Vaillant-Markenfamilie über Glen Dimplex bis Xtherma.
+Wir haben noch einige Baustellen wie eine passendere Modus-Benennung, einen angepassten Plan-Modus und die zeitbasierte Datenerfassung (siehe weiter unten) sowie weitergehende Ideen wie Wärmebedarfsvorhersagen im Optimizer.
+
+**Sponsoring erforderlich:** Bei der Einführung der Heating-Kategorie hatten wir angekündigt, dass diese Geräte, ähnlich wie viele Wallboxen, ein Sponsoring voraussetzen werden.
+Der Hinweis steht seitdem oben in der [Geräteliste](/de/heating).
+Mit einem der kommenden Releases setzen wir das in der Software um.
+
+{/* TODO: Bild Temperaturbereich Heizen */}
+
+## Batterie-Boost
+
+Manchmal soll das Auto schnell voll werden, auch wenn die Sonne gerade nicht liefert.
+Mit **Batterie Boost** kannst du die Hausbatterie gezielt ins Fahrzeug entladen.
+Ein Klick am Ladepunkt genügt, geladen wird bis zu einem einstellbaren Batterie-Limit.
+Der Boost funktioniert im **PV-Modus**.
+
+Batterie Boost ist übrigens das erste Feature, das es auf einen eigenen Sticker geschafft hat.
+Beim [Community-Treffen](/de/blog/2026/04/20/community-treffen-rueckblick) im April haben wir ein paar Stickerentwürfe verteilt und Ideen gesammelt.
+In den Briefen an neue Sponsoren ist dieser Sticker, mit pixydust-grünem Sparkle-Druck, jetzt standardmäßig im Set enthalten.
+
+{/* TODO: Bild Batterie Boost */}
+
+## OCPP-Weiterleitung
+
+Ein typischer Fall: Du fährst einen Dienstwagen und dein Arbeitgeber erstattet die Ladekosten über eine Abrechnungsplattform.
+Deine Wallbox spricht dafür OCPP, kann sich aber nur mit einem System verbinden.
+Bisher musstest du dich entscheiden: Solar-Optimierung mit evcc oder Abrechnung über die Plattform.
+
+Die neue [OCPP-Weiterleitung](/de/integrations/ocpp-forwarding) löst das.
+Deine evcc-Instanz steuert die Wallbox und reicht die OCPP-Nachrichten gleichzeitig an das externe Backend weiter.
+Auf Wunsch blockiert sie dabei Befehle von außen und behält die alleinige Kontrolle über das Laden.
+
+{/* TODO: Diagramm OCPP-Weiterleitung */}
+
+## Neue Geräte-Unterstützung
+
+Seit Jahresbeginn sind **über 50 neue Hersteller** hinzugekommen.
+Die Gerätebibliothek umfasst jetzt mehr als **320 Hersteller** und über **800 Produkte**.
+
+**Wallboxen:** ChargeLine, ChargeX, Enovates, ETEK, EVSE Master (Besen, Telestar, Morec), Hager, Lektrico, Nexblue, RAEDIAN, Shell Recharge, Stegen, Voltie
+
+**Wärmepumpen & Heizstäbe:** Askoma, E.G.O., Glen Dimplex, M-Tec, OVUM, Xtherma sowie die Vaillant-Markenfamilie (Saunier Duval, Bulex, Glow-worm, DemirDöküm)
+
+**Zähler, PV- & Batteriesysteme:** ADA, Afore, Atmoce, Azimut Energy, Danfoss, Eltako, Everhome, Finder, Homey, IBC Solar, IndeVolt, INTILION, IoTaWatt, Sessy, Smartstuff, Solinteg, stromleser.one, Tepto
+
+**Tarife:** BKW, CKW, Energy-Charts, EPEX Predictor, EWS Schönau, Fingrid, OMIE, Pstryk, pvnode
+
+**Fahrzeuge:** Alpine, Genesis, Lexus
+
+Natürlich gab es auch viele Bugfixes und Verbesserungen an bestehenden Implementierungen.
+Details findest du in den [Release Notes](https://github.com/evcc-io/evcc/releases).
+
+## VW-Konzern: weg und teilweise zurück
+
+Ab und an verschwinden Integrationen aber auch wieder.
+Die Situation beim VW-Konzern ist eine kleine Achterbahnfahrt.
+Mehrere Konzernmarken sind durch die [Abschaltung der Drittanbieter-Schnittstelle](https://www.heise.de/news/Frust-bei-E-Auto-Fahrern-Schnittstelle-fuer-Drittanbieter-weg-VW-arbeitet-dran-11320034.html) rausgefallen.
+Über den Umweg der neuen EU-Data-Act-Schnittstelle haben wir sie teilweise und mit Einschränkungen wieder verfügbar gemacht.
+Statt einer Live-API stellt das Transparenzportal alle 15 Minuten ein ZIP-Archiv mit den Fahrzeugdaten bereit, das deine Instanz herunterlädt und ausliest.
+Der Konzern hat eine nachhaltige Lösung für Smart-Home-Projekte und Open Source angekündigt.
+Wir sind in Kontakt, warten jetzt aber auch schon seit einigen Wochen auf den nächsten Schritt des Herstellers.
+
+<a id="history"></a>
+
+## Historie: zeitbasierte Auswertungen
+
+Mit einem lange gewünschten Feature haben wir begonnen: Energiedaten werden jetzt strukturiert in 15-Minuten-Auflösung erfasst, unabhängig von Ladevorgängen.
+Die neue, experimentelle Seite **Historie** zeigt Netz, Erzeugung, Batterie, Laden & Heizen, Hausverbrauch und weitere Zähler im zeitlichen Verlauf.
+Zusätzlich zur visuellen Darstellung lassen sich die Daten als CSV oder XLSX exportieren.
+
+Neu ist auch das Konzept der _Verbraucher_: Damit lässt sich der erfasste Hausverbrauch weiter aufschlüsseln, z. B. nach Waschmaschine, Geschirrspüler oder Toaster.
+Verbraucher werden im Gegensatz zu Ladepunkten und Heizgeräten nur erfasst und nicht geregelt.
+
+Um die Datenqualität zu verbessern, haben wir Unterstützung für die Energieerfassung von Zweirichtungszählern hinzugefügt.
+Damit erfassen wir beide Richtungen: bezogen und eingespeist beim Netz, geladen und entladen bei der Batterie.
+
+Fertig ist das Thema damit noch nicht.
+Aktueller Fokus ist, die Korrektheit der Daten für alle unterstützten Geräteklassen sicherzustellen.
+Die Auswertungen sind deshalb noch bewusst simpel gehaltene Zeitreihen.
+Ideen gibt es aber schon viele: In diesem [Ideen-Thread](https://github.com/evcc-io/evcc/discussions/31060) kannst du Screenshots von Auswertungen und Visualisierungen posten, die du gelungen und hilfreich findest und gerne zukünftig in evcc sehen würdest.
+
+Damit legen wir die Basis für Auswertungen jenseits des E-Auto-Ladens.
+Fragen wie „Wie viel Sonnenstrom hat die Wärmepumpe letztes Jahr verwendet?“ wollen wir künftig direkt beantworten.
+
+{/* TODO: Animation Historie-Seite */}
+
+<a id="optimizer"></a>
+
+## Optimizer
+
+Bisher regelt evcc abhängig von der aktuellen Energiesituation im Haus.
+Ladepläne schauen zwar vorausschauend auf Preise und Prognosen, aber immer fokussiert auf einen einzelnen Ladepunkt.
+Der [Optimizer](/de/features/optimizer) nimmt das große Ganze in den Blick: Er berechnet das optimale Verhalten des Gesamtsystems für die nächsten zwei Tage, auf Basis von Verbrauchs- und Produktionsprognosen sowie dem Strompreisverlauf.
+Frisch gemerged sind Wetterprognosen, mit denen sich zukünftig auch der Wärmebedarf schätzen und einbeziehen lässt.
+
+Neu ist außerdem eine wählbare Strategie: Du bestimmst, worauf der Plan neben der Kosteneffizienz optimieren soll, z. B. die Batterie zuerst füllen oder Netzspitzen reduzieren.
+Die Empfehlungen des Optimizers werden dort eingeblendet, wo sie relevant sind: am Ladepunkt und auf der Batterie-Seite, inklusive des prognostizierten Ladestandsverlaufs.
+Noch steuert der Optimizer keine Geräte.
+Der nächste Schritt ist, die berechneten Pläne in Aktionen umzusetzen: das konkrete Steuern des Batterie- und Ladepunktverhaltens.
+
+{/* TODO: Screenshot Optimizer-Empfehlung */}
+
+## Sponsoring über Creem
+
+Sponsoring ist jetzt auch ohne GitHub-Account möglich.
+Über [sponsor.evcc.io](https://sponsor.evcc.io) kannst du dein Sponsoring direkt abschließen, abgewickelt über den Zahlungsdienstleister [Creem](https://www.creem.io), ein junges europäisches Unternehmen aus Estland.
+Bezahlen kannst du aktuell mit Apple Pay, Google Pay und Kreditkarte, weitere Zahlarten sind in Planung.
+Neu sind auch [Token-Bundles mit Mengenrabatt](https://sponsor.evcc.io/business) für Solarteure und Installationsbetriebe, die evcc bei ihren Kundenprojekten einsetzen.
+Alle Details findest du in der [Sponsoring-Dokumentation](/de/sponsorship).
+
+## Neue Dokumentation
+
+Auch [docs.evcc.io](https://docs.evcc.io) hat einen Umbau hinter sich.
+Wir sind von Docusaurus auf [Astro Starlight](https://starlight.astro.build) umgestiegen.
+Die neue Basis ist leichtgewichtiger, moderner und bietet mehr Freiheiten für Erweiterungen.
+Die Seiten laden schneller und kommen ohne clientseitiges JavaScript aus.
+Die Suche läuft jetzt lokal im Browser statt über den externen Dienst Algolia.
+Englisch ist die neue Standardsprache.
+Jedes Gerät hat eine eigene, direkt verlinkbare Detailseite mit Parametertabelle, generiert aus den Templates und mit Umschalter zwischen Release- und Nightly-Stand.
+Die Bearbeitungsfunktion führt direkt zum Quell-Template.
+Die REST-API-Referenz entsteht aus der OpenAPI-Spezifikation, und für LLMs gibt es eine [llms.txt](https://docs.evcc.io/llms.txt).
+
+## Agentic Development
+
+Agentische Entwicklungswerkzeuge sind in den letzten Monaten deutlich besser geworden und haben die Arbeit im Projekt verändert, im Guten wie im Schlechten.
+Auf GitHub sortiert ein Agent neue Issues vor, Pull Requests bekommen ein automatisches Erst-Review und Maintainer können per Kommentar Analysen, Fixes und Testbuilds anstoßen.
+Das Ergebnis: bessere Issues, bessere Pull Requests und ein großer Boost für Contributions.
+In der [CONTRIBUTING.md](https://github.com/evcc-io/evcc/blob/master/CONTRIBUTING.md) haben wir Richtlinien für AI-generierte Beiträge festgehalten.
+
+Klar ist aber auch: Fokus und Qualität haben für uns weiterhin oberste Priorität.
+Neue Features zu generieren ist einfach geworden.
+Gute Kommunikation in Issues und Discussions ist dadurch umso wichtiger.
+Anwendungsfälle und die konkreten Bedürfnisse dahinter zu verstehen bleibt entscheidend, auch wenn die Abkürzung über die „schnell dazugenerierte Einstellungsmöglichkeit“ oft sehr verlockend ist.
+
+## Ausblick
+
+Woran arbeiten wir als Nächstes?
+Einige Pläne haben wir oben schon angerissen: weitere [Verbesserungen für Wärmepumpen](#heating), mehr [Auswertungen](#history) auf Basis der neuen Datenerfassung und der [Optimizer](#optimizer) auf dem Weg von der Empfehlung zur aktiven Steuerung.
+Zwei größere Themen kommen dazu.
+
+**Mini-Loadpoints:** Reguläre Verbraucher und Wärmeerzeuger sollen eigene Kacheln mit passenden Funktionen bekommen.
+Mit den zeitbasierten Daten und der überarbeiteten Geräteverwaltung sind die Vorbedingungen dafür jetzt geschaffen.
+Details in der [GitHub Discussion](https://github.com/evcc-io/evcc/discussions/7235).
+
+**Bidirektionales Laden:** Erste Fahrzeuge und Wallboxen mit Rückspeisefähigkeit sind in der Community vorhanden (auch im Core-Team).
+Wir arbeiten daran, sie in evcc nutzbar zu machen.
+Wir führen gerade Diskussionen mit Herstellern zu Implementierungsdetails im Standard, Zertifikaten und anderen technischen Herausforderungen.
+Falls du eine kompatible Wallbox-Fahrzeug-Kombination zu Hause hast (oder bei einem Hersteller arbeitest), melde dich gerne bei uns: per [GitHub Issue](https://github.com/evcc-io/evcc/issues), im [Slack](https://evcc.io/slack) oder an [info@evcc.io](mailto:info@evcc.io).
+
+---
+
+💚 Großes Dankeschön an alle, die das Projekt voranbringen: durch Code, Ideen, Testen, Diskussionen und finanzielle Unterstützung, ohne die das Projekt in dieser Form nicht möglich wäre.
+
+Wir wünschen euch einen sonnigen Sommer mit vielen vollen Batterien.
+
+**Viele Grüße**<br />
+Das evcc Team<br />
+Michael, Andi & Uli
