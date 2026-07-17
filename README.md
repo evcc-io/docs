@@ -41,19 +41,6 @@ npm run build
 This builds the static site into `dist/` and runs the legacy-redirect generator.
 The output can be served by any static host.
 
-### Update CLI docs
-
-CLI documentation is auto-generated.
-Generation needs to be triggered manually.
-Run this command inside the evcc core repository (e.g. `./evcc`):
-
-```sh
-go run main.go gendoc ../evcc-docs/src/content/docs/en/reference/cli/
-```
-
-CLI docs only live in the English (default-locale) directory.
-German pages fall back to the English content automatically.
-
 ## Contributing
 
 ### Code formatting
