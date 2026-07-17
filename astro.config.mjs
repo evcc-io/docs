@@ -221,6 +221,11 @@ export default defineConfig({
               slug: "integrations/sma-sunny-home-manager",
             },
             {
+              label: "OCPP Forward",
+              translations: { de: "OCPP-Weiterleitung" },
+              slug: "integrations/ocpp-forwarding",
+            },
+            {
               label: "Notifications",
               translations: { de: "Benachrichtigungen" },
               link: "/notifications",
