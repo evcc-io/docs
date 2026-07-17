@@ -202,9 +202,16 @@ Everything else is hand-written:
 ##### Link Formats
 
 - **Locale-prefixed absolute links**: `/en/features/solar-charging` or `/de/features/solar-charging`
-- Astro's router preserves the prefix, so use the locale-prefixed form for clarity
+- **Never use relative links** (`./linux`, `../meters`, `loadpoints#charger`) for pages — the production site (GitHub Pages) serves pages with a trailing slash, so relative links resolve one level too deep and 404. Local dev serves without the trailing slash, so the breakage is invisible locally.
+- Relative paths are fine (and preferred) for **co-located images/assets** — Astro bundles them at build time
 - **Anchors**: `/en/reference/configuration/site#residualpower`
 - **Never include** `.md` or `.mdx` extensions in links
+- The REST API pages are not locale-prefixed: link to `/integrations/rest-api`
+
+##### Validation
+
+- `npm run build` validates all internal links via `starlight-links-validator` and fails on broken links, missing anchors, and relative page links — CI enforces this on every PR
+- Custom routes under `src/pages/[lang]/` (device pages, `external-limit`, `notifications`, `nightly`) plus the openapi and blog index pages are excluded from validation in `astro.config.mjs`; extend that list when adding new custom routes
 
 ##### Best Practices
 
