@@ -9,7 +9,7 @@ Generate the autocompletion script for zsh
 Generate the autocompletion script for the zsh shell.
 
 If shell completion is not already enabled in your environment you will need
-to enable it.  You can execute the following once:
+to enable it. You can execute the following once:
 
 ```
 echo "autoload -U compinit; compinit" >> ~/.zshrc
