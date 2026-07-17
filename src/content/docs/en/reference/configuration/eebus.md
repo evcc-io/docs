@@ -32,7 +32,7 @@ Remove the `eebus:` block from your `evcc.yaml` and restart.
 A new certificate is generated automatically and all EEBus devices must be paired again.
 
 To keep your existing certificate, enter it in the EEBus dialog under **Show advanced settings**.
-This is useful if the SKI (part of the public certificate) is already registered with your grid operator for [external control](/en/features/external-control).
+This is useful if the SKI (part of the public certificate) is already registered with your grid operator for [external control](/en/external-limit).
 :::
 
 ---

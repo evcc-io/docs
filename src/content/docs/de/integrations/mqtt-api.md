@@ -4,7 +4,7 @@ sidebar:
   order: 2
 ---
 
-Alle Daten des [REST API](./rest-api) Endpunkts `/api/state` werden auch per MQTT veröffentlicht.
+Alle Daten des [REST API](/integrations/rest-api) Endpunkts `/api/state` werden auch per MQTT veröffentlicht.
 Listen werden dabei in einzelne Sub-Topics aufgelöst (Index beginnt bei `1`).
 
 ## Lesbare Topics

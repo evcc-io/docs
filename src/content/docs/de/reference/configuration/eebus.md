@@ -32,7 +32,7 @@ Entferne den `eebus:`-Block aus deiner `evcc.yaml` und starte neu.
 Ein neues Zertifikat wird automatisch generiert und alle EEBus-Geräte müssen neu gekoppelt werden.
 
 Wenn du dein bisheriges Zertifikat behalten möchtest, trage es im EEBus-Dialog unter **Erweiterte Einstellungen anzeigen** ein.
-Das ist sinnvoll, wenn die SKI (Bestandteil des öffentlichen Zertifikats) bereits für die [externe Steuerung](/de/features/external-control) beim Netzbetreiber hinterlegt ist.
+Das ist sinnvoll, wenn die SKI (Bestandteil des öffentlichen Zertifikats) bereits für die [externe Steuerung](/de/external-limit) beim Netzbetreiber hinterlegt ist.
 :::
 
 ---

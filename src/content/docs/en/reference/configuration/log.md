@@ -38,9 +38,9 @@ Defines the level of detail for logging for different evcc components.
 **Possible components**:
 
 - `site`: The central evcc component (control, calculations, ...)
-- `lp-X`: The respective charging point, where `X` is numbered according to the order of [`loadpoints`](loadpoints) configuration (charging points), starting at `1`
-- `sma`: The SMA HEMS component if SMA Sunny Home Manager 2.0 is integrated using [`hems`](hems)
-- _`vehicle`_: Each [`vehicle`](vehicles) (vehicle), where you must specify the corresponding value of the [`type`](vehicles#type) parameter (or template).
+- `lp-X`: The respective charging point, where `X` is numbered according to the order of [`loadpoints`](/en/reference/configuration/loadpoints) configuration (charging points), starting at `1`
+- `sma`: The SMA HEMS component if SMA Sunny Home Manager 2.0 is integrated using [`hems`](/en/reference/configuration/hems)
+- _`vehicle`_: Each [`vehicle`](/en/reference/configuration/vehicles) (vehicle), where you must specify the corresponding value of the [`type`](/en/reference/configuration/vehicles#type) parameter (or template).
 - Additionally, depending on the use case, additional components can be specified (e.g. `cache`, `db`, `influx`, `mqtt`, ...)
 
 **Possible values for each component**: Identical to the values of [`log`](#log)

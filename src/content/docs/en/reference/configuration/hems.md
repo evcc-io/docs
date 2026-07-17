@@ -10,7 +10,7 @@ For background and setup details, see [External Limit](/en/external-limit).
 
 :::note[Note]
 Curtailment and dimming of controllable consumers act directly on the device, no circuit configuration is required.
-To apply the consumption limit to charging points, circuits must be set up in [Load Management](../../features/loadmanagement).
+To apply the consumption limit to charging points, circuits must be set up in [Load Management](/en/features/loadmanagement).
 An active limit then caps the top-level circuit.
 :::
 

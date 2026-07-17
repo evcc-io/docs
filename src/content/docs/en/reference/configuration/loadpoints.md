@@ -46,7 +46,7 @@ Reference to a `charger` configuration.
 charger: charger
 ```
 
-Where the value `charger` corresponds to the value of the `name` parameter in the [charger definition](chargers#name).
+Where the value `charger` corresponds to the value of the `name` parameter in the [charger definition](/en/reference/configuration/chargers#name).
 
 ---
 
@@ -64,7 +64,7 @@ This entry is only needed if the used charger doesn't perform its own current me
 meter: charge
 ```
 
-Where the value `charge` corresponds to the value of the `name` parameter in the [current meter definition](meters#name).
+Where the value `charge` corresponds to the value of the `name` parameter in the [current meter definition](/en/reference/configuration/meters#name).
 
 ---
 
@@ -80,7 +80,7 @@ When a vehicle is plugged into the charger, it is assumed that this vehicle is c
 vehicle: renault
 ```
 
-Where the value `renault` corresponds to the value of the `name` parameter in the [vehicle definition](vehicles#name).
+Where the value `renault` corresponds to the value of the `name` parameter in the [vehicle definition](/en/reference/configuration/vehicles#name).
 
 ---
 

@@ -10,7 +10,7 @@ Details zu Hintergrund und Einrichtung findest du unter [Externe Begrenzung](/de
 
 :::note[Hinweis]
 Abregelung und das Dimmen steuerbarer Verbraucher wirken direkt am Gerät, dafür sind keine Stromkreise erforderlich.
-Damit das Verbrauchslimit auf Ladepunkte wirkt, müssen Stromkreise im [Lastmanagement](../../features/loadmanagement) eingerichtet sein.
+Damit das Verbrauchslimit auf Ladepunkte wirkt, müssen Stromkreise im [Lastmanagement](/de/features/loadmanagement) eingerichtet sein.
 Ein aktives Limit begrenzt dann den obersten Stromkreis.
 :::
 
