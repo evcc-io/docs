@@ -3,9 +3,11 @@ product:
   identifier: atmoce-mg100-m-gateway
   brand: Atmoce
   description: MG100 M-gateway
-capabilities: ["battery-control"]
+capabilities: ["battery-control", "curtail", "dim"]
 description: |
-  Support for Atmoce MG100 (included with MC100 and MC100-T). Requires installer to enable Modbus TCP in configuration; available in firmware 01.01.00.18.10 or later.
+  Support for Atmoce MG100 (included with MC100 and MC100-T).
+  Requires installer to enable Modbus TCP in configuration or through Atmozen app; available in firmware 01.01.00.18.10 or later.
+  'Grid Recharging' and 'Export Power' must be enabled in the Atmozen app to allow battery (dis)charging to/from grid.
 
 render:
   - usage: grid
@@ -29,6 +31,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      firmware: <01.01.00.28.15 # Firmware version, Firmware 01.01.00.28.15 and higher allows for correct hold/holdcharge functionality, dimming and curtailing. Older versions only support hold function without (dis)charge. [<01.01.00.28.15, >=01.01.00.28.15] (optional)
   - usage: pv
     default: |
       type: template
@@ -51,6 +54,7 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      firmware: <01.01.00.28.15 # Firmware version, Firmware 01.01.00.28.15 and higher allows for correct hold/holdcharge functionality, dimming and curtailing. Older versions only support hold function without (dis)charge. [<01.01.00.28.15, >=01.01.00.28.15] (optional)
   - usage: battery
     default: |
       type: template
@@ -78,6 +82,7 @@ render:
       maxsoc: 100 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
       maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
       maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      firmware: <01.01.00.28.15 # Firmware version, Firmware 01.01.00.28.15 and higher allows for correct hold/holdcharge functionality, dimming and curtailing. Older versions only support hold function without (dis)charge. [<01.01.00.28.15, >=01.01.00.28.15] (optional)
 params:
   - name: modbus
     example:
@@ -140,6 +145,15 @@ params:
     unit: W
     description: Maximum discharge power
     help: Maximum discharge power of the storage.
+    advanced: true
+    optional: true
+  - name: firmware
+    example:
+    default: <01.01.00.28.15
+    choice: ['<01.01.00.28.15', '>=01.01.00.28.15']
+    unit:
+    description: Firmware version
+    help: Firmware 01.01.00.28.15 and higher allows for correct hold/holdcharge functionality, dimming and curtailing. Older versions only support hold function without (dis)charge.
     advanced: true
     optional: true
 modbus:
