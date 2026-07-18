@@ -1,0 +1,123 @@
+---
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  label?: string;
+}
+
+const defaultLabel =
+  Astro.currentLocale === "de"
+    ? "Blog: neuer Beitrag verfügbar"
+    : "Blog: new blog post available";
+const { label = defaultLabel } = Astro.props;
+
+// Optional chaining: routes outside Starlight's middleware (e.g. llms-full.txt) have no blog data
+const latest = Astro.locals.starlightBlog?.posts.find((p) => !p.draft);
+
+// Evaluated at build time — hides once no rebuild has picked up a fresh post for 2 months
+const MAX_AGE_MS = 1000 * 60 * 60 * 24 * 61;
+const post =
+  latest && Date.now() - latest.createdAt.getTime() < MAX_AGE_MS
+    ? latest
+    : undefined;
+
+const images = import.meta.glob<ImageMetadata>(
+  "/src/content/docs/**/blog/**/*.{webp,png,jpg,jpeg}",
+  { eager: true, import: "default" },
+);
+
+// Posts embed their banner as the first markdown image; no cover frontmatter exists
+let image: ImageMetadata | undefined;
+let imageAlt = "";
+if (post?.entry.filePath && post.entry.body) {
+  const match = post.entry.body.match(
+    /!\[([^\]]*)\]\(\.\/([^)\s]+\.(?:webp|png|jpg|jpeg))\)/,
+  );
+  if (match) {
+    const dir = post.entry.filePath.replace(/\/[^/]+$/, "");
+    image = images[`/${dir}/${match[2]}`];
+    imageAlt = match[1];
+  }
+}
+---
+
+{
+  post && (
+    <div class="latest-post-wrap">
+      <a class="latest-post" href={post.href}>
+        {image && (
+          <img
+            src={image.src}
+            width={image.width}
+            height={image.height}
+            alt={imageAlt}
+            loading="lazy"
+          />
+        )}
+        <span class="latest-post-text">
+          <span class="latest-post-label">{label}</span>
+          <span class="latest-post-title">{post.title}</span>
+        </span>
+      </a>
+    </div>
+  )
+}
+
+<style>
+  .latest-post-wrap {
+    container-type: inline-size;
+    margin: 3.5rem 0 !important;
+  }
+  .latest-post {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--sl-color-accent);
+    border-radius: 0.5rem;
+    background: var(--sl-color-accent-low);
+    text-decoration: none;
+  }
+  .latest-post:hover .latest-post-title {
+    text-decoration: underline;
+  }
+  .latest-post img {
+    display: block;
+    width: 20rem;
+    height: auto;
+    flex-shrink: 0;
+    border-radius: 0.25rem;
+    margin: 0 !important;
+  }
+  .latest-post-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1;
+  }
+  .latest-post-label {
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sl-color-accent-high);
+  }
+  .latest-post-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--sl-color-white);
+    line-height: 1.4;
+  }
+  /* Stack when the card gets narrow: text first, image full width below */
+  @container (max-width: 40rem) {
+    .latest-post {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .latest-post img {
+      order: 1;
+      width: 100%;
+    }
+  }
+</style>
