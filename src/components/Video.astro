@@ -3,11 +3,14 @@ interface Props {
   src: string;
   title?: string;
   poster?: string | ImageMetadata;
+  autoplay?: boolean;
+  aspect?: string;
 }
 
-const { src, title = "Video", poster: posterProp } = Astro.props;
+const { src, title = "Video", poster: posterProp, autoplay = false, aspect } = Astro.props;
 const poster = typeof posterProp === "object" ? posterProp.src : posterProp;
 const isYouTube = /youtu\.?be/i.test(src);
+const style = aspect ? `aspect-ratio: ${aspect}` : undefined;
 ---
 
 {
@@ -21,8 +24,14 @@ const isYouTube = /youtu\.?be/i.test(src);
         loading="lazy"
       />
     </div>
+  ) : autoplay ? (
+    <div class="video-wrap" style={style}>
+      <video autoplay muted loop playsinline poster={poster} preload="metadata">
+        <source src={src} />
+      </video>
+    </div>
   ) : (
-    <div class="video-wrap">
+    <div class="video-wrap" style={style}>
       <video controls poster={poster} preload="metadata">
         <source src={src} />
       </video>
