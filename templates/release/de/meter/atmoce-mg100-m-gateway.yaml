@@ -3,9 +3,11 @@ product:
   identifier: atmoce-mg100-m-gateway
   brand: Atmoce
   description: MG100 M-gateway
-capabilities: ["battery-control"]
+capabilities: ["battery-control", "curtail", "dim"]
 description: |
-  Unterstützung für Atmoce MG100 (im Lieferumfang von MC100 und MC100-T enthalten). Erfordert, dass der Installateur Modbus TCP in der Konfiguration aktiviert; verfügbar ab Firmware-Version 01.01.00.18.10.
+  Unterstützung für Atmoce MG100 (im Lieferumfang von MC100 und MC100-T enthalten).
+  Der Installateur muss Modbus TCP in der Konfiguration oder über die Atmozen-App aktivieren; verfügbar ab Firmware-Version 01.01.00.18.10.
+  Die Funktionen 'Netzaufladung' und 'Export von Leistung ins Netz' müssen in der Atmozen-App aktiviert sein, um das Laden/Entladen des Akkus aus dem Netz zu ermöglichen.
 
 render:
   - usage: grid
@@ -29,6 +31,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      firmware: <01.01.00.28.15 # Firmware-Version, Firmware 01.01.00.28.15 und höher ermöglichen die korrekte Hold/Holdcharge-Funktionalität sowie das Dimmen und Abschalten. Ältere Versionen unterstützen lediglich die Hold-Funktion ohne (Ent-)Ladefunktion. [<01.01.00.28.15, >=01.01.00.28.15] (optional)
   - usage: pv
     default: |
       type: template
@@ -51,6 +54,7 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
+      firmware: <01.01.00.28.15 # Firmware-Version, Firmware 01.01.00.28.15 und höher ermöglichen die korrekte Hold/Holdcharge-Funktionalität sowie das Dimmen und Abschalten. Ältere Versionen unterstützen lediglich die Hold-Funktion ohne (Ent-)Ladefunktion. [<01.01.00.28.15, >=01.01.00.28.15] (optional)
   - usage: battery
     default: |
       type: template
@@ -78,6 +82,7 @@ render:
       maxsoc: 100 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
       maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
       maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
+      firmware: <01.01.00.28.15 # Firmware-Version, Firmware 01.01.00.28.15 und höher ermöglichen die korrekte Hold/Holdcharge-Funktionalität sowie das Dimmen und Abschalten. Ältere Versionen unterstützen lediglich die Hold-Funktion ohne (Ent-)Ladefunktion. [<01.01.00.28.15, >=01.01.00.28.15] (optional)
 params:
   - name: modbus
     example:
@@ -140,6 +145,15 @@ params:
     unit: W
     description: Maximale Entladeleistung
     help: Maximale Entladeleistung des Speichers.
+    advanced: true
+    optional: true
+  - name: firmware
+    example:
+    default: <01.01.00.28.15
+    choice: ['<01.01.00.28.15', '>=01.01.00.28.15']
+    unit:
+    description: Firmware-Version
+    help: Firmware 01.01.00.28.15 und höher ermöglichen die korrekte Hold/Holdcharge-Funktionalität sowie das Dimmen und Abschalten. Ältere Versionen unterstützen lediglich die Hold-Funktion ohne (Ent-)Ladefunktion.
     advanced: true
     optional: true
 modbus:
