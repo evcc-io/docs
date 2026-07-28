@@ -7,6 +7,7 @@ capabilities: ["battery-control"]
 description: |
   Nur ein System kann und darf zeitgleich eine Modbus TCP-Verbindung zum Wechselrichter haben!
   Für die optionale Batteriesteuerung muss StorageConf_CtrlMode (0xE004) auf 4 "Remote" stehen.
+  Curtailment begrenzt die Einspeiseleistung auf den gewünschten Prozentsatz der maximalen AC-Leistung. Der Wechselrichter begrenzt automatisch die PV-Leistung, um dies zu erreichen.
 
 render:
   - usage: grid
@@ -81,6 +82,7 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W)
     advanced: |
       type: template
       template: solaredge-hybrid
@@ -104,7 +106,7 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W)
       watchdog: 60s # Watchdog, optional
   - usage: battery
     default: |
@@ -172,6 +174,15 @@ params:
     help:
     advanced: false
     optional: false
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximale AC Leistung des Hybrid-Wechselrichters
+    help:
+    advanced: false
+    optional: false
   - name: capacity
     example: 50
     default:
@@ -198,15 +209,6 @@ params:
     description: Maximaler Ladestand
     help: Oberes Limit beim Laden der Batterie aus dem Netz
     advanced: false
-    optional: true
-  - name: maxacpower
-    example: 5000
-    default: 0
-    choice: []
-    unit: W
-    description: Maximale AC Leistung des Hybrid-Wechselrichters
-    help:
-    advanced: true
     optional: true
   - name: maxchargepower
     example:

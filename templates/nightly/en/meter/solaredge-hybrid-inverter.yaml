@@ -7,6 +7,7 @@ capabilities: ["battery-control"]
 description: |
   Only one system can and may have a Modbus TCP connection to the inverter at the same time!
   For optional battery control, StorageConf_CtrlMode (0xE004) must be set to 4 "Remote".
+  Curtailment will limit the export power to the desired percentage of the maximum AC power. The inverter will automatically limit the PV power to achieve this.
 
 render:
   - usage: grid
@@ -81,6 +82,7 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W)
     advanced: |
       type: template
       template: solaredge-hybrid
@@ -104,7 +106,7 @@ render:
       id: 1
       host:  # Hostname
       port: 1502 # Port
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W)
       watchdog: 60s # Watchdog, optional
   - usage: battery
     default: |
@@ -172,6 +174,15 @@ params:
     help:
     advanced: false
     optional: false
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximum AC power of the hybrid inverter
+    help:
+    advanced: false
+    optional: false
   - name: capacity
     example: 50
     default:
@@ -198,15 +209,6 @@ params:
     description: Maximum charge
     help: Upper limit when charging the battery from the grid
     advanced: false
-    optional: true
-  - name: maxacpower
-    example: 5000
-    default: 0
-    choice: []
-    unit: W
-    description: Maximum AC power of the hybrid inverter
-    help:
-    advanced: true
     optional: true
   - name: maxchargepower
     example:
