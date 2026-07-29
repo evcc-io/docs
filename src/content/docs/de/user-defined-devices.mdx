@@ -536,8 +536,7 @@ Zahlt eine feste Einspeisevergütung von 7 ct/kWh, außer wenn der Börsenstromp
 Eine benutzerdefinierte Integration für die [Externe Begrenzung](/de/external-limit) bindet eine Steuerbox oder ein Energiemanagementsystem an, das nicht durch eine integrierte Integration abgedeckt ist.
 Wähle dazu in der Oberfläche unter **Konfiguration → Externe Begrenzung** die Option **Benutzerdefinierte Integration**.
 
-Anders als bei anderen Gerätetypen gibt es hier kein `type: custom`.
-Stattdessen beschreibt einer von drei Typen, wie das Begrenzungssignal empfangen wird: `relay` (einzelner Schaltkontakt), `fnn` (FNN-Steuerbox mit mehreren Schaltkontakten) oder `eebus` (EEBus-Protokoll).
+Einer von vier Typen beschreibt, wie das Begrenzungssignal empfangen wird: `relay` (einzelner Schaltkontakt), `fnn` (FNN-Steuerbox mit mehreren Schaltkontakten), `eebus` (EEBus-Protokoll) oder `custom` (dynamische Limitwerte über Plugins).
 Jedes Signal wird über eine [Plugin](/de/reference/plugins)-Konfiguration ausgelesen (GPIO, MQTT, HTTP, Modbus).
 Siehe auch die [`hems`-Konfigurationsreferenz](/de/reference/configuration/hems).
 
@@ -689,6 +688,35 @@ Steuerbox und evcc müssen einmalig [gekoppelt](/de/external-limit#eebus-pairing
 ```yaml
 type: eebus
 ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
+```
+
+<a id="external-limit-custom"></a>
+
+### Custom
+
+Die generische Integration für Steuerungssysteme, die dynamische Limitwerte statt Schaltkontakten liefern.
+Verbrauchslimit und Abregelung der Einspeisung werden über Plugins ausgelesen und arbeiten unabhängig voneinander.
+Mindestens eines der Attribute `maxConsumptionPower` oder `curtailedPercent` muss konfiguriert sein.
+
+| Attribut               | Typ        | Erforderlich | Beschreibung                                                                                                |
+| ---------------------- | ---------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | Plugin     | nein¹        | Liest das Gesamtleistungslimit in Watt. `0` = kein Limit.                                                   |
+| `curtailedPercent`     | Plugin     | nein¹        | Liest die erlaubte Einspeisung in Prozent von `productionNominalMax` (0 bis 100). `100` = keine Abregelung. |
+| `productionNominalMax` | `int` (W)  | nein²        | Installierte Generatorleistung (Wp).                                                                        |
+| `interval`             | `duration` | nein         | Abfrageintervall für die Plugins. Standard `10s`.                                                           |
+
+¹ mindestens eines von beiden ist erforderlich, ² erforderlich, wenn `curtailedPercent` konfiguriert ist.
+
+```yaml
+type: custom
+maxConsumptionPower:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .maxPower # Leistungslimit in Watt, 0 = kein Limit
+curtailedPercent:
+  source: mqtt
+  topic: hems/curtail/percent # Erlaubte Einspeisung in Prozent, 100 = keine Abregelung
+productionNominalMax: 10000 # Installierte Generatorleistung (Wp)
 ```
 
 <a id="notification-service"></a>

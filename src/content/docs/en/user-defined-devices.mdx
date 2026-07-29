@@ -535,8 +535,7 @@ Pays a fixed feed-in tariff of 7 ct/kWh, except when the day-ahead market price 
 A user-defined integration for the [External Limit](/en/external-limit) feature connects a control box or energy management system that isn't covered by a built-in integration.
 In the UI, pick **User-defined integration** under **Configuration → External Limit**.
 
-Unlike other device types, there is no `type: custom` here.
-Instead, one of three types describes how the limit signal is received: `relay` (single switch contact), `fnn` (FNN control box with multiple switch contacts) or `eebus` (EEBus protocol).
+One of four types describes how the limit signal is received: `relay` (single switch contact), `fnn` (FNN control box with multiple switch contacts), `eebus` (EEBus protocol) or `custom` (dynamic limit values via plugins).
 Each signal is read via a [plugin](/en/reference/plugins) configuration (GPIO, MQTT, HTTP, Modbus).
 See also the [`hems` configuration reference](/en/reference/configuration/hems).
 
@@ -688,6 +687,35 @@ Control box and evcc need to be [paired](/en/external-limit#eebus-pairing) once.
 ```yaml
 type: eebus
 ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+<a id="external-limit-custom"></a>
+
+### Custom
+
+The generic integration for control systems that provide dynamic limit values instead of switch contacts.
+Consumption limit and feed-in curtailment are read via plugins and work independently of each other.
+At least one of `maxConsumptionPower` or `curtailedPercent` must be configured.
+
+| Attribute              | Type       | Required | Description                                                                                           |
+| ---------------------- | ---------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | no¹      | Reads the total power limit in watts. `0` = no limit.                                                 |
+| `curtailedPercent`     | plugin     | no¹      | Reads the allowed feed-in as percentage of `productionNominalMax` (0 to 100). `100` = no curtailment. |
+| `productionNominalMax` | `int` (W)  | no²      | Installed generator power (Wp).                                                                       |
+| `interval`             | `duration` | no       | Polling interval for the plugins. Default `10s`.                                                      |
+
+¹ at least one of the two is required, ² required when `curtailedPercent` is configured.
+
+```yaml
+type: custom
+maxConsumptionPower:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .maxPower # Power limit in watts, 0 = no limit
+curtailedPercent:
+  source: mqtt
+  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
+productionNominalMax: 10000 # Installed generator power (Wp)
 ```
 
 <a id="notification-service"></a>
