@@ -3,7 +3,7 @@ product:
   identifier: sunsynk-3p-hybrid-inverter
   brand: Sunsynk
   description: 3p hybrid inverter
-capabilities: ["battery-control"]
+capabilities: ["battery-control", "curtail"]
 render:
   - usage: grid
     default: |
@@ -84,6 +84,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W)
       batterytype: lv # Wechselrichter für LV- oder HV-Batterie, "hv" für eine Hochvolt-Batterie mit Nennspannung über 60V verwenden [lv, hv]
       maxdischargecurrent: 100 # Max Entladestrom, Maximaler Batterieentladestrom in Ampere (A) für Normalmodus. Typischer Bereich 50-350A abhängig von Batteriekapazität. Leistungsberechnung: P(W) = Strom(A) x Spannung(V). Beispiel mit 48V Batterie: 100A x 48V = 4800W (4,8kW).
       gridchargecurrent: 60 # Netzladestrom, Maximaler Batterieladestrom in Ampere (A) aus dem Netz für Lademodus. Typischer Bereich 30-350A abhängig von Batterie- und Wechselrichterkapazität. Leistungsberechnung: P(W) = Strom(A) x Spannung(V). Beispiel mit 48V Batterie: 60A x 48V = 2880W (2,9kW).
@@ -110,10 +111,10 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W)
       batterytype: lv # Wechselrichter für LV- oder HV-Batterie, "hv" für eine Hochvolt-Batterie mit Nennspannung über 60V verwenden [lv, hv]
       maxdischargecurrent: 100 # Max Entladestrom, Maximaler Batterieentladestrom in Ampere (A) für Normalmodus. Typischer Bereich 50-350A abhängig von Batteriekapazität. Leistungsberechnung: P(W) = Strom(A) x Spannung(V). Beispiel mit 48V Batterie: 100A x 48V = 4800W (4,8kW).
       gridchargecurrent: 60 # Netzladestrom, Maximaler Batterieladestrom in Ampere (A) aus dem Netz für Lademodus. Typischer Bereich 30-350A abhängig von Batterie- und Wechselrichterkapazität. Leistungsberechnung: P(W) = Strom(A) x Spannung(V). Beispiel mit 48V Batterie: 60A x 48V = 2880W (2,9kW).
-      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
       includegenport: # GEN-Anschluss als Solar-Eingang verwenden, Wenn aktiviert, wird der GEN-Anschluss des Wechselrichters als zusätzlicher Solar-Eingang behandelt. Dadurch werden die Leistung und Energie, die über den GEN-Port eingespeist werden, zum Gesamt-Solarertrag addiert. (optional)
       firmware1098: # Firmware 1098 oder neuer (nur für HV Versionen), Nach einem Firmware-Update für Hochvolt-Wechselrichter haben einige Registerwerte ihren Skalierungsfaktor geändert. Wenn der Wechselrichter die Firmware-Version 1098 oder neuer hat, muss diese Option aktiviert werden, um korrekte Werte zu erhalten. (optional)
   - usage: battery
@@ -190,6 +191,15 @@ params:
     help:
     advanced: false
     optional: false
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximale AC Leistung des Hybrid-Wechselrichters
+    help:
+    advanced: false
+    optional: false
   - name: batterytype
     example:
     default: lv
@@ -243,15 +253,6 @@ params:
     description: Maximaler Ladestand
     help: Oberes Limit beim Laden der Batterie aus dem Netz
     advanced: false
-    optional: true
-  - name: maxacpower
-    example: 5000
-    default: 0
-    choice: []
-    unit: W
-    description: Maximale AC Leistung des Hybrid-Wechselrichters
-    help:
-    advanced: true
     optional: true
   - name: storageunit
     example:
