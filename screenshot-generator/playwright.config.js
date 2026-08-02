@@ -9,13 +9,13 @@ module.exports = defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  timeout: 5000,
+  timeout: 60000,
   expect: {
-    timeout: 5000,
+    timeout: 10000,
   },
   workers: 1,
   use: {
-    baseURL: "http://127.0.0.1:7070",
+    baseURL: "http://127.0.0.1:7099",
     trace: "on-first-retry",
   },
 

@@ -16,11 +16,15 @@ const images = import.meta.glob<ImageMetadata>(
   { eager: true, import: "default" },
 );
 
+const rawLocale = Astro.currentLocale ?? Astro.url.pathname.split("/")[1];
+const locale = rawLocale === "de" ? "de" : "en";
+
 function url(base: string, theme: "light" | "dark", dpr: 1 | 2) {
-  const key = `/src/assets/${base}-${theme}-${dpr}x.webp`;
-  const img = images[key];
+  const localeKey = `/src/assets/${base}-${locale}-${theme}-${dpr}x.webp`;
+  const sharedKey = `/src/assets/${base}-${theme}-${dpr}x.webp`;
+  const img = images[localeKey] ?? images[sharedKey];
   if (!img) {
-    throw new Error(`Screenshot: missing asset ${key}`);
+    throw new Error(`Screenshot: missing asset ${localeKey} (or ${sharedKey})`);
   }
   return img.src;
 }

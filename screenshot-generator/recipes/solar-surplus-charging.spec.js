@@ -17,9 +17,18 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 loop((screenshot) => {
   test("solar mode", async ({ page }) => {
     await page.goto(`/`);
-    await page.locator(".mode-group > .btn:nth-child(2)").first().click();
+    await page
+      .locator('[data-testid="mode"] > .btn:nth-child(2)')
+      .first()
+      .click();
     await wait(100);
-    await placeOverlay(page, ".mode-group > .btn.active", CURSOR, 20, 10);
+    await placeOverlay(
+      page,
+      '[data-testid="mode"] > .btn.active',
+      CURSOR,
+      20,
+      10,
+    );
     await screenshot(
       page,
       `${BASE_PATH}/solar-mode`,
@@ -30,9 +39,18 @@ loop((screenshot) => {
 
   test("min+solar mode", async ({ page }) => {
     await page.goto(`/`);
-    await page.locator(".mode-group > .btn:nth-child(3)").first().click();
+    await page
+      .locator('[data-testid="mode"] > .btn:nth-child(3)')
+      .first()
+      .click();
     await wait(100);
-    await placeOverlay(page, ".mode-group > .btn.active", CURSOR, 40, 10);
+    await placeOverlay(
+      page,
+      '[data-testid="mode"] > .btn.active',
+      CURSOR,
+      40,
+      10,
+    );
     await screenshot(
       page,
       `${BASE_PATH}/min-solar-mode`,

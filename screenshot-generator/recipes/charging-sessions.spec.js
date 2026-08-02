@@ -21,7 +21,11 @@ loop((screenshot) => {
   test("loadpoint", async ({ page }) => {
     await page.goto(`/`);
     await wait(3000);
-    await page.getByTestId("sessionInfoSelect").first().selectOption("solar");
+    await page
+      .getByTestId("sessionInfoSelect")
+      .first()
+      .locator("select")
+      .selectOption("solar");
     await placeOverlay(page, "shopicon-regular-lightning", ONE, 20, -18);
     await placeOverlay(page, ".vehicle .details div:first-child", TWO, 10, -30);
     await placeOverlay(page, "[data-testid=sessionInfoSelect]", THREE);
@@ -37,6 +41,7 @@ loop((screenshot) => {
   });
 
   test("session", async ({ page }) => {
+    await page.goto("about:blank");
     await page.goto(`/#/sessions?year=2024&month=3`);
     await expect(
       await page.getByTestId("sessions-entry").first(),
