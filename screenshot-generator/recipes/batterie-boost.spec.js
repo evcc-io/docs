@@ -6,7 +6,7 @@ import { start, stop } from "./utils/evcc";
 const BASE_PATH = "features/screenshots";
 
 test.beforeAll(async () => {
-  await start("basics.evcc.yaml", "password.sql");
+  await start(["basics.evcc.yaml", "batterie-boost.evcc.yaml"], "password.sql");
 });
 
 test.afterAll(async () => {
@@ -34,5 +34,41 @@ loop((screenshot) => {
         all: 20,
       },
     );
+    await removeOverlays(page);
+
+    // boost button at the charging point
+    await page.locator("#loadpointSettingsModal_1 .btn-close").click();
+    await expect(page.locator("#loadpointSettingsModal_1")).not.toBeVisible();
+
+    const boostButton = page.getByTestId("battery-boost-button").first();
+    await expect(boostButton).toBeVisible();
+    const boostActive = await boostButton.evaluate((el) =>
+      el.classList.contains("active"),
+    );
+    if (boostActive) {
+      await boostButton.click();
+      await wait(500);
+    }
+    await boostButton.click();
+    await expect(boostButton).toHaveClass(/active/);
+    await wait(500);
+
+    await placeOverlay(
+      page,
+      "[data-testid=battery-boost-button]",
+      CURSOR,
+      15,
+      15,
+    );
+
+    await screenshot(
+      page,
+      `${BASE_PATH}/battery-boost-button`,
+      "[data-testid=loadpoint] .d-flex:has([data-testid=battery-boost-button])",
+      {
+        all: 20,
+      },
+    );
+    await removeOverlays(page);
   });
 });
