@@ -1,6 +1,4 @@
 ---
-import type { ImageMetadata } from "astro";
-
 interface Props {
   label?: string;
 }
@@ -21,24 +19,9 @@ const post =
     ? latest
     : undefined;
 
-const images = import.meta.glob<ImageMetadata>(
-  "/src/content/docs/**/blog/**/*.{webp,png,jpg,jpeg}",
-  { eager: true, import: "default" },
-);
-
-// Posts embed their banner as the first markdown image; no cover frontmatter exists
-let image: ImageMetadata | undefined;
-let imageAlt = "";
-if (post?.entry.filePath && post.entry.body) {
-  const match = post.entry.body.match(
-    /!\[([^\]]*)\]\(\.\/([^)\s]+\.(?:webp|png|jpg|jpeg))\)/,
-  );
-  if (match) {
-    const dir = post.entry.filePath.replace(/\/[^/]+$/, "");
-    image = images[`/${dir}/${match[2]}`];
-    imageAlt = match[1];
-  }
-}
+const cover = post?.entry.data.cover;
+const image = cover && ("image" in cover ? cover.image : cover.light);
+const imageAlt = cover?.alt ?? "";
 ---
 
 {
