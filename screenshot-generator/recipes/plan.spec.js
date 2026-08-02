@@ -4,6 +4,7 @@ import { CURSOR, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
+const MODAL = "[data-testid=charging-plan-modal]";
 
 test.beforeEach(async () => {
   await start(["vehicles.evcc.yaml", "dynamicprice.evcc.yaml"], "password.sql");
@@ -23,33 +24,25 @@ loop((screenshot) => {
     await page.getByTestId("static-plan-time").fill("10:00");
     await page.getByTestId("static-plan-active").click();
     await placeOverlay(page, "#chargingplan-lp1-1-goal", CURSOR, 60, 5);
-    await screenshot(
-      page,
-      `${BASE_PATH}/plan-soc`,
-      "#chargingPlanModal_1 .modal-content",
-      {
-        all: 20,
-      },
-    );
+    await screenshot(page, `${BASE_PATH}/plan-soc`, `${MODAL} .modal-content`, {
+      all: 20,
+    });
     await removeOverlays(page);
 
-    // click late
-    await page.getByTestId("static-plan-precondition-lg-toggle").click();
-    await page.getByTestId("static-plan-apply").click();
-    await placeOverlay(
-      page,
-      "[data-testid='static-plan-precondition-lg-select']",
-      CURSOR,
-      0,
-      5,
-    );
+    // late charging (strategy settings)
+    await page.locator(`${MODAL} h5 button`).click();
+    await wait(300);
+    await page.locator("#chargingplan-1-precondition").selectOption("3600");
+    await wait(300);
+    await placeOverlay(page, "#chargingplan-1-precondition", CURSOR, 0, 5);
     await screenshot(
       page,
       `${BASE_PATH}/plan-precondition`,
-      "#chargingPlanModal_1 .modal-content",
+      `${MODAL} .modal-content`,
       { all: 20 },
     );
-    await page.getByTestId("static-plan-precondition-lg-toggle").click();
+    await page.locator("#chargingplan-1-precondition").selectOption("0");
+    await page.locator(`${MODAL} h5 button`).click();
     await removeOverlays(page);
 
     // repeating
@@ -61,7 +54,7 @@ loop((screenshot) => {
     await screenshot(
       page,
       `${BASE_PATH}/plan-soc-repeating`,
-      "#chargingPlanModal_1 .modal-content",
+      `${MODAL} .modal-content`,
       { all: 20 },
     );
     await removeOverlays(page);
@@ -71,8 +64,10 @@ loop((screenshot) => {
     await page.goto("/");
 
     await page
-      .locator("#vehicleOptionsDropdown1")
-      .selectOption("red Fiat 500e");
+      .getByTestId("change-vehicle")
+      .first()
+      .locator("select")
+      .selectOption("vehicle_3");
 
     await page.locator("[data-testid=charging-plan] button").first().click();
     await wait(300);
@@ -82,7 +77,7 @@ loop((screenshot) => {
     await screenshot(
       page,
       `${BASE_PATH}/plan-energy`,
-      "#chargingPlanModal_1 .modal-content",
+      `${MODAL} .modal-content`,
       {
         all: 20,
       },

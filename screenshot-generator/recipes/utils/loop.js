@@ -1,29 +1,7 @@
 const { test } = require("@playwright/test");
 const sharp = require("sharp");
-const fs = require("fs");
 
-const screenshotBase = {
-  de: "../docs/",
-  en: "../i18n/en/docusaurus-plugin-content-docs/current",
-};
-
-const sleep = async function (ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-async function convertToWebp(pngPath) {
-  try {
-    const webpPath1x = pngPath.replace(/\.png$/, "-1x.webp");
-    const meta = await sharp(pngPath).metadata();
-    const halfWidth = Math.round(meta.width * 0.5);
-    await sharp(pngPath).resize(halfWidth).toFile(webpPath1x);
-
-    const webpPath2x = pngPath.replace(/\.png$/, "-2x.webp");
-    await sharp(pngPath).toFormat("webp").toFile(webpPath2x);
-  } catch (e) {
-    console.error("Error converting to webp", e);
-  }
-}
+const screenshotBase = "../src/assets";
 
 export function loop(body) {
   ["light", "dark"].forEach((theme) => {
@@ -45,29 +23,35 @@ export function loop(body) {
             height: boundingBox.height + paddingTop + paddingBottom,
           };
         }
-        const path = `${screenshotBase[lang]}/${name}-${theme}.png`;
+        const path2x = `${screenshotBase}/${name}-${lang}-${theme}-2x.webp`;
         await page.screenshot({
-          path,
+          path: path2x,
+          quality: 80,
           omitBackground: true,
           clip,
           animations: "disabled",
         });
-        await convertToWebp(path);
-        fs.unlinkSync(path);
+        const path1x = path2x.replace(/-2x\.webp$/, "-1x.webp");
+        const meta = await sharp(path2x).metadata();
+        await sharp(path2x)
+          .resize(Math.round(meta.width * 0.5))
+          .toFile(path1x);
         console.log("screenshot created", { name, theme, lang });
       }
 
       test.describe(`${lang}/${theme}`, () => {
         test.beforeEach(async ({ page }) => {
+          await page.addInitScript(
+            ([lang, theme]) => {
+              localStorage.setItem("settings_locale", lang);
+              localStorage.setItem("settings_theme", theme);
+            },
+            [lang, theme],
+          );
           await page.goto(`/`);
-          await page.getByTestId("topnavigation-button").click();
-          await page.getByTestId("topnavigation-settings").click();
-          await page.getByRole("button", { name: theme }).click();
-          await page.getByLabel("Language").selectOption({ value: lang });
-          await page.getByRole("button", { name: "Close" }).click();
         });
 
-        body(screenshot);
+        body(screenshot, { lang, theme });
       });
     });
   });

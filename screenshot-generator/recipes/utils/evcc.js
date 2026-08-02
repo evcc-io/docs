@@ -56,8 +56,9 @@ async function _start(config) {
       : mergeYaml(`recipes/${config[0]}`, `recipes/${config[1]}`);
 
   console.log("starting evcc", { config });
+  const port = new URL(BASE_URL).port;
   instance = exec(
-    `EVCC_DATABASE_DSN=${DB_PATH} ${BINARY} --config ${configPath}`,
+    `EVCC_DATABASE_DSN=${DB_PATH} EVCC_NETWORK_PORT=${port} EVCC_OCPP_PORT=12099 EVCC_EEBUS_PORT=13099 ${BINARY} --config ${configPath}`,
   );
   instance.stdout.pipe(process.stdout);
   instance.stderr.pipe(process.stderr);
@@ -66,7 +67,10 @@ async function _start(config) {
       console.log("evcc terminated");
     }
   });
-  await waitOn({ resources: [BASE_URL] });
+  // wait for apiReady so tests don't race a half-started backend
+  const jq = encodeURIComponent(".apiReady|select(.)");
+  const ready = `${BASE_URL.replace(/^http/, "http-get")}/api/state?jq=${jq}`;
+  await waitOn({ resources: [ready], timeout: 90000 });
 }
 
 async function _stop() {

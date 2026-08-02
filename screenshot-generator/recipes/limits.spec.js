@@ -4,6 +4,8 @@ import { CURSOR, ARROW, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
+const VEHICLES_MENU_LABEL = { en: "Vehicles", de: "Fahrzeuge" };
+const MODAL = "[data-testid=vehicle-settings-modal]";
 
 test.beforeEach(async () => {
   await start("vehicles.evcc.yaml", "password.sql");
@@ -12,7 +14,21 @@ test.afterEach(async () => {
   await stop();
 });
 
-loop((screenshot) => {
+loop((screenshot, { lang }) => {
+  async function openVehicleSettings(page) {
+    const moreTab = page.getByTestId("tab-more");
+    await moreTab.click();
+    await moreTab
+      .getByRole("button", { name: VEHICLES_MENU_LABEL[lang] })
+      .click();
+    await expect(page.locator(MODAL)).toBeVisible();
+  }
+
+  async function closeVehicleSettings(page) {
+    await page.locator(`${MODAL} .btn-close`).click();
+    await expect(page.locator(MODAL)).not.toBeVisible();
+  }
+
   test("min soc / limit soc / limit energy", async ({ page }) => {
     await page.goto(`/`);
 
@@ -23,24 +39,26 @@ loop((screenshot) => {
       "white Model 3",
     );
 
-    await page.locator("[data-testid=charging-plan] button").first().click();
-    await page
-      .locator("#chargingPlanModal_1 .nav-tabs .nav-item")
-      .last()
-      .click();
-    await page.locator("#chargingplan_1_minsoc").selectOption("25");
-    await placeOverlay(page, "#chargingplan_1_minsoc", CURSOR, 70, 5);
+    // min charge (vehicle settings)
+    await openVehicleSettings(page);
+    await page.locator("#vehicleSettings-vehicle_1-minSoc").selectOption("25");
+    await placeOverlay(
+      page,
+      "select#vehicleSettings-vehicle_1-minSoc",
+      CURSOR,
+      70,
+      50,
+    );
     await screenshot(
       page,
       `${BASE_PATH}/minsoc-setting`,
-      "#chargingPlanModal_1 .modal-content",
+      `${MODAL} .modal-content`,
       {
         all: 20,
       },
     );
     await removeOverlays(page);
-    await page.getByRole("button", { name: "Close" }).click();
-    await expect(page.locator("#chargingPlanModal_1")).not.toBeVisible();
+    await closeVehicleSettings(page);
     await screenshot(
       page,
       `${BASE_PATH}/minsoc-loadpoint`,
@@ -50,24 +68,30 @@ loop((screenshot) => {
       },
     );
 
-    await page.locator("[data-testid=charging-plan] button").last().click();
+    // limit soc (vehicle settings)
+    await openVehicleSettings(page);
     await page
-      .locator("#chargingPlanModal_2 .nav-tabs .nav-item")
-      .last()
-      .click();
-    await page.locator("#chargingplan_2_limitsoc").selectOption("80");
-    await placeOverlay(page, "#chargingplan_2_limitsoc", CURSOR, 70, 5);
+      .locator("#vehicleSettings-vehicle_2-limitSoc")
+      .selectOption("80");
+    await placeOverlay(
+      page,
+      "select#vehicleSettings-vehicle_2-limitSoc",
+      CURSOR,
+      70,
+      50,
+    );
     await screenshot(
       page,
       `${BASE_PATH}/limitsoc-setting`,
-      "#chargingPlanModal_2 .modal-content",
+      `${MODAL} .modal-content`,
       {
         all: 20,
       },
     );
     await removeOverlays(page);
-    await page.getByRole("button", { name: "Close" }).click();
-    await expect(page.locator("#chargingPlanModal_2")).not.toBeVisible();
+    await closeVehicleSettings(page);
+
+    // limit soc (loadpoint)
     await page
       .getByTestId("limit-soc")
       .locator("select")
@@ -91,8 +115,10 @@ loop((screenshot) => {
 
     // limit energy
     await page
-      .locator("#vehicleOptionsDropdown2")
-      .selectOption("red Fiat 500e");
+      .getByTestId("change-vehicle")
+      .last()
+      .locator("select")
+      .selectOption("vehicle_3");
     await expect(page.getByTestId("vehicle-name").last()).toHaveText(
       "red Fiat 500e",
     );

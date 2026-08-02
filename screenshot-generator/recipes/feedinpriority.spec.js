@@ -1,4 +1,4 @@
-const { test } = require("@playwright/test");
+const { test, expect } = require("@playwright/test");
 import { loop } from "./utils/loop";
 const { start, stop } = require("./utils/evcc");
 
@@ -19,7 +19,13 @@ loop((screenshot) => {
     await page.getByTestId("loadpoint-settings-button").nth(1).click();
     await wait(300);
 
+    const limitActive = page.locator("#smartFeedInPriority-1Active");
+    if (!(await limitActive.isChecked())) {
+      await limitActive.click();
+    }
     await page.locator("#smartFeedInPriority-1").selectOption("0.3");
+    await expect(limitActive).toBeChecked();
+    await wait(300);
 
     await screenshot(
       page,
