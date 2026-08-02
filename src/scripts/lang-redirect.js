@@ -1,4 +1,16 @@
 (function () {
+  // legacy Docusaurus URLs: /docs/* (default locale de) and /{en,de}/docs/*
+  var legacy = location.pathname.match(/^\/(?:(en|de)\/)?docs\/(.+)/);
+  if (legacy) {
+    var rest = legacy[2]
+      .replace(/^devices\//, "")
+      .replace(/^features\/external-control\/?$/, "external-limit")
+      .replace(/^reference\/api\/?$/, "integrations/rest-api");
+    location.replace(
+      "/" + (legacy[1] || "de") + "/" + rest + location.search + location.hash,
+    );
+    return;
+  }
   var m = location.pathname.match(/^\/(en|de)(\/|$)/);
   if (!m) return;
   var current = m[1];
