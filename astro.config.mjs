@@ -38,6 +38,8 @@ export default defineConfig({
     "/en/docs/reference/api": "/en/integrations/rest-api",
     "/en/features/external-control": "/en/external-limit",
     "/de/features/external-control": "/de/external-limit",
+    "/en/integrations/home-assistant": "/en/smarthome/home-assistant",
+    "/de/integrations/home-assistant": "/de/smarthome/home-assistant",
   },
   integrations: [
     mermaid({
@@ -214,7 +216,6 @@ export default defineConfig({
           items: [
             ...openAPISidebarGroups,
             { label: "MQTT API", slug: "integrations/mqtt-api" },
-            { label: "Home Assistant", slug: "integrations/home-assistant" },
             { label: "MCP-Server", slug: "integrations/mcp" },
             {
               label: "Sunny Home Manager",
@@ -229,6 +230,21 @@ export default defineConfig({
               label: "Notifications",
               translations: { de: "Benachrichtigungen" },
               link: "/notifications",
+            },
+          ],
+        },
+        {
+          label: "Smart Home",
+          items: [
+            { label: "Home Assistant", slug: "smarthome/home-assistant" },
+            { label: "openHAB", slug: "smarthome/openhab" },
+            { label: "ioBroker", slug: "smarthome/iobroker" },
+            { label: "Homey", slug: "smarthome/homey" },
+            { label: "Garmin", slug: "smarthome/garmin" },
+            {
+              label: "More…",
+              translations: { de: "Mehr…" },
+              slug: "smarthome/awesome",
             },
           ],
         },
