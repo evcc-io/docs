@@ -4,8 +4,8 @@ sidebar:
   order: 2
 ---
 
-Alle Daten des [REST API](/integrations/rest-api) Endpunkts `/api/state` werden auch per MQTT veröffentlicht.
-Listen werden dabei in einzelne Sub-Topics aufgelöst (Index beginnt bei `1`).
+Der [API State](/de/reference/state) wird auch per MQTT veröffentlicht.
+Jedes Feld wird zu einem eigenen Topic, verschachtelte Objekte und Listen werden in einzelne Sub-Topics aufgelöst (Index beginnt bei `1`).
 
 ## Lesbare Topics
 

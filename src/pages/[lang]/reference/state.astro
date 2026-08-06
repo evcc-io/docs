@@ -1,0 +1,374 @@
+---
+import fs from "node:fs";
+import { parse } from "yaml";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+
+export async function getStaticPaths() {
+  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
+}
+
+const lang = Astro.params.lang as "de" | "en";
+
+// The state schemas are part of the bundled OpenAPI spec (synced from the main
+// evcc repository, generated there from assets/js/types/evcc.ts).
+type Raw = Record<string, any>;
+const doc = parse(fs.readFileSync("public/openapi.yaml", "utf8"));
+const allSchemas: Record<string, Raw> = doc.components.schemas;
+
+// Only show schemas reachable from State — the rest belong to other endpoints.
+const collectRefs = (node: any, refs: Set<string>) => {
+  if (Array.isArray(node)) {
+    node.forEach((entry) => collectRefs(entry, refs));
+  } else if (node && typeof node === "object") {
+    if (typeof node.$ref === "string") refs.add(node.$ref.split("/").pop()!);
+    Object.values(node).forEach((value) => collectRefs(value, refs));
+  }
+};
+const reachable = new Set(["State"]);
+let queue = ["State"];
+while (queue.length) {
+  const refs = new Set<string>();
+  collectRefs(allSchemas[queue.shift()!], refs);
+  queue = queue.concat([...refs].filter((name) => !reachable.has(name) && allSchemas[name]));
+  refs.forEach((name) => allSchemas[name] && reachable.add(name));
+}
+
+const anchor = (name: string) => name.toLowerCase();
+
+interface TypeToken {
+  text: string;
+  href?: string;
+}
+
+const refToken = (ref: string): TypeToken => {
+  const name = ref.split("/").pop()!;
+  return { text: name, href: `#${anchor(name)}` };
+};
+
+const typeTokens = (schema: Raw): TypeToken[] => {
+  if (schema.$ref) return [refToken(schema.$ref)];
+  // nullable refs are wrapped in allOf with a single $ref
+  if (schema.allOf?.length === 1 && schema.allOf[0].$ref) return [refToken(schema.allOf[0].$ref)];
+  const variants: Raw[] | undefined = schema.anyOf ?? schema.oneOf;
+  if (variants) {
+    return variants.flatMap((variant, i): TypeToken[] => {
+      const tokens = variant.enum
+        ? [{ text: variant.enum.map((v: any) => JSON.stringify(v)).join(" | ") }]
+        : typeTokens(variant);
+      return i > 0 ? [{ text: " | " }, ...tokens] : tokens;
+    });
+  }
+  if (schema.type === "array") {
+    return [...(schema.items ? typeTokens(schema.items) : [{ text: "any" }]), { text: "[]" }];
+  }
+  if (schema.type === "object" && schema.additionalProperties) {
+    if (schema.additionalProperties === true) return [{ text: "object" }];
+    return [
+      { text: "Record<string, " },
+      ...typeTokens(schema.additionalProperties),
+      { text: ">" },
+    ];
+  }
+  if (schema.type === "string" && schema.format) return [{ text: `string (${schema.format})` }];
+  return [{ text: String(schema.type ?? "object") }];
+};
+
+// reverse index: type name → list of "Schema.property" usage sites
+const usedBy = new Map<string, { label: string; href: string }[]>();
+for (const name of reachable) {
+  const schema = allSchemas[name];
+  for (const [propName, prop] of Object.entries(schema.properties ?? {})) {
+    const refs = new Set<string>();
+    collectRefs(prop, refs);
+    for (const ref of refs) {
+      if (!usedBy.has(ref)) usedBy.set(ref, []);
+      usedBy.get(ref)!.push({
+        label: `${name}.${propName}`,
+        href: `#${anchor(name)}-${propName.toLowerCase()}`,
+      });
+    }
+  }
+  // union schemas reference types without properties
+  if (schema.anyOf || schema.oneOf) {
+    const refs = new Set<string>();
+    collectRefs(schema.anyOf ?? schema.oneOf, refs);
+    for (const ref of refs) {
+      if (!usedBy.has(ref)) usedBy.set(ref, []);
+      usedBy.get(ref)!.push({ label: name, href: `#${anchor(name)}` });
+    }
+  }
+}
+usedBy.forEach((sites) => sites.sort((a, b) => a.label.localeCompare(b.label)));
+
+// State first, everything else alphabetical
+const sections = [...reachable]
+  .sort((a, b) => (a === "State" ? -1 : b === "State" ? 1 : a.localeCompare(b)))
+  .map((name) => {
+    const schema = allSchemas[name];
+    const required: string[] = schema.required ?? [];
+    return {
+      name,
+      anchor: anchor(name),
+      description: schema.description as string | undefined,
+      enumValues: schema.enum as string[] | undefined,
+      unionTypes: schema.anyOf || schema.oneOf ? typeTokens(schema) : undefined,
+      usedBy: usedBy.get(name) ?? [],
+      properties: Object.entries(schema.properties ?? {})
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([propName, prop]) => {
+        const p = prop as Raw;
+        return {
+          name: propName,
+          anchor: `${anchor(name)}-${propName.toLowerCase()}`,
+          type: typeTokens(p),
+          required: required.includes(propName),
+          nullable: p.nullable === true,
+          description: p.description as string | undefined,
+          enumValues: p.enum as string[] | undefined,
+        };
+      }),
+    };
+  });
+
+const title = "API State";
+const description =
+  lang === "de"
+    ? "Datenstruktur von /api/state, WebSocket und MQTT."
+    : "Data structure of /api/state, websocket and MQTT.";
+
+const demoUrl = "https://demo.evcc.io/api/state";
+const jqExampleUrl = "https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower";
+
+const typesLabel = lang === "de" ? "Typen" : "Types";
+
+const frontmatter = { title, description, template: "doc" as const };
+// root State properties render directly below the intro; referenced types are h3s under "Types"
+const headings = [
+  { depth: 2, slug: "top-level", text: "Top Level" },
+  { depth: 2, slug: "types", text: typesLabel },
+  ...sections.slice(1).map((section) => ({
+    depth: 3,
+    slug: section.anchor,
+    text: section.name,
+  })),
+];
+---
+
+<StarlightPage frontmatter={frontmatter} headings={headings}>
+  {
+    lang === "de" ? (
+      <>
+        <p>
+          Der API State ist die Datenstruktur hinter der UI. Er ist über drei Schnittstellen
+          verfügbar. Es gibt keine Kompatibilitätsgarantie, Felder können sich zwischen Releases
+          ändern.
+        </p>
+        <ul>
+          <li>
+            <a href="/integrations/rest-api">REST-API</a>: <code>GET /api/state</code> liefert den
+            kompletten Zustand als ein JSON-Dokument, eingepackt in ein <code>result</code>-Objekt.
+            Mit dem Query-Parameter <code>jq</code> lässt sich die Antwort per{" "}
+            <a href="https://jqlang.org/">jq</a>-Ausdruck filtern.
+            <ul>
+              <li>
+                Live-Beispiel:{" "}
+                <a href={demoUrl}>
+                  <code>{demoUrl}</code>
+                </a>
+              </li>
+              <li>
+                Gefiltert auf ein einzelnes Feld:{" "}
+                <a href={jqExampleUrl}>
+                  <code>{demoUrl}?jq=.loadpoints[2].chargePower</code>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="/de/integrations/mqtt-api">MQTT</a>: jedes Feld wird als eigenes Topic
+            veröffentlicht. Felder der Site liegen unter <code>evcc/site/&lt;feld&gt;</code>,
+            Ladepunkt-Felder unter <code>evcc/loadpoints/&lt;n&gt;/&lt;feld&gt;</code> mit Index ab
+            1. Verschachtelte Objekte und Listen werden in Sub-Topics aufgelöst, z.&nbsp;B.{" "}
+            <code>evcc/site/pv/1/power</code>. Werte werden als einfache Strings veröffentlicht,
+            Zeitstempel als Unix-Sekunden, Zeitdauern in Sekunden.
+          </li>
+          <li>
+            <strong>WebSocket</strong>: beim Verbinden erhält der Client den kompletten Zustand als
+            ein JSON-Objekt. Ladepunkt-Felder verwenden Schlüssel mit Punktnotation wie{" "}
+            <code>loadpoints.0.chargePower</code>. Danach werden nur noch inkrementelle Updates
+            gesendet: kleine JSON-Objekte mit den geänderten Feldern, die der Client in seine Kopie
+            des Zustands übernimmt.
+          </li>
+        </ul>
+      </>
+    ) : (
+      <>
+        <p>
+          The API State is the data structure behind the UI. It is available over three interfaces.
+          There is no compatibility promise, fields may change between releases.
+        </p>
+        <ul>
+          <li>
+            <a href="/integrations/rest-api">REST API</a>: <code>GET /api/state</code> returns the
+            full state as a single JSON document, wrapped in a <code>result</code> object. The{" "}
+            <code>jq</code> query parameter filters the response with a{" "}
+            <a href="https://jqlang.org/">jq</a> expression.
+            <ul>
+              <li>
+                Live example:{" "}
+                <a href={demoUrl}>
+                  <code>{demoUrl}</code>
+                </a>
+              </li>
+              <li>
+                Filtered to a single field:{" "}
+                <a href={jqExampleUrl}>
+                  <code>{demoUrl}?jq=.loadpoints[2].chargePower</code>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="/en/integrations/mqtt-api">MQTT</a>: every field is published as its own
+            topic. Site-level fields appear under <code>evcc/site/&lt;field&gt;</code>, loadpoint
+            fields under <code>evcc/loadpoints/&lt;n&gt;/&lt;field&gt;</code> with 1-based indexes.
+            Nested objects and arrays flatten into subtopics, e.g.{" "}
+            <code>evcc/site/pv/1/power</code>. Values are published as plain strings, timestamps as
+            unix seconds, durations in seconds.
+          </li>
+          <li>
+            <strong>Websocket</strong>: on connect, the client receives the full state as one JSON
+            object. Loadpoint
+            fields use dotted keys like <code>loadpoints.0.chargePower</code>. After that, only
+            incremental updates are sent: small JSON objects containing the changed fields, which
+            the client merges into its copy of the state.
+          </li>
+        </ul>
+      </>
+    )
+  }
+  {
+    sections.map((section, i) => (
+      <>
+        {i === 0 && <h2 id="top-level">Top Level</h2>}
+        {i === 1 && <h2 id="types">{typesLabel}</h2>}
+        {i > 0 && <h3 id={section.anchor}>{section.name}</h3>}
+        {i > 0 && section.description && <p>{section.description}</p>}
+        {i > 0 && section.usedBy.length > 0 && (
+          <p class="sr-used-by">
+            {"Used by: "}
+            {section.usedBy.map((site, j) => (
+              <>
+                {j > 0 && ", "}
+                <a href={site.href}>
+                  <code>{site.label}</code>
+                </a>
+              </>
+            ))}
+          </p>
+        )}
+        {section.enumValues && (
+          <p class="sr-enum">
+            {section.enumValues.map((value) => (
+              <code>{JSON.stringify(value)}</code>
+            ))}
+          </p>
+        )}
+        {section.unionTypes && (
+          <p>
+            {"One of: "}
+            <span class="sr-type">
+              {section.unionTypes.map((t) => (t.href ? <a href={t.href}>{t.text}</a> : t.text))}
+            </span>
+          </p>
+        )}
+        {section.properties.length > 0 && (
+          <div class="sr-props">
+            {section.properties.map((prop) => (
+              <div class="sr-prop" id={prop.anchor}>
+                <div class="sr-prop-head">
+                  <a class="sr-prop-name" href={`#${prop.anchor}`}>
+                    {prop.name}
+                  </a>
+                  <span class="sr-type">
+                    {prop.type.map((t) => (t.href ? <a href={t.href}>{t.text}</a> : t.text))}
+                  </span>
+                  {prop.required && <span class="sr-tag sr-required">required</span>}
+                  {prop.nullable && <span class="sr-tag">nullable</span>}
+                </div>
+                {prop.description && <p class="sr-prop-desc">{prop.description}</p>}
+                {prop.enumValues && (
+                  <p class="sr-prop-desc sr-enum">
+                    {prop.enumValues.map((value) => (
+                      <code>{JSON.stringify(value)}</code>
+                    ))}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    ))
+  }
+</StarlightPage>
+
+<style>
+  .sr-props {
+    margin-top: 1rem;
+  }
+  .sr-prop {
+    border-top: 1px solid var(--sl-color-hairline);
+    padding: 0.6rem 0;
+    scroll-margin-top: calc(var(--sl-nav-height) + 1rem);
+  }
+  .sr-prop-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .sr-prop-name {
+    font-family: var(--__sl-font-mono);
+    font-weight: 600;
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+  .sr-prop-name:hover::after {
+    content: " #";
+    color: var(--sl-color-gray-3);
+  }
+  .sr-type {
+    font-family: var(--__sl-font-mono);
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  .sr-type a {
+    color: var(--sl-color-text-accent);
+  }
+  .sr-tag {
+    font-size: var(--sl-text-xs);
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    padding: 0 0.4rem;
+    color: var(--sl-color-gray-3);
+  }
+  .sr-required {
+    color: var(--sl-color-orange);
+    border-color: var(--sl-color-orange-low);
+  }
+  .sr-prop-desc {
+    margin: 0.2rem 0 0;
+    font-size: var(--sl-text-sm);
+  }
+  .sr-used-by {
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  .sr-used-by code {
+    font-size: var(--sl-text-xs);
+  }
+  .sr-enum code {
+    margin-inline-end: 0.4rem;
+  }
+</style>
