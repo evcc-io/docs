@@ -4,8 +4,8 @@ sidebar:
   order: 2
 ---
 
-All data from the [REST API](/integrations/rest-api) endpoint `/api/state` is also published via MQTT.
-Lists are converted into individual sub-topics (index starts at `1`).
+The [API State](/en/reference/state) is also published via MQTT.
+Every field becomes its own topic, nested objects and lists are converted into individual sub-topics (index starts at `1`).
 
 ## Read-Only Topics
 

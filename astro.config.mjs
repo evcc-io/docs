@@ -127,6 +127,8 @@ export default defineConfig({
             "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}",
             "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}/**",
             "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}#*",
+            "/{en,de}/reference/state",
+            "/{en,de}/reference/state#*",
             // starlight-openapi and starlight-blog routes are not visible to the validator
             "/integrations/rest-api",
             "/integrations/rest-api/**",
@@ -267,6 +269,7 @@ export default defineConfig({
             { label: "Plugins", slug: "reference/plugins" },
             { label: "Modbus", slug: "reference/modbus" },
             { label: "Web UI", slug: "reference/web-ui" },
+            { label: "API State", link: "/reference/state" },
             { label: "evcc App", slug: "reference/app" },
             {
               label: "CLI",
