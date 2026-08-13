@@ -162,6 +162,11 @@ Everything else is hand-written:
 - No history lessons / deprecated aliases in user-facing docs
 - Don't add Docker bullets to setup instructions
 
+#### Media List (`media.md`)
+
+- New entries go at the top of their section (newest first), format: `Month Year · source \` + linked original title
+- Mark entries whose language differs from the page locale with a language marker after the source: `(de)` on the English page, `(en)` on the German page. Same-language entries get no marker.
+
 #### Markdown Formatting
 
 - **Put each sentence on a separate line** to improve diff handling

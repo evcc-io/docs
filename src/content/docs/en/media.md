@@ -78,6 +78,12 @@ News and announcements from the core team are on the [official evcc blog](/en/bl
 
 Here is a list of articles from the community:
 
+- August 2026 · mihaigafiteanu.eu \
+  [Charging on solar surplus — the build, and the prosumer's case behind it](https://evcc-tuned-by.mihaigafiteanu.eu/)
+- July 2025 · markus-haack.com \
+  [Introduction to evcc: Smart Solar EV Charging Made Simple](https://markus-haack.com/intro-into-evcc-charging/)
+- March 2025 · heise.de (de) \
+  [Ladevermittler: evcc lädt das E-Auto mit Strom vom Dach](https://www.heise.de/select/ct/2025/8/2422612181119466753)
 - November 2023 · the-ninth.com \
   [A closer look at the inner workings of evcc](https://www.the-ninth.com/blog/a-closer-look-at-the-inner-workings-of-evcc)
 - November 2023 · the-ninth.com \
@@ -86,14 +92,16 @@ Here is a list of articles from the community:
   [Running evcc on Synology with Huawei, go-e and VW](https://www.the-ninth.com/blog/running-evcc-synology-huawei-go-e-vw)
 - November 2023 · the-ninth.com \
   [Comparing evcc and the go-e Controller for solar charging](https://www.the-ninth.com/blog/comparing-evcc-go-e-controller)
-- June 2023 · elefacts.de \
+- June 2023 · elefacts.de (de) \
   [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
-- May 2023 · elefacts.de \
+- May 2023 · elefacts.de (de) \
   [Von evcc erfasste Daten langfristig speichern und aufbereiten](https://www.elefacts.de/test-208-von_evcc_erfasste_daten_langfristig_speichern_und_aufbereiten)
-- March 2023 · hobbyblogging.de \
+- March 2023 · hobbyblogging.de (de) \
   [evcc installieren - So einfach geht's!](https://hobbyblogging.de/evcc-installieren)
-- March 2023 · hobbyblogging.de \
+- March 2023 · hobbyblogging.de (de) \
   [evcc - Was soll das sein?](https://hobbyblogging.de/evcc-was-soll-das-sein)
+- October 2022 · chris-blog.com (de) \
+  [evcc.io – Schnittstelle zwischen PV und Wallbox](https://chris-blog.com/2022/10/20/evcc-io-schnittstelle-zwischen-pv-und-wallbox/)
 
 :::note[Missing an entry?]
 Found a good talk, video, or article that's missing from this list? Click the **Edit page** button below and suggest it.

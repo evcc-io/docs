@@ -78,13 +78,19 @@ Neuigkeiten und Ankündigungen vom Core Team findest du im [offiziellen evcc-Blo
 
 Hier ist eine Liste von Artikeln aus der Community:
 
-- November 2023 · the-ninth.com \
+- August 2026 · mihaigafiteanu.eu (en) \
+  [Charging on solar surplus — the build, and the prosumer's case behind it](https://evcc-tuned-by.mihaigafiteanu.eu/)
+- Juli 2025 · markus-haack.com (en) \
+  [Introduction to evcc: Smart Solar EV Charging Made Simple](https://markus-haack.com/intro-into-evcc-charging/)
+- März 2025 · heise.de \
+  [Ladevermittler: evcc lädt das E-Auto mit Strom vom Dach](https://www.heise.de/select/ct/2025/8/2422612181119466753)
+- November 2023 · the-ninth.com (en) \
   [A closer look at the inner workings of evcc](https://www.the-ninth.com/blog/a-closer-look-at-the-inner-workings-of-evcc)
-- November 2023 · the-ninth.com \
+- November 2023 · the-ninth.com (en) \
   [Running evcc in our second home with Fronius](https://www.the-ninth.com/blog/running-evcc-in-our-second-home-with-fronius)
-- November 2023 · the-ninth.com \
+- November 2023 · the-ninth.com (en) \
   [Running evcc on Synology with Huawei, go-e and VW](https://www.the-ninth.com/blog/running-evcc-synology-huawei-go-e-vw)
-- November 2023 · the-ninth.com \
+- November 2023 · the-ninth.com (en) \
   [Comparing evcc and the go-e Controller for solar charging](https://www.the-ninth.com/blog/comparing-evcc-go-e-controller)
 - Juni 2023 · elefacts.de \
   [evcc Anleitung für intelligentes PV Überschussladen mit vielen Wallboxen](https://www.elefacts.de/test-206-evcc_anleitung_fuer_intelligentes_pv_ueberschussladen_mit_vielen_wallboxen)
@@ -94,6 +100,8 @@ Hier ist eine Liste von Artikeln aus der Community:
   [evcc installieren - So einfach geht's!](https://hobbyblogging.de/evcc-installieren)
 - März 2023 · hobbyblogging.de \
   [evcc - Was soll das sein?](https://hobbyblogging.de/evcc-was-soll-das-sein)
+- Oktober 2022 · chris-blog.com \
+  [evcc.io – Schnittstelle zwischen PV und Wallbox](https://chris-blog.com/2022/10/20/evcc-io-schnittstelle-zwischen-pv-und-wallbox/)
 
 :::note[Fehlt ein Eintrag?]
 Du kennst einen guten Vortrag, ein Video oder einen Artikel, der hier fehlt? Klicke unten auf **Seite bearbeiten** und schlage ihn vor.
