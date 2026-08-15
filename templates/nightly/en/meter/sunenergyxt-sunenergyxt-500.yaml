@@ -1,63 +1,68 @@
-template: fronius-gen24
+template: sunenergyxt-500
 product:
-  identifier: fronius-symo-gen24-plus
-  brand: Fronius
-  description: Symo GEN24 Plus
-capabilities: ["battery-control", "curtail"]
+  identifier: sunenergyxt-sunenergyxt-500
+  brand: SunEnergyXT
+  description: SunEnergyXT 500
+capabilities: ["battery-control"]
 description: |
-  To use active charge control, the Energy Cost Assistant (ECA) must not be activated in Fronius Solar.web. (Fronius Solar.web -> Settings -> Operating Mode -> Self-Consumption)
+  The battery's local mode must be enabled in the manufacturer's app.
+  Furthermore, the device's IP address must be set to a fixed, permanent IP address in the router.
+  If the `grid` mode is used, an external meter (e.g., Shelly) must be connected to the battery to measure the grid connection point (via the manufacturer's app).
+
+caveats:
+  - description: |
+      Currently, each head storage must be individually added in EVCC.
+      Connecting multiple head storages into one system has been announced by the manufacturer but is not yet implemented on the software side.
 
 render:
   - usage: grid
     default: |
       type: template
-      template: fronius-gen24
+      template: sunenergyxt-500
       usage: grid
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port, optional
     advanced: |
       type: template
-      template: fronius-gen24
+      template: sunenergyxt-500
       usage: grid
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port, optional
-      id: 200 # ID, Meter address of primary or secondary meters. On the web interface of the inverter, only the address of the first meter (e.g., 200) can be set. Additional meters receive an ascending number (e.g., 201). (optional)
+      cache: 1s # Cache, Time interval for data refresh (optional)
+      timeout: 10s # Timeout, optional
   - usage: pv
     default: |
       type: template
-      template: fronius-gen24
+      template: sunenergyxt-500
       usage: pv
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port, optional
     advanced: |
       type: template
-      template: fronius-gen24
+      template: sunenergyxt-500
       usage: pv
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port, optional
-      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      maxacpower: 800.0 # Maximum AC power of the hybrid inverter (W), optional
+      cache: 1s # Cache, Time interval for data refresh (optional)
+      timeout: 10s # Timeout, optional
   - usage: battery
     default: |
       type: template
-      template: fronius-gen24
+      template: sunenergyxt-500
       usage: battery
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port, optional
-      capacity: 50 # Battery capacity (kWh), optional
+      capacity: 4.8 # Battery capacity (kWh), optional
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
-      template: fronius-gen24
+      template: sunenergyxt-500
       usage: battery
       host: 192.0.2.2 # IP address or hostname
-      port: 502 # Port, optional
-      capacity: 50 # Battery capacity (kWh), optional
+      capacity: 4.8 # Battery capacity (kWh), optional
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
-      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
-      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
-      maxchargerate: 100 # Maximum charge rate (%), For forced charging of the battery in percent in relation to the maximum charge power of the battery inverter. (optional)
+      maxchargepower: 2400.0 # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: 800.0 # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      cache: 1s # Cache, Time interval for data refresh (optional)
+      timeout: 10s # Timeout, optional
 params:
   - name: host
     example: 192.0.2.2
@@ -68,18 +73,9 @@ params:
     help:
     advanced: false
     optional: false
-  - name: port
-    example:
-    default: 502
-    choice: []
-    unit:
-    description: Port
-    help:
-    advanced: false
-    optional: true
   - name: capacity
     example: 50
-    default:
+    default: 4.8
     choice: []
     unit: kWh
     description: Battery capacity
@@ -104,18 +100,9 @@ params:
     help: Upper limit when charging the battery from the grid
     advanced: false
     optional: true
-  - name: id
-    example:
-    default: 200
-    choice: []
-    unit:
-    description: ID
-    help: Meter address of primary or secondary meters. On the web interface of the inverter, only the address of the first meter (e.g., 200) can be set. Additional meters receive an ascending number (e.g., 201).
-    advanced: true
-    optional: true
   - name: maxacpower
     example: 5000
-    default: 0
+    default: '800.0'
     choice: []
     unit: W
     description: Maximum AC power of the hybrid inverter
@@ -124,7 +111,7 @@ params:
     optional: true
   - name: maxchargepower
     example:
-    default:
+    default: '2400.0'
     choice: []
     unit: W
     description: Maximum charge power
@@ -133,19 +120,28 @@ params:
     optional: true
   - name: maxdischargepower
     example:
-    default:
+    default: '800.0'
     choice: []
     unit: W
     description: Maximum discharge power
     help: Maximum discharge power of the storage.
     advanced: true
     optional: true
-  - name: maxchargerate
-    example:
-    default: 100
+  - name: cache
+    example: 5m
+    default: 1s
     choice: []
-    unit: '%'
-    description: Maximum charge rate
-    help: For forced charging of the battery in percent in relation to the maximum charge power of the battery inverter.
+    unit:
+    description: Cache
+    help: Time interval for data refresh
+    advanced: true
+    optional: true
+  - name: timeout
+    example: 10s
+    default: 10s
+    choice: []
+    unit:
+    description: Timeout
+    help:
     advanced: true
     optional: true
