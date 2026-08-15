@@ -110,7 +110,7 @@ Everything else is hand-written:
 #### German
 
 - Use "PV-Anlage" with hyphen (follow Duden rules for compound words)
-- Be consistent with hyphens: "PV-Überschuss", "PV-Modus"
+- Be consistent with hyphens: "PV-Überschuss", "Smart-Modus"
 - Use abbreviations: "z. B." not "beispielsweise"
 - Use "Sponsortoken" as one word, not "Sponsor Token" or "Sponsor-Token"
 - UI panels are „Kacheln", not „Karten" (e.g. „Lastmanagement-Kachel"); English uses "card"
@@ -130,7 +130,7 @@ Everything else is hand-written:
 
 #### UI Elements & Technical Terms
 
-- **Bold** for UI elements and modes: **PV-Modus**, **Min+PV**
+- **Bold** for UI elements and modes: **Smart-Modus**, **Dauerhaft laden**
 - **Bold with `→` separator** for UI navigation paths: **Konfiguration → Externe Steuerung**, **Configuration → EEBus**
 - `Code formatting` for configuration keys: `residualPower`, `evcc.yaml`
 - _Italics_ for technical terms when introducing concepts
