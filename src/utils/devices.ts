@@ -9,13 +9,18 @@ import countriesEn from "i18n-iso-countries/langs/en.json";
 countries.registerLocale(countriesEn);
 countries.registerLocale(countriesDe);
 
-export const TARIFF_GROUPS: Record<string, "price" | "co2" | "solar"> = {
+export const TARIFF_GROUPS: Record<
+  string,
+  "price" | "co2" | "solar" | "temperature"
+> = {
   "Dynamic electricity price": "price",
   "Dynamischer Strompreis": "price",
   "CO₂ Vorhersage": "co2",
   "CO₂ forecast": "co2",
   "PV Vorhersage": "solar",
   "PV forecast": "solar",
+  Temperaturvorhersage: "temperature",
+  "Temperature forecast": "temperature",
 };
 
 export const GROUP_SORT_ORDER: Record<string, number> = {
@@ -25,6 +30,8 @@ export const GROUP_SORT_ORDER: Record<string, number> = {
   "CO₂ forecast": 2,
   "PV Vorhersage": 3,
   "PV forecast": 3,
+  Temperaturvorhersage: 4,
+  "Temperature forecast": 4,
 };
 
 export const CHARGER_GROUPS: Record<string, "smartswitch"> = {
@@ -51,6 +58,7 @@ export const CODE_PREAMBLES: Record<string, string> = {
   price: "tariffs:\n    grid:",
   co2: "tariffs:\n    co2:",
   solar: "tariffs:\n    solar:",
+  temperature: "tariffs:\n    temperature:",
   hems: "hems:",
   messenger: "messaging:\n  services:",
 };
