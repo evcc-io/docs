@@ -1,0 +1,173 @@
+---
+title: "White Label"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+You can ship your evcc instance under your own brand: with your logo, your contact details and your colour scheme.
+This page is aimed at installers and vendors who deliver preconfigured devices or hosted installations to their customers.
+
+<a id="custom-css"></a>
+
+## Colours and Fonts
+
+Beyond logo and name you can also adjust colours and fonts to match your brand.
+`EVCC_CUSTOM_CSS` points to a CSS file that is loaded in addition to the standard styles.
+The UI makes heavy use of CSS custom properties for colours and fonts.
+Most visual adjustments work by overriding these properties instead of styling individual elements.
+The available properties are defined in [`app.css`](https://github.com/evcc-io/evcc/blob/master/assets/css/app.css).
+
+This example changes the primary colour and loads a different font from Google Fonts:
+
+```css title="custom.css"
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap");
+
+:root {
+  --evcc-dark-green: #22d3ee;
+  --evcc-darker-green: #0891b2;
+  --bs-body-font-family: "Space Grotesk", sans-serif;
+}
+```
+
+With this file loaded, the interface looks like this:
+
+<Screenshot
+  name="reference/screenshots/white-label-css"
+  caption="Adjusted primary colour and font"
+/>
+
+A few things to keep in mind:
+
+- There are no compatibility guarantees. Properties and markup may change with any release, so check your styles after each update.
+- Test your styles in light and dark mode.
+- Check for sufficient contrast, e.g. text on your primary colour.
+
+<a id="brand"></a>
+
+## Brand Name and Logo
+
+| Variable                 | Effect                             |
+| ------------------------ | ---------------------------------- |
+| `EVCC_CUSTOM_BRAND`      | Brand name in the navigation menu  |
+| `EVCC_CUSTOM_LOGO_LIGHT` | Logo for light mode                |
+| `EVCC_CUSTOM_LOGO_DARK`  | Logo for dark mode                 |
+| `EVCC_CUSTOM_WEBSITE`    | Website link in the Version dialog |
+| `EVCC_CUSTOM_EMAIL`      | Support email address              |
+| `EVCC_CUSTOM_PHONE`      | Support phone number               |
+
+`EVCC_CUSTOM_BRAND` sets your brand name.
+It replaces the _evcc_ entry in the navigation menu.
+
+<Screenshot
+  name="reference/screenshots/white-label-menu"
+  caption="Navigation menu with custom brand name"
+  width={400}
+/>
+
+`EVCC_CUSTOM_LOGO_LIGHT` and `EVCC_CUSTOM_LOGO_DARK` replace the evcc logo with your own (`svg` or `png`).
+The two variants must always be configured together.
+Use `svg` if possible, it stays sharp at any size.
+The logo is displayed at 64 px height with the width scaling accordingly, so a landscape format works best.
+Clicking the brand name in the menu opens the **Version** dialog with your logo.
+`EVCC_CUSTOM_WEBSITE`, `EVCC_CUSTOM_EMAIL` and `EVCC_CUSTOM_PHONE` add your website, support email address and phone number to this dialog.
+
+<Screenshot
+  name="reference/screenshots/white-label-about"
+  caption="Version dialog with custom logo and contact details"
+/>
+
+<a id="problem-reports"></a>
+
+## Problem Reports
+
+Under **Need Help? → Report a problem** users can report bugs and ask for help.
+By default this opens a prefilled GitHub discussion or GitHub issue.
+With `EVCC_CUSTOM_EMAIL` configured, the page switches to an email flow instead: users describe their problem and send it to your support address via their email client (`mailto:`).
+
+<Screenshot
+  name="reference/screenshots/white-label-issue"
+  caption="Problem report via email"
+/>
+
+For technical reasons the email doesn't include debug details (configuration, logs, state).
+If you need them, ask your users to download the debug file on the same page and attach it to their email.
+
+The help dialog also shows a **Contact us** email button instead of the **GitHub discussions** link.
+
+<a id="configuration"></a>
+
+## Configuration
+
+Each setting is an environment variable.
+The same settings are also available as [CLI flags](/en/reference/cli/evcc#options), e.g. `--custom-brand` for `EVCC_CUSTOM_BRAND`.
+
+You can set them directly on the command line, in a systemd override file or in your Docker compose file:
+
+<Tabs>
+  <TabItem label="CLI">
+
+```sh
+EVCC_CUSTOM_BRAND="G1GA HEMS" \
+EVCC_CUSTOM_LOGO_LIGHT=logo-light.svg \
+EVCC_CUSTOM_LOGO_DARK=logo-dark.svg \
+EVCC_CUSTOM_WEBSITE=https://example.com/hems \
+EVCC_CUSTOM_EMAIL=support@example.com \
+EVCC_CUSTOM_PHONE="+49 123 456789" \
+EVCC_CUSTOM_CSS=custom.css \
+evcc
+```
+
+  </TabItem>
+  <TabItem label="Linux Service">
+
+Create an override file with `sudo systemctl edit evcc`, see [Linux → Environment Variables & CLI Options](/en/installation/linux#environment-variables).
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_CUSTOM_BRAND=G1GA HEMS"
+Environment="EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg"
+Environment="EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg"
+Environment="EVCC_CUSTOM_EMAIL=support@example.com"
+Environment="EVCC_CUSTOM_CSS=/etc/branding/custom.css"
+```
+
+  </TabItem>
+  <TabItem label="Docker">
+
+Set the variables in your compose file and mount the logo and CSS files into the container.
+
+```yaml
+services:
+  evcc:
+    image: evcc/evcc:latest
+    environment:
+      - EVCC_CUSTOM_BRAND=G1GA HEMS
+      - EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg
+      - EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg
+      - EVCC_CUSTOM_EMAIL=support@example.com
+      - EVCC_CUSTOM_CSS=/etc/branding/custom.css
+    volumes:
+      - /home/user/branding:/etc/branding
+```
+
+  </TabItem>
+</Tabs>
+
+All other configuration can also be provided via environment variables: `EVCC_` followed by the `evcc.yaml` parameter name in uppercase, e.g. `EVCC_NETWORK_HOST` or `EVCC_DATABASE_DSN`.
+
+<a id="custom-image"></a>
+
+## Custom Image
+
+To ship a complete SD card image with your branding, fork the [evcc-io/images](https://github.com/evcc-io/images) repository.
+The [`userpatches/customize-image.sh`](https://github.com/evcc-io/images/blob/main/userpatches/customize-image.sh) script configures evcc during the image build.
+In its _EVCC SETUP_ section it writes the systemd override file, so this is where your `Environment="EVCC_CUSTOM_..."` lines go.
+
+<a id="licensing"></a>
+
+## Licensing
+
+Shipping or selling the official binary or Docker image to your customers is perfectly fine.
+Make sure you follow the [sponsorship conditions](/en/sponsorship) and the [license](https://github.com/evcc-io/evcc#license).
+Instances that use sponsorship-required integrations each need their own sponsor token.

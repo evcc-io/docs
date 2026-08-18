@@ -269,6 +269,7 @@ export default defineConfig({
             { label: "Plugins", slug: "reference/plugins" },
             { label: "Modbus", slug: "reference/modbus" },
             { label: "Web UI", slug: "reference/web-ui" },
+            { label: "White Label", slug: "reference/white-label" },
             { label: "API State", link: "/reference/state" },
             { label: "evcc App", slug: "reference/app" },
             {
