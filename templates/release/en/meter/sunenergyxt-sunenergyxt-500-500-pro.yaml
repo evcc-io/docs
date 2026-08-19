@@ -1,18 +1,24 @@
 template: sunenergyxt-500
 product:
-  identifier: sunenergyxt-sunenergyxt-500-pro
+  identifier: sunenergyxt-sunenergyxt-500-500-pro
   brand: SunEnergyXT
-  description: SunEnergyXT 500 PRO
+  description: SunEnergyXT 500 / 500 PRO
 capabilities: ["battery-control"]
 description: |
   The battery's local mode must be enabled in the manufacturer's app.
   Furthermore, the device's IP address must be set to a fixed, permanent IP address in the router.
-  If the `grid` mode is used, an external meter (e.g., Shelly) must be connected to the battery to measure the grid connection point (via the manufacturer's app).
+  An external meter (e.g., Shelly) measuring the grid connection point must be connected to the battery via the manufacturer's app.
+  It is required for the `grid` usage, and also for the `battery` usage, because the normal battery mode enables the device's
+  zero feed-in regulation, which reads this meter.
 
 caveats:
   - description: |
       Currently, each head storage must be individually added in EVCC.
       Connecting multiple head storages into one system has been announced by the manufacturer but is not yet implemented on the software side.
+
+  - description: |
+      `maxacpower` and `maxdischargepower` are derived from the selected `model` when left empty.
+      An explicitly configured value takes precedence and is not clamped to the model limit.
 
 render:
   - usage: grid
@@ -20,50 +26,65 @@ render:
       type: template
       template: sunenergyxt-500
       usage: grid
+      model: # Model, `standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W). [standard, pro]
       host: 192.0.2.2 # IP address or hostname
     advanced: |
       type: template
       template: sunenergyxt-500
       usage: grid
+      model: # Model, `standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W). [standard, pro]
       host: 192.0.2.2 # IP address or hostname
-      cache: 1s # Cache, Time interval for data refresh (optional)
+      cache: 2s # Cache, Time interval for data refresh (optional)
       timeout: 10s # Timeout, optional
   - usage: pv
     default: |
       type: template
       template: sunenergyxt-500
       usage: pv
+      model: # Model, `standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W). [standard, pro]
       host: 192.0.2.2 # IP address or hostname
     advanced: |
       type: template
       template: sunenergyxt-500
       usage: pv
+      model: # Model, `standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W). [standard, pro]
       host: 192.0.2.2 # IP address or hostname
-      maxacpower: 800.0 # Maximum AC power of the hybrid inverter (W), optional
-      cache: 1s # Cache, Time interval for data refresh (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      cache: 2s # Cache, Time interval for data refresh (optional)
       timeout: 10s # Timeout, optional
   - usage: battery
     default: |
       type: template
       template: sunenergyxt-500
       usage: battery
+      model: # Model, `standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W). [standard, pro]
       host: 192.0.2.2 # IP address or hostname
-      capacity: 4.8 # Battery capacity (kWh), optional
+      capacity: 5 # Battery capacity (kWh), Total storage capacity: head unit 5 kWh, each extension pack adds 5 kWh. So 5 (head unit only), 10 (+1 extension) or 15 (+2 extensions). The number of detected battery packs is reported in the `ON` field of `/read`. (optional)
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
     advanced: |
       type: template
       template: sunenergyxt-500
       usage: battery
+      model: # Model, `standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W). [standard, pro]
       host: 192.0.2.2 # IP address or hostname
-      capacity: 4.8 # Battery capacity (kWh), optional
+      capacity: 5 # Battery capacity (kWh), Total storage capacity: head unit 5 kWh, each extension pack adds 5 kWh. So 5 (head unit only), 10 (+1 extension) or 15 (+2 extensions). The number of detected battery packs is reported in the `ON` field of `/read`. (optional)
       minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
       maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
-      maxchargepower: 2400.0 # Maximum charge power (W), For forced charging of the battery. (optional)
-      maxdischargepower: 800.0 # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
-      cache: 1s # Cache, Time interval for data refresh (optional)
+      maxchargepower: 2400 # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      cache: 2s # Cache, Time interval for data refresh (optional)
       timeout: 10s # Timeout, optional
 params:
+  - name: model
+    example:
+    default:
+    choice: ['standard', 'pro']
+    unit:
+    description: Model
+    help: '`standard` for the SunEnergyXT 500, `pro` for the SunEnergyXT 500 PRO. Determines the maximum AC and discharge power (800 W resp. 2400 W).'
+    advanced: false
+    optional: false
   - name: host
     example: 192.0.2.2
     default:
@@ -75,11 +96,11 @@ params:
     optional: false
   - name: capacity
     example: 50
-    default: 4.8
+    default: 5
     choice: []
     unit: kWh
     description: Battery capacity
-    help:
+    help: 'Total storage capacity: head unit 5 kWh, each extension pack adds 5 kWh. So 5 (head unit only), 10 (+1 extension) or 15 (+2 extensions). The number of detected battery packs is reported in the `ON` field of `/read`.'
     advanced: false
     optional: true
   - name: minsoc
@@ -102,7 +123,7 @@ params:
     optional: true
   - name: maxacpower
     example: 5000
-    default: '800.0'
+    default: 0
     choice: []
     unit: W
     description: Maximum AC power of the hybrid inverter
@@ -111,7 +132,7 @@ params:
     optional: true
   - name: maxchargepower
     example:
-    default: '2400.0'
+    default: 2400
     choice: []
     unit: W
     description: Maximum charge power
@@ -120,7 +141,7 @@ params:
     optional: true
   - name: maxdischargepower
     example:
-    default: '800.0'
+    default:
     choice: []
     unit: W
     description: Maximum discharge power
@@ -129,7 +150,7 @@ params:
     optional: true
   - name: cache
     example: 5m
-    default: 1s
+    default: 2s
     choice: []
     unit:
     description: Cache
