@@ -104,6 +104,7 @@ Everything else is hand-written:
 
 - Use "solar" instead of "PV" or "photovoltaic"
 - Use UK English spelling (e.g., "optimise" not "optimize")
+- Exception: the "optimizer" feature is always spelled with "z", matching the UI — generic verbs and nouns keep UK spelling ("optimising", "optimisation")
 - Use abbreviations: "e.g." not "for example"
 - Use "sponsor token" as two words, lowercase in body text, title case only in headings
 
