@@ -81,7 +81,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: grid residual power
 - `evcc/site/batteryGridChargeLimit`: smart charging cost limit
 - `evcc/site/batteryDischargeControl`: enable/disable battery discharge control (true/false)
-- `evcc/site/batteryMode`: external battery mode (`normal`, `hold`, `charge`) — directly controls all controllable batteries, overrules other evcc modes, resets after 60 s
+- `evcc/site/batteryMode`: external battery mode (`normal`, `hold`, `charge`, `holdcharge`) — directly controls all controllable batteries, overrules other evcc modes, resets after 60 s
 - `evcc/site/smartCostLimit`: smart cost limit for all loadpoints
 - `evcc/site/smartFeedInPriorityLimit`: feed-in priority limit for all loadpoints
 
