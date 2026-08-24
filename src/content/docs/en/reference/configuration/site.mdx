@@ -253,6 +253,13 @@ Heating loadpoints (e.g. a heat pump) are excluded from this sub-ordering. They 
 
 The default is `none`, so existing configurations are unaffected unless this option is set explicitly.
 
+Two kinds of loadpoint are never sub-ordered and keep their plain `priority` rank:
+
+- Heating loadpoints. Their soc value holds a temperature rather than a charge level, so "charge the emptier one first" would compare unrelated quantities. Within the same `priority` a heater therefore loses against a vehicle that has a charge level. Put heaters in their own `priority` if you want them ahead of, or behind, your vehicles.
+- Loadpoints whose vehicle charge level is unknown.
+
+The ordering between different `priority` values is unaffected in both cases.
+
 **Default value:** `none`
 
 **For example**:
@@ -274,6 +281,8 @@ Determines whether the sub-ordering selected via [`priorityStrategy`](#prioritys
 
 When the capacity of any compared vehicle is unknown, the `energy` basis falls back to the percentage comparison.
 Heating loadpoints don't take part in this comparison, and they don't force a fallback to `percent`.
+
+The comparison saturates above 99 kWh, so two loadpoints that both need more than that rank equal and share the surplus.
 
 This option has no effect with `priorityStrategy: none`.
 
