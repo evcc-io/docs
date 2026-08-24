@@ -1,50 +1,26 @@
 ---
-title: "Remote Access 🧪"
+title: "Remote Access"
 sidebar:
-  order: 13
+  order: 11
 ---
 
 import { Steps } from "@astrojs/starlight/components";
+import SponsorInfoBox from "@components/SponsorInfoBox.astro";
 import statusImg from "@assets/features/remote-access/status.png";
 import clientsImg from "@assets/features/remote-access/clients.png";
 import clientCreatedImg from "@assets/features/remote-access/client-created.png";
 
-:::caution[Experimental]
-Remote Access is in development.
-Both behaviour and configuration may still change.
-:::
+Remote Access lets you reach your evcc instance from outside your home network, via the [evcc app](/en/features/app) or a browser.
+Your instance gets its own domain on `evcc.cloud`.
+Port forwarding, dynamic DNS, or a VPN are not required, because the instance establishes the connection outbound itself.
 
-Remote Access lets you reach your local evcc instance from anywhere.
-Each instance gets its own domain on `evcc.cloud`.
-You don't need dynamic DNS or a port forward in your router.
-
-```mermaid
-flowchart LR
-  subgraph internet [Internet]
-    app["evcc app"]
-    browser["browser"]
-    proxy["Remote Proxy<br/><code>___.evcc.cloud</code>"]
-  end
-  app <-- HTTPS --> proxy
-  browser <-- HTTPS --> proxy
-  proxy <-->|"secure websocket<br/><i>permanent</i>"| evcc["evcc instance<br/><code>evcc.local</code>"]
-```
-
-## How It Works
-
-Your app or browser connects to your personal domain on `evcc.cloud`.
-The Remote Proxy forwards the requests through a WebSocket tunnel to your local evcc instance.
-Your local instance opens that tunnel outbound itself, so no open port in your network is required.
+<SponsorInfoBox lang="en" type="feature" />
 
 ## Setup
 
-Remote Access requires an active [sponsorship](/en/sponsorship).
-
 <Steps>
 
-1. Enable the feature in the user interface:
-   - **Configuration → Experimental** → enable
-   - **Configuration → Remote Access 🧪** → enable
+1. Enable the feature under **Configuration → Remote Access**.
 
    <img
      src={statusImg.src}
@@ -52,7 +28,7 @@ Remote Access requires an active [sponsorship](/en/sponsorship).
      style={{ maxWidth: "500px" }}
    />
 
-2. Your evcc instance registers with the Remote Proxy and receives its own domain, e.g. `swift-dark-crow.evcc.cloud`.
+2. Your evcc instance connects to `evcc.cloud` and receives its own domain, e.g. `swift-dark-crow.evcc.cloud`.
 
    <img
      src={clientsImg.src}
@@ -111,7 +87,23 @@ Changes to the configuration, backups, logs, or a restart still require the admi
 Registration is verified against `sponsor.evcc.io`.
 Each sponsor receives exactly one domain, permanently bound to that sponsor and never reassigned.
 
-## Technical Background
+## Technical Details
+
+Your app or browser connects to your personal domain on `evcc.cloud`.
+The Remote Proxy forwards the requests through a WebSocket tunnel to your local evcc instance.
+Your local instance opens that tunnel outbound itself, so no open port in your network is required.
+
+```mermaid
+flowchart LR
+  subgraph internet [Internet]
+    app["evcc app"]
+    browser["browser"]
+    proxy["Remote Proxy<br/><code>___.evcc.cloud</code>"]
+  end
+  app <-- HTTPS --> proxy
+  browser <-- HTTPS --> proxy
+  proxy <-->|"secure websocket<br/><i>permanent</i>"| evcc["evcc instance<br/><code>evcc.local</code>"]
+```
 
 On first activation, the local evcc instance registers with the Remote Proxy.
 In exchange for the sponsor token, it receives a connection token and a randomly assigned domain.

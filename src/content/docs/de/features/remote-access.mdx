@@ -1,62 +1,38 @@
 ---
-title: "Remote Access 🧪"
+title: "Remotezugriff"
 sidebar:
-  order: 13
+  order: 11
 ---
 
 import { Steps } from "@astrojs/starlight/components";
+import SponsorInfoBox from "@components/SponsorInfoBox.astro";
 import statusImg from "@assets/features/remote-access/status.png";
 import clientsImg from "@assets/features/remote-access/clients.png";
 import clientCreatedImg from "@assets/features/remote-access/client-created.png";
 
-:::caution[Experimentell]
-Remote Access befindet sich in Entwicklung.
-Funktionsweise und Konfiguration können sich noch ändern.
-:::
+Mit Remotezugriff erreichst du deine evcc-Instanz auch außerhalb deines Heimnetzes, per [evcc-App](/de/features/app) oder Browser.
+Deine Instanz bekommt dafür eine eigene Domain auf `evcc.cloud`.
+Portfreigabe, DynDNS oder VPN sind nicht nötig, da die Instanz die Verbindung selbst nach außen aufbaut.
 
-Mit Remote Access erreichst du deine lokale evcc-Instanz von unterwegs.
-Jede Instanz bekommt dafür ihre eigene Domain auf `evcc.cloud`.
-Du brauchst weder DynDNS noch eine Portfreigabe in deinem Router.
-
-```mermaid
-flowchart LR
-  subgraph internet [Internet]
-    app["evcc App"]
-    browser["Browser"]
-    proxy["Remote-Proxy<br/><code>___.evcc.cloud</code>"]
-  end
-  app <-- HTTPS --> proxy
-  browser <-- HTTPS --> proxy
-  proxy <-->|"secure websocket<br/><i>permanent</i>"| evcc["evcc-Instanz<br/><code>evcc.local</code>"]
-```
-
-## Wie funktioniert das?
-
-Deine App oder dein Browser verbindet sich mit deiner persönlichen Domain unter `evcc.cloud`.
-Der Remote-Proxy leitet die Anfragen durch einen WebSocket-Tunnel an deine lokale evcc-Instanz weiter.
-Den Tunnel baut deine evcc-Instanz selbst nach außen auf, daher ist kein offener Port in deinem Netzwerk nötig.
+<SponsorInfoBox lang="de" type="feature" />
 
 ## Einrichtung
 
-Remote Access setzt ein aktives [Sponsoring](/de/sponsorship) voraus.
-
 <Steps>
 
-1. Aktiviere die Funktion in der Oberfläche:
-   - **Konfiguration → Experimentell** → aktivieren
-   - **Konfiguration → Remote Access 🧪** → aktivieren
+1. Aktiviere die Funktion unter **Konfiguration → Remotezugriff**.
 
    <img
      src={statusImg.src}
-     alt="Integrations-Übersicht mit aktivem Remote Access"
+     alt="Integrations-Übersicht mit aktivem Remotezugriff"
      style={{ maxWidth: "500px" }}
    />
 
-2. Deine evcc-Instanz registriert sich beim Remote-Proxy und erhält eine eigene Domain, z. B. `swift-dark-crow.evcc.cloud`.
+2. Deine evcc-Instanz verbindet sich mit `evcc.cloud` und erhält eine eigene Domain, z. B. `swift-dark-crow.evcc.cloud`.
 
    <img
      src={clientsImg.src}
-     alt="Remote-Access-Verwaltung mit Domain und Client-Liste"
+     alt="Remotezugriff-Verwaltung mit Domain und Client-Liste"
      style={{ maxWidth: "500px" }}
    />
 
@@ -103,7 +79,7 @@ Alle anderen bleiben verbunden.
 Wiederholte Fehlversuche bei der Anmeldung werden automatisch ausgebremst.
 
 **Umfang des Zugriffs.**
-Die Remote-Access-Zugangsdaten bestehen parallel zu den Sicherheitsmechanismen in evcc selbst.
+Die Remotezugriff-Zugangsdaten bestehen parallel zu den Sicherheitsmechanismen in evcc selbst.
 Sie gewähren ausschließlich Netzwerkzugang zu deiner Instanz, vergleichbar mit dem Zugriff aus deinem lokalen Netzwerk.
 Für Änderungen an der Konfiguration, Backups, Logs oder einen Neustart ist weiterhin das Administrator-Passwort erforderlich.
 
@@ -111,7 +87,23 @@ Für Änderungen an der Konfiguration, Backups, Logs oder einen Neustart ist wei
 Die Registrierung wird gegen `sponsor.evcc.io` geprüft.
 Jeder Sponsor erhält genau eine Domain, die fest mit ihm verknüpft bleibt und nicht erneut vergeben wird.
 
-## Technischer Hintergrund
+## Technische Details
+
+Deine App oder dein Browser verbindet sich mit deiner persönlichen Domain unter `evcc.cloud`.
+Der Remote-Proxy leitet die Anfragen durch einen WebSocket-Tunnel an deine lokale evcc-Instanz weiter.
+Den Tunnel baut deine evcc-Instanz selbst nach außen auf, daher ist kein offener Port in deinem Netzwerk nötig.
+
+```mermaid
+flowchart LR
+  subgraph internet [Internet]
+    app["evcc App"]
+    browser["Browser"]
+    proxy["Remote-Proxy<br/><code>___.evcc.cloud</code>"]
+  end
+  app <-- HTTPS --> proxy
+  browser <-- HTTPS --> proxy
+  proxy <-->|"secure websocket<br/><i>permanent</i>"| evcc["evcc-Instanz<br/><code>evcc.local</code>"]
+```
 
 Beim ersten Aktivieren registriert sich die lokale evcc-Instanz beim Remote-Proxy.
 Im Tausch gegen den Sponsor-Token erhält sie ein Verbindungstoken und eine zufällig vergebene Domain.
