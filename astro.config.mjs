@@ -54,6 +54,7 @@ export default defineConfig({
       description: "evcc Dokumentation",
       components: {
         SiteTitle: "./src/components/SiteTitle.astro",
+        Search: "./src/components/Search.astro",
         SocialIcons: "./src/components/SocialIcons.astro",
         LanguageSelect: "./src/components/LanguageSelect.astro",
         ThemeSelect: "./src/components/ThemeSelect.astro",
