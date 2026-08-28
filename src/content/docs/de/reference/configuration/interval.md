@@ -1,7 +1,7 @@
 ---
 title: "interval"
 sidebar:
-  order: 9
+  order: 10
 ---
 
 Definiert das zeitliche Interval, in welchem neue Werte von allen Messgeräten gelesen werden und die Ladeströme der Wallboxen neu geregelt wird.

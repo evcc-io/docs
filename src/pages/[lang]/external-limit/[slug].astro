@@ -2,10 +2,14 @@
 import DeviceDetailLayout from "@components/DeviceDetailLayout.astro";
 import { deviceDetailPaths, featuresFor, buildCodeBlocks, templateEditUrl } from "@utils/devices";
 
-export const getStaticPaths = () =>
-  deviceDetailPaths({ prefix: "hems", urlType: "external-limit", channel: "release" });
+// hems integrations and curtailment devices share the external-limit URL space
+export const getStaticPaths = async () => [
+  ...(await deviceDetailPaths({ prefix: "hems", urlType: "external-limit", channel: "release" })),
+  ...(await deviceDetailPaths({ prefix: "curtailers", urlType: "external-limit", channel: "release" })),
+];
 
 const { entry, lang, counterpartHref } = Astro.props as any;
+const kind: "hems" | "curtailer" = entry.collection.startsWith("curtailers") ? "curtailer" : "hems";
 ---
 
 <DeviceDetailLayout
@@ -14,8 +18,8 @@ const { entry, lang, counterpartHref } = Astro.props as any;
   channel="release"
   type="external-limit"
   categoryLabel={lang === "de" ? "Externe Begrenzung" : "External Limit"}
-  features={featuresFor("hems", entry, lang)}
-  codeBlocks={buildCodeBlocks(entry, "hems")}
-  editUrl={templateEditUrl(entry, "hems")}
+  features={featuresFor(kind, entry, lang)}
+  codeBlocks={buildCodeBlocks(entry, kind)}
+  editUrl={templateEditUrl(entry, kind)}
   counterpartHref={counterpartHref}
 />

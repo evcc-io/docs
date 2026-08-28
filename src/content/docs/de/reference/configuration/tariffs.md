@@ -1,7 +1,7 @@
 ---
 title: "tariffs"
 sidebar:
-  order: 11
+  order: 12
 ---
 
 Hier kannst du deinen Energietarif und gegebenenfalls deine Einspeisevergütung angeben.

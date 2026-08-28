@@ -27,7 +27,7 @@ Device pages are generated from YAML templates that are synchronised with the ma
 
 Most content is **manually written**, except for:
 
-- **Device list pages** — `chargers`, `meters`, `vehicles`, `smartswitches`, `heating`, `tariffs` — rendered by routes under `src/pages/[lang]/` using `src/utils/devices.ts` against the YAML templates.
+- **Device list pages** — `chargers`, `meters`, `vehicles`, `smartswitches`, `heating`, `tariffs`, `external-limit` (hems integrations + curtailment devices), `notifications` — rendered by routes under `src/pages/[lang]/` using `src/utils/devices.ts` against the YAML templates.
 - **Device detail pages** — same routes, one per template.
 - **CLI reference** — `reference/cli/*.md` generated from the main evcc repository (English only, German falls back automatically).
 - **REST API** — generated from `public/openapi.yaml` by `starlight-openapi`.
@@ -38,7 +38,7 @@ YAML device templates organised by:
 
 - Channel: `nightly/` and `release/`
 - Language: `de/`, `en/`
-- Category: `charger/`, `meter/`, `vehicle/`, `tariff/`
+- Category: `charger/`, `meter/`, `vehicle/`, `tariff/`, `hems/`, `curtailer/`, `messenger/`
 
 The nightly/release toggle in the UI switches which collection is used at runtime.
 

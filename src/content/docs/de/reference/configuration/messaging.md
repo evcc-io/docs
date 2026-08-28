@@ -1,7 +1,7 @@
 ---
 title: "messaging"
 sidebar:
-  order: 12
+  order: 13
 ---
 
 Der Abschnitt `messaging` konfiguriert [Benachrichtigungen](/de/notifications) über Ladevorgänge per Diensten wie Telegram, Pushover, ntfy oder E-Mail.

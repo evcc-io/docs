@@ -1,7 +1,7 @@
 ---
 title: "mqtt"
 sidebar:
-  order: 14
+  order: 15
 ---
 
 Establishes connectivity with an MQTT broker.

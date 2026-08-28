@@ -6,7 +6,7 @@ tableOfContents:
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Batterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs oder eines Benachrichtigungsdienstes lässt sich in der Geräteliste der Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
+Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Batterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes lässt sich in der Geräteliste der Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
 
 So lassen sich auch Geräte einbinden, die nicht von einem eingebauten Template abgedeckt sind, z. B. die aktuelle Leistung über einen HTTP-Endpunkt lesen oder einen Zielstrom per Modbus schreiben.
 
@@ -108,6 +108,7 @@ Zur Konvertierung dienen die [Lese-Pipelines](/de/reference/plugins#reading).
 | `powers`       | `[float,float,float]` | nein      | alle          | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen. |
 | `currents`     | `[float,float,float]` | nein      | alle          | Phasenströme in A. Zur Erkennung aktiver Phasen.                            |
 | `voltages`     | `[float,float,float]` | nein      | alle          | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                      |
+| `curtailed`    | `int`                 | nein      | `pv`          | Aktuelles Einspeiselimit in % (0 bis 100). Nur zusammen mit `curtail`.      |
 
 ### Vorzeichen und Richtungen \{#signs-and-directions\}
 
@@ -133,10 +134,11 @@ Echte Zählerstände liefern genauere Langzeitstatistiken.
 
 ### Schreib-Attribute
 
-| Attribut      | Typ   | Erfordert | Kontext   | Beschreibung                                                                                                                                          |
-| ------------- | ----- | --------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `limitsoc`    | `int` | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet. |
-| `batterymode` | `int` | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge)                                                                                                |
+| Attribut      | Typ   | Erfordert | Kontext   | Beschreibung                                                                                                                                                    |
+| ------------- | ----- | --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.           |
+| `batterymode` | `int` | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge)                                                                                                          |
+| `curtail`     | `int` | nein      | `pv`      | Setze Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
 
 ### Beispiel
 
@@ -690,6 +692,60 @@ curtailedPercent:
   topic: hems/curtail/percent # Erlaubte Einspeisung in Prozent, 100 = keine Abregelung
 productionNominalMax: 10000 # Installierte Generatorleistung (Wp)
 ```
+
+## Einspeisebegrenzer \{#curtailer\}
+
+Ein benutzerdefinierter Einspeisebegrenzer begrenzt die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers (§ 9 EEG), wenn der Wechselrichter nicht über seine [Zähler](#meter)-Konfiguration abgeregelt werden kann.
+Wähle dazu in der Oberfläche unter **Konfiguration → Netzanschluss → Einspeisebegrenzung hinzufügen** die Option **Benutzerdefiniertes Gerät**.
+Siehe auch die [`curtailers`-Konfigurationsreferenz](/de/reference/configuration/curtailers) und [Externe Begrenzung](/de/external-limit#curtailment-devices).
+
+Das Gerät erhält die erlaubte Einspeisung in Prozent der installierten Generatorleistung und muss sie am Wechselrichter umsetzen.
+`100` bedeutet kein Limit.
+
+### Attribute
+
+| Attribut    | Typ    | Erforderlich | Beschreibung                                                                                                                                                |
+| ----------- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | Plugin | ja           | Setzt das Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100). Muss Schreibzugriff unterstützen.                                                 |
+| `curtailed` | Plugin | ja           | Liest das aktuelle Einspeiselimit in %. Kann das Gerät es nicht liefern, wird das [`error`](/de/reference/plugins#error)-Plugin verwendet (siehe Beispiel). |
+
+### Beispiele
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Der Wechselrichter kann sein Limit nicht zurückmelden, `curtailed` liefert daher `ErrNotAvailable` und das Limit wird bei jeder Änderung geschrieben.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
 
 ## Benachrichtigungsdienst \{#notification-service\}
 

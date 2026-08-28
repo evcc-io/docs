@@ -1,7 +1,7 @@
 ---
 title: "interval"
 sidebar:
-  order: 9
+  order: 10
 ---
 
 Defines the time interval at which new values are read from all measurement devices and the charging currents of the chargers are re-regulated.

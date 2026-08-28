@@ -1,7 +1,7 @@
 ---
 title: "hems"
 sidebar:
-  order: 7
+  order: 8
 ---
 
 Unter `hems` wird die externe Steuerung von Verbrauchsleistung und Einspeisung konfiguriert.
@@ -9,7 +9,8 @@ Dies wird z. B. für die Umsetzung von § 14a EnWG oder § 9 EEG benötigt.
 Details zu Hintergrund und Einrichtung findest du unter [Externe Begrenzung](/de/external-limit).
 
 :::note[Hinweis]
-Abregelung und das Dimmen steuerbarer Verbraucher wirken direkt am Gerät, dafür sind keine Stromkreise erforderlich.
+Die Abregelung wirkt direkt auf die abregelbaren `pv`-Zähler und [Einspeisebegrenzer](/de/reference/configuration/curtailers), das Dimmen direkt auf die steuerbaren Verbraucher.
+Dafür sind keine Stromkreise erforderlich.
 Damit das Verbrauchslimit auf Ladepunkte wirkt, müssen Stromkreise im [Lastmanagement](/de/features/loadmanagement) eingerichtet sein.
 Ein aktives Limit begrenzt dann den obersten Stromkreis.
 :::
