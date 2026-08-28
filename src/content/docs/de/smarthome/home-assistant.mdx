@@ -9,7 +9,7 @@ evcc ist auf intelligentes Laden und Heizen spezialisiert.
 Beide Systeme ergänzen sich und lassen sich auf verschiedene Arten miteinander verbinden.
 
 :::note
-evcc kann auch als Home Assistant Addon installiert werden. Die Anleitung dafür findest du [hier](/de/installation/home-assistant).
+evcc kann auch als Home Assistant App installiert werden. Die Anleitung dafür findest du [hier](/de/installation/home-assistant).
 :::
 
 ## Visualisieren & Automatisieren
@@ -26,7 +26,7 @@ Hier ein paar Beispiele:
 ### Home Assistant evcc Integration (empfohlen)
 
 Die [ha-evcc](https://github.com/marq24/ha-evcc) Integration von [marq24](https://github.com/marq24) bringt evcc-Daten und -Funktionen direkt in Home Assistant.
-Das funktioniert unabhängig davon, ob du evcc als Home Assistant Addon betreibst oder nicht.
+Das funktioniert unabhängig davon, ob du evcc als Home Assistant App betreibst oder nicht.
 Voraussetzung ist, dass Home Assistant und evcc im gleichen Netzwerk erreichbar sind.
 
 Die Integration stellt alle relevanten evcc-Entitäten bereit: Messwerte, Einstellungen, Ladepunkte und Fahrzeuge.
@@ -54,7 +54,7 @@ evcc bietet eine [REST API](/integrations/rest-api) an.
 
 #### MQTT
 
-Du benötigst einen MQTT-Broker (z. B. [Mosquitto](https://mosquitto.org/), auch als Home Assistant Addon verfügbar).
+Du benötigst einen MQTT-Broker (z. B. [Mosquitto](https://mosquitto.org/), auch als Home Assistant App verfügbar).
 
 Konfiguriere in evcc unter **Konfiguration → MQTT** die Verbindung zum Broker.
 In Home Assistant muss der gleiche Broker und das gleiche Topic konfiguriert sein, damit beide Systeme die Daten austauschen können.
@@ -70,17 +70,6 @@ evcc kann sich direkt mit Home Assistant verbinden und dessen Entitäten (Sensor
 So lassen sich z. B. Geräte in evcc einbinden, die nicht direkt unterstützt werden, wie Zigbee-Smartplugs, Sensoren aus anderen Integrationen oder selbstgebaute Lösungen.
 Solange die Daten als Home Assistant Entität vorliegen, kann evcc damit arbeiten.
 
-### Einrichtung
-
-1. In der evcc-Oberfläche ein neues Gerät anlegen (z. B. **Konfiguration → Zusätzlichen Zähler hinzufügen**)
-2. Als Hersteller „Home Assistant" auswählen
-3. evcc erkennt deine Home Assistant Instanz automatisch im Netzwerk
-4. Autorisierung von evcc in Home Assistant durchführen (neuer Tab)
-5. Den angezeigten Feldern (z. B. „Leistung") Home Assistant Entitäten zuweisen
-   - Du bekommst Vorschläge und Autovervollständigung (z. B. `sensor.inverter_power`)
-   - Entitäten müssen rein numerische Werte liefern (`1234`, nicht `1234 W`)
-   - Um das Vorzeichen zu invertieren, stelle dem Entitätsnamen ein `-` voran (`-sensor.inverter_power`)
-
 ### Unterstützte Gerätetypen
 
 - **[Zähler](/de/meters#home-assistant)** (Netz, PV, Batterie, ...) mit Leistung, Energie, Strömen, Spannungen, SoC
@@ -88,6 +77,69 @@ Solange die Daten als Home Assistant Entität vorliegen, kann evcc damit arbeite
 - **[Schaltbare Steckdosen](/de/smartswitches#home-assistant-switch)** mit einfacher Ein-/Aus-Steuerung (für Smartplugs, Relais)
 - **[Fahrzeuge](/de/vehicles#home-assistant)** mit SoC, Reichweite, Status, Kilometerstand; optional Skripte zum Starten/Stoppen
 - **[Benachrichtigungen](/de/notifications)** unter **Konfiguration → Benachrichtigungen** kannst du evcc-Meldungen über Home Assistant versenden
+
+### Einrichtung
+
+Home Assistant Geräte werden wie jedes andere Gerät in der Konfigurationsoberfläche angelegt.
+
+1. Unter **Konfiguration** ein Gerät hinzufügen, z. B. **Zusätzlichen Zähler hinzufügen**.
+2. Als Hersteller „Home Assistant“ auswählen.
+3. Die eigene Instanz auswählen. Instanzen im lokalen Netzwerk werden automatisch erkannt.
+   Bleibt die Liste leer, z. B. weil Home Assistant in einem anderen Subnetz läuft, kann die Adresse manuell eingetragen werden (`http://homeassistant.local:8123`).
+4. Zugriff autorisieren.
+   Home Assistant öffnet sich in einem neuen Tab, dort anmelden und die Anfrage bestätigen.
+   Der Token wird von deiner evcc-Instanz gespeichert und automatisch erneuert.
+5. Den Feldern jeweils eine Entität zuweisen, z. B. „Leistung“.
+   Du bekommst Autovervollständigung mit den Entitäten deiner Instanz, angeboten werden nur Entitäten, die zum Feld passen.
+6. **Überprüfen & speichern** prüft, ob die Entitäten gelesen werden können.
+
+:::note
+Wenn du evcc innerhalb von Home Assistant als [App](/de/installation/home-assistant) betreibst, wähle in Schritt 3 die Instanz `http://supervisor/core` aus.
+Sie ist bereits autorisiert, Schritt 4 entfällt.
+:::
+
+<a id="entity-values"></a>
+
+### Werte der Entitäten
+
+Jedes Feld erwartet eine bestimmte Art von Wert.
+Eine Entität mit `unknown` oder `unavailable` gilt als vorübergehend nicht verfügbar und wird beim nächsten Update erneut gelesen.
+
+#### Zahlen
+
+Felder für Leistung, Energie, Strom und SoC brauchen eine reine Zahl als Zustand, z. B. `1234`.
+Ein Zustand wie `1234 W` kann nicht gelesen werden, die Einheit gehört in das Attribut `unit_of_measurement` der Entität.
+`W`/`kW` und `Wh`/`kWh`/`MWh` werden automatisch umgerechnet.
+Um das Vorzeichen zu invertieren, stelle dem Entitätsnamen ein `-` voran (`-sensor.inverter_power`).
+
+#### Ein/Aus
+
+Der Freigabe-Zustand einer Wallbox, eine schaltbare Steckdose und ähnliche Felder akzeptieren `on`, `true`, `1`, `active` und `yes` sowie die Gegenstücke `off`, `false`, `0`, `inactive` und `no`.
+
+<a id="charge-status"></a>
+
+#### Ladestatus
+
+Wallboxen und Fahrzeuge brauchen eine Status-Entität, die meldet, ob das Fahrzeug getrennt, verbunden oder am Laden ist.
+Diese Zustände werden ohne weitere Konfiguration erkannt:
+
+| Status | Bedeutung | Zustände                                                                                       |
+| ------ | --------- | ---------------------------------------------------------------------------------------------- |
+| **A**  | getrennt  | `a`, `disconnected`, `not_plugged`                                                             |
+| **B**  | verbunden | `b`, `connected`, `plugged`, `starting`, `stopped`, `paused`, `complete`, `charging_completed` |
+| **C**  | lädt      | `c`, `charging`                                                                                |
+
+Viele Integrationen verwenden eigene Bezeichnungen.
+Meldet die Entität einen Zustand, der nicht in der Tabelle steht, zeigt das Log den Rohwert zusammen mit der Entität an.
+Dieser Wert gehört in das passende Feld **Zustände für Status A/B/C** in den erweiterten Optionen des Geräts.
+Mehrere Werte werden durch Kommas getrennt, Groß- und Kleinschreibung spielt keine Rolle.
+
+```yaml
+statusB: charging_stopped, charging_error
+statusC: instant_charging
+```
+
+Ein `binary_sensor` als Status-Entität braucht ebenfalls eine explizite Zuordnung, z. B. `statusA: off` und `statusC: on`.
 
 ## Weitere Ressourcen (Videos)
 

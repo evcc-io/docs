@@ -9,7 +9,7 @@ evcc specialises in smart charging and heating.
 Both systems complement each other and can be connected in different ways.
 
 :::note
-evcc can also be installed as a Home Assistant Addon. You can find the instructions [here](/en/installation/home-assistant).
+evcc can also be installed as a Home Assistant App. You can find the instructions [here](/en/installation/home-assistant).
 :::
 
 ## Visualise & Automate
@@ -26,7 +26,7 @@ Here are some examples:
 ### Home Assistant evcc Integration (Recommended)
 
 The [ha-evcc](https://github.com/marq24/ha-evcc) integration by [marq24](https://github.com/marq24) brings evcc data and functions directly into Home Assistant.
-This works regardless of whether you run evcc as a Home Assistant addon or not.
+This works regardless of whether you run evcc as a Home Assistant app or not.
 The only requirement is that Home Assistant and evcc are reachable on the same network.
 
 The integration provides all relevant evcc entities: measurements, settings, charging points, and vehicles.
@@ -54,7 +54,7 @@ evcc offers a [REST API](/integrations/rest-api).
 
 #### MQTT
 
-You need an MQTT broker (e.g. [Mosquitto](https://mosquitto.org/), also available as a Home Assistant addon).
+You need an MQTT broker (e.g. [Mosquitto](https://mosquitto.org/), also available as a Home Assistant app).
 
 Configure the broker connection in evcc under **Configuration → MQTT**.
 The same broker and topic must be configured in Home Assistant so that both systems can exchange data.
@@ -70,17 +70,6 @@ evcc can connect directly to Home Assistant and use its entities (sensors, switc
 This allows you to integrate devices into evcc that are not natively supported, e.g. Zigbee smart plugs, sensors from other integrations, or DIY solutions.
 As long as the data is available as a Home Assistant entity, evcc can work with it.
 
-### Setup
-
-1. Add a new device in the evcc UI (e.g. **Configuration → Add additional meter**)
-2. Select "Home Assistant" as the manufacturer
-3. evcc will automatically discover your Home Assistant instance on the network
-4. Authorise evcc in Home Assistant (new tab)
-5. Assign Home Assistant entities to the presented fields (e.g. "Power")
-   - You'll get suggestions and autocomplete (e.g. `sensor.inverter_power`)
-   - Entities must return pure numeric values (`1234`, not `1234 W`)
-   - To invert the sign, prepend `-` to the entity name (`-sensor.inverter_power`)
-
 ### Supported Device Types
 
 - **[Meters](/en/meters#home-assistant)** (grid, solar, battery, ...) with power, energy, currents, voltages, SoC
@@ -88,6 +77,69 @@ As long as the data is available as a Home Assistant entity, evcc can work with 
 - **[Smart switches](/en/smartswitches#home-assistant-switch)** with simple on/off control (for smart plugs, relays)
 - **[Vehicles](/en/vehicles#home-assistant)** with SoC, range, status, odometer; optionally scripts for start/stop
 - **[Notifications](/en/notifications)** under **Configuration → Notifications** you can send evcc messages via Home Assistant
+
+### Setup
+
+Home Assistant devices are added like any other device in the configuration UI.
+
+1. Go to **Configuration** and add a device, e.g. **Add additional meter**.
+2. Select "Home Assistant" as the manufacturer.
+3. Pick your instance. Instances in the local network are discovered automatically.
+   If the list stays empty, e.g. because Home Assistant runs in a different subnet, enter the address manually (`http://homeassistant.local:8123`).
+4. Authorise the access.
+   Home Assistant opens in a new tab where you log in and confirm the request.
+   The token is stored by your evcc instance and renewed automatically.
+5. Assign an entity to each field, e.g. "Power".
+   You get autocomplete with the entities of your instance, and only entities that fit the field are offered.
+6. **Validate & save** checks whether the entities can be read.
+
+:::note
+If you're running evcc inside Home Assistant as an [App](/en/installation/home-assistant), pick the `http://supervisor/core` instance in step 3.
+It's authorised already, so step 4 is skipped.
+:::
+
+<a id="entity-values"></a>
+
+### Entity Values
+
+Each field expects a certain kind of value.
+An entity reporting `unknown` or `unavailable` counts as temporarily not available and is read again on the next update.
+
+#### Numbers
+
+Power, energy, current and SoC fields need a plain number as state, e.g. `1234`.
+A state such as `1234 W` can't be read, the unit belongs into the entity's `unit_of_measurement` attribute.
+`W`/`kW` and `Wh`/`kWh`/`MWh` are converted automatically.
+To invert the sign, prepend `-` to the entity name (`-sensor.inverter_power`).
+
+#### On/Off
+
+The enabled state of a charger, a smart switch and similar fields accept `on`, `true`, `1`, `active` and `yes`, as well as their counterparts `off`, `false`, `0`, `inactive` and `no`.
+
+<a id="charge-status"></a>
+
+#### Charge Status
+
+Chargers and vehicles need a status entity that reports whether the vehicle is disconnected, connected or charging.
+These states are understood out of the box:
+
+| Status | Meaning      | States                                                                                         |
+| ------ | ------------ | ---------------------------------------------------------------------------------------------- |
+| **A**  | disconnected | `a`, `disconnected`, `not_plugged`                                                             |
+| **B**  | connected    | `b`, `connected`, `plugged`, `starting`, `stopped`, `paused`, `complete`, `charging_completed` |
+| **C**  | charging     | `c`, `charging`                                                                                |
+
+Many integrations use their own wording.
+If the entity reports a state that isn't in the table, the log shows the raw value together with the entity name.
+Add that value to the matching **States for status A/B/C** field in the advanced options of the device.
+Multiple values are separated by commas, upper and lower case don't matter.
+
+```yaml
+statusB: charging_stopped, charging_error
+statusC: instant_charging
+```
+
+A `binary_sensor` as status entity also needs an explicit mapping, e.g. `statusA: off` and `statusC: on`.
 
 ## Further Resources (Videos)
 
