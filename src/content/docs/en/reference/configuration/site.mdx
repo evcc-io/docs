@@ -239,10 +239,10 @@ residualPower: -690
 
 Determines how loadpoints that share the same [`priority`](/en/reference/configuration/loadpoints#priority) are sub-ordered when PV surplus is distributed. This only breaks ties between equal-priority loadpoints; it never changes the ordering between loadpoints of different `priority`.
 
-These options are experimental. In the UI, the Priority dialog (marked 🧪) only appears when you enable experimental features under **Configuration → Experimental**. You can also set them in `evcc.yaml`; the configuration works without experimental mode.
+These options are experimental. In the UI, the Priority dialog (marked 🧪) only appears when you enable experimental features under **Configuration → Experimental** and at least two loadpoints are configured. You can also set them in `evcc.yaml`; the configuration works without experimental mode.
 
 :::note[Heating]
-Heating loadpoints (e.g. a heat pump) are excluded from this sub-ordering. They always keep the plain `priority` ranking, so within a tier they rank below vehicles. Cross-tier integer priorities still apply to them.
+Heating loadpoints (e.g. a heat pump) are excluded from this sub-ordering. Their soc value holds a temperature rather than a charge level, so "charge the emptier one first" would compare unrelated quantities. They keep the plain `priority` ranking and therefore rank below vehicles within the same tier. Put heaters in their own `priority` if you want them ahead of, or behind, your vehicles. Cross-tier priorities still apply to them.
 :::
 
 **Possible values**:
@@ -253,12 +253,7 @@ Heating loadpoints (e.g. a heat pump) are excluded from this sub-ordering. They 
 
 The default is `none`, so existing configurations are unaffected unless this option is set explicitly.
 
-Two kinds of loadpoint are never sub-ordered and keep their plain `priority` rank:
-
-- Heating loadpoints. Their soc value holds a temperature rather than a charge level, so "charge the emptier one first" would compare unrelated quantities. Within the same `priority` a heater therefore loses against a vehicle that has a charge level. Put heaters in their own `priority` if you want them ahead of, or behind, your vehicles.
-- Loadpoints whose vehicle charge level is unknown.
-
-The ordering between different `priority` values is unaffected in both cases.
+A loadpoint whose vehicle charge level is unknown keeps its plain `priority` rank as well. A vehicle reporting 0 % counts as unknown here, so it ties with a fully charged one instead of being charged first.
 
 **Default value:** `none`
 
@@ -300,7 +295,7 @@ priorityBasis: energy
 
 A deadband for the sub-ordering selected via [`priorityStrategy`](#prioritystrategy). A loadpoint only outranks another of the same `priority` when it is ahead by **more** than this amount. This prevents two near-equal vehicles from leapfrogging each other (swapping rank every time their charge levels cross); instead they tie and share the available surplus.
 
-The unit follows [`priorityBasis`](#prioritybasis): soc-% with the `percent` basis (the default) and kWh with the `energy` basis.
+The unit follows [`priorityBasis`](#prioritybasis): soc-% with the `percent` basis (the default) and kWh with the `energy` basis. When the `energy` basis falls back to the percentage comparison (see above), the deadband is read in soc-% too.
 
 Valid values range from `0` to `99`. The default `0` disables the deadband.
 
