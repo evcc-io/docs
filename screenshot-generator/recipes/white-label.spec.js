@@ -31,7 +31,7 @@ test.afterAll(async () => {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// shorten dev version strings like "0.315.0-dev+4cc75b1a4" to "0.315.0"
+// shorten dev version strings like "0.315.0-dev.1788086532" to "0.315.0"
 async function shortenVersion(page) {
   await page.evaluate(() => {
     const walker = document.createTreeWalker(
@@ -40,12 +40,12 @@ async function shortenVersion(page) {
     );
     let node;
     while ((node = walker.nextNode())) {
-      if (node.nodeValue.includes("-dev+")) {
-        node.nodeValue = node.nodeValue.replace(/-dev\+[0-9a-f]+/gi, "");
+      if (node.nodeValue.includes("-dev")) {
+        node.nodeValue = node.nodeValue.replace(/-dev[.+][0-9a-f]+/gi, "");
       }
     }
     document.querySelectorAll("input").forEach((input) => {
-      input.value = input.value.replace(/-dev\+[0-9a-f]+/gi, "");
+      input.value = input.value.replace(/-dev[.+][0-9a-f]+/gi, "");
     });
   });
 }
