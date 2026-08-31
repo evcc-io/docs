@@ -61,6 +61,7 @@ export const CODE_PREAMBLES: Record<string, string> = {
   temperature: "tariffs:\n    temperature:",
   hems: "hems:",
   messenger: "messaging:\n  services:",
+  curtailer: "curtailers:\n    - name: my_curtailer",
 };
 
 const TRANSLATIONS_DE: Record<string, string> = {
@@ -299,7 +300,8 @@ export function featuresFor(
     | "smartswitch"
     | "heating"
     | "hems"
-    | "messenger",
+    | "messenger"
+    | "curtailer",
   entry: DeviceEntry,
   lang: "de" | "en",
 ): string[] {
@@ -336,7 +338,13 @@ export type Channel = "release" | "nightly";
  */
 export function collectionName(
   prefix:
-    "chargers" | "meters" | "vehicles" | "tariffs" | "hems" | "messengers",
+    | "chargers"
+    | "meters"
+    | "vehicles"
+    | "tariffs"
+    | "hems"
+    | "messengers"
+    | "curtailers",
   lang: "de" | "en",
   channel: Channel,
 ): string {
@@ -355,7 +363,14 @@ export const nightlyPageHead = [
 /** Link to the device's source template in the evcc repo (undefined if none). */
 export function templateEditUrl(
   entry: DeviceEntry,
-  dir: "charger" | "meter" | "vehicle" | "tariff" | "hems" | "messenger",
+  dir:
+    | "charger"
+    | "meter"
+    | "vehicle"
+    | "tariff"
+    | "hems"
+    | "messenger"
+    | "curtailer",
 ): string | undefined {
   return entry.data.template
     ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/${dir}/${entry.data.template}.yaml`
@@ -372,7 +387,8 @@ export function buildCodeBlocks(
     | "heating"
     | "tariff"
     | "hems"
-    | "messenger",
+    | "messenger"
+    | "curtailer",
 ): string[] {
   const render = (entry.data.render as any[]) ?? [];
   if (type === "hems") {
@@ -417,7 +433,13 @@ export function buildCodeBlocks(
  */
 export async function deviceDetailPaths(opts: {
   prefix:
-    "chargers" | "meters" | "vehicles" | "tariffs" | "hems" | "messengers";
+    | "chargers"
+    | "meters"
+    | "vehicles"
+    | "tariffs"
+    | "hems"
+    | "messengers"
+    | "curtailers";
   /** URL segment, e.g. "smartswitches" (may differ from the collection prefix). */
   urlType: string;
   channel: Channel;

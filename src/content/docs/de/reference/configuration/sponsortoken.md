@@ -1,7 +1,7 @@
 ---
 title: "sponsortoken"
 sidebar:
-  order: 16
+  order: 17
 ---
 
 `sponsortoken` definiert ein Token das auf [https://sponsor.evcc.io](https://sponsor.evcc.io) vergeben wird.

@@ -1,7 +1,7 @@
 ---
 title: "influx"
 sidebar:
-  order: 15
+  order: 16
 ---
 
 Definiert die Influx Konfiguration, um Daten in Influx zu schreiben.

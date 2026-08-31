@@ -1,7 +1,7 @@
 ---
 title: "network"
 sidebar:
-  order: 8
+  order: 9
 ---
 
 Defines the IP address or hostname and port on which the web interface should be accessed.

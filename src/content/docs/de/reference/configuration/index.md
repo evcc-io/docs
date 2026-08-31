@@ -128,6 +128,12 @@ _Meters_ (Hausinstallation) ist eine Liste von Geräten welche verschiedene Stro
 
 [Weiterlesen...](/de/reference/configuration/meters)
 
+### Curtailers
+
+_Curtailers_ (Einspeisebegrenzer) sind Geräte, die ausschließlich die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG), z. B. der SMA Sunny Home Manager 2.0 oder der führende Wechselrichter einer Anlage mit mehreren Wechselrichtern.
+
+[Weiterlesen...](/de/reference/configuration/curtailers)
+
 ### Vehicles
 
 Um die Ladung auf einen bestimmten Ladestand (Soc) in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.

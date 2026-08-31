@@ -6,7 +6,7 @@ tableOfContents:
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-When creating a charger, heater, grid meter, battery, solar system, other consumer, vehicle, tariff or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
+When creating a charger, heater, grid meter, battery, solar system, other consumer, vehicle, tariff, curtailment device or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
 
 That way you can integrate devices that aren't covered by a built-in template, e.g. read the current power from an HTTP endpoint, or write a target current via Modbus.
 
@@ -90,6 +90,7 @@ Meters defined under `meters:` can be referenced from `site`:
 Not all meter roles support all attributes:
 
 - `limitsoc` and `batterymode` are used exclusively for battery meters (referenced from `site.battery`).
+- `curtail` and `curtailed` are used together for `pv` meters that support feed-in curtailment (§ 9 EEG).
 - `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin entries each (as a YAML array) and apply to grid meters (`grid`) and wallboxes (`charge`).
 
 Return the correct data type from each plugin.
@@ -97,17 +98,18 @@ To convert, use the [reading pipelines](/en/reference/plugins#reading).
 
 ### Read attributes
 
-| Attribute      | Type                  | Required | Context       | Description                                                 |
-| -------------- | --------------------- | -------- | ------------- | ----------------------------------------------------------- |
-| `power`        | `float`               | yes      | all           | Current power in W                                          |
-| `energy`       | `float`               | no       | all           | Meter reading in kWh                                        |
-| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)       |
-| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
-| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                        |
-| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                             |
-| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
-| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.           |
-| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
+| Attribute      | Type                  | Required | Context       | Description                                                          |
+| -------------- | --------------------- | -------- | ------------- | -------------------------------------------------------------------- |
+| `power`        | `float`               | yes      | all           | Current power in W                                                   |
+| `energy`       | `float`               | no       | all           | Meter reading in kWh                                                 |
+| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)                |
+| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                                |
+| `curtailed`    | `int`                 | no       | `pv`          | Current feed-in limit in % (0 to 100). Only together with `curtail`. |
+| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                                 |
+| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                                      |
+| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents.          |
+| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.                    |
+| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).               |
 
 ### Signs and Directions \{#signs-and-directions\}
 
@@ -136,6 +138,7 @@ Real meter readings give more accurate long-term statistics.
 | ------------- | ----- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
 | `batterymode` | `int` | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                                        |
+| `curtail`     | `int` | no       | `pv`      | Set feed-in limit in % of the nominal production power (0 to 100, `100` = no limit). Only together with `curtailed`. See [Curtailment Device](#curtailer).        |
 
 ### Example
 
@@ -689,6 +692,60 @@ curtailedPercent:
   topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
 productionNominalMax: 10000 # Installed generator power (Wp)
 ```
+
+## Curtailment Device \{#curtailer\}
+
+A user-defined curtailment device limits the feed-in of the solar installation on request of the grid operator (§ 9 EEG) when the inverter can't be curtailed through its [meter](#meter) configuration.
+In the UI, pick **User-defined device** under **Configuration → Grid → Add curtailment device**.
+See also the [`curtailers` configuration reference](/en/reference/configuration/curtailers) and [External Limit](/en/external-limit#curtailment-devices).
+
+The device receives the allowed feed-in as a percentage of the installed generator power and has to apply it on the inverter.
+`100` means no limit.
+
+### Attributes
+
+| Attribute   | Type   | Required | Description                                                                                                                               |
+| ----------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | yes      | Sets the feed-in limit in % of the nominal production power (0 to 100). Must support write access.                                        |
+| `curtailed` | plugin | yes      | Reads the current feed-in limit in %. If the device can't report it, use the [`error`](/en/reference/plugins#error) plugin (see example). |
+
+### Examples
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+The inverter can't report its limit, so `curtailed` returns `ErrNotAvailable` and the limit is written whenever it changes.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
 
 ## Notification Service \{#notification-service\}
 

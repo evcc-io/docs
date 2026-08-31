@@ -1,7 +1,7 @@
 ---
 title: "tariffs"
 sidebar:
-  order: 11
+  order: 12
 ---
 
 You can specify your energy tariff and, if applicable, your feed-in tariff.

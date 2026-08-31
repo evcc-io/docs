@@ -1,7 +1,7 @@
 ---
 title: "modbusproxy"
 sidebar:
-  order: 17
+  order: 18
 ---
 
 _modbusproxy_ ist eine Liste von Geräten welche für Drittsysteme via Modbus TCP im Netzwerk freigeben werden.

@@ -1,7 +1,7 @@
 ---
 title: "hems"
 sidebar:
-  order: 7
+  order: 8
 ---
 
 The `hems` section configures external control of consumption and feed-in power.
@@ -9,7 +9,8 @@ This is used e.g. for implementing German § 14a EnWG or § 9 EEG regulations.
 For background and setup details, see [External Limit](/en/external-limit).
 
 :::note[Note]
-Curtailment and dimming of controllable consumers act directly on the device, no circuit configuration is required.
+Curtailment acts directly on the curtailable `pv` meters and [curtailment devices](/en/reference/configuration/curtailers), dimming acts directly on the controllable consumers.
+No circuit configuration is required for either.
 To apply the consumption limit to charging points, circuits must be set up in [Load Management](/en/features/loadmanagement).
 An active limit then caps the top-level circuit.
 :::

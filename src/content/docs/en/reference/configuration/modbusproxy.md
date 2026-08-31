@@ -1,7 +1,7 @@
 ---
 title: "modbusproxy"
 sidebar:
-  order: 17
+  order: 18
 ---
 
 The `modbusproxy` setting is a list of devices that are exposed for third-party systems via Modbus TCP on the network.

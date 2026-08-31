@@ -1,7 +1,7 @@
 ---
 title: "influx"
 sidebar:
-  order: 15
+  order: 16
 ---
 
 Defines the configuration required to write data to Influx.

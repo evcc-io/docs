@@ -1,7 +1,7 @@
 ---
 title: "log, levels"
 sidebar:
-  order: 10
+  order: 11
 ---
 
 ## `log`
