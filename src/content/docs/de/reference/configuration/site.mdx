@@ -250,3 +250,79 @@ Mindestladeleistung: 1 Phase _ 6A _ 230V = 1380 W, davon 50%: 690 W. Siehe auch 
 ```yaml
 residualPower: -690
 ```
+
+---
+
+### `priorityStrategy`
+
+Legt fest, wie Ladepunkte mit gleichem [`priority`](/de/reference/configuration/loadpoints#priority) bei der Verteilung des PV-Überschusses untereinander gereiht werden. Dies betrifft nur die Reihenfolge innerhalb derselben Prioritätsstufe; die Rangordnung zwischen unterschiedlichen `priority`-Stufen bleibt unverändert.
+
+Diese Optionen sind experimentell. In der UI erscheint der Priority-Dialog (gekennzeichnet mit 🧪) nur, wenn experimentelle Funktionen unter **Konfiguration → Experimentell** aktiviert sind und mindestens zwei Ladepunkte konfiguriert sind. Die Einstellungen können auch in der `evcc.yaml` vorgenommen werden; die Konfiguration funktioniert ohne experimentellen Modus.
+
+:::note[Heizung]
+Heizungs-Ladepunkte (z. B. eine Wärmepumpe) sind von dieser Unterordnung ausgeschlossen. Ihr soc-Wert enthält eine Temperatur statt eines Ladestands, ein "das leerere zuerst" würde also nicht vergleichbare Größen gegenüberstellen. Sie behalten die reine `priority`-Einstufung und stehen damit innerhalb einer Stufe hinter Fahrzeugen zurück. Wer Heizungen vor oder hinter den Fahrzeugen haben will, gibt ihnen eine eigene `priority`. Prioritäten über verschiedene Stufen hinweg werden weiterhin angewendet.
+:::
+
+**Mögliche Werte**:
+
+- `none`: Nur nach `priority` ordnen. Gleichrangige Ladepunkte behalten ihre bisherige Reihenfolge. Das ist das Standardverhalten.
+- `soc`: Von gleichrangigen Ladepunkten wird der mit dem niedrigeren Ladestand bevorzugt, d. h. das leerere Fahrzeug wird zuerst geladen.
+- `deficit`: Von gleichrangigen Ladepunkten wird der mit dem größeren Abstand zwischen Ladestand und Ladegrenze (`limitSoc − soc`) bevorzugt, d. h. das Fahrzeug, das am weitesten von seinem Ziel entfernt ist.
+
+Der Standardwert ist `none`, bestehende Konfigurationen sind daher nicht betroffen.
+
+Ein Ladepunkt mit unbekanntem Fahrzeug-Ladestand behält ebenfalls seine reine `priority`-Einstufung. Ein Fahrzeug, das 0 % meldet, gilt hier als unbekannt und liegt damit gleichauf mit einem vollen Fahrzeug, statt zuerst geladen zu werden.
+
+**Standardwert:** `none`
+
+**Beispiel**:
+
+```yaml
+priorityStrategy: soc
+```
+
+---
+
+### `priorityBasis`
+
+Legt fest, ob die über [`priorityStrategy`](#prioritystrategy) gewählte Unterordnung den Abstand als Ladezustandsprozentsatz oder als absolute Energie misst.
+
+**Mögliche Werte**:
+
+- `percent`: Vergleich anhand der soc-%-Differenz. Das ist das Standardverhalten.
+- `energy`: Skaliert die soc-%-Differenz mit der Fahrzeug-[`capacity`](/de/reference/configuration/vehicles#capacity), sodass Ladepunkte nach **absoluter Energie (kWh)** verglichen werden. Dies verhindert, dass ein kleiner zweiter Akku allein aufgrund seines niedrigeren Prozentsatzes bevorzugt wird, obwohl er weniger Energie benötigt als ein größerer (z. B. ein 25‑kWh‑Auto bei 40 % braucht weniger Energie als ein 75‑kWh‑Auto bei 50 %).
+
+Meldet ein Ladepunkt einen Ladestand ohne bekannte Fahrzeug-Kapazität, kann die `energy`-Basis nicht angewendet werden und alle Ladepunkte werden stattdessen nach Prozent gereiht. Das betrifft neben Ladepunkten ohne Fahrzeug auch Wallboxen, die den Ladestand selbst melden (integrierte Geräte). evcc protokolliert den Rückfall und veröffentlicht die tatsächlich verwendete Basis, sodass das Hysterese-Feld in der UI mit der jeweils gültigen Einheit beschriftet wird.
+Heizungs-Ladepunkte nehmen an diesem Vergleich nicht teil und erzwingen auch keinen Rückfall auf `percent`.
+
+Diese Option hat keine Wirkung bei `priorityStrategy: none`.
+
+**Standardwert:** `percent`
+
+**Beispiel**:
+
+```yaml
+priorityBasis: energy
+```
+
+---
+
+### `priorityHysteresis`
+
+Eine Totband für die über [`priorityStrategy`](#prioritystrategy) gewählte Unterordnung. Ein Ladepunkt übertrifft einen anderen derselben `priority` nur dann, wenn er um **mehr** als diesen Betrag voraus ist. Dies verhindert, dass zwei nahezu gleich geladene Fahrzeuge ständig die Plätze tauschen (Rangwechsel bei jeder Ladestandsänderung); stattdessen bleiben sie gleichauf und teilen sich den verfügbaren Überschuss.
+
+Die Einheit folgt [`priorityBasis`](#prioritybasis): soc-%-Punkte bei der `percent`-Basis (Standard) und kWh bei der `energy`-Basis. Fällt die `energy`-Basis auf den Prozentvergleich zurück (siehe oben), wird auch das Totband in soc-%-Punkten gelesen.
+
+Gültige Werte reichen von `0` bis `99`. Der Standardwert `0` deaktiviert die Totband.
+
+Die Totband gilt nicht für Heizungs-Ladepunkte, da diese von der Unterordnung vollständig ausgeschlossen sind.
+
+Diese Option hat keine Wirkung bei `priorityStrategy: none` und beeinflusst nie die Rangordnung zwischen Ladepunkten unterschiedlicher `priority`.
+
+**Standardwert:** `0`
+
+**Beispiel**:
+
+```yaml
+priorityHysteresis: 5
+```

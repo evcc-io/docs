@@ -349,6 +349,8 @@ This prioritisation works in `pv` and `minpv` modes. In `minpv` mode, charging i
 If a vehicle has a priority defined, it overrides the priority of the loadpoint it is connected to.
 :::
 
+How loadpoints with the **same** priority are sub-ordered can be configured via the site options [`priorityStrategy`](/en/reference/configuration/site#prioritystrategy), [`priorityBasis`](/en/reference/configuration/site#prioritybasis) and [`priorityHysteresis`](/en/reference/configuration/site#priorityhysteresis).
+
 **Default value:** `0`
 
 **For example**:
