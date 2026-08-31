@@ -1,0 +1,64 @@
+template: solaredge
+product:
+  identifier: solaredge-inverter-feed-in-limitation
+  brand: SolarEdge
+  description: Inverter (feed-in limitation)
+description: |
+  Only one system can and may have a Modbus TCP connection to the inverter at the same time!
+  Feed-in limitation limits the export power at the grid connection point to the requested percentage of the installed generator power.
+
+render:
+  - default: |
+      type: template
+      template: solaredge
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host:  # Hostname
+      port: 1502 # Port
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 1502 # Port
+      productionnominalmax: # Installed generator power (Wp), Rated generator/module power of the installation (reference value according to § 9 EEG).
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip', 'rs485']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: false
+  - name: productionnominalmax
+    example:
+    default:
+    choice: []
+    unit: Wp
+    description: Installed generator power
+    help: Rated generator/module power of the installation (reference value according to § 9 EEG).
+    advanced: false
+    optional: false
+modbus:
+  baudrate: 9600
+  comset: 8N1
+  delay:
+  device: /dev/ttyUSB0
+  host:
+  id: 1
+  port: 1502
+  rs485serial: true
+  rs485tcpip: true
+  tcpip: true
+  timeout:

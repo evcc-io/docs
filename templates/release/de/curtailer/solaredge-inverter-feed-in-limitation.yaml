@@ -1,0 +1,64 @@
+template: solaredge
+product:
+  identifier: solaredge-inverter-feed-in-limitation
+  brand: SolarEdge
+  description: Wechselrichter (Einspeisebegrenzung)
+description: |
+  Nur ein System kann und darf zeitgleich eine Modbus TCP-Verbindung zum Wechselrichter haben!
+  Die Einspeisebegrenzung begrenzt die Netzeinspeisung am Netzanschlusspunkt auf den geforderten Prozentsatz der installierten Generatorleistung.
+
+render:
+  - default: |
+      type: template
+      template: solaredge
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 1
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 1
+      host:  # Hostname
+      port: 1502 # Port
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 1502 # Port
+      productionnominalmax: # Installierte Generatorleistung (Wp), Gesamtnennleistung bzw. Modul- oder Generatorleistung der Anlage (Bezugsgröße nach § 9 EEG).
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip', 'rs485']
+    unit:
+    description: Modbus Typ
+    help:
+    advanced: false
+    optional: false
+  - name: productionnominalmax
+    example:
+    default:
+    choice: []
+    unit: Wp
+    description: Installierte Generatorleistung
+    help: Gesamtnennleistung bzw. Modul- oder Generatorleistung der Anlage (Bezugsgröße nach § 9 EEG).
+    advanced: false
+    optional: false
+modbus:
+  baudrate: 9600
+  comset: 8N1
+  delay:
+  device: /dev/ttyUSB0
+  host:
+  id: 1
+  port: 1502
+  rs485serial: true
+  rs485tcpip: true
+  tcpip: true
+  timeout:
