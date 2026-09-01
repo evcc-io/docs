@@ -1,0 +1,77 @@
+template: viessmann
+product:
+  identifier: viessmann-heatpump-api
+  brand: Viessmann
+  description: Heatpump (API)
+  group: Heating devices
+requirements: ["skiptest"]
+description: |
+  One-time hot water preparation. The device automatically decides whether to use the heat pump or the auxiliary electric heater (if available).
+
+  Optionally, power and temperature readings can be enabled. This requires data points of the One Base/E3 device generation (e.g. Vitocal 25x, tested with a Vitocal 250-A). Which data points a device provides is device-specific and can be inspected via the [Viessmann API](https://developer.viessmann-climatesolutions.com/) feature endpoint of the installation. The "Read power and temperature values" option is pre-set automatically after login if the device provides the data points.
+
+render:
+  - default: |
+      type: template
+      template: viessmann
+      clientid: # Client ID, Configure at [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
+      redirecturi: # Redirect URI, Redirect URI of the evcc instance. Must match the redirect URI set in the Viessmann developer portal.
+      gateway_serial: # Gateway Serial, Determined automatically after login. Alternatively enter manually (ViCare app -> Settings -> Communication module -> Serial number)
+      installation_id: # Installation ID, Determined automatically after login.  <details><summary>Fallback: determine the installation id on the command line</summary>  Prerequisites: curl, jq, and the following parameters:  ``` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> ```  Then execute the following to get an oauth token (n.b. it's best to paste the entire block as-is, since the intermediate 'CODE' is only valid for 20 seconds):  ``` VIESSMANN_REDIRECT_URI=<your-redirect-uri> VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed 's/.*\?code=\(.*\).*/\1/' \   | tr -d '[:space:]')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann-climatesolutions.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) ```  Finally, get the installation id:  ``` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann-climatesolutions.com/iot/v2/equipment/installations?includeGateways=true \   | jq '.data[].id' ```  </details>
+      device_id: 0 # Device ID, typically `0`
+      measurements: # Read power and temperature values, Reads the current electrical power consumption and the domestic hot water temperature. Pre-set automatically after login based on the data points the device reports (One Base/E3 generation, e.g. Vitocal 25x). Disabled by default so existing installations are unchanged on upgrade. (optional)
+params:
+  - name: clientid
+    example:
+    default:
+    choice: []
+    unit:
+    description: Client ID
+    help: Configure at [app.developer.viessmann-climatesolutions.com](https://app.developer.viessmann-climatesolutions.com)
+    advanced: false
+    optional: false
+  - name: redirecturi
+    example:
+    default:
+    choice: []
+    unit:
+    description: Redirect URI
+    help: Redirect URI of the evcc instance. Must match the redirect URI set in the Viessmann developer portal.
+    advanced: false
+    optional: false
+  - name: gateway_serial
+    example:
+    default:
+    choice: []
+    unit:
+    description: Gateway Serial
+    help: Determined automatically after login. Alternatively enter manually (ViCare app -> Settings -> Communication module -> Serial number)
+    advanced: false
+    optional: false
+  - name: installation_id
+    example:
+    default:
+    choice: []
+    unit:
+    description: Installation ID
+    help: 'Determined automatically after login.  <details><summary>Fallback: determine the installation id on the command line</summary>  Prerequisites: curl, jq, and the following parameters:  ``` VIESSMANN_USER=<your-user> VIESSMANN_PASS=<your-password> VIESSMANN_CLIENT_ID=<your-clientid> ```  Then execute the following to get an oauth token (n.b. it''s best to paste the entire block as-is, since the intermediate ''CODE'' is only valid for 20 seconds):  ``` VIESSMANN_REDIRECT_URI=<your-redirect-uri> VIESSMANN_CODE_CHALLENGE="5M5nhkBfkWZCGfLZYcTL-l7esjPUN7PpZ4rq8k4cmys" VIESSMANN_CODE_VERIFIER="6PygdmeK8JKPuuftlkc6q4ceyvjhMM_a_cJrPbcmcLc-SPjx2ZXTYr-SOofPUBydQ3McNYRy7Hibc2L2WtVLJFpOQ~Qbgic455ArKjUz9_UiTLnO6q8A3e.I_fIF8hAo"  VIESSMANN_CODE=$(curl -X POST --silent \   --user $VIESSMANN_USER:$VIESSMANN_PASS \   --output /dev/null \   --dump-header -    \   "https://iam.viessmann-climatesolutions.com/idp/v3/authorize?client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&scope=IoT%20User%20offline_access&response_type=code&code_challenge=$VIESSMANN_CODE_CHALLENGE&code_challenge_method=S256" \   | grep "^location: "            \   | sed ''s/.*\?code=\(.*\).*/\1/'' \   | tr -d ''[:space:]'')  TOKEN_RESPONSE=$(curl -XPOST --silent \   -H "Content-Type: application/x-www-form-urlencoded" \   --data "grant_type=authorization_code&client_id=$VIESSMANN_CLIENT_ID&redirect_uri=$VIESSMANN_REDIRECT_URI&code_verifier=$VIESSMANN_CODE_VERIFIER&code=$VIESSMANN_CODE" \   https://iam.viessmann-climatesolutions.com/idp/v3/token)  VIESSMANN_TOKEN=$(echo $TOKEN_RESPONSE | jq --raw-output .access_token) ```  Finally, get the installation id:  ``` curl --silent -H "Authorization: Bearer $VIESSMANN_TOKEN" \   https://api.viessmann-climatesolutions.com/iot/v2/equipment/installations?includeGateways=true \   | jq ''.data[].id'' ```  </details>'
+    advanced: false
+    optional: false
+  - name: device_id
+    example:
+    default: 0
+    choice: []
+    unit:
+    description: Device ID
+    help: typically `0`
+    advanced: false
+    optional: false
+  - name: measurements
+    example:
+    default:
+    choice: []
+    unit:
+    description: Read power and temperature values
+    help: Reads the current electrical power consumption and the domestic hot water temperature. Pre-set automatically after login based on the data points the device reports (One Base/E3 generation, e.g. Vitocal 25x). Disabled by default so existing installations are unchanged on upgrade.
+    advanced: false
+    optional: true
