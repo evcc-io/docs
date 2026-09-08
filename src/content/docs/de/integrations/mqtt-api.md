@@ -81,7 +81,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: Netz-Residualleistung
 - `evcc/site/batteryGridChargeLimit`: Preisschwelle für Netzladen
 - `evcc/site/batteryDischargeControl`: Entladeregelung aktivieren/deaktivieren (true/false)
-- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `hold`, `charge`) – steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi, wird nach 60 s zurückgesetzt
+- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `hold`, `charge`, `holdcharge`) – steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi, wird nach 60 s zurückgesetzt
 - `evcc/site/smartCostLimit`: Smart-Cost-Limit für alle Ladepunkte
 - `evcc/site/smartFeedInPriorityLimit`: Einspeise-Prioritäts-Limit für alle Ladepunkte
 
