@@ -34,6 +34,8 @@ All loadpoint IDs begin at `1`.
 - `evcc/loadpoints/<id>/connected`: vehicle connected (true/false)
 - `evcc/loadpoints/<id>/charging`: currently charging (true/false)
 - `evcc/loadpoints/<id>/enabled`: charger enabled (true/false)
+- `evcc/loadpoints/<id>/mode`: charge mode (`off`, `smart`, `now`)
+- `evcc/loadpoints/<id>/alwaysCharge`: always charge option (`off`, `on`, `once`)
 - `evcc/loadpoints/<id>/chargePower`: current charge power (W)
 - `evcc/loadpoints/<id>/chargedEnergy`: energy charged in session (Wh)
 - `evcc/loadpoints/<id>/chargeDuration`: charge duration (ns)
@@ -87,7 +89,8 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 
 ### Loadpoints
 
-- `evcc/loadpoints/<id>/mode`: charge mode
+- `evcc/loadpoints/<id>/mode`: charge mode (`off`, `smart`, `now`)
+- `evcc/loadpoints/<id>/alwaysCharge`: always charge option (`off`, `on`, `once`) — only in smart mode
 - `evcc/loadpoints/<id>/minSoc`: minimum SoC
 - `evcc/loadpoints/<id>/limitSoc`: limit SoC in % — only applicable for online vehicles
 - `evcc/loadpoints/<id>/limitEnergy`: limit energy in kWh — only applicable for offline vehicles

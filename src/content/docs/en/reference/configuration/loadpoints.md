@@ -13,7 +13,7 @@ loadpoints:
   - title: Garage # display name for UI
     charger: charger # charger reference
     vehicle: audi # reference to standard vehicle
-    mode: pv # charge mode (off, now, minpv, pv)
+    mode: smart # charge mode (off, smart, now)
 ```
 
 References always correspond to the values of the `name` parameter (e.g., `charger`) in the respective device configuration.
@@ -92,11 +92,19 @@ With the `mode` parameter, you can specify the charging mode that should be used
 **Possible values**:
 
 - `off`: Charging is stopped, even if a vehicle is connected to the charger.
+- `smart`: Charge using solar surplus, cheap hours of a dynamic tariff and charging plans. Pause if no cheap energy is available.
 - `now`: Start charging immediately at the maximum possible power.
-- `minpv`: Start charging immediately at the minimum possible power. If sufficient PV surplus is available, charge faster.
-- `pv`: Charge only using PV surplus and pause if there isn't enough power available.
 
-**Default value:** `pv`
+**Default value:** `smart`
+
+The deprecated values `pv` and `minpv` are still accepted when writing:
+`pv` activates `smart` and turns [Always charge](/en/features/solar-charging#always-charge) off, `minpv` activates `smart` and turns Always charge on.
+
+:::caution[Breaking change]
+State and API reads (`/api/state`, websocket, MQTT) report `smart` instead of `pv`; `minpv` no longer appears on the read path.
+External automations that compare against `pv` or `minpv` when reading need updating.
+Integrations can detect the new mode schema via the presence of `loadpoints[].alwaysCharge` in `/api/state`.
+:::
 
 :::note
 In general, an EV requires a minimum of 1.4 kW power per phase for charging. With chargers and vehicles that communicate via the ISO15118 standard, a total of at least 1.4 kW power is needed regardless of the number of phases used for charging.
@@ -105,7 +113,7 @@ In general, an EV requires a minimum of 1.4 kW power per phase for charging. Wit
 **For example**:
 
 ```yaml
-mode: pv
+mode: smart
 ```
 
 ---
@@ -183,7 +191,7 @@ estimate: false # No interpolation
 
 ### `enable`
 
-Defines the behaviour of starting charging in PV mode. Additionally, it defines the behaviour during automatic phase switching from 1p to 3p.
+Defines the behaviour of starting charging on solar surplus in smart mode. Additionally, it defines the behaviour during automatic phase switching from 1p to 3p.
 
 **For example**:
 
@@ -231,7 +239,7 @@ delay: 1m
 
 ### `disable`
 
-Defines the behaviour of stopping charging in PV mode. Additionally, it defines the behaviour during automatic phase switching from 3p to 1p.
+Defines the behaviour of stopping charging on solar surplus in smart mode. Additionally, it defines the behaviour during automatic phase switching from 3p to 1p.
 
 **For example**:
 
@@ -287,7 +295,7 @@ This value can now be set in the charging point settings dialog.
 
 Defines the number of phases with which the charger is connected.
 
-This parameter does not change the physical connection of the charger but is used to determine the minimum starting power for charging in PV mode (in combination with `minCurrent`).
+This parameter does not change the physical connection of the charger but is used to determine the minimum starting power for charging on solar surplus (in combination with `minCurrent`).
 
 Recently, the incoming voltages are evaluated if the charger's meter provides them. Based on the voltages, the `phases` value is automatically changed via API. In cases where the charger is set to 1p or 3p using a switch, manual changes to the `phases` value are no longer necessary.
 
@@ -343,7 +351,7 @@ Higher values indicate higher priority. Loadpoints without an entry have `priori
 
 When multiple loadpoints are present, this parameter doesn't influence the order in which the charging sessions are started. However, if a lower-priority loadpoint is charging, a higher-priority one might be switched on if it is given access to the unused charging power.
 
-This prioritisation works in `pv` and `minpv` modes. In `minpv` mode, charging is not interrupted, only reduced to the minimum.
+This prioritisation works in `smart` mode. With [Always charge](/en/features/solar-charging#always-charge) active, charging is not interrupted, only reduced to the minimum.
 
 :::note
 If a vehicle has a priority defined, it overrides the priority of the loadpoint it is connected to.

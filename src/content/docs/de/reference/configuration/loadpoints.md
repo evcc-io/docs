@@ -13,7 +13,7 @@ loadpoints:
   - title: Garage # display name for UI
     charger: wallbox # Wallbox Referenz
     vehicle: audi # Referenz auf Standardfahrzeug
-    mode: pv # charge mode (off, now, minpv, pv)
+    mode: smart # Lademodus (off, smart, now)
 ```
 
 Referenzen sind hierbei immer die Werte des Parameters `name` (z. B. `wallbox`) in der jeweiligen Gerätekonfiguration.
@@ -93,11 +93,19 @@ Mit dem optionalen Parameter `mode` kann der Lademodus eingestellt werden, der n
 **Mögliche Werte**:
 
 - `off`: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
+- `smart`: Lade mit PV-Überschuss, in den günstigen Stunden eines dynamischen Tarifs und nach Ladeplan. Pausiere, wenn keine günstige Energie verfügbar ist.
 - `now`: Lade sofort mit der maximal möglichen Leistung.
-- `minpv`: Lade sofort mit der minimal möglichen Leistung. Falls genug PV-Überschuss vorhanden ist, lade schneller.
-- `pv`: Lade nur mit PV-Überschuss und pausiere wenn nicht genug Leistung verfügbar ist.
 
-**Standardwert:** `pv`
+**Standardwert:** `smart`
+
+Die veralteten Werte `pv` und `minpv` werden beim Schreiben weiterhin akzeptiert:
+`pv` aktiviert `smart` und schaltet [Dauerhaft laden](/de/features/solar-charging#always-charge) aus, `minpv` aktiviert `smart` und schaltet Dauerhaft laden ein.
+
+:::caution[Breaking Change]
+Status- und API-Lesezugriffe (`/api/state`, Websocket, MQTT) melden `smart` statt `pv`; `minpv` taucht beim Lesen nicht mehr auf.
+Externe Automatisierungen, die beim Lesen mit `pv` oder `minpv` vergleichen, müssen angepasst werden.
+Integrationen erkennen das neue Modus-Schema am Vorhandensein von `loadpoints[].alwaysCharge` in `/api/state`.
+:::
 
 :::note
 Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren, wird insgesamt mindestens 1,4kW Leistung benötigt, egal mit wievielen Phasen geladen wird.
@@ -106,7 +114,7 @@ Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. B
 **Beispiel**:
 
 ```yaml
-mode: pv
+mode: smart
 ```
 
 ---
@@ -188,7 +196,7 @@ estimate: false # Keine Extrapolation
 
 ### `enable`
 
-Definiert das Verhalten, wann im PV Modus das Laden begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.
+Definiert das Verhalten, wann im Smart-Modus das Laden mit PV-Überschuss begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.
 
 **Beispiel**:
 
@@ -236,7 +244,7 @@ delay: 1m
 
 ### `disable`
 
-Definiert das Verhalten, wann im PV Modus das Laden unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
+Definiert das Verhalten, wann im Smart-Modus das Laden mit PV-Überschuss unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
 
 **Beispiel**:
 
@@ -294,7 +302,7 @@ Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
 
 Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
 
-Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern dient lediglich dazu, im PV-Modus (in Verbindung mit `minCurrent`) die minimale Startleistung für die Ladung zu ermitteln.
+Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern dient lediglich dazu, beim Überschussladen (in Verbindung mit `minCurrent`) die minimale Startleistung für die Ladung zu ermitteln.
 
 Seit kurzem werden die anliegenden Spannungen ausgewertet, wenn der Zähler der Wallbox diese liefert. Anhand der Spannungen wird der `phases` Wert „automatisch“ per API geändert. In den Fällen in denen die Wallbox per „Lasttrennschalter“ auf 1p oder 3p eingestellt wird, ist somit keine manuelle Änderung des `phases` Wertes mehr notwendig.
 
@@ -351,7 +359,7 @@ Loadpoints ohne Eintrag haben `priority: 0`
 
 Hat bei mehreren Loadpoints keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Loadpoint, wird ein höher priorisierter unter Umständen eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird.
 
-Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
+Die Priorisierung wirkt im Modus `smart`. Bei aktivem [Dauerhaft laden](/de/features/solar-charging#always-charge) wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
 
 :::note
 Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist.
