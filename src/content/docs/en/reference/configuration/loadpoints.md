@@ -349,6 +349,43 @@ This prioritisation works in `pv` and `minpv` modes. In `minpv` mode, charging i
 If a vehicle has a priority defined, it overrides the priority of the loadpoint it is connected to.
 :::
 
+Loadpoints that share the **same** priority can be further sub-ordered 🧪.
+This is configured in the UI under **Configuration → Loadpoints → Priorities**.
+The dialog only appears when experimental features are enabled under **Configuration → Experimental** and at least two loadpoints are configured.
+These settings are not available in `evcc.yaml`; they are stored internally and survive restarts.
+
+**Strategy** decides which equal-priority loadpoint receives surplus power first:
+
+- `none` – "First wins" (default): no sub-ordering, whoever started charging first keeps the surplus.
+- `soc` – "Emptiest first": the vehicle with the lowest charge level is preferred.
+- `deficit` – "Biggest need first": the vehicle furthest from its charging limit (`limitSoc − soc`) is preferred.
+
+**Basis** determines how the gap between vehicles is measured:
+
+- `percent` (default): compare by charge level in percent.
+- `energy`: scale the percentage gap by the vehicle's [`capacity`](/en/reference/configuration/vehicles#capacity), so loadpoints are compared by **absolute energy demand (kWh)**. This avoids preferring a small second battery just because its percentage is lower, even though it needs less energy than a larger one (a 25 kWh car at 40 % needs less energy than a 75 kWh car at 50 %). When any compared vehicle has no known capacity – including loadpoints without a vehicle or chargers reporting the charge level themselves – all loadpoints are compared by percent instead. evcc logs this fallback and publishes the basis actually in use, so the UI labels the hysteresis field with the correct unit.
+
+**Hysteresis** is a deadband from `0` to `99`.
+An equal-priority loadpoint only overtakes another when it is ahead by **more** than this value.
+This prevents two nearly equally charged vehicles from constantly swapping ranks; instead they tie and share the available surplus.
+The unit follows the basis: soc percentage points with `percent` (default) and kWh with `energy`.
+When the `energy` basis falls back to the percent comparison (see above), the deadband is read in percentage points as well.
+`0` (default) disables the deadband.
+Basis and hysteresis have no effect with strategy `none`.
+
+:::note[Heating]
+Heating loadpoints (e.g. a heat pump) are excluded from this sub-ordering.
+Their soc value holds a temperature, not a charge level, so "emptiest first" would compare unrelated quantities.
+They keep their plain `priority` ranking.
+Put heaters on their own `priority` if you want them ahead of or behind your vehicles; priorities across tiers are unaffected by this sub-ordering.
+:::
+
+A loadpoint whose vehicle charge level is unknown also keeps its plain `priority` rank.
+A vehicle reporting 0 % counts as unknown here, so it ties with a fully charged one instead of being charged first.
+
+These values can also be set via the API: `POST /api/prioritystrategy/{none|soc|deficit}`, `POST /api/prioritybasis/{percent|energy}` and `POST /api/priorityhysteresis/{0..99}`.
+The same topics are available via MQTT (`priorityStrategy`, `priorityBasis`, `priorityHysteresis`) and the active values are published in the state.
+
 **Default value:** `0`
 
 **For example**:

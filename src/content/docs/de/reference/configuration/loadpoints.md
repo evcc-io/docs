@@ -357,6 +357,43 @@ Die Priorisierung wirkt in den Modi `pv` und `minpv`. Bei `minpv` wird die Ladun
 Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist.
 :::
 
+Loadpoints mit der **gleichen** Priorität können zusätzlich untereinander gereiht werden 🧪.
+Die Konfiguration erfolgt in der UI unter **Konfiguration → Ladepunkte → Prioritäten**.
+Der Dialog erscheint nur, wenn unter **Konfiguration → Experimentell** die experimentellen Funktionen aktiviert sind und mindestens zwei Ladepunkte konfiguriert sind.
+Diese Einstellungen sind nicht in der `evcc.yaml` verfügbar; sie werden intern gespeichert und bleiben über Neustarts erhalten.
+
+**Strategie** bestimmt, welcher gleichrangige Ladepunkt den Überschuss zuerst erhält:
+
+- `none` – "Wer zuerst kommt" (Standard): keine Unterordnung, wer zuerst mit dem Laden beginnt, behält den Überschuss.
+- `soc` – "Leerstes zuerst": das Fahrzeug mit dem niedrigsten Ladestand wird bevorzugt.
+- `deficit` – "Größter Bedarf zuerst": das Fahrzeug mit dem größten Abstand zum Ladeziel (`limitSoc − soc`) wird bevorzugt.
+
+**Basis** legt fest, wie der Abstand zwischen den Fahrzeugen gemessen wird:
+
+- `percent` (Standard): Vergleich anhand des Ladestands in Prozent.
+- `energy`: Skaliert den Prozent-Abstand mit der Fahrzeug-[`capacity`](/de/reference/configuration/vehicles#capacity), sodass Ladepunkte nach **absolutem Energiebedarf (kWh)** verglichen werden. Dies verhindert, dass ein kleiner zweiter Akku allein aufgrund seines niedrigeren Prozentsatzes bevorzugt wird, obwohl er weniger Energie benötigt als ein größerer (ein 25-kWh-Auto bei 40 % braucht weniger Energie als ein 75-kWh-Auto bei 50 %). Hat ein verglichenes Fahrzeug keine bekannte Kapazität – etwa Ladepunkte ohne Fahrzeug oder Wallboxen, die den Ladestand selbst melden – werden stattdessen alle Ladepunkte nach Prozent verglichen. evcc protokolliert diesen Rückfall und veröffentlicht die tatsächlich verwendete Basis, damit das Hysterese-Feld in der UI mit der richtigen Einheit beschriftet ist.
+
+**Hysterese** ist eine Totband von `0` bis `99`.
+Ein gleichrangiger Ladepunkt überholt einen anderen nur, wenn er um **mehr** als diesen Wert voraus ist.
+Dies verhindert, dass zwei nahezu gleich geladene Fahrzeuge ständig die Plätze tauschen; stattdessen gelten sie als gleichauf und teilen sich den verfügbaren Überschuss.
+Die Einheit folgt der Basis: soc-Prozentpunkte bei `percent` (Standard) und kWh bei `energy`.
+Fällt die `energy`-Basis auf den Prozentvergleich zurück (siehe oben), wird auch das Totband in Prozentpunkten gelesen.
+`0` (Standard) deaktiviert das Totband.
+Basis und Hysterese haben bei der Strategie `none` keine Wirkung.
+
+:::note[Heizung]
+Heizungs-Ladepunkte (z. B. eine Wärmepumpe) sind von dieser Unterordnung ausgeschlossen.
+Ihr soc-Wert enthält eine Temperatur, keinen Ladestand – "das Leerste zuerst" würde also unvergleichbare Größen gegenüberstellen.
+Sie behalten ihre reine `priority`-Einstufung.
+Gib Heizungen eine eigene `priority`, wenn sie vor oder hinter den Fahrzeugen liegen sollen; Prioritäten über verschiedene Stufen hinweg bleiben von dieser Unterordnung unberührt.
+:::
+
+Ein Ladepunkt mit unbekanntem Fahrzeug-Ladestand behält ebenfalls seine reine `priority`-Einstufung.
+Ein Fahrzeug, das 0 % meldet, gilt hier als unbekannt und liegt damit gleichauf mit einem vollen Fahrzeug, statt zuerst geladen zu werden.
+
+Die Werte können auch über die API gesetzt werden: `POST /api/prioritystrategy/{none|soc|deficit}`, `POST /api/prioritybasis/{percent|energy}` und `POST /api/priorityhysteresis/{0..99}`.
+Dieselben Topics stehen per MQTT zur Verfügung (`priorityStrategy`, `priorityBasis`, `priorityHysteresis`); die aktiven Werte werden im State veröffentlicht.
+
 **Standardwert:** `0`
 
 **Beispiel**:
