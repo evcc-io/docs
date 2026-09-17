@@ -56,6 +56,7 @@ export const CODE_PREAMBLES: Record<string, string> = {
   charge: "meters:\n    - name: my_charger",
   aux: "meters:\n    - name: my_aux",
   price: "tariffs:\n    grid:",
+  feedin: "tariffs:\n    feedin:",
   co2: "tariffs:\n    co2:",
   solar: "tariffs:\n    solar:",
   temperature: "tariffs:\n    temperature:",
@@ -129,6 +130,7 @@ export interface DeviceEntry {
     requirements?: string[];
     caveats?: Array<{ description?: string; link?: string }>;
     countries?: string[];
+    usages?: string[];
   };
 }
 
@@ -408,7 +410,10 @@ export function buildCodeBlocks(
   }
   if (type === "tariff") {
     const groupKey = TARIFF_GROUPS[entry.data.product.group ?? ""] ?? "price";
-    const preamble = CODE_PREAMBLES[groupKey];
+    const usages = entry.data.usages ?? [];
+    const feedinOnly =
+      groupKey === "price" && usages.length === 1 && usages[0] === "feedin";
+    const preamble = CODE_PREAMBLES[feedinOnly ? "feedin" : groupKey];
     const list = groupKey === "solar";
     return render.map((r) => {
       const src = r.advanced ?? r.default;
