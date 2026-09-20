@@ -1,6 +1,7 @@
 ---
 date: 2021-12-10
 title: "Version 0.72"
+description: "Release notes for evcc 0.72 from December 2021 with simplified installation guides and the new interactive setup wizard evcc configure."
 authors: [derandereandi]
 tags: [release]
 prev: false

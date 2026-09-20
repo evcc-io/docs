@@ -1,6 +1,7 @@
 ---
 date: 2021-12-12
 title: "Version 0.73"
+description: "Release Notes zu evcc 0.73 vom Dezember 2021 mit Verbesserungen am Assistenten evcc configure, fahrzeugspezifischen Ladevorgaben und erster Standort-Erkennung."
 authors: [derandereandi]
 tags: [release]
 prev: false

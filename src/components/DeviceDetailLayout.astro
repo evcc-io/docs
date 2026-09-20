@@ -5,7 +5,13 @@ import DeviceFeatures from "@components/DeviceFeatures.astro";
 import DeviceParams from "@components/DeviceParams.astro";
 import SponsorshipBadge from "@components/SponsorshipBadge.astro";
 import NightlyIcon from "@components/NightlyIcon.astro";
-import { renderMarkdown, renderMarkdownInline, nightlyPageHead } from "@utils/devices";
+import {
+  renderMarkdown,
+  renderMarkdownInline,
+  nightlyPageHead,
+  deviceTitle,
+  plainText,
+} from "@utils/devices";
 import type { Channel } from "@utils/devices";
 import { deviceIconSvg } from "@utils/deviceIcon";
 
@@ -45,10 +51,7 @@ const {
 
 const isNightly = channel === "nightly";
 
-const product = entry.data.product;
-const title = product.brand
-  ? `${product.brand} ${product.description ?? ""}`.trim()
-  : product.description || entry.id;
+const title = deviceTitle(entry);
 const requiresSponsorship = entry.data.requirements?.includes("sponsorship");
 const isSponsorFree = !requiresSponsorship && features.includes("sponsorfree");
 const iconSvg = await deviceIconSvg(type, entry.id);
@@ -95,13 +98,27 @@ const nightlyBannerText =
       ? `This page shows the <strong>nightly version</strong>. Switch to the <a href="${counterpartHref}">release version</a>.`
       : `This page shows the <strong>nightly version</strong>. There is no release version yet.`;
 
+// Release pages have a markdown twin at the same URL + ".md" (see
+// src/pages/[lang]/*/[slug].md.ts); advertise it like the docs pages do.
+const markdownAlternate = [
+  {
+    tag: "link" as const,
+    attrs: {
+      rel: "alternate",
+      type: "text/markdown",
+      href: `/${lang}/${type}/${entry.id}.md`,
+    },
+  },
+];
+
 const frontmatter = {
   title,
-  description: entry.data.description,
+  description: plainText(entry.data.description),
   template: "doc",
   editUrl,
   tableOfContents: false,
-  ...(isNightly ? { pagefind: false, head: nightlyPageHead } : {}),
+  head: isNightly ? nightlyPageHead : markdownAlternate,
+  ...(isNightly ? { pagefind: false } : {}),
 };
 ---
 

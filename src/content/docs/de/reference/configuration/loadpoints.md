@@ -1,5 +1,6 @@
 ---
 title: "loadpoints"
+description: "Ladepunkte in der evcc.yaml einrichten: Wallbox, Zähler und Fahrzeug verknüpfen, den Standardmodus wählen und Abfrage, Schwellwerte und Phasen anpassen."
 sidebar:
   order: 3
 ---

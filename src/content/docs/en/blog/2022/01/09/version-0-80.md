@@ -1,6 +1,7 @@
 ---
 date: 2022-01-09
 title: "Version 0.80"
+description: "Release notes for evcc 0.80 from January 2022 with improvements to evcc configure, a new solar share and savings dialog and Docker latest and nightly tags."
 authors: [derandereandi, naltatis]
 tags: [release]
 prev: false

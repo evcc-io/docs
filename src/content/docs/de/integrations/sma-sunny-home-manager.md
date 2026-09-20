@@ -1,5 +1,6 @@
 ---
 title: "Sunny Home Manager"
+description: "Erklärt, wie evcc seine Ladepunkte für einen SMA Sunny Home Manager 2.0 im Sunny Portal sichtbar macht und ihn optional die Ladeleistung beeinflussen lässt."
 sidebar:
   order: 5
 ---

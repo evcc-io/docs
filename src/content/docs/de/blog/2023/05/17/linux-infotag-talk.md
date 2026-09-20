@@ -1,6 +1,7 @@
 ---
 date: 2023-05-17
 title: "evcc auf dem 19. Linux Infotag"
+description: "Im Mai 2023 haben wir Video-Aufzeichnung und Folien unseres Vortrags über evcc auf dem 19. Linux Infotag der Linux User Group Augsburg veröffentlicht."
 authors: [naltatis]
 tags: [talk]
 prev: false

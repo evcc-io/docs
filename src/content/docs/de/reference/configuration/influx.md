@@ -1,5 +1,6 @@
 ---
 title: "influx"
+description: "Ladedaten per evcc.yaml an InfluxDB 1.8, InfluxDB 2 oder VictoriaMetrics schreiben, auch über HTTPS mit selbstsigniertem Zertifikat."
 sidebar:
   order: 16
 ---

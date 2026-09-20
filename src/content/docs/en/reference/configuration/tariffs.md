@@ -1,5 +1,6 @@
 ---
 title: "tariffs"
+description: "How to configure grid, feed-in, CO₂ and solar forecast tariffs in evcc.yaml for savings statistics, smart charging plans and time-based grid fees."
 sidebar:
   order: 12
 ---

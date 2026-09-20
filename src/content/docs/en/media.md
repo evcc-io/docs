@@ -1,5 +1,6 @@
 ---
 title: "Talks, Videos & Blogs"
+description: "Collects videos, conference talks, podcasts and blog posts from the community that show how to set up evcc and tell the story behind the project."
 ---
 
 Beyond the official documentation there are lots of good, hands-on introduction and tutorial videos.

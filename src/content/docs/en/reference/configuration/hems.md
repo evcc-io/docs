@@ -1,5 +1,6 @@
 ---
 title: "hems"
+description: "How to configure external limits for consumption and feed-in in evcc.yaml, e.g. for § 14a EnWG or § 9 EEG, via relay, FNN control box or EEBus."
 sidebar:
   order: 8
 ---

@@ -1,5 +1,6 @@
 ---
 title: "curtailers"
+description: "Einspeisebegrenzer in der evcc.yaml anlegen, die die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers drosseln, und wann du einen brauchst."
 sidebar:
   order: 6
 ---

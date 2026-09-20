@@ -1,5 +1,6 @@
 ---
 title: "Web UI"
+description: "Jede Seite der Weboberfläche hat eine eigene URL zum Verlinken oder als Lesezeichen, und Einstellungen wie Design, Sprache oder Einheiten lassen sich per URL setzen."
 sidebar:
   order: 3
 ---

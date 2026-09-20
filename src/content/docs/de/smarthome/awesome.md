@@ -1,5 +1,6 @@
 ---
 title: "More Awesome Projects"
+description: "Listet Projekte aus der Community rund um evcc auf, etwa Grafana-Dashboards, eine Home-Assistant-Karte, ein E-Ink-Display, einen LED-Ring und eine macOS-Menüleisten-App."
 ---
 
 Die evcc-Community ist kreativ.

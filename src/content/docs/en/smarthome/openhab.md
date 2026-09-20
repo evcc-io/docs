@@ -1,5 +1,6 @@
 ---
 title: "openHAB"
+description: "Shows how to bring your evcc instance into openHAB with the official evcc binding, which discovers charging points, vehicles and site data, or via MQTT instead."
 ---
 
 [openHAB](https://www.openhab.org) is an open-source smart home platform that connects devices and services from many manufacturers.

@@ -1,5 +1,6 @@
 ---
 title: "Web UI"
+description: "Every page of the web UI has its own URL you can bookmark or link to, and display settings such as theme, language or units can be applied via URL parameters."
 sidebar:
   order: 3
 ---

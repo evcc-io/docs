@@ -1,5 +1,6 @@
 ---
 title: "sponsortoken"
+description: "Where to enter your sponsor token from sponsor.evcc.io in evcc.yaml, and why entering it in the web interface is usually the better choice."
 sidebar:
   order: 17
 ---

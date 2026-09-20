@@ -1,6 +1,7 @@
 ---
 date: 2022-05-08
 title: "Phase handling, Templates and Lithuanian"
+description: "Release roundup for evcc 0.81 to 0.91 from May 2022 with many new wallboxes and vehicles, improved phase switching, device templates and a Lithuanian UI."
 authors: [naltatis]
 tags: [release]
 prev: false

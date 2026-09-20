@@ -1,5 +1,6 @@
 ---
 title: "ioBroker"
+description: "Zeigt, wie du ioBroker mit deiner evcc-Instanz verbindest, entweder über den Community-Adapter ioBroker.evcc per REST-API oder über einen gemeinsamen MQTT-Broker."
 ---
 
 [ioBroker](https://www.iobroker.net) ist eine Open-Source-Smart-Home-Plattform, die Geräte und Dienste über Adapter einbindet.

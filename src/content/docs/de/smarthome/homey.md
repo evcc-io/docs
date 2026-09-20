@@ -1,5 +1,6 @@
 ---
 title: "Homey"
+description: "Die Community-App evcc für Homey stellt Ladepunkte, Anlage und Hausbatterie als Geräte bereit und lässt Flows den Lademodus und Limits im lokalen Netz steuern."
 ---
 
 [Homey](https://homey.app) ist ein Smart-Home-Hub, der Geräte vieler Hersteller verbindet und über Flows automatisiert.
