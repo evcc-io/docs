@@ -1,6 +1,7 @@
 ---
 date: 2021-12-19
 title: "Version 0.74"
+description: "Release notes for evcc 0.74 from December 2021, which shows the running timers for solar mode and phase switching in the UI and brings back target charging."
 authors: [derandereandi]
 tags: [release]
 prev: false

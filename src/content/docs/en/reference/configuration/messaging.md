@@ -1,5 +1,6 @@
 ---
 title: "messaging"
+description: "How to set up notifications in evcc.yaml: which charging events trigger a message, how to write message templates and which services can deliver them."
 sidebar:
   order: 13
 ---

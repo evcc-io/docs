@@ -1,6 +1,7 @@
 ---
 date: 2023-01-11
 title: "Version 0.111"
+description: "Release notes for evcc 0.111 from January 2023 with a smarter charging planner that uses dynamic prices from awattar and Tibber, manual tariffs and CO₂ data."
 authors: [naltatis]
 tags: [release]
 prev: false

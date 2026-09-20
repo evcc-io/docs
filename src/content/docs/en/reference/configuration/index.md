@@ -1,5 +1,6 @@
 ---
 title: "Configuration"
+description: "Overview of file-based configuration with evcc.yaml: where the file lives, how it is structured and which sections describe your site and devices."
 sidebar:
   order: 1
 ---

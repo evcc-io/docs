@@ -1,5 +1,6 @@
 ---
 title: "mqtt"
+description: "So verbindest du deine evcc-Instanz per evcc.yaml mit einem MQTT-Broker, mit oder ohne TLS, inklusive Client-Zertifikaten und eigenem Topic."
 sidebar:
   order: 15
 ---

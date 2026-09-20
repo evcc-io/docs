@@ -1,5 +1,6 @@
 ---
 title: "ioBroker"
+description: "Shows how to connect ioBroker to your evcc instance, either with the community ioBroker.evcc adapter over the REST API or by sharing an MQTT broker."
 ---
 
 [ioBroker](https://www.iobroker.net) is an open-source smart home platform that integrates devices and services via adapters.

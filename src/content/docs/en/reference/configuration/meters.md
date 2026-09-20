@@ -1,5 +1,6 @@
 ---
 title: "meters"
+description: "How to define meters in evcc.yaml for grid, solar, home battery and consumers, which sign convention applies and which meter types are available."
 sidebar:
   order: 5
 ---

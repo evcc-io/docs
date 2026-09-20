@@ -493,3 +493,148 @@ export function buildMeterTabs(entry: DeviceEntry, lang: "de" | "en") {
     };
   });
 }
+
+/* ---------------------------------------------------------------------------
+ * Markdown twins for device pages (served at /{lang}/{type}/{slug}.md) so
+ * LLM agents get the same content as the HTML page without the chrome.
+ * ------------------------------------------------------------------------- */
+
+export type DeviceKind =
+  | "charger"
+  | "meter"
+  | "vehicle"
+  | "smartswitch"
+  | "heating"
+  | "tariff"
+  | "hems"
+  | "messenger"
+  | "curtailer";
+
+/** Page title of a device: "Brand Model", falling back to the template id. */
+export function deviceTitle(entry: DeviceEntry): string {
+  const product = entry.data.product;
+  return product.brand
+    ? `${product.brand} ${product.description ?? ""}`.trim()
+    : product.description || entry.id;
+}
+
+/** First line of a markdown snippet as plain text (for <meta description>). */
+export function plainText(md: string | undefined | null): string | undefined {
+  if (!md) return undefined;
+  return (
+    md
+      .split("\n")
+      .map((l) => l.trim())
+      .find(Boolean)
+      ?.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/[`*_]/g, "") || undefined
+  );
+}
+
+const t = (lang: "de" | "en", de: string, en: string) =>
+  lang === "de" ? de : en;
+
+function localized(
+  v: string | Record<string, string> | null | undefined,
+  lang: "de" | "en",
+): string {
+  if (v == null) return "";
+  return typeof v === "string" ? v : (v[lang] ?? v.en ?? v.de ?? "");
+}
+
+export function deviceMarkdown(
+  entry: DeviceEntry,
+  lang: "de" | "en",
+  type: string,
+  kind: DeviceKind,
+): string {
+  const url = `https://docs.evcc.io/${lang}/${type}/${entry.id}`;
+  const features = featuresFor(kind, entry, lang).filter(
+    (f) => f !== "sponsorfree",
+  );
+  const codeBlocks =
+    kind === "meter"
+      ? buildMeterTabs(entry, lang).map((tab) => tab.code)
+      : buildCodeBlocks(entry, kind);
+  // ponytail: modbus meta-param is listed as-is; the YAML block below shows
+  // the concrete connection variants, which is what an agent needs anyway.
+  const params = ((entry.data as any).params ?? []).filter(
+    (p: any) => p.name && !p.deprecated,
+  );
+
+  const out: string[] = [`# ${deviceTitle(entry)}`, ""];
+  out.push(`${t(lang, "Quelle", "Source")}: ${url}`, "");
+  if (entry.data.description) out.push(entry.data.description.trim(), "");
+  if (features.length) {
+    out.push(
+      `${t(lang, "Unterstützte Funktionen", "Supported features")}: ${features.join(", ")}`,
+      "",
+    );
+  }
+  if (entry.data.requirements?.includes("sponsorship")) {
+    out.push(
+      t(
+        lang,
+        "Sponsortoken erforderlich: Dieses Gerät steht Unterstützern des Projekts zur Verfügung, siehe https://docs.evcc.io/de/sponsorship.",
+        "Sponsor token required: this device is available to sponsors of the project, see https://docs.evcc.io/en/sponsorship.",
+      ),
+      "",
+    );
+  }
+  if (entry.data.caveats?.length) {
+    out.push(
+      `## ${t(lang, "Bekannte Einschränkungen", "Known limitations")}`,
+      "",
+    );
+    for (const c of entry.data.caveats) {
+      out.push(`- ${c.description ?? ""}${c.link ? ` (${c.link})` : ""}`);
+    }
+    out.push("");
+  }
+  if (params.length) {
+    out.push(`## ${t(lang, "Parameter", "Parameters")}`, "");
+    out.push(
+      `| ${t(lang, "Name", "Name")} | ${t(lang, "Beschreibung", "Description")} | ${t(lang, "Standard / Beispiel", "Default / example")} | |`,
+      "| --- | --- | --- | --- |",
+    );
+    for (const p of params) {
+      const value = p.default ?? p.example ?? "";
+      const choices = p.choice?.length ? ` (${p.choice.join(", ")})` : "";
+      const flag = p.required
+        ? t(lang, "erforderlich", "required")
+        : p.advanced
+          ? t(lang, "erweitert", "advanced")
+          : "";
+      const desc = `${localized(p.description, lang)}${localized(p.help, lang) ? ` ${localized(p.help, lang)}` : ""}${choices}`;
+      out.push(
+        `| ${p.name} | ${desc.replace(/\|/g, "\\|").replace(/\n/g, " ")} | ${String(value).replace(/\|/g, "\\|")}${p.unit ? ` ${p.unit}` : ""} | ${flag} |`,
+      );
+    }
+    out.push("");
+  }
+  if (codeBlocks.length) {
+    out.push(
+      `## ${t(lang, "Konfigurationsbeispiel für evcc.yaml", "Configuration example for evcc.yaml")}`,
+      "",
+    );
+    for (const code of codeBlocks) out.push("```yaml", code, "```", "");
+  }
+  return out.join("\n");
+}
+
+/** Astro endpoint handler serving `deviceMarkdown` for a detail route. */
+export function deviceMarkdownEndpoint(
+  type: string,
+  kind: DeviceKind | ((entry: any) => DeviceKind),
+) {
+  return ({ props }: { props: any }) =>
+    new Response(
+      deviceMarkdown(
+        props.entry,
+        props.lang,
+        type,
+        typeof kind === "function" ? kind(props.entry) : kind,
+      ),
+      { headers: { "Content-Type": "text/markdown; charset=utf-8" } },
+    );
+}

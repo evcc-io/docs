@@ -1,5 +1,6 @@
 ---
 title: "Konfiguration"
+description: "Überblick über die Konfiguration per evcc.yaml: wo die Datei liegt, wie sie aufgebaut ist und welche Abschnitte deine Anlage, Ladepunkte und Geräte beschreiben."
 sidebar:
   order: 1
 ---

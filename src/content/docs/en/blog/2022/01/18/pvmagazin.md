@@ -1,6 +1,7 @@
 ---
 date: 2022-01-18
 title: "evcc im pv magazin"
+description: "In January 2022 pv magazine interviewed core developer Andreas Linde and user Tjarko Tjaden about open source charge management with evcc."
 authors: [naltatis]
 prev: false
 next: false

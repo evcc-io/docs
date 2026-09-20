@@ -69,6 +69,12 @@ The nightly/release toggle in the UI switches which collection is used at runtim
 1. Spec at `public/openapi.yaml`
 2. `starlight-openapi` plugin (configured in `astro.config.mjs`) renders the pages under `integrations/rest-api`
 
+#### LLM & crawler outputs
+
+1. `starlight-llm-actions` (configured in `astro.config.mjs`) serves every docs page as markdown at `<page-url>.md`, advertises it via `<link rel="alternate" type="text/markdown">` and generates `/llms.txt`, `/llms-full.txt` and the topic bundles (`/llms-installation.txt`, …). The `llms.txt` entry of a page is its frontmatter `description`.
+2. Device pages are custom routes the plugin cannot see: `src/pages/[lang]/*/[slug].md.ts` serve their markdown twins via `deviceMarkdown()` in `src/utils/devices.ts`, and `src/pages/llms-devices.txt.ts` lists them all.
+3. `public/robots.txt` points crawlers at the sitemap; nightly device pages stay `noindex`.
+
 ### Manual content
 
 Everything else is hand-written:
@@ -187,11 +193,13 @@ Everything else is hand-written:
   ```yaml
   ---
   title: "Solar Surplus Charging"
+  description: "Explains how solar surplus charging works in Solar and Min+Solar mode and at which power charging starts, pauses or switches phases."
   sidebar:
     order: 1
   ---
   ```
   Don't use Docusaurus' `sidebar_position`.
+- **`description` is mandatory** on every hand-written page in both locales (exception: the generated `reference/cli/*.md`). Add it when creating a page and revise it when the page's scope changes. See "Page Descriptions" below.
 - **Tabs**: `<Tabs>` + `<TabItem label="…">` from `@astrojs/starlight/components`
 - **Admonitions** (Starlight set, slightly different from Docusaurus):
   - `:::note` — general note
@@ -235,6 +243,18 @@ Everything else is hand-written:
     ### Vehicle Detection
     ```
 
+### Page Descriptions
+
+The frontmatter `description` becomes the `<meta name="description">` (search snippets, link previews), the intro line of the page's markdown twin and the page's entry in `llms.txt`, where LLMs decide from that line alone whether to fetch the page.
+
+- **Audience**: a person scanning search results or a page list. They should understand what the page helps them do without opening it. Write for humans first; a good human summary is also the best LLM summary.
+- **Style**: one complete, natural sentence with a verb, 90 to 160 characters (German up to 170), ending with a period. Same tone as the body text: direct, informal, no marketing. No "This page …", no "Learn how to …", no colon followed by a keyword list („Die Liste chargers: name und type …" is not acceptable).
+- **Level**: name the concrete outcome or question the page answers (what you can set up, what behaviour it explains, which platform it covers). Use everyday product terms (charger / Wallbox, meter / Zähler, home battery / Hausbatterie, charging point / Ladepunkt, solar / PV-Anlage). Mention a config key only when it is the thing people look up (e.g. `residualPower`), at most one or two, written without backticks.
+- **Locales**: English and German must convey the same content. Use UI wording from `../evcc/i18n/{en,de}.json` and the page's own headings; German uses German terminology („benutzerdefinierte Geräte", not „eigene Geräte").
+- **Blog posts**: start with the kind and date so readers and LLMs can judge age, e.g. "Release notes for evcc 0.124 from February 2024 with …" / „Community-Portrait vom August 2024: …".
+- Good: "Install evcc from the apt repository on Debian, Ubuntu and similar distributions, run it as a systemd service and keep it updated or roll back."
+- Bad: "The mqtt section: broker and topic plus user, password, clientid, insecure, caCert, clientCert and clientKey."
+
 ### Documentation Best Practices
 
 1. Always check existing documentation before creating new pages
@@ -242,7 +262,8 @@ Everything else is hand-written:
 3. Use clear, concise language suitable for technical documentation
 4. Include code examples where appropriate
 5. **Update both English and German versions together** to prevent divergence
-6. Test changes locally with `npm run dev` (serves both locales at `/en/...` and `/de/...`)
+6. Every new or reworked page gets a frontmatter `description` following "Page Descriptions" above; check it still fits after content changes
+7. Test changes locally with `npm run dev` (serves both locales at `/en/...` and `/de/...`)
 
 ## Git Workflow
 

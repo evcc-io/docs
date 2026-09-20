@@ -1,5 +1,6 @@
 ---
 title: "curtailers"
+description: "How to add curtailment devices in evcc.yaml that limit solar feed-in when the grid operator requests it, and when you need one at all."
 sidebar:
   order: 6
 ---

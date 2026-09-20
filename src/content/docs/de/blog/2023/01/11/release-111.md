@@ -1,6 +1,7 @@
 ---
 date: 2023-01-11
 title: "Version 0.111"
+description: "Release Notes zu evcc 0.111 vom Januar 2023 mit einem intelligenteren Ladeplaner, der Börsenpreise von awattar und Tibber, Zeittarife und CO₂-Daten nutzt."
 authors: [naltatis]
 tags: [release]
 prev: false

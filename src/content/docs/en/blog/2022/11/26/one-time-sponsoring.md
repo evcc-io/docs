@@ -1,6 +1,7 @@
 ---
 date: 2022-11-26
 title: "Sponsoring und Umzüge"
+description: "In November 2022 we introduced one-time sponsoring and contributor tokens, explained how we fund evcc and moved GitHub sponsoring and the Docker image."
 authors: [naltatis]
 tags: [sponsoring]
 prev: false

@@ -1,6 +1,7 @@
 ---
 date: 2021-12-19
 title: "Version 0.74"
+description: "Release Notes zu evcc 0.74 vom Dezember 2021, das die laufenden Timer für PV-Modus und Phasenumschaltung in der Oberfläche zeigt und das Zielladen zurückbringt."
 authors: [derandereandi]
 tags: [release]
 prev: false
