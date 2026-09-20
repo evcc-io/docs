@@ -534,6 +534,13 @@ export function plainText(md: string | undefined | null): string | undefined {
 const t = (lang: "de" | "en", de: string, en: string) =>
   lang === "de" ? de : en;
 
+/** Escape a value for a markdown table cell: backslashes, pipes, newlines. */
+function cell(v: unknown): string {
+  return String(v ?? "")
+    .replace(/[\\|]/g, "\\$&")
+    .replace(/\s*\n\s*/g, " ");
+}
+
 function localized(
   v: string | Record<string, string> | null | undefined,
   lang: "de" | "en",
@@ -607,7 +614,7 @@ export function deviceMarkdown(
           : "";
       const desc = `${localized(p.description, lang)}${localized(p.help, lang) ? ` ${localized(p.help, lang)}` : ""}${choices}`;
       out.push(
-        `| ${p.name} | ${desc.replace(/\|/g, "\\|").replace(/\n/g, " ")} | ${String(value).replace(/\|/g, "\\|")}${p.unit ? ` ${p.unit}` : ""} | ${flag} |`,
+        `| ${cell(p.name)} | ${cell(desc)} | ${cell(value)}${p.unit ? ` ${cell(p.unit)}` : ""} | ${flag} |`,
       );
     }
     out.push("");
