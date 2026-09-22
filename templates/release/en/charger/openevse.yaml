@@ -4,7 +4,11 @@ product:
   brand: OpenEVSE
 capabilities: ["meter", "dim"]
 description: |
-  Requires firmware 7.0 or later.
+  Requires OpenEVSE WiFi firmware 4.1.9 or later. evcc controls the charger through its claims API;
+  the manual override on the charger (the On/Off mode on its dashboard) takes precedence over evcc; tap Auto to release it. If evcc is removed, delete its claim
+  (client 262145) in the charger's web UI or via `DELETE /claims/262145`.
+  1p/3p phase switching (`phases1p3p`) only works with modified 3-phase controllers that answer the `$G7`/`$S7` RAPI commands; stock OpenEVSE controllers do not.
+
 render:
   - default: |
       type: template
@@ -12,6 +16,13 @@ render:
       host: 192.0.2.2 # IP address or hostname
       user: # Username, e.g. email address, user id, etc. (optional)
       password: # Password, Service account password (optional)
+    advanced: |
+      type: template
+      template: openevse
+      host: 192.0.2.2 # IP address or hostname
+      user: # Username, e.g. email address, user id, etc. (optional)
+      password: # Password, Service account password (optional)
+      phases1p3p: # Phase switching, Only for modified 3-phase controllers that support `$G7` and `$S7` (optional)
 params:
   - name: host
     example: 192.0.2.2
@@ -39,4 +50,13 @@ params:
     description: Password
     help: Service account password
     advanced: false
+    optional: true
+  - name: phases1p3p
+    example:
+    default:
+    choice: []
+    unit:
+    description: Phase switching
+    help: Only for modified 3-phase controllers that support `$G7` and `$S7`
+    advanced: true
     optional: true
