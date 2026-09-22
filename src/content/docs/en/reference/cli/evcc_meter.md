@@ -11,7 +11,7 @@ evcc meter [name] [flags]
 ## Options
 
 ```
-  -b, --battery-mode string          Set battery mode (normal, hold, charge, holdcharge)
+  -b, --battery-mode string          Set battery mode (normal, hold, charge, holdcharge, discharge)
   -w, --battery-mode-wait duration   Wait given duration during which potential watchdogs are active
   -u, --curtail int                  Curtail feed-in to percent (0-100, only available if supported by device) (default -1)
       --diagnose                     Diagnose
@@ -38,3 +38,4 @@ evcc meter [name] [flags]
 ## See also
 
 - [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc meter verifybatterymodes](/en/reference/cli/evcc_meter_verifybatterymodes) - Cycle through battery mode transitions and verify battery power interactively
