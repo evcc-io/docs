@@ -1,5 +1,6 @@
 ---
 title: Benutzerdefinierte Geräte
+description: "Zeigt, wie du Wallbox, Zähler, Fahrzeug oder Heizung ohne fertige Vorlage einbindest, indem du Messwerte und Steuerung selbst per HTTP, MQTT oder Modbus definierst."
 tableOfContents:
   maxHeadingLevel: 4
 ---
@@ -138,8 +139,12 @@ Echte Zählerstände liefern genauere Langzeitstatistiken.
 | Attribut      | Typ   | Erfordert | Kontext   | Beschreibung                                                                                                                                                    |
 | ------------- | ----- | --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `limitsoc`    | `int` | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.           |
-| `batterymode` | `int` | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge)                                                                                                          |
+| `batterymode` | `int` | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge, 4: holdcharge, 5: discharge)                                                                             |
 | `curtail`     | `int` | nein      | `pv`      | Setze Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
+
+Es werden nur die Batteriemodi genutzt, die das Gerät unterstützt.
+Ist `batterymode` ein [`switch`](/de/reference/plugins#switch) (optional in einem `watchdog`), werden die unterstützten Modi aus dessen `case`-Werten übernommen.
+Für alle anderen Plugins müssen die unterstützten Modi in `batterymodes` angegeben werden, z. B. `batterymodes: ["normal", "hold", "charge"]`.
 
 ### Beispiel
 
@@ -194,7 +199,7 @@ Für andere Geräte stehen spezialisierte Charger-Typen unter [Switchsocket](#ch
 | `integrateddevice` | Gerät ohne angeschlossenes Fahrzeug und ohne Ladesitzungen (z. B. Wärmepumpe, Heizstab, fest installierter Verbraucher). Keine Fahrzeugauswahl.                                                                                                           |
 | `heating`          | Behandelt das Gerät als Heizung: SOC und Limits werden in °C statt in % dargestellt.                                                                                                                                                                      |
 | `continuous`       | Gerät läuft im "deaktivierten" Zustand eigenständig in seinem Normalbetrieb weiter. Statt "Standby" wird "Normalbetrieb" angezeigt. Eine Empfehlung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Strom) wird als "Boost" gekennzeichnet. |
-| `switchdevice`     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Max-Strom und der `Min+PV`-Modus werden nicht angezeigt. Min-Strom und Phasen legen die PV-Einschaltleistung fest.                                                         |
+| `switchdevice`     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Max-Strom und die Option **Dauerhaft laden** werden nicht angezeigt. Min-Strom und Phasen legen die PV-Einschaltleistung fest.                                             |
 
 Häufige Feature-Kombinationen aus den vorkonfigurierten Templates:
 
@@ -402,10 +407,11 @@ soc:
   source: mqtt
   topic: car/soc
 onIdentify:
-  mode: pv
+  mode: smart
 ```
 
-Verfügbare Modi sind: `off`, `now`, `minpv`, `pv`.
+Verfügbare Modi sind: `off`, `smart`, `now`.
+Die veralteten Werte `pv` und `minpv` werden weiterhin akzeptiert und aktivieren `smart` mit [Dauerhaft laden](/de/features/solar-charging#always-charge) aus bzw. an.
 
 ## Tarif und Vorhersage \{#tariff\}
 

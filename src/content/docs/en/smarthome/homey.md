@@ -1,5 +1,6 @@
 ---
 title: "Homey"
+description: "The community evcc app for Homey exposes charging points, site and home battery as devices and lets flows switch charge modes and limits on the local network."
 ---
 
 [Homey](https://homey.app) is a smart home hub that connects devices from many manufacturers and automates them via flows.

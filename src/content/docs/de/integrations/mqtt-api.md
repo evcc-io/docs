@@ -1,5 +1,6 @@
 ---
 title: "MQTT API"
+description: "Listet alle MQTT-Topics auf, die evcc zu Anlage, Ladepunkten, Fahrzeugen und Hausbatterie veröffentlicht, sowie die Topics, über die du Modus, Limits und Pläne änderst."
 sidebar:
   order: 2
 ---
@@ -34,6 +35,8 @@ Alle Loadpoint IDs beginnen bei `1`.
 - `evcc/loadpoints/<id>/connected`: Fahrzeug verbunden (true/false)
 - `evcc/loadpoints/<id>/charging`: lädt gerade (true/false)
 - `evcc/loadpoints/<id>/enabled`: Ladepunkt aktiviert (true/false)
+- `evcc/loadpoints/<id>/mode`: Lademodus (`off`, `smart`, `now`)
+- `evcc/loadpoints/<id>/alwaysCharge`: Option Dauerhaft laden (`off`, `on`, `once`)
 - `evcc/loadpoints/<id>/chargePower`: aktuelle Ladeleistung (W)
 - `evcc/loadpoints/<id>/chargedEnergy`: geladene Energie in Sitzung (Wh)
 - `evcc/loadpoints/<id>/chargeDuration`: Ladedauer (ns)
@@ -81,13 +84,14 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: Netz-Residualleistung
 - `evcc/site/batteryGridChargeLimit`: Preisschwelle für Netzladen
 - `evcc/site/batteryDischargeControl`: Entladeregelung aktivieren/deaktivieren (true/false)
-- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `hold`, `charge`) – steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi, wird nach 60 s zurückgesetzt
+- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `hold`, `charge`, `holdcharge`, `discharge`) – steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi, wird nach 60 s zurückgesetzt
 - `evcc/site/smartCostLimit`: Smart-Cost-Limit für alle Ladepunkte
 - `evcc/site/smartFeedInPriorityLimit`: Einspeise-Prioritäts-Limit für alle Ladepunkte
 
 ### Loadpoints
 
-- `evcc/loadpoints/<id>/mode`: Lademodus
+- `evcc/loadpoints/<id>/mode`: Lademodus (`off`, `smart`, `now`)
+- `evcc/loadpoints/<id>/alwaysCharge`: Option Dauerhaft laden (`off`, `on`, `once`) — nur im Smart-Modus
 - `evcc/loadpoints/<id>/minSoc`: minimaler SoC
 - `evcc/loadpoints/<id>/limitSoc`: Limit-SoC in % – nur für Online-Fahrzeuge
 - `evcc/loadpoints/<id>/limitEnergy`: Limit-Energie in kWh – nur für Offline-Fahrzeuge

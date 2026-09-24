@@ -1,5 +1,6 @@
 ---
 title: "interval"
+description: "Wie oft Zählerwerte gelesen und Ladeströme nachgeregelt werden, wie du das Intervall änderst und warum sehr kurze Intervalle zu Schwingungen führen können."
 sidebar:
   order: 10
 ---

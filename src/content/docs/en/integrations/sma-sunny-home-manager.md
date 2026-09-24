@@ -1,5 +1,6 @@
 ---
 title: "Sunny Home Manager"
+description: "Explains how evcc makes its charging points visible to an SMA Sunny Home Manager 2.0 in the Sunny Portal and optionally lets it influence the charging power."
 sidebar:
   order: 5
 ---

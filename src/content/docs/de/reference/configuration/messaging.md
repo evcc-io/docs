@@ -1,5 +1,6 @@
 ---
 title: "messaging"
+description: "Benachrichtigungen in der evcc.yaml einrichten: welche Ladeereignisse eine Nachricht auslösen, wie du Vorlagen schreibst und welche Dienste sie zustellen."
 sidebar:
   order: 13
 ---

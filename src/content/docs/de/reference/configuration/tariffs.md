@@ -1,5 +1,6 @@
 ---
 title: "tariffs"
+description: "Tarife für Netzbezug, Einspeisung, CO₂ und Solarprognose in der evcc.yaml hinterlegen, für Ersparnisstatistik, Ladepläne und zeitabhängige Netzentgelte."
 sidebar:
   order: 12
 ---

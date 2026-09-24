@@ -1,5 +1,6 @@
 ---
 title: "Referenz"
+description: "Dient als Einstieg in die technische Referenz und führt zur Konfigurationsdatei mit ihren Einstellungen sowie zu den Modbus-Verbindungen unterstützter Geräte."
 sidebar:
   order: 1
 ---

@@ -1,5 +1,6 @@
 ---
 title: "log, levels"
+description: "How to set the log level in evcc.yaml, what the levels from fatal to trace mean and how to raise the level for single components such as a charging point."
 sidebar:
   order: 11
 ---

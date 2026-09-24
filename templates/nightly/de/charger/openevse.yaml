@@ -4,7 +4,11 @@ product:
   brand: OpenEVSE
 capabilities: ["meter", "dim"]
 description: |
-  Benötigt mindestens Firmware 7.0 oder neuer.
+  Benötigt OpenEVSE WiFi-Firmware 4.1.9 oder neuer. evcc steuert die Wallbox über deren Claims-API;
+  die manuelle Übersteuerung an der Wallbox (Modus Ein/Aus im Dashboard) hat Vorrang vor evcc; Auto wählen, um sie aufzuheben. Wird evcc entfernt, den evcc-Claim
+  (Client 262145) in der Weboberfläche der Wallbox oder per `DELETE /claims/262145` löschen.
+  1p/3p-Phasenumschaltung (`phases1p3p`) funktioniert nur mit modifizierten 3-Phasen-Controllern, die die RAPI-Befehle `$G7`/`$S7` beantworten; serienmäßige OpenEVSE-Controller tun das nicht.
+
 render:
   - default: |
       type: template
@@ -12,6 +16,13 @@ render:
       host: 192.0.2.2 # IP-Adresse oder Hostname
       user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc. (optional)
       password: # Passwort, Zugangspasswort des Dienstes (optional)
+    advanced: |
+      type: template
+      template: openevse
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc. (optional)
+      password: # Passwort, Zugangspasswort des Dienstes (optional)
+      phases1p3p: # Phasenumschaltung, Nur für modifizierte 3-Phasen-Controller, die `$G7` und `$S7` unterstützen (optional)
 params:
   - name: host
     example: 192.0.2.2
@@ -39,4 +50,13 @@ params:
     description: Passwort
     help: Zugangspasswort des Dienstes
     advanced: false
+    optional: true
+  - name: phases1p3p
+    example:
+    default:
+    choice: []
+    unit:
+    description: Phasenumschaltung
+    help: Nur für modifizierte 3-Phasen-Controller, die `$G7` und `$S7` unterstützen
+    advanced: true
     optional: true

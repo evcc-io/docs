@@ -1,5 +1,6 @@
 ---
 title: Plugins
+description: "Plugins read and write single values via Modbus, HTTP, MQTT, scripts and more, and form the building blocks of user-defined devices."
 tableOfContents:
   maxHeadingLevel: 4
 ---
@@ -354,6 +355,16 @@ body: %v # only applicable for PUT or POST requests
 enable:
   source: http
   uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
+```
+
+**Dynamic URIs**:
+
+`uri` and `body` are Go templates that are evaluated on every request. Besides the [sprig functions](https://masterminds.github.io/sprig/), `addDate` and `timeRound` are available. This allows e.g. a forecast API to always be queried for a moving date range:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.example.org/forecast?from={{ now | date "2006-01-02" }}&to={{ addDate now 0 0 2 | date "2006-01-02" }}
 ```
 
 ### JavaScript <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" /> \{#javascript\}
@@ -1218,7 +1229,7 @@ In this example, values are automatically repeated every 30 s, except when the v
 - Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
 - No further repetitions until a new value != `0` is written
 
-**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge):
+**Example with battery control** (`batterymode` uses values 1=normal, 2=hold, 3=charge, 4=holdcharge, 5=discharge):
 
 ```yaml
 batterymode:

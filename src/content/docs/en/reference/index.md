@@ -1,5 +1,6 @@
 ---
 title: "References"
+description: "Serves as the starting point for the technical reference, covering the configuration file and its settings as well as Modbus connections for supported devices."
 sidebar:
   order: 1
 ---

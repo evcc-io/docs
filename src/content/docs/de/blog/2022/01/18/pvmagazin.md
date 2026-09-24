@@ -1,6 +1,7 @@
 ---
 date: 2022-01-18
 title: "evcc im pv magazin"
+description: "Im Januar 2022 hat das pv magazine Core-Entwickler Andreas Linde und Anwender Tjarko Tjaden zu Open-Source-Lademanagement mit evcc interviewt."
 authors: [naltatis]
 prev: false
 next: false

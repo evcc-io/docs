@@ -1,5 +1,6 @@
 ---
 title: "eebus"
+description: "EEBus in der evcc.yaml mit eigenem Zertifikat, Netzwerkschnittstellen und SHIP-ID einrichten und die Einstellungen in die Weboberfläche übernehmen."
 sidebar:
   order: 14
 ---

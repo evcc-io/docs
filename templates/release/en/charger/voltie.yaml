@@ -1,0 +1,62 @@
+template: voltie
+product:
+  identifier: voltie
+  brand: Voltie
+capabilities: ["mA", "1p3p", "meter", "dim"]
+requirements: ["sponsorship"]
+description: |
+  Modbus must be set to "TCP" on the Modbus config screen of the Voltie app, and the slave address configured there (default 11) must match the ID. The communication timeout reduces the charging current to 0 A after a loss of communication, so it has to be set to 0 (disabled) or to a value larger than the evcc update interval.
+caveats:
+  - description: |
+      The charger's auto start mode is disabled persistently when evcc starts and has to be switched back on in the Voltie app after evcc is removed.
+  - description: |
+      The Modbus TCP gateway forwards at most two transactions per second. Shorter polling intervals produce timeouts rather than fresher data.
+  - description: |
+      Phase switching is only available on chargers manufactured from 2026 (serial number starting with 1026). From firmware 357 evcc reads the capability from the charger and only offers phase switching where it is supported.
+render:
+  - default: |
+      type: template
+      template: voltie
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 11
+      host:  # Hostname
+      port: 502 # Port
+    advanced: |
+      type: template
+      template: voltie
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 11
+      host:  # Hostname
+      port: 502 # Port
+      cache: 1s # Cache, Time interval for data refresh (optional)
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: false
+  - name: cache
+    example: 5m
+    default: 1s
+    choice: []
+    unit:
+    description: Cache
+    help: Time interval for data refresh
+    advanced: true
+    optional: true
+modbus:
+  delay:
+  host:
+  id: 11
+  modbus: tcpip
+  port: 502
+  tcpip: true
+  timeout:

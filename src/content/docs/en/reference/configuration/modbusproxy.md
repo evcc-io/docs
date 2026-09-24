@@ -1,5 +1,6 @@
 ---
 title: "modbusproxy"
+description: "How to set up the Modbus proxy in evcc.yaml so that other systems can share a Modbus connection to an inverter or meter with your evcc instance."
 sidebar:
   order: 18
 ---

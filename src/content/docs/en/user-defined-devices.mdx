@@ -1,5 +1,6 @@
 ---
 title: User-defined Devices
+description: "Shows how to integrate a wallbox, meter, vehicle or heater without a built-in template by defining its readings and controls yourself via HTTP, MQTT or Modbus."
 tableOfContents:
   maxHeadingLevel: 4
 ---
@@ -137,8 +138,12 @@ Real meter readings give more accurate long-term statistics.
 | Attribute     | Type  | Required | Context   | Description                                                                                                                                                       |
 | ------------- | ----- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
-| `batterymode` | `int` | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                                        |
+| `batterymode` | `int` | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge, 4: holdcharge, 5: discharge)                                                                           |
 | `curtail`     | `int` | no       | `pv`      | Set feed-in limit in % of the nominal production power (0 to 100, `100` = no limit). Only together with `curtailed`. See [Curtailment Device](#curtailer).        |
+
+Only the battery modes the device supports are used.
+If `batterymode` is a [`switch`](/en/reference/plugins#switch) (optionally wrapped in a `watchdog`), the supported modes are taken from its `case` values.
+Any other plugin needs `batterymodes` listing the supported modes, e.g. `batterymodes: ["normal", "hold", "charge"]`.
 
 ### Example
 
@@ -193,7 +198,7 @@ For other devices, specialised charger types are described under [Switchsocket](
 | `integrateddevice` | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                        |
 | `heating`          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                         |
 | `continuous`       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". |
-| `switchdevice`     | Device can only be switched on/off (no continuous current control). Max current and the `Min+PV` mode are not shown. Min current and phases set the PV enable power.                                              |
+| `switchdevice`     | Device can only be switched on/off (no continuous current control). Max current and the **Always charge** option are not shown. Min current and phases set the PV enable power.                                   |
 
 Common feature combinations seen in built-in templates:
 
@@ -401,10 +406,11 @@ soc:
   source: mqtt
   topic: car/soc
 onIdentify:
-  mode: pv
+  mode: smart
 ```
 
-Available modes: `off`, `now`, `minpv`, `pv`.
+Available modes: `off`, `smart`, `now`.
+The deprecated values `pv` and `minpv` are still accepted and activate `smart` with [Always charge](/en/features/solar-charging#always-charge) off or on.
 
 ## Tariff and forecast \{#tariff\}
 

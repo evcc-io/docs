@@ -1,5 +1,6 @@
 ---
 title: "Garmin"
+description: "The community app evccg shows live data from your evcc instance on Garmin smartwatches, including home battery, vehicles, power flows and the solar forecast."
 ---
 
 The [evccg](https://github.com/METIQ-Solutions/evcc-garmin) app by [TheNinth7](https://github.com/TheNinth7) shows live data from your evcc instance on [Garmin](https://www.garmin.com) smartwatches.

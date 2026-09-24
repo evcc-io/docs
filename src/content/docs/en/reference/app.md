@@ -1,5 +1,6 @@
 ---
 title: "evcc App"
+description: "The evcc app understands evcc:// links that prefill a server entry, open the forecast page or jump straight to a charging point, which is handy for onboarding."
 sidebar:
   order: 4
 ---

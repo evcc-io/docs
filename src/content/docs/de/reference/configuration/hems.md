@@ -1,5 +1,6 @@
 ---
 title: "hems"
+description: "Externe Begrenzung von Bezug und Einspeisung in der evcc.yaml einrichten, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBus."
 sidebar:
   order: 8
 ---

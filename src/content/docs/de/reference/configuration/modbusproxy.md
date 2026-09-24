@@ -1,5 +1,6 @@
 ---
 title: "modbusproxy"
+description: "Modbus-Proxy in der evcc.yaml einrichten, damit andere Systeme sich eine Modbus-Verbindung zu Wechselrichter oder Zähler mit evcc teilen können."
 sidebar:
   order: 18
 ---
