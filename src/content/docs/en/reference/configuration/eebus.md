@@ -1,7 +1,8 @@
 ---
 title: "eebus"
+description: "How to configure EEBus in evcc.yaml with your own certificate, network interfaces and SHIP ID, and how to move the setup to the web interface."
 sidebar:
-  order: 13
+  order: 14
 ---
 
 :::tip[Recommendation]

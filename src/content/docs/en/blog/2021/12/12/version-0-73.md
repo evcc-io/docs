@@ -1,6 +1,7 @@
 ---
 date: 2021-12-12
 title: "Version 0.73"
+description: "Release notes for evcc 0.73 from December 2021 with improvements to the evcc configure wizard, vehicle-specific charging defaults and first location detection."
 authors: [derandereandi]
 tags: [release]
 prev: false

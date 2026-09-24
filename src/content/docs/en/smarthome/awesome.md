@@ -1,5 +1,6 @@
 ---
 title: "More Awesome Projects"
+description: "Lists projects from the community that build on evcc, such as Grafana dashboards, a Home Assistant card, an E-Ink display, an LED ring and a macOS menu bar app."
 ---
 
 The evcc community is a creative bunch.

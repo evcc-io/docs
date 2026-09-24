@@ -1,7 +1,8 @@
 ---
 title: "modbusproxy"
+description: "Modbus-Proxy in der evcc.yaml einrichten, damit andere Systeme sich eine Modbus-Verbindung zu Wechselrichter oder Zähler mit evcc teilen können."
 sidebar:
-  order: 17
+  order: 18
 ---
 
 _modbusproxy_ ist eine Liste von Geräten welche für Drittsysteme via Modbus TCP im Netzwerk freigeben werden.

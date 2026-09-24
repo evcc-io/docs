@@ -12,12 +12,12 @@ const BINARY = "./evcc";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function start(config, sqlDumps) {
+export async function start(config, sqlDumps, flags = []) {
   await _clean();
   if (sqlDumps) {
     await _restoreDatabase(sqlDumps);
   }
-  await _start(config);
+  await _start(config, flags);
 }
 
 export async function stop() {
@@ -49,16 +49,17 @@ async function _restoreDatabase(sqlDumps) {
 
 let instance = null;
 
-async function _start(config) {
+async function _start(config, flags = []) {
   const configPath =
     typeof config === "string"
       ? `recipes/${config}`
       : mergeYaml(`recipes/${config[0]}`, `recipes/${config[1]}`);
 
-  console.log("starting evcc", { config });
+  console.log("starting evcc", { config, flags });
   const port = new URL(BASE_URL).port;
+  const flagArgs = flags.map((flag) => JSON.stringify(flag)).join(" ");
   instance = exec(
-    `EVCC_DATABASE_DSN=${DB_PATH} EVCC_NETWORK_PORT=${port} EVCC_OCPP_PORT=12099 EVCC_EEBUS_PORT=13099 ${BINARY} --config ${configPath}`,
+    `EVCC_DATABASE_DSN=${DB_PATH} EVCC_NETWORK_PORT=${port} EVCC_OCPP_PORT=12099 EVCC_EEBUS_PORT=13099 ${BINARY} --config ${configPath} ${flagArgs}`,
   );
   instance.stdout.pipe(process.stdout);
   instance.stderr.pipe(process.stderr);

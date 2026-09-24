@@ -27,34 +27,37 @@ const basePath = `/${lang}${isNightly ? "/nightly" : ""}/tariffs`;
 const title = lang === "de" ? "Tarife & Vorhersagen" : "Tariffs & forecasts";
 const description =
   lang === "de"
-    ? "Dynamische Stromtarife sowie CO₂- und PV-Vorhersage-Anbieter."
-    : "Dynamic electricity tariffs and CO₂ / solar forecast providers.";
+    ? "Dynamische Stromtarife sowie Anbieter für CO₂-, PV- und Temperaturvorhersagen."
+    : "Dynamic electricity tariffs and CO₂, solar, and temperature forecast providers.";
 
-function bucketFor(d: any): "price" | "co2" | "solar" {
+function bucketFor(d: any): "price" | "co2" | "solar" | "temperature" {
   const group = d.data.product.group ?? "";
   return TARIFF_GROUPS[group] ?? "price";
 }
 
-const buckets: Record<"price" | "co2" | "solar", any[]> = {
+const buckets: Record<"price" | "co2" | "solar" | "temperature", any[]> = {
   price: [],
   co2: [],
   solar: [],
+  temperature: [],
 };
 for (const d of devices) buckets[bucketFor(d)].push(d);
 
 const sectionLabels = lang === "de"
   ? {
-      price: { id: "preis", title: "Strompreise" },
+      price: { id: "price", title: "Strompreise" },
       co2: { id: "co2", title: "CO₂-Vorhersagen" },
       solar: { id: "solar", title: "Solar-Vorhersagen" },
+      temperature: { id: "temperature", title: "Temperaturvorhersagen" },
     }
   : {
       price: { id: "price", title: "Electricity prices" },
       co2: { id: "co2", title: "CO₂ forecasts" },
       solar: { id: "solar", title: "Solar forecasts" },
+      temperature: { id: "temperature", title: "Temperature forecasts" },
     };
 
-const sectionOrder = ["price", "co2", "solar"] as const;
+const sectionOrder = ["price", "co2", "solar", "temperature"] as const;
 
 const headings = [
   ...(lang === "de"

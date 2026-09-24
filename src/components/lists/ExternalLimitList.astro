@@ -4,6 +4,7 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
 import ExternalLimitIntro from "@components/intros/ExternalLimitIntro.astro";
 import ExternalLimitOutro from "@components/intros/ExternalLimitOutro.astro";
+import CurtailmentDevicesIntro from "@components/intros/CurtailmentDevicesIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
 import { sortDevices, collectionName, nightlyPageHead } from "@utils/devices";
@@ -18,6 +19,8 @@ const isNightly = channel === "nightly";
 
 const coll = await getCollection(collectionName("hems", lang, channel) as any);
 const devices = sortDevices(coll as any);
+const curtailerColl = await getCollection(collectionName("curtailers", lang, channel) as any);
+const curtailers = sortDevices(curtailerColl as any);
 const basePath = `/${lang}${isNightly ? "/nightly" : ""}/external-limit`;
 
 const title =
@@ -38,6 +41,7 @@ const headings =
         { depth: 2, slug: "setup", text: "Einrichtung" },
         { depth: 3, slug: "eebus-pairing", text: "Pairing bei EEBus-Integrationen" },
         { depth: 2, slug: "integrations", text: "Integrationen" },
+        { depth: 2, slug: "curtailment-devices", text: "Einspeisebegrenzer" },
         { depth: 2, slug: "how-it-works", text: "Funktionsweise" },
         { depth: 2, slug: "logging", text: "Protokollierung" },
         { depth: 2, slug: "additional-consumers", text: "Steuerung weiterer Verbraucher" },
@@ -50,6 +54,7 @@ const headings =
         { depth: 2, slug: "setup", text: "Setup" },
         { depth: 3, slug: "eebus-pairing", text: "Pairing for EEBus Integrations" },
         { depth: 2, slug: "integrations", text: "Integrations" },
+        { depth: 2, slug: "curtailment-devices", text: "Curtailment" },
         { depth: 2, slug: "how-it-works", text: "How It Works" },
         { depth: 2, slug: "logging", text: "Logging" },
         { depth: 2, slug: "additional-consumers", text: "Controlling Additional Consumers" },
@@ -77,6 +82,16 @@ const frontmatter = {
   />
   {channel === "release" && (
     <UserDefinedHint lang={lang} kind="hems" nightlyHref={`/${lang}/nightly/external-limit`} />
+  )}
+  <h2 id="curtailment-devices">{lang === "de" ? "Einspeisebegrenzer" : "Curtailment"}</h2>
+  <CurtailmentDevicesIntro lang={lang} />
+  <DeviceCardList devices={curtailers as any} lang={lang} basePath={basePath} />
+  {channel === "release" && (
+    <UserDefinedHint
+      lang={lang}
+      kind="curtailer"
+      nightlyHref={`/${lang}/nightly/external-limit#curtailment-devices`}
+    />
   )}
   <ExternalLimitOutro lang={lang} />
 </StarlightPage>

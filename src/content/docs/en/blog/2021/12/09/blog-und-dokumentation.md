@@ -1,6 +1,7 @@
 ---
 date: 2021-12-09
 title: "Neue Dokumentation und Blog"
+description: "In December 2021 evcc got a new documentation site at docs.evcc.io and this blog, along with a few numbers on how the project has grown since 2020."
 authors: [derandereandi]
 tags: [allgemein]
 prev: false

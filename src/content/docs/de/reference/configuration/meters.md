@@ -1,5 +1,6 @@
 ---
 title: "meters"
+description: "Zähler für Netz, PV-Anlage, Hausbatterie und Verbraucher in der evcc.yaml anlegen, welche Vorzeichenregel gilt und welche Zählertypen es gibt."
 sidebar:
   order: 5
 ---

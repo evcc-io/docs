@@ -59,8 +59,8 @@ render:
       uri: http://homeassistant.local:8123 # Home Assistant URI
       power: sensor.house_power # Leistungsentität, Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
       capacity: 50 # Akkukapazität (kWh), optional
-      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
-      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
     advanced: |
       type: template
       template: homeassistant
@@ -68,8 +68,8 @@ render:
       uri: http://homeassistant.local:8123 # Home Assistant URI
       power: sensor.house_power # Leistungsentität, Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
       capacity: 50 # Akkukapazität (kWh), optional
-      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
-      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
       energy: sensor.house_energy # Energieentität, Entitäts-ID für Gesamtenergie in kWh (z.B. Netzbezug oder Batterieladung). Keine täglichen oder Intervallwerte. (optional)
       returnEnergy: sensor.house_return_energy # Energieentität (Gegenrichtung), Entitäts-ID für Gesamtenergie in Gegenrichtung in kWh (z.B. Netzeinspeisung oder Batterieentladung). Keine täglichen oder Intervallwerte. (optional)
       currentL1: sensor.house_current_l1 # L1 Stromentität, Entitäts-ID für L1 Strommessung in Ampere (optional)
@@ -79,9 +79,11 @@ render:
       voltageL2: sensor.house_voltage_l2 # L2 Spannungsentität, Entitäts-ID für L2 Spannungsmessung in Volt (optional)
       voltageL3: sensor.house_voltage_l3 # L3 Spannungsentität, Entitäts-ID für L3 Spannungsmessung in Volt (optional)
       soc: sensor.battery_soc # Batterieladestand, Entitäts-ID für Batterieladestand in Prozent (optional)
-      modeNormal: script.battery_normal # Normalbetrieb Skript, Skript um die Heimbatterie in den Normalbetrieb zu versetzen. Erforderlich, wenn modeHold oder modeCharge gesetzt ist. Das Skript ist verantwortlich für alle notwendigen Statusänderungen auf der HA-Seite. (optional)
+      modeNormal: script.battery_normal # Normalbetrieb Skript, Skript um die Heimbatterie in den Normalbetrieb zu versetzen. Erforderlich, sobald ein anderes Modus-Skript gesetzt ist. Das Skript ist verantwortlich für alle notwendigen Statusänderungen auf der HA-Seite. (optional)
       modeHold: script.battery_hold # Halten Skript, Optionales Skript um Entladen der Heimbatterie zu verhindern. (optional)
       modeCharge: script.battery_grid_charge # Netzladung Skript, Optionales Skript um die Heimbatterie aus dem Netz zu laden. (optional)
+      modeHoldCharge: script.battery_hold_charge # Laden sperren Skript, Optionales Skript um Laden der Heimbatterie zu verhindern, während Entladen zur Deckung des Hausverbrauchs erlaubt bleibt. (optional)
+      modeDischarge: script.battery_grid_discharge # Netzentladung Skript, Optionales Skript um die Heimbatterie ins Netz zu entladen. (optional)
       insecure: # Selbstsignierte Zertifikate akzeptieren, optional
       maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
       maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
@@ -159,20 +161,20 @@ params:
     optional: true
   - name: minsoc
     example: 25
-    default:
+    default: 0
     choice: []
     unit: '%'
     description: Minimaler Ladestand
-    help: Untere Grenze beim Entladen der Batterie im normalen Betrieb
+    help: Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt.
     advanced: false
     optional: true
   - name: maxsoc
     example: 95
-    default:
+    default: 100
     choice: []
     unit: '%'
     description: Maximaler Ladestand
-    help: Oberes Limit beim Laden der Batterie aus dem Netz
+    help: Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt.
     advanced: false
     optional: true
   - name: energy
@@ -262,7 +264,7 @@ params:
     choice: []
     unit:
     description: Normalbetrieb Skript
-    help: Skript um die Heimbatterie in den Normalbetrieb zu versetzen. Erforderlich, wenn modeHold oder modeCharge gesetzt ist. Das Skript ist verantwortlich für alle notwendigen Statusänderungen auf der HA-Seite.
+    help: Skript um die Heimbatterie in den Normalbetrieb zu versetzen. Erforderlich, sobald ein anderes Modus-Skript gesetzt ist. Das Skript ist verantwortlich für alle notwendigen Statusänderungen auf der HA-Seite.
     advanced: true
     optional: true
   - name: modeHold
@@ -281,6 +283,24 @@ params:
     unit:
     description: Netzladung Skript
     help: Optionales Skript um die Heimbatterie aus dem Netz zu laden.
+    advanced: true
+    optional: true
+  - name: modeHoldCharge
+    example: script.battery_hold_charge
+    default:
+    choice: []
+    unit:
+    description: Laden sperren Skript
+    help: Optionales Skript um Laden der Heimbatterie zu verhindern, während Entladen zur Deckung des Hausverbrauchs erlaubt bleibt.
+    advanced: true
+    optional: true
+  - name: modeDischarge
+    example: script.battery_grid_discharge
+    default:
+    choice: []
+    unit:
+    description: Netzentladung Skript
+    help: Optionales Skript um die Heimbatterie ins Netz zu entladen.
     advanced: true
     optional: true
   - name: insecure

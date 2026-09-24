@@ -1,7 +1,8 @@
 ---
 title: "messaging"
+description: "How to set up notifications in evcc.yaml: which charging events trigger a message, how to write message templates and which services can deliver them."
 sidebar:
-  order: 12
+  order: 13
 ---
 
 The `messaging` section configures [notifications](/en/notifications) about charging sessions via services like Telegram, Pushover, ntfy, or email.

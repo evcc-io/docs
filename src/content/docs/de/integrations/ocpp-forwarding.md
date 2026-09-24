@@ -1,5 +1,6 @@
 ---
 title: "OCPP-Weiterleitung"
+description: "Zeigt, wie du die OCPP-Nachrichten einer Wallbox von evcc an ein externes Backend wie eine Abrechnungsplattform weiterleitest, während evcc das Laden weiter steuert."
 ---
 
 Manchmal sollen Ladevorgänge zusätzlich in einem externen OCPP-Backend landen, z. B. bei einer Abrechnungsplattform für die Erstattung durch den Arbeitgeber oder einem Charge Point Operator.

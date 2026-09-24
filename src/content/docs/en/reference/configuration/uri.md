@@ -1,7 +1,8 @@
 ---
 title: "network"
+description: "How to set the address of the web interface in evcc.yaml: hostname or IP, port and the external URL used behind a reverse proxy or by the app."
 sidebar:
-  order: 8
+  order: 9
 ---
 
 Defines the IP address or hostname and port on which the web interface should be accessed.

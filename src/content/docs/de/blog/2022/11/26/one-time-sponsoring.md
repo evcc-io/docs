@@ -1,6 +1,7 @@
 ---
 date: 2022-11-26
 title: "Sponsoring und Umzüge"
+description: "Im November 2022 haben wir Einmal-Sponsoring und Contributor-Token eingeführt, unsere Finanzierung erklärt und GitHub Sponsoring und Docker-Image umgezogen."
 authors: [naltatis]
 tags: [sponsoring]
 prev: false

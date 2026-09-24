@@ -1,5 +1,6 @@
 ---
 title: "Modbus"
+description: "Explains how evcc talks to meters and wallboxes over Modbus, whether serial via RS485, over TCP or through an RTU-to-TCP converter, and how to configure each."
 sidebar:
   order: 4
 ---

@@ -1,7 +1,8 @@
 ---
 title: "network"
+description: "Netzwerkeinstellungen in der evcc.yaml: Hostname oder IP-Adresse, Port und die externe URL, die hinter einem Reverse-Proxy oder von der App genutzt wird."
 sidebar:
-  order: 8
+  order: 9
 ---
 
 Defines the IP address or hostname and port on which the web interface should be accessed.

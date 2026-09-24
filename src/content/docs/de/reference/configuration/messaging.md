@@ -1,7 +1,8 @@
 ---
 title: "messaging"
+description: "Benachrichtigungen in der evcc.yaml einrichten: welche Ladeereignisse eine Nachricht auslösen, wie du Vorlagen schreibst und welche Dienste sie zustellen."
 sidebar:
-  order: 12
+  order: 13
 ---
 
 Der Abschnitt `messaging` konfiguriert [Benachrichtigungen](/de/notifications) über Ladevorgänge per Diensten wie Telegram, Pushover, ntfy oder E-Mail.

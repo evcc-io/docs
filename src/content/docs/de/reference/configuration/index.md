@@ -1,5 +1,6 @@
 ---
 title: "Konfiguration"
+description: "Überblick über die Konfiguration per evcc.yaml: wo die Datei liegt, wie sie aufgebaut ist und welche Abschnitte deine Anlage, Ladepunkte und Geräte beschreiben."
 sidebar:
   order: 1
 ---
@@ -127,6 +128,12 @@ _Meters_ (Hausinstallation) ist eine Liste von Geräten welche verschiedene Stro
 - Ströme der Hausbatterie(n)
 
 [Weiterlesen...](/de/reference/configuration/meters)
+
+### Curtailers
+
+_Curtailers_ (Einspeisebegrenzer) sind Geräte, die ausschließlich die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG), z. B. der SMA Sunny Home Manager 2.0 oder der führende Wechselrichter einer Anlage mit mehreren Wechselrichtern.
+
+[Weiterlesen...](/de/reference/configuration/curtailers)
 
 ### Vehicles
 

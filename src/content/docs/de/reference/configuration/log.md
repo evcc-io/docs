@@ -1,7 +1,8 @@
 ---
 title: "log, levels"
+description: "Loglevel in der evcc.yaml festlegen, was die Stufen von fatal bis trace bedeuten und wie du einzelne Komponenten wie einen Ladepunkt genauer protokollierst."
 sidebar:
-  order: 10
+  order: 11
 ---
 
 ## `log`

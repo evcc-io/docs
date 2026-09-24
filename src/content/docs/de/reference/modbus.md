@@ -1,5 +1,6 @@
 ---
 title: "Modbus"
+description: "Erklärt, wie evcc mit Zählern und Wallboxen über Modbus spricht, seriell per RS485, über TCP oder über einen RTU-zu-TCP-Konverter, und wie du jede Variante konfigurierst."
 sidebar:
   order: 4
 ---

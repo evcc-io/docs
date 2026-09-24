@@ -1,5 +1,6 @@
 ---
 title: "OCPP Forward"
+description: "Shows how to forward a wallbox's OCPP messages from evcc to an external backend such as a billing platform while evcc keeps controlling the charging."
 ---
 
 Sometimes charging sessions need to reach an external OCPP backend, e.g. a billing platform for employer reimbursement or a charge point operator.

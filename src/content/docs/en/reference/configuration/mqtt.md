@@ -1,7 +1,8 @@
 ---
 title: "mqtt"
+description: "How to connect your evcc instance to an MQTT broker in evcc.yaml, with or without TLS, including client certificates and a custom topic."
 sidebar:
-  order: 14
+  order: 15
 ---
 
 Establishes connectivity with an MQTT broker.

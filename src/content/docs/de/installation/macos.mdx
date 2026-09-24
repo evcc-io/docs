@@ -1,5 +1,6 @@
 ---
 title: "macOS"
+description: "Installiere evcc auf macOS mit Homebrew, starte es als launchd-Dienst und halte es aktuell, oder installiere es manuell, wenn du eine Nightly-Version ausprobieren möchtest."
 sidebar:
   order: 8
 ---
@@ -21,16 +22,44 @@ Wenn du evcc ohne Paketmanager installieren willst oder eine nightly Version tes
    Öffne ein Terminal Fenster und installiere [Homebrew](https://brew.sh), falls es noch nicht installiert ist.
 
    ```sh
+   brew trust --tap evcc-io/tap
    brew tap evcc-io/tap
-   brew trust --formula evcc-io/tap
    brew update
-   brew install evcc
+   brew install --cask evcc
    ```
 
 2. ### Starten
 
+   evcc wird als Homebrew Cask ausgeliefert. Casks lassen sich nicht mit `brew services` verwalten.
+   Lege stattdessen einen launchd-Agent an. Er startet evcc beim Login und startet es neu, falls es beendet wird:
+
    ```sh
-   brew services start evcc
+   mkdir -p "$(brew --prefix)/var/log"
+   cat > ~/Library/LaunchAgents/io.evcc.plist <<EOF
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+   <plist version="1.0">
+   <dict>
+     <key>Label</key>
+     <string>io.evcc</string>
+     <key>ProgramArguments</key>
+     <array>
+       <string>$(brew --prefix)/bin/evcc</string>
+     </array>
+     <key>WorkingDirectory</key>
+     <string>$(brew --prefix)</string>
+     <key>RunAtLoad</key>
+     <true/>
+     <key>KeepAlive</key>
+     <true/>
+     <key>StandardOutPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+     <key>StandardErrorPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+   </dict>
+   </plist>
+   EOF
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
    ```
 
 3. ### Einrichten
@@ -66,7 +95,13 @@ Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte dur
 - Installiere evcc:
 
   ```sh
-  brew upgrade evcc
+  brew upgrade --cask evcc
+  ```
+
+- Starte evcc neu:
+
+  ```sh
+  launchctl kickstart -k gui/$(id -u)/io.evcc
   ```
 
 :::caution[OCPP und die Firewall]
@@ -77,29 +112,49 @@ Auf einem Mac ohne Bildschirm bleibt der Freigabedialog unsichtbar.
 Gib die Programmdatei deshalb nach jedem Upgrade über das Terminal frei:
 
 ```sh
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$(brew --prefix)/opt/evcc/bin/evcc"
-brew services restart evcc
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$(brew --prefix)/bin/evcc"
+launchctl kickstart -k gui/$(id -u)/io.evcc
 ```
 
 :::
+
+### Umstieg von der Homebrew Formula
+
+Bis Version 0.314.5 wurde evcc als Homebrew Formula ausgeliefert und mit `brew services` gestartet.
+Homebrew aktualisiert eine installierte Formula nicht auf einen Cask, `brew upgrade` meldet die alte Version daher weiter als aktuell.
+Entferne die Formula einmalig und installiere den Cask:
+
+```sh
+brew services stop evcc
+brew uninstall evcc
+brew update
+brew install --cask evcc
+```
+
+Lege anschließend den launchd-Agent wie unter [Starten](#starten) beschrieben an.
+Konfiguration und Datenbank bleiben erhalten.
 
 ## Weitere Befehle
 
 - Prüfe den Status des evcc-Servers:
 
   ```sh
-  brew services info evcc
+  launchctl print gui/$(id -u)/io.evcc
+  ```
+
+- Stoppe evcc und entferne den launchd-Agent:
+
+  ```sh
+  launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
   ```
 
 - Logs anzeigen:
 
   ```sh
-  tail -f /opt/homebrew/var/log/evcc.log
+  tail -f "$(brew --prefix)/var/log/evcc.log"
   ```
 
-<a id="manual"></a>
-
-## Manuelle Installation
+## Manuelle Installation \{#manual\}
 
 Hier findest du die Anleitung für die manuelle Installation von evcc auf macOS.
 

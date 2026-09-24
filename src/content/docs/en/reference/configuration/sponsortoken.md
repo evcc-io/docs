@@ -1,7 +1,8 @@
 ---
 title: "sponsortoken"
+description: "Where to enter your sponsor token from sponsor.evcc.io in evcc.yaml, and why entering it in the web interface is usually the better choice."
 sidebar:
-  order: 16
+  order: 17
 ---
 
 `sponsortoken` defines a token that is provided on [https://sponsor.evcc.io](https://sponsor.evcc.io).

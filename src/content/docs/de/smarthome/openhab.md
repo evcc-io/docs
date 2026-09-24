@@ -1,5 +1,6 @@
 ---
 title: "openHAB"
+description: "Zeigt, wie du deine evcc-Instanz mit dem offiziellen evcc-Binding in openHAB holst, das Ladepunkte, Fahrzeuge und Anlagendaten selbst findet, oder alternativ per MQTT."
 ---
 
 [openHAB](https://www.openhab.org) ist eine Open-Source-Smart-Home-Plattform, die Geräte und Dienste vieler Hersteller verbindet.
