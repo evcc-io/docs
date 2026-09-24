@@ -1,6 +1,6 @@
 const { test } = require("@playwright/test");
 import { loop } from "./utils/loop";
-import { CURSOR, ARROW, placeOverlay } from "./utils/overlay";
+import { CURSOR, ARROW, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
@@ -37,7 +37,7 @@ loop((screenshot) => {
     });
     await page.locator('[data-testid="mode"] .smart-btn').first().click();
     await wait(100);
-    await page.locator('[data-testid="always-charge-toggle"]').first().click();
+    await page.locator('[data-testid="mode"] .chevron-btn').first().click();
     await wait(100);
     await page
       .locator('[data-testid="always-charge-dropdown"] .form-check-input')
@@ -73,6 +73,32 @@ loop((screenshot) => {
       .first()
       .click();
     await wait(100);
+  });
+
+  test("solar share", async ({ page }) => {
+    await page.goto(`/`);
+    await page
+      .getByTestId("loadpoint-settings-button")
+      .locator("visible=true")
+      .first()
+      .click();
+    await wait(700);
+    const slider = page.locator("#loadpoint_1_solarshare");
+    await slider.evaluate((el) => {
+      el.value = 50;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await wait(300);
+    await placeOverlay(page, "#loadpoint_1_solarshare", CURSOR, 0, 5);
+    await screenshot(
+      page,
+      `${BASE_PATH}/solar-share`,
+      "#loadpointSettingsModal_1 .modal-content",
+      { all: 20 },
+    );
+    await removeOverlays(page);
+    await page.locator("#loadpointSettingsModal_1 .btn-close").click();
   });
 
   test("energyflow surplus", async ({ page }) => {

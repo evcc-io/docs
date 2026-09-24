@@ -199,6 +199,11 @@ estimate: false # Keine Extrapolation
 
 Definiert das Verhalten, wann im Smart-Modus das Laden mit PV-Überschuss begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.
 
+:::note
+Um einen Anteil Netzstrom zu erlauben, nutze stattdessen den Regler **Sonnenanteil** in den Einstellungen des Ladepunkts (siehe [Nicht genügend Überschuss?](/de/features/solar-charging#not-enough-surplus)).
+Der Regler ist deaktiviert, solange ein `enable`- oder `disable`-Schwellwert gesetzt ist.
+:::
+
 **Beispiel**:
 
 ```yaml

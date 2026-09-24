@@ -99,6 +99,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/loadpoints/<id>/phasesConfigured`: konfigurierte Phasen
 - `evcc/loadpoints/<id>/minCurrent`: minimaler Ladestrom
 - `evcc/loadpoints/<id>/maxCurrent`: maximaler Ladestrom
+- `evcc/loadpoints/<id>/solarShare`: Sonnenanteil an der Mindestladeleistung (0 bis 1)
 - `evcc/loadpoints/<id>/enableThreshold`: Einschaltschwelle
 - `evcc/loadpoints/<id>/enableDelay`: Einschaltverzögerung (s)
 - `evcc/loadpoints/<id>/disableThreshold`: Ausschaltschwelle

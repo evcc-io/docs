@@ -194,6 +194,11 @@ estimate: false # No interpolation
 
 Defines the behaviour of starting charging on solar surplus in smart mode. Additionally, it defines the behaviour during automatic phase switching from 1p to 3p.
 
+:::note
+To allow a share of grid power, use the **Solar Share** slider in the charging point settings instead (see [Not enough surplus?](/en/features/solar-charging#not-enough-surplus)).
+The slider is disabled as long as an `enable` or `disable` threshold is set.
+:::
+
 **For example**:
 
 ```yaml
