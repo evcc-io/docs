@@ -30,7 +30,7 @@ loop((screenshot) => {
     await removeOverlays(page);
 
     // late charging (strategy settings)
-    await page.locator(`${MODAL} h5 button`).click();
+    await page.getByTestId("plan-strategy").getByRole("button").first().click();
     await wait(300);
     await page.locator("#chargingplan-1-precondition").selectOption("3600");
     await wait(300);
@@ -42,7 +42,7 @@ loop((screenshot) => {
       { all: 20 },
     );
     await page.locator("#chargingplan-1-precondition").selectOption("0");
-    await page.locator(`${MODAL} h5 button`).click();
+    await page.getByTestId("plan-strategy").getByRole("button").first().click();
     await removeOverlays(page);
 
     // repeating

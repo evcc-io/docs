@@ -99,6 +99,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/loadpoints/<id>/phasesConfigured`: configured phases
 - `evcc/loadpoints/<id>/minCurrent`: minimum current value
 - `evcc/loadpoints/<id>/maxCurrent`: maximum current value
+- `evcc/loadpoints/<id>/solarShare`: solar share of the minimum charging power (0 to 1)
 - `evcc/loadpoints/<id>/enableThreshold`: threshold value
 - `evcc/loadpoints/<id>/enableDelay`: delay value (s)
 - `evcc/loadpoints/<id>/disableThreshold`: threshold value

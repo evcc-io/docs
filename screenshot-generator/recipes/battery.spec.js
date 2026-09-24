@@ -1,14 +1,6 @@
 import { loop } from "./utils/loop";
 const { test, expect } = require("@playwright/test");
-import {
-  CURSOR,
-  ONE,
-  TWO,
-  THREE,
-  FOUR,
-  placeOverlay,
-  removeOverlays,
-} from "./utils/overlay";
+import { CURSOR, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
 
 const BASE_PATH = "features/screenshots";
@@ -39,41 +31,35 @@ loop((screenshot) => {
     await page
       .locator('[data-testid="bottom-tab-bar"] a[href="#/battery"]')
       .click();
-    await expect(page.locator(".batteryLimits")).toBeVisible();
+    const usageCard = "main section:has(#batteryPriority)";
+    await expect(page.locator(usageCard)).toBeVisible();
 
-    await page.locator("#batterySettingsPriority").selectOption("50");
+    await page.locator("#batteryPriority").selectOption("50");
     await wait(300);
-    await placeOverlay(page, "#batterySettingsPriority", CURSOR, 0, 10);
-    await placeOverlay(page, ".battery .bg-darkest-green", ONE, -100, -21);
-    await placeOverlay(page, ".battery .bg-darker-green", TWO, -100, -21);
+    await placeOverlay(page, "#batteryPriority", CURSOR, 0, 10);
 
-    await screenshot(page, `${BASE_PATH}/battery-priority`, "main > .row", {
+    await screenshot(page, `${BASE_PATH}/battery-priority`, usageCard, {
       all: 20,
-      top: 80,
     });
     await removeOverlays(page);
 
     // buffer soc
-    await page.locator("#batterySettingsBuffer").selectOption("75");
+    await page.locator("#batteryBuffer").selectOption("75");
     await wait(300);
-    await placeOverlay(page, "#batterySettingsBuffer", CURSOR, 0, 10);
-    await placeOverlay(page, ".battery .bg-dark-green", THREE, -100, -21);
+    await placeOverlay(page, "#batteryBuffer", CURSOR, 0, 10);
 
-    await screenshot(page, `${BASE_PATH}/battery-buffer`, "main > .row", {
+    await screenshot(page, `${BASE_PATH}/battery-buffer`, usageCard, {
       all: 20,
-      top: 80,
     });
     await removeOverlays(page);
 
     // buffer start
-    await page.locator("#batterySettingsBufferStart").selectOption("90");
+    await page.locator("#batteryBufferStart").selectOption("90");
     await wait(300);
-    await placeOverlay(page, "#batterySettingsBufferStart", CURSOR, 0, 10);
-    await placeOverlay(page, ".bufferStartIndicator", FOUR, -100, -21);
+    await placeOverlay(page, "#batteryBufferStart", CURSOR, 0, 10);
 
-    await screenshot(page, `${BASE_PATH}/battery-bufferstart`, "main > .row", {
+    await screenshot(page, `${BASE_PATH}/battery-bufferstart`, usageCard, {
       all: 20,
-      top: 80,
     });
     await removeOverlays(page);
   });
@@ -91,10 +77,17 @@ loop((screenshot) => {
     await wait(300);
     await page.locator("main #smartCostLimit-battery").selectOption("0.12");
 
+    // card sits at the bottom of a long page: make it fit and hide the fixed tab bar
+    await page.setViewportSize({ width: 1280, height: 1800 });
+    await page.addStyleTag({
+      content: '[data-testid="bottom-tab-bar"] { display: none !important }',
+    });
+    await wait(300);
+
     await screenshot(
       page,
       `${BASE_PATH}/battery-grid-charging`,
-      "main > div:has(#smartCostLimit-battery)",
+      "main section:has(#smartCostLimit-battery)",
       {
         all: 20,
       },
