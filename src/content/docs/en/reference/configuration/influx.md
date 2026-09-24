@@ -1,7 +1,8 @@
 ---
 title: "influx"
+description: "How to write charging data to InfluxDB 1.8, InfluxDB 2 or VictoriaMetrics from evcc.yaml, including HTTPS with a self-signed certificate."
 sidebar:
-  order: 15
+  order: 16
 ---
 
 Defines the configuration required to write data to Influx.

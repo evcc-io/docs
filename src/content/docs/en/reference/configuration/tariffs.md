@@ -1,7 +1,8 @@
 ---
 title: "tariffs"
+description: "How to configure grid, feed-in, CO₂ and solar forecast tariffs in evcc.yaml for savings statistics, smart charging plans and time-based grid fees."
 sidebar:
-  order: 11
+  order: 12
 ---
 
 You can specify your energy tariff and, if applicable, your feed-in tariff.
@@ -17,6 +18,10 @@ tariffs:
   feedin:
     type: ...
   co2:
+    type: ...
+  solar:
+    type: ...
+  temperature:
     type: ...
 ```
 

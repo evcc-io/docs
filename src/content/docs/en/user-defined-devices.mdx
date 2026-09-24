@@ -1,12 +1,13 @@
 ---
 title: User-defined Devices
+description: "Shows how to integrate a wallbox, meter, vehicle or heater without a built-in template by defining its readings and controls yourself via HTTP, MQTT or Modbus."
 tableOfContents:
   maxHeadingLevel: 4
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-When creating a charger, heater, grid meter, battery, solar system, other consumer, vehicle, tariff or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
+When creating a charger, heater, grid meter, battery, solar system, other consumer, vehicle, tariff, curtailment device or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
 
 That way you can integrate devices that aren't covered by a built-in template, e.g. read the current power from an HTTP endpoint, or write a target current via Modbus.
 
@@ -73,9 +74,7 @@ features:
 
 The available attribute names and feature flags differ per device type and are listed in the sections below.
 
-<a id="meter"></a>
-
-## Meter
+## Meter \{#meter\}
 
 Power meters are configured in the [`meters`](/en/reference/configuration/meters) section.
 Meters defined under `meters:` can be referenced from `site`:
@@ -92,6 +91,7 @@ Meters defined under `meters:` can be referenced from `site`:
 Not all meter roles support all attributes:
 
 - `limitsoc` and `batterymode` are used exclusively for battery meters (referenced from `site.battery`).
+- `curtail` and `curtailed` are used together for `pv` meters that support feed-in curtailment (§ 9 EEG).
 - `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin entries each (as a YAML array) and apply to grid meters (`grid`) and wallboxes (`charge`).
 
 Return the correct data type from each plugin.
@@ -99,21 +99,20 @@ To convert, use the [reading pipelines](/en/reference/plugins#reading).
 
 ### Read attributes
 
-| Attribute      | Type                  | Required | Context       | Description                                                 |
-| -------------- | --------------------- | -------- | ------------- | ----------------------------------------------------------- |
-| `power`        | `float`               | yes      | all           | Current power in W                                          |
-| `energy`       | `float`               | no       | all           | Meter reading in kWh                                        |
-| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)       |
-| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                       |
-| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                        |
-| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                             |
-| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents. |
-| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.           |
-| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).      |
+| Attribute      | Type                  | Required | Context       | Description                                                          |
+| -------------- | --------------------- | -------- | ------------- | -------------------------------------------------------------------- |
+| `power`        | `float`               | yes      | all           | Current power in W                                                   |
+| `energy`       | `float`               | no       | all           | Meter reading in kWh                                                 |
+| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)                |
+| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                                |
+| `curtailed`    | `int`                 | no       | `pv`          | Current feed-in limit in % (0 to 100). Only together with `curtail`. |
+| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                                 |
+| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                                      |
+| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents.          |
+| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.                    |
+| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).               |
 
-<a id="signs-and-directions"></a>
-
-### Signs and Directions
+### Signs and Directions \{#signs-and-directions\}
 
 What a positive `power` value and the two energy directions mean depends on the meter role:
 
@@ -140,6 +139,7 @@ Real meter readings give more accurate long-term statistics.
 | ------------- | ----- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
 | `batterymode` | `int` | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge)                                                                                                        |
+| `curtail`     | `int` | no       | `pv`      | Set feed-in limit in % of the nominal production power (0 to 100, `100` = no limit). Only together with `curtailed`. See [Curtailment Device](#curtailer).        |
 
 ### Example
 
@@ -152,9 +152,7 @@ power:
   jq: .data.tuples[0][1]
 ```
 
-<a id="charger"></a>
-
-## Charger
+## Charger \{#charger\}
 
 The default `type: custom` covers wallboxes with continuous current control.
 For other devices, specialised charger types are described under [Switchsocket](#charger-switchsocket) and [Heat pumps](#charger-heating).
@@ -189,9 +187,7 @@ For other devices, specialised charger types are described under [Switchsocket](
 | `phases1p3p`       | `int`   | no       | Perform phase switching (requires `tos: true`)    |
 | `wakeup`           | `bool`  | no       | Wake up vehicle                                   |
 
-<a id="charger-features"></a>
-
-### Features
+### Features \{#charger-features\}
 
 | Feature            | Description                                                                                                                                                                                                       |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -257,9 +253,7 @@ enable:
   payload: ON
 ```
 
-<a id="charger-switchsocket"></a>
-
-### Switchsocket
+### Switchsocket \{#charger-switchsocket\}
 
 **`type: switchsocket`**
 
@@ -276,9 +270,7 @@ Full setup details are under [Smart switches](/en/smartswitches).
 | `enable`       | `bool`  | yes      | Switch socket on/off                                                                     |
 | `standbypower` | `float` | no       | Power threshold in W. Above it: charging; below: standby. Negative: static (no metering) |
 
-<a id="charger-heating"></a>
-
-### Heat pumps
+### Heat pumps \{#charger-heating\}
 
 Heat pumps and similar heating devices use dedicated charger types, each with its own attributes.
 The full setup is described under [Heat pumps, electric heaters](/en/heating).
@@ -338,9 +330,7 @@ Each contact is driven by a separate sub-charger referenced by type, not via plu
   </TabItem>
 </Tabs>
 
-<a id="vehicle"></a>
-
-## Vehicle
+## Vehicle \{#vehicle\}
 
 Vehicle parameters can also be read via plugins.
 
@@ -373,9 +363,7 @@ Vehicle parameters can also be read via plugins.
 | `capacity` | `float`  | no       | Battery capacity in kWh          |
 | `icon`     | `string` | no       | Icon shown in the user interface |
 
-<a id="vehicle-features"></a>
-
-### Features
+### Features \{#vehicle-features\}
 
 | Feature         | Description                                                                                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -420,9 +408,7 @@ onIdentify:
 Available modes: `off`, `smart`, `now`.
 The deprecated values `pv` and `minpv` are still accepted and activate `smart` with [Always charge](/en/features/solar-charging#always-charge) off or on.
 
-<a id="tariff"></a>
-
-## Tariff and forecast
+## Tariff and forecast \{#tariff\}
 
 A user-defined tariff connects evcc to a custom value source via the plugin mechanism.
 The `tariff` attribute selects what the source represents and which unit the values use.
@@ -438,19 +424,17 @@ Exactly one of `price` or `forecast` must be configured.
 
 ### Configuration
 
-| Attribute      | Type       | Required | Description                                                                                                                                                      |
-| -------------- | ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tariff`       | `string`   | no       | `price` (default), `co2` or `solar`. Sets the unit of the returned values: price in configured currency per kWh, CO₂ intensity in g/kWh, solar forecast in W.    |
-| `charges`      | `float`    | no       | Fixed additional charge per kWh added to every value. Default `0`.                                                                                               |
-| `chargesZones` | `list`     | no       | Time-based charges (e.g. grid fees) that override `charges` for specific periods. See [time-based grid fees](/en/reference/configuration/tariffs#charges-zones). |
-| `tax`          | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20%. Default `0`.                                                                                           |
-| `formula`      | `string`   | no       | Go expression for a custom calculation, with `price`, `charges` and `tax` in scope. See [examples](#formula-examples).                                           |
-| `interval`     | `duration` | no       | Polling interval for `forecast`. Default `1h`.                                                                                                                   |
-| `cache`        | `duration` | no       | Cache duration for `price`. Default `15m`.                                                                                                                       |
+| Attribute      | Type       | Required | Description                                                                                                                                                                                     |
+| -------------- | ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`       | `string`   | no       | `price` (default), `co2`, `solar` or `temperature`. Sets the unit of the returned values: price in configured currency per kWh, CO₂ intensity in g/kWh, solar forecast in W, temperature in °C. |
+| `charges`      | `float`    | no       | Fixed additional charge per kWh added to every value. Default `0`.                                                                                                                              |
+| `chargesZones` | `list`     | no       | Time-based charges (e.g. grid fees) that override `charges` for specific periods. See [time-based grid fees](/en/reference/configuration/tariffs#charges-zones).                                |
+| `tax`          | `float`    | no       | Percentage tax applied to the result, e.g. `0.2` for 20%. Default `0`.                                                                                                                          |
+| `formula`      | `string`   | no       | Go expression for a custom calculation, with `price`, `charges` and `tax` in scope. See [examples](#formula-examples).                                                                          |
+| `interval`     | `duration` | no       | Polling interval for `forecast`. Default `1h`.                                                                                                                                                  |
+| `cache`        | `duration` | no       | Cache duration for `price`. Default `15m`.                                                                                                                                                      |
 
-<a id="tariff-features"></a>
-
-### Features
+### Features \{#tariff-features\}
 
 | Feature     | Description                                                                                    |
 | ----------- | ---------------------------------------------------------------------------------------------- |
@@ -529,9 +513,7 @@ formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 
 Pays a fixed feed-in tariff of 7 ct/kWh, except when the day-ahead market price is negative.
 
-<a id="external-limit"></a>
-
-## External Limit
+## External Limit \{#external-limit\}
 
 A user-defined integration for the [External Limit](/en/external-limit) feature connects a control box or energy management system that isn't covered by a built-in integration.
 In the UI, pick **User-defined integration** under **Configuration → External Limit**.
@@ -624,9 +606,7 @@ limit:
 </TabItem>
 </Tabs>
 
-<a id="external-limit-fnn"></a>
-
-### FNN Control Box
+### FNN Control Box \{#external-limit-fnn\}
 
 Control boxes following the FNN standard signal dimming and curtailment via separate switch contacts.
 Consumption dimming (W4) and feed-in curtailment (W3, S2, S1) operate independently.
@@ -667,9 +647,7 @@ s1:
   pin: 23
 ```
 
-<a id="external-limit-eebus"></a>
-
-### EEBus
+### EEBus \{#external-limit-eebus\}
 
 The digital connection via the EEBus protocol.
 The control box communicates directly with your evcc instance and automatically transmits the power limit.
@@ -690,9 +668,7 @@ type: eebus
 ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ```
 
-<a id="external-limit-custom"></a>
-
-### Custom
+### Custom \{#external-limit-custom\}
 
 The generic integration for control systems that provide dynamic limit values instead of switch contacts.
 Consumption limit and feed-in curtailment are read via plugins and work independently of each other.
@@ -719,9 +695,61 @@ curtailedPercent:
 productionNominalMax: 10000 # Installed generator power (Wp)
 ```
 
-<a id="notification-service"></a>
+## Curtailment Device \{#curtailer\}
 
-## Notification Service
+A user-defined curtailment device limits the feed-in of the solar installation on request of the grid operator (§ 9 EEG) when the inverter can't be curtailed through its [meter](#meter) configuration.
+In the UI, pick **User-defined device** under **Configuration → Grid → Add curtailment device**.
+See also the [`curtailers` configuration reference](/en/reference/configuration/curtailers) and [External Limit](/en/external-limit#curtailment-devices).
+
+The device receives the allowed feed-in as a percentage of the installed generator power and has to apply it on the inverter.
+`100` means no limit.
+
+### Attributes
+
+| Attribute   | Type   | Required | Description                                                                                                                               |
+| ----------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | yes      | Sets the feed-in limit in % of the nominal production power (0 to 100). Must support write access.                                        |
+| `curtailed` | plugin | yes      | Reads the current feed-in limit in %. If the device can't report it, use the [`error`](/en/reference/plugins#error) plugin (see example). |
+
+### Examples
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+The inverter can't report its limit, so `curtailed` returns `ErrNotAvailable` and the limit is written whenever it changes.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
+
+## Notification Service \{#notification-service\}
 
 A user-defined notification service processes [notification](/en/notifications) messages via any [plugin](/en/reference/plugins) with write access, e.g. a shell script, HTTP request, or MQTT message.
 In the UI, pick **User-defined service** under **Configuration → Notifications → Services**.

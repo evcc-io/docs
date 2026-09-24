@@ -1,6 +1,7 @@
 ---
 date: 2021-12-29
 title: "Version 0.76"
+description: "Release Notes zu evcc 0.76 vom Dezember 2021 mit Unterstützung für die Fahrzeuge Dacia und Smart EQ, die Wallbox Innogy eBox und einigen Fehlerkorrekturen."
 authors: [derandereandi]
 tags: [release]
 prev: false

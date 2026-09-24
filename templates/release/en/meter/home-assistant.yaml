@@ -59,8 +59,8 @@ render:
       uri: http://homeassistant.local:8123 # Home Assistant URI
       power: sensor.house_power # Power Entity, Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
       capacity: 50 # Battery capacity (kWh), optional
-      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
-      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
     advanced: |
       type: template
       template: homeassistant
@@ -68,8 +68,8 @@ render:
       uri: http://homeassistant.local:8123 # Home Assistant URI
       power: sensor.house_power # Power Entity, Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
       capacity: 50 # Battery capacity (kWh), optional
-      minsoc: 25 # Minimum charge (%), Lower limit when discharging the battery in normal operation (optional)
-      maxsoc: 95 # Maximum charge (%), Upper limit when charging the battery from the grid (optional)
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
       energy: sensor.house_energy # Energy Entity, Entity ID for total energy in kWh (e.g. grid import or battery charging). No daily or interval values. (optional)
       returnEnergy: sensor.house_return_energy # Return Energy Entity, Entity ID for total energy in reverse direction in kWh (e.g. grid export or battery discharging). No daily or interval values. (optional)
       currentL1: sensor.house_current_l1 # L1 Current Entity, Entity ID for L1 current measurement in amperes (optional)
@@ -79,9 +79,11 @@ render:
       voltageL2: sensor.house_voltage_l2 # L2 Voltage Entity, Entity ID for L2 voltage measurement in volts (optional)
       voltageL3: sensor.house_voltage_l3 # L3 Voltage Entity, Entity ID for L3 voltage measurement in volts (optional)
       soc: sensor.battery_soc # Battery State of Charge, Entity ID for battery state of charge in percent (optional)
-      modeNormal: script.battery_normal # Normal Mode Script, Script to put home battery to normal operation. Required when modeHold or modeCharge is set. The script is responsible for any necessary state changes on the HA side. (optional)
+      modeNormal: script.battery_normal # Normal Mode Script, Script to put home battery to normal operation. Required when any other mode script is set. The script is responsible for any necessary state changes on the HA side. (optional)
       modeHold: script.battery_hold # Hold Mode Script, Optional script to prevent the home battery from discharging. (optional)
       modeCharge: script.battery_grid_charge # Grid Charge Mode Script, Optional script to grid-charge the home battery. (optional)
+      modeHoldCharge: script.battery_hold_charge # Hold Charge Mode Script, Optional script to prevent the home battery from charging while discharging to cover the house load remains allowed. (optional)
+      modeDischarge: script.battery_grid_discharge # Grid Discharge Mode Script, Optional script to force-discharge the home battery to the grid. (optional)
       insecure: # Accept self-signed certificates, optional
       maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
       maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
@@ -159,20 +161,20 @@ params:
     optional: true
   - name: minsoc
     example: 25
-    default:
+    default: 0
     choice: []
     unit: '%'
     description: Minimum charge
-    help: Lower limit when discharging the battery in normal operation
+    help: Lower limit as configured on the battery system. Used by optimizer.
     advanced: false
     optional: true
   - name: maxsoc
     example: 95
-    default:
+    default: 100
     choice: []
     unit: '%'
     description: Maximum charge
-    help: Upper limit when charging the battery from the grid
+    help: Upper limit as configured on the battery system. Used by optimizer and for grid charging.
     advanced: false
     optional: true
   - name: energy
@@ -262,7 +264,7 @@ params:
     choice: []
     unit:
     description: Normal Mode Script
-    help: Script to put home battery to normal operation. Required when modeHold or modeCharge is set. The script is responsible for any necessary state changes on the HA side.
+    help: Script to put home battery to normal operation. Required when any other mode script is set. The script is responsible for any necessary state changes on the HA side.
     advanced: true
     optional: true
   - name: modeHold
@@ -281,6 +283,24 @@ params:
     unit:
     description: Grid Charge Mode Script
     help: Optional script to grid-charge the home battery.
+    advanced: true
+    optional: true
+  - name: modeHoldCharge
+    example: script.battery_hold_charge
+    default:
+    choice: []
+    unit:
+    description: Hold Charge Mode Script
+    help: Optional script to prevent the home battery from charging while discharging to cover the house load remains allowed.
+    advanced: true
+    optional: true
+  - name: modeDischarge
+    example: script.battery_grid_discharge
+    default:
+    choice: []
+    unit:
+    description: Grid Discharge Mode Script
+    help: Optional script to force-discharge the home battery to the grid.
     advanced: true
     optional: true
   - name: insecure

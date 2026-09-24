@@ -1,5 +1,6 @@
 ---
 title: "Vorträge, Videos & Blogs"
+description: "Sammelt Videos, Vorträge, Podcasts und Blogbeiträge aus der Community, die zeigen, wie du evcc einrichtest, und die Geschichte hinter dem Projekt erzählen."
 ---
 
 Abseits der offiziellen Dokumentation gibt es inzwischen viele gute und praxisnahe Einstiegs- und Erklärvideos.

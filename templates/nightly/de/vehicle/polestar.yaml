@@ -1,25 +1,30 @@
-template: polestar
+template: polestar-data-portal
 product:
   identifier: polestar
   brand: Polestar
 requirements: ["skiptest"]
+description: |
+  Benötigt Client-Zugangsdaten aus dem [Polestar Data Portal](https://data-portal.polestar.com/) Entwicklerkonto (EU Data Act). Registrierung im [Polestar Data Portal](https://data-portal.polestar.com/) für Client ID, Client Secret und Account ID.
+
 render:
   - default: |
       type: template
-      template: polestar
-      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
-      password: # Passwort, Zugangspasswort des Dienstes
-      vin: LPSVS... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      template: polestar-data-portal
+      clientid: # Client ID
+      clientsecret: # Client Secret
+      accountid: # Account ID, Account ID, wird als x-client-id Header gesendet.
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
+      vin: LPSVS... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
     advanced: |
       type: template
-      template: polestar
-      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
-      password: # Passwort, Zugangspasswort des Dienstes
-      vin: LPSVS... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
+      template: polestar-data-portal
+      clientid: # Client ID
+      clientsecret: # Client Secret
+      accountid: # Account ID, Account ID, wird als x-client-id Header gesendet.
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
+      vin: LPSVS... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
       phases: # Maximale Phasenanzahl, Wird für die Bestimmung des minimalen Solar-Überschusses und der Planungsdauer verwendet. [1, 2, 3] (optional)
       minCurrent: 6 # Minimale Stromstärke (A), Definiert die minimale Stromstärke pro angeschlossener Phase die genutzt werden kann (optional)
@@ -27,38 +32,38 @@ render:
       maxPower: 10000 # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # RFID-Identifikation, Für die Zuordnung des Fahrzeugs an einen Ladepunkt via RFID-Karte. Die Kennung wird am Ladepunkt angezeigt. Übernehme den Wert von dort. [Mehr erfahren.](https://docs.evcc.io/docs/features/vehicle) (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität). (optional)
-      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
       climaterdisabled: # Klimatisierungserkennung deaktivieren, Klimatisierungsstatus des Fahrzeugs für die Ladesteuerung ignorieren, sodass der Ladevorgang am SoC- oder Energielimit endet, auch wenn das Fahrzeug einen aktiven Klimatisierungswunsch signalisiert. (optional)
       autodetectdisabled: # Von automatischer Erkennung ausschließen, Das Fahrzeug von der automatischen Erkennung beim Anschließen eines Fahrzeugs ausschließen (optional)
       wakeupdisabled: # Aufweck-Aufrufe deaktivieren, Keine Aufweck-Aufrufe an Fahrzeug oder Ladegerät senden, hilfreich bei Fahrzeugen, die nach wiederholtem Aufwecken das Laden verweigern. (optional)
+      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
 params:
-  - name: user
+  - name: clientid
     example:
     default:
     choice: []
     unit:
-    description: Benutzerkonto
-    help: bspw. E-Mail Adresse, User Id, etc.
+    description: Client ID
+    help:
     advanced: false
     optional: false
-  - name: password
+  - name: clientsecret
     example:
     default:
     choice: []
     unit:
-    description: Passwort
-    help: Zugangspasswort des Dienstes
+    description: Client Secret
+    help:
     advanced: false
     optional: false
-  - name: vin
-    example: LPSVS...
+  - name: accountid
+    example:
     default:
     choice: []
     unit:
-    description: Fahrzeugidentifikationsnummer
-    help: Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+    description: Account ID
+    help: Account ID, wird als x-client-id Header gesendet.
     advanced: false
-    optional: true
+    optional: false
   - name: title
     example:
     default:
@@ -75,6 +80,15 @@ params:
     unit: kWh
     description: Akkukapazität
     help:
+    advanced: false
+    optional: true
+  - name: vin
+    example: LPSVS...
+    default:
+    choice: []
+    unit:
+    description: Fahrzeugidentifikationsnummer
+    help: Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
     advanced: false
     optional: true
   - name: icon
@@ -140,15 +154,6 @@ params:
     help: Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität).
     advanced: true
     optional: true
-  - name: cache
-    example: 5m
-    default: 15m
-    choice: []
-    unit:
-    description: Cache
-    help: Zeitintervall für erneute Datenabfrage
-    advanced: true
-    optional: true
   - name: climaterdisabled
     example:
     default:
@@ -174,5 +179,14 @@ params:
     unit:
     description: Aufweck-Aufrufe deaktivieren
     help: Keine Aufweck-Aufrufe an Fahrzeug oder Ladegerät senden, hilfreich bei Fahrzeugen, die nach wiederholtem Aufwecken das Laden verweigern.
+    advanced: true
+    optional: true
+  - name: cache
+    example: 5m
+    default: 15m
+    choice: []
+    unit:
+    description: Cache
+    help: Zeitintervall für erneute Datenabfrage
     advanced: true
     optional: true

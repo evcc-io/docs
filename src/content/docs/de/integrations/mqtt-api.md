@@ -1,5 +1,6 @@
 ---
 title: "MQTT API"
+description: "Listet alle MQTT-Topics auf, die evcc zu Anlage, Ladepunkten, Fahrzeugen und Hausbatterie veröffentlicht, sowie die Topics, über die du Modus, Limits und Pläne änderst."
 sidebar:
   order: 2
 ---

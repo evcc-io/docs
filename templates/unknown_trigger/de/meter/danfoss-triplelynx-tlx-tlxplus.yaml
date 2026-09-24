@@ -1,0 +1,84 @@
+template: danfoss-triplelynx-tlx
+product:
+  identifier: danfoss-triplelynx-tlx-tlxplus
+  brand: Danfoss
+  description: TripleLynx TLX/TLX+
+description: |
+  Die Kommunikation erfolgt über die RS485-Schnittstelle des Wechselrichters (ComLynx-Protokoll).
+
+  **Verkabelung (RJ45-Stecker am Wechselrichter):**
+  - Pin 1: GND
+  - Pin 2: B (RS485-)
+  - Pin 3: A (RS485+)
+  - Pin 6: B (Daisy-Chain zum nächsten Gerät)
+  - Pin 7: A (Daisy-Chain zum nächsten Gerät)
+
+  Busabschlusswiderstände (120 Ω) am ersten und letzten Gerät der Kette erforderlich
+  (Pins 4→6 und 5→7 am Wechselrichter).
+
+  Verbinde den USB-RS485-Adapter (oder Netzwerk-Seriellbrücke) mit dem RS485-Bus.
+  Mehrere Wechselrichter an einem Bus: `node`-Parameter für jeden Wechselrichter setzen.
+
+render:
+  - usage: pv
+    default: |
+      type: template
+      template: danfoss-triplelynx-tlx
+      usage: pv
+      device: /dev/ttyUSB0 # Serieller Anschluss (USB-RS485-Adapter), z. B. /dev/ttyUSB0 — Gegenseitig ausschließend mit uri (optional)
+      uri: localhost:4196 # TCP-Endpunkt einer Netzwerk-Seriellbrücke, z. B. rs485bridge.lan:4196 — Gegenseitig ausschließend mit device (optional)
+    advanced: |
+      type: template
+      template: danfoss-triplelynx-tlx
+      usage: pv
+      device: /dev/ttyUSB0 # Serieller Anschluss (USB-RS485-Adapter), z. B. /dev/ttyUSB0 — Gegenseitig ausschließend mit uri (optional)
+      uri: localhost:4196 # TCP-Endpunkt einer Netzwerk-Seriellbrücke, z. B. rs485bridge.lan:4196 — Gegenseitig ausschließend mit device (optional)
+      node: c-6-b1 # Geräteadresse (hex, Format N-S-NN), Nur erforderlich wenn mehrere Wechselrichter am selben RS485-Bus hängen. Die Adresse wird beim Start automatisch ermittelt und im Log ausgegeben. Format: Netzwerk-Subnetz-Knoten in Hex, z. B. c-6-b1 (optional)
+      baudrate: 19200 # Baudrate, Typische Werte sind 9600, 19200, 38400, 57600, 115200 (optional)
+      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
+params:
+  - name: device
+    example: /dev/ttyUSB0
+    default:
+    choice: []
+    unit:
+    description: Serieller Anschluss (USB-RS485-Adapter)
+    help: z. B. /dev/ttyUSB0 — Gegenseitig ausschließend mit uri
+    advanced: false
+    optional: true
+  - name: uri
+    example: localhost:4196
+    default:
+    choice: []
+    unit:
+    description: TCP-Endpunkt einer Netzwerk-Seriellbrücke
+    help: z. B. rs485bridge.lan:4196 — Gegenseitig ausschließend mit device
+    advanced: false
+    optional: true
+  - name: node
+    example: c-6-b1
+    default:
+    choice: []
+    unit:
+    description: Geräteadresse (hex, Format N-S-NN)
+    help: 'Nur erforderlich wenn mehrere Wechselrichter am selben RS485-Bus hängen. Die Adresse wird beim Start automatisch ermittelt und im Log ausgegeben. Format: Netzwerk-Subnetz-Knoten in Hex, z. B. c-6-b1'
+    advanced: true
+    optional: true
+  - name: baudrate
+    example:
+    default: 19200
+    choice: []
+    unit:
+    description: Baudrate
+    help: Typische Werte sind 9600, 19200, 38400, 57600, 115200
+    advanced: true
+    optional: true
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximale AC Leistung des Hybrid-Wechselrichters
+    help:
+    advanced: true
+    optional: true

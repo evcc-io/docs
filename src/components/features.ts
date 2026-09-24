@@ -64,7 +64,7 @@ const descriptions: Record<string, Partial<Record<Lang, string>>> = {
   },
   curtail: {
     de: "Wechselrichter-Erzeugung kann reduziert werden (bspw. § 9 EEG). Siehe [Externe Begrenzung](/de/external-limit).",
-    en: "Inverter production can be reduced (e.g. § 9 EEG). See [External Limit](/en/external-limit).",
+    en: "Inverter production can be reduced (e.g. § 9 EEG). See [External Limit](/en/external-limit#curtailment-devices).",
   },
   ocpp: {
     de: "Kommunikation über das offene OCPP-Protokoll.",

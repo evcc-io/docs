@@ -3,7 +3,7 @@ product:
   identifier: fronius-primo-gen24-plus
   brand: Fronius
   description: Primo GEN24 Plus
-capabilities: ["battery-control"]
+capabilities: ["battery-control", "curtail"]
 description: |
   Um die aktive Ladesteuerung zu nutzen darf der Energiekosten-Assistent (ECA) im Fronius Solar.web nicht aktiviert sein. (Fronius Solar.web->Einstellungen->Betriebsmodus->Eigenverbrauch)
 
@@ -35,7 +35,6 @@ render:
       usage: pv
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 502 # Port, optional
-      maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
   - usage: battery
     default: |
       type: template
@@ -44,8 +43,8 @@ render:
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 502 # Port, optional
       capacity: 50 # Akkukapazität (kWh), optional
-      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
-      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
     advanced: |
       type: template
       template: fronius-gen24
@@ -53,8 +52,8 @@ render:
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 502 # Port, optional
       capacity: 50 # Akkukapazität (kWh), optional
-      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
-      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
       maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
       maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
       maxchargerate: 100 # Maximale prozentuale Ladeleistung (%), Für erzwungenes Laden des Speichers in Prozent in Relation zur maximalen Ladeleistung des Batteriewechselrichters. (optional)
@@ -88,20 +87,20 @@ params:
     optional: true
   - name: minsoc
     example: 25
-    default:
+    default: 0
     choice: []
     unit: '%'
     description: Minimaler Ladestand
-    help: Untere Grenze beim Entladen der Batterie im normalen Betrieb
+    help: Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt.
     advanced: false
     optional: true
   - name: maxsoc
     example: 95
-    default:
+    default: 100
     choice: []
     unit: '%'
     description: Maximaler Ladestand
-    help: Oberes Limit beim Laden der Batterie aus dem Netz
+    help: Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt.
     advanced: false
     optional: true
   - name: id
@@ -111,15 +110,6 @@ params:
     unit:
     description: ID
     help: 'Zähleradresse von Primär- oder Sekundärzählern. Auf der Weboberfläche des Wechselrichters kann nur die Adresse des ersten Zählers (z.B. 200) eingestellt werden. Zusätzliche Zähler erhalten eine aufsteigende Nummer (z.B: 201).'
-    advanced: true
-    optional: true
-  - name: maxacpower
-    example: 5000
-    default: 0
-    choice: []
-    unit: W
-    description: Maximale AC Leistung des Hybrid-Wechselrichters
-    help:
     advanced: true
     optional: true
   - name: maxchargepower

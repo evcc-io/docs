@@ -1,5 +1,6 @@
 ---
 title: "loadpoints"
+description: "How to set up charging points in evcc.yaml: link a charger, meter and vehicle, pick the default mode and fine-tune vehicle polling, thresholds and phases."
 sidebar:
   order: 3
 ---

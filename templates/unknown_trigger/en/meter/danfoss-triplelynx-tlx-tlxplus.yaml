@@ -1,0 +1,84 @@
+template: danfoss-triplelynx-tlx
+product:
+  identifier: danfoss-triplelynx-tlx-tlxplus
+  brand: Danfoss
+  description: TripleLynx TLX/TLX+
+description: |
+  Communication uses the RS485 port of the inverter (ComLynx protocol).
+
+  **Wiring (RJ45 connector on the inverter):**
+  - Pin 1: GND
+  - Pin 2: B (RS485-)
+  - Pin 3: A (RS485+)
+  - Pin 6: B (daisy-chain to next device)
+  - Pin 7: A (daisy-chain to next device)
+
+  Termination resistors (120 Ω) are required at both ends of the bus
+  (bridge pins 4→6 and 5→7 on the inverter).
+
+  Connect a USB-RS485 adapter (or a network serial bridge) to the RS485 bus.
+  For multiple inverters on one bus set the `node` parameter for each meter entry.
+
+render:
+  - usage: pv
+    default: |
+      type: template
+      template: danfoss-triplelynx-tlx
+      usage: pv
+      device: /dev/ttyUSB0 # Serial port (USB-RS485 adapter), e.g. /dev/ttyUSB0 — mutually exclusive with uri (optional)
+      uri: localhost:4196 # TCP endpoint of a network RS485 bridge, e.g. rs485bridge.lan:4196 — mutually exclusive with device (optional)
+    advanced: |
+      type: template
+      template: danfoss-triplelynx-tlx
+      usage: pv
+      device: /dev/ttyUSB0 # Serial port (USB-RS485 adapter), e.g. /dev/ttyUSB0 — mutually exclusive with uri (optional)
+      uri: localhost:4196 # TCP endpoint of a network RS485 bridge, e.g. rs485bridge.lan:4196 — mutually exclusive with device (optional)
+      node: c-6-b1 # Inverter node address (hex, N-S-NN), Only required when multiple inverters share the same RS485 bus. The address is discovered automatically on startup and printed to the log. Format: network-subnet-node in hex, e.g. c-6-b1 (optional)
+      baudrate: 19200 # Baudrate, Typical values are 9600, 19200, 38400, 57600, 115200 (optional)
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+params:
+  - name: device
+    example: /dev/ttyUSB0
+    default:
+    choice: []
+    unit:
+    description: Serial port (USB-RS485 adapter)
+    help: e.g. /dev/ttyUSB0 — mutually exclusive with uri
+    advanced: false
+    optional: true
+  - name: uri
+    example: localhost:4196
+    default:
+    choice: []
+    unit:
+    description: TCP endpoint of a network RS485 bridge
+    help: e.g. rs485bridge.lan:4196 — mutually exclusive with device
+    advanced: false
+    optional: true
+  - name: node
+    example: c-6-b1
+    default:
+    choice: []
+    unit:
+    description: Inverter node address (hex, N-S-NN)
+    help: 'Only required when multiple inverters share the same RS485 bus. The address is discovered automatically on startup and printed to the log. Format: network-subnet-node in hex, e.g. c-6-b1'
+    advanced: true
+    optional: true
+  - name: baudrate
+    example:
+    default: 19200
+    choice: []
+    unit:
+    description: Baudrate
+    help: Typical values are 9600, 19200, 38400, 57600, 115200
+    advanced: true
+    optional: true
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximum AC power of the hybrid inverter
+    help:
+    advanced: true
+    optional: true

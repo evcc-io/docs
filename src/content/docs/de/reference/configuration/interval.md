@@ -1,7 +1,8 @@
 ---
 title: "interval"
+description: "Wie oft Zählerwerte gelesen und Ladeströme nachgeregelt werden, wie du das Intervall änderst und warum sehr kurze Intervalle zu Schwingungen führen können."
 sidebar:
-  order: 9
+  order: 10
 ---
 
 Definiert das zeitliche Interval, in welchem neue Werte von allen Messgeräten gelesen werden und die Ladeströme der Wallboxen neu geregelt wird.

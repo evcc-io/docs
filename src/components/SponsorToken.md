@@ -1,3 +1,3 @@
-```text title="trial token, valid until 2026-08-16" wrap
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJldmNjLmlvIiwic3ViIjoidHJpYWwiLCJleHAiOjE3ODY4NjAwMDAsImlhdCI6MTc4NTk5NjAwMCwic3BlIjp0cnVlLCJzcmMiOiJtYSJ9.PepsUH_pnuq1HpSPCPrRWyquglcO58xOLZ5KP_chtN0
+```text title="trial token, valid until 2026-09-29" wrap
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJldmNjLmlvIiwic3ViIjoidHJpYWwiLCJleHAiOjE3OTA3MDg0MDAsImlhdCI6MTc4OTg0NDQwMCwic3BlIjp0cnVlLCJzcmMiOiJtYSJ9.00Cq2VloFnMGqA136D2q08A0sx4MVv-bTxogJBwbfTs
 ```

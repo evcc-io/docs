@@ -1,7 +1,8 @@
 ---
 title: "tariffs"
+description: "Tarife für Netzbezug, Einspeisung, CO₂ und Solarprognose in der evcc.yaml hinterlegen, für Ersparnisstatistik, Ladepläne und zeitabhängige Netzentgelte."
 sidebar:
-  order: 11
+  order: 12
 ---
 
 Hier kannst du deinen Energietarif und gegebenenfalls deine Einspeisevergütung angeben.
@@ -19,6 +20,8 @@ tariffs:
   co2:
     type: ...
   solar:
+    type: ...
+  temperature:
     type: ...
 ```
 

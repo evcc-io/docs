@@ -1,6 +1,7 @@
 ---
 date: 2022-05-08
 title: "Phasenhandling, Templates und Lithauisch"
+description: "Release-Rückblick zu evcc 0.81 bis 0.91 vom Mai 2022 mit vielen neuen Wallboxen und Fahrzeugen, besserer Phasenumschaltung, Geräte-Templates und Litauisch."
 authors: [naltatis]
 tags: [release]
 prev: false

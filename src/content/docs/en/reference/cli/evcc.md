@@ -11,19 +11,26 @@ evcc [flags]
 ## Options
 
 ```
-  -c, --config string          Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
-      --custom-css string      Additional user-defined CSS file for custom styling. No compatibility guarantees.
-      --database string        Database location (default "~/.evcc/evcc.db")
-      --demo                   Enter demo mode. Disables auth, config ui and restart
-      --disable-auth           Disable authentication (dangerous)
-  -h, --help                   Help
-      --ignore-db              Run command ignoring service database
-  -l, --log string             Log level (fatal, error, warn, info, debug, trace) (default "info")
-      --log-headers            Log headers
-      --metrics                Expose metrics
-      --profile                Expose pprof profiles
-      --template string        Add custom template file (debug only)
-      --template-type string   Custom template type (charger, meter, tariff, vehicle) (debug only)
+  -c, --config string              Config file (default "~/evcc.yaml" or "/etc/evcc.yaml")
+      --custom-brand string        Custom brand name shown in the UI
+      --custom-css string          Additional user-defined CSS file for custom styling. No compatibility guarantees.
+      --custom-email string        Support email address shown in the UI
+      --custom-logo-dark string    Custom dark-mode logo file (svg, png) replacing the evcc logo in the UI. Requires custom-logo-light.
+      --custom-logo-light string   Custom light-mode logo file (svg, png) replacing the evcc logo in the UI. Requires custom-logo-dark.
+      --custom-phone string        Support phone number shown in the UI
+      --custom-theme string        Default UI theme (auto, light, dark). Users can override in the UI.
+      --custom-website string      Custom website URL shown in the UI
+      --database string            Database location (default "~/.evcc/evcc.db")
+      --demo                       Enter demo mode. Disables auth, config ui and restart
+      --disable-auth               Disable authentication (dangerous)
+  -h, --help                       Help
+      --ignore-db                  Run command ignoring service database
+  -l, --log string                 Log level (fatal, error, warn, info, debug, trace) (default "info")
+      --log-headers                Log headers
+      --metrics                    Expose metrics
+      --profile                    Expose pprof profiles
+      --template string            Add custom template file (debug only)
+      --template-type string       Custom template type (charger, meter, tariff, vehicle) (debug only)
 ```
 
 ## See also

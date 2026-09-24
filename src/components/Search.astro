@@ -1,0 +1,49 @@
+---
+// Sticky footer linking the search term to GitHub. Pagefind's prefix fallback
+// ("Weishaupt" → "GoodWe") means search never comes up empty.
+import Default from "@astrojs/starlight/components/Search.astro";
+
+const t =
+  Astro.currentLocale === "de"
+    ? { lead: "Nichts Passendes?", before: "Auf GitHub nach „", after: "“ suchen" }
+    : { lead: "Nothing helpful?", before: "Search GitHub for “", after: "”" };
+---
+
+<Default {...Astro.props} />
+
+<div class="search-repo-hint" hidden>
+  {t.lead}{" "}
+  <a target="_blank">{t.before}<strong data-term></strong>{t.after} →</a>
+</div>
+
+<script>
+  const hint = document.querySelector<HTMLElement>(".search-repo-hint")!;
+  const frame = document.querySelector("site-search .dialog-frame");
+  if (frame) {
+    frame.append(hint);
+    const term = hint.querySelector("[data-term]")!;
+    const link = hint.querySelector("a")!;
+    frame.addEventListener("input", (e) => {
+      const value = (e.target as HTMLInputElement).value.trim();
+      hint.hidden = !value;
+      term.textContent = value;
+      link.href = `https://github.com/search?q=${encodeURIComponent(`repo:evcc-io/evcc ${value}`)}&type=discussions`;
+    });
+  }
+</script>
+
+<style is:global>
+  .search-repo-hint {
+    position: sticky;
+    bottom: -1rem;
+    margin: auto -1rem -1rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+    background-color: var(--sl-color-gray-6);
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+  }
+  .search-repo-hint a {
+    color: var(--sl-color-text-accent);
+  }
+</style>

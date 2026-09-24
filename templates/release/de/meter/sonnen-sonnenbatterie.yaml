@@ -23,6 +23,7 @@ render:
       usage: grid
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 8080 # Port, optional
+      cache: 1s # Cache, Zeitintervall für erneute Datenabfrage (optional)
   - usage: pv
     default: |
       type: template
@@ -36,6 +37,7 @@ render:
       usage: pv
       host: 192.0.2.2 # IP-Adresse oder Hostname
       port: 8080 # Port, optional
+      cache: 1s # Cache, Zeitintervall für erneute Datenabfrage (optional)
   - usage: battery
     default: |
       type: template
@@ -45,8 +47,8 @@ render:
       defaultmode: self-consumption # Standardmodus für die aktive Batteriesteuerung, Wechselrichter fällt nach einem Laden des Speichers oder Unterbinden der Entladung zurück auf diesen Modus. [self-consumption, time-of-use]
       port: 8080 # Port, optional
       capacity: 50 # Akkukapazität (kWh), optional
-      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
-      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
       token: # Token, API Token (benötigt für aktive Batteriesteuerung) (optional)
     advanced: |
       type: template
@@ -56,11 +58,12 @@ render:
       defaultmode: self-consumption # Standardmodus für die aktive Batteriesteuerung, Wechselrichter fällt nach einem Laden des Speichers oder Unterbinden der Entladung zurück auf diesen Modus. [self-consumption, time-of-use]
       port: 8080 # Port, optional
       capacity: 50 # Akkukapazität (kWh), optional
-      minsoc: 25 # Minimaler Ladestand (%), Untere Grenze beim Entladen der Batterie im normalen Betrieb (optional)
-      maxsoc: 95 # Maximaler Ladestand (%), Oberes Limit beim Laden der Batterie aus dem Netz (optional)
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
       token: # Token, API Token (benötigt für aktive Batteriesteuerung) (optional)
       maxchargepower: 3300 # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
       maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
+      cache: 1s # Cache, Zeitintervall für erneute Datenabfrage (optional)
 params:
   - name: host
     example: 192.0.2.2
@@ -100,20 +103,20 @@ params:
     optional: true
   - name: minsoc
     example: 25
-    default:
+    default: 0
     choice: []
     unit: '%'
     description: Minimaler Ladestand
-    help: Untere Grenze beim Entladen der Batterie im normalen Betrieb
+    help: Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt.
     advanced: false
     optional: true
   - name: maxsoc
     example: 95
-    default:
+    default: 100
     choice: []
     unit: '%'
     description: Maximaler Ladestand
-    help: Oberes Limit beim Laden der Batterie aus dem Netz
+    help: Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt.
     advanced: false
     optional: true
   - name: token
@@ -141,5 +144,14 @@ params:
     unit: W
     description: Maximale Entladeleistung
     help: Maximale Entladeleistung des Speichers.
+    advanced: true
+    optional: true
+  - name: cache
+    example: 5m
+    default: 1s
+    choice: []
+    unit:
+    description: Cache
+    help: Zeitintervall für erneute Datenabfrage
     advanced: true
     optional: true

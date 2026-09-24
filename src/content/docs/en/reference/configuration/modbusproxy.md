@@ -1,7 +1,8 @@
 ---
 title: "modbusproxy"
+description: "How to set up the Modbus proxy in evcc.yaml so that other systems can share a Modbus connection to an inverter or meter with your evcc instance."
 sidebar:
-  order: 17
+  order: 18
 ---
 
 The `modbusproxy` setting is a list of devices that are exposed for third-party systems via Modbus TCP on the network.

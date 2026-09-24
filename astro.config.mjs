@@ -1,27 +1,30 @@
 // @ts-check
-import fs from "node:fs";
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import starlightBlog from "starlight-blog";
-import starlightLlmsTxt from "starlight-llms-txt";
+import starlightLlmActions from "starlight-llm-actions";
 import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
 import starlightLinksValidator from "starlight-links-validator";
 import mermaid from "astro-mermaid";
 import { unified } from "@astrojs/markdown-remark";
 import remarkHeadingId from "remark-heading-id";
 
-const langRedirectScript = fs.readFileSync(
-  new URL("./src/scripts/lang-redirect.js", import.meta.url),
-  "utf8",
-);
-
 export default defineConfig({
   site: "https://docs.evcc.io",
   trailingSlash: "never",
   build: {
     format: "directory",
+  },
+  vite: {
+    build: {
+      rolldownOptions: {
+        // Astro injects "use astro:head-inject" into every MDX module; rolldown
+        // warns about non-"use strict" directives once per page. Pure noise.
+        checks: { moduleLevelDirective: false },
+      },
+    },
   },
   markdown: {
     processor: unified({
@@ -51,9 +54,12 @@ export default defineConfig({
         en: "evcc - smart charging",
         de: "evcc - Smart laden",
       },
-      description: "evcc Dokumentation",
+      description:
+        "Documentation for evcc, the open-source charge controller for solar surplus and dynamic-tariff EV charging.",
       components: {
+        Head: "./src/components/Head.astro",
         SiteTitle: "./src/components/SiteTitle.astro",
+        Search: "./src/components/Search.astro",
         SocialIcons: "./src/components/SocialIcons.astro",
         LanguageSelect: "./src/components/LanguageSelect.astro",
         ThemeSelect: "./src/components/ThemeSelect.astro",
@@ -75,7 +81,6 @@ export default defineConfig({
         en: { label: "English", lang: "en" },
         de: { label: "Deutsch", lang: "de" },
       },
-      head: [{ tag: "script", content: langRedirectScript }],
       social: [
         {
           icon: "github",
@@ -114,8 +119,57 @@ export default defineConfig({
             schema: "./public/openapi.yaml",
           },
         ]),
-        starlightLlmsTxt({
-          exclude: ["**/blog/**"],
+        starlightLlmActions({
+          // Every docs page gets a markdown twin at /{slug}.md, advertised via
+          // <link rel="alternate" type="text/markdown">. "simple" flattens
+          // MDX components (Tabs, Steps, asides) to plain markdown.
+          markdownUrl: "/{slug}.md",
+          renderMarkdown: "simple",
+          linkAlternate: true,
+          llmsTxt: {
+            title: "evcc",
+            description:
+              "Documentation for evcc, the open-source charge controller for solar surplus and dynamic-tariff EV charging. " +
+              "English pages live under /en, German under /de (append .md to any page URL for markdown). " +
+              "Supported devices (chargers, meters, vehicles, tariffs) are listed in https://docs.evcc.io/llms-devices.txt.",
+            // Bundles and index stay English; German pages keep their .md routes.
+            exclude: ["de/**"],
+            promote: ["en", "en/installation/**", "en/features/**"],
+            demote: ["en/reference/cli/**", "en/media", "en/blog/**"],
+            subsets: [
+              {
+                label: "Installation",
+                description:
+                  "installing and initial setup on Linux, Raspberry Pi, Docker, Home Assistant, macOS, Windows",
+                paths: ["en/installation/**"],
+              },
+              {
+                label: "Features",
+                description:
+                  "solar surplus charging, dynamic tariffs, charge planner, home battery, load management, vehicles",
+                paths: ["en/features/**"],
+              },
+              {
+                label: "Configuration reference",
+                description: "evcc.yaml options, plugins, Modbus, CLI commands",
+                paths: ["en/reference/**"],
+              },
+              {
+                label: "Integrations",
+                description:
+                  "MQTT and REST APIs, MCP server, Home Assistant, openHAB, ioBroker and other smart home systems",
+                paths: ["en/integrations/**", "en/smarthome/**"],
+              },
+              {
+                label: "Blog",
+                description:
+                  "release notes and community posts, oldest first; older posts may describe outdated behaviour",
+                paths: ["en/blog/**"],
+              },
+            ],
+          },
+          // Page dropdown: copy / view markdown only.
+          actions: { printPdf: false, openIn: false },
         }),
         starlightLinksValidator({
           // German pages fall back to English, links to them are valid
@@ -269,6 +323,7 @@ export default defineConfig({
             { label: "Plugins", slug: "reference/plugins" },
             { label: "Modbus", slug: "reference/modbus" },
             { label: "Web UI", slug: "reference/web-ui" },
+            { label: "White Label", slug: "reference/white-label" },
             { label: "API State", link: "/reference/state" },
             { label: "evcc App", slug: "reference/app" },
             {

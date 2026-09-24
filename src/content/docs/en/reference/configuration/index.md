@@ -1,5 +1,6 @@
 ---
 title: "Configuration"
+description: "Overview of file-based configuration with evcc.yaml: where the file lives, how it is structured and which sections describe your site and devices."
 sidebar:
   order: 1
 ---
@@ -135,6 +136,12 @@ include:
 - PV-generated power
 - Charging current of EV (if the charger does not support this directly)
 - Power flow of house battery(ies)
+
+### Curtailers
+
+[Curtailers](/en/reference/configuration/curtailers) are devices that only limit the feed-in of the solar
+installation on request of the grid operator (§ 9 EEG), e.g. the SMA Sunny Home Manager 2.0 or the leader
+inverter of a system with several inverters.
 
 ### Vehicles
 

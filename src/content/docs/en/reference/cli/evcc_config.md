@@ -11,7 +11,7 @@ evcc config [flags]
 ## Options
 
 ```
-      --class string   Device class (charger|meter|vehicle|tariff|loadpoint|circuit|messenger|hems)
+      --class string   Device class (charger|meter|vehicle|tariff|loadpoint|circuit|messenger|hems|curtailer)
 ```
 
 ## Options inherited from parent commands

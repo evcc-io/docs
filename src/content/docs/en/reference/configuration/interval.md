@@ -1,7 +1,8 @@
 ---
 title: "interval"
+description: "How often evcc reads meter values and adjusts charging currents, how to change this interval and why very short intervals can cause oscillation."
 sidebar:
-  order: 9
+  order: 10
 ---
 
 Defines the time interval at which new values are read from all measurement devices and the charging currents of the chargers are re-regulated.
