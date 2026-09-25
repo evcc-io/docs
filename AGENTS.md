@@ -235,13 +235,8 @@ Everything else is hand-written:
 - **Create explicit anchors** on headings instead of relying on auto-generated ones
   - Auto-generated anchors change with heading text and differ between languages
   - In `.md` files use the compact form: `### Vehicle Detection {#vehicle}`
-  - In `.mdx` files use a raw HTML anchor element on the line above (MDX parses `{...}` as a JSX expression, so the compact form breaks the build):
-
-    ```mdx
-    <a id="vehicle"></a>
-
-    ### Vehicle Detection
-    ```
+  - In `.mdx` files escape the braces, because MDX parses `{...}` as a JSX expression: `### Vehicle Detection \{#vehicle\}`
+  - Don't put a `<a id="…"></a>` element between a heading and its first paragraph: Starlight's spacing rule skips paragraphs that follow an `a` element, so the gap below the heading disappears. Use a raw anchor element only for targets that aren't headings, on its own line before the target.
 
 ### Page Descriptions
 
