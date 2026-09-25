@@ -133,27 +133,78 @@ Both attributes are optional.
 Without them, the energy history is derived from `power` over time.
 Real meter readings give more accurate long-term statistics.
 
-### Write attributes
+### Write attributes \{#meter-write-attributes\}
 
 | Attribute     | Type  | Required | Context   | Description                                                                                                                                                       |
 | ------------- | ----- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
-| `batterymode` | `int` | no       | `battery` | Set charging mode directly (1: normal, 2: hold, 3: charge, 4: holdcharge, 5: discharge)                                                                           |
 | `curtail`     | `int` | no       | `pv`      | Set feed-in limit in % of the nominal production power (0 to 100, `100` = no limit). Only together with `curtailed`. See [Curtailment Device](#curtailer).        |
+| `batterymode` | `int` | no       | `battery` | Set the battery control mode directly. The modes are listed below.                                                                                                |
+
+#### Battery modes \{#battery-modes\}
+
+| Value | Mode         | Behaviour                                                        |
+| ----- | ------------ | ---------------------------------------------------------------- |
+| `1`   | `normal`     | Normal operation: charge from surplus, discharge for consumption |
+| `2`   | `hold`       | Prevent discharging, charging from surplus still allowed         |
+| `3`   | `charge`     | Charge from grid, no discharging                                 |
+| `4`   | `holdcharge` | Prevent charging, discharging for consumption still allowed      |
+| `5`   | `discharge`  | Discharge to grid                                                |
 
 Only the battery modes the device supports are used.
-If `batterymode` is a [`switch`](/en/reference/plugins#switch) (optionally wrapped in a `watchdog`), the supported modes are taken from its `case` values.
+If `batterymode` is a [`switch`](/en/reference/plugins#switch), the supported modes are taken from its `case` values.
+This also works when the switch is wrapped in a [`watchdog`](/en/reference/plugins#watchdog).
 Any other plugin needs `batterymodes` listing the supported modes, e.g. `batterymodes: ["normal", "hold", "charge"]`.
 
-### Example
+### Examples
 
 Read the current grid power from an HTTP endpoint.
 
 ```yaml
-power:
-  source: http
-  uri: http://zaehler.network.local:8080/api/data.json?from=now
-  jq: .data.tuples[0][1]
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+```
+
+Read power and charge level of a home battery and set its mode via HTTP.
+The `switch` covers the modes normal, hold and charge, so evcc offers exactly these three.
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    capacity: 10 # kWh
+    power:
+      source: http
+      uri: http://battery.local/api/power
+    soc:
+      source: http
+      uri: http://battery.local/api/soc
+    batterymode:
+      source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "auto"}'
+        - case: 2 # hold
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "hold"}'
+        - case: 3 # charge
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "charge"}'
 ```
 
 ## Charger \{#charger\}

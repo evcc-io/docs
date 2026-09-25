@@ -134,27 +134,78 @@ Beide Attribute sind optional.
 Ohne sie wird die Energiehistorie aus dem zeitlichen Verlauf von `power` abgeleitet.
 Echte Zählerstände liefern genauere Langzeitstatistiken.
 
-### Schreib-Attribute
+### Schreib-Attribute \{#meter-write-attributes\}
 
 | Attribut      | Typ   | Erfordert | Kontext   | Beschreibung                                                                                                                                                    |
 | ------------- | ----- | --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `limitsoc`    | `int` | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.           |
-| `batterymode` | `int` | nein      | `battery` | Setze Lademodus direkt (1: normal, 2: hold, 3: charge, 4: holdcharge, 5: discharge)                                                                             |
 | `curtail`     | `int` | nein      | `pv`      | Setze Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
+| `batterymode` | `int` | nein      | `battery` | Setze den Steuerungsmodus der Batterie direkt. Die Modi sind unten aufgeführt.                                                                                  |
+
+#### Batteriemodi \{#battery-modes\}
+
+| Wert | Modus        | Verhalten                                                          |
+| ---- | ------------ | ------------------------------------------------------------------ |
+| `1`  | `normal`     | Normaler Betrieb: Laden aus Überschuss, Entladen für den Verbrauch |
+| `2`  | `hold`       | Entladen verhindern, Laden aus Überschuss bleibt erlaubt           |
+| `3`  | `charge`     | Aus dem Netz laden, kein Entladen                                  |
+| `4`  | `holdcharge` | Laden verhindern, Entladen für den Verbrauch bleibt erlaubt        |
+| `5`  | `discharge`  | Einspeisung ins Netz                                               |
 
 Es werden nur die Batteriemodi genutzt, die das Gerät unterstützt.
-Ist `batterymode` ein [`switch`](/de/reference/plugins#switch) (optional in einem `watchdog`), werden die unterstützten Modi aus dessen `case`-Werten übernommen.
+Ist `batterymode` ein [`switch`](/de/reference/plugins#switch), werden die unterstützten Modi aus dessen `case`-Werten übernommen.
+Das funktioniert auch, wenn der Switch in einem [`watchdog`](/de/reference/plugins#watchdog) steckt.
 Für alle anderen Plugins müssen die unterstützten Modi in `batterymodes` angegeben werden, z. B. `batterymodes: ["normal", "hold", "charge"]`.
 
-### Beispiel
+### Beispiele
 
 Lese die aktuelle Netzleistung über einen HTTP-Endpunkt.
 
 ```yaml
-power:
-  source: http
-  uri: http://zaehler.network.local:8080/api/data.json?from=now
-  jq: .data.tuples[0][1]
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+```
+
+Lese Leistung und Ladestand einer Hausbatterie und setze ihren Modus über HTTP.
+Der `switch` deckt die Modi normal, hold und charge ab, evcc bietet also genau diese drei an.
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    capacity: 10 # kWh
+    power:
+      source: http
+      uri: http://battery.local/api/power
+    soc:
+      source: http
+      uri: http://battery.local/api/soc
+    batterymode:
+      source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "auto"}'
+        - case: 2 # hold
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "hold"}'
+        - case: 3 # charge
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "charge"}'
 ```
 
 ## Wallbox \{#charger\}
