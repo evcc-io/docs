@@ -99,7 +99,7 @@ With the `mode` parameter, you can specify the charging mode that should be used
 **Default value:** `smart`
 
 The deprecated values `pv` and `minpv` are still accepted when writing:
-`pv` activates `smart` and turns [Always charge](/en/features/solar-charging#always-charge) off, `minpv` activates `smart` and turns Always charge on.
+`pv` activates `smart` and turns [Always charge](/en/features/modes#always-charge) off, `minpv` activates `smart` and turns Always charge on.
 
 :::caution[Breaking change]
 State and API reads (`/api/state`, websocket, MQTT) report `smart` instead of `pv`; `minpv` no longer appears on the read path.
@@ -357,7 +357,7 @@ Higher values indicate higher priority. Loadpoints without an entry have `priori
 
 When multiple loadpoints are present, this parameter doesn't influence the order in which the charging sessions are started. However, if a lower-priority loadpoint is charging, a higher-priority one might be switched on if it is given access to the unused charging power.
 
-This prioritisation works in `smart` mode. With [Always charge](/en/features/solar-charging#always-charge) active, charging is not interrupted, only reduced to the minimum.
+This prioritisation works in `smart` mode. With [Always charge](/en/features/modes#always-charge) active, charging is not interrupted, only reduced to the minimum.
 
 :::note
 If a vehicle has a priority defined, it overrides the priority of the loadpoint it is connected to.
