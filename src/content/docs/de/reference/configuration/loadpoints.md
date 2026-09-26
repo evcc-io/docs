@@ -100,7 +100,7 @@ Mit dem optionalen Parameter `mode` kann der Lademodus eingestellt werden, der n
 **Standardwert:** `smart`
 
 Die veralteten Werte `pv` und `minpv` werden beim Schreiben weiterhin akzeptiert:
-`pv` aktiviert `smart` und schaltet [Dauerhaft laden](/de/features/solar-charging#always-charge) aus, `minpv` aktiviert `smart` und schaltet Dauerhaft laden ein.
+`pv` aktiviert `smart` und schaltet [Dauerhaft laden](/de/features/modes#always-charge) aus, `minpv` aktiviert `smart` und schaltet Dauerhaft laden ein.
 
 :::caution[Breaking Change]
 Status- und API-Lesezugriffe (`/api/state`, Websocket, MQTT) melden `smart` statt `pv`; `minpv` taucht beim Lesen nicht mehr auf.
@@ -365,7 +365,7 @@ Loadpoints ohne Eintrag haben `priority: 0`
 
 Hat bei mehreren Loadpoints keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Loadpoint, wird ein höher priorisierter unter Umständen eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird.
 
-Die Priorisierung wirkt im Modus `smart`. Bei aktivem [Dauerhaft laden](/de/features/solar-charging#always-charge) wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
+Die Priorisierung wirkt im Modus `smart`. Bei aktivem [Dauerhaft laden](/de/features/modes#always-charge) wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
 
 :::note
 Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist.
