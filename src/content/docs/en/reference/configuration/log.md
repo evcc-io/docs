@@ -18,9 +18,8 @@ Defines the level of detail for logging information to the console.
 - `debug`: Includes `info`, additionally shows messages of the `debug` category. This is necessary for error analysis.
 - `trace`: Includes `debug`, additionally shows messages of the `trace` category. This is the most detailed category and can result in very large log data. In general, this is not usually needed!
 
-When running evcc in the console, the `log` messages are simply directed to the standard output.  
-If evcc is run as a Linux systemd service, messages can be tracked using `sudo journalctl -fau evcc`, see [Logfile zur Fehleranalyse](/en/faq#debugging).  
-In the case of a Docker installation, you can view the messages using `docker logs`, see [Docker Documentation](https://docs.docker.com/config/containers/logging/).
+The setting applies to the [long-term logs](/en/report-a-problem#system-logs) of your installation.
+The Logs page in the web interface always records all levels, see [Logs](/en/report-a-problem#logs).
 
 **For example**:
 

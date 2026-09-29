@@ -1,0 +1,389 @@
+---
+title: "Report a Problem"
+description: "Get help faster with a report that has what helpers need: where to report, what to include and how to collect logs on your installation."
+---
+
+import Screenshot from "@components/Screenshot.astro";
+import { Steps, Tabs, TabItem } from "@astrojs/starlight/components";
+
+Something doesn't work as expected?
+A good report contains a clear description, your configuration and a log that shows the problem.
+This page shows where to report and how to collect that information.
+
+## Why a Good Report Matters \{#why\}
+
+Every installation is different.
+Devices, firmware versions, settings and the network vary from home to home.
+We're a community of users and developers who help each other.
+We'd like to help you too, but we can't look at your system.
+Your report is our only view into it.
+
+With a description, the configuration and a log that shows the problem, we can often find the cause in the first reply.
+A precise report also lets us reproduce a bug, and that's what we need to fix it.
+Others with the same problem benefit too, because they find your post and its solution.
+
+## Before You Report \{#checklist\}
+
+- **Update**: Use the latest version. For bugs also try the nightly build, the problem may already be fixed there.
+- **Search**: Check [discussions](https://github.com/evcc-io/evcc/discussions), [issues](https://github.com/evcc-io/evcc/issues) and the [FAQ](/en/faq), including closed posts. If your problem is already there, add your details to that post.
+- **Reproduce**: Trigger the problem again and note the time. You need it to find the matching log entries.
+- **Isolate**: Pause external automations (e.g. Home Assistant, Node-RED, ioBroker). Two systems controlling the same device often cause the problem.
+- **Focus**: Report one problem per post.
+
+## Where Does the Problem Belong? \{#where\}
+
+- **[evcc-io/evcc](#app)**: Core repository for charging, devices, tariffs and the web interface
+- **[evcc-io/app](https://github.com/evcc-io/app/issues/new/choose)**: iOS & Android app, if it works fine in the web browser
+- **[evcc-io/docs](https://github.com/evcc-io/docs/issues/new/choose)**: Documentation on [docs.evcc.io](https://docs.evcc.io). Device pages are generated from the core repository. The _Edit page_ link at the bottom of every page leads to the right source.
+- **[evcc-io/evcc.io](https://github.com/evcc-io/evcc.io/issues/new/choose)**: Landing page [evcc.io](https://evcc.io), e.g. typos
+- **[evcc-io/optimizer](https://github.com/evcc-io/optimizer/issues/new/choose)**: Optimizer, if the calculated results are implausible or unexpected
+
+Problems with the Linux image belong to [evcc-io/images](https://github.com/evcc-io/images/issues/new/choose), problems with the Home Assistant app to [evcc-io/hassio-addon](https://github.com/evcc-io/hassio-addon/issues/new/choose).
+
+## Discussion or Bug? \{#type\}
+
+- **[Discussion](https://github.com/evcc-io/evcc/discussions)**: Questions and help with your setup. Most unexpected behaviour turns out to be a matter of configuration or settings.
+- **Bug**: Something worked before and stopped working after an update, or the behaviour clearly contradicts the documentation. Bugs are reported as an [issue](https://github.com/evcc-io/evcc/issues).
+
+If you can't rule out a settings problem, start with a discussion.
+
+## Report from the Web Interface \{#app\}
+
+The **Report a problem** page collects version, system, configuration and logs for you.
+It creates a prepared discussion or issue on GitHub.
+You need a [GitHub account](https://github.com/signup) for this.
+
+<Steps>
+
+1. Open **More → Report a problem**.
+
+2. Select **Need help with my setup** or **Found a bug**.
+
+3. Fill in **Title**, **Description** and **Steps to reproduce**.
+   Describe what you expected and what happened instead.
+
+4. Check the **Additional Information**.
+   For **Logs**, click the parameters and choose level, number of lines and areas.
+   For longer periods, [capture a log](#logs) and attach it as a file.
+   Only include **State** if someone asks for it.
+
+   <Screenshot
+     name="report-a-problem/report-a-problem"
+     caption="Report a problem page with description and additional information"
+   />
+
+5. Click **Create GitHub Issue...** or **Start GitHub Discussion...**.
+
+6. If the additional information is too long for a link, the dialog shows two steps.
+   Create the post on GitHub first.
+   Then return to your instance, click **Copy additional information** and paste it into the post at the marked position.
+   Without this second step your post contains neither configuration nor logs.
+
+</Steps>
+
+If you write the post on GitHub by hand, you can copy each section on this page individually with **copy**.
+
+:::caution[Reports Are Public]
+We automatically replace passwords, tokens and other sensitive values with `*****`.
+Please check your post for personal data before you submit it on GitHub.
+:::
+
+## Capture a Log \{#logs\}
+
+The Logs page always records all levels including `trace`.
+You don't need to change the configuration or restart.
+
+<Steps>
+
+1. Open **More → Logs**.
+
+2. Select the level **TRACE** and the areas of the affected charging point and devices.
+
+   <Screenshot
+     name="report-a-problem/logs"
+     caption="Logs page filtered by level TRACE and area lp-1"
+   />
+
+3. Reproduce the problem.
+   For connection problems (e.g. OCPP, EEBus, Modbus), restart your instance first so the log covers everything from the start.
+
+4. Click the download button right after the problem occurred.
+   The file contains the entries of the selected level and areas.
+
+5. Attach the file to your post on GitHub via drag and drop.
+
+</Steps>
+
+The log starts before the problem arises and runs until it's visible.
+That way it shows how the problem came about.
+
+The Logs page keeps the last 10,000 entries, roughly 30 to 90 minutes depending on your setup.
+A restart clears them.
+For longer periods use the [long-term logs](#system-logs).
+
+The Logs page shows the level `debug` by default, which covers the decisions of the control loop.
+`trace` adds the raw communication with devices and services.
+
+## Long-Term Logs \{#system-logs\}
+
+The Logs page covers a limited window.
+When you need more data, a longer period or entries from before a restart, use the logs of your system.
+They're also the way to go when the web interface isn't reachable.
+
+These logs only contain entries of the configured level, which is `info` by default.
+Raise the level before you reproduce the problem.
+
+### Raise the Log Level \{#log-level\}
+
+The level is set in the configuration file `evcc.yaml`, in general and per area.
+The example sets `debug` in general and `trace` for the first charging point.
+You find the names of your areas in the area filter of the [Logs page](#logs).
+
+```yaml title="evcc.yaml"
+log: debug
+levels:
+  lp-1: trace
+```
+
+If the file doesn't exist yet, create it with only these lines.
+Your configuration from the web interface stays untouched.
+Set the level back once you have the log, because `trace` creates a lot of data.
+
+### Logs by Installation \{#platforms\}
+
+Where the logs are and which file you adjust depends on how you installed evcc.
+Open the panel that matches your installation.
+
+<details>
+<summary>Raspberry Pi & Co. (evcc Linux Image)</summary>
+
+Open [Cockpit](/en/installation/linux-image#cockpit) at `https://evcc.local:9090`.
+Edit files with **Navigator** and run commands in **Terminal**.
+
+To raise the log level, edit `/etc/evcc.yaml` and restart:
+
+```sh
+sudo systemctl restart evcc
+```
+
+Show the entries of the last hour:
+
+```sh
+sudo journalctl -u evcc --since "1 hour ago" --no-pager
+```
+
+Follow the log live:
+
+```sh
+sudo journalctl -fau evcc
+```
+
+Show a time range:
+
+```sh
+sudo journalctl -u evcc -S "2026-03-21 07:00" -U "2026-03-21 08:00" --no-pager
+```
+
+Copy the output from the terminal into your post.
+
+</details>
+
+<details>
+<summary>Docker</summary>
+
+To raise the log level, add it to your `compose.yml` if you use Docker Compose, or to the `evcc.yaml` that you mounted into the container.
+
+<Tabs>
+  <TabItem label="compose.yml">
+
+    ```yaml
+    services:
+      evcc:
+        environment:
+          - EVCC_LOG=debug,lp-1:trace
+    ```
+
+    Recreate the container:
+
+    ```sh
+    docker compose up -d
+    ```
+
+  </TabItem>
+  <TabItem label="evcc.yaml">
+
+    ```yaml
+    log: debug
+    levels:
+      lp-1: trace
+    ```
+
+    Restart the container:
+
+    ```sh
+    docker restart evcc
+    ```
+
+  </TabItem>
+</Tabs>
+
+Show all entries of the container named `evcc`:
+
+```sh
+docker logs evcc
+```
+
+Follow the log live:
+
+```sh
+docker logs -f --since 10m evcc
+```
+
+Show the entries of the last hour:
+
+```sh
+docker logs --since 1h evcc
+```
+
+Copy the output from the terminal into your post.
+
+With Docker Compose use `docker compose logs evcc` in the folder of your `compose.yml`.
+Docker UIs (e.g. Synology, QNAP, Portainer, Unraid) show the log in the details of the container.
+Recreating the container deletes its log.
+For how to keep logs permanently, see the documentation of your Docker UI.
+
+</details>
+
+<details>
+<summary>Home Assistant</summary>
+
+To raise the log level, edit `/addon_configs/49686a9f_evcc/evcc.yaml`.
+In the **Configuration** tab of the app, `config_file` must be set to `/config/evcc.yaml`.
+Restart the app afterwards.
+See [Configuration File](/en/installation/home-assistant) for how to edit the file.
+
+To get the logs, open **Settings → Apps → evcc** in Home Assistant and select the **Log** tab.
+
+</details>
+
+<details>
+<summary>Proxmox</summary>
+
+Open the console of the container in Proxmox.
+
+To raise the log level, edit `/etc/evcc.yaml` and restart:
+
+```sh
+sudo systemctl restart evcc
+```
+
+Show the entries of the last hour:
+
+```sh
+sudo journalctl -u evcc --since "1 hour ago" --no-pager
+```
+
+Follow the log live:
+
+```sh
+sudo journalctl -fau evcc
+```
+
+Show a time range:
+
+```sh
+sudo journalctl -u evcc -S "2026-03-21 07:00" -U "2026-03-21 08:00" --no-pager
+```
+
+Copy the output from the terminal into your post.
+
+</details>
+
+<details>
+<summary>Linux</summary>
+
+To raise the log level, edit `/etc/evcc.yaml` and restart:
+
+```sh
+sudo systemctl restart evcc
+```
+
+Show the entries of the last hour:
+
+```sh
+sudo journalctl -u evcc --since "1 hour ago" --no-pager
+```
+
+Follow the log live:
+
+```sh
+sudo journalctl -fau evcc
+```
+
+Show a time range:
+
+```sh
+sudo journalctl -u evcc -S "2026-03-21 07:00" -U "2026-03-21 08:00" --no-pager
+```
+
+Copy the output from the terminal into your post.
+
+</details>
+
+<details>
+<summary>macOS</summary>
+
+If you've installed with Homebrew and set up the launchd agent as described under [macOS](/en/installation/macos), the log is written to a file.
+
+To raise the log level, edit `/etc/evcc.yaml` and restart:
+
+```sh
+launchctl kickstart -k gui/$(id -u)/io.evcc
+```
+
+Show the logs:
+
+```sh
+tail -f "$(brew --prefix)/var/log/evcc.log"
+```
+
+</details>
+
+<details>
+<summary>FreeBSD</summary>
+
+To raise the log level, edit `/usr/local/etc/evcc.yaml` and restart:
+
+```sh
+service evcc restart
+```
+
+Follow the log file:
+
+```sh
+tail -f /var/log/evcc.log
+```
+
+</details>
+
+<details>
+<summary>Windows</summary>
+
+To raise the log level, edit the `evcc.yaml` in the folder of `evcc.exe` and restart the service.
+The service must be started with the argument `-c evcc.yaml`.
+
+Log files only exist if you set up the output redirection in the **I/O** tab of the [background service](/en/installation/windows#nssm).
+Without a service, start the program in a terminal window to see the output.
+
+</details>
+
+## Feature Requests \{#feature-request\}
+
+A device or a function is missing?
+The community is large, so chances are good that someone has had a similar idea before.
+Take a little time for research before you submit your request as an [issue](https://github.com/evcc-io/evcc/issues/new/choose).
+
+- **Research**: Check the [discussions](https://github.com/evcc-io/evcc/discussions) and the [closed issues](https://github.com/evcc-io/evcc/issues?q=is%3Aissue+is%3Aclosed) to see if the topic has come up before.
+- **Reviving is fine**: Circumstances may have changed since a topic was last discussed.
+- **What and why**: Describe what you'd like to achieve, not only the solution you have in mind.
+- **New devices**: Name the concrete device and attach the API documentation or data sheet provided by the vendor. Be prepared to test and verify with your own device.
