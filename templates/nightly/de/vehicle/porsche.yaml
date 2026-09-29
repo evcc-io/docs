@@ -1,24 +1,24 @@
-template: iso15118
+template: porsche
 product:
-  identifier: iso15118
-  description: ISO15118
-  group: Generische Unterstützung
-capabilities: ["iso151182"]
+  identifier: porsche
+  brand: Porsche
 description: |
-  Nur unterstützt wenn das Fahrzeug den Ladestand (Soc) an die verbundene Wallbox übermitteln kann.
-  Bei Verwendung von ISO15118 mit bestimmten VW Konzernfahrzeugen, z.B. Porsche Taycan, ist zusätzliche Konfiguration
-  im Fahrzeug erforderlich. Dafür muss ein aktives ortsbezogenes Ladeprofil mit der niedrigsten Minimalladung (25%)
-  angelegt sein und Direktladen deaktiviert. Anderenfalls kann das Fahrzeug nicht in den Schlafmodus übergehen.
-
+  Anmeldung mit den Zugangsdaten des My-Porsche-Kontos. Beim Verbinden kann ein Captcha abgefragt werden.
 render:
   - default: |
       type: template
-      template: iso15118
+      template: porsche
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Zugangspasswort des Dienstes
+      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
     advanced: |
       type: template
-      template: iso15118
+      template: porsche
+      user: # Benutzerkonto, bspw. E-Mail Adresse, User Id, etc.
+      password: # Passwort, Zugangspasswort des Dienstes
+      vin: W... # Fahrzeugidentifikationsnummer, Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind (optional)
       title: # Titel, Wird in der Benutzeroberfläche angezeigt (optional)
       capacity: 50 # Akkukapazität (kWh), optional
       icon: car # Icon, Wird in der Benutzeroberfläche angezeigt [car, bike, bus, moped, motorcycle, rocket, scooter, taxi, tractor, rickshaw, shuttle, van, airpurifier, battery, bulb, climate, coffeemaker, compute, cooking, cooler, desktop, device, dishwasher, dryer, floorlamp, generic, heater, heatexchange, heatpump, kettle, laundry, laundry2, machine, meter, microwave, pump, smartconsumer, tool, waterheater] (optional)
@@ -28,7 +28,38 @@ render:
       maxPower: 10000 # Ladeleistungs-Hinweis (W), Definiert die maximale Ladeleistung des Fahrzeugs. Hilft, die Ladeplanung zu verbessern, wenn das Fahrzeug üblicherweise weniger Strom nutzt als angeboten oder höhere Ströme bei einphasigem Laden erlaubt als bei dreiphasigem. _Der bereitgestellte Strom des Ladepunktes wird nicht beeinflusst._ (optional)
       identifiers: # RFID-Identifikation, Für die Zuordnung des Fahrzeugs an einen Ladepunkt via RFID-Karte. Die Kennung wird am Ladepunkt angezeigt. Übernehme den Wert von dort. [Mehr erfahren.](https://docs.evcc.io/docs/features/vehicle) (optional)
       priority: # Priorität, Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität). (optional)
+      cache: 15m # Cache, Zeitintervall für erneute Datenabfrage (optional)
+      climaterdisabled: # Klimatisierungserkennung deaktivieren, Klimatisierungsstatus des Fahrzeugs für die Ladesteuerung ignorieren, sodass der Ladevorgang am SoC- oder Energielimit endet, auch wenn das Fahrzeug einen aktiven Klimatisierungswunsch signalisiert. (optional)
+      autodetectdisabled: # Von automatischer Erkennung ausschließen, Das Fahrzeug von der automatischen Erkennung beim Anschließen eines Fahrzeugs ausschließen (optional)
+      wakeupdisabled: # Aufweck-Aufrufe deaktivieren, Keine Aufweck-Aufrufe an Fahrzeug oder Ladegerät senden, hilfreich bei Fahrzeugen, die nach wiederholtem Aufwecken das Laden verweigern. (optional)
 params:
+  - name: user
+    example:
+    default:
+    choice: []
+    unit:
+    description: Benutzerkonto
+    help: bspw. E-Mail Adresse, User Id, etc.
+    advanced: false
+    optional: false
+  - name: password
+    example:
+    default:
+    choice: []
+    unit:
+    description: Passwort
+    help: Zugangspasswort des Dienstes
+    advanced: false
+    optional: false
+  - name: vin
+    example: W...
+    default:
+    choice: []
+    unit:
+    description: Fahrzeugidentifikationsnummer
+    help: Wenn mehrere Fahrzeuge eines Herstellers vorhanden sind
+    advanced: false
+    optional: true
   - name: title
     example:
     default:
@@ -108,5 +139,41 @@ params:
     unit:
     description: Priorität
     help: Priorität des Ladepunktes oder Fahrzeugs in Relation zu anderen Ladepunkten oder Fahrzeugen für die Zuweisung von Überschussenergie (höhere Werte, höhere Priorität).
+    advanced: true
+    optional: true
+  - name: cache
+    example: 5m
+    default: 15m
+    choice: []
+    unit:
+    description: Cache
+    help: Zeitintervall für erneute Datenabfrage
+    advanced: true
+    optional: true
+  - name: climaterdisabled
+    example:
+    default:
+    choice: []
+    unit:
+    description: Klimatisierungserkennung deaktivieren
+    help: Klimatisierungsstatus des Fahrzeugs für die Ladesteuerung ignorieren, sodass der Ladevorgang am SoC- oder Energielimit endet, auch wenn das Fahrzeug einen aktiven Klimatisierungswunsch signalisiert.
+    advanced: true
+    optional: true
+  - name: autodetectdisabled
+    example:
+    default:
+    choice: []
+    unit:
+    description: Von automatischer Erkennung ausschließen
+    help: Das Fahrzeug von der automatischen Erkennung beim Anschließen eines Fahrzeugs ausschließen
+    advanced: true
+    optional: true
+  - name: wakeupdisabled
+    example:
+    default:
+    choice: []
+    unit:
+    description: Aufweck-Aufrufe deaktivieren
+    help: Keine Aufweck-Aufrufe an Fahrzeug oder Ladegerät senden, hilfreich bei Fahrzeugen, die nach wiederholtem Aufwecken das Laden verweigern.
     advanced: true
     optional: true
