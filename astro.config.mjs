@@ -338,6 +338,11 @@ export default defineConfig({
           ],
         },
         { label: "FAQ", translations: { de: "Häufige Fragen" }, slug: "faq" },
+        {
+          label: "Report a Problem",
+          translations: { de: "Problem melden" },
+          slug: "report-a-problem",
+        },
         { slug: "sponsorship" },
       ],
     }),

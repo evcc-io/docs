@@ -18,9 +18,8 @@ Definiert den Detailgrad der Protokollierung von Informationen auf der Konsole.
 - `debug`: Beinhaltet `info`, zusätzlich werden Nachrichten der Kategorie `debug` angezeigt. Dies ist für die Fehleranalyse erforderlich.
 - `trace`: Beinhaltet `debug`, zusätzlich werden Nachrichten der Kategorie `trace` angezeigt. Dies ist die detaillierteste Kategorie und kann zu sehr großen Logdaten führen. In der Regel wird dies nicht benötigt!
 
-Wenn evcc auf der Konsole ausgeführt wird, werden die `log` Nachrichten einfach in die normale Ausgabe geleitet.  
-Falls evcc als Linux Systemdienst ausgeführt wird, können die Nachrichten über `sudo journalctl -fau evcc` verfolgt werden, siehe [Logfile zur Fehleranalyse](/de/faq#fehlersuche).  
-Im Falle einer Docker Installation kann man über `docker logs` die Nachrichten anzeigen lassen, siehe [Docker Dokumentation](https://docs.docker.com/config/containers/logging/).
+Die Einstellung wirkt auf die [Langzeit-Logs](/de/report-a-problem#system-logs) deiner Installation.
+Die Logs-Seite in der Weboberfläche zeichnet immer alle Level auf, siehe [Logs](/de/report-a-problem#logs).
 
 **Beispiel**:
 
