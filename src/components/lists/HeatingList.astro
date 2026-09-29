@@ -5,6 +5,7 @@ import DeviceCardList from "@components/DeviceCardList.astro";
 import DeviceFilter from "@components/DeviceFilter.astro";
 import HeatingIntro from "@components/intros/HeatingIntro.astro";
 import HeatingOutro from "@components/intros/HeatingOutro.astro";
+import TemperatureSensorsIntro from "@components/intros/TemperatureSensorsIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
 import SponsorInfoBox from "@components/SponsorInfoBox.astro";
@@ -26,6 +27,8 @@ const isNightly = channel === "nightly";
 
 const coll = await getCollection(collectionName("chargers", lang, channel) as any);
 const devices = sortDevices(filterByType(coll as any, "heating"));
+const tempsensorColl = await getCollection(collectionName("tempsensors", lang, channel) as any);
+const tempsensors = sortDevices(tempsensorColl as any);
 const basePath = `/${lang}${isNightly ? "/nightly" : ""}/heating`;
 const filterFeatures = availableOverviewFeatures(devices as any);
 
@@ -48,6 +51,7 @@ const headings = lang === "de"
       { depth: 2, slug: "sgready-konfiguration", text: "Konfiguration über SG-Ready Relais" },
       { depth: 2, slug: "statusanzeige", text: "Statusanzeige" },
       { depth: 2, slug: "heizstaebe", text: "Heizstäbe" },
+      { depth: 2, slug: "temperature", text: "Temperatur" },
     ]
   : [
       { depth: 2, slug: "setup", text: "Setup" },
@@ -56,6 +60,7 @@ const headings = lang === "de"
       { depth: 2, slug: "sgready-configuration", text: "SG-Ready relay configuration" },
       { depth: 2, slug: "status-display", text: "Status display" },
       { depth: 2, slug: "electric-water-heaters", text: "Electric water heaters" },
+      { depth: 2, slug: "temperature", text: "Temperature" },
     ];
 
 const frontmatter = {
@@ -73,8 +78,24 @@ const frontmatter = {
   {filterFeatures.length > 0 && <DeviceFilter lang={lang} features={filterFeatures} />}
   <h2 id="supported">{supportedTitle}</h2>
   <DeviceCardList devices={devices as any} lang={lang} basePath={basePath} showSponsorRequired filterId="branded" />
-  <HeatingOutro lang={lang} />
   {channel === "release" && (
     <UserDefinedHint lang={lang} nightlyHref={`/${lang}/nightly/heating`} />
+  )}
+  <HeatingOutro lang={lang} />
+  <h2 id="temperature">{lang === "de" ? "Temperatur" : "Temperature"}</h2>
+  <TemperatureSensorsIntro lang={lang} />
+  <DeviceCardList
+    devices={tempsensors as any}
+    lang={lang}
+    basePath={`/${lang}${isNightly ? "/nightly" : ""}/temperature`}
+    noBrandLabel={lang === "de" ? "Generische Integrationen" : "Generic integrations"}
+    unbrandedFirst
+  />
+  {channel === "release" && (
+    <UserDefinedHint
+      lang={lang}
+      kind="tempsensor"
+      nightlyHref={`/${lang}/nightly/heating#temperature`}
+    />
   )}
 </StarlightPage>
