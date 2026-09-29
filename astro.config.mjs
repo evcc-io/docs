@@ -41,6 +41,8 @@ export default defineConfig({
     "/en/docs/reference/api": "/en/integrations/rest-api",
     "/en/features/external-control": "/en/external-limit",
     "/de/features/external-control": "/de/external-limit",
+    "/en/temperature": "/en/heating#temperature",
+    "/de/temperature": "/de/heating#temperature",
     "/en/integrations/home-assistant": "/en/smarthome/home-assistant",
     "/de/integrations/home-assistant": "/de/smarthome/home-assistant",
   },
@@ -178,9 +180,9 @@ export default defineConfig({
           errorOnLocalLinks: false,
           // device and integration pages are custom routes (src/pages) the validator cannot see
           exclude: [
-            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}",
-            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}/**",
-            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}#*",
+            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,temperature,tariffs,external-limit,notifications,nightly}",
+            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,temperature,tariffs,external-limit,notifications,nightly}/**",
+            "/{en,de}/{chargers,meters,vehicles,smartswitches,heating,temperature,tariffs,external-limit,notifications,nightly}#*",
             "/{en,de}/reference/state",
             "/{en,de}/reference/state#*",
             // starlight-openapi and starlight-blog routes are not visible to the validator
@@ -238,8 +240,8 @@ export default defineConfig({
               link: "/smartswitches",
             },
             {
-              label: "Heating",
-              translations: { de: "Heizgeräte" },
+              label: "Heat pumps, electric heaters",
+              translations: { de: "Wärmepumpen, Heizstäbe" },
               link: "/heating",
             },
             {

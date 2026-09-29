@@ -39,6 +39,11 @@ const SECTIONS: Array<{
     type: "heating",
     filterType: "heating",
   },
+  {
+    heading: "Temperature sensors",
+    prefix: "tempsensors",
+    type: "temperature",
+  },
   { heading: "Tariffs and forecasts", prefix: "tariffs", type: "tariffs" },
   { heading: "External limit (HEMS)", prefix: "hems", type: "external-limit" },
   {
