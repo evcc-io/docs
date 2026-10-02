@@ -6,6 +6,7 @@ product:
 capabilities: ["battery-control", "curtail"]
 description: |
   Um die aktive Ladesteuerung zu nutzen darf der Energiekosten-Assistent (ECA) im Fronius Solar.web nicht aktiviert sein. (Fronius Solar.web->Einstellungen->Betriebsmodus->Eigenverbrauch)
+  Zähleradresse von Primär- oder Sekundärzählern: auf der Weboberfläche des Wechselrichters kann nur die Adresse des ersten Zählers (z.B. 200) eingestellt werden. Zusätzliche Zähler erhalten eine aufsteigende Nummer (z.B: 201).
 
 render:
   - usage: grid
@@ -13,35 +14,54 @@ render:
       type: template
       template: fronius-gen24
       usage: grid
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      port: 502 # Port, optional
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 200
+      host:  # Hostname
+      port: 502 # Port
     advanced: |
       type: template
       template: fronius-gen24
       usage: grid
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      port: 502 # Port, optional
-      id: 200 # ID, Zähleradresse von Primär- oder Sekundärzählern. Auf der Weboberfläche des Wechselrichters kann nur die Adresse des ersten Zählers (z.B. 200) eingestellt werden. Zusätzliche Zähler erhalten eine aufsteigende Nummer (z.B: 201). (optional)
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 200
+      host:  # Hostname
+      port: 502 # Port
   - usage: pv
     default: |
       type: template
       template: fronius-gen24
       usage: pv
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      port: 502 # Port, optional
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 200
+      host:  # Hostname
+      port: 502 # Port
     advanced: |
       type: template
       template: fronius-gen24
       usage: pv
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      port: 502 # Port, optional
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 200
+      host:  # Hostname
+      port: 502 # Port
   - usage: battery
     default: |
       type: template
       template: fronius-gen24
       usage: battery
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      port: 502 # Port, optional
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 200
+      host:  # Hostname
+      port: 502 # Port
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
       maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
@@ -49,8 +69,12 @@ render:
       type: template
       template: fronius-gen24
       usage: battery
-      host: 192.0.2.2 # IP-Adresse oder Hostname
-      port: 502 # Port, optional
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 200
+      host:  # Hostname
+      port: 502 # Port
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
       maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
@@ -58,24 +82,15 @@ render:
       maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
       maxchargerate: 100 # Maximale prozentuale Ladeleistung (%), Für erzwungenes Laden des Speichers in Prozent in Relation zur maximalen Ladeleistung des Batteriewechselrichters. (optional)
 params:
-  - name: host
-    example: 192.0.2.2
+  - name: modbus
+    example:
     default:
-    choice: []
+    choice: ['tcpip']
     unit:
-    description: IP-Adresse oder Hostname
+    description: Modbus Typ
     help:
     advanced: false
     optional: false
-  - name: port
-    example:
-    default: 502
-    choice: []
-    unit:
-    description: Port
-    help:
-    advanced: false
-    optional: true
   - name: capacity
     example: 50
     default:
@@ -102,15 +117,6 @@ params:
     description: Maximaler Ladestand
     help: Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt.
     advanced: false
-    optional: true
-  - name: id
-    example:
-    default: 200
-    choice: []
-    unit:
-    description: ID
-    help: 'Zähleradresse von Primär- oder Sekundärzählern. Auf der Weboberfläche des Wechselrichters kann nur die Adresse des ersten Zählers (z.B. 200) eingestellt werden. Zusätzliche Zähler erhalten eine aufsteigende Nummer (z.B: 201).'
-    advanced: true
     optional: true
   - name: maxchargepower
     example:
@@ -139,3 +145,11 @@ params:
     help: Für erzwungenes Laden des Speichers in Prozent in Relation zur maximalen Ladeleistung des Batteriewechselrichters.
     advanced: true
     optional: true
+modbus:
+  delay:
+  host:
+  id: 200
+  modbus: tcpip
+  port: 502
+  tcpip: true
+  timeout:
