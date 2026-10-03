@@ -1,193 +1,94 @@
 ---
 title: "Docker"
-description: "Betreibe evcc als Docker-Container, z. B. auf einem NAS von Synology, QNAP, Unraid oder TrueNAS, mit einem docker-compose-Beispiel und Hinweisen zum Testen."
+description: "Betreibe evcc als Docker-Container auf einem NAS oder Linux-Server mit Docker Compose und erfahre, warum das Host-Netzwerk empfohlen wird und welche Ports der Bridge-Modus braucht."
 sidebar:
   order: 4
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-Diese Anleitung beschreibt die Installation von evcc als Docker Image.
-Aktuell stellen wir Docker Images für AMD64, armv6 und arm64 zur Verfügung.
+Diese Anleitung beschreibt die Installation von evcc als Docker-Image.
+Images gibt es für AMD64, armv6 und arm64.
 Oft kommen hier NAS-Systeme wie Synology, QNAP, Unraid und TrueNAS zum Einsatz.
 
 :::caution[Wichtig]
 Diese Anleitung setzt grundlegende Erfahrung mit Docker voraus.
-Solltest du noch nicht mit Docker gearbeitet haben, empfehlen wir eine direkte Installation wie in der [Linux](/de/installation/linux) oder [macOS](/de/installation/macos) Anleitung beschrieben
 
-Sind deine Geräte nicht über Netzwerk erreichbar (bspw. RS485 Adapter) solltest du auch die direkte Installation wählen.
+Solltest du noch nicht mit Docker gearbeitet haben und einen einfachen Weg suchen, empfehlen wir stattdessen ein eigenes Gerät, z. B. einen Raspberry Pi mit dem [fertigen Image](/de/installation/linux-image).
+
+Sind deine Geräte nicht über Netzwerk erreichbar (z. B. RS485-Adapter), solltest du eine direkte Installation ohne Docker wählen, z. B. unter [Linux](/de/installation/linux).
 Es gibt technische Lösungen, dies mit Docker umzusetzen.
 Diese werden hier allerdings nicht behandelt.
 :::
 
-## Vorbereitung
+## Netzwerkmodus \{#network\}
 
-### Konfiguration
+Bevor du den Container erstellst, musst du entscheiden, wie er mit deinem Netzwerk verbunden wird.
+Wir empfehlen das **Host-Netzwerk**.
+Der Container teilt sich dann das Netzwerk mit dem Host und verhält sich wie ein direkt installiertes Programm.
+Das hat mehrere Vorteile:
 
-evcc kann auf zwei Arten konfiguriert werden:
+- Beim Hinzufügen eines Geräts schlägt das Feld **IP Adresse oder Hostname** die in deinem Netzwerk gefundenen Geräte vor.
+- Funktionen auf Basis von mDNS funktionieren, z. B. EEBus, der SMA Sunny Home Manager und die automatische Erkennung durch die evcc App.
+- Geräte, die über UDP kommunizieren, z. B. KEBA Wallboxen und SMA Geräte, sind ohne weitere Einrichtung erreichbar.
+- Es muss keine Portliste gepflegt werden. Eingehende Verbindungen wie OCPP-Wallboxen funktionieren sofort.
 
-1. **Weboberfläche** (empfohlen): Starte den Container ohne `evcc.yaml`. Nach dem Start richtest du evcc direkt im Browser ein. Die Konfiguration wird automatisch in der Datenbank gespeichert.
+Im **Bridge-Netzwerk** läuft der Container in einem separaten Docker-Netzwerk.
+Das ist in Ordnung, wenn du die oben genannten Funktionen nicht brauchst oder den Container bewusst isolieren möchtest.
+Alle benötigten [Ports](#ports) musst du dann selbst freigeben.
+Geräte in deinem Netzwerk werden nicht vorgeschlagen, ihre Adressen trägst du von Hand ein.
 
-2. **Konfigurationsdatei** (traditionelle Methode): Erstelle eine `evcc.yaml` Datei mit deinen Einstellungen. Eine Anleitung findest du unter [Einrichtung](/de/installation/configuration).
-
-### Volumes
-
-Der evcc Docker Container benötigt mindestens ein Volume:
-
-- `/root/.evcc/` Verzeichnis für die interne SQLite Datenbank (erforderlich). Die Datenbank wird automatisch in diesem Verzeichnis abgelegt.
-- `/etc/evcc.yaml` für die Konfigurationsdatei (optional - nur bei dateibasierter Konfiguration)
-
-Erstelle das Datenbank-Verzeichnis auf deinem Host-System.
-In dieser Anleitung verwenden wir exemplarisch den Pfad `/home/user/.evcc/`.
-Falls du die dateibasierte Konfiguration nutzt, verwende zusätzlich `/home/user/evcc.yaml`
+Das Host-Netzwerk setzt einen Linux-Host voraus, dazu zählen auch die gängigen NAS-Systeme.
+Mit Docker Desktop unter macOS und Windows läuft der Container in einer virtuellen Maschine ohne direkten Zugriff auf dein Netzwerk.
+Nutze dort stattdessen die Installation für [macOS](/de/installation/macos) oder [Windows](/de/installation/windows).
 
 ## Installation
 
-In diesem Abschnitt werden drei Möglichkeiten zur Installation von evcc über Docker beschrieben.
-Über eine Docker GUI, über die Docker CLI und über Docker Compose.
+Der Container lässt sich über Docker Compose, die Docker CLI oder die Docker UI deines Systems einrichten.
+Alle drei Wege verwenden dasselbe Image und dieselben Volumes.
 
-### via Docker UI
+Es gibt zwei Image-Tags: `evcc/evcc:latest` (empfohlen) und `evcc/evcc:nightly` (Entwickler-Build).
 
-Hast du ein System mit einer Docker GUI (z. B. Synology, QNAP, Portainer, Unraid, ...) kannst du die Installation auch über diese Oberfläche vornehmen.
-Hier sind die relevanten Angaben, die du eintragen musst:
+### Volumes \{#volumes\}
 
-#### Verfügbare Docker Images
+| Host-Pfad              | Container-Pfad   | Beschreibung                                      | Erforderlich |
+| ---------------------- | ---------------- | ------------------------------------------------- | ------------ |
+| `/home/user/.evcc`     | `/root/.evcc`    | Verzeichnis für die Datenbank                     | ja           |
+| `/home/user/evcc.yaml` | `/etc/evcc.yaml` | Konfigurationsdatei (nur wenn du eine verwendest) | nein         |
 
-- `evcc/evcc:latest` (empfohlen)
-- `evcc/evcc:nightly` (Entwickler-Build)
+Die Datenbank enthält deine Ladevorgänge und alles, was du in der Weboberfläche einrichtest.
+Lege das Verzeichnis vor dem ersten Start auf deinem Host-System an.
+Diese Anleitung verwendet exemplarisch `/home/user/.evcc`.
 
-#### Volume Mounts
+Das Volume für die `evcc.yaml` wird nur benötigt, wenn du deine Instanz über eine [Konfigurationsdatei](/de/installation/configuration) statt über die Weboberfläche einrichtest.
+Entferne die Zeile aus den folgenden Beispielen, wenn du keine verwendest.
 
-| Host Pfad              | Container Pfad   | Beschreibung                                               | Erfordert |
-| ---------------------- | ---------------- | ---------------------------------------------------------- | --------- |
-| `/home/user/evcc.yaml` | `/etc/evcc.yaml` | Konfigurationsdatei (nur bei dateibasierter Konfiguration) | nein      |
-| `/home/user/.evcc/`    | `/root/.evcc`    | Verzeichnis für interne Datenbank                          | ja        |
+### Docker Compose \{#compose\}
 
-#### Ports
+[Docker Compose](https://docs.docker.com/compose) ist der empfohlene Weg, da alle Parameter in einer Datei hinterlegt sind.
+Lege eine Datei mit dem Namen `compose.yml` und einer der folgenden Konfigurationen an:
 
-| Host Port | Container Port | Beschreibung           | Erfordert |
-| --------- | -------------- | ---------------------- | --------- |
-| 7070      | 7070/tcp       | Web UI, API            | ja        |
-| 8887      | 8887/tcp       | OCPP Server            | nein      |
-| 9522      | 9522/udp       | SMA Sunny Home Manager | nein      |
-| 7090      | 7090/udp       | KEBA Chargers          | nein      |
-| 5353      | 5353/udp       | mDNS                   | nein      |
-| 4712      | 4712/tcp       | EEBus                  | nein      |
-| 8899      | 8899/udp       | Modbus UDP             | nein      |
-
-Öffne die Docker UI deines Systems und erstelle einen neuen Container mit den obigen Angaben und starte ihn.
-
-Die genauen Feldbezeichnungen sind von System zu System unterschiedlich.
-Die Konzepte Ports und Volumes findest du aber in allen Systemen wieder.
-
-Springe zum Abschnitt [Testen](#test) und überprüfe die Installation.
-
-#### Aktualisierung
-
-Der Aktualisierungsprozess hängt von der jeweiligen Docker UI ab.
-Schaue dafür in die Dokumentation deines Systems.
-
-:::note[Hinweis]
-Sollten nach einer Aktualisierung bspw. deine Ladevorgänge nicht mehr angezeigt werden ist das `/root/.evcc` Verzeichnis nicht korrekt gemountet.
-:::
-
-### via Docker CLI
-
-Installiere und starte den Docker Container mit einem der folgenden Befehle.
-Ob du `sudo` benötigst, hängt von deinem System ab.
-
-<Tabs groupId="docker">
-  <TabItem label="Standard" default>
-
-```sh
-sudo docker run -d --name evcc \
--v /home/user/evcc.yaml:/etc/evcc.yaml \  # optional
--v /home/user/.evcc:/root/.evcc \
--p 7070:7070 \
--p 8887:8887 \
-evcc/evcc:latest
-```
-
-  </TabItem>
-  <TabItem label="SMA Geräte und EEBus">
-
-```sh
-sudo docker run -d --name evcc \
--v /home/user/evcc.yaml:/etc/evcc.yaml \
--v /home/user/.evcc:/root/.evcc \
--p 7070:7070 \
--p 8887:8887 \
--p 9522:9522/udp \
--p 5353:5353/udp \
--p 4712:4712 \
---network host \
--v /etc/machine-id:/etc/machine-id \
-# highlight-end
-evcc/evcc:latest
-```
-
-Setze den Netzwerkmodus auf `host`.
-Der SMA Sunny Home Manager benötigt eine eindeutige Geräte-ID.
-Unter Linux kannst du `machine-id` in den Container mounten.
-Alternativ kannst du in der `evcc.yaml` auch eine ID im `plant` Parameter hinterlegen.
-
----
-
-  </TabItem>
-</Tabs>
-
-:::note[Hinweis]
-Die obige Konfiguration nutzt nur die grundlegenden Ports.
-Füge bei Bedarf weitere Ports hinzu.
-Details findest du im Abschnitt [Ports](#ports).
-:::
-
-#### Aktualisierung
-
-Um auf eine neue Version von evcc zu aktualisieren, führe folgende Schritte durch.
-Aktualisiere auf das neuste evcc Image:
-
-```sh
-sudo docker pull evcc/evcc:latest
-```
-
-Stoppe den evcc Container:
-
-```sh
-sudo docker stop evcc
-```
-
-Lösche den evcc Container:
-
-```sh
-sudo docker rm evcc
-```
-
-Starte den evcc Container mit den gleichen Parametern wie beim ersten Start.
-
-```sh
-sudo docker run [...] evcc/evcc:latest
-```
-
-Springe zum Abschnitt [Testen](#test) um zu prüfen, ob die Installation erfolgreich war.
-
-### via Docker Compose
-
-[docker-compose](https://docs.docker.com/compose) hat einige Vorteile gegenüber der direkten Ausführung in der Kommandozeile
-Alle Parameter werden in einer Datei hinterlegt.
-Zudem kannst du weitere Programme wie Traefik in Verbindung mit evcc konfigurieren und gemeinsam starten.
-Im aktiven Verzeichnis legt man dazu einfach eine Konfigurationsdatei mit dem Namen `compose.yml` an.
-Entsprechend der passenden Komponenten-Konstellation kopiert man eine der folgenden Konfigurationen in die `compose.yml` und speichert diese ab:
-
-<Tabs groupId="compose">
-  <TabItem label="Standard" default>
+<Tabs syncKey="docker-network">
+  <TabItem label="Host-Netzwerk (empfohlen)">
 
 ```yaml
-version: "3"
 services:
   evcc:
-    command:
-      - evcc
+    container_name: evcc
+    image: evcc/evcc:latest
+    network_mode: host
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+  </TabItem>
+  <TabItem label="Bridge-Netzwerk">
+
+```yaml
+services:
+  evcc:
     container_name: evcc
     image: evcc/evcc:latest
     ports:
@@ -197,46 +98,13 @@ services:
       - /home/user/.evcc:/root/.evcc
       - /home/user/evcc.yaml:/etc/evcc.yaml # optional
     restart: unless-stopped
-    # optional:
-    #user: <UID>:<GID>
 ```
 
-  </TabItem>
-  <TabItem label="SMA Geräte und EEBus">
-
-```yaml
-version: "3"
-services:
-  evcc:
-    command:
-      - evcc
-    container_name: evcc
-    image: evcc/evcc:latest
-    ports:
-      - 7070:7070/tcp
-      - 8887:8887/tcp
-      - 9522:9522/udp
-      - 5353:5353/udp
-      - 4712:4712/tcp
-    volumes:
-      - /home/user/evcc.yaml:/etc/evcc.yaml
-      - /home/user/.evcc:/root/.evcc
-      - /etc/machine-id:/etc/machine-id
-      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id
-    network_mode: host
-    restart: unless-stopped
-    # optional:
-    #user: <UID>:<GID>
-```
+Dieses Beispiel gibt nur die Weboberfläche und den OCPP-Server frei.
+Füge bei Bedarf weitere [Ports](#ports) hinzu.
 
   </TabItem>
 </Tabs>
-
-:::note[Hinweis]
-Die obige Konfiguration nutzt nur die grundlegenden Ports.
-Füge bei Bedarf weitere Ports hinzu.
-Details findest du im Abschnitt [Ports](#ports).
-:::
 
 Starte den Container mit:
 
@@ -244,42 +112,124 @@ Starte den Container mit:
 sudo docker compose up -d
 ```
 
-#### Aktualisierung
+Ob du `sudo` benötigst, hängt von deinem System ab.
 
-Navigiere in das Verzeichnis, das die `compose.yml` Datei von evcc enthält.
+### Docker CLI \{#cli\}
 
-Aktualisiere auf das neuste evcc Image:
+Alternativ erstellst und startest du den Container mit einem einzelnen Befehl:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Host-Netzwerk (empfohlen)">
+
+```sh
+sudo docker run -d --name evcc \
+  --network host \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+  </TabItem>
+  <TabItem label="Bridge-Netzwerk">
+
+```sh
+sudo docker run -d --name evcc \
+  -p 7070:7070 \
+  -p 8887:8887 \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+Dieses Beispiel gibt nur die Weboberfläche und den OCPP-Server frei.
+Füge bei Bedarf weitere [Ports](#ports) hinzu.
+
+  </TabItem>
+</Tabs>
+
+### Docker UI \{#ui\}
+
+Hat dein System eine Docker UI (z. B. Synology, QNAP, Portainer, Unraid), kannst du den Container dort erstellen.
+Trage das Image und die [Volumes](#volumes) von oben ein und setze den Netzwerkmodus auf `host`.
+Wenn du stattdessen das Bridge-Netzwerk wählst, füge die benötigten [Ports](#ports) hinzu.
+
+Die genauen Feldbezeichnungen sind von System zu System unterschiedlich.
+Die Konzepte Netzwerkmodus, Ports und Volumes findest du aber in allen Systemen wieder.
+
+## Ports \{#ports\}
+
+Ports müssen nur im Bridge-Netzwerk freigegeben werden.
+Im Host-Netzwerk sind diese Ports direkt auf dem Host verfügbar.
+
+| Host-Port | Container-Port | Beschreibung           | Erforderlich |
+| --------- | -------------- | ---------------------- | ------------ |
+| 7070      | 7070/tcp       | Web UI, API            | ja           |
+| 8887      | 8887/tcp       | OCPP-Server            | nein         |
+| 9522      | 9522/udp       | SMA Sunny Home Manager | nein         |
+| 7090      | 7090/udp       | KEBA Wallboxen         | nein         |
+| 28376     | 28376/udp      | EVSE Master Wallboxen  | nein         |
+| 5353      | 5353/udp       | mDNS                   | nein         |
+| 4712      | 4712/tcp       | EEBus                  | nein         |
+| 8899      | 8899/udp       | Modbus UDP             | nein         |
+
+## Testen \{#test\}
+
+Nach dem Start des Containers erreichst du die Weboberfläche unter `http://<host>:7070`.
+`<host>` ist die IP-Adresse oder der Hostname des Computers, auf dem der Container läuft.
+
+Bei der ersten Verwendung wirst du aufgefordert, ein Administrations-Passwort zu setzen.
+Danach kannst du deine Geräte einrichten, wie unter [Einrichtung](/de/installation/configuration) beschrieben.
+
+Solltest du keine Verbindung herstellen können, überprüfe die [Logs deines Containers](/de/report-a-problem#system-logs).
+Weitere Hilfe findest du in den [GitHub Diskussionen](https://github.com/evcc-io/evcc/discussions).
+
+## Aktualisierung \{#update\}
+
+<Tabs>
+  <TabItem label="Docker Compose">
+
+Navigiere in das Verzeichnis mit der `compose.yml` und lade das neueste Image:
 
 ```sh
 sudo docker compose pull
 ```
 
-Falls ein neues Image vorhanden ist, startet das folgende Kommando den Container neu - ansonsten läuft der Alte einfach weiter:
+Falls ein neues Image vorhanden ist, erstellt der folgende Befehl den Container neu.
+Ansonsten läuft der bestehende einfach weiter.
 
 ```sh
 sudo docker compose up -d
 ```
 
-## Testen \{#test\}
+  </TabItem>
+  <TabItem label="Docker CLI">
 
-Hast du deinen Container erfolgreich erstellt und gestartet, kannst du die evcc Web UI unter `http://<host>:7070` aufrufen.
-`<host>` ist hier die IP-Adresse oder der Hostname des Computers, auf dem der Container läuft.
+Lade das neueste Image, stoppe und lösche dann den bestehenden Container:
 
-**Bei der ersten Verwendung:**
+```sh
+sudo docker pull evcc/evcc:latest
+sudo docker stop evcc
+sudo docker rm evcc
+```
 
-- Wirst du aufgefordert ein Administrations-Passwort zu setzen
-- Kannst du anschließend deine Geräte über die Weboberfläche einrichten (bei UI-Konfiguration)
-- Oder siehst direkt deine konfigurierten Geräte (bei dateibasierter Konfiguration)
+Starte den Container anschließend mit demselben `docker run` Befehl wie bei der [Installation](#cli).
 
-Solltest du keine Verbindung herstellen können, überprüfe die [Logs deines Containers](/de/report-a-problem#system-logs).
-Wenn du die Oberfläche siehst, aber eine Fehlermeldung angezeigt wird, überprüfe:
+  </TabItem>
+  <TabItem label="Docker UI">
 
-- Bei dateibasierter Konfiguration: die Einstellungen in der `evcc.yaml` Datei
-- Bei UI-Konfiguration: die Geräteeinstellungen auf der Konfigurationsseite
+Der Aktualisierungsprozess hängt von der jeweiligen Docker UI ab.
+Schaue dafür in die Dokumentation deines Systems.
 
-Weitere Details findest du in [Einrichtung](/de/installation/configuration) oder in den [GitHub Diskussionen](https://github.com/evcc-io/evcc/discussions).
+  </TabItem>
+</Tabs>
 
-## Community Anleitungen
+:::note[Hinweis]
+Sollten nach einer Aktualisierung deine Ladevorgänge nicht mehr angezeigt werden, ist das Verzeichnis `/root/.evcc` nicht korrekt gemountet.
+:::
+
+## Community-Anleitungen
 
 Hier findest du von Nutzern erstellte Anleitungen für konkrete Systeme.
 Für die Richtigkeit und Aktualität können wir nicht garantieren.
@@ -292,15 +242,39 @@ Erstelle gerne einen Pull Request im [Doku Repository](https://github.com/evcc-i
 
 ### Synology NAS
 
-Die Einrichtung von evcc über Docker auf einem Synology NAS-System ist über dessen grafische Benutzeroberfläche ohne Verwendung der Kommandozeile möglich.
-Hierbei sind zwei Netzwerkmodi wählbar: Host oder Bridge. Ob der Bridge-Modus anwendbar ist, hängt von den verwendeten Komponenten ab.
-Im Zweifelsfall ist immer der Host-Mode zu wählen. Hier die Anleitung dazu:
+Die Einrichtung über Docker auf einem Synology NAS ist über dessen grafische Benutzeroberfläche ohne Verwendung der Kommandozeile möglich.
+Diese Anleitung verwendet den empfohlenen [Host-Modus](#network):
 [Anleitung: Synology Docker (PDF)](https://github.com/evcc-io/docs/files/10365841/Anleitung.EVCC.Synology.Docker.Elli.Charger.Connect-Pro.pdf)
 
-Für den Bridge-Mode ist nach dieser Anleitung zu verfahren: [Anleitung: Synology Docker 2 (PDF)](https://github.com/evcc-io/docs/files/10365845/EVCC_Synology_Docker-2.pdf) (erstellt von at4hawo1)
+Eine Anleitung für den Bridge-Modus findest du hier:
+[Anleitung: Synology Docker 2 (PDF)](https://github.com/evcc-io/docs/files/10365845/EVCC_Synology_Docker-2.pdf) von [at4hawo1](https://github.com/at4hawo1)
 
 ### QNAP NAS
 
-Auch auf der QNAP NAS kann man über die Container Station evcc in einem Container laufen lassen. Ganz ohne Kommandozeile habe ich hier nicht gearbeitet. Wie auch bei der Synology ist es die Nutzung des Netzwerkmodus abhängig von den verwendeten Komponenten. Insbesondere beim SMA Sunny Home Manager 2.0 ist der "Host-Modus" zu wählen, um den Multicast zu joinen.
-Hier die Anleitung für das Erstellen des Containers mit der QNAP NAS und der Container Station 2/3:
+Die Einrichtung auf einem QNAP NAS über die Container Station ähnelt der obigen Synology-Anleitung.
+QNAP-spezifische Hinweise findest du hier:
 [Anleitung: QNAP (PDF)](https://github.com/evcc-io/docs/files/11241693/EVCC_auf_QNAP_Container_Station.pdf)
+
+## Statische Gerätevorschläge \{#discovery\}
+
+Dies ist eine Option für Fortgeschrittene in kontrollierten Docker-Umgebungen, in denen das Bridge-Netzwerk gewollt ist und die Geräte feststehen.
+Die Umgebungsvariable `EVCC_DISCOVERY_HOSTS` stellt eine statische Liste von Geräten bereit.
+Diese Liste wird dann für die Vorschläge im Feld **IP Adresse oder Hostname** verwendet, statt das Netzwerk zu durchsuchen.
+
+Der Wert ist eine JSON-Liste.
+Jeder Eintrag benötigt eine `ip`.
+`hostname` und `mac` sind optional.
+Sie werden verwendet, um den Hersteller anzuzeigen und Geräte, die zum gewählten Gerätetyp passen, unter **Passend** aufzuführen.
+
+```yaml
+services:
+  evcc:
+    environment:
+      EVCC_DISCOVERY_HOSTS: >-
+        [
+          {"ip": "192.168.1.10", "hostname": "sma3009876543", "mac": "00:15:BB:12:34:56"},
+          {"ip": "192.168.1.20", "hostname": "go-echarger_123456"}
+        ]
+```
+
+Eine leere Liste `[]` schaltet die Vorschläge ab.
