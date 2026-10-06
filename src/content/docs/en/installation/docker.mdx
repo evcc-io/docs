@@ -42,6 +42,12 @@ Host networking requires a Linux host, which includes the common NAS systems.
 With Docker Desktop on macOS and Windows the container runs in a virtual machine without direct access to your network.
 Use the [macOS](/en/installation/macos) or [Windows](/en/installation/windows) installation there instead.
 
+:::tip[Mount the directory, not the database file]
+Always mount the `/root/.evcc` **directory** — never a single `evcc.db` file. evcc keeps the SQLite database together with its sidecar files (`evcc.db-wal` and `evcc.db-shm`) in this directory, and all of them have to persist together.
+
+A [named volume](https://docs.docker.com/engine/storage/volumes/) (`docker volume create evcc`, then mount `evcc:/root/.evcc`) is the most robust choice: it keeps the files together and lives on the host's native filesystem, which provides the file locking SQLite needs. Avoid placing the database on a network share (NFS/SMB) or — on Docker Desktop for macOS/Windows — on a bind mount, as these can break SQLite locking.
+:::
+
 ## Installation
 
 The container can be set up via Docker Compose, the Docker CLI or the Docker UI of your system.

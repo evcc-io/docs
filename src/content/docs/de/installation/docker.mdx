@@ -42,6 +42,12 @@ Das Host-Netzwerk setzt einen Linux-Host voraus, dazu zählen auch die gängigen
 Mit Docker Desktop unter macOS und Windows läuft der Container in einer virtuellen Maschine ohne direkten Zugriff auf dein Netzwerk.
 Nutze dort stattdessen die Installation für [macOS](/de/installation/macos) oder [Windows](/de/installation/windows).
 
+:::tip[Das Verzeichnis einbinden, nicht die Datenbankdatei]
+Binde immer das **Verzeichnis** `/root/.evcc` ein — niemals eine einzelne `evcc.db` Datei. evcc legt die SQLite Datenbank zusammen mit ihren Begleitdateien (`evcc.db-wal` und `evcc.db-shm`) in diesem Verzeichnis ab, und alle müssen gemeinsam erhalten bleiben.
+
+Ein [Named Volume](https://docs.docker.com/engine/storage/volumes/) (`docker volume create evcc`, dann `evcc:/root/.evcc` einbinden) ist die robusteste Wahl: Es hält die Dateien zusammen und liegt auf dem nativen Dateisystem des Hosts, das die von SQLite benötigte Dateisperrung bereitstellt. Lege die Datenbank nicht auf einer Netzwerkfreigabe (NFS/SMB) ab und — bei Docker Desktop für macOS/Windows — nicht auf einem Bind Mount, da dies die SQLite-Sperrung beeinträchtigen kann.
+:::
+
 ## Installation
 
 Der Container lässt sich über Docker Compose, die Docker CLI oder die Docker UI deines Systems einrichten.
