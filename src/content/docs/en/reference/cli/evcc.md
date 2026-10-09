@@ -42,6 +42,7 @@ evcc [flags]
 - [evcc config](/en/reference/cli/evcc_config) - Dump database configuration
 - [evcc detect](/en/reference/cli/evcc_detect) - Auto-detect compatible hardware
 - [evcc device](/en/reference/cli/evcc_device) - Query database-configured devices (debug only)
+- [evcc discovery](/en/reference/cli/evcc_discovery) - Scan the local network for devices
 - [evcc discuss](/en/reference/cli/evcc_discuss) - Request support at Github Discussions (https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe)
 - [evcc dump](/en/reference/cli/evcc_dump) - Dump configuration
 - [evcc easee-ocpp](/en/reference/cli/evcc_easee-ocpp) - Manage Easee local OCPP configuration
