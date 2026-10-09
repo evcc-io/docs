@@ -1,13 +1,14 @@
-template: mtec-eb-gen2
+template: solinteg-gen2
 product:
   identifier: m-tec-energy-butler-gen2
   brand: M-TEC
   description: Energy Butler GEN2
+capabilities: ["battery-control"]
 render:
   - usage: grid
     default: |
       type: template
-      template: mtec-eb-gen2
+      template: solinteg-gen2
       usage: grid
 
       # RS485 via adapter (Modbus RTU)
@@ -16,16 +17,37 @@ render:
       device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
       baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
       comset: "8N1" # Kommunikationsparameter für den Adapter
+      delay: 100ms # optional
 
       # RS485 via TCP/IP (Modbus RTU)
       modbus: rs485tcpip
       id: 247
       host:  # Hostname
       port: 502 # Port
+      delay: 100ms # optional
+    advanced: |
+      type: template
+      template: solinteg-gen2
+      usage: grid
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 247
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      delay: 100ms # optional
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 247
+      host:  # Hostname
+      port: 502 # Port
+      delay: 100ms # optional
   - usage: pv
     default: |
       type: template
-      template: mtec-eb-gen2
+      template: solinteg-gen2
       usage: pv
 
       # RS485 via adapter (Modbus RTU)
@@ -34,16 +56,38 @@ render:
       device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
       baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
       comset: "8N1" # Kommunikationsparameter für den Adapter
+      delay: 100ms # optional
 
       # RS485 via TCP/IP (Modbus RTU)
       modbus: rs485tcpip
       id: 247
       host:  # Hostname
       port: 502 # Port
+      delay: 100ms # optional
+    advanced: |
+      type: template
+      template: solinteg-gen2
+      usage: pv
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 247
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      delay: 100ms # optional
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 247
+      host:  # Hostname
+      port: 502 # Port
+      delay: 100ms # optional
+      maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
   - usage: battery
     default: |
       type: template
-      template: mtec-eb-gen2
+      template: solinteg-gen2
       usage: battery
 
       # RS485 via adapter (Modbus RTU)
@@ -52,12 +96,41 @@ render:
       device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
       baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
       comset: "8N1" # Kommunikationsparameter für den Adapter
+      delay: 100ms # optional
 
       # RS485 via TCP/IP (Modbus RTU)
       modbus: rs485tcpip
       id: 247
       host:  # Hostname
       port: 502 # Port
+      delay: 100ms # optional
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
+    advanced: |
+      type: template
+      template: solinteg-gen2
+      usage: battery
+
+      # RS485 via adapter (Modbus RTU)
+      modbus: rs485serial
+      id: 247
+      device: /dev/ttyUSB0 # USB-RS485 Adapter Adresse
+      baudrate: 9600 # Prüfe die Geräteeinstellungen, typische Werte sind 9600, 19200, 38400, 57600, 115200
+      comset: "8N1" # Kommunikationsparameter für den Adapter
+      delay: 100ms # optional
+
+      # RS485 via TCP/IP (Modbus RTU)
+      modbus: rs485tcpip
+      id: 247
+      host:  # Hostname
+      port: 502 # Port
+      delay: 100ms # optional
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
+      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
+      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
 params:
   - name: modbus
     example:
@@ -68,10 +141,64 @@ params:
     help:
     advanced: false
     optional: false
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default: 0
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit as configured on the battery system. Used by optimizer.
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default: 100
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit as configured on the battery system. Used by optimizer and for grid charging.
+    advanced: false
+    optional: true
+  - name: maxacpower
+    example: 5000
+    default: 0
+    choice: []
+    unit: W
+    description: Maximum AC power of the hybrid inverter
+    help:
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: For forced charging of the battery.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Maximum discharge power of the storage.
+    advanced: true
+    optional: true
 modbus:
   baudrate: 9600
   comset: 8N1
-  delay:
+  delay: 100ms
   device: /dev/ttyUSB0
   host:
   id: 247
