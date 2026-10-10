@@ -62,6 +62,7 @@ export const CODE_PREAMBLES: Record<string, string> = {
   hems: "hems:",
   messenger: "messaging:\n  services:",
   curtailer: "curtailers:\n    - name: my_curtailer",
+  tempsensor: "tempsensors:\n    - name: my_tempsensor",
 };
 
 const TRANSLATIONS_DE: Record<string, string> = {
@@ -301,7 +302,8 @@ export function featuresFor(
     | "heating"
     | "hems"
     | "messenger"
-    | "curtailer",
+    | "curtailer"
+    | "tempsensor",
   entry: DeviceEntry,
   lang: "de" | "en",
 ): string[] {
@@ -344,7 +346,8 @@ export function collectionName(
     | "tariffs"
     | "hems"
     | "messengers"
-    | "curtailers",
+    | "curtailers"
+    | "tempsensors",
   lang: "de" | "en",
   channel: Channel,
 ): string {
@@ -370,7 +373,8 @@ export function templateEditUrl(
     | "tariff"
     | "hems"
     | "messenger"
-    | "curtailer",
+    | "curtailer"
+    | "tempsensor",
 ): string | undefined {
   return entry.data.template
     ? `https://github.com/evcc-io/evcc/tree/master/templates/definition/${dir}/${entry.data.template}.yaml`
@@ -388,7 +392,8 @@ export function buildCodeBlocks(
     | "tariff"
     | "hems"
     | "messenger"
-    | "curtailer",
+    | "curtailer"
+    | "tempsensor",
 ): string[] {
   const render = (entry.data.render as any[]) ?? [];
   if (type === "hems") {
@@ -439,7 +444,8 @@ export async function deviceDetailPaths(opts: {
     | "tariffs"
     | "hems"
     | "messengers"
-    | "curtailers";
+    | "curtailers"
+    | "tempsensors";
   /** URL segment, e.g. "smartswitches" (may differ from the collection prefix). */
   urlType: string;
   channel: Channel;
@@ -508,7 +514,8 @@ export type DeviceKind =
   | "tariff"
   | "hems"
   | "messenger"
-  | "curtailer";
+  | "curtailer"
+  | "tempsensor";
 
 /** Page title of a device: "Brand Model", falling back to the template id. */
 export function deviceTitle(entry: DeviceEntry): string {
