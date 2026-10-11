@@ -30,34 +30,44 @@ const description =
     ? "Dynamische Stromtarife sowie Anbieter für CO₂-, PV- und Temperaturvorhersagen."
     : "Dynamic electricity tariffs and CO₂, solar, and temperature forecast providers.";
 
-function bucketFor(d: any): "price" | "co2" | "solar" | "temperature" {
-  const group = d.data.product.group ?? "";
-  return TARIFF_GROUPS[group] ?? "price";
-}
+type Bucket = "price" | "feedin" | "co2" | "solar" | "temperature";
 
-const buckets: Record<"price" | "co2" | "solar" | "temperature", any[]> = {
+const buckets: Record<Bucket, any[]> = {
   price: [],
+  feedin: [],
   co2: [],
   solar: [],
   temperature: [],
 };
-for (const d of devices) buckets[bucketFor(d)].push(d);
+for (const d of devices) {
+  const group = TARIFF_GROUPS[d.data.product.group ?? ""] ?? "price";
+  if (group !== "price") {
+    buckets[group].push(d);
+    continue;
+  }
+  // price templates without usages fit both directions
+  const usages: string[] = d.data.usages ?? [];
+  if (usages.length === 0 || usages.includes("grid")) buckets.price.push(d);
+  if (usages.length === 0 || usages.includes("feedin")) buckets.feedin.push(d);
+}
 
 const sectionLabels = lang === "de"
   ? {
-      price: { id: "price", title: "Strompreise" },
+      price: { id: "price", title: "Netzbezugstarife" },
+      feedin: { id: "feedin", title: "Einspeisetarife" },
       co2: { id: "co2", title: "CO₂-Vorhersagen" },
       solar: { id: "solar", title: "Solar-Vorhersagen" },
       temperature: { id: "temperature", title: "Temperaturvorhersagen" },
     }
   : {
-      price: { id: "price", title: "Electricity prices" },
+      price: { id: "price", title: "Grid tariffs" },
+      feedin: { id: "feedin", title: "Feed-in tariffs" },
       co2: { id: "co2", title: "CO₂ forecasts" },
       solar: { id: "solar", title: "Solar forecasts" },
       temperature: { id: "temperature", title: "Temperature forecasts" },
     };
 
-const sectionOrder = ["price", "co2", "solar", "temperature"] as const;
+const sectionOrder = ["price", "feedin", "co2", "solar", "temperature"] as const;
 
 const headings = [
   ...(lang === "de"
