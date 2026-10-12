@@ -3,7 +3,16 @@ import Default from "@astrojs/starlight/components/Head.astro";
 // Inlined at the end of <head> so it stays out of the meta/link block
 // crawlers read first, but still runs before the body renders.
 import langRedirect from "../scripts/lang-redirect.js?raw";
+
+// Blog cover as link preview image (Slack, Mastodon, …).
+const cover = Astro.locals.starlightRoute.entry.data.cover;
+const image = cover && ("image" in cover ? cover.image : cover.light);
+const ogImage =
+  image &&
+  new URL(typeof image === "string" ? image : image.src, Astro.site).href;
 ---
 
 <Default><slot /></Default>
+{ogImage && <meta property="og:image" content={ogImage} />}
+{ogImage && <meta name="twitter:image" content={ogImage} />}
 <script is:inline set:html={langRedirect} />
