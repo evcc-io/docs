@@ -1,37 +1,29 @@
 ---
 title: "Zendure Speicher via HTTP-API"
-description: "Anleitung zur Integration von Zendure-Speichern (AIO, Solarflow) in evcc über die lokale HTTP-API mit dem custom meter Plugin."
+description: "So bindet man Zendure-Speicher (AIO, ältere Solarflow-Modelle) in evcc ein – über die lokale HTTP-API mit dem custom meter Plugin."
 sidebar:
   order: 15
 ---
 
-## Übersicht
+## Zendure-Geräte ohne Cloud-Anbindung
 
-Die nativen [Zendure-Templates](/de/meters/zendure-hyper-2000) unterstützen die Hyper 2000, Solarflow 800 Pro und Solarflow AC Modelle über die Zendure Cloud API (MQTT).
+Die nativen [Zendure-Templates](/de/meters/zendure-hyper-2000) funktionieren super für Hyper 2000, Solarflow 800 Pro und Solarflow AC – die reden alle über die Zendure Cloud (MQTT).
 
-Für ältere oder alternative Zendure-Geräte (AIO Serie, bestimmte Solarflow-Modelle) steht diese API nicht zur Verfügung. Diese Geräte bieten jedoch eine **lokale HTTP-API**, über die sich Leistung und Ladestand auslesen lassen.
+Aber: Ältere Geräte wie die AIO-Serie oder bestimmte Solarflow-Modelle haben keinen Cloud-Zugang. Stattdessen bieten sie eine **lokale HTTP-API** an, die man direkt im Netzwerk ansprechen kann.
 
-Diese Anleitung zeigt die Integration über das [`custom` meter](/de/reference/configuration/meters#custom) mit dem [`http` Plugin](/de/reference/plugins#http-read-write).
+Ich nutze das selbst in meiner Hybrid-Anlage (Kostal Plenticore + 2× Zendure + Hoymiles) und hier ist wie's funktioniert.
 
-## Voraussetzungen
+## Das Gerät finden
 
-- Zendure-Gerät im lokalen Netzwerk erreichbar
-- Gerät hat HTTP-API auf Port 80 (oder anderem Port)
-- evcc läuft und kann das Gerät erreichen
-
-## API-Endpunkt finden
-
-Die meisten Zendure-Geräte mit lokaler HTTP-API antworten auf:
+Die meisten Zendure-Geräte mit dieser API antworten auf:
 
 ```
 http://<GERAET_IP>/properties/report
 ```
 
-### IP-Adresse herausfinden
+### IP-Adresse rausfinden
 
-1. In der **Zendure App** unter *Einstellungen* → *Gerät* die IP-Adresse ablesen (falls angezeigt)
-2. Oder im Router nach dem Gerätenamen "ZENDURE" oder "Solarflow" suchen
-3. Oder mit einem Netzwerk-Scanner wie `nmap` scannen:
+Am einfachsten schaust du im Router nach – such nach "ZENDURE" oder "Solarflow". Alternativ geht die Zendure App (unter *Einstellungen* → *Gerät*), wenn sie die IP anzeigt. Oder du scannst dein Netzwerk:
 
 ```bash
 nmap -sn 192.168.178.0/24 | grep -i zendure
@@ -39,49 +31,46 @@ nmap -sn 192.168.178.0/24 | grep -i zendure
 
 ### API testen
 
-Rufe den Endpunkt im Browser oder mit curl auf:
+Ruf den Endpunkt einfach im Browser auf oder mit curl:
 
 ```bash
 curl http://<GERAET_IP>/properties/report
 ```
 
-Eine erfolgreiche Antwort sieht etwa so aus:
+Wenn's klappt, bekommst du JSON zurück – etwa so:
 
 ```json
 {
   "properties": {
     "outputHomePower": 1500,
     "gridInputPower": 200,
-    "electricLevel": 75,
-    ...
+    "electricLevel": 75
   }
 }
 ```
 
-## JSON-Struktur verstehen
+## Was bedeuten die Werte?
 
-| Feld | Bedeutung | Einheit |
+| Feld | Was es ist | Einheit |
 |------|-----------|---------|
-| `outputHomePower` | Leistung am Hausanschluss (PV + Batterie) | W |
-| `gridInputPower` | Bezogene Netzleistung | W |
-| `electricLevel` | Batterieladestand (SOC) | % |
+| `outputHomePower` | Leistung am Haus (PV + Batterie zusammen) | W |
+| `gridInputPower` | Netzbezug | W |
+| `electricLevel` | Batterieladestand | % |
 
-### Berechnung der Batterieleistung
-
-Die Batterieleistung ergibt sich aus:
+Die **Batterieleistung** berechnest du so:
 
 ```
 Batterie = outputHomePower - gridInputPower
 ```
 
-- **Positiv**: Batterie entlädt sich (versorgt das Haus)
-- **Negativ**: Batterie lädt (überschüssige PV-Ladung)
+- **Positiv** → Batterie liefert Strom (entlädt sich)
+- **Negativ** → Batterie lädt (überschüssige PV)
 
-## evcc-Konfiguration
+## evcc einrichten
 
-### Custom Meter für Zendure-Batterie
+### Einfache Konfiguration
 
-Füge folgende Konfiguration in deine `evcc.yaml` ein:
+Folgendes in die `evcc.yaml`:
 
 ```yaml
 meters:
@@ -95,25 +84,22 @@ meters:
       source: http
       uri: http://<GERAET_IP>/properties/report
       jq: .properties.electricLevel
-    capacity: 8.16  # Akkukapazität in kWh (anpassen!)
+    capacity: 8.16
 ```
 
-### Erklärung der Parameter
-
-| Parameter | Beschreibung |
-|-----------|-------------|
-| `source: http` | Verwendet das HTTP-Plugin zum Auslesen |
-| `uri` | URL des Zendure API-Endpunkts |
-| `jq` | jq-Expression zur Extraktion/Berechnung des Werts |
-| `capacity` | Kapazität des Speichers in kWh (wichtig für mehrere Batterien) |
+Kurze Erklärung:
+- `source: http` → evcc holt die Werte per HTTP-Request
+- `uri` → die URL vom Zendure-Gerät
+- `jq` → damit extrahierst du den Wert aus dem JSON (oder rechnest drauflos)
+- `capacity` → Akkukapazität in kWh, wichtig wenn du mehrere Batterien hast
 
 ### Mehrere Zendure-Speicher
 
-Bei mehreren Zendure-Geräten wiederhole die Konfiguration mit unterschiedlichen IPs und Namen:
+So sieht's bei mir aus – drei Batterien im System:
 
 ```yaml
 meters:
-  # Hauptbatterie (Kostal Plenticore BYD)
+  # Hauptbatterie: BYD via Kostal Plenticore (Modbus)
   - name: kostal_battery
     type: template
     template: kostal-plenticore-gen2
@@ -156,15 +142,11 @@ site:
     - zendure_gaeste
 ```
 
-### Komplettes Beispiel (Hybrid-Anlage)
+### Komplettes Beispiel – meine Anlage
 
-Hier eine vollständige Konfiguration wie im evcc-Forum diskutiert:
+Hier die komplette `evcc.yaml` meiner Hybrid-Anlage:
 
 ```yaml
-# ============================================
-# HYBRID-ANLAGE: Kostal + Hoymiles + 2× Zendure
-# ============================================
-
 interval: 30s
 
 meters:
@@ -253,17 +235,15 @@ site:
       - zendure_2
 ```
 
-## Troubleshooting
+## Was wenn's nicht klappt?
 
-### API antwortet nicht
-
-- Firewall prüfen: Port 80 vom evcc-Server zum Zendure-Gerät muss offen sein
+### Gerät antwortet nicht
+- Firewall checken: Port 80 vom evcc-Server zum Zendure-Gerät muss offen sein
 - Gerät neu starten (Strom weg, wieder rein)
-- IP-Adresse im Router prüfen
+- IP im Router prüfen
 
-### Falsche Werte / Vorzeichen
-
-Die Berechnung `outputHomePower - gridInputPower` kann bei manchen Geräten invertiert sein. Falls die Vorzeichen falsch sind:
+### Vorzeichen sind falsch
+Manche Geräte liefern die Werte invertiert. Dann einfach umdrehen:
 
 ```yaml
 power:
@@ -272,19 +252,17 @@ power:
   jq: (.properties.gridInputPower - .properties.outputHomePower) * -1
 ```
 
-### SOC-Wert fehlt oder falsch
-
-Manche Zendure-Firmware-Versionen haben das Feld `electricLevel` nicht. Prüfe die rohe JSON-Antwort:
+### SOC-Feld fehlt
+Manche Firmware-Versionen haben kein `electricLevel`. Dann die rohe JSON-Antwort checken:
 
 ```bash
 curl http://<IP>/properties/report | python3 -m json.tool
 ```
 
-Suche nach Feldern wie `soc`, `batteryLevel`, `stateOfCharge`.
+Suche nach Feldern wie `soc`, `batteryLevel` oder `stateOfCharge`.
 
-### Timeout bei langsamer Antwort
-
-Füge einen Timeout hinzu:
+### Langsame Antwort
+Ein Timeout hilft:
 
 ```yaml
 power:
@@ -294,11 +272,9 @@ power:
   timeout: 5s
 ```
 
-## Tipps für die Optimierung
+## Batteriemodus steuern (optional)
 
-### Batteriemodus steuern
-
-Falls dein Zendure-Gerät den Modus über HTTP ändert (z.B. `auto`, `hold`, `charge`):
+Falls dein Gerät den Modus per HTTP ändert, geht das so:
 
 ```yaml
 meters:
@@ -335,9 +311,9 @@ meters:
             body: '{"mode":"charge"}'
 ```
 
-### Cache für API-Antworten
+## API-Antworten cachen
 
-Um die API nicht zu oft zu belasten, kannst du einen Cache setzen:
+Die API nicht zu oft belasten – ein Cache hilft:
 
 ```yaml
 power:
@@ -347,17 +323,17 @@ power:
   cache: 10s
 ```
 
-## Bekannte Geräte mit HTTP-API
+## Welche Geräte haben die HTTP-API?
 
 | Gerät | API-Endpunkt | SOC-Feld |
 |-------|-------------|----------|
 | Zendure AIO Serie | `/properties/report` | `electricLevel` |
-| Zendure Solarflow (ältere) | `/properties/report` | `electricLevel` |
+| Zendure Solarflow (älter) | `/properties/report` | `electricLevel` |
 | Zendure Hyper 2000 | Cloud API (MQTT) | — |
 | Zendure Solarflow 800 Pro | Cloud API (MQTT) | — |
 
 ## Quellen
 
-- [evcc custom meter docs](/de/reference/configuration/meters#custom)
-- [evcc http plugin docs](/de/reference/plugins#http-read-write)
+- [evcc custom meter](/de/reference/configuration/meters#custom)
+- [evcc http plugin](/de/reference/plugins#http-read-write)
 - [jq manual](https://jqlang.github.io/jq/manual/)
