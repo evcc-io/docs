@@ -1,13 +1,13 @@
 ---
 title: "tariffs"
-description: "How to configure grid, feed-in, CO₂ and solar forecast tariffs in evcc.yaml for savings statistics, smart charging plans and time-based grid fees."
+description: "How to configure grid import, grid export, CO₂ and solar forecast tariffs in evcc.yaml for savings statistics, smart charging plans and time-based grid fees."
 sidebar:
   order: 12
 ---
 
-You can specify your energy tariff and, if applicable, your feed-in tariff.
+You can specify your energy tariff and, if applicable, your grid export tariff.
 evcc uses these values for a rough [savings calculation](/en/faq#statistical-data) that is displayed in the web UI.
-This data is also used by the [planner](/en/features/plans) for price and CO₂-optimized charging.
+This data is also used by the [planner](/en/features/plans) for price and CO₂-optimised charging.
 
 **Structure**
 

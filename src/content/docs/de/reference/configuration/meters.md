@@ -459,7 +459,7 @@ Plugin Definition um die Energiemenge in Gegenrichtung in kWh zurückzugeben, z.
 
 #### `soc`
 
-Plugin Definiton um den Ladestand SOC in % zurückzugeben
+Plugin Definiton um den Ladestand in % zurückzugeben
 
 **Beispiel**:
 
@@ -475,7 +475,7 @@ Plugin Definiton um den Ladestand SOC in % zurückzugeben
 
 Angabe der Batterie Kapazität. Nur nützlich, wenn mehrere Batterien vorhanden sind
 
-Dient dazu, den Gesamt-SOC zu ermittlen.
+Dient dazu, den Gesamt-Ladestand zu ermittlen.
 
 ---
 

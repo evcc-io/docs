@@ -1,13 +1,13 @@
 ---
 title: User-defined Devices
-description: "Shows how to integrate a wallbox, meter, vehicle or heater without a built-in template by defining its readings and controls yourself via HTTP, MQTT or Modbus."
+description: "Shows how to integrate a charger, meter, vehicle or heater without a built-in template by defining its readings and controls yourself via HTTP, MQTT or Modbus."
 tableOfContents:
   maxHeadingLevel: 4
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-When creating a charger, heater, grid meter, battery, solar system, other consumer, vehicle, tariff, curtailment device or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
+When creating a charger, heater, grid meter, home battery, solar system, other consumer, vehicle, tariff, curtailment device or notification service, you can pick the **User-defined device** option from the device type list and describe your own logic based on the [plugin system](/en/reference/plugins).
 
 That way you can integrate devices that aren't covered by a built-in template, e.g. read the current power from an HTTP endpoint, or write a target current via Modbus.
 
@@ -80,9 +80,9 @@ Power meters are configured in the [`meters`](/en/reference/configuration/meters
 Meters defined under `meters:` can be referenced from `site`:
 
 - `grid`: Grid meter
-- `pv`: PV meter
+- `pv`: Solar meter
 - `battery`: Home battery meter
-- `charge`: Meter for the charging power of the wallbox
+- `charge`: Meter for the charging power of the charger
 - `aux`: Consumption meter for intelligent consumers
 - `consumer`: Meter for a regular consumer, recorded for consumption statistics
 - `ext`: Additional meter not used for regulation or shown in the UI, only logged and exported
@@ -91,38 +91,38 @@ Meters defined under `meters:` can be referenced from `site`:
 Not all meter roles support all attributes:
 
 - `limitsoc` and `batterymode` are used exclusively for battery meters (referenced from `site.battery`).
-- `curtail` and `curtailed` are used together for `pv` meters that support feed-in curtailment (§ 9 EEG).
-- `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin entries each (as a YAML array) and apply to grid meters (`grid`) and wallboxes (`charge`).
+- `curtail` and `curtailed` are used together for `pv` meters that support curtailment (§ 9 EEG).
+- `currents`, `voltages` and `powers` are phase attributes that must be configured with exactly three plugin entries each (as a YAML array) and apply to grid meters (`grid`) and chargers (`charge`).
 
 Return the correct data type from each plugin.
 To convert, use the [reading pipelines](/en/reference/plugins#reading).
 
 ### Read attributes
 
-| Attribute      | Type                  | Required | Context       | Description                                                          |
-| -------------- | --------------------- | -------- | ------------- | -------------------------------------------------------------------- |
-| `power`        | `float`               | yes      | all           | Current power in W                                                   |
-| `energy`       | `float`               | no       | all           | Meter reading in kWh                                                 |
-| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)                |
-| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                                |
-| `curtailed`    | `int`                 | no       | `pv`          | Current feed-in limit in % (0 to 100). Only together with `curtail`. |
-| `soc`          | `int`                 | no       | `battery`     | State of charge in %                                                 |
-| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                                      |
-| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents.          |
-| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.                    |
-| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).               |
+| Attribute      | Type                  | Required | Context       | Description                                                              |
+| -------------- | --------------------- | -------- | ------------- | ------------------------------------------------------------------------ |
+| `power`        | `float`               | yes      | all           | Current power in W                                                       |
+| `energy`       | `float`               | no       | all           | Meter reading in kWh                                                     |
+| `returnenergy` | `float`               | no       | all           | Meter reading in reverse direction in kWh (see below)                    |
+| `maxpower`     | `int`                 | no       | `pv` (hybrid) | Maximum AC power in W                                                    |
+| `curtailed`    | `int`                 | no       | `pv`          | Current grid export limit in % (0 to 100). Only together with `curtail`. |
+| `soc`          | `int`                 | no       | `battery`     | Charge level in %                                                        |
+| `capacity`     | `float`               | no       | `battery`     | Capacity in kWh                                                          |
+| `powers`       | `[float,float,float]` | no       | all           | Phase powers in W. For sign detection of unsigned currents.              |
+| `currents`     | `[float,float,float]` | no       | all           | Phase currents in A. For detecting active phases.                        |
+| `voltages`     | `[float,float,float]` | no       | all           | Phase voltages in V. For connection detection (1p/3p).                   |
 
 ### Signs and Directions \{#signs-and-directions\}
 
 What a positive `power` value and the two energy directions mean depends on the meter role:
 
-| Role                     | `power` positive                 | `energy`   | `returnenergy`     |
-| ------------------------ | -------------------------------- | ---------- | ------------------ |
-| `grid`                   | Grid import                      | Imported   | Exported (feed-in) |
-| `pv`                     | Production                       | Produced   | Consumed (rare)    |
-| `battery`                | Discharging (negative: charging) | Discharged | Charged            |
-| `charge`                 | Charging                         | Charged    | Discharged (V2X)   |
-| `aux`, `ext`, `consumer` | Consumption                      | Consumed   | Produced (rare)    |
+| Role                     | `power` positive                 | `energy`   | `returnenergy`         |
+| ------------------------ | -------------------------------- | ---------- | ---------------------- |
+| `grid`                   | Grid import                      | Imported   | Exported (grid export) |
+| `pv`                     | Production                       | Produced   | Consumed (rare)        |
+| `battery`                | Discharging (negative: charging) | Discharged | Charged                |
+| `charge`                 | Charging                         | Charged    | Discharged (V2X)       |
+| `aux`, `ext`, `consumer` | Consumption                      | Consumed   | Produced (rare)        |
 
 `energy` and `returnenergy` are increasing meter readings in kWh, ideally lifetime totals like the import and export registers of a grid meter.
 The differences between readings are calculated automatically, so the plugin must return a meter reading and not consumption values per interval.
@@ -135,11 +135,11 @@ Real meter readings give more accurate long-term statistics.
 
 ### Write attributes \{#meter-write-attributes\}
 
-| Attribute     | Type  | Required | Context   | Description                                                                                                                                                       |
-| ------------- | ----- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current state of charge (attribute `soc`). |
-| `curtail`     | `int` | no       | `pv`      | Set feed-in limit in % of the nominal production power (0 to 100, `100` = no limit). Only together with `curtailed`. See [Curtailment Device](#curtailer).        |
-| `batterymode` | `int` | no       | `battery` | Set the battery control mode directly. The modes are listed below.                                                                                                |
+| Attribute     | Type  | Required | Context   | Description                                                                                                                                                    |
+| ------------- | ----- | -------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | no       | `battery` | Set charging target for battery in %. The charging target is calculated from the configured `MinSoc`, `MaxSoc` and the current charge level (attribute `soc`). |
+| `curtail`     | `int` | no       | `pv`      | Set grid export limit in % of the nominal production power (0 to 100, `100` = no limit). Only together with `curtailed`. See [Curtailment Device](#curtailer). |
+| `batterymode` | `int` | no       | `battery` | Set the battery control mode directly. The modes are listed below.                                                                                             |
 
 #### Battery modes \{#battery-modes\}
 
@@ -209,7 +209,7 @@ meters:
 
 ## Charger \{#charger\}
 
-The default `type: custom` covers wallboxes with continuous current control.
+The default `type: custom` covers chargers with continuous current control.
 For other devices, specialised charger types are described under [Switchsocket](#charger-switchsocket) and [Heat pumps](#charger-heating).
 
 ### Read attributes
@@ -222,7 +222,7 @@ For other devices, specialised charger types are described under [Switchsocket](
 | `energy`       | `float`               | no       | Meter reading in kWh                                                                        |
 | `returnenergy` | `float`               | no       | Meter reading in reverse direction in kWh (discharged energy, V2X)                          |
 | `identify`     | `string`              | no       | Current RFID identifier                                                                     |
-| `soc`          | `int`                 | no       | State of charge in %                                                                        |
+| `soc`          | `int`                 | no       | Charge level in %                                                                           |
 | `limitsoc`     | `int`                 | no       | Charge limit in %                                                                           |
 | `temp`         | `float`               | no       | Current temperature in °C (heating, alias for `soc`)                                        |
 | `limittemp`    | `int`                 | no       | Temperature limit in °C (heating, alias for `limitsoc`)                                     |
@@ -244,12 +244,12 @@ For other devices, specialised charger types are described under [Switchsocket](
 
 ### Features \{#charger-features\}
 
-| Feature            | Description                                                                                                                                                                                                                                                                                                          |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `integrateddevice` | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                                                                                                                           |
-| `heating`          | Treat device as heating: SOC and limits are displayed in °C instead of %.                                                                                                                                                                                                                                            |
-| `continuous`       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on PV surplus or cheap grid power) is labelled "Boost". Modes are labelled **Normal**, **Smart** and **Boost** instead of **Off**, **Smart** and **Fast**. |
-| `switchdevice`     | Device can only be switched on/off (no continuous current control). Max current and the **Always charge** option are not shown. Min current and phases set the PV enable power. Without `continuous`, modes are labelled **Off**, **Smart** and **On**.                                                              |
+| Feature            | Description                                                                                                                                                                                                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | No vehicle selection. Device runs without a connected vehicle and without charging sessions (e.g. heat pump, heating rod, permanently installed consumer).                                                                                                                                                              |
+| `heating`          | Treat device as heating: Charge level and limits are displayed in °C instead of %.                                                                                                                                                                                                                                      |
+| `continuous`       | Device keeps running in its own normal operation when "disabled". The UI shows "Normal operation" instead of "Standby". A request to increase power (e.g. on solar surplus or cheap grid power) is labelled "Boost". Modes are labelled **Normal**, **Smart** and **Boost** instead of **Off**, **Smart** and **Fast**. |
+| `switchdevice`     | Device can only be switched on/off (no continuous current control). Max current and the **Always charge** option are not shown. Min current and phases set the solar enable power. Without `continuous`, modes are labelled **Off**, **Smart** and **On**.                                                              |
 
 Common feature combinations seen in built-in templates:
 
@@ -321,7 +321,7 @@ Full setup details are under [Smart switches](/en/smartswitches).
 | `enabled`      | `bool`  | yes      | Read socket state (on/off)                                                               |
 | `power`        | `float` | yes      | Current power in W                                                                       |
 | `energy`       | `float` | no       | Meter reading in kWh                                                                     |
-| `soc`          | `float` | no       | State of charge in %                                                                     |
+| `soc`          | `float` | no       | Charge level in %                                                                        |
 | `enable`       | `bool`  | yes      | Switch socket on/off                                                                     |
 | `standbypower` | `float` | no       | Power threshold in W. Above it: charging; below: standby. Negative: static (no metering) |
 
@@ -393,7 +393,7 @@ Vehicle parameters can also be read via plugins.
 
 | Attribute       | Type     | Required | Description                                                                                 |
 | --------------- | -------- | -------- | ------------------------------------------------------------------------------------------- |
-| `soc`           | `int`    | yes      | State of charge in %                                                                        |
+| `soc`           | `int`    | yes      | Charge level in %                                                                           |
 | `limitsoc`      | `int`    | no       | Charge limit in %                                                                           |
 | `status`        | `string` | no       | Status (A..F)                                                                               |
 | `range`         | `int`    | no       | Range in km                                                                                 |
@@ -423,8 +423,8 @@ Vehicle parameters can also be read via plugins.
 | Feature         | Description                                                                                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `coarsecurrent` | Vehicle accepts charging current only in whole 1 A steps. The control logic is constrained to coarse 1 A steps even when the charger could regulate more finely. |
-| `streaming`     | Vehicle pushes data instead of being polled (e.g. BMW Cardata). SOC updates outside active charging are treated as reliable.                                     |
-| `welcomecharge` | Vehicle expects the wallbox to be active on connect to register the link as working. Otherwise it reports an error.                                              |
+| `streaming`     | Vehicle pushes data instead of being polled (e.g. BMW Cardata). Charge level updates outside active charging are treated as reliable.                            |
+| `welcomecharge` | Vehicle expects the charger to be active on connect to register the link as working. Otherwise it reports an error.                                              |
 
 ### Examples
 
@@ -560,20 +560,20 @@ formula: math.Min(0.5, (price + charges) * (1 + tax))
 
 Caps the result at 50 ct/kWh.
 
-**No feed-in tariff on negative day-ahead prices** (German PV systems commissioned after February 25, 2025):
+**No grid export tariff on negative day-ahead prices** (German solar systems commissioned after February 25, 2025):
 
 ```yaml
 formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 ```
 
-Pays a fixed feed-in tariff of 7 ct/kWh, except when the day-ahead market price is negative.
+Pays a fixed grid export tariff of 7 ct/kWh, except when the day-ahead market price is negative.
 
 ## External Limit \{#external-limit\}
 
 A user-defined integration for the [External Limit](/en/external-limit) feature connects a control box or energy management system that isn't covered by a built-in integration.
 In the UI, pick **User-defined integration** under **Configuration → External Limit**.
 
-One of four types describes how the limit signal is received: `relay` (single switch contact), `fnn` (FNN control box with multiple switch contacts), `eebus` (EEBus protocol) or `custom` (dynamic limit values via plugins).
+One of four types describes how the limit signal is received: `relay` (single switch contact), `fnn` (FNN control box with multiple switch contacts), `eebus` (EEBUS protocol) or `custom` (dynamic limit values via plugins).
 Each signal is read via a [plugin](/en/reference/plugins) configuration (GPIO, MQTT, HTTP, Modbus).
 See also the [`hems` configuration reference](/en/reference/configuration/hems).
 
@@ -664,18 +664,18 @@ limit:
 ### FNN Control Box \{#external-limit-fnn\}
 
 Control boxes following the FNN standard signal dimming and curtailment via separate switch contacts.
-Consumption dimming (W4) and feed-in curtailment (W3, S2, S1) operate independently.
+Consumption dimming (W4) and curtailment (W3, S2, S1) operate independently.
 At least one of the signals `w4` or `w3` must be configured.
 
-| Attribute         | Type       | Required | Description                                                               |
-| ----------------- | ---------- | -------- | ------------------------------------------------------------------------- |
-| `maxDimPower`     | `int` (W)  | yes¹     | Consumption limit while the dim signal (W4) is active.                    |
-| `maxCurtailPower` | `int` (W)  | yes²     | Installed solar power, base value for the curtailment steps.              |
-| `w4`              | plugin     | no       | Reads the dim signal. Limits consumption to `maxDimPower`.                |
-| `w3`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 0% of `maxCurtailPower`.  |
-| `s2`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 30% of `maxCurtailPower`. |
-| `s1`              | plugin     | no       | Reads the curtailment signal. Limits feed-in to 60% of `maxCurtailPower`. |
-| `interval`        | `duration` | no       | Polling interval for the switch contacts. Default `10s`.                  |
+| Attribute         | Type       | Required | Description                                                                   |
+| ----------------- | ---------- | -------- | ----------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | yes¹     | Consumption limit while the dim signal (W4) is active.                        |
+| `maxCurtailPower` | `int` (W)  | yes²     | Installed solar power, base value for the curtailment steps.                  |
+| `w4`              | plugin     | no       | Reads the dim signal. Limits consumption to `maxDimPower`.                    |
+| `w3`              | plugin     | no       | Reads the curtailment signal. Limits grid export to 0% of `maxCurtailPower`.  |
+| `s2`              | plugin     | no       | Reads the curtailment signal. Limits grid export to 30% of `maxCurtailPower`. |
+| `s1`              | plugin     | no       | Reads the curtailment signal. Limits grid export to 60% of `maxCurtailPower`. |
+| `interval`        | `duration` | no       | Polling interval for the switch contacts. Default `10s`.                      |
 
 ¹ required when `w4` is configured, ² required when `w3` is configured.
 
@@ -702,9 +702,9 @@ s1:
   pin: 23
 ```
 
-### EEBus \{#external-limit-eebus\}
+### EEBUS \{#external-limit-eebus\}
 
-The digital connection via the EEBus protocol.
+The digital connection via the EEBUS protocol.
 The control box communicates directly with your evcc instance and automatically transmits the power limit.
 Control box and evcc need to be [paired](/en/external-limit#eebus-pairing) once.
 
@@ -714,7 +714,7 @@ Control box and evcc need to be [paired](/en/external-limit#eebus-pairing) once.
 | `contractualConsumptionNominalMax`    | `int` (W)  | no       | Contractual maximum consumption power.                      |
 | `failsafeConsumptionActivePowerLimit` | `int` (W)  | no       | Failsafe limit for consumption power.                       |
 | `productionNominalMax`                | `int` (W)  | no       | Installed generator power (Wp).                             |
-| `failsafeProductionActivePowerLimit`  | `int` (W)  | no       | Failsafe limit for feed-in power.                           |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | no       | Failsafe limit for grid export power.                       |
 | `failsafeDurationMinimum`             | `duration` | no       | Minimum failsafe duration, e.g. `2h`.                       |
 | `passthrough`                         | plugin     | no       | Passes the limitation signal through to an external system. |
 
@@ -726,15 +726,15 @@ ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ### Custom \{#external-limit-custom\}
 
 The generic integration for control systems that provide dynamic limit values instead of switch contacts.
-Consumption limit and feed-in curtailment are read via plugins and work independently of each other.
+Consumption limit and curtailment are read via plugins and work independently of each other.
 At least one of `maxConsumptionPower` or `curtailedPercent` must be configured.
 
-| Attribute              | Type       | Required | Description                                                                                           |
-| ---------------------- | ---------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `maxConsumptionPower`  | plugin     | no¹      | Reads the total power limit in watts. `0` = no limit.                                                 |
-| `curtailedPercent`     | plugin     | no¹      | Reads the allowed feed-in as percentage of `productionNominalMax` (0 to 100). `100` = no curtailment. |
-| `productionNominalMax` | `int` (W)  | no²      | Installed generator power (Wp).                                                                       |
-| `interval`             | `duration` | no       | Polling interval for the plugins. Default `10s`.                                                      |
+| Attribute              | Type       | Required | Description                                                                                               |
+| ---------------------- | ---------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | no¹      | Reads the total power limit in watts. `0` = no limit.                                                     |
+| `curtailedPercent`     | plugin     | no¹      | Reads the allowed grid export as percentage of `productionNominalMax` (0 to 100). `100` = no curtailment. |
+| `productionNominalMax` | `int` (W)  | no²      | Installed generator power (Wp).                                                                           |
+| `interval`             | `duration` | no       | Polling interval for the plugins. Default `10s`.                                                          |
 
 ¹ at least one of the two is required, ² required when `curtailedPercent` is configured.
 
@@ -752,19 +752,19 @@ productionNominalMax: 10000 # Installed generator power (Wp)
 
 ## Curtailment Device \{#curtailer\}
 
-A user-defined curtailment device limits the feed-in of the solar installation on request of the grid operator (§ 9 EEG) when the inverter can't be curtailed through its [meter](#meter) configuration.
+A user-defined curtailment device limits the grid export of the solar installation on request of the grid operator (§ 9 EEG) when the inverter can't be curtailed through its [meter](#meter) configuration.
 In the UI, pick **User-defined device** under **Configuration → Grid → Add curtailment device**.
 See also the [`curtailers` configuration reference](/en/reference/configuration/curtailers) and [External Limit](/en/external-limit#curtailment-devices).
 
-The device receives the allowed feed-in as a percentage of the installed generator power and has to apply it on the inverter.
+The device receives the allowed grid export as a percentage of the installed generator power and has to apply it on the inverter.
 `100` means no limit.
 
 ### Attributes
 
-| Attribute   | Type   | Required | Description                                                                                                                               |
-| ----------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `curtail`   | plugin | yes      | Sets the feed-in limit in % of the nominal production power (0 to 100). Must support write access.                                        |
-| `curtailed` | plugin | yes      | Reads the current feed-in limit in %. If the device can't report it, use the [`error`](/en/reference/plugins#error) plugin (see example). |
+| Attribute   | Type   | Required | Description                                                                                                                                   |
+| ----------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | yes      | Sets the grid export limit in % of the nominal production power (0 to 100). Must support write access.                                        |
+| `curtailed` | plugin | yes      | Reads the current grid export limit in %. If the device can't report it, use the [`error`](/en/reference/plugins#error) plugin (see example). |
 
 ### Examples
 

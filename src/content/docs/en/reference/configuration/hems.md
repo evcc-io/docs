@@ -1,11 +1,11 @@
 ---
 title: "hems"
-description: "How to configure external limits for consumption and feed-in in evcc.yaml, e.g. for § 14a EnWG or § 9 EEG, via relay, FNN control box or EEBus."
+description: "How to configure external limits for consumption and grid export in evcc.yaml, e.g. for § 14a EnWG or § 9 EEG, via relay, FNN control box or EEBUS."
 sidebar:
   order: 8
 ---
 
-The `hems` section configures external control of consumption and feed-in power.
+The `hems` section configures external control of consumption and grid export power.
 This is used e.g. for implementing German § 14a EnWG or § 9 EEG regulations.
 For background and setup details, see [External Limit](/en/external-limit).
 
@@ -33,7 +33,7 @@ Defines the type of external control.
 
 - `relay`: Connection via switch contact
 - `fnn`: Connection via FNN control box with multiple switch contacts
-- `eebus`: Connection via the EEBus protocol
+- `eebus`: Connection via the EEBUS protocol
 
 ---
 
@@ -79,7 +79,7 @@ For more examples of different connections (GPIO, MQTT, HTTP), see [user-defined
 ## `type: fnn`
 
 Connection via an FNN control box with separate switch contacts.
-Dimming of consumption (W4) and curtailment of feed-in (W3, S2, S1) are signaled via individual contacts.
+Dimming of consumption (W4) and curtailment of grid export (W3, S2, S1) are signalled via individual contacts.
 
 ```yaml
 hems:
@@ -116,7 +116,7 @@ Required when `w4` is configured.
 
 #### `maxCurtailPower`
 
-Installed PV power in watts.
+Installed solar power in watts.
 Base value for the curtailment steps (W3, S2, S1).
 
 #### `w4`
@@ -127,17 +127,17 @@ When active, consumption is limited to `maxDimPower`.
 #### `w3`
 
 [Plugin](/en/reference/plugins) configuration for reading the curtailment signal "0%".
-When active, feed-in is limited to 0% of `maxCurtailPower`.
+When active, grid export is limited to 0% of `maxCurtailPower`.
 
 #### `s2`
 
 [Plugin](/en/reference/plugins) configuration for reading the curtailment signal "30%".
-When active, feed-in is limited to 30% of `maxCurtailPower`.
+When active, grid export is limited to 30% of `maxCurtailPower`.
 
 #### `s1`
 
 [Plugin](/en/reference/plugins) configuration for reading the curtailment signal "60%".
-When active, feed-in is limited to 60% of `maxCurtailPower`.
+When active, grid export is limited to 60% of `maxCurtailPower`.
 
 #### `interval`
 
@@ -150,7 +150,7 @@ For setup details, see [External Limit](/en/external-limit).
 
 ## `type: eebus`
 
-Connection via the EEBus protocol.
+Connection via the EEBUS protocol.
 The control box automatically transmits the power limit.
 
 ```yaml
@@ -168,12 +168,12 @@ Required for pairing.
 
 #### Advanced Limits
 
-The following optional parameters can be set for EEBus communication:
+The following optional parameters can be set for EEBUS communication:
 
 - `contractualConsumptionNominalMax`: Contractual maximum consumption power (in watts)
 - `failsafeConsumptionActivePowerLimit`: Failsafe limit for consumption power (in watts)
 - `productionNominalMax`: Installed generator power (Wp, in watts)
-- `failsafeProductionActivePowerLimit`: Failsafe limit for feed-in power (in watts)
+- `failsafeProductionActivePowerLimit`: Failsafe limit for grid export power (in watts)
 - `failsafeDurationMinimum`: Minimum failsafe duration (e.g. `2h`)
 
 #### `passthrough`

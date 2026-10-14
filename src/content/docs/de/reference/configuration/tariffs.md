@@ -1,12 +1,12 @@
 ---
 title: "tariffs"
-description: "Tarife für Netzbezug, Einspeisung, CO₂ und Solarprognose in der evcc.yaml hinterlegen, für Ersparnisstatistik, Ladepläne und zeitabhängige Netzentgelte."
+description: "Tarife für Netzbezug, Einspeisung, CO₂ und PV-Vorhersage in der evcc.yaml hinterlegen, für Ersparnisstatistik, Ladepläne und zeitabhängige Netzentgelte."
 sidebar:
   order: 12
 ---
 
 Hier kannst du deinen Energietarif und gegebenenfalls deine Einspeisevergütung angeben.
-evcc verwendet diese Werte für eine grobe [Einsparungsberechnung](/de/faq#ersparnisberechnung), die in der Web-UI angezeigt wird.
+evcc verwendet diese Werte für eine grobe [Ersparnisberechnung](/de/faq#ersparnisberechnung), die in der Web-UI angezeigt wird.
 Diese Daten werden auch vom [Planer](/de/features/plans) für preis- und CO₂-optimiertes Laden verwendet.
 
 **Struktur**

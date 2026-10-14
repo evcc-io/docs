@@ -1,17 +1,17 @@
 ---
 title: "curtailers"
-description: "How to add curtailment devices in evcc.yaml that limit solar feed-in when the grid operator requests it, and when you need one at all."
+description: "How to add curtailment devices in evcc.yaml that limit solar grid export when the grid operator requests it, and when you need one at all."
 sidebar:
   order: 6
 ---
 
-_Curtailers_ (curtailment devices) is a list of devices that only limit the feed-in of the solar installation on request of the grid operator (§ 9 EEG).
+_Curtailers_ (curtailment devices) is a list of devices that only limit the grid export of the solar system on request of the grid operator (§ 9 EEG).
 Most inverters are curtailed through their [`meters`](/en/reference/configuration/meters) entry and don't need a separate device.
 A curtailment device is only required when the inverter can't be curtailed via its meter configuration, for the SMA Sunny Home Manager 2.0, or for systems with several inverters where the limit has to be written to the leader inverter.
 For background and the list of supported devices see [External Limit](/en/external-limit#curtailment-devices).
 
 Curtailment devices are referenced from [`site.curtailers`](/en/reference/configuration/site#curtailers).
-They only become active when the [`hems`](/en/reference/configuration/hems) integration signals a feed-in limit.
+They only become active when the [`hems`](/en/reference/configuration/hems) integration signals a grid export limit.
 The limit is passed as a percentage of the installed generator power to all curtailable `pv` meters and curtailment devices alike.
 
 **For example**:

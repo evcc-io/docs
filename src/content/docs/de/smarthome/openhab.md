@@ -14,7 +14,7 @@ Es benötigt evcc-Version 0.209.8 oder neuer.
 Nach der Einrichtung der Verbindung werden deine konfigurierten Geräte automatisch erkannt.
 Das Binding stellt Things bereit für:
 
-- Ladepunkte mit Ladeleistung, Lademodus, Stromgrenzen und Sitzungsdaten
+- Ladepunkte mit Ladeleistung, Lademodus, Stromgrenzen und Daten zum Ladevorgang
 - Fahrzeuge mit Ladestand und Ladeplänen
 - Standortdaten wie Netzleistung, PV-Erzeugung und Hausbatterie
 - Heizgeräte

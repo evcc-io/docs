@@ -20,7 +20,7 @@ Dieser Bereich dokumentiert die YAML-basierte Konfiguration.
 
 :::note[Parallele Nutzung]
 Beide Konfigurationsmethoden können parallel genutzt werden.
-Geräte (Ladepunkte, Zähler, PV-Anlagen, Batterien, Fahrzeuge) werden aus beiden Quellen zusammengeführt.
+Geräte (Ladepunkte, Zähler, PV-Anlagen, Hausbatterien, Fahrzeuge) werden aus beiden Quellen zusammengeführt.
 Bei anderen Einstellungen hat die UI-Konfiguration Vorrang.
 Details findest du in der [FAQ](/de/faq#ui-migration).
 :::
@@ -81,7 +81,7 @@ Ein Betrieb ist aber auch ohne Netzanschlusszähler möglich. Mehr dazu findest 
 
 Die Überschussleistung wird mit der Mindestladeleistung verglichen. Ist diese erreicht, startet die Ladung.
 
-Die Mindestladeleistung ergibt sich aus den im Loadpoint definierten Werten [`minCurrent`](/de/reference/configuration/loadpoints) und [`phases`](/de/reference/configuration/loadpoints).
+Die Mindestladeleistung ergibt sich aus den im Ladepunkt definierten Werten [`minCurrent`](/de/reference/configuration/loadpoints) und [`phases`](/de/reference/configuration/loadpoints).
 
 Beispiel: `phases: 1` und `minCurrent: 8`
 
@@ -106,9 +106,9 @@ Eine _Site_ beschreibt den Standort mit den vorhandenen und benötigten Geräten
 
 [Weiterlesen...](/de/reference/configuration/site)
 
-### Loadpoints
+### Ladepunkte
 
-_Loadpoints_ (Ladepunkte) beschreiben die Ladeinfrastruktur und kombinieren vorhandene _Charger_ (Wallboxen), _Vehicle_ (Fahrzeuge) und alles weitere was ein Ladepunkt benötigt.
+_Ladepunkte_ (`loadpoints`) beschreiben die Ladeinfrastruktur und kombinieren vorhandene _Charger_ (Wallboxen), _Vehicle_ (Fahrzeuge) und alles weitere was ein Ladepunkt benötigt.
 
 [Weiterlesen...](/de/reference/configuration/loadpoints)
 
@@ -137,7 +137,7 @@ _Curtailers_ (Einspeisebegrenzer) sind Geräte, die ausschließlich die Einspeis
 
 ### Vehicles
 
-Um die Ladung auf einen bestimmten Ladestand (Soc) in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.
+Um die Ladung auf einen bestimmten Ladestand in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.
 
 [Weiterlesen...](/de/reference/configuration/vehicles)
 

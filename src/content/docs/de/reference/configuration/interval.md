@@ -5,7 +5,7 @@ sidebar:
   order: 10
 ---
 
-Definiert das zeitliche Interval, in welchem neue Werte von allen Messgeräten gelesen werden und die Ladeströme der Wallboxen neu geregelt wird.
+Definiert das zeitliche Interval, in welchem neue Werte von allen Zählern gelesen werden und die Ladeströme der Wallboxen neu geregelt wird.
 
 **Mögliche Werte**: Ein Zahlenwert gefolgt von der Zeiteinheit
 

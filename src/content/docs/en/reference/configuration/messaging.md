@@ -26,7 +26,7 @@ The available events are:
 - `stop`: Charging has stopped
 - `connect`: Vehicle connected
 - `disconnect`: Vehicle disconnected
-- `soc`: Vehicle battery state of charge changed
+- `soc`: Vehicle charge level changed
 - `guest`: Unknown vehicle detected
 - `asleep`: Vehicle not charging despite charge release
 - `planoverrun`: Charging plan projected to miss its target

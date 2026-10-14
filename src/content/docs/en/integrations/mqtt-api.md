@@ -1,6 +1,6 @@
 ---
 title: "MQTT API"
-description: "Lists all MQTT topics evcc publishes about your site, charging points, vehicles and home battery, and the topics you can write to change modes, limits or plans."
+description: "Lists all MQTT topics evcc publishes about your site, charging points, vehicles and home battery, and the topics you can write to change modes, limits or charging plans."
 sidebar:
   order: 2
 ---
@@ -18,20 +18,20 @@ Every field becomes its own topic, nested objects and lists are converted into i
 - `evcc/site/pvPower`: current solar production (W)
 - `evcc/site/grid/power`: current grid power (W, positive = import)
 - `evcc/site/battery/power`: battery power (W, positive = discharge)
-- `evcc/site/battery/soc`: battery state of charge (%)
+- `evcc/site/battery/soc`: battery charge level (%)
 - `evcc/site/greenShareHome`: self-produced energy share of home consumption (0–1)
-- `evcc/site/greenShareLoadpoints`: self-produced energy share of loadpoint consumption (0–1)
+- `evcc/site/greenShareLoadpoints`: self-produced energy share of charging point consumption (0–1)
 - `evcc/site/tariffGrid`: current grid tariff
-- `evcc/site/tariffFeedIn`: current feed-in tariff
+- `evcc/site/tariffFeedIn`: current grid export tariff
 - `evcc/site/tariffCo2`: current CO₂ intensity
 - `evcc/site/batteryGridChargeActive`: battery grid charging active (true/false)
 
-### Loadpoints
+### Charging Points
 
-All loadpoint IDs begin at `1`.
+All charging point IDs begin at `1`.
 
-- `evcc/loadpoints`: number of available loadpoints
-- `evcc/loadpoints/<id>/title`: loadpoint title
+- `evcc/loadpoints`: number of available charging points
+- `evcc/loadpoints/<id>/title`: charging point title
 - `evcc/loadpoints/<id>/connected`: vehicle connected (true/false)
 - `evcc/loadpoints/<id>/charging`: currently charging (true/false)
 - `evcc/loadpoints/<id>/enabled`: charger enabled (true/false)
@@ -45,10 +45,10 @@ All loadpoint IDs begin at `1`.
 - `evcc/loadpoints/<id>/chargeTotalImport`: charge meter total (Wh)
 - `evcc/loadpoints/<id>/vehicleName`: vehicle identifier
 - `evcc/loadpoints/<id>/vehicleTitle`: vehicle display name
-- `evcc/loadpoints/<id>/vehicleSoc`: vehicle SoC (%)
+- `evcc/loadpoints/<id>/vehicleSoc`: vehicle charge level (%)
 - `evcc/loadpoints/<id>/vehicleRange`: vehicle range (km)
 - `evcc/loadpoints/<id>/phasesActive`: active phases
-- `evcc/loadpoints/<id>/planActive`: plan currently active (true/false)
+- `evcc/loadpoints/<id>/planActive`: charging plan currently active (true/false)
 - `evcc/loadpoints/<id>/sessionEnergy`: session energy (Wh)
 - `evcc/loadpoints/<id>/sessionSolarPercentage`: self-produced energy share of session (%)
 - `evcc/loadpoints/<id>/smartCostActive`: smart cost currently active (true/false)
@@ -78,24 +78,24 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 
 ### Site
 
-- `evcc/site/prioritySoc`: battery priority SoC
-- `evcc/site/bufferSoc`: battery buffer SoC
-- `evcc/site/bufferStartSoc`: battery buffer start SoC
+- `evcc/site/prioritySoc`: battery priority charge level
+- `evcc/site/bufferSoc`: battery buffer charge level
+- `evcc/site/bufferStartSoc`: battery buffer start charge level
 - `evcc/site/residualPower`: grid residual power
 - `evcc/site/batteryGridChargeLimit`: smart charging cost limit
 - `evcc/site/batteryDischargeControl`: enable/disable battery discharge control (true/false)
 - `evcc/site/batteryMode`: external battery mode (`normal`, `hold`, `charge`, `holdcharge`, `discharge`) — directly controls all controllable batteries, overrules other evcc modes, resets after 60 s
-- `evcc/site/smartCostLimit`: smart cost limit for all loadpoints
-- `evcc/site/smartFeedInPriorityLimit`: feed-in priority limit for all loadpoints
+- `evcc/site/smartCostLimit`: smart cost limit for all charging points
+- `evcc/site/smartFeedInPriorityLimit`: feed-in priority limit for all charging points
 
-### Loadpoints
+### Charging Points
 
 - `evcc/loadpoints/<id>/mode`: charge mode (`off`, `smart`, `now`)
 - `evcc/loadpoints/<id>/alwaysCharge`: always charge option (`off`, `on`, `once`) — only in smart mode
-- `evcc/loadpoints/<id>/minSoc`: minimum SoC
-- `evcc/loadpoints/<id>/limitSoc`: limit SoC in % — only applicable for online vehicles
+- `evcc/loadpoints/<id>/minSoc`: minimum charge level
+- `evcc/loadpoints/<id>/limitSoc`: limit charge level in % — only applicable for online vehicles
 - `evcc/loadpoints/<id>/limitEnergy`: limit energy in kWh — only applicable for offline vehicles
-- `evcc/loadpoints/<id>/planEnergy`: plan energy (JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+- `evcc/loadpoints/<id>/planEnergy`: charging plan energy (JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
 - `evcc/loadpoints/<id>/phasesConfigured`: configured phases
 - `evcc/loadpoints/<id>/minCurrent`: minimum current value
 - `evcc/loadpoints/<id>/maxCurrent`: maximum current value
@@ -105,18 +105,18 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/loadpoints/<id>/disableThreshold`: threshold value
 - `evcc/loadpoints/<id>/disableDelay`: delay value (s)
 - `evcc/loadpoints/<id>/batteryboost`: battery boost enabled (1/0)
-- `evcc/loadpoints/<id>/batteryBoostLimit`: battery boost SoC limit
+- `evcc/loadpoints/<id>/batteryBoostLimit`: battery boost charge level limit
 - `evcc/loadpoints/<id>/priority`: priority value
 - `evcc/loadpoints/<id>/smartCostLimit`: smart cost limit
 - `evcc/loadpoints/<id>/smartFeedInPriorityLimit`: feed-in priority limit
-- `evcc/loadpoints/<id>/planStrategy`: plan strategy (JSON)
+- `evcc/loadpoints/<id>/planStrategy`: charging plan strategy (JSON)
 - `evcc/loadpoints/<id>/vehicle`: set vehicle by name
 
 ### Vehicles
 
 For vehicle names see `evcc/vehicles`.
 
-- `evcc/vehicles/<name>/minSoc`: minimum SoC in %
-- `evcc/vehicles/<name>/limitSoc`: limit SoC in %
-- `evcc/vehicles/<name>/planSoc`: plan SoC (JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
-- `evcc/vehicles/<name>/planStrategy`: plan strategy (JSON)
+- `evcc/vehicles/<name>/minSoc`: minimum charge level in %
+- `evcc/vehicles/<name>/limitSoc`: limit charge level in %
+- `evcc/vehicles/<name>/planSoc`: charging plan charge level (JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+- `evcc/vehicles/<name>/planStrategy`: charging plan strategy (JSON)

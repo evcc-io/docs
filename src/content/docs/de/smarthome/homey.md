@@ -11,7 +11,7 @@ Sie ist ein Community-Projekt von [rdvnit](https://github.com/rdvnit) und nicht 
 
 Die App stellt drei Gerätetypen bereit:
 
-- **Ladepunkt** mit Lademodus, Ladelimit, Ladeleistung, Sitzungsenergie, Ladestand und Reichweite des Fahrzeugs sowie Verbindungs- und Ladestatus
+- **Ladepunkt** mit Lademodus, Ladelimit, Ladeleistung, Energie des Ladevorgangs, Ladestand und Reichweite des Fahrzeugs sowie Verbindungs- und Ladestatus
 - **Standort** mit PV-Erzeugung, Netzleistung und Hausverbrauch
 - **Hausbatterie** mit Batterieleistung, Ladestand und Batteriesteuerung
 
