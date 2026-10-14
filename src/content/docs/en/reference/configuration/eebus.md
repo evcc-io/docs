@@ -1,12 +1,12 @@
 ---
 title: "eebus"
-description: "How to configure EEBus in evcc.yaml with your own certificate, network interfaces and SHIP ID, and how to move the setup to the web interface."
+description: "How to configure EEBUS in evcc.yaml with your own certificate, network interfaces and SHIP ID, and how to move the setup to the web interface."
 sidebar:
   order: 14
 ---
 
 :::tip[Recommendation]
-Configure EEBus in the UI under **Configuration → EEBus**.
+Configure EEBUS in the UI under **Configuration → EEBUS**.
 Certificate and identifiers are generated automatically on first start.
 :::
 
@@ -30,9 +30,9 @@ eebus:
 
 :::note[Migration from YAML to UI]
 Remove the `eebus:` block from your `evcc.yaml` and restart.
-A new certificate is generated automatically and all EEBus devices must be paired again.
+A new certificate is generated automatically and all EEBUS devices must be paired again.
 
-To keep your existing certificate, enter it in the EEBus dialog under **Show advanced settings**.
+To keep your existing certificate, enter it in the EEBUS dialog under **Show advanced settings**.
 This is useful if the SKI (part of the public certificate) is already registered with your grid operator for [external control](/en/external-limit).
 :::
 
@@ -96,7 +96,7 @@ private: |
 
 ### `interfaces`
 
-Defines a list of network interfaces through which EEBus should communicate. By default, all interfaces are used, but this might lead to communication issues.
+Defines a list of network interfaces through which EEBUS should communicate. By default, all interfaces are used, but this might lead to communication issues.
 
 **For example**:
 

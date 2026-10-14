@@ -122,7 +122,7 @@ mode: smart
 
 ### `soc`
 
-Definiere die Standardeinstellungen für den Umgang mit dem SoC eines angeschlossenen Fahrzeugs
+Definiere die Standardeinstellungen für den Umgang mit dem Ladestand eines angeschlossenen Fahrzeugs
 
 **Beispiel**:
 
@@ -178,12 +178,12 @@ interval: 60m
 
 #### `estimate`
 
-Berechne eine Schätzung des aktuellen SoC anhand der vorliegenden Messwerte (Extrapolation) zwischen den per `interval` eingestellten Abfragezeitpunkten an das Fahrzeug.
+Berechne eine Schätzung des aktuellen Ladestands anhand der vorliegenden Messwerte (Extrapolation) zwischen den per `interval` eingestellten Abfragezeitpunkten an das Fahrzeug.
 
 **Mögliche Werte**:
 
-- `true`: evcc extrapoliert die SoC Werte zwischen den Fahrzeugabfragen (empfohlen)
-- `false`: evcc nutzt nur die SoC Werte, welche das Fahrzeug zurückliefert
+- `true`: evcc extrapoliert die Ladestandswerte zwischen den Fahrzeugabfragen (empfohlen)
+- `false`: evcc nutzt nur die Ladestandswerte, welche das Fahrzeug zurückliefert
 
 **Standardwert:** `true`
 
@@ -200,7 +200,7 @@ estimate: false # Keine Extrapolation
 Definiert das Verhalten, wann im Smart-Modus das Laden mit PV-Überschuss begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.
 
 :::note
-Um einen Anteil Netzstrom zu erlauben, nutze stattdessen den Regler **Sonnenanteil** in den Einstellungen des Ladepunkts (siehe [Nicht genügend Überschuss?](/de/features/solar-charging#not-enough-surplus)).
+Um einen Anteil Netzstrom zu erlauben, nutze stattdessen den Regler **PV-Anteil** in den Einstellungen des Ladepunkts (siehe [Nicht genügend Überschuss?](/de/features/solar-charging#not-enough-surplus)).
 Der Regler ist deaktiviert, solange ein `enable`- oder `disable`-Schwellwert gesetzt ist.
 :::
 
@@ -356,19 +356,19 @@ Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Ste
 
 ### `priority`
 
-Dient während der Ladung der Priorisierung von Loadpoints untereinander.
+Dient während der Ladung der Priorisierung von Ladepunkten untereinander.
 
-Dem priorisierten Loadpoint wird die Ladeleistung der anderen nicht oder geringer priorisierten Loadpoints zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist.
+Dem priorisierten Ladepunkt wird die Ladeleistung der anderen nicht oder geringer priorisierten Ladepunkte zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist.
 
 Je höher der Wert, desto größer die Priorität.
-Loadpoints ohne Eintrag haben `priority: 0`
+Ladepunkte ohne Eintrag haben `priority: 0`
 
-Hat bei mehreren Loadpoints keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Loadpoint, wird ein höher priorisierter unter Umständen eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird.
+Hat bei mehreren Ladepunkten keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Ladepunkt, wird ein höher priorisierter unter Umständen eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird.
 
 Die Priorisierung wirkt im Modus `smart`. Bei aktivem [Dauerhaft laden](/de/features/modes#always-charge) wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
 
 :::note
-Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Loadpoints, mit dem das Fahrzeug verbunden ist.
+Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Ladepunkts, mit dem das Fahrzeug verbunden ist.
 :::
 
 **Standardwert:** `0`

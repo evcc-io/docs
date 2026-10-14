@@ -223,8 +223,8 @@ export default defineConfig({
               link: "/chargers",
             },
             {
-              label: "PV, Battery, Grid, Meter",
-              translations: { de: "PV, Batterie, Netz, Zähler" },
+              label: "Solar, Home Battery, Grid, Meters",
+              translations: { de: "PV, Hausbatterie, Netz, Zähler" },
               link: "/meters",
             },
             {

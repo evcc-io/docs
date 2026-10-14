@@ -1,6 +1,6 @@
 ---
 title: "hems"
-description: "Externe Begrenzung von Bezug und Einspeisung in der evcc.yaml einrichten, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBus."
+description: "Externe Begrenzung von Bezug und Einspeisung in der evcc.yaml einrichten, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBUS."
 sidebar:
   order: 8
 ---
@@ -33,7 +33,7 @@ Definiert den Typ der externen Steuerung.
 
 - `relay`: Anbindung über Schaltkontakt
 - `fnn`: Anbindung über FNN-Steuerbox mit mehreren Schaltkontakten
-- `eebus`: Anbindung über das EEBus-Protokoll
+- `eebus`: Anbindung über das EEBUS-Protokoll
 
 ---
 
@@ -150,7 +150,7 @@ Details zur Einrichtung findest du unter [Externe Begrenzung](/de/external-limit
 
 ## `type: eebus`
 
-Anbindung über das EEBus-Protokoll.
+Anbindung über das EEBUS-Protokoll.
 Die Steuerbox übermittelt das Leistungslimit automatisch.
 
 ```yaml
@@ -168,7 +168,7 @@ Wird für das Pairing benötigt.
 
 #### Erweiterte Limits
 
-Folgende optionale Parameter können für die EEBus-Kommunikation gesetzt werden:
+Folgende optionale Parameter können für die EEBUS-Kommunikation gesetzt werden:
 
 - `contractualConsumptionNominalMax`: Vertragliche maximale Verbrauchsleistung (in Watt)
 - `failsafeConsumptionActivePowerLimit`: Failsafe-Limit für Verbrauchsleistung (in Watt)

@@ -119,8 +119,8 @@ scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
 
 ## Negation von Werten
 
-Bei MBMD-Messgeräten können Messwerte durch Voranstellen eines `-` (Minus) vor dem Aliasnamen invertiert werden.
-Dies ist nützlich, wenn Messgeräte in unterschiedlichen Konfigurationen oder Montagerichtungen verwendet werden und das Vorzeichen der Messwerte angepasst werden muss.
+Bei MBMD-Zählern können Messwerte durch Voranstellen eines `-` (Minus) vor dem Aliasnamen invertiert werden.
+Dies ist nützlich, wenn Zähler in unterschiedlichen Konfigurationen oder Montagerichtungen verwendet werden und das Vorzeichen der Messwerte angepasst werden muss.
 
 ### Unterstützte Messungen
 
@@ -182,11 +182,11 @@ meters:
 
 ### Anwendungsfälle
 
-**Falsch montierte Messgeräte**:
-Wenn ein Stromsensor/Messgerät physisch in der falschen Richtung installiert ist, können die Werte in der Software korrigiert werden.
+**Falsch montierte Zähler**:
+Wenn ein Stromsensor/Zähler physisch in der falschen Richtung installiert ist, können die Werte in der Software korrigiert werden.
 
 **Netzeinspeisung vs. Verbrauch**:
-Für PV-Messgeräte, bei denen die Vorzeichenkonvention umgekehrt werden muss.
+Für PV-Zähler, bei denen die Vorzeichenkonvention umgekehrt werden muss.
 
 **Unterschiedliche CT-Orientierungen**:
 Für mehrphasige Installationen mit unterschiedlich ausgerichteten Stromwandlern.

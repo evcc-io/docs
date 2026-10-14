@@ -1,6 +1,6 @@
 ---
 title: "MQTT API"
-description: "Listet alle MQTT-Topics auf, die evcc zu Anlage, Ladepunkten, Fahrzeugen und Hausbatterie veröffentlicht, sowie die Topics, über die du Modus, Limits und Pläne änderst."
+description: "Listet alle MQTT-Topics auf, die evcc zu Anlage, Ladepunkten, Fahrzeugen und Hausbatterie veröffentlicht, sowie die Topics, über die du Modus, Limits und Ladepläne änderst."
 sidebar:
   order: 2
 ---
@@ -26,9 +26,9 @@ Jedes Feld wird zu einem eigenen Topic, verschachtelte Objekte und Listen werden
 - `evcc/site/tariffCo2`: aktuelle CO₂-Intensität
 - `evcc/site/batteryGridChargeActive`: Netzladen der Batterie aktiv (true/false)
 
-### Loadpoints
+### Ladepunkte
 
-Alle Loadpoint IDs beginnen bei `1`.
+Alle Ladepunkt-IDs beginnen bei `1`.
 
 - `evcc/loadpoints`: Anzahl der verfügbaren Ladepunkte
 - `evcc/loadpoints/<id>/title`: Ladepunkt-Titel
@@ -38,19 +38,19 @@ Alle Loadpoint IDs beginnen bei `1`.
 - `evcc/loadpoints/<id>/mode`: Lademodus (`off`, `smart`, `now`)
 - `evcc/loadpoints/<id>/alwaysCharge`: Option Dauerhaft laden (`off`, `on`, `once`)
 - `evcc/loadpoints/<id>/chargePower`: aktuelle Ladeleistung (W)
-- `evcc/loadpoints/<id>/chargedEnergy`: geladene Energie in Sitzung (Wh)
+- `evcc/loadpoints/<id>/chargedEnergy`: geladene Energie im Ladevorgang (Wh)
 - `evcc/loadpoints/<id>/chargeDuration`: Ladedauer (ns)
 - `evcc/loadpoints/<id>/chargeRemainingDuration`: verbleibende Ladedauer (ns)
 - `evcc/loadpoints/<id>/chargeRemainingEnergy`: verbleibende Energie (Wh)
 - `evcc/loadpoints/<id>/chargeTotalImport`: Zählerstand Ladezähler (Wh)
 - `evcc/loadpoints/<id>/vehicleName`: Fahrzeug-Bezeichner
 - `evcc/loadpoints/<id>/vehicleTitle`: Fahrzeug-Anzeigename
-- `evcc/loadpoints/<id>/vehicleSoc`: Fahrzeug-SoC (%)
+- `evcc/loadpoints/<id>/vehicleSoc`: Fahrzeug-Ladestand (%)
 - `evcc/loadpoints/<id>/vehicleRange`: Fahrzeug-Reichweite (km)
 - `evcc/loadpoints/<id>/phasesActive`: aktive Phasen
-- `evcc/loadpoints/<id>/planActive`: Plan aktiv (true/false)
-- `evcc/loadpoints/<id>/sessionEnergy`: Sitzungsenergie (Wh)
-- `evcc/loadpoints/<id>/sessionSolarPercentage`: Eigenerzeugungs-Anteil der Sitzung (%)
+- `evcc/loadpoints/<id>/planActive`: Ladeplan aktiv (true/false)
+- `evcc/loadpoints/<id>/sessionEnergy`: Energie des Ladevorgangs (Wh)
+- `evcc/loadpoints/<id>/sessionSolarPercentage`: Eigenerzeugungs-Anteil des Ladevorgangs (%)
 - `evcc/loadpoints/<id>/smartCostActive`: Smart Cost aktiv (true/false)
 - `evcc/loadpoints/<id>/effectivePriority`: effektive Priorität
 
@@ -78,9 +78,9 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 
 ### Site
 
-- `evcc/site/prioritySoc`: Batterie-Prioritäts-SoC
-- `evcc/site/bufferSoc`: Batterie-Puffer-SoC
-- `evcc/site/bufferStartSoc`: Batterie-Puffer-Start-SoC
+- `evcc/site/prioritySoc`: Batterie-Prioritäts-Ladestand
+- `evcc/site/bufferSoc`: Batterie-Puffer-Ladestand
+- `evcc/site/bufferStartSoc`: Batterie-Puffer-Start-Ladestand
 - `evcc/site/residualPower`: Netz-Residualleistung
 - `evcc/site/batteryGridChargeLimit`: Preisschwelle für Netzladen
 - `evcc/site/batteryDischargeControl`: Entladeregelung aktivieren/deaktivieren (true/false)
@@ -88,35 +88,35 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/smartCostLimit`: Smart-Cost-Limit für alle Ladepunkte
 - `evcc/site/smartFeedInPriorityLimit`: Einspeise-Prioritäts-Limit für alle Ladepunkte
 
-### Loadpoints
+### Ladepunkte
 
 - `evcc/loadpoints/<id>/mode`: Lademodus (`off`, `smart`, `now`)
 - `evcc/loadpoints/<id>/alwaysCharge`: Option Dauerhaft laden (`off`, `on`, `once`) — nur im Smart-Modus
-- `evcc/loadpoints/<id>/minSoc`: minimaler SoC
-- `evcc/loadpoints/<id>/limitSoc`: Limit-SoC in % – nur für Online-Fahrzeuge
+- `evcc/loadpoints/<id>/minSoc`: minimaler Ladestand
+- `evcc/loadpoints/<id>/limitSoc`: Limit-Ladestand in % – nur für Online-Fahrzeuge
 - `evcc/loadpoints/<id>/limitEnergy`: Limit-Energie in kWh – nur für Offline-Fahrzeuge
-- `evcc/loadpoints/<id>/planEnergy`: Planenergie (JSON-Payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+- `evcc/loadpoints/<id>/planEnergy`: Ladeplan-Energie (JSON-Payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
 - `evcc/loadpoints/<id>/phasesConfigured`: konfigurierte Phasen
 - `evcc/loadpoints/<id>/minCurrent`: minimaler Ladestrom
 - `evcc/loadpoints/<id>/maxCurrent`: maximaler Ladestrom
-- `evcc/loadpoints/<id>/solarShare`: Sonnenanteil an der Mindestladeleistung (0 bis 1)
+- `evcc/loadpoints/<id>/solarShare`: PV-Anteil an der Mindestladeleistung (0 bis 1)
 - `evcc/loadpoints/<id>/enableThreshold`: Einschaltschwelle
 - `evcc/loadpoints/<id>/enableDelay`: Einschaltverzögerung (s)
 - `evcc/loadpoints/<id>/disableThreshold`: Ausschaltschwelle
 - `evcc/loadpoints/<id>/disableDelay`: Ausschaltverzögerung (s)
 - `evcc/loadpoints/<id>/batteryboost`: Battery Boost aktiviert (1/0)
-- `evcc/loadpoints/<id>/batteryBoostLimit`: Battery Boost SoC-Limit
+- `evcc/loadpoints/<id>/batteryBoostLimit`: Battery-Boost-Ladestandlimit
 - `evcc/loadpoints/<id>/priority`: Priorität
 - `evcc/loadpoints/<id>/smartCostLimit`: Smart-Cost-Limit
 - `evcc/loadpoints/<id>/smartFeedInPriorityLimit`: Einspeise-Prioritäts-Limit
-- `evcc/loadpoints/<id>/planStrategy`: Planstrategie (JSON)
+- `evcc/loadpoints/<id>/planStrategy`: Ladeplan-Strategie (JSON)
 - `evcc/loadpoints/<id>/vehicle`: Fahrzeug setzen (Fahrzeugname)
 
 ### Vehicles
 
 Fahrzeugnamen siehe `evcc/vehicles`.
 
-- `evcc/vehicles/<name>/minSoc`: minimaler SoC in %
-- `evcc/vehicles/<name>/limitSoc`: Limit-SoC in %
-- `evcc/vehicles/<name>/planSoc`: Plan-SoC (JSON-Payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
-- `evcc/vehicles/<name>/planStrategy`: Planstrategie (JSON)
+- `evcc/vehicles/<name>/minSoc`: minimaler Ladestand in %
+- `evcc/vehicles/<name>/limitSoc`: Limit-Ladestand in %
+- `evcc/vehicles/<name>/planSoc`: Ladeplan-Ladestand (JSON-Payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
+- `evcc/vehicles/<name>/planStrategy`: Ladeplan-Strategie (JSON)

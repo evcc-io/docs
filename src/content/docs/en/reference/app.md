@@ -45,14 +45,14 @@ evcc://forecast?server=<index>
 `server` is the zero-based index of a saved server.
 If omitted, the active server is used.
 
-## Open a Loadpoint {#loadpoint}
+## Open a Charging Point {#loadpoint}
 
-Navigates to the loadpoints page.
+Navigates to the charging points page.
 
 ```
 evcc://loadpoint?lp=<number>&server=<index>
 ```
 
-`lp` focuses the loadpoint with that one-based number.
-If omitted, the current loadpoint is used.
+`lp` focuses the charging point with that one-based number.
+If omitted, the current charging point is used.
 `server` works the same as above.

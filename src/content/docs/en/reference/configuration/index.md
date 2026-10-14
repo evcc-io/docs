@@ -20,7 +20,7 @@ This section documents the YAML-based configuration.
 
 :::note[Parallel Usage]
 Both configuration methods can be used in parallel.
-Devices (loadpoints, meters, PV systems, batteries, vehicles) are merged from both sources.
+Devices (charging points, meters, solar systems, home batteries, vehicles) are merged from both sources.
 For other settings, UI configuration takes priority.
 Details can be found in the [FAQ](/en/faq#ui-migration).
 :::
@@ -117,9 +117,9 @@ settings.
 A [Site](/en/reference/configuration/site) describes the location with the existing and required devices of
 the home installation and is responsible for regulating the available power.
 
-### Loadpoint
+### Charging Point
 
-A [Loadpoint](/en/reference/configuration/loadpoints) describes the charging infrastructure and combines
+A [charging point](/en/reference/configuration/loadpoints) describes the charging infrastructure and combines
 existing _Chargers_, _Vehicles_, and anything else a charging point needs.
 
 ### Chargers
@@ -133,26 +133,26 @@ how they are addressed.
 include:
 
 - Imported, Exported power
-- PV-generated power
+- Solar-generated power
 - Charging current of EV (if the charger does not support this directly)
-- Power flow of house battery(ies)
+- Power flow of home battery(ies)
 
 ### Curtailers
 
-[Curtailers](/en/reference/configuration/curtailers) are devices that only limit the feed-in of the solar
-installation on request of the grid operator (§ 9 EEG), e.g. the SMA Sunny Home Manager 2.0 or the leader
+[Curtailers](/en/reference/configuration/curtailers) are devices that only limit the grid export of the solar
+system on request of the grid operator (§ 9 EEG), e.g. the SMA Sunny Home Manager 2.0 or the leader
 inverter of a system with several inverters.
 
 ### Vehicles
 
-To limit the state of charge (SoC) of EVs to a specific level, you can specify
+To limit the charge level of EVs to a specific level, you can specify
 the existing [vehicles](/en/reference/configuration/vehicles) and online access data here.
 
 ### HEMS
 
 evcc can forward the charging points and their charging currents to another
 [Home Energy Management System (HEMS)](/en/reference/configuration/hems) so that it can use this
-information, for example, to control the house battery.
+information, for example, to control the home battery.
 
 ### Messaging
 

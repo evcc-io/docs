@@ -1,12 +1,12 @@
 ---
 title: "eebus"
-description: "EEBus in der evcc.yaml mit eigenem Zertifikat, Netzwerkschnittstellen und SHIP-ID einrichten und die Einstellungen in die Weboberfläche übernehmen."
+description: "EEBUS in der evcc.yaml mit eigenem Zertifikat, Netzwerkschnittstellen und SHIP-ID einrichten und die Einstellungen in die Weboberfläche übernehmen."
 sidebar:
   order: 14
 ---
 
 :::tip[Empfehlung]
-Konfiguriere EEBus im UI unter **Konfiguration → EEBus**.
+Konfiguriere EEBUS im UI unter **Konfiguration → EEBUS**.
 Zertifikat und Kennungen werden beim ersten Start automatisch generiert.
 :::
 
@@ -30,9 +30,9 @@ eebus:
 
 :::note[Migration von YAML zum UI]
 Entferne den `eebus:`-Block aus deiner `evcc.yaml` und starte neu.
-Ein neues Zertifikat wird automatisch generiert und alle EEBus-Geräte müssen neu gekoppelt werden.
+Ein neues Zertifikat wird automatisch generiert und alle EEBUS-Geräte müssen neu gekoppelt werden.
 
-Wenn du dein bisheriges Zertifikat behalten möchtest, trage es im EEBus-Dialog unter **Erweiterte Einstellungen anzeigen** ein.
+Wenn du dein bisheriges Zertifikat behalten möchtest, trage es im EEBUS-Dialog unter **Erweiterte Einstellungen anzeigen** ein.
 Das ist sinnvoll, wenn die SKI (Bestandteil des öffentlichen Zertifikats) bereits für die [externe Steuerung](/de/external-limit) beim Netzbetreiber hinterlegt ist.
 :::
 
@@ -96,7 +96,7 @@ private: |
 
 ### `interfaces`
 
-Definiert eine Liste von Netzwerkschnittstellen, über welche EEBus kommunizieren soll. Standardmäßig werden alle Schnittstellen verwendet, dies kann jedoch zu Kommunikationsproblemen führen.
+Definiert eine Liste von Netzwerkschnittstellen, über welche EEBUS kommunizieren soll. Standardmäßig werden alle Schnittstellen verwendet, dies kann jedoch zu Kommunikationsproblemen führen.
 
 **Beispiel**:
 

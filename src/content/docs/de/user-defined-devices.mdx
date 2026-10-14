@@ -7,7 +7,7 @@ tableOfContents:
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Batterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes lässt sich in der Geräteliste der Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
+Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Hausbatterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes lässt sich in der Geräteliste der Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
 
 So lassen sich auch Geräte einbinden, die nicht von einem eingebauten Template abgedeckt sind, z. B. die aktuelle Leistung über einen HTTP-Endpunkt lesen oder einen Zielstrom per Modbus schreiben.
 
@@ -248,7 +248,7 @@ Für andere Geräte stehen spezialisierte Charger-Typen unter [Switchsocket](#ch
 | Feature            | Beschreibung                                                                                                                                                                                                                                                                                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `integrateddevice` | Gerät ohne angeschlossenes Fahrzeug und ohne Ladesitzungen (z. B. Wärmepumpe, Heizstab, fest installierter Verbraucher). Keine Fahrzeugauswahl.                                                                                                                                                                                                         |
-| `heating`          | Behandelt das Gerät als Heizung: SOC und Limits werden in °C statt in % dargestellt.                                                                                                                                                                                                                                                                    |
+| `heating`          | Behandelt das Gerät als Heizung: Ladestand und Limits werden in °C statt in % dargestellt.                                                                                                                                                                                                                                                              |
 | `continuous`       | Gerät läuft im "deaktivierten" Zustand eigenständig in seinem Normalbetrieb weiter. Statt "Standby" wird "Normalbetrieb" angezeigt. Eine Empfehlung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Strom) wird als "Boost" gekennzeichnet. Die Modi heißen **Normal**, **Smart** und **Boost** statt **Aus**, **Smart** und **Schnell**. |
 | `switchdevice`     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Max-Strom und die Option **Dauerhaft laden** werden nicht angezeigt. Min-Strom und Phasen legen die PV-Einschaltleistung fest. Ohne `continuous` heißen die Modi **Aus**, **Smart** und **Ein**.                                                                         |
 
@@ -424,7 +424,7 @@ Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 | Feature         | Beschreibung                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `coarsecurrent` | Fahrzeug akzeptiert den Ladestrom nur in ganzen 1 A Schritten. Die Regelung wird auf grobe 1 A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
-| `streaming`     | Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). SOC-Updates außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.           |
+| `streaming`     | Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). Ladestand-Updates außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.     |
 | `welcomecharge` | Fahrzeug erwartet beim Anschließen eine aktive Wallbox, um die Verbindung als funktionierend zu erkennen. Andernfalls meldet das Fahrzeug einen Fehler.       |
 
 ### Beispiele
@@ -480,15 +480,15 @@ Die Attribute `price` und `forecast` schließen sich gegenseitig aus. Genau eine
 
 ### Konfiguration
 
-| Attribut       | Typ        | Erfordert | Beschreibung                                                                                                                                                                                                      |
-| -------------- | ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tariff`       | `string`   | nein      | `price` (Standard), `co2`, `solar` oder `temperature`. Bestimmt die Einheit der zurückgegebenen Werte: Preis in konfigurierter Währung pro kWh, CO₂-Intensität in g/kWh, Solar-Vorhersage in W, Temperatur in °C. |
-| `charges`      | `float`    | nein      | Fester Aufschlag pro kWh, der zu jedem Wert addiert wird. Standard `0`.                                                                                                                                           |
-| `chargesZones` | `list`     | nein      | Zeitabhängige Aufschläge (z. B. Netzentgelte), die `charges` für bestimmte Zeiträume überschreiben. Siehe [zeitabhängige Netzentgelte](/de/reference/configuration/tariffs#charges-zones).                        |
-| `tax`          | `float`    | nein      | Prozentualer Steuersatz auf das Ergebnis, z. B. `0.2` für 20%. Standard `0`.                                                                                                                                      |
-| `formula`      | `string`   | nein      | Go-Ausdruck für eine eigene Berechnung, mit `price`, `charges` und `tax` im Scope. Siehe [Beispiele](#formula-examples).                                                                                          |
-| `interval`     | `duration` | nein      | Abfrageintervall für `forecast`. Standard `1h`.                                                                                                                                                                   |
-| `cache`        | `duration` | nein      | Cache-Dauer für `price`. Standard `15m`.                                                                                                                                                                          |
+| Attribut       | Typ        | Erfordert | Beschreibung                                                                                                                                                                                                   |
+| -------------- | ---------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`       | `string`   | nein      | `price` (Standard), `co2`, `solar` oder `temperature`. Bestimmt die Einheit der zurückgegebenen Werte: Preis in konfigurierter Währung pro kWh, CO₂-Intensität in g/kWh, PV-Vorhersage in W, Temperatur in °C. |
+| `charges`      | `float`    | nein      | Fester Aufschlag pro kWh, der zu jedem Wert addiert wird. Standard `0`.                                                                                                                                        |
+| `chargesZones` | `list`     | nein      | Zeitabhängige Aufschläge (z. B. Netzentgelte), die `charges` für bestimmte Zeiträume überschreiben. Siehe [zeitabhängige Netzentgelte](/de/reference/configuration/tariffs#charges-zones).                     |
+| `tax`          | `float`    | nein      | Prozentualer Steuersatz auf das Ergebnis, z. B. `0.2` für 20%. Standard `0`.                                                                                                                                   |
+| `formula`      | `string`   | nein      | Go-Ausdruck für eine eigene Berechnung, mit `price`, `charges` und `tax` im Scope. Siehe [Beispiele](#formula-examples).                                                                                       |
+| `interval`     | `duration` | nein      | Abfrageintervall für `forecast`. Standard `1h`.                                                                                                                                                                |
+| `cache`        | `duration` | nein      | Cache-Dauer für `price`. Standard `15m`.                                                                                                                                                                       |
 
 ### Features \{#tariff-features\}
 
@@ -549,7 +549,7 @@ evcc arbeitet intern mit 15-Minuten-Intervallen; Plugins können auch stündlich
 
 Das `formula`-Feld akzeptiert einen Go-Ausdruck mit `price`, `charges`, `tax` und dem Slot-Zeitstempel `ts` im Scope.
 Die [`math`-Bibliothek](https://pkg.go.dev/math) und [`time.Time`](https://pkg.go.dev/time#Time)-Methoden auf `ts` stehen zur Verfügung.
-Die Formel wird für den aktuellen Preis und jeden Forecast-Slot ausgeführt.
+Die Formel wird für den aktuellen Preis und jeden Vorhersage-Slot ausgeführt.
 
 **Preisobergrenze**:
 
@@ -574,7 +574,7 @@ Zahlt eine feste Einspeisevergütung von 7 ct/kWh, außer wenn der Börsenstromp
 Eine benutzerdefinierte Integration für die [Externe Begrenzung](/de/external-limit) bindet eine Steuerbox oder ein Energiemanagementsystem an, das nicht durch eine integrierte Integration abgedeckt ist.
 Wähle dazu in der Oberfläche unter **Konfiguration → Externe Begrenzung** die Option **Benutzerdefinierte Integration**.
 
-Einer von vier Typen beschreibt, wie das Begrenzungssignal empfangen wird: `relay` (einzelner Schaltkontakt), `fnn` (FNN-Steuerbox mit mehreren Schaltkontakten), `eebus` (EEBus-Protokoll) oder `custom` (dynamische Limitwerte über Plugins).
+Einer von vier Typen beschreibt, wie das Begrenzungssignal empfangen wird: `relay` (einzelner Schaltkontakt), `fnn` (FNN-Steuerbox mit mehreren Schaltkontakten), `eebus` (EEBUS-Protokoll) oder `custom` (dynamische Limitwerte über Plugins).
 Jedes Signal wird über eine [Plugin](/de/reference/plugins)-Konfiguration ausgelesen (GPIO, MQTT, HTTP, Modbus).
 Siehe auch die [`hems`-Konfigurationsreferenz](/de/reference/configuration/hems).
 
@@ -703,9 +703,9 @@ s1:
   pin: 23
 ```
 
-### EEBus \{#external-limit-eebus\}
+### EEBUS \{#external-limit-eebus\}
 
-Die digitale Anbindung über das EEBus-Protokoll.
+Die digitale Anbindung über das EEBUS-Protokoll.
 Die Steuerbox kommuniziert direkt mit deiner evcc-Instanz und übermittelt das Leistungslimit automatisch.
 Steuerbox und evcc müssen einmalig [gekoppelt](/de/external-limit#eebus-pairing) werden.
 

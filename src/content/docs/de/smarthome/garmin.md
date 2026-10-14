@@ -1,6 +1,6 @@
 ---
 title: "Garmin"
-description: "Die Community-App evccg zeigt Live-Daten deiner evcc-Instanz auf Garmin-Smartwatches, darunter Hausbatterie, Fahrzeuge, Leistungsflüsse und die PV-Prognose."
+description: "Die Community-App evccg zeigt Live-Daten deiner evcc-Instanz auf Garmin-Smartwatches, darunter Hausbatterie, Fahrzeuge, Leistungsflüsse und die PV-Vorhersage."
 ---
 
 Die App [evccg](https://github.com/METIQ-Solutions/evcc-garmin) von [TheNinth7](https://github.com/TheNinth7) zeigt Live-Daten deiner evcc-Instanz auf [Garmin](https://www.garmin.com)-Smartwatches an.
@@ -11,7 +11,7 @@ Sie ist ein Community-Projekt und nicht Teil von evcc.
 Die App bietet zwei Ansichten:
 
 - **Glance**: ein schneller Überblick über Hausbatterie und verbundene Fahrzeuge mit Ladestand und Ladestatus
-- **Widget**: Detailansichten mit aktuellen Energieflüssen, Ladepunkt-Details, PV-Prognose, Strompreisen und Solarstatistiken
+- **Widget**: Detailansichten mit aktuellen Energieflüssen, Ladepunkt-Details, PV-Vorhersage, Strompreisen und PV-Statistiken
 
 Mehrere evcc-Instanzen (Standorte) werden unterstützt.
 

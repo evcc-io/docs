@@ -1,6 +1,6 @@
 ---
 title: "evcc App"
-description: "Die evcc-App versteht evcc://-Links, die einen Servereintrag vorausfüllen, die Prognoseseite öffnen oder direkt zu einem Ladepunkt springen, was beim Einrichten hilft."
+description: "Die evcc-App versteht evcc://-Links, die einen Servereintrag vorausfüllen, die Vorhersageseite öffnen oder direkt zu einem Ladepunkt springen, was beim Einrichten hilft."
 sidebar:
   order: 4
 ---

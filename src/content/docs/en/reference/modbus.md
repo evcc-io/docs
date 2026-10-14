@@ -1,6 +1,6 @@
 ---
 title: "Modbus"
-description: "Explains how evcc talks to meters and wallboxes over Modbus, whether serial via RS485, over TCP or through an RTU-to-TCP converter, and how to configure each."
+description: "Explains how evcc talks to meters and chargers over Modbus, whether serial via RS485, over TCP or through an RTU-to-TCP converter, and how to configure each."
 sidebar:
   order: 4
 ---
@@ -180,7 +180,7 @@ meters:
 **Incorrectly Mounted Meters**:
 If a current sensor/meter is physically installed in the wrong direction, you can correct the values in software.
 
-**Grid Feed-in vs. Consumption**:
+**Grid Export vs. Consumption**:
 For solar meters where the sign convention needs to be reversed.
 
 **Different CT Orientations**:

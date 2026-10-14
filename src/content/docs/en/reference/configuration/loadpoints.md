@@ -121,7 +121,7 @@ mode: smart
 
 ### `soc`
 
-Defins the default settings for handling the State of Charge (SoC) of a connected vehicle.
+Defins the default settings for handling the charge level of a connected vehicle.
 
 **For example**:
 
@@ -173,12 +173,12 @@ interval: 60m
 
 #### `estimate`
 
-Calculate (interpolate) the current SoC between vehicle data queries.
+Calculate (interpolate) the current charge level between vehicle data queries.
 
 **Possible values**:
 
-- `true`: evcc interpolates the SoC values between vehicle data queries (recommended).
-- `false`: evcc only uses the SoC values returned by the vehicle.
+- `true`: evcc interpolates the charge level values between vehicle data queries (recommended).
+- `false`: evcc only uses the charge level values returned by the vehicle.
 
 **Default value:** `true`
 
@@ -211,7 +211,7 @@ enable:
 
 Defines the power threshold at the grid connection point in watts (W).
 
-**Possible values**: A positive value for grid consumption, a negative value for grid export. When set to `0`, export must reach the minimum charging power.
+**Possible values**: A positive value for grid import, a negative value for grid export. When set to `0`, export must reach the minimum charging power.
 
 **Default value:** `0`
 
@@ -224,9 +224,9 @@ threshold: 0
 :::note
 If a residual power offset for the desired operating point of the surplus regulation is defined for the evcc site using the `residualPower` parameter, this value must be considered when setting the `threshold` value.
 
-For example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W feed-in), then setting an `enable` `threshold` value of 100 doesn't mean that charging will start at 100W grid consumption. Instead, the remaining feed-in power will be reduced by 100W, starting the charging at 100W feed-in.
+For example, if `residualPower` is set to 200 (the evcc control sets the desired operating point to 200W grid export), then setting an `enable` `threshold` value of 100 doesn't mean that charging will start at 100W grid import. Instead, the remaining grid export power will be reduced by 100W, starting the charging at 100W grid export.
 
-To start charging at 100W grid consumption in this case, the `threshold` value should be set to 300.
+To start charging at 100W grid import in this case, the `threshold` value should be set to 300.
 :::
 
 #### `delay`
@@ -259,7 +259,7 @@ disable:
 
 Defines the power threshold at the grid connection point in watts (W).
 
-**Possible values**: A positive value for grid consumption. When set to `0`, charging stops once surplus no longer covers the minimum charging power.
+**Possible values**: A positive value for grid import. When set to `0`, charging stops once surplus no longer covers the minimum charging power.
 
 **Default value:** `0`
 
@@ -349,18 +349,18 @@ If the charging point is not assigned a charger but one of the supported control
 
 ### `priority`
 
-During charging, this parameter prioritises loadpoints with each other.
+During charging, this parameter prioritises charging points with each other.
 
-The prioritised loadpoint is given the charging power of other non-prioritised loadpoints or those with lower priority. When a prioritised loadpoint accesses this power, it might lead to short-term grid consumption until the regulation stabilises.
+The prioritised charging point is given the charging power of other non-prioritised charging points or those with lower priority. When a prioritised charging point accesses this power, it might lead to short-term grid import until the regulation stabilises.
 
-Higher values indicate higher priority. Loadpoints without an entry have `priority: 0`.
+Higher values indicate higher priority. Charging points without an entry have `priority: 0`.
 
-When multiple loadpoints are present, this parameter doesn't influence the order in which the charging sessions are started. However, if a lower-priority loadpoint is charging, a higher-priority one might be switched on if it is given access to the unused charging power.
+When multiple charging points are present, this parameter doesn't influence the order in which the charging sessions are started. However, if a lower-priority charging point is charging, a higher-priority one might be switched on if it is given access to the unused charging power.
 
 This prioritisation works in `smart` mode. With [Always charge](/en/features/modes#always-charge) active, charging is not interrupted, only reduced to the minimum.
 
 :::note
-If a vehicle has a priority defined, it overrides the priority of the loadpoint it is connected to.
+If a vehicle has a priority defined, it overrides the priority of the charging point it is connected to.
 :::
 
 **Default value:** `0`

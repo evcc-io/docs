@@ -10,7 +10,7 @@ It is a community project and not part of evcc.
 ## evcc Adapter
 
 The adapter communicates with your evcc instance via the [REST API](/integrations/rest-api).
-It provides states for loadpoints, vehicles, and site data, and lets you control charge modes and limits from ioBroker scripts and visualisations.
+It provides states for charging points, vehicles, and site data, and lets you control charge modes and limits from ioBroker scripts and visualisations.
 
 ### Setup
 
