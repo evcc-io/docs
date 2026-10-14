@@ -5,6 +5,7 @@
 This is the documentation repository for evcc (Electric Vehicle Charge Controller).
 The site is built with [Astro](https://astro.build/) and the [Starlight](https://starlight.astro.build/) docs theme.
 Device pages are generated from YAML templates that are synchronised with the main evcc repository.
+Paths starting with `../evcc/` refer to a local checkout of the main repository (https://github.com/evcc-io/evcc) next to this one; clone it there if it is missing.
 
 ## Repository Structure
 
@@ -104,7 +105,7 @@ Everything else is hand-written:
 
 ### Terminology
 
-- **Match the evcc UI wording** — check `../evcc/i18n/en.json` and `de.json` for existing terms before inventing new ones (e.g. grid: "imported/exported" / „bezogen/eingespeist", battery: "charged/discharged" / „geladen/entladen", PV: "production" / „Erzeugung")
+- **Use the shared glossary** — agreed terms per language with explanations live in `../evcc/i18n/glossary/` (`en.json` + `de.json`, rules in `README.md`). Check it before wording anything user-facing; if a concept is missing there, fall back to the UI strings in `../evcc/i18n/en.json` and `de.json`
 
 #### English
 
@@ -245,7 +246,7 @@ The frontmatter `description` becomes the `<meta name="description">` (search sn
 - **Audience**: a person scanning search results or a page list. They should understand what the page helps them do without opening it. Write for humans first; a good human summary is also the best LLM summary.
 - **Style**: one complete, natural sentence with a verb, 90 to 160 characters (German up to 170), ending with a period. Same tone as the body text: direct, informal, no marketing. No "This page …", no "Learn how to …", no colon followed by a keyword list („Die Liste chargers: name und type …" is not acceptable).
 - **Level**: name the concrete outcome or question the page answers (what you can set up, what behaviour it explains, which platform it covers). Use everyday product terms (charger / Wallbox, meter / Zähler, home battery / Hausbatterie, charging point / Ladepunkt, solar / PV-Anlage). Mention a config key only when it is the thing people look up (e.g. `residualPower`), at most one or two, written without backticks.
-- **Locales**: English and German must convey the same content. Use UI wording from `../evcc/i18n/{en,de}.json` and the page's own headings; German uses German terminology („benutzerdefinierte Geräte", not „eigene Geräte").
+- **Locales**: English and German must convey the same content. Use the glossary terms (`../evcc/i18n/glossary/`), UI wording from `../evcc/i18n/{en,de}.json` and the page's own headings; German uses German terminology („benutzerdefinierte Geräte", not „eigene Geräte").
 - **Blog posts**: start with the kind and date so readers and LLMs can judge age, e.g. "Release notes for evcc 0.124 from February 2024 with …" / „Community-Portrait vom August 2024: …".
 - Good: "Install evcc from the apt repository on Debian, Ubuntu and similar distributions, run it as a systemd service and keep it updated or roll back."
 - Bad: "The mqtt section: broker and topic plus user, password, clientid, insecure, caCert, clientCert and clientKey."
