@@ -13,6 +13,7 @@ All of them are developed independently by their authors and are not part of evc
 - [powelllens/evcc_eink_monitor](https://github.com/powelllens/evcc_eink_monitor): E-Ink display that shows the current evcc status
 - [maschiach/evcc_power_ring](https://github.com/maschiach/evcc_power_ring): LED ring that visualises the current evcc status
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): macOS menu bar app with live energy overview and charging status
+- [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): touch display next to the wallbox (ESP32-4848S040C) that shows charging power and solar share and switches charging modes – installable straight from the browser
 
 Missing a project?
 [Edit this page](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) to add it.
