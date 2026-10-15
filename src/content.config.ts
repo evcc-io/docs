@@ -73,6 +73,7 @@ const deviceSchema = z.object({
   requirements: z.array(z.string()).optional(),
   caveats: z.array(caveatSchema).optional(),
   countries: z.array(z.string()).optional(),
+  usages: z.array(z.string()).optional(),
   params: z.array(paramSchema).optional(),
 });
 
