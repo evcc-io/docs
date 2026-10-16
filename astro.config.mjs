@@ -343,6 +343,11 @@ export default defineConfig({
           translations: { de: "Problem melden" },
           slug: "report-a-problem",
         },
+        {
+          label: "Contribute",
+          translations: { de: "Mitmachen" },
+          slug: "contribute",
+        },
         { slug: "sponsorship" },
       ],
     }),
