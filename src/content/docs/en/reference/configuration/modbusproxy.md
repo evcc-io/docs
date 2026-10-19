@@ -88,10 +88,15 @@ By setting this parameter, you can prevent Modbus write accesses by third-party 
 - `deny`: Write access is blocked with a modbus error as response
 - `false`: Write access is forwarded
 
-Function codes the proxy doesn't handle itself, such as Huawei's vendor-specific function code 0x41, can contain write operations. Both read-only modes therefore block them with a Modbus error. With `readonly: false` the proxy forwards them unchanged, but only to devices connected via Modbus TCP. The Home Assistant integration huawei_solar, for example, needs `readonly: false` to read the optimizer data.
+Function codes the proxy doesn't handle itself, such as Huawei's vendor-specific function code 0x41, can contain write operations.
+Both read-only modes therefore block them with a Modbus error.
+With `readonly: false` the proxy forwards them unchanged, but only to devices connected via Modbus TCP.
+The Home Assistant integration for Huawei inverters, for example, needs `readonly: false`.
 
 :::caution
-The proxy doesn't check who connects. With `readonly: false`, any device in your network that can reach the port can write to the target device. Only run the proxy in a trusted network.
+The proxy doesn't check who connects.
+With `readonly: false` (the default), any device in your network that can reach the port can write to the target device.
+Only run the proxy in a trusted network.
 :::
 
 **For example**:
