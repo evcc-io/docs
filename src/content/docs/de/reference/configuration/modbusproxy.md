@@ -92,6 +92,17 @@ Durch diesen Parameter lassen sich Modbus-Schreibzugriffe durch Drittsysteme pau
 - `deny`: Schreibzugriffe werden mit einem Modbusfehler als Antwort blockiert
 - `false`: Schreibzugriffe werden weitergeleitet
 
+Funktionscodes, die der Proxy nicht selbst verarbeitet, z. B. Huaweis herstellerspezifischer Funktionscode 0x41, können Schreibzugriffe enthalten.
+Beide Read-only-Modi blockieren sie deshalb mit einem Modbusfehler.
+Mit `readonly: false` leitet der Proxy sie unverändert weiter, allerdings nur an Geräte, die per Modbus TCP angebunden sind.
+Die Home-Assistant-Integration für Huawei-Wechselrichter braucht z. B. `readonly: false`.
+
+:::caution
+Der Proxy prüft nicht, wer sich verbindet.
+Mit `readonly: false` (Standard) kann jedes Gerät, das den Port im Netzwerk erreicht, auf das Zielgerät schreiben.
+Betreibe den Proxy deshalb nur in einem vertrauenswürdigen Netzwerk.
+:::
+
 **Beispiel**:
 
 ```yaml
