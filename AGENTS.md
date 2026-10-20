@@ -268,6 +268,16 @@ The frontmatter `description` becomes the `<meta name="description">` (search sn
 - Reference issues when applicable
 - Keep commits focused and atomic
 
+## AI Attribution
+
+Work produced by an AI agent must be attributable as such on GitHub. Append the tool's attribution footer to every PR description, issue body, review, and comment written by an agent, for example:
+
+```
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+
+Commit messages are the exception: no footer, and no `Co-Authored-By` trailer. Never dress agent work up as human review (e.g. "PR by an agent but looks good to me") in place of the footer.
+
 ## Common Tasks
 
 - Updating device docs: edit YAML in `/templates`, rebuild
