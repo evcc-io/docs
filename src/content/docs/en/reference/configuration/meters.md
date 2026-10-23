@@ -380,6 +380,8 @@ Standard implementation, in which individual values are defined via [plugins](/e
   soc: # Battery SOC (%)
     source: # Plugin Type
     ...
+  minsoc: 10 # Minimum battery SOC (%)
+  maxsoc: 90 # Maximum battery SOC (%)
   capacity: # Optional Battery Capacity (kWh)
   currents: # Current (A) per phase
     - source: # Phase 1 Plugin Type
@@ -470,6 +472,12 @@ Plugin definition to return battery charge level in percentage (%).
 #### `capacity`
 
 Indication of battery capacity. Only useful when multiple batteries are present. Used to determine the overall charge level.
+
+---
+
+#### `minsoc` and `maxsoc`
+
+Optional lower and upper battery charge limits in percent. Set these to the limits configured on the battery system. evcc uses them when calculating the battery's usable SOC range, including for the optimizer and grid charging. The defaults are `0` and `100`.
 
 ---
 
