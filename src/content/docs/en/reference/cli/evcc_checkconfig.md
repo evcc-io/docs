@@ -27,4 +27,4 @@ evcc checkconfig [flags]
 
 ## See also
 
-- [evcc](/en/reference/cli/evcc) - evcc - smart charging
+- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging

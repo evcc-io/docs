@@ -2,7 +2,7 @@
 title: "evcc"
 ---
 
-evcc - smart charging
+evcc - open source solar charging
 
 ```
 evcc [flags]
@@ -23,7 +23,6 @@ evcc [flags]
       --database string            Database location (default "~/.evcc/evcc.db")
       --demo                       Enter demo mode. Disables auth, config ui and restart
       --disable-auth               Disable authentication (dangerous)
-      --disable-onboarding         Skip the setup wizard and checklist
   -h, --help                       Help
       --ignore-db                  Run command ignoring service database
   -l, --log string                 Log level (fatal, error, warn, info, debug, trace) (default "info")
