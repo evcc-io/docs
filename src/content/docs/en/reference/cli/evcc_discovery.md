@@ -37,4 +37,4 @@ evcc discovery [flags]
 
 ## See also
 
-- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc](/en/reference/cli/evcc) - evcc - smart charging
