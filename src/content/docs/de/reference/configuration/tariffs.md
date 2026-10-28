@@ -43,6 +43,26 @@ tariffs:
 
 Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Stromtarife](/de/tariffs).
 
+## Tarife kombinieren {#merged}
+
+Der Tarif `merged` nutzt die Preise eines primären Tarifs und setzt sie mit einem sekundären Tarif fort, wo diese enden, zum Beispiel echte Marktpreise ergänzt um eine längerfristige Preisprognose.
+In der Oberfläche steht **Kombinierter Tarif** als Anbieter für Netzbezug, Einspeisung und Planer zur Auswahl. Beide Tarife werden direkt aus diesem Formular heraus angelegt.
+In der `evcc.yaml` werden beide Tarife inline konfiguriert:
+
+```yaml
+tariffs:
+  grid:
+    type: merged
+    primary:
+      type: template
+      template: tibber
+      token: ...
+    secondary:
+      type: template
+      template: energyforecast
+      token: ...
+```
+
 ## Zeitabhängige Netzentgelte {#charges-zones}
 
 Über `charges` kannst du einen festen Aufschlag pro kWh auf jeden Preiswert addieren.

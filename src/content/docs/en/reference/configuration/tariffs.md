@@ -43,6 +43,26 @@ tariffs:
 
 More examples and a list of available providers can be found in the section [Tariffs](/en/tariffs).
 
+## Combining Tariffs {#merged}
+
+The `merged` tariff uses the prices of a primary tariff and continues with a secondary tariff where they end, for example real market prices extended by a longer-term price forecast.
+In the UI, **Merged tariff** is available as provider for the grid, feed-in and planner tariff. Both tariffs are added directly from that form.
+In `evcc.yaml` both tariffs are configured inline:
+
+```yaml
+tariffs:
+  grid:
+    type: merged
+    primary:
+      type: template
+      template: tibber
+      token: ...
+    secondary:
+      type: template
+      template: energyforecast
+      token: ...
+```
+
 ## Time-Based Grid Fees {#charges-zones}
 
 Use `charges` to add a fixed fee per kWh to every price value.
