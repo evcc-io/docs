@@ -14,6 +14,8 @@ test.beforeAll(async () => {
     "recipes/custom-logo-light.svg",
     "--custom-logo-dark",
     "recipes/custom-logo-dark.svg",
+    "--custom-icon",
+    "recipes/custom-icon.png",
     "--custom-website",
     "https://example.com/hems",
     "--custom-email",
