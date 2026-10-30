@@ -1,23 +1,24 @@
 ---
 title: "meters"
-description: "Zähler für Netz, PV-Anlage, Hausbatterie und Verbraucher in der evcc.yaml anlegen, welche Vorzeichenregel gilt und welche Zählertypen es gibt."
+description: "Beschreibt, wie du Zähler für Netz, PV-Anlage, Hausbatterie und Verbraucher in der evcc.yaml definierst, welche Vorzeichenkonvention gilt und welche Zählertypen es gibt."
 sidebar:
   order: 5
+translatedFrom: "731e5e09d04f"
 ---
 
-_Meters_ (Strommessgeräte) ist eine Liste von in der Hausinstallation vorhandenen Geräten, welche die Leistung und den Energieverbrauch, die PV Erzeugung oder Hausbatterienutzung zur Verfügung stellen können. Ein `meter` definiert einen Punkt einer Energieleistung und kann ein physikalisches Gerät sein (z.b. ein Messgerät am Netzanschlusspunkt), ein PV Wechselrichter (AC oder auch DC im Falle von Hybrid-Wechselrichtern), oder ein Batterie-Wechselrichter.
+Unter _meters_ (Zähler) steht eine Liste von Geräten im Haus, die Leistung und Energieverbrauch, PV-Erzeugung oder die Nutzung der Hausbatterie messen können. Ein `meter` definiert einen Messpunkt für Energie und kann ein physisches Gerät sein (z. B. ein Zähler am Netzanschlusspunkt), ein PV-Wechselrichter (AC oder bei Hybridwechselrichtern auch DC) oder ein Batteriewechselrichter.
 
-Wallboxen können intern ein Messgerät eingebaut haben, oder es kann auch extern angeschlossen sein. Falls eine Wallbox ein internes Strommessgerät hat, dann muss in `meters` **kein** Eintrag dafür angelegt werden. Falls die Wallbox keinen solchen Zähler hat, wird evcc den hier konfigurierten und der Wallbox im Ladepunkt unter [`meter`](/de/reference/configuration/loadpoints#meter) zugewiesenen Zähler verwenden, oder annehmen dass die eingestellte Ladeleistung auch tatsächlich genutzt wird.
+Wallboxen können einen eingebauten Zähler haben, oder der Zähler wird extern angeschlossen. Hat eine Wallbox einen internen Zähler, muss dafür in `meters` kein Eintrag angelegt werden. Hat die Wallbox keinen solchen Zähler, verwendet evcc den hier definierten Zähler, den du der Wallbox in der Ladepunkt-Konfiguration unter [`meter`](/de/reference/configuration/loadpoints#meter) zuweist. Ohne Zähler nimmt evcc an, dass die eingestellte Ladeleistung auch tatsächlich genutzt wird.
 
-evcc verwendet eine einheitliche Vorzeichen-Konvention für Leistungs- und Stromwerte (`power`, `powers`, `currents`):
+evcc verwendet eine einheitliche Vorzeichenkonvention für Leistungs- und Stromwerte (`power`, `powers`, `currents`):
 
-- **Positiv (+)** für eingehende Energie: Netzbezug, PV-Erzeugung, Hausbatterie-Entladung
-- **Negativ (-)** für ausgehende Energie: Netzeinspeisung, PV-Wechselrichter Ruhestrombedarf, Hausbatterie-Ladung
+- **Positiv (+)** für eingehende Energie: Netzbezug, PV-Erzeugung, Entladung der Hausbatterie
+- **Negativ (-)** für ausgehende Energie: Einspeisung, Standby-Verbrauch des PV-Wechselrichters, Ladung der Hausbatterie
 - **Verbraucher** (Wallbox, Aux-Zähler) sind immer **positiv (+)**
 
-Liefert das Gerät die Werte mit umgekehrtem Vorzeichen, kann dies in der [Plugin-Konfiguration](/de/reference/plugins) über `scale: -1` korrigiert werden.
+Liefert das Gerät die Werte mit umgekehrtem Vorzeichen, kann das in der [Plugin-Konfiguration](/de/reference/plugins) über `scale: -1` korrigiert werden.
 
-Die `meters` Konfiguration ist eine Liste von verschiedenen vorhandenen Geräten.
+Die `meters`-Konfiguration ist eine Liste der vorhandenen Geräte.
 
 **Beispiel**:
 
@@ -35,9 +36,9 @@ meters:
     type: ...
 ```
 
-Konfigurationen für bekannte Geräte sind unter [Geräte - Hausinstallation](/de/meters) zu finden.
+Konfigurationen für bekannte Geräte findest du unter [Geräte – Hausinstallation](/de/meters).
 
-Im folgenden werden nun alle möglichen Parameter erklärt.
+Im Folgenden werden die verschiedenen Parameter erklärt.
 
 ---
 
@@ -45,7 +46,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ### `name`
 
-Eine Kurzbezeichnung der hier definierten Wallbox. Der Wert wird in der Referenzierung des Gerätes in der Konfiguration der [Site](/de/reference/configuration/site) oder des [Ladepunktes](/de/reference/configuration/loadpoints#meter) verwendet.
+Eine Kurzbezeichnung des Zählers. Der Wert wird verwendet, um das Gerät in der Konfiguration des [Standorts](/de/reference/configuration/site) oder des [Ladepunkts](/de/reference/configuration/loadpoints#meter) zu referenzieren.
 
 **Beispiel**:
 
@@ -57,7 +58,7 @@ name: wallbox1
 
 ### `type`
 
-Dies ist der evcc spezifische Messgeräte Typ, mit Hilfe dessen mit dem Gerät kommuniziert werden kann. Den passenden Typ für bekannte Geräte findet man unter [Geräte - Hausinstallation](/de/meters).
+Dies ist der evcc-spezifische Zählertyp, über den die Kommunikation mit dem Gerät läuft. Den passenden Typ für bekannte Geräte findest du unter [Geräte – Hausinstallation](/de/meters).
 
 **Beispiel**:
 
@@ -65,22 +66,22 @@ Dies ist der evcc spezifische Messgeräte Typ, mit Hilfe dessen mit dem Gerät k
 type: modbus
 ```
 
-Im folgenden sind die verschiedenen möglichen Typen und deren weitere Parameter dokumentiert:
+Im Folgenden sind die verschiedenen möglichen Typen und ihre weiteren Parameter dokumentiert:
 
 ---
 
 :::note[Hinweis]
-Die zusätzlichen Meter-Felder `title` und `icon` werden in der `evcc.yaml` aus technischen Gründen nicht unterstützt.
-Titel und Icon (je Anwendungsfall) können nur für Zähler definiert werden, die über die Konfigurationsoberfläche angelegt wurden.
+Die zusätzlichen Zählerfelder `title` und `icon` werden in der `evcc.yaml` aus technischen Gründen nicht unterstützt.
+Titel und Icons (je nach Anwendungsfall) können nur für Zähler definiert werden, die über die Oberfläche angelegt wurden.
 :::
 
 ## Unterstützte Typen
 
 ### `movingaverage`
 
-Mit dieser Meter-Type kann man schwankende Meter-Messwerte "glätten". Nutzbar ist es bei allen Meter-Anwendungen (`usage`). Der Parameter `decay` gibt dabei an, mit wieviel Prozent der neue Wert in die Berechnung übernommen werden soll.
+Mit diesem Zählertyp lassen sich schwankende Messwerte glätten. Er funktioniert mit jeder Verwendung (`usage`). Der Parameter `decay` gibt an, mit wie viel Prozent der neue Wert in die Berechnung einfließt.
 
-**Beispiel**
+**Beispiel**:
 
 ```yaml
 meters:
@@ -95,13 +96,13 @@ meters:
     ...
 ```
 
-In diesen Beispiel werden 10% vom neuen Wert übernommen. Nach 10 Regelungszyklen fällt der älteste Wert aus der Berechnung raus. Wie lange das dauert hängt vom `interval` ab.
+In diesem Beispiel fließen 10% des neuen Werts ein. Nach 10 Zyklen fällt der älteste Wert aus der Berechnung heraus. Wie lange das dauert, hängt vom `interval` ab.
 
 ---
 
 ### `modbus`
 
-Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [MBMD](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
+Geräte, die über die Modbus-Schnittstelle angebunden sind und vom Projekt [MBMD (ModBus Measurement Daemon)](https://github.com/volkszaehler/mbmd#supported-devices) unterstützt werden.
 
 **Beispiel**:
 
@@ -115,11 +116,11 @@ Geräte welche über die ModBus Schnittstelle angebunden sind und vom Projekt [M
 
 #### Erforderliche Parameter
 
-Zusätzlich zu den hier definierten Parametern, sind weitere Parameter notwendig. Diese sind unter in der [Modbus](/de/reference/modbus) Dokumentation aufgeführt.
+Zusätzlich zu den hier definierten Parametern sind weitere Parameter notwendig. Diese sind in der [Modbus](/de/reference/modbus)-Dokumentation aufgeführt.
 
 ##### `power`
 
-Definiert den MBMD Messwert welcher die Leistung zurückliefert, typischerweise ist das `Power`.
+Definiert den MBMD-Messwert, der die Leistung liefert, typischerweise `Power`.
 
 **Beispiel**:
 
@@ -131,7 +132,7 @@ power: Power
 
 ##### `energy`
 
-Definiert den MBMD Messwert welcher die Energiemenge zurückliefert, typischerweise ist das `Sum`.
+Definiert den MBMD-Messwert, der die Energie liefert, typischerweise `Sum`.
 
 **Beispiel**:
 
@@ -145,7 +146,7 @@ energy: Sum
 
 ##### `soc`
 
-Definiert den MBMD Messwert welcher den Ladestand der Batterie zurückliefert, typischerweise ist das `ChargeState`.
+Definiert den MBMD-Messwert, der den Ladestand der Batterie liefert, typischerweise `ChargeState`.
 
 **Beispiel**:
 
@@ -157,7 +158,7 @@ soc: ChargeState
 
 ### `lgess`
 
-LG ESS Home 8/10 Geräte.
+Geräte vom Typ LG ESS Home 8/10.
 
 **Beispiel**:
 
@@ -169,26 +170,26 @@ password: "DE200..."
 ```
 
 :::note
-Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt, falls mehrere konfiguriert werden.
+Die Parameter `uri` und `password` werden bei einem `meter`-Gerät nur benötigt, wenn mehrere Geräte konfiguriert sind.
 :::
 
 #### Erforderliche Parameter
 
 ##### `usage`
 
-Definiert welches Messwerte hier benötigt werden.
+Definiert, welche Messwerte hier benötigt werden.
 
 **Mögliche Werte**:
 
-- **`grid`**: Für die Messwerte am Netzanschlusspunkt
-- **`pv`**: Für die Messwerte der PV Erzeugung
-- **`battery`**: Für die Messwerte der Hausbatterie
+- **`grid`**: Für Messwerte am Netzanschlusspunkt
+- **`pv`**: Für Messwerte der PV-Erzeugung
+- **`battery`**: Für Messwerte der Hausbatterie
 
 ---
 
 ##### `uri`
 
-Definiert die URL im Heimnetzwerk des LG ESS Gerätes.
+Definiert die URL des LG-ESS-Geräts im Heimnetzwerk.
 
 **Beispiel**:
 
@@ -200,7 +201,7 @@ uri: https://192.0.2.2/
 
 ##### `password`
 
-Hier muss die Registriernummer des LG ESS HOME Wechselrichters eingetragen werden.
+Hier muss die Registriernummer des LG-ESS-Home-Wechselrichters eingetragen werden.
 
 **Beispiel**:
 
@@ -212,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Verwendung der Messwerte von der OpenWB Wallbox
+Verwendet die Messwerte einer OpenWB-Wallbox.
 
 **Beispiel**:
 
@@ -222,29 +223,23 @@ usage: grid
 broker: 192.0.2.2
 ```
 
-:::note
-Der Parameter `uri` und `password` werden nur bei einem `meter` Gerät benötigt, falls mehrere konfiguriert werden.
-:::
-
----
-
 #### Erforderliche Parameter
 
 ##### `usage`
 
-Definiert welches Messwerte hier benötigt werden.
+Definiert, welche Messwerte hier benötigt werden.
 
 **Mögliche Werte**:
 
-- **`grid`**: Für die Messwerte am Netzanschlusspunkt
-- **`pv`**: Für die Messwerte der PV Erzeugung
-- **`battery`**: Für die Messwerte der Hausbatterie
+- **`grid`**: Für Messwerte am Netzanschlusspunkt
+- **`pv`**: Für Messwerte der PV-Erzeugung
+- **`battery`**: Für Messwerte der Hausbatterie
 
 ---
 
 ##### `broker`
 
-Definiert den hostnamen oder die IP Adresse und die Portadresse im Heimnetzwerk der OpenWB.
+Definiert den Hostnamen oder die IP-Adresse und den Port der OpenWB im Heimnetzwerk.
 
 **Beispiel**:
 
@@ -256,7 +251,7 @@ broker: 192.0.2.2:1883
 
 ### `sma`
 
-Für die Verwendung des SMA Home Manager 2.0 oder SMA Energy Meter oder eines SMA Wechselrichters. Die Geräte müssen das Protokoll Speedwire unterstützen.
+Für die Verwendung des SMA Home Manager 2.0, des SMA Energy Meters oder eines SMA-Wechselrichters. Die Geräte müssen das Speedwire-Protokoll unterstützen.
 
 **Beispiel**:
 
@@ -272,12 +267,12 @@ interface: eth0
 #### Erforderliche Parameter
 
 :::note
-Es ist ausreichend nur einen der Parameter (`uri` oder `serial`) zu definieren.
+Es reicht aus, entweder `uri` oder `serial` zu definieren.
 :::
 
 ##### `uri`
 
-Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
+Definiert den Hostnamen oder die IP-Adresse des Geräts im Heimnetzwerk.
 
 **Beispiel**:
 
@@ -287,7 +282,7 @@ uri: 192.0.2.2
 
 ##### `serial`
 
-Definiert die Seriennummer des Gerätes von dem Messwerte empfangen werden sollen.
+Definiert die Seriennummer des Geräts, von dem Messwerte empfangen werden sollen.
 
 **Beispiel**:
 
@@ -299,9 +294,7 @@ serial: 12345678
 
 ##### `interface`
 
-Multicast Botschaften können nur auf einem bestimmten Netzwerkinterface empfangen werden.
-Üblicherweise das erste Interace im System.
-Falls das nicht das Interface ist, das mit dem Meter verbunden ist, muss das Interface explizit angegeben werden.
+Multicast-Nachrichten können nur auf einer bestimmten Netzwerkschnittstelle empfangen werden. Üblicherweise ist das die erste Schnittstelle im System. Ist das nicht die Schnittstelle, die mit dem Zähler verbunden ist, muss sie explizit angegeben werden.
 
 **Beispiel**:
 
@@ -330,19 +323,19 @@ password: "***"
 
 ##### `usage`
 
-Definiert welches Messwerte hier benötigt werden.
+Definiert, welche Messwerte hier benötigt werden.
 
 **Mögliche Werte**:
 
-- **`grid`**: Für die Messwerte am Netzanschlusspunkt
-- **`pv`**: Für die Messwerte der PV Erzeugung
-- **`battery`**: Für die Messwerte der Hausbatterie
+- **`grid`**: Für Messwerte am Netzanschlusspunkt
+- **`pv`**: Für Messwerte der PV-Erzeugung
+- **`battery`**: Für Messwerte der Hausbatterie
 
 ---
 
 ##### `uri`
 
-Definiert den hostnamen oder die IP Adresse im Heimnetzwerk des Gerätes.
+Definiert den Hostnamen oder die IP-Adresse des Geräts im Heimnetzwerk.
 
 **Beispiel**:
 
@@ -354,7 +347,7 @@ uri: 192.0.2.2
 
 ##### `password`
 
-Hier muss das Password für den Benutzer _customer_ (Kunde) eingetragen werden.
+Hier muss das Passwort für den Benutzer _customer_ eingetragen werden.
 
 **Beispiel**:
 
@@ -366,45 +359,45 @@ password: "DasPasswort"
 
 ### `custom`
 
-Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/de/user-defined-devices#meter) definiert werden.
+Generische Implementierung, bei der die einzelnen Werte über [Plugins](/de/user-defined-devices#meter) definiert werden.
 
 **Beispiel**:
 
 ```yaml
   type: custom
   power: # Leistung (W)
-    source: # Plugin Typ
+    source: # Plugin-Typ
     ...
-  energy: # Energiemenge (kWh)
-    source: # Plugin Typ
+  energy: # Energie (kWh)
+    source: # Plugin-Typ
     ...
-  returnenergy: # Energiemenge in Gegenrichtung (kWh)
-    source: # Plugin Typ
+  returnenergy: # Energie in Gegenrichtung (kWh)
+    source: # Plugin-Typ
     ...
-  soc: # Batterie SOC (%)
-    source: # Plugin Typ
+  soc: # Ladestand der Batterie (%)
+    source: # Plugin-Typ
     ...
-  capacity: # optional Batterie Kapazität (kWh)
-  currents: # Stromstärke (A) pro Phase
-    - source: # Phase 1 Plugin Typ
+  capacity: # optional: Batteriekapazität (kWh)
+  currents: # Strom (A) pro Phase
+    - source: # Plugin-Typ Phase 1
       ...
-    - source: # Phase 2 Plugin Typ
+    - source: # Plugin-Typ Phase 2
       ...
-    - source: # Phase 3 Plugin Typ
+    - source: # Plugin-Typ Phase 3
       ...
   powers: # Leistung (W) pro Phase
-    - source: # Phase 1 Plugin Typ
+    - source: # Plugin-Typ Phase 1
       ...
-    - source: # Phase 2 Plugin Typ
+    - source: # Plugin-Typ Phase 2
       ...
-    - source: # Phase 3 Plugin Typ
+    - source: # Plugin-Typ Phase 3
       ...
   voltages: # Spannung (V) pro Phase
-    - source: # Phase 1 Plugin Typ
+    - source: # Plugin-Typ Phase 1
       ...
-    - source: # Phase 2 Plugin Typ
+    - source: # Plugin-Typ Phase 2
       ...
-    - source: # Phase 3 Plugin Typ
+    - source: # Plugin-Typ Phase 3
       ...
   ...
 ```
@@ -415,13 +408,13 @@ Standard Implementierung, bei welchem die einzelnen Werte über [Plugins](/de/us
 
 ##### `power`
 
-Plugin Definition um die Leistung in Watt (W) zurückzugeben.
+Plugin-Definition, die die Leistung in Watt (W) liefert.
 
 **Beispiel**:
 
 ```yaml
   power: ... # Leistung (W)
-    source: # Plugin Typ
+    source: # Plugin-Typ
     ...
 ```
 
@@ -431,13 +424,13 @@ Plugin Definition um die Leistung in Watt (W) zurückzugeben.
 
 ##### `energy`
 
-Plugin Definition um die geladene Energiemenge in kWh zurückzugeben.
+Plugin-Definition, die die verbrauchte Energie in Kilowattstunden (kWh) liefert.
 
 **Beispiel**:
 
 ```yaml
-  energy: ... # Energiemenge (kWh)
-    source: # Plugin Typ
+  energy: ... # Energie (kWh)
+    source: # Plugin-Typ
     ...
 ```
 
@@ -445,13 +438,13 @@ Plugin Definition um die geladene Energiemenge in kWh zurückzugeben.
 
 ##### `returnenergy`
 
-Plugin Definition um die Energiemenge in Gegenrichtung in kWh zurückzugeben, z. B. Netzeinspeisung.
+Plugin-Definition, die die Energie in Gegenrichtung in Kilowattstunden (kWh) liefert, z. B. die Einspeisung.
 
 **Beispiel**:
 
 ```yaml
-  returnenergy: ... # Energiemenge in Gegenrichtung (kWh)
-    source: # Plugin Typ
+  returnenergy: ... # Energie in Gegenrichtung (kWh)
+    source: # Plugin-Typ
     ...
 ```
 
@@ -459,13 +452,13 @@ Plugin Definition um die Energiemenge in Gegenrichtung in kWh zurückzugeben, z.
 
 #### `soc`
 
-Plugin Definiton um den Ladestand in % zurückzugeben
+Plugin-Definition, die den Ladestand der Batterie in Prozent (%) liefert.
 
 **Beispiel**:
 
 ```yaml
-  soc: ... # Batterie SOC (%)
-    source: # Plugin Typ
+  soc: ... # Ladestand der Batterie (%)
+    source: # Plugin-Typ
     ...
 ```
 
@@ -473,25 +466,23 @@ Plugin Definiton um den Ladestand in % zurückzugeben
 
 #### `capacity`
 
-Angabe der Batterie Kapazität. Nur nützlich, wenn mehrere Batterien vorhanden sind
-
-Dient dazu, den Gesamt-Ladestand zu ermittlen.
+Gibt die Batteriekapazität an. Das ist nur bei mehreren Batterien sinnvoll und dient dazu, den Gesamtladestand zu ermitteln.
 
 ---
 
 #### `currents`
 
-Eine Liste von Plugin Definitionen um die Stromstärke in A pro Phase zurückzugeben.
+Eine Liste von Plugin-Definitionen, die den Strom in Ampere (A) pro Phase liefern.
 
 **Beispiel**:
 
 ```yaml
-  currents: # Stromstärke (A) pro Phase
-    - source: # Phase 1 Plugin Typ
+  currents: # Strom (A) pro Phase
+    - source: # Plugin-Typ Phase 1
       ...
-    - source: # Phase 2 Plugin Typ
+    - source: # Plugin-Typ Phase 2
       ...
-    - source: # Phase 3 Plugin Typ
+    - source: # Plugin-Typ Phase 3
       ...
   ...
 ```
@@ -500,17 +491,17 @@ Eine Liste von Plugin Definitionen um die Stromstärke in A pro Phase zurückzug
 
 #### `powers`
 
-Eine Liste von Plugin Definitionen um die Leistung in W pro Phase zurückzugeben.
+Eine Liste von Plugin-Definitionen, die die Leistung in Watt (W) pro Phase liefern.
 
 **Beispiel**:
 
 ```yaml
   powers: # Leistung (W) pro Phase
-    - source: # Phase 1 Plugin Typ
+    - source: # Plugin-Typ Phase 1
       ...
-    - source: # Phase 2 Plugin Typ
+    - source: # Plugin-Typ Phase 2
       ...
-    - source: # Phase 3 Plugin Typ
+    - source: # Plugin-Typ Phase 3
       ...
   ...
 ```
@@ -519,17 +510,17 @@ Eine Liste von Plugin Definitionen um die Leistung in W pro Phase zurückzugeben
 
 #### `voltages`
 
-Eine Liste von Plugin Definitionen um die Spannung in V pro Phase zurückzugeben.
+Eine Liste von Plugin-Definitionen, die die Spannung in Volt (V) pro Phase liefern.
 
 **Beispiel**:
 
 ```yaml
   voltages: # Spannung (V) pro Phase
-    - source: # Phase 1 Plugin Typ
+    - source: # Plugin-Typ Phase 1
       ...
-    - source: # Phase 2 Plugin Typ
+    - source: # Plugin-Typ Phase 2
       ...
-    - source: # Phase 3 Plugin Typ
+    - source: # Plugin-Typ Phase 3
       ...
   ...
 ```

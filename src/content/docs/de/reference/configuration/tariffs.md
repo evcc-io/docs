@@ -1,12 +1,13 @@
 ---
 title: "tariffs"
-description: "Tarife für Netzbezug, Einspeisung, CO₂ und PV-Vorhersage in der evcc.yaml hinterlegen, für Ersparnisstatistik, Ladepläne und zeitabhängige Netzentgelte."
+description: "Lege in der evcc.yaml Tarife für Netzbezug und Einspeisung sowie CO₂- und PV-Vorhersagen fest, für Ersparnisstatistik, smarte Ladepläne und zeitabhängige Netzentgelte."
 sidebar:
   order: 12
+translatedFrom: "104e48d142a6"
 ---
 
 Hier kannst du deinen Energietarif und gegebenenfalls deine Einspeisevergütung angeben.
-evcc verwendet diese Werte für eine grobe [Ersparnisberechnung](/de/faq#savings-calculation), die in der Web-UI angezeigt wird.
+evcc verwendet diese Werte für eine grobe [Ersparnisberechnung](/de/faq#statistical-data), die in der Oberfläche angezeigt wird.
 Diese Daten werden auch vom [Planer](/de/features/plans) für preis- und CO₂-optimiertes Laden verwendet.
 
 **Struktur**
@@ -29,34 +30,34 @@ tariffs:
 
 ```yaml
 tariffs:
-  currency: EUR # (default EUR)
+  currency: EUR # (Standard: EUR)
   grid:
-    # static grid price
+    # statischer Netzpreis
     type: fixed
     price: 0.294 # [currency]/kWh
 
   feedin:
-    # rate for feeding excess (pv) energy to the grid
+    # Vergütung für ins Netz eingespeisten PV-Überschuss
     type: fixed
     price: 0.08 # [currency]/kWh
 ```
 
-Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Stromtarife](/de/tariffs).
+Mehr Beispiele und eine Übersicht der verfügbaren Anbieter findest du unter [Tarife](/de/tariffs).
 
 ## Zeitabhängige Netzentgelte {#charges-zones}
 
-Über `charges` kannst du einen festen Aufschlag pro kWh auf jeden Preiswert addieren.
-Berechnet dein Netzbetreiber zeitvariable Netzentgelte (z. B. nach § 14a EnWG), kannst du über `chargesZones` den Standardaufschlag `charges` für bestimmte Zeiträume überschreiben.
-Das funktioniert mit jedem Netztarif, egal ob Anbieter-Template, `fixed`-Preis oder `custom`-Quelle.
+Über `charges` kannst du jeden Preiswert um einen festen Aufschlag pro kWh erhöhen.
+Berechnet dein Netzbetreiber zeitabhängige Netzentgelte (z. B. nach § 14a EnWG in Deutschland), kannst du über `chargesZones` den Standardaufschlag `charges` für bestimmte Zeiträume überschreiben.
+Das funktioniert mit jedem Netzbezugstarif, egal ob Anbieter-Template, `fixed`-Preis oder `custom`-Quelle.
 
 Jede Zone hat folgende Felder:
 
-| Feld      | Erfordert | Beschreibung                                                      |
-| --------- | --------- | ----------------------------------------------------------------- |
-| `charges` | ja        | Aufschlag pro kWh in dieser Zone. Ersetzt den Standard-`charges`. |
-| `months`  | nein      | z. B. `Nov-Mär` oder `Jun`. Leer bedeutet ganzjährig.             |
-| `days`    | nein      | z. B. `Mo-Fr` oder `Sa,So`. Leer bedeutet täglich.                |
-| `hours`   | nein      | z. B. `17-20` oder `15:30-21`. Leer bedeutet ganztägig.           |
+| Feld      | Pflicht | Beschreibung                                                              |
+| --------- | ------- | ------------------------------------------------------------------------- |
+| `charges` | ja      | Aufschlag pro kWh in dieser Zone. Ersetzt den Standardwert aus `charges`. |
+| `months`  | nein    | z. B. `Nov-Mar` oder `Jun`. Leer bedeutet ganzjährig.                     |
+| `days`    | nein    | z. B. `Mon-Fri` oder `Sat,Sun`. Leer bedeutet täglich.                    |
+| `hours`   | nein    | z. B. `17-20` oder `15:30-21`. Leer bedeutet ganztägig.                   |
 
 **Beispiel**:
 
@@ -68,8 +69,8 @@ tariffs:
     token: "..."
     charges: 0.0941 # Standard-Netzentgelt pro kWh
     chargesZones:
-      - months: Nov-Mär
-        days: Mo-Fr
+      - months: Nov-Mar
+        days: Mon-Fri
         hours: 17-20
         charges: 0.1838 # Hochtarif
       - hours: 0-6
@@ -84,7 +85,7 @@ Ein `fixed`-Tarif mit `chargesZones` wird wie ein dynamischer Tarif behandelt: D
 
 ## Feature-Flags
 
-Bei eigenen Tarifen vom Typ `custom` kannst du über `features` das Verhalten beeinflussen:
+Bei benutzerdefinierten Tarifen (`type: custom`) kannst du über `features` das Verhalten beeinflussen:
 
 | Feature   | Beschreibung                                                                                                                |
 | --------- | --------------------------------------------------------------------------------------------------------------------------- |

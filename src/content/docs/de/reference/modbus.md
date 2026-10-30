@@ -3,44 +3,38 @@ title: "Modbus"
 description: "Erklärt, wie evcc mit Zählern und Wallboxen über Modbus spricht, seriell per RS485, über TCP oder über einen RTU-zu-TCP-Konverter, und wie du jede Variante konfigurierst."
 sidebar:
   order: 4
+translatedFrom: "01c339d6465c"
 ---
 
-Einige Geräte, wie z.b. Zähler ([`meters`](/de/reference/configuration/meters#modbus)) oder Wallboxen ([`chargers`](/de/reference/configuration/chargers)) werden über das Modbus-Protokoll angebunden und angesprochen.
+Einige Geräte, wie Zähler ([`meters`](/de/reference/configuration/meters#modbus)) oder Wallboxen ([`chargers`](/de/reference/configuration/chargers)), werden über das Modbus-Protokoll angebunden und angesprochen.
 
-Die `meter` Konfiguration besteht hierbei aus der Art der pysikalischen Verbindung (Schnittstelle), ggf. den technischen Schnittstellenparametern, dem verwendeten Modbus-Protokoll, der eindeutigen Modbus-ID des Gerätes auf dem Bus und der Nummer und Art des Registers welches letztendlich gelesen oder geschrieben werden soll.
+Die `meter`-Konfiguration besteht aus der Art der physikalischen Verbindung (Schnittstelle), ggf. den technischen Schnittstellenparametern, dem verwendeten Modbus-Protokoll, der eindeutigen Modbus-ID des Geräts auf dem Bus sowie der Nummer und Art des Registers, das gelesen oder geschrieben werden soll.
 
-Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus RTU, Modbus ASCII und Modbus TCP. Diese können technisch auch über unterschiedliche Schnittstellentypen übertragen werden können.
-Die klassische Variante ist dabei Modbus RTU über eine serielle RS485-Busschnittstelle wie sie bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer nativen Netzwerkschnittstelle (Ethernet/WiFi) hingegen werden typischerweise über das Modbus TCP-Protokoll angesprochen.
+Zu beachten ist, dass es drei verschiedene Modbus-Protokolle gibt: Modbus RTU, Modbus ASCII und Modbus TCP. Diese können technisch über unterschiedliche Schnittstellentypen übertragen werden. Die klassische Variante ist Modbus RTU über eine serielle RS485-Busschnittstelle, wie sie bei den meisten Zählern oder manchen Wallboxen genutzt wird. Geräte mit einer nativen Netzwerkschnittstelle (Ethernet/WLAN) werden hingegen typischerweise über das Protokoll Modbus TCP angesprochen.
 
-Soll ein serielles Modbus-Gerät über einen Schnittstellenkonverter via Netzwerk (Ethernet/WiFi/PowerLAN) angebunden werden kommt dabei letztendlich ein Modbus RTU Protokoll über eine TCP/IP-Verbindung zustande.
-Das Modbus RTU Protokoll wird dabei 1:1 über das Netzwerk übertragen (sprich "getunnelt"). Auch wenn der Transportweg (TCP/IP) hierbei identisch ist handelt es sich vom Protokoll dennoch NICHT um Modbus TCP!
-Hierbei muss sehr genau zwischen Protokoll und Transportweg unterschieden werden. "Modbus (RTU) over TCP" ist etwas anderes als Modbus TCP!
+Soll ein serielles Modbus-Gerät über einen Schnittstellenkonverter via Netzwerk (Ethernet/WLAN/PowerLAN) angebunden werden, kommt Modbus RTU über eine TCP/IP-Verbindung zum Einsatz. Das Modbus-RTU-Protokoll wird dabei direkt über das Netzwerk übertragen (sprich „getunnelt“). Auch wenn der Transportweg (TCP/IP) identisch ist, handelt es sich beim Protokoll NICHT um Modbus TCP. Es ist wichtig, zwischen Protokoll und Transportweg zu unterscheiden. „Modbus (RTU) over TCP“ ist etwas anderes als Modbus TCP!
 
 :::caution
-Achtung: Es gibt auch komplexere Schnittstellenkonverter die optional das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP übersetzen können!
+Achtung: Es gibt komplexere Schnittstellenkonverter, die optional das Modbus-Protokoll selbst zwischen Modbus RTU und Modbus TCP übersetzen können!
 
-Ist diese Funktion aktiv muss evcc mit dem Konverter mittels Modbus TCP kommunizieren während der Konverter auf der anderen Seite mit dem seriellen Gerät via Modbus RTU kommuniziert und die beiden Protokolle bidirektional übersetzt.
-Hier muss man ggf. genau auf die Gerätespezifikation und Konfiguration achten sonst ist keine Kommunikation möglich!
+Ist diese Funktion aktiv, muss evcc mit dem Konverter über Modbus TCP kommunizieren, während der Konverter mit dem seriellen Gerät über Modbus RTU kommuniziert und die beiden Protokolle bidirektional übersetzt.
+In diesem Fall muss genau auf die Gerätespezifikation und Konfiguration geachtet werden, sonst funktioniert die Kommunikation möglicherweise nicht!
 :::
 
-Im Falle einer Konfiguration mit einem Schnittstellenkonverter wird die serielle Buskonfiguration nur am Konverter festgelegt.
-Die evcc-Konfiguration betrifft dann nur den Abschnitt zum Konverter.
+Bei einer Konfiguration mit Schnittstellenkonverter wird die serielle Buskonfiguration nur am Konverter festgelegt. Die evcc-Konfiguration betrifft dann nur den Abschnitt bis zum Konverter.
 
 ## Physikalische Verbindung
 
 ### Serielle Verbindung (RS485)
 
-Wenn das Gerät direkt über einen RS485-Adapter verbunden ist (Modbus RTU), muss `device` und die seriellen Kommunikationsparameter `baudrate`, `comset` entsprechend der Gerätekonfiguration angegeben werden.
-Dazu bitte die jeweilige Betriebanleitung, Datenblätter oder Systemeinstellungen vergleichen.
+Wenn das Gerät direkt über einen RS485-Adapter verbunden ist (Modbus RTU), müssen `device` und die seriellen Kommunikationsparameter `baudrate` und `comset` entsprechend der Gerätekonfiguration angegeben werden. Diese finden sich in der jeweiligen Bedienungsanleitung, in den Datenblättern oder in den Systemeinstellungen.
 
 :::note
-An einem seriellen RS485-Bus lassen sich mehrere Geräte mit identischen Kommunikationsparameter betreiben wenn jedes Gerät eine eigene Modbus ID zugewiesen bekommen hat.
-
-Lassen sich nicht alle Geräte an einem Bus auf einheitliche Kommunikationseinstellungen (aber unterschiedliche IDs) konfigurieren ist eine Aufteilung auf mehrere voneinander unabhängige Bussysteme erforderlich.
+An einem seriellen RS485-Bus lassen sich mehrere Geräte mit identischen Kommunikationsparametern betreiben, wenn jedem Gerät eine eigene Modbus-ID zugewiesen ist. Lassen sich nicht alle Geräte an einem Bus auf einheitliche Kommunikationseinstellungen (aber unterschiedliche IDs) konfigurieren, ist eine Aufteilung auf mehrere voneinander unabhängige Bussysteme erforderlich.
 :::
 
 :::caution
-Das Mischen von Geräten mit voneinander abweichenden seriellen Kommunikationsparametern an einem Bus ist nicht möglich und führt zu unvorhersehbaren Kommunikationsfehlern.
+Das Mischen von Geräten mit unterschiedlichen seriellen Kommunikationsparametern an einem Bus ist nicht möglich und führt zu unvorhersehbaren Kommunikationsfehlern.
 :::
 
 **Beispiel**:
@@ -55,7 +49,7 @@ comset: "8E1"
 
 ### Direkte Netzwerkverbindung
 
-Wenn das Gerät direkt über eine native Netzwerkverbindung (Modbus TCP) angebunden ist, muss eine `uri` bestehend aus HOSTNAME:PORT oder IP:PORT angegeben werden:
+Wenn das Gerät direkt über eine native Netzwerkverbindung (Modbus TCP) angebunden ist, muss eine `uri`, bestehend aus HOSTNAME:PORT oder IP:PORT, angegeben werden:
 
 **Beispiel**:
 
@@ -67,7 +61,7 @@ uri: 192.168.0.11:502
 
 ### Serielles Gerät über Netzwerkverbindung (mit Schnittstellenkonverter)
 
-Wird ein serielles Gerät über einen zwischengeschalteten transparenten RS485-IP-Schnittstellenkonverter (ohne Protokollübersetzung) angeschlossen muss das Protokoll über die TCP/IP-Verbindung zusätzlich mittels `rtu: true` auf Modbus RTU umgestellt werden.
+Wird ein serielles Gerät über einen zwischengeschalteten transparenten RS485-IP-Schnittstellenkonverter (ohne Protokollübersetzung) angeschlossen, muss das Protokoll über die TCP/IP-Verbindung zusätzlich mit `rtu: true` auf Modbus RTU umgestellt werden.
 
 **Beispiel**:
 
@@ -75,12 +69,12 @@ Wird ein serielles Gerät über einen zwischengeschalteten transparenten RS485-I
 source: modbus
 id: 1
 uri: 192.168.0.10:502
-rtu: true # Modbus RTU over TCP
+rtu: true # Modbus RTU über TCP
 ```
 
 ## Vordefinierte Geräte
 
-Die integrierten vordefinierten Gerätemodelle `model` sind identisch zu [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
+Die integrierten vordefinierten Gerätemodelle für `model` entsprechen denen von [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
 
      ABB       ABB A/B-Series meters
      DDM       DDM18SD
@@ -99,13 +93,13 @@ Die integrierten vordefinierten Gerätemodelle `model` sind identisch zu [MBMD](
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Alle davon abweichenden `model` werden als Gerät vom Typ _SunSpec_ behandelt.
+Jedes davon abweichende `model` wird als Gerät vom Typ _SunSpec_ behandelt.
 
-Verwende `value` um den Wert der vom Gerät gelesen werden soll zu definieren. Alle unterstützten Werte sind auf [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28) voreingestellt.
+Mit `value` legst du den Wert fest, der vom Gerät gelesen werden soll. Alle unterstützten Werte sind in [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28) vordefiniert.
 
-Im Falle eines _SunSpec_-kompatiblen Wechselrichters oder Zählers werden die zu lesenden Werte in der Form `model:[block:]point` nach der _SunSpec_-Definition angegeben. Zum Beispiel wird die DC-Leistung auf dem zweiten String eines dreiphasigen PV-Wechselrichters (enspricht SunSpec Model 103) wie folgt abgefragt: `value: 103:2:W`.
+Bei einem _SunSpec_-kompatiblen Wechselrichter oder Zähler werden die zu lesenden Werte im Format `model:[block:]point` gemäß der _SunSpec_-Definition angegeben. So wird z. B. die DC-Leistung auf dem zweiten String eines dreiphasigen PV-Wechselrichters (entspricht SunSpec Model 103) folgendermaßen abgefragt: `value: 103:2:W`.
 
-Das Geräte-`model` und die Slave ID `id` sind immer erforderlich:
+Das Gerätemodell `model` und die Modbus-ID `id` sind immer erforderlich:
 
 **Beispiel**:
 
@@ -114,21 +108,21 @@ source: modbus
 ---
 model: sdm
 value: Power
-scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
+scale: -1 # Gleitkommafaktor für das Ergebnis, z. B. zur Umrechnung von kW in W
 ```
 
 ## Negation von Werten
 
-Bei MBMD-Zählern können Messwerte durch Voranstellen eines `-` (Minus) vor dem Aliasnamen invertiert werden.
-Dies ist nützlich, wenn Zähler in unterschiedlichen Konfigurationen oder Montagerichtungen verwendet werden und das Vorzeichen der Messwerte angepasst werden muss.
+Bei MBMD-Zählern können Messwerte invertiert werden, indem dem Aliasnamen ein `-` (Minuszeichen) vorangestellt wird.
+Das ist nützlich, wenn Zähler in unterschiedlichen Konfigurationen oder Einbaurichtungen verwendet werden und das Vorzeichen der Messwerte angepasst werden muss.
 
-### Unterstützte Messungen
+### Unterstützte Messwerte
 
-Die Negation funktioniert für folgende MBMD-Messungen:
+Die Negation funktioniert für folgende MBMD-Messwerte:
 
-- `power` - Gesamtleistung
-- `currents` - Ströme pro Phase (Array)
-- `powers` - Leistungen pro Phase (Array)
+- `power`: Gesamtleistung
+- `currents`: Ströme pro Phase (Array)
+- `powers`: Leistungen pro Phase (Array)
 
 ### Syntax
 
@@ -149,7 +143,7 @@ meters:
   - name: pv-meter
     type: modbus
     model: sdm
-    power: -Power # Leistung wird invertiert (z. B. +1000 W wird zu -1000 W)
+    power: -Power # Leistung wird invertiert (z. B. wird aus +1000 W -1000 W)
 ```
 
 #### Invertierte Phasenleistungen
@@ -183,30 +177,30 @@ meters:
 ### Anwendungsfälle
 
 **Falsch montierte Zähler**:
-Wenn ein Stromsensor/Zähler physisch in der falschen Richtung installiert ist, können die Werte in der Software korrigiert werden.
+Wenn ein Stromsensor oder Zähler physisch in der falschen Richtung eingebaut ist, kannst du die Werte in der Software korrigieren.
 
-**Netzeinspeisung vs. Verbrauch**:
+**Einspeisung oder Verbrauch**:
 Für PV-Zähler, bei denen die Vorzeichenkonvention umgekehrt werden muss.
 
-**Unterschiedliche CT-Orientierungen**:
+**Unterschiedlich ausgerichtete Stromwandler**:
 Für mehrphasige Installationen mit unterschiedlich ausgerichteten Stromwandlern.
 
 ## Manuelle Konfiguration
 
-Falls das Modbus-Gerät nicht direkt unterstützt wird oder von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden sollen, können die Modbus Register auch vollständig manuell konfiguriert werden.
-Dazu bedarf es neben den allgemeinen 'modbus' Einstellungen (siehe oben) auch der Definition eines `registers` an Stelle eines `value`, wie bei vordefinierten Geräten. Es ist nicht zulässig, sowohl `value` als auch `register` anzugeben.
+Wird das Modbus-Gerät nicht direkt unterstützt oder sollen von den vordefinierten Modellen abweichende Werte gelesen oder geschrieben werden, lassen sich die Modbus-Register auch manuell konfigurieren.
+Dazu muss zusätzlich zu den allgemeinen _modbus_-Einstellungen (siehe oben) ein `register` statt eines `value` wie bei vordefinierten Geräten definiert werden. Es ist nicht zulässig, sowohl `value` als auch `register` anzugeben.
 
 Die Definition eines Registers benötigt folgende Parameter:
 
 - `address`: die Registeradresse
 - `type`: Der Registertyp, zulässig sind lesend `coil`, `input`, `holding` sowie schreibend `writeholding`, `writeholdings`, `writecoil`
 - `decode`: Die Art der Codierung der Daten. Zulässig sind: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Beim Typ `coil` wird die Codierung ignoriert, muss aber trotzdem angegeben werden. Beim Typ `writecoil` muss `bool8` angegeben werden.
-- `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen UND verknüpft, um so einzelne Bits extrahieren zu können.
+- `bitmask`: Eine optionale Angabe. Der angegebene Wert wird mit dem gelesenen Wert UND-verknüpft, um einzelne Bits zu extrahieren.
 
 Weitere zulässige Parameter einer manuellen Konfiguration sind:
 
-- `scale`: Fließkommazahl, die zur Konvertierung von gelesenen Werten (z. B. W in kW oder umgekehrt) verwendet werden kann. Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
-- `timeout`: modbus timeout. Ohne Einheit ist der Wertt in ns, ansonsten Einheit mit angeben, z. B. 10s für 10 Sekunden.
+- `scale`: Gleitkommazahl, mit der gelesene Werte umgerechnet werden können (z. B. W in kW oder umgekehrt). Dieser Wert wird mit dem gelesenen und decodierten Rohwert multipliziert.
+- `timeout`: Modbus-Timeout. Ohne Einheit wird der Wert in ns interpretiert, ansonsten lässt sich die Einheit mit angeben, z. B. 10s für 10 Sekunden.
 
 **Beispiel**:
 
@@ -215,20 +209,20 @@ source: modbus
 ---
 register:
   address: 40070
-  type: holding # coil, holding or input
-  decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
-  bitmask: 2 # Optional: a bitmask that is applied to the read value. Here the mask is 0000000000000010b, ignored if value is 0
-scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 2s # timeout, without unit in ns
+  type: holding # coil, holding oder input
+  decode: int32 # int16|32|64, uint16|32|64, float32|64 und u|int32s + float32s
+  bitmask: 2 # Optional: Bitmaske, die auf den gelesenen Wert angewendet wird. Hier ist die Maske 0000000000000010b, wird bei Wert 0 ignoriert
+scale: -1.0 # Gleitkommafaktor für das Ergebnis, z. B. zur Umrechnung von kW in W
+timeout: 2s # Timeout, ohne Einheit in ns
 ```
 
-Bei den `int32s/uint32s` Dekodierungen wird die Wortreihenfolge vertauscht und sind z. B. bei E3/DC Geräten nützlich.
+Bei den Decodierungen `int32s/uint32s` wird die Wortreihenfolge vertauscht (niederwertigstes Wort zuerst), was bei E3/DC-Geräten nützlich ist.
 
 ### Schreiben von Registern
 
-Es können sowohl Holding-Register als auch Coils beschrieben werden. Dazu muss entweder `type: writeholding` für Holding-Register oder `type: writecoil` für Coils angegeben werden. Für das Schreiben multipler Register (Funktionscode 16) gibt es den Typ `writeholdings`.
+Es können sowohl Holding-Register als auch Coils beschrieben werden. Dazu muss entweder `type: writeholding` für Holding-Register oder `type: writecoil` für Coils angegeben werden. Für das Schreiben mehrerer Register (Funktionscode 16) gibt es den Typ `writeholdings`.
 
-`type: writeholding` schreibt immer ein 16Bit Register (int oder bool16). Für `decode` muss hier daher immer `uint16` angegeben werden.
+`type: writeholding` schreibt immer ein 16-Bit-Register (int oder bool16). Für `decode` muss daher immer `uint16` angegeben werden.
 `type: writecoil` schreibt ein Coil. Für `decode` muss `bool8` angegeben werden.
 
 **Beispiel**:
@@ -241,9 +235,9 @@ register:
   type: writeholding # writeholding, writeholdings oder writecoil
 ```
 
-### Gesamtbeispiel
+### Vollständiges Beispiel
 
-Ein vollständiges Beispiel für einen custom Charger mit modbus Interface (hier ein Phoenix EM-CP-PP-ETH mit der IP-Adresse 192.168.1.10) könnte z. B. so aussehen:
+Ein vollständiges Beispiel für eine benutzerdefinierte Wallbox mit Modbus-Schnittstelle (hier ein Phoenix EM-CP-PP-ETH mit der IP-Adresse 192.168.1.10) könnte so aussehen:
 
 **Beispiel**:
 
@@ -252,41 +246,41 @@ chargers:
   - type: custom
     name: CustomCharger
     status:
-      # Read the status of the charger
-      # Either A,B,C or F
+      # Status der Wallbox lesen
+      # Entweder A, B, C oder F
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       timeout: 3s
       register:
         address: 100
-        type: input # Read an input register
+        type: input # Input-Register lesen
         decode: int16
     enabled:
-      # Is the charger enabled (1) or not (0)
+      # Ist die Wallbox freigegeben (1) oder nicht (0)
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: coil # Read a coil
-        decode: bool16 # Doesn't matter but required
+        type: coil # Coil lesen
+        decode: bool16 # Egal, aber erforderlich
     enable:
-      # Enable the charger
+      # Wallbox freigeben
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: writecoil # Write a coil
+        type: writecoil # Coil schreiben
         decode: bool8
     maxcurrent:
-      # Set the maximum current
+      # Maximalen Strom setzen
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 300
-        type: writeholding # Write a holding register
+        type: writeholding # Holding-Register schreiben
         decode: uint16
 ```

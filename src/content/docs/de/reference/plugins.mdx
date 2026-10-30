@@ -1,60 +1,61 @@
 ---
 title: Plugins
-description: "Plugins lesen und schreiben einzelne Werte per Modbus, HTTP, MQTT, Skript und Co. und bilden damit die Grundlage für benutzerdefinierte Geräte."
+description: "Plugins lesen und schreiben einzelne Werte über Modbus, HTTP, MQTT, Skripte und mehr und sind die Bausteine für benutzerdefinierte Geräte."
 tableOfContents:
   maxHeadingLevel: 4
+translatedFrom: "ffe5935de8c0"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
 
-Plugins lesen und schreiben einzelne Werte an einem Gerät, z. B. eine Leistungsmessung, einen Zielstrom, einen Enable-Befehl.
-Sie treiben die mitgelieferten Geräte-Templates und werden direkt referenziert, wenn du ein [eigenes Gerät](/de/user-defined-devices) vom Typ `type: custom` aufbaust.
+Plugins lesen und schreiben einzelne Werte an einem Gerät, z. B. eine Leistungsmessung, einen Zielstrom oder einen Freigabebefehl.
+Sie stecken hinter den mitgelieferten Geräte-Templates und werden direkt referenziert, wenn du ein [benutzerdefiniertes Gerät](/de/user-defined-devices) vom Typ `type: custom` aufbaust.
 
 Plugins können für folgende Kategorien verwendet werden:
 
-- `meter`: [PV, Hausbatterie, Netz, Zähler](/de/meters)
-- `charger`: [Wallboxen](/de/chargers), [Smarte Schalter](/de/smartswitches), [Wärmepumpen, Heizstäbe](/de/heating)
+- `meter`: [PV-Anlage, Hausbatterie, Netz, Zähler](/de/meters)
+- `charger`: [Wallboxen](/de/chargers), [schaltbare Steckdosen](/de/smartswitches), [Wärmepumpen, Heizstäbe](/de/heating)
 - `vehicle`: [Fahrzeuge](/de/vehicles)
 - `tariff`: [Tarife, Vorhersagen](/de/tariffs)
 - `circuit`: [Lastmanagement](/de/features/loadmanagement)
 
-Zusätzlich können Plugins auch von [Benachrichtigungen](/de/notifications) zum Versenden von Lifecycle-Events genutzt werden.
+Auch [Benachrichtigungen](/de/notifications) nutzen Plugins, um Lebenszyklus-Ereignisse zu versenden.
 
 ### Plugin-Liste
 
-- [GPIO Plugin](#gpio) - Plugin zum direkten Zugriff auf GPIO-Pins (nur Linux).
-- [Go Plugin](#go) - Plugin, das Werte über ein Go Skript bereitstellt oder entgegennimmt.
-- [HTTP Plugin](#http) - Plugin, das über HTTP-API mit Endgeräten spricht.
-- [JavaScript Plugin](#javascript) - Plugin, das Werte in über ein JavaScript Skript bereitstellt oder entgegennimmt.
-- [Modbus Plugin](#modbus) - Plugin zum Auslesen von einem Modbus-fähigen Gerät.
-- [MQTT Plugin](#mqtt) - Plugin um indirekt über MQTT mit den MQTT-fähigen Geräten zu kommunizieren.
-- [Prometheus Plugin](#prometheus) - Plugin zum Lesen von Metriken aus Prometheus über PromQL.
-- [Shell Plugin](#shell) - Plugin, das ein Shell Skript ausführen kann, um Daten zu extrahieren oder schreibend entgegennimmt.
-- [SMA/Speedwire Plugin](#speedwire) - Plugin speziell für SMA Geräte, die mit dem Speedwire Protokoll kommunizieren können.
-- [Websocket Plugin](#websocket) - Plugin zum Empfangen von Gerätedaten über einen eigenen Webserver. Kann nur zum Lesen von Daten genutzt werden.
+- [GPIO-Plugin](#gpio): Plugin für den direkten Zugriff auf GPIO-Pins (nur Linux).
+- [Go-Plugin](#go): Plugin, das Werte über ein Go-Skript bereitstellt oder entgegennimmt.
+- [HTTP-Plugin](#http): Plugin, das über eine HTTP-API mit Endgeräten kommuniziert.
+- [JavaScript-Plugin](#javascript): Plugin, das Werte über ein JavaScript-Skript bereitstellt oder entgegennimmt.
+- [Modbus-Plugin](#modbus): Plugin zum Auslesen eines Modbus-fähigen Geräts.
+- [MQTT-Plugin](#mqtt): Plugin, um indirekt über MQTT mit MQTT-fähigen Geräten zu kommunizieren.
+- [Prometheus-Plugin](#prometheus): Plugin zum Lesen von Metriken aus Prometheus über PromQL.
+- [Shell-Plugin](#shell): Plugin, das ein Shell-Skript ausführt, um Daten zu extrahieren oder zu schreibende Daten entgegenzunehmen.
+- [SMA/Speedwire-Plugin](#speedwire): Plugin speziell für SMA-Geräte, die über das Speedwire-Protokoll kommunizieren.
+- [Websocket-Plugin](#websocket): Plugin zum Empfangen von Gerätedaten über einen eigenen Webserver. Kann nur zum Lesen von Daten genutzt werden.
 
-### Helper-Liste
+### Liste der Hilfsplugins
 
-- [Calc Plugin](#calc) - Meta-Plugin um Ausgaben von anderen Plugins arithmetisch zu verknüpfen.
-- [Combined Plugin](#combined) - Meta-Plugin speziell für `charger` um die booleschen Status-Werte für den angeschlossenen (_plugged_) und ladenden (_charging_) Zustand zu einem einzigen Ladestatus zu kombinieren.
-- [Const Plugin](#const) - Spezielles Plugin das einfach einen konstanten Wert zurückliefert.
-- [Error Plugin](#error) - Spezielles Plugin das einen bekannten Fehlerwert zurückgibt.
-- [Convert Plugin](#convert) - Meta-Plugin zur Datentyp-Konvertierung beim Schreiben (z. B. float zu int).
-- [Delta Plugin](#delta) - Meta-Plugin zur Umwandlung von absoluten Werten in Änderungswerte (Deltas) beim Schreiben.
-- [Ignore Plugin](#ignore) - Meta-Plugin zum Unterdrücken spezifischer Fehlermeldungen.
-- [IfElse Plugin](#ifelse) - Meta-Plugin für bedingte Schreibvorgänge mit zwei Zweigen (if/else).
-- [Map Plugin](#map) - Meta-Plugin zur Übersetzung von Integer-Werten (z. B. gerätespezifische Modi in evcc-Modi).
-- [Meter Plugin](#meter-plugin) - Plugin um ein anderes Messgerät als Datenquelle zu verwenden.
-- [Sequence Plugin](#sequence) - Meta-Plugin zur sequentiellen Ausführung mehrerer Schreibvorgänge.
-- [Sleep Plugin](#sleep) - Hilfsplugin zum Verzögern von Aktionen (wird meist mit Sequence verwendet).
-- [Switch Plugin](#switch) - Meta-Plugin für bedingte Schreibvorgänge basierend auf Eingabewerten (wie switch/case).
-- [Valid Plugin](#valid) - Meta-Plugin um Plugin-Werte basierend auf einer booleschen Validierung bereitzustellen.
-- [Watchdog Plugin](#watchdog) - Meta-Plugin zur automatischen Wiederholung von Schreibvorgängen in regelmäßigen Abständen.
+- [Calc-Plugin](#calc): Meta-Plugin, um Ausgaben anderer Plugins arithmetisch zu verknüpfen.
+- [Combined-Plugin](#combined): Meta-Plugin speziell für `charger`, um die booleschen Statuswerte für den angeschlossenen (_plugged_) und ladenden (_charging_) Zustand zu einem einzigen Ladestatus zu kombinieren.
+- [Const-Plugin](#const): Spezielles Plugin, das einfach einen konstanten Wert zurückgibt.
+- [Error-Plugin](#error): Spezielles Plugin, das einen bekannten Fehlerwert zurückgibt.
+- [Convert-Plugin](#convert): Meta-Plugin zur Datentyp-Konvertierung beim Schreiben (z. B. float zu int).
+- [Delta-Plugin](#delta): Meta-Plugin zur Umwandlung absoluter Werte in Änderungswerte (Deltas) beim Schreiben.
+- [Ignore-Plugin](#ignore): Meta-Plugin zum Unterdrücken bestimmter Fehlermeldungen.
+- [IfElse-Plugin](#ifelse): Meta-Plugin für bedingte Schreibvorgänge mit zwei Zweigen (if/else).
+- [Map-Plugin](#map): Meta-Plugin zur Übersetzung von Integer-Werten (z. B. gerätespezifische Modi in evcc-Modi).
+- [Meter-Plugin](#meter-plugin): Plugin, um einen anderen Zähler als Datenquelle zu verwenden.
+- [Sequence-Plugin](#sequence): Meta-Plugin zur sequenziellen Ausführung mehrerer Schreibvorgänge.
+- [Sleep-Plugin](#sleep): Hilfsplugin zum Verzögern von Aktionen (wird meist mit Sequence verwendet).
+- [Switch-Plugin](#switch): Meta-Plugin für bedingte Schreibvorgänge abhängig von Eingabewerten (wie switch/case).
+- [Valid-Plugin](#valid): Meta-Plugin, um Plugin-Werte anhand einer booleschen Validierung bereitzustellen.
+- [Watchdog-Plugin](#watchdog): Meta-Plugin zur automatischen Wiederholung von Schreibvorgängen in regelmäßigen Abständen.
 
 ## Syntax
 
 Ein Plugin wird an ein Attribut eines Geräts gehängt.
-Der Attributname (z. B. `power`, `enable`, `soc`) bestimmt die Rolle; `source` wählt den Plugin-Typ; weitere Schlüssel sind plugin-spezifische Parameter.
+Der Attributname (z. B. `power`, `enable`, `soc`) bestimmt die Rolle, `source` wählt den Plugin-Typ. Die übrigen Schlüssel sind Parameter des jeweiligen Plugins.
 
 ```yaml
 <attribut>:
@@ -64,71 +65,71 @@ Der Attributname (z. B. `power`, `enable`, `soc`) bestimmt die Rolle; `source` w
 ```
 
 Jedes Plugin wird entweder in einem **lesenden** oder einem **schreibenden** Kontext verwendet. Einige Parameter sind nur in einem der beiden Modi sinnvoll.
-Die vollständigen Attribut-Listen für Zähler, Wallboxen, Fahrzeuge und Tarife findest du unter [Eigene Geräte](/de/user-defined-devices).
+Die vollständigen Attributlisten für Zähler, Wallboxen, Fahrzeuge und Tarife findest du auf der Seite [Benutzerdefinierte Geräte](/de/user-defined-devices).
 
 ### Lesen \{#reading\}
 
 Beim Lesen von Daten mithilfe eines Plugins können sogenannte _Pipelines_ verwendet werden.
-Damit können Daten aus der Ausgabe des Plugins fein granular extrahiert werden.
+Damit lassen sich gezielt einzelne Werte aus der Ausgabe des Plugins extrahieren.
 Dies ermöglicht es, komplexe Datenstrukturen wie JSON oder XML zu verarbeiten und die benötigten Informationen herauszufiltern.
 Mögliche Parameter für die Datenextraktion sind:
 
 - `regex`: Ein regulärer Ausdruck, um Werte aus dem empfangenen Text zu extrahieren.
 - `jq`: Ein [jq](https://jqlang.github.io/jq/)-Ausdruck, um Werte aus JSON-Strukturen zu extrahieren.
-  Die volle Syntax und Möglichkeiten finden sich in der jq-Dokumentation.
-- `quote`: Boolean-Wert, der die Eingabedaten in Anführungszeichen einschließt, bevor sie an jq weitergegeben werden. Dies ermöglicht es jq, unquotierte Strings (z. B. von MQTT) zu verarbeiten. Bei einem MQTT-Wert wie `Charging` kann man `quote: true` und `jq: '. == "Charging"'` verwenden.
+  Die vollständige Syntax und alle Möglichkeiten findest du in der jq-Dokumentation.
+- `quote`: Boolescher Wert. Wenn er gesetzt ist, werden die Eingabedaten in Anführungszeichen gesetzt, bevor sie an jq weitergegeben werden. Dadurch kann jq Strings ohne Anführungszeichen (z. B. von MQTT) verarbeiten. Bei einem MQTT-Wert wie `Charging` kannst du `quote: true` und `jq: '. == "Charging"'` verwenden.
 - `unpack`: Konvertiert Werte aus anderen Zahlenrepräsentationen, z. B. `hex`.
-- `decode`: Dekodiert Binärformate wie `uint32`, `float32` etc.
+- `decode`: Dekodiert Binärformate wie `uint32`, `float32` usw.
 
 #### Bekannte Fehlerwerte \{#known-errors\}
 
 [HTTP](#http)-, [MQTT](#mqtt)- und [Websocket](#websocket)-Plugins können spezielle Fehlerwerte als String zurückgeben.
 evcc erkennt diese und wandelt sie in interne Fehlercodes um, anstatt sie als Daten zu behandeln.
-Das ist z. B. nützlich für eigene Fahrzeugintegrationen, bei denen die Datenquelle den Zustand des Fahrzeugs kennt.
+Das ist z. B. nützlich für benutzerdefinierte Fahrzeugintegrationen, bei denen die Datenquelle den Zustand des Fahrzeugs kennt.
 
-- `ErrAsleep`: Fahrzeug schläft. evcc kann entscheiden, ob das Fahrzeug geweckt werden soll.
+- `ErrAsleep`: Fahrzeug schläft. evcc kann das Fahrzeug dann wecken und es erneut versuchen.
 - `ErrMustRetry`: Vorgang soll erneut versucht werden (z. B. bei Rate-Limiting).
 - `ErrNotAvailable`: Wert ist nicht verfügbar. evcc behandelt dies als permanenten Fehler bis zum nächsten Neustart.
 
-Wenn ein Plugin z. B. den String `ErrAsleep` als Antwort liefert, erzeugt evcc intern den entsprechenden Fehler.
-Das [Error Plugin](#error) nutzt denselben Mechanismus, um einen festen Fehlerwert als Konstante zurückzugeben.
+Wenn ein Plugin den String `ErrAsleep` als Antwort liefert, erzeugt evcc intern den entsprechenden Fehler.
+Das [Error-Plugin](#error) nutzt denselben Mechanismus, um einen festen Fehlerwert als Konstante zurückzugeben.
 
 ### Schreiben \{#writing\}
 
-Beim Schreiben können Parameter in der Konfiguration durch Platzhalter ersetzt werden.
+Beim Schreiben können Parameter in der Konfiguration Platzhalter enthalten.
 Die Daten werden in Form von `${var[:format]}` zur Verfügung gestellt.
-Wenn Format nicht angegeben wird, werden die Daten im Standard %v Go-Format bereitgestellt.
-Die Variablen werden mit dem entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird.
-Zusätzlich können sämtliche Funktionen der Go Template Library verwendet werden, um komplexere Datentransformationen durchzuführen.
+Wenn kein Format angegeben ist, werden die Daten im Go-Standardformat %v bereitgestellt.
+Die Variablen werden durch den entsprechenden Wert ersetzt, bevor das Plugin ausgeführt wird.
+Zusätzlich können sämtliche Funktionen der Go-Template-Bibliothek verwendet werden, um komplexere Datentransformationen durchzuführen.
 
 ## Plugins
 
 ### GPIO <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#gpio\}
 
-Das `gpio` Plugin ermöglicht den direkten Zugriff auf GPIO-Pins (General Purpose Input/Output) unter Linux.
-Es ist besonders für Raspberry Pi und ähnliche Einplatinencomputer geeignet.
+Das `gpio`-Plugin ermöglicht den direkten Zugriff auf GPIO-Pins (General Purpose Input/Output) unter Linux.
+Es eignet sich besonders für den Raspberry Pi und ähnliche Einplatinencomputer.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                   |
-| --------- | ------ | --------- | ---------------------------------------------- |
-| function  | string | ja        | Modus: `read` (Eingang) oder `write` (Ausgang) |
-| pin       | int    | ja        | Pin-Nummer (BCM-Nummerierung, z. B. GPIO 17)   |
+| Parameter | Typ    | Erforderlich | Beschreibung                                   |
+| --------- | ------ | ------------ | ---------------------------------------------- |
+| function  | string | ja           | Modus: `read` (Eingang) oder `write` (Ausgang) |
+| pin       | int    | ja           | Pin-Nummer (BCM-Nummerierung, z. B. GPIO 17)   |
 
 **Funktionsweise**:
 
-- **Lesen** (`function: read`): Liest den Zustand eines GPIO-Pins als Boolean-Wert (`true` = HIGH, `false` = LOW)
+- **Lesen** (`function: read`): Liest den Zustand eines GPIO-Pins als booleschen Wert (`true` = HIGH, `false` = LOW)
 - **Schreiben** (`function: write`): Setzt einen GPIO-Pin auf HIGH (`true`) oder LOW (`false`)
 
 Die Pin-Nummerierung folgt dem BCM-Schema (Broadcom-Nummern, nicht die physische Pin-Position).
-Für ein Raspberry Pi Pinout siehe z. B. [pinout.xyz](https://pinout.xyz/).
+Eine Pinbelegung des Raspberry Pi findest du z. B. auf [pinout.xyz](https://pinout.xyz/).
 
 **Beispiel Lesen**:
 
 ```yaml
 source: gpio
 function: read
-pin: 17 # BCM pin number
+pin: 17 # BCM-Pin-Nummer
 ```
 
 **Beispiel Schreiben**:
@@ -136,7 +137,7 @@ pin: 17 # BCM pin number
 ```yaml
 source: gpio
 function: write
-pin: 27 # BCM pin number
+pin: 27 # BCM-Pin-Nummer
 ```
 
 :::note
@@ -145,17 +146,17 @@ Dieses Plugin funktioniert nur auf Linux-Systemen mit Zugriff auf `/dev/gpiomem`
 
 ### Go <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#go\}
 
-Das `go` Plugin verwendet den [Yaegi](https://github.com/traefik/yaegi) Interpreter, um Go Code zur Laufzeit auszuführen.
+Das `go`-Plugin verwendet den Interpreter [Yaegi](https://github.com/traefik/yaegi), um Go-Code zur Laufzeit auszuführen.
 Es ist besonders nützlich für typsichere Berechnungen und komplexe Datenverarbeitungslogik.
 
-#### Verfügbare Go Standardbibliotheken
+#### Verfügbare Pakete der Go-Standardbibliothek
 
-Folgende Go Pakete stehen automatisch zur Verfügung und müssen nicht importiert werden:
+Folgende Go-Pakete stehen automatisch zur Verfügung und müssen nicht importiert werden:
 
-- `fmt` - Formatierte Ein-/Ausgabe
-- `math` - Mathematische Funktionen
-- `strings` - String-Manipulation
-- `time` - Zeit- und Datumsfunktionen
+- `fmt`: Formatierte Ein-/Ausgabe
+- `math`: Mathematische Funktionen
+- `strings`: String-Manipulation
+- `time`: Zeit- und Datumsfunktionen
 
 **Beispiel Lesen**:
 
@@ -163,7 +164,7 @@ Folgende Go Pakete stehen automatisch zur Verfügung und müssen nicht importier
 source: go
 script: |
   res := 500.0
-  res * 2 // returns 1000.0
+  res * 2 // liefert 1000.0
 ```
 
 **Beispiel mit Zeitfunktionen**:
@@ -174,9 +175,9 @@ script: |
   hour := time.Now().Hour()
   price := 50.0 // Nachttarif
   if hour >= 9 && hour < 17 {
-    price = 100.0 // Tagestarif
+    price = 100.0 // Tarifpreis während der Geschäftszeiten
   }
-  price // returns 50.0 oder 100.0 abhängig von der Uhrzeit
+  price // liefert 50.0 oder 100.0 je nach Tageszeit
 ```
 
 **Beispiel mit String-Verarbeitung**:
@@ -185,10 +186,10 @@ script: |
 source: go
 script: |
   text := "hello world"
-  strings.ToUpper(text) // returns "HELLO WORLD"
+  strings.ToUpper(text) // liefert "HELLO WORLD"
 ```
 
-Wenn das `go` Plugin zum Schreiben verwendet wird, wird der zu schreibende Wert dem Script als Variable übergeben:
+Wenn das `go`-Plugin zum Schreiben verwendet wird, wird der zu schreibende Wert dem Skript als Variable übergeben:
 
 **Beispiel Schreiben**:
 
@@ -197,17 +198,17 @@ maxcurrent:
   source: go
   script: |
     fmt.Printf("Setze Ladestrom: %d A\n", maxcurrent)
-    // maxcurrent Variable ist automatisch verfügbar
+    // Variable maxcurrent ist automatisch verfügbar
 ```
 
 #### Input- und Output-Transformationen \{#transformations\}
 
-Die `go` und `js` Plugins unterstützen `in` und `out` Parameter, um Daten aus anderen Quellen als Variablen im Script zu verwenden bzw. das Ergebnis an andere Plugins weiterzuleiten.
+Die Plugins `go` und `js` unterstützen die Parameter `in` und `out`, um Werte aus anderen Quellen als Variablen im Skript zu verwenden oder das Skriptergebnis an andere Plugins weiterzuleiten.
 
 ##### Input-Transformationen (`in`)
 
-Mit dem `in` Parameter können Werte aus anderen Quellen als Variablen im Script verwendet werden.
-Jeder Eintrag benötigt `name` (Variablenname im Script), `type` (`bool`, `int`, `float`, `string`) und `config` (Plugin-Konfiguration).
+Mit dem Parameter `in` kannst du Werte aus anderen Quellen als Variablen in deinem Skript verwenden.
+Jeder Eintrag benötigt `name` (Variablenname im Skript), `type` (`bool`, `int`, `float`, `string`) und `config` (Plugin-Konfiguration).
 
 Dieses Beispiel zeigt eine bedingte Logik, die mit den einfachen Calc-Operationen nicht möglich ist:
 
@@ -215,14 +216,14 @@ Dieses Beispiel zeigt eine bedingte Logik, die mit den einfachen Calc-Operatione
 power:
   source: go
   script: |
-    // Leistung abhängig vom SoC und Standby
+    // Leistung abhängig von Ladestand und Standby
     power := 5000.0 // normal
     if standby {
       power = 0.0 // im Standby keine Last
     } else if soc < 20.0 {
       power = 1000.0 // niedrig
     }
-    power // returns 5000.0 (standby=false, soc>=20)
+    power // liefert 5000.0 (standby=false, soc>=20)
   in:
     - name: soc
       type: float
@@ -238,8 +239,8 @@ power:
 
 ##### Output-Transformationen (`out`)
 
-Mit dem `out` Parameter kann das Ergebnis eines Scripts an andere Plugins weitergeleitet werden.
-Dies ist besonders nützlich im Schreibkontext, wenn das Script-Ergebnis z. B. per MQTT oder HTTP weiterverarbeitet werden soll.
+Der Parameter `out` leitet das Skriptergebnis an andere Plugins weiter.
+Das ist besonders im Schreibkontext nützlich, z. B. wenn das Skriptergebnis per MQTT oder HTTP weiterverarbeitet werden soll.
 Jeder Eintrag benötigt `name`, `type` und `config`, analog zu `in`.
 
 ```yaml
@@ -258,18 +259,18 @@ maxcurrent:
 
 ### HTTP <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#http\}
 
-Das `http`-Plugin führt HTTP Aufrufe durch, um Daten zu lesen oder zu aktualisieren.
-Es beinhaltet auch die Fähigkeit, JSON-Datenstrukturen über jq-Abfragen (z. B. für REST-APIs) zu lesen oder einfache Transformationen durchzuführen.
-Der volle Funktionsumfang ist in der [offiziellen jq Dokumentation](https://jqlang.github.io/jq/manual/) zu finden.
+Das `http`-Plugin führt HTTP-Aufrufe aus, um Daten zu lesen oder zu aktualisieren.
+Außerdem kann es JSON-Datenstrukturen (z. B. von REST-APIs) per jq-Abfrage auslesen und einfach umformen.
+Der volle Funktionsumfang ist in der [offiziellen jq-Dokumentation](https://jqlang.github.io/jq/manual/) beschrieben.
 
-Methoden der Authentifizierung sind `basic`, `bearer` und `digest`.
+Als Authentifizierungsmethoden stehen `basic`, `bearer` und `digest` zur Verfügung.
 Die Namen der jeweiligen Parameter finden sich [hier](https://github.com/evcc-io/evcc/blob/master/plugin/http_auth.go#L23).
 
 #### Authentifizierung
 
 Für HTTP-Anfragen stehen verschiedene Authentifizierungsmethoden zur Verfügung:
 
-**Basic Authentication**:
+**Basic-Authentifizierung**:
 
 ```yaml
 auth:
@@ -278,7 +279,7 @@ auth:
   password: <passwort>
 ```
 
-**Bearer Token** (z. B. für JWT):
+**Bearer-Token** (z. B. für JWT):
 
 ```yaml
 auth:
@@ -286,7 +287,7 @@ auth:
   token: <token>
 ```
 
-**Digest Authentication**:
+**Digest-Authentifizierung**:
 
 ```yaml
 auth:
@@ -311,12 +312,12 @@ auth:
 Dies ermöglicht die Integration von Geräten mit speziellen Authentifizierungsanforderungen, ohne den gesamten HTTP-Plugin-Code anpassen zu müssen.
 
 :::caution[Wichtig]
-XML-Dokumente werden intern automatisch in JSON-Form überführt, welche dann mit jq wie eine native JSON-Antwort weiter gefiltert werden können.
-Attribute bekommen das prefix `attr`.
+XML-Dokumente werden intern automatisch in JSON umgewandelt und lassen sich dann wie eine native JSON-Antwort mit jq filtern.
+Attribute bekommen das Präfix `attr`.
 :::
 
 :::tip
-Für den Test von jq-Abfragen bietet sich z. B. das Online-Tool [jqplay.org](https://jqplay.org/) an.
+Zum Testen von jq-Abfragen eignen sich Online-Tools wie [jqplay.org](https://jqplay.org/).
 Für Regex-Tests eignet sich [regex101.com](https://regex101.com/).
 :::
 
@@ -325,30 +326,30 @@ Für Regex-Tests eignet sich [regex101.com](https://regex101.com/).
 ```yaml
 source: http
 uri: https://volkszaehler/api/data/<uuid>.json?from=now
-method: GET # default HTTP method
+method: GET # Standard-HTTP-Methode
 headers:
   - content-type: application/json
-auth: # basic authentication
+auth: # Basic-Authentifizierung
   type: basic
   user: foo
   password: bar
-insecure: false # set to true to trust self-signed certificates
-jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # factor applied to result, e.g. for kW to W conversion
-cache: 60s # response cache duration
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+insecure: false # auf true setzen, um selbstsignierten Zertifikaten zu vertrauen
+jq: .data.tuples[0][1] # JSON-Antwort auswerten
+scale: 0.001 # Faktor für das Ergebnis, z. B. zur Umrechnung von W in kW
+cache: 60s # Cache-Dauer der Antwort
+timeout: 10s # Timeout im Go-Duration-Format, siehe https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
 source: http
 uri: http://charger/status
-jq: .total_power > 10 # Converts a json integer to a boolean value
+jq: .total_power > 10 # wandelt eine JSON-Ganzzahl in einen booleschen Wert um
 ```
 
 **Beispiel Schreiben**:
 
 ```yaml
-body: %v # only applicable for PUT or POST requests
+body: %v # nur bei PUT- oder POST-Anfragen
 ```
 
 ```yaml
@@ -359,7 +360,7 @@ enable:
 
 **Dynamische URIs**:
 
-`uri` und `body` sind Go-Templates, die bei jeder Anfrage neu ausgewertet werden. Neben den [sprig-Funktionen](https://masterminds.github.io/sprig/) stehen `addDate` und `timeRound` zur Verfügung. Damit lässt sich z. B. eine Vorhersage-API immer für einen mitlaufenden Zeitraum abfragen:
+`uri` und `body` sind Go-Templates, die bei jeder Anfrage neu ausgewertet werden. Neben den [sprig-Funktionen](https://masterminds.github.io/sprig/) stehen `addDate` und `timeRound` zur Verfügung. Damit lässt sich z. B. eine Vorhersage-API immer für einen gleitenden Zeitraum abfragen:
 
 ```yaml
 forecast:
@@ -369,8 +370,8 @@ forecast:
 
 ### JavaScript <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#javascript\}
 
-evcc integriert einen JavaScript Interpreter mit der [Underscore.js](https://underscorejs.org) Bibliothek, welche direkt über `_.` zugreifbar ist, z. B. `_.random(0,5)`.
-Das `js` Plugin kann JavaScript code über den `script` Parameter ausführen. Sehr hilfreich für das schnelle Erstellen von Prototypen:
+evcc integriert einen JavaScript-Interpreter mit der Bibliothek [Underscore.js](https://underscorejs.org), die direkt über `_.` erreichbar ist, z. B. `_.random(0,5)`.
+Das `js`-Plugin kann JavaScript-Code über den Parameter `script` ausführen. Das ist besonders für schnelles Prototyping hilfreich:
 
 **Beispiel Lesen**:
 
@@ -378,10 +379,10 @@ Das `js` Plugin kann JavaScript code über den `script` Parameter ausführen. Se
 source: js
 script: |
   var res = 500;
-  2 * res; // returns 1000
+  2 * res; // liefert 1000
 ```
 
-Wenn das `js` Plugin zum Schreiben verwendet wird, wird der zu schreibende Wert dem Script als Variable übergeben:
+Wenn das `js`-Plugin zum Schreiben verwendet wird, wird der zu schreibende Wert dem Skript als Variable übergeben:
 
 **Beispiel Schreiben**:
 
@@ -392,13 +393,13 @@ maxcurrent:
     console.log(maxcurrent);
 ```
 
-Das `js` Plugin unterstützt dieselben [Input- und Output-Transformationen](#transformations) (`in`/`out`) wie das `go` Plugin.
+Das `js`-Plugin unterstützt dieselben [Input- und Output-Transformationen](#transformations) (`in`/`out`) wie das `go`-Plugin.
 
 ### Modbus <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#modbus\}
 
 Das `modbus`-Plugin kann Daten von jedem Modbus-fähigen Gerät oder SunSpec-kompatiblen Wechselrichter lesen.
-Viele Strommessgeräte sind bereits vorkonfiguriert (siehe [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
-Es ist ebenfalls möglich Modbus Register zu Schreiben um weitere Wallboxen zu integrieren.
+Viele Zähler sind bereits vorkonfiguriert (siehe [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
+Außerdem lassen sich Modbus-Register schreiben, um weitere Wallboxen einzubinden.
 
 **Beispiel**:
 
@@ -412,43 +413,43 @@ register:
   decode: uint16
 ```
 
-Schaue in die [Modbus Dokumentation](/de/reference/modbus) für weitere Details.
+Weitere Details findest du in der [Modbus-Dokumentation](/de/reference/modbus).
 
 ### MQTT <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#mqtt\}
 
 Das `mqtt`-Plugin ermöglicht das Lesen von Werten über MQTT-Topics.
-Das ist insbesondere für Strommessgeräte nützlich, z. B. wenn diese ihre Daten bereits über MQTT bereitstellen.
-Schaue in die [MBMD Dokumentation](https://github.com/volkszaehler/mbmd) für ein Beispiel, wie man Modbus Messdaten in MQTT bekommt.
+Das ist besonders für Zähler nützlich, z. B. wenn diese ihre Daten bereits über MQTT bereitstellen.
+Ein Beispiel, wie Modbus-Messdaten nach MQTT gelangen, findest du in der [MBMD-Dokumentation](https://github.com/volkszaehler/mbmd).
 
 **Parameter (Lesen)**:
 
-| Parameter | Typ      | Erfordert | Beschreibung                                                             |
-| --------- | -------- | --------- | ------------------------------------------------------------------------ |
-| topic     | string   | ja        | MQTT Topic zum Lesen                                                     |
-| timeout   | duration | nein      | Maximales Alter empfangener Werte                                        |
-| scale     | float    | nein      | Skalierungsfaktor für Ergebnis (z. B. 0.001 für Wh zu kWh Konvertierung) |
+| Parameter | Typ      | Erforderlich | Beschreibung                                                                  |
+| --------- | -------- | ------------ | ----------------------------------------------------------------------------- |
+| topic     | string   | ja           | MQTT-Topic zum Lesen                                                          |
+| timeout   | duration | nein         | Maximales Alter empfangener Werte                                             |
+| scale     | float    | nein         | Skalierungsfaktor für das Ergebnis (z. B. 0,001 zur Umrechnung von Wh in kWh) |
 
-Das Plugin gibt einen Fehler zurück, wenn innerhalb der `timeout` Dauer kein neuer Wert empfangen wurde.
+Das Plugin gibt einen Fehler zurück, wenn innerhalb der mit `timeout` festgelegten Zeit kein neuer Wert empfangen wurde.
 Wenn `timeout` nicht gesetzt ist, werden Werte beliebigen Alters akzeptiert, sobald die erste Nachricht empfangen wurde.
 Es wird empfohlen, einen Timeout zu setzen, um zu erkennen, wenn die Quelle keine aktuellen Daten mehr liefert.
 
-Für die Datenextraktion stehen die unter [Lesen](#reading) beschriebenen Pipeline-Parameter zur Verfügung (`regex`, `jq`, `quote`, etc.).
+Für die Datenextraktion stehen die unter [Lesen](#reading) beschriebenen Pipeline-Parameter zur Verfügung (`regex`, `jq`, `quote` usw.).
 
 **Beispiel Lesen**:
 
 ```yaml
 source: mqtt
 topic: mbmd/sdm1-1/Power
-timeout: 30s # don't accept values older than timeout
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+timeout: 30s # Werte älter als timeout nicht akzeptieren
+scale: 0.001 # Faktor für das Ergebnis, z. B. zur Umrechnung von Wh in kWh
 ```
 
 **Parameter (Schreiben)**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                                            |
-| --------- | ------ | --------- | ----------------------------------------------------------------------- |
-| topic     | string | ja        | MQTT Topic zum Schreiben                                                |
-| payload   | string | nein      | Payload-Template (verwendet Wert im Standardformat, wenn nicht gesetzt) |
+| Parameter | Typ    | Erforderlich | Beschreibung                                                            |
+| --------- | ------ | ------------ | ----------------------------------------------------------------------- |
+| topic     | string | ja           | MQTT-Topic zum Schreiben                                                |
+| payload   | string | nein         | Payload-Template (verwendet Wert im Standardformat, wenn nicht gesetzt) |
 
 Für den Schreibzugriff werden die Daten mit dem Attribut `payload` bereitgestellt.
 Falls dieser Parameter in der Konfiguration fehlt, wird der Wert im Standardformat geschrieben.
@@ -463,16 +464,16 @@ payload: ${var:%d}
 
 ### Prometheus <Badge text="lesen" variant="tip" size="small" /> \{#prometheus\}
 
-Das `prometheus` Plugin liest Metriken aus einer Prometheus-Instanz über PromQL-Abfragen.
+Das `prometheus`-Plugin liest Metriken aus einer Prometheus-Instanz über PromQL-Abfragen.
 Dies ist nützlich, wenn bereits Monitoring-Daten in Prometheus vorliegen, die in evcc verwendet werden sollen.
 
 **Parameter**:
 
-| Parameter | Typ      | Erfordert | Beschreibung                  |
-| --------- | -------- | --------- | ----------------------------- |
-| uri       | string   | ja        | Prometheus Server URL         |
-| query     | string   | ja        | PromQL-Abfrage                |
-| timeout   | duration | nein      | Timeout (Standard: 2 Minuten) |
+| Parameter | Typ      | Erforderlich | Beschreibung                  |
+| --------- | -------- | ------------ | ----------------------------- |
+| uri       | string   | ja           | URL des Prometheus-Servers    |
+| query     | string   | ja           | PromQL-Abfrage                |
+| timeout   | duration | nein         | Timeout (Standard: 2 Minuten) |
 
 **Unterstützte Abfrageergebnisse**:
 
@@ -501,9 +502,9 @@ energy:
 Die Abfrage muss einen einzelnen numerischen Wert zurückgeben.
 Bei Vektor-Ergebnissen muss genau eine Metrik enthalten sein.
 
-### Shell Script <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#shell\}
+### Shell-Skript <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#shell\}
 
-Das `script` Plugin führt externe Skripte zum Lesen oder Aktualisieren von Daten aus. Das Plugin ist hilfreich um jede Art von externer Funktionalität einzubinden.
+Das `script`-Plugin führt externe Skripte aus, um Daten zu lesen oder zu aktualisieren. Damit lassen sich beliebige externe Funktionen einbinden.
 
 **Beispiel Lesen**:
 
@@ -517,53 +518,53 @@ timeout: 5s
 
 ```yaml
 source: script
-cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
+cmd: /home/user/my-script.sh ${enable:%b} # booleschen Wert enable als 0/1 formatieren
 timeout: 5s
 ```
 
 ### SMA/Speedwire <Badge text="lesen" variant="tip" size="small" /> \{#speedwire\}
 
-Das `sma` Plugin bietet eine Schnittstelle zu SMA Geräten, welche das Speedwire Protokoll beherrschen.
+Das `sma`-Plugin bietet eine Schnittstelle zu SMA-Geräten, die das Speedwire-Protokoll unterstützen.
 
 **Beispiel Lesen**:
 
 ```yaml
 source: sma
-uri: 192.168.4.51 # alternative to serial
-serial: 123456 # alternative to uri
-value: ActivePowerPlus # ID of value to read
-password: "0000" # optional (default: 0000)
+uri: 192.168.4.51 # Alternative zu serial
+serial: 123456 # Alternative zu uri
+value: ActivePowerPlus # ID des zu lesenden Werts
+password: "0000" # optional (Standard: 0000)
 interface: eth0 # optional
-scale: 1 # optional scale factor for value
+scale: 1 # optionaler Skalierungsfaktor für den Wert
 ```
 
-Unterstützte Werte für `value` können in der Diagnoseausgabe über das Kommando `evcc meter` (mit konfigurierten SMA `meter` Geräten) gefunden werden.
+Unterstützte Werte für `value` findest du in der Diagnoseausgabe des Befehls `evcc meter` (bei konfigurierten SMA-Geräten vom Typ `meter`).
 
-Alle möglichen Werte können als Konstanten [hier](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) gefunden werden (verwende den Namen der Konstante für `value`).
+Alle möglichen Werte sind [hier](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) als Konstanten aufgeführt (verwende den Namen der Konstante für `value`).
 
 ### Websocket <Badge text="lesen" variant="tip" size="small" /> \{#websocket\}
 
 Das `websocket`-Plugin bietet einen WebSocket-Listener.
-Es beinhaltet auch die Fähigkeit, JSON-Datenstrukturen über jq-ähnliche Abfragen zu lesen oder zu parsen.
-Dies kann z. B. verwendet werden, um Daten von Volkszählers Push Server zu empfangen.
+Außerdem kann es JSON-Datenstrukturen über jq-ähnliche Abfragen auslesen.
+Damit lassen sich z. B. Daten vom Volkszähler-Push-Server empfangen.
 
-Für die Datenextraktion stehen die unter [Lesen](#reading) beschriebenen Pipeline-Parameter zur Verfügung (`regex`, `jq`, `quote`, etc.).
+Für die Datenextraktion stehen die unter [Lesen](#reading) beschriebenen Pipeline-Parameter zur Verfügung (`regex`, `jq`, `quote` usw.).
 
 **Beispiel Lesen**:
 
 ```yaml
 source: http
 uri: ws://<volkszaehler host:port>/socket
-jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
-timeout: 30s # error if no update received in 30 seconds
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # JSON-Nachricht auswerten
+scale: 0.001 # Faktor für das Ergebnis, z. B. zur Umrechnung von Wh in kWh
+timeout: 30s # Fehler, wenn 30 Sekunden lang kein Update empfangen wird
 ```
 
-## Helpers
+## Hilfsplugins
 
 ### Calc <Badge text="lesen" variant="tip" size="small" /> \{#calc\}
 
-Das `calc` Plugin erlaubt es mehrere Einzelwerte mathematisch weiterzuverarbeiten:
+Das `calc`-Plugin erlaubt es, mehrere Einzelwerte mathematisch weiterzuverarbeiten:
 
 **Beispiel Lesen**:
 
@@ -587,34 +588,34 @@ mul:
   ...
 ```
 
-Als Operanden werden dabei die Grundrechenarten Addition (`add`), Multiplikation (`mul`) unterstützt, Division (`div`), Vorzeichenumkehr (`sign`), Absolutwert (`abs`), Minimalwert (`min`) und Maximalwert (`max`) unterstützt.
+Unterstützt werden die Operationen Addition (add), Multiplikation (mul), Division (div), Vorzeichenumkehr (sign), Absolutwert (abs), Minimum (min) und Maximum (max).
 
-Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division z. B. zur Konvertierung von kWh in Wh.
+Mit `scale: -1` bei einem der Werte kann eine einfache Subtraktion durchgeführt werden, mit `scale: 0.001` eine Division, z. B. zur Umrechnung von Wh in kWh.
 
-Mit `sign:` (jede positive Zahl wird zu +1, jede negative Zahl wird zu -1, 0 bleibt 0) können (in Verbindung mit `mul`) Vorzeichen auf andere Werte übertragen werden.
-Z. B. um bei Zählern die „Richtung" der Leistung (Einspeisung oder Bezug) auf die gemessenen Ströme zu übertragen.
+Mit `sign:` wird jede positive Zahl zu +1, jede negative zu -1, und 0 bleibt 0. In Verbindung mit `mul` lassen sich so Vorzeichen auf andere Werte übertragen.
+So lässt sich z. B. bei Zählern die _Richtung_ der Leistung (Einspeisung oder Netzbezug) auf die gemessenen Ströme übertragen.
 
 Mit `abs:` wird der Absolutwert einer Zahl berechnet.
 
 Mit `min:` und `max:` wird der Minimalwert bzw. der Maximalwert berechnet.
 
-Das `calc` Plugin ist hilfreich um z. B.
+Das `calc`-Plugin ist hilfreich, um z. B.
 
-- Leistungswerte von einzelnen PV-Strings zu summieren (addieren)
-- Die Scheinleistung aus Spannung und Strom zu berechnen (multiplizieren)
-- Getrennte Leistungswerte für Import und Export zu einem vorzeichenbehafteten Einzelwert zu kombinieren (subtrahieren).
-- Prozentuale Füllstände zu berechnen (dividieren)
-- Die richtige Richtung des Stromflusses festlegen (sign)
-- Bekannte Offsets zu eliminieren (addieren mit `const` Plugin)
+- Leistungswerte einzelner PV-Strings zu summieren (addieren)
+- die Scheinleistung aus Spannung und Strom zu berechnen (multiplizieren)
+- getrennte Leistungswerte für Netzbezug und Einspeisung zu einem vorzeichenbehafteten Einzelwert zu kombinieren (subtrahieren)
+- prozentuale Füllstände zu berechnen (dividieren)
+- die richtige Richtung des Stromflusses zu bestimmen (sign)
+- bekannte Offsets zu eliminieren (addieren mit dem `const`-Plugin)
 
 :::tip
-Konstante Hilfswerte (z. B. für Offsets) lassen sich mithilfe des `const` Plugins als Operand erzeugen.
+Konstante Hilfswerte (z. B. für Offsets) lassen sich mithilfe des `const`-Plugins als Operand erzeugen.
 :::
 
 ### Combined <Badge text="lesen" variant="tip" size="small" /> \{#combined\}
 
-Das `combined` Status Plugin wird verwendet um gemischte Boolean Status Werte von `Plugged` (angeschlossen) / `Charging` (Laden) in einen evcc-kompatiblen Ladestatus von A..F zu konvertieren.
-Es wird z.b. zusammen mit einer OpenWB MQTT Integration verwendet.
+Das `combined`-Plugin fasst die booleschen Statuswerte `Plugged` (angeschlossen) und `Charging` (lädt) zu einem evcc-kompatiblen Ladestatus A bis F zusammen.
+Es wird z. B. zusammen mit einer OpenWB-MQTT-Integration verwendet.
 
 **Beispiel Lesen**:
 
@@ -630,8 +631,8 @@ charging:
 
 ### Const <Badge text="lesen" variant="tip" size="small" /> \{#const\}
 
-Das `const` Plugin gibt einen konstanten Wert zurück.
-Es eignet sich z. B. um in Verbindung mit dem `calc` Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder auch zur Simulation von Mess- und Statuswerten zu Testzwecken.
+Das `const`-Plugin gibt einen konstanten Wert zurück.
+Es eignet sich z. B. dazu, in Verbindung mit dem `calc`-Plugin feste Korrekturwerte (Offset) auf einen variablen Wert anzuwenden oder Mess- und Statuswerte zu Testzwecken zu simulieren.
 
 **Beispiel Lesen**:
 
@@ -642,14 +643,14 @@ value: -16247
 
 ### Error <Badge text="lesen" variant="tip" size="small" /> \{#error\}
 
-Das `error` Plugin gibt immer einen [bekannten Fehlerwert](#known-errors) zurück.
-Es ist nützlich, um ein nicht implementiertes Attribut als explizit nicht verfügbar zu kennzeichnen.
+Das `error`-Plugin gibt immer einen [bekannten Fehlerwert](#known-errors) zurück.
+Es ist nützlich, um ein nicht implementiertes Attribut explizit als nicht verfügbar zu kennzeichnen.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                                    |
-| --------- | ------ | --------- | --------------------------------------------------------------- |
-| error     | string | ja        | Fehlerwert (`ErrAsleep`, `ErrMustRetry` oder `ErrNotAvailable`) |
+| Parameter | Typ    | Erforderlich | Beschreibung                                                    |
+| --------- | ------ | ------------ | --------------------------------------------------------------- |
+| error     | string | ja           | Fehlerwert (`ErrAsleep`, `ErrMustRetry` oder `ErrNotAvailable`) |
 
 **Beispiel**:
 
@@ -661,15 +662,15 @@ soc:
 
 ### Convert <Badge text="schreiben" variant="caution" size="small" /> \{#convert\}
 
-Das `convert` Plugin konvertiert Datentypen beim Schreiben.
-Es wird verwendet, wenn ein Plugin einen anderen Datentyp erwartet als evcc liefert.
+Das `convert`-Plugin konvertiert Datentypen beim Schreiben.
+Es wird verwendet, wenn ein Plugin einen anderen Datentyp erwartet, als evcc liefert.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                            |
-| --------- | ------ | --------- | --------------------------------------- |
-| convert   | string | ja        | Konvertierungstyp                       |
-| set       | config | ja        | Plugin zum Schreiben nach Konvertierung |
+| Parameter | Typ    | Erforderlich | Beschreibung                            |
+| --------- | ------ | ------------ | --------------------------------------- |
+| convert   | string | ja           | Konvertierungstyp                       |
+| set       | config | ja           | Plugin zum Schreiben nach Konvertierung |
 
 **Unterstützte Konvertierungen**:
 
@@ -696,38 +697,38 @@ limitsoc:
       encoding: uint16
 ```
 
-In diesem Beispiel konvertiert evcc einen Float-Wert wie `85.5` in `85` bevor er an das Modbus-Register geschrieben wird.
+In diesem Beispiel konvertiert evcc einen Float-Wert wie `85.5` in `85`, bevor er in das Modbus-Register geschrieben wird.
 
 ### Delta <Badge text="schreiben" variant="caution" size="small" /> \{#delta\}
 
-Das `delta` Plugin wandelt absolute Werte in Änderungswerte (Deltas) um.
+Das `delta`-Plugin wandelt absolute Werte in Änderungswerte (Deltas) um.
 Es wird für Geräte verwendet, die geschriebene Werte zu einem internen Summenwert addieren, anstatt sie direkt zu setzen.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                |
-| --------- | ------ | --------- | ------------------------------------------- |
-| get       | config | nein      | Plugin zum Lesen des aktuellen Gesamtwerts  |
-| set       | config | ja        | Plugin zum Schreiben des berechneten Deltas |
+| Parameter | Typ    | Erforderlich | Beschreibung                                         |
+| --------- | ------ | ------------ | ---------------------------------------------------- |
+| get       | config | nein         | Plugin zum Lesen des aktuellen Gesamtwerts vom Gerät |
+| set       | config | ja           | Plugin zum Schreiben des berechneten Deltas          |
 
 **Funktionsweise**:
 
-1. Eingabewert wird empfangen (z. B. `1000`)
+1. Der Eingabewert wird empfangen (z. B. `1000`)
 2. Falls `get` konfiguriert ist, wird der aktuelle Gesamtwert vom Gerät gelesen
-3. Delta wird berechnet: `delta = neuer_wert - aktueller_gesamtwert`
-4. Delta wird über das `set` Plugin geschrieben
-5. Interner Zustand wird aktualisiert
+3. Das Delta wird berechnet: `delta = new_value - current_total`
+4. Das Delta wird über das `set`-Plugin geschrieben
+5. Der interne Zustand wird aktualisiert
 
-Ohne `get` Parameter führt das Plugin den Gesamtwert intern (startet bei 0).
-Bei Neustart von evcc geht die Synchronisation zum Gerät verloren.
-Daher wird empfohlen, `get` zu konfigurieren, wenn das Gerät einen lesbaren Summenwert bereitstellt.
+Ohne den Parameter `get` führt das Plugin den Gesamtwert intern (beginnend bei 0).
+Bei einem Neustart von evcc geht die Synchronisation mit dem Gerät verloren.
+Daher wird empfohlen, `get` zu konfigurieren, wenn das Gerät ein lesbares Summenregister bereitstellt.
 
 **Unterstützte Datentypen**: `int64`, `float64`
 
 **Anwendungsfall**:
 
 Einige Wärmepumpen (z. B. Ochsner) haben Register, die Änderungswerte statt absolute Werte erwarten.
-Beim Schreiben von `500` addiert das Gerät 500 W zum internen Wert, anstatt auf 500 W zu setzen.
+Beim Schreiben von `500` addiert das Gerät 500 W zum internen Wert, anstatt ihn auf 500 W zu setzen.
 Um von 1000 W auf 1500 W zu erhöhen, muss `+500` geschrieben werden.
 Um zu reduzieren, werden negative Werte geschrieben (z. B. `-300`).
 
@@ -741,7 +742,7 @@ setmaxpower:
     uri: 192.168.1.50:502
     id: 50
     register:
-      address: 2012 # Interner Summenwert des Geräts
+      address: 2012 # Internes Summenregister des Geräts
       type: input
       decode: uint16
   set: # Berechnetes Delta schreiben
@@ -756,7 +757,7 @@ setmaxpower:
 
 **Beispiel mit Watchdog**:
 
-Häufig wird das Delta Plugin mit dem [Watchdog Plugin](#watchdog) kombiniert, wenn das Gerät regelmäßige Updates benötigt:
+Das Delta-Plugin wird häufig mit dem [Watchdog-Plugin](#watchdog) kombiniert, wenn das Gerät regelmäßige Updates benötigt:
 
 ```yaml
 setmaxpower:
@@ -784,21 +785,21 @@ setmaxpower:
 
 ### Ignore <Badge text="schreiben" variant="caution" size="small" /> \{#ignore\}
 
-Das `ignore` Plugin unterdrückt spezifische Fehlermeldungen beim Schreiben.
+Das `ignore`-Plugin unterdrückt bestimmte Fehlermeldungen beim Schreiben.
 Es wird verwendet, wenn ein Gerät harmlose Fehler zurückgibt, die ignoriert werden können.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                 |
-| --------- | ------ | --------- | -------------------------------------------- |
-| error     | string | ja        | Fehlertext-Präfix, der ignoriert werden soll |
-| set       | config | ja        | Plugin zum Schreiben                         |
+| Parameter | Typ    | Erforderlich | Beschreibung                                        |
+| --------- | ------ | ------------ | --------------------------------------------------- |
+| error     | string | ja           | Präfix der Fehlermeldung, das ignoriert werden soll |
+| set       | config | ja           | Plugin zum Schreiben                                |
 
 **Funktionsweise**:
 
-1. Das verschachtelte `set` Plugin wird ausgeführt
-2. Falls ein Fehler auftritt, wird geprüft, ob die Fehlermeldung mit dem `error` String beginnt
-3. Wenn ja, wird der Fehler ignoriert und Erfolg zurückgegeben
+1. Das verschachtelte `set`-Plugin wird ausgeführt
+2. Falls ein Fehler auftritt, wird geprüft, ob die Fehlermeldung mit dem `error`-String beginnt
+3. Wenn ja, wird der Fehler ignoriert und der Schreibvorgang gilt als erfolgreich
 4. Wenn nein, wird der Fehler normal weitergegeben
 
 **Unterstützte Datentypen**: `int64`, `float64`, `bool`, `[]byte`
@@ -830,24 +831,24 @@ In diesem Beispiel gibt das Gerät einen harmlosen Modbus-Fehler zurück, der ig
 
 ### IfElse <Badge text="schreiben" variant="caution" size="small" /> \{#ifelse\}
 
-Das `ifelse` Plugin führt bedingte Schreibvorgänge mit zwei Zweigen aus.
-Je nach Eingabewert wird entweder das `if` oder das `else` Plugin ausgeführt.
+Das `ifelse`-Plugin führt bedingte Schreibvorgänge mit zwei Zweigen aus.
+Je nach Eingabewert wird entweder das `if`- oder das `else`-Plugin ausgeführt.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                              |
-| --------- | ------ | --------- | --------------------------------------------------------- |
-| if        | config | ja        | Plugin, das bei erfüllter Bedingung ausgeführt wird       |
-| else      | config | ja        | Plugin, das bei nicht erfüllter Bedingung ausgeführt wird |
+| Parameter | Typ    | Erforderlich | Beschreibung                                              |
+| --------- | ------ | ------------ | --------------------------------------------------------- |
+| if        | config | ja           | Plugin, das bei erfüllter Bedingung ausgeführt wird       |
+| else      | config | ja           | Plugin, das bei nicht erfüllter Bedingung ausgeführt wird |
 
 **Funktionsweise**:
 
-- Bei `bool` Werten: `true` führt `if` aus, `false` führt `else` aus
-- Bei `int64` Werten: `> 0` führt `if` aus, sonst `else`
+- Bei `bool`-Werten: `true` führt `if` aus, `false` führt `else` aus
+- Bei `int64`-Werten: `> 0` führt `if` aus, sonst `else`
 
 **Unterstützte Datentypen**: `int64`, `bool`
 
-**Beispiel** (unterschiedliche Endpunkte für An- und Ausschalten):
+**Beispiel** (unterschiedliche Endpunkte für Ein- und Ausschalten):
 
 ```yaml
 enable:
@@ -864,32 +865,32 @@ enable:
 
 ### Map <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#map\}
 
-Das `map` Plugin übersetzt Integer-Werte in andere Integer-Werte mithilfe einer Lookup-Tabelle.
+Das `map`-Plugin übersetzt Integer-Werte in andere Integer-Werte mithilfe einer Lookup-Tabelle.
 Es wird häufig verwendet, um gerätespezifische Werte in evcc-Standardwerte zu konvertieren und umgekehrt.
 
 **Parameter**:
 
-| Parameter | Typ             | Erfordert | Beschreibung                                           |
-| --------- | --------------- | --------- | ------------------------------------------------------ |
-| values    | map[int64]int64 | ja        | Lookup-Tabelle mit Eingabe → Ausgabe Zuordnung         |
-| get       | config          | nein      | Plugin zum Lesen (nur beim Lesen erforderlich)         |
-| set       | config          | nein      | Plugin zum Schreiben (nur beim Schreiben erforderlich) |
+| Parameter | Typ             | Erforderlich | Beschreibung                                            |
+| --------- | --------------- | ------------ | ------------------------------------------------------- |
+| values    | map[int64]int64 | ja           | Lookup-Tabelle, die Eingabewerte Ausgabewerten zuordnet |
+| get       | config          | nein         | Plugin zum Lesen (nur beim Lesen erforderlich)          |
+| set       | config          | nein         | Plugin zum Schreiben (nur beim Schreiben erforderlich)  |
 
 **Funktionsweise**:
 
 **Beim Lesen**:
 
-1. `get` Plugin liefert einen Wert (z. B. `0`)
-2. Wert wird in der `values` Tabelle nachgeschlagen
+1. Das `get`-Plugin liefert einen Wert (z. B. `0`)
+2. Der Wert wird in der `values`-Tabelle nachgeschlagen
 3. Der zugeordnete Wert wird zurückgegeben (z. B. `0` → `2`)
 
 **Beim Schreiben**:
 
-1. Eingabewert wird empfangen (z. B. `3`)
-2. Wert wird in der `values` Tabelle nachgeschlagen
-3. Der zugeordnete Wert wird an das `set` Plugin übergeben (z. B. `3` → `6`)
+1. Der Eingabewert wird empfangen (z. B. `3`)
+2. Der Wert wird in der `values`-Tabelle nachgeschlagen
+3. Der zugeordnete Wert wird an das `set`-Plugin übergeben (z. B. `3` → `6`)
 
-Falls kein passender Wert in der Tabelle gefunden wird, gibt es einen Fehler.
+Findet sich kein passender Wert in der Tabelle, meldet das Plugin einen Fehler.
 
 **Unterstützte Datentypen**: `int64` (nur Integer-Werte)
 
@@ -934,10 +935,10 @@ setmode:
 
 ### Meter <Badge text="lesen" variant="tip" size="small" /> \{#meter-plugin\}
 
-Das `meter` Plugin ermöglicht es, ein anderes Messgerät als Datenquelle zu verwenden.
-Dies ist nützlich, wenn man ein bestehendes Gerät für mehrere Messwerte verwenden möchte oder wenn man verschiedene Methoden eines Geräts für unterschiedliche Attribute nutzen will.
+Das `meter`-Plugin ermöglicht es, einen anderen Zähler als Datenquelle zu verwenden.
+Das ist nützlich, wenn du ein bestehendes Gerät für mehrere Messwerte verwenden möchtest oder für unterschiedliche Attribute verschiedene Methoden eines Geräts brauchst.
 
-Die `config` Sektion enthält dabei die vollständige Template-Konfiguration des einzubettenden Messgeräts.
+Der Abschnitt `config` enthält die vollständige Template-Konfiguration des einzubettenden Zählers.
 Der Parameter `method` bestimmt, welcher Wert gelesen wird: `power`, `energy`, `returnenergy` oder `soc`.
 
 **Beispiel Lesen**:
@@ -970,35 +971,35 @@ meters:
       timeout: 60s
 ```
 
-In diesem Beispiel wird ein Shelly 1PM Gerät als Datenquelle für Leistung und Energie einer Hausbatterie verwendet, während der Ladestand über MQTT abgerufen wird.
+In diesem Beispiel dient ein Shelly 1PM als Datenquelle für Leistung und Energie einer Hausbatterie, während der Ladestand über MQTT abgerufen wird.
 
 ### Sequence <Badge text="schreiben" variant="caution" size="small" /> \{#sequence\}
 
-Das `sequence` Plugin führt mehrere Schreibvorgänge nacheinander aus.
+Das `sequence`-Plugin führt mehrere Schreibvorgänge nacheinander aus.
 Alle verschachtelten Plugins erhalten denselben Eingabewert und werden in der definierten Reihenfolge ausgeführt.
 Bei einem Fehler stoppt die Ausführung sofort.
 
 **Parameter**:
 
-| Parameter | Typ      | Erfordert | Beschreibung                                     |
-| --------- | -------- | --------- | ------------------------------------------------ |
-| set       | [config] | ja        | Array von verschachtelten Plugin-Konfigurationen |
+| Parameter | Typ      | Erforderlich | Beschreibung                                     |
+| --------- | -------- | ------------ | ------------------------------------------------ |
+| set       | [config] | ja           | Array von verschachtelten Plugin-Konfigurationen |
 
 **Funktionsweise**:
 
-1. Eingabewert wird empfangen
-2. Jedes Plugin in der `set` Liste wird nacheinander mit diesem Wert aufgerufen
+1. Der Eingabewert wird empfangen
+2. Jedes Plugin in der `set`-Liste wird nacheinander mit diesem Wert aufgerufen
 3. Bei einem Fehler wird die Sequenz abgebrochen und der Fehler zurückgegeben
-4. Erfolgreiche Ausführung bedeutet, dass alle Plugins erfolgreich ausgeführt wurden
+4. Die Sequenz gilt nur dann als erfolgreich, wenn alle Plugins fehlerfrei durchgelaufen sind
 
 **Unterstützte Datentypen**: `int64`, `float64`, `bool`
 
 **Anwendungsfälle**:
 
 - Mehrere HTTP-Aufrufe nacheinander ausführen
-- Kombination mit `sleep` Plugin für zeitlich verzögerte Aktionen
-- Mehrere Modbus-Register gleichzeitig setzen
-- Propagierung von Werten an mehrere Ziele
+- Mit dem `sleep`-Plugin für zeitlich verzögerte Aktionen kombinieren
+- Mehrere Modbus-Register in einem Schritt schreiben
+- Werte an mehrere Ziele weitergeben
 
 **Beispiel 1: Mehrere HTTP-Aufrufe**
 
@@ -1047,8 +1048,8 @@ batterymode:
 
 1. Äußere `sequence` empfängt Wert `1`
 2. Erster Schritt: `switch` prüft den Wert `1`
-   - Fall `1` trifft zu → HTTP-Aufruf zu `/api/mode` mit Body `automatic`
-3. Zweiter Schritt: `mqtt` sendet Nachricht zu `home/battery/status` mit Payload `mode_1`
+   - Fall `1` trifft zu → HTTP-Aufruf an `/api/mode` mit Body `automatic`
+3. Zweiter Schritt: `mqtt` sendet eine Nachricht an `home/battery/status` mit Payload `mode_1`
 4. Fertig
 
 **Ablauf bei `batterymode: 3` (charge)**:
@@ -1056,23 +1057,23 @@ batterymode:
 1. Äußere `sequence` empfängt Wert `3`
 2. Erster Schritt: `switch` prüft den Wert `3`
    - Fall `3` trifft zu → Innere `sequence` wird ausgeführt:
-     - Warte 1 Sekunde (`sleep`)
-     - HTTP-Aufruf zu `/api/charge` mit Body `5000`
-3. Zweiter Schritt: `mqtt` sendet Nachricht zu `home/battery/status` mit Payload `mode_3`
+     - 1 Sekunde warten (`sleep`)
+     - HTTP-Aufruf an `/api/charge` mit Body `5000`
+3. Zweiter Schritt: `mqtt` sendet eine Nachricht an `home/battery/status` mit Payload `mode_3`
 4. Fertig
 
-Der Wert fließt durch alle Plugins, wobei `switch` unterschiedliche Aktionen basierend auf dem Wert ausführt und `mqtt` am Ende immer benachrichtigt wird.
+Der Wert fließt durch alle Plugins, wobei `switch` abhängig vom Wert unterschiedliche Aktionen ausführt und `mqtt` am Ende immer eine Nachricht sendet.
 
 ### Sleep <Badge text="schreiben" variant="caution" size="small" /> \{#sleep\}
 
-Das `sleep` Plugin fügt eine Verzögerung ein.
-Wird typischerweise innerhalb eines `sequence` Plugins verwendet, um zeitliche Abstände zwischen Aktionen zu schaffen.
+Das `sleep`-Plugin fügt eine Verzögerung ein.
+Es wird typischerweise innerhalb eines `sequence`-Plugins verwendet, um zeitliche Abstände zwischen Aktionen zu schaffen.
 
 **Parameter**:
 
-| Parameter | Typ      | Erfordert | Beschreibung                                                |
-| --------- | -------- | --------- | ----------------------------------------------------------- |
-| duration  | duration | ja        | Wartezeit (z. B. `1s`, `500ms`, `0s` für keine Verzögerung) |
+| Parameter | Typ      | Erforderlich | Beschreibung                                                |
+| --------- | -------- | ------------ | ----------------------------------------------------------- |
+| duration  | duration | ja           | Wartezeit (z. B. `1s`, `500ms`, `0s` für keine Verzögerung) |
 
 **Beispiel**:
 
@@ -1092,22 +1093,22 @@ setmode:
 
 ### Switch <Badge text="schreiben" variant="caution" size="small" /> \{#switch\}
 
-Das `switch` Plugin führt bedingte Schreibvorgänge durch, ähnlich einer switch/case-Anweisung in Programmiersprachen.
-Basierend auf dem Eingabewert wird die entsprechende Aktion ausgeführt.
+Das `switch`-Plugin führt bedingte Schreibvorgänge durch, ähnlich einer switch/case-Anweisung in Programmiersprachen.
+Je nach Eingabewert wird die entsprechende Aktion ausgeführt.
 
 **Parameter**:
 
-| Parameter | Typ    | Erfordert | Beschreibung                                        |
-| --------- | ------ | --------- | --------------------------------------------------- |
-| switch    | [case] | ja        | Array von Fällen mit `case` und `set` Konfiguration |
-| default   | config | nein      | Fallback-Plugin, wenn kein Fall zutrifft            |
+| Parameter | Typ    | Erforderlich | Beschreibung                                         |
+| --------- | ------ | ------------ | ---------------------------------------------------- |
+| switch    | [case] | ja           | Liste von Fällen mit `case`- und `set`-Konfiguration |
+| default   | config | nein         | Fallback-Plugin, wenn kein Fall zutrifft             |
 
 **Funktionsweise**:
 
-1. Eingabewert wird mit den `case` Werten verglichen
-2. Bei Übereinstimmung wird das entsprechende `set` Plugin ausgeführt
+1. Der Eingabewert wird mit den `case`-Werten verglichen
+2. Bei Übereinstimmung wird das entsprechende `set`-Plugin ausgeführt
 3. Falls kein Fall zutrifft und `default` definiert ist, wird dieses ausgeführt
-4. Falls kein Fall zutrifft und kein `default` definiert ist, gibt es einen Fehler
+4. Falls kein Fall zutrifft und kein `default` definiert ist, meldet das Plugin einen Fehler
 
 **Unterstützte Datentypen**: `int64` (nur Integer-Werte)
 
@@ -1136,8 +1137,8 @@ setmode:
 
 ### Valid <Badge text="lesen" variant="tip" size="small" /> \{#valid\}
 
-Das `valid` Plugin ermöglicht es, Plugin-Werte basierend auf einer booleschen Validierung bereitzustellen.
-Es trennt die Gültigkeit eines Werts von dessen eigenem Inhalt.
+Das `valid`-Plugin ermöglicht es, Plugin-Werte anhand einer booleschen Validierung bereitzustellen.
+Es trennt die Gültigkeit eines Werts von seinem eigentlichen Inhalt.
 Wenn die Validierung `false` zurückgibt, wird der Wert als nicht verfügbar betrachtet.
 
 Dies ist besonders nützlich für Integrationen wie ioBroker, die Gültigkeit und Wert getrennt bereitstellen.
@@ -1154,50 +1155,50 @@ value:
   topic: iobroker/wallbox/power/value
 ```
 
-In diesem Beispiel wird der Wert nur verwendet, wenn das `valid` Topic `true` zurückgibt.
+In diesem Beispiel wird der Wert nur verwendet, wenn das `valid`-Topic `true` zurückgibt.
 Wenn es `false` zurückgibt, wird der Wert als nicht verfügbar markiert.
 
 ### Watchdog <Badge text="schreiben" variant="caution" size="small" /> \{#watchdog\}
 
-Das `watchdog` Plugin ist ein Wrapper-Plugin, das Schreibvorgänge automatisch in regelmäßigen Abständen wiederholt.
+Das `watchdog`-Plugin ist ein Wrapper-Plugin, das Schreibvorgänge automatisch in regelmäßigen Abständen wiederholt.
 Manche Geräte (z. B. Hausbatterien, Wechselrichter) erwarten, dass Steuerbefehle regelmäßig wiederholt werden, um aktiv zu bleiben.
-Das Watchdog-Plugin überwacht Schreibvorgänge und wiederholt diese automatisch in der Hälfte des konfigurierten Timeout-Intervalls.
+Das Watchdog-Plugin überwacht Schreibvorgänge und wiederholt sie automatisch jeweils nach Ablauf des halben Timeouts.
 
 **Parameter**:
 
-| Parameter | Typ                | Erfordert | Beschreibung                                                                   |
-| --------- | ------------------ | --------- | ------------------------------------------------------------------------------ |
-| timeout   | duration           | ja        | Zeitintervall für Wiederholungen (Wert wird alle timeout/2 erneut geschrieben) |
-| reset     | string \| [string] | nein      | Wert(e), bei denen Wiederholungen gestoppt werden                              |
-| initial   | string             | nein      | Wert, der beim Start einmalig geschrieben wird                                 |
-| defer     | bool               | nein      | Verzögert Updates statt sie sofort auszuführen (Standard: false)               |
-| set       | config             | ja        | Verschachteltes Plugin für den eigentlichen Schreibvorgang                     |
+| Parameter | Typ                | Erforderlich | Beschreibung                                                                   |
+| --------- | ------------------ | ------------ | ------------------------------------------------------------------------------ |
+| timeout   | duration           | ja           | Zeitintervall für Wiederholungen (Wert wird alle timeout/2 erneut geschrieben) |
+| reset     | string \| [string] | nein         | Wert(e), bei denen Wiederholungen gestoppt werden                              |
+| initial   | string             | nein         | Wert, der beim Start einmalig geschrieben wird                                 |
+| defer     | bool               | nein         | Verzögert Updates, statt sie sofort auszuführen (Standard: false)              |
+| set       | config             | ja           | Verschachteltes Plugin für den eigentlichen Schreibvorgang                     |
 
 **Funktionsweise**:
 
 1. **Start**: Falls `initial` konfiguriert ist, wird dieser Wert beim Start einmalig geschrieben
-2. **Schreiben**: Wenn ein Wert geschrieben wird, prüft das Plugin, ob dieser in der `reset` Liste steht
-3. **Watchdog aktiv**: Falls der Wert **nicht** in `reset` steht, startet der Watchdog und schreibt den Wert automatisch alle `timeout/2` Sekunden erneut
+2. **Schreiben**: Wenn ein Wert geschrieben wird, prüft das Plugin, ob dieser in der `reset`-Liste steht
+3. **Watchdog aktiv**: Falls der Wert **nicht** in `reset` steht, startet der Watchdog und schreibt den Wert automatisch im halben `timeout`-Intervall erneut
 4. **Watchdog stoppt**: Falls der Wert in `reset` steht, werden keine Wiederholungen durchgeführt
 
-**reset Parameter**:
+**reset-Parameter**:
 
 - Definiert Werte, bei denen der Watchdog gestoppt wird
 - Kann ein einzelner Wert (`reset: 0`) oder mehrere Werte (`reset: [0, 1]`) sein
-- Typischerweise für "sichere" oder "Standard" Zustände verwendet, die keine kontinuierliche Wiederholung benötigen
+- Typischerweise für sichere Zustände oder Standardzustände verwendet, die keine kontinuierliche Wiederholung benötigen
 
-**initial Parameter**:
+**initial-Parameter**:
 
-- Optionaler Wert, der beim Pluginstart einmalig geschrieben wird
+- Optionaler Wert, der beim Start des Plugins einmalig geschrieben wird
 - Nützlich, um einen definierten Startzustand zu setzen
 - Wird vor allen anderen Schreibvorgängen ausgeführt
 
-**defer Parameter**:
+**defer-Parameter**:
 
-- Stellt sicher, dass Timeouts zwischen Updates eingehalten werden
+- Stellt sicher, dass zwischen zwei Updates ein Mindestabstand eingehalten wird
 - Der Watchdog wird während der Verzögerung gestoppt und nach Ablauf mit dem neuen Wert neu gestartet
-- Sinnvoll wenn Geräte eine Mindestwartezeit zwischen Modusänderungen benötigen
-- Die Verzögerung wird basierend auf der Zeit seit dem letzten Update berechnet
+- Sinnvoll, wenn Geräte eine Mindestwartezeit zwischen Modusänderungen benötigen
+- Die Verzögerung wird anhand der Zeit seit dem letzten Update berechnet
 - Reset-Werte werden immer sofort (ohne Verzögerung) geschrieben
 
 **Unterstützte Datentypen**: `int64`, `float64`, `bool`
@@ -1223,11 +1224,11 @@ In diesem Beispiel werden Werte automatisch alle 30 s wiederholt, außer wenn de
 **Ablaufbeispiel** mit `timeout: 60s`, `reset: 0`:
 
 - Plugin startet
-- Schreibe Wert `100` → Watchdog **läuft**, Wert wird alle 30 s wiederholt
-- Nach 2 Minuten: Wert `100` wurde bereits 4x geschrieben (0s, 30s, 60s, 90s, 120s)
-- Schreibe Wert `200` → Watchdog **läuft** weiter, jetzt mit neuem Wert `200` alle 30 s
-- Schreibe Wert `0` → Watchdog **stoppt** (da `0` in `reset` definiert)
-- Keine weiteren Wiederholungen, bis ein neuer Wert != `0` geschrieben wird
+- Wert `100` schreiben → Watchdog **läuft**, Wert wird alle 30 s wiederholt
+- Nach 2 Minuten: Wert `100` wurde 5-mal geschrieben (bei 0, 30, 60, 90 und 120 s)
+- Wert `200` schreiben → Watchdog **läuft** weiter, jetzt mit dem neuen Wert `200` alle 30 s
+- Wert `0` schreiben → Watchdog **stoppt** (da `0` in `reset` definiert ist)
+- Keine weiteren Wiederholungen, bis ein neuer Wert ungleich `0` geschrieben wird
 
 **Beispiel mit Batteriesteuerung** (`batterymode` verwendet Werte 1=normal, 2=hold, 3=charge, 4=holdcharge, 5=discharge):
 
@@ -1235,7 +1236,7 @@ In diesem Beispiel werden Werte automatisch alle 30 s wiederholt, außer wenn de
 batterymode:
   source: watchdog
   timeout: 60s
-  reset: 1 # Stoppe Wiederholungen im Normalbetrieb
+  reset: 1 # Wiederholungen im Normalbetrieb stoppen
   set:
     source: switch
     switch:

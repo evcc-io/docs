@@ -1,17 +1,17 @@
 ---
 title: "modbusproxy"
-description: "Modbus-Proxy in der evcc.yaml einrichten, damit andere Systeme sich eine Modbus-Verbindung zu Wechselrichter oder Zähler mit evcc teilen können."
+description: "So richtest du in der evcc.yaml einen Modbus-Proxy ein, damit andere Systeme die Modbus-Verbindung deiner evcc-Instanz zu Wechselrichter oder Zähler mitnutzen können."
 sidebar:
   order: 18
+translatedFrom: "7191bc3757f6"
 ---
 
-_modbusproxy_ ist eine Liste von Geräten welche für Drittsysteme via Modbus TCP im Netzwerk freigeben werden.
+Die Einstellung `modbusproxy` ist eine Liste von Geräten, die für Drittsysteme per Modbus TCP im Netzwerk freigegeben werden.
 
-Einige Geräte lassen nur eine sehr beschränkte Anzahl an Modbus TCP Clients zu. Im ungünstigsten Fall nur genau eine einzige Verbindung wie z. B. bei SolarEdge-Komponenten. Aber auch bei seriellen Modbus RTU RS485-Bussystemen ist ohnehin immer nur ein Master erlaubt.
-Mit Hilfe von `modbusproxy` ist es möglich, evcc zusätzlich als Modbus-Proxy einzurichten welcher die bestehenden Modbus-Verbindungen mit weiteren Systemen teilen kann.
-Damit kommuniziert evcc direkt mit dem Gerät, weitere Systeme aber stattdessen mit evcc, welches die Kommunikationverbindungen bündelt und stellvertretend an das Zielgerät weiterreicht.
+Einige Geräte lassen nur eine sehr begrenzte Anzahl an Modbus-TCP-Clients zu. Im ungünstigsten Fall ist nur eine einzige Verbindung erlaubt, wie z. B. bei SolarEdge-Komponenten. Außerdem ist bei seriellen Modbus-RTU-RS485-Bussystemen ohnehin nur ein Master erlaubt.
+Mit Hilfe von `modbusproxy` lässt sich evcc als Modbus-Proxy einrichten, der bestehende Modbus-Verbindungen mit weiteren Systemen teilen kann. Damit kommuniziert evcc direkt mit dem Gerät, weitere Systeme dagegen mit evcc, das die Kommunikationsverbindungen bündelt und an das Zielgerät weiterreicht.
 
-Die `modbusproxy` Konfiguration ist eine Liste von verschiedenen Proxy-Freigaben.
+Die `modbusproxy`-Konfiguration ist eine Liste von verschiedenen Proxy-Konfigurationen.
 
 **Beispiel**:
 
@@ -29,14 +29,14 @@ modbusproxy:
 ```
 
 :::note
-Die Proxy-Funktion unterstützt _eingehend_ (d.h. von Drittsystemen wie z. B. Hausautomation, Logger) ausschließlich Modbus TCP.
+_Eingehend_ (von Drittsystemen wie Hausautomation oder Loggern) unterstützt die Proxy-Funktion ausschließlich Modbus TCP.
 
-_Ausgehend_ in Richtung des abzufragenden Gerätes (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Zielgerätekonfiguration übersetzt.
+_Ausgehend_ in Richtung des abzufragenden Zielgeräts (z. B. Wechselrichter, Energiezähler) wird das Protokoll ggf. entsprechend der Konfiguration des Zielgeräts übersetzt.
 :::
 
 :::tip[Sponsortoken erforderlich]
 
-Hier findest du weitere Informationen zum [evcc Sponsorship](/de/sponsorship).
+Weitere Informationen zum evcc-Sponsoring findest du auf der [Sponsoring-Seite](/de/sponsorship).
 
 :::
 
@@ -46,21 +46,21 @@ Hier findest du weitere Informationen zum [evcc Sponsorship](/de/sponsorship).
 
 ### `port`
 
-Der lokale TCP/IP-Port unter dem eine Verbindung als Proxyserver bereitstellt wird und eingehende Modbus TCP Verbindungen von Drittsystemen angenommen werden.
+Der lokale TCP/IP-Port, auf dem der Proxy eingehende Modbus-TCP-Verbindungen von Drittsystemen annimmt.
 
 **Beispiel**:
 
 ```yaml
-- port: 5021
+port: 5021
 ```
 
 ## Optionale Parameter
 
 ### `uri`
 
-Die IP-Adresse und der Port des Zielgerätes nach allgemeinem URI-Schema.
+Die IP-Adresse und der Port des Zielgeräts im üblichen URI-Schema.
 
-Jeder bereitgestellte Port muss eindeutig und noch nicht von einer anderen Anwendung auf dem evcc Host belegt sein, muss sich aber nicht zwingend vom ausgehenden Port unterscheiden. Es ist somit problemlos möglich eine Freigabe für Port 502 zu definieren, die ihrerseits auf Port 502 des Zielgerätes verweist.
+Jeder bereitgestellte Port muss eindeutig sein und darf nicht bereits von einer anderen Anwendung auf dem evcc-Host belegt sein, muss sich aber nicht vom Port des Zielgeräts unterscheiden. Es ist somit zulässig, eine Konfiguration für Port 502 zu definieren, die auf Port 502 des Zielgeräts verweist.
 
 **Beispiel**:
 
@@ -71,10 +71,7 @@ Jeder bereitgestellte Port muss eindeutig und noch nicht von einer anderen Anwen
 
 ### `rtu`
 
-Zu Netzwerkzielen wird üblicherweise mit Modbus TCP kommuniziert.
-Bei Bedarf kann mit der Angabe von `rtu: true` auf Modbus RTU over TCP statt Modbus TCP umgeschaltet werden.
-Ein typischer Anwendungsfall dafür sind einfache, transparente RS485-TCP-Konverter (ohne Protokollübersetzung).
-Muss mit der Gerätekonfiguration übereinstimmen. Wird bei seriellen Zielsystemen ignoriert.
+Mit Netzwerkzielen wird üblicherweise per Modbus TCP kommuniziert. Bei Bedarf kannst du mit `rtu: true` auf Modbus RTU over TCP umschalten. Ein typischer Anwendungsfall sind einfache, transparente RS485-TCP-Konverter (ohne Protokollübersetzung). Die Einstellung muss mit der Konfiguration des Geräts übereinstimmen. Bei seriellen Zielsystemen wird sie ignoriert.
 
 **Beispiel**:
 
@@ -84,23 +81,23 @@ rtu: true
 
 ### `readonly`
 
-Durch diesen Parameter lassen sich Modbus-Schreibzugriffe durch Drittsysteme pauschal unterbinden.
+Mit diesem Parameter lassen sich Modbus-Schreibzugriffe durch Drittsysteme unterbinden.
 
 **Mögliche Werte**:
 
 - `true`: Schreibzugriffe werden ohne Antwort blockiert
-- `deny`: Schreibzugriffe werden mit einem Modbusfehler als Antwort blockiert
+- `deny`: Schreibzugriffe werden mit einem Modbus-Fehler als Antwort blockiert
 - `false`: Schreibzugriffe werden weitergeleitet
 
 Funktionscodes, die der Proxy nicht selbst verarbeitet, z. B. Huaweis herstellerspezifischer Funktionscode 0x41, können Schreibzugriffe enthalten.
-Beide Read-only-Modi blockieren sie deshalb mit einem Modbusfehler.
+Beide schreibgeschützten Modi blockieren sie deshalb mit einem Modbus-Fehler.
 Mit `readonly: false` leitet der Proxy sie unverändert weiter, allerdings nur an Geräte, die per Modbus TCP angebunden sind.
 Die Home-Assistant-Integration für Huawei-Wechselrichter braucht z. B. `readonly: false`.
 
 :::caution
 Der Proxy prüft nicht, wer sich verbindet.
-Mit `readonly: false` (Standard) kann jedes Gerät, das den Port im Netzwerk erreicht, auf das Zielgerät schreiben.
-Betreibe den Proxy deshalb nur in einem vertrauenswürdigen Netzwerk.
+Mit `readonly: false` (Standard) kann jedes Gerät in deinem Netzwerk, das den Port erreicht, auf das Zielgerät schreiben.
+Betreibe den Proxy nur in einem vertrauenswürdigen Netzwerk.
 :::
 
 **Beispiel**:

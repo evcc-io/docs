@@ -1,28 +1,30 @@
 ---
 title: "Lastmanagement"
-description: "Das Lastmanagement fasst Ladepunkte zu Stromkreisen mit einer Strom- oder Leistungsgrenze zusammen, damit mehrere Wallboxen die Hausinstallation nicht überlasten."
+description: "Das Lastmanagement fasst Ladepunkte zu Stromkreisen mit maximaler Stromstärke oder Leistung zusammen, damit mehrere Wallboxen deine Hausinstallation nie überlasten."
 sidebar:
   order: 12
+translatedFrom: "56826048a083"
 ---
 
 :::caution[Experimentell]
-Lastmanagement befindet sich gerade noch in der Erprobungsphase.
+Das Lastmanagement ist noch experimentell. In Kombination mit einigen anderen Funktionen verhält es sich möglicherweise nicht wie erwartet.
 :::
 
-Lastmanagement ermöglicht es, die Leistung von Wallboxen zu steuern, um die Gesamtlast zu begrenzen.
-Hierfür können Ladepunkte in **Stromkreise** zusammengefasst werden.
-Für jeden Stromkreis (`circuit`) kann eine maximale Stromstärke (`maxCurrent`) und/oder Leistung (`maxPower`) konfiguriert werden.
-Das System arbeitet hierarchisch, d.h. ein Stromkreis kann Teil eines übergeordneten Stromkreises sein.
+Mit dem Lastmanagement (Lastausgleich) lässt sich die Leistung von Wallboxen begrenzen, um eine Überlastung der Stromkreise und das Auslösen von Sicherungen zu verhindern.
+Die Begrenzung der Leistung kann auch nützlich sein, wenn du ungewollte Lastspitzen vermeiden willst.
+Dazu kann ein Ladepunkt einem Stromkreis (`circuit`) zugeordnet werden.
+Ein Stromkreis (`circuit`) kann eine maximale Stromstärke (`maxCurrent`) und/oder eine maximale Leistung (`maxPower`) haben.
+Das System arbeitet hierarchisch, d. h. ein Stromkreis kann Teil eines übergeordneten Stromkreises sein.
 
 :::note[Konfiguration über die Oberfläche]
-Diese Seite beschreibt die Konfiguration über die `evcc.yaml`.
+Diese Seite beschreibt die Konfiguration über die Datei `evcc.yaml`.
 Die Konfiguration ist auch über die Oberfläche möglich.
 
 Stromkreise können unter **Konfiguration → Lastmanagement** angelegt werden.
 Die Eingabe erfolgt im YAML-Format und entspricht dem Inhalt unterhalb von `circuits:` in den folgenden Beispielen.
 Wir arbeiten daran, dies durch eine formularbasierte Eingabe zu ersetzen.
 
-Jeder Ladepunkt kann anschließend (Neustart erforderlich) unter **Konfiguration → Ladepunkte & Heizungen → [Name]** einem Stromkreis zugeordnet werden.
+Anschließend kann jeder Ladepunkt unter **Konfiguration → Ladepunkte & Heizungen → [Name]** einem Stromkreis zugeordnet werden (Neustart erforderlich).
 :::
 
 ## Konfiguration
@@ -34,10 +36,10 @@ Jeder Ladepunkt kann dann einem Stromkreis zugeordnet werden.
 
 ```yaml
 circuits:
-  - name: main # eindeutiger Name, wird als Referenz für andere Circuits verwendet
-    title: Hauptstromkreis # Anzeige in der UI (später)
-    maxCurrent: 63 # 63A (optional)
-    maxPower: 30000 # 30kW (optional)
+  - name: main # eindeutiger Name, andere Stromkreise verweisen über parent darauf
+    title: "Hauptstromkreis" # Name für die Oberfläche (dort noch nicht umgesetzt)
+    maxCurrent: 63 # 63 A (optional)
+    maxPower: 30000 # 30 kW (optional)
     meter: grid # optional
 
 loadpoints:
@@ -49,17 +51,18 @@ loadpoints:
     # ...
 ```
 
-Hier wird der **Hauptstromkreis** `main` definiert, der eine maximale Leistung von 30kW und eine maximale Phasen-Stromstärke von 63A hat.
+Diese Konfiguration definiert den Hauptstromkreis `main` mit einer maximalen Leistung von 30 kW und einer maximalen Stromstärke von 63 A pro Phase.
 Die Ladepunkte _Garage_ und _Carport_ sind diesem Stromkreis zugeordnet.
-Da der Netzzähler diesem Stromkreis zugeordnet ist, wird die Ladeleistung der Ladepunkte so gedrosselt werden, dass am Netzanschluss die eingestellten Werte nicht überschritten werden.
-Ohne Zuordnung des Netzzählers wirken die eingestellten Grenzen direkt auf die Summe aller Ladepunkte.
+Ziehen andere Verbraucher wie ein Backofen oder eine Wärmepumpe (dafür ist ein Zähler nötig) insgesamt 50 A, dürfen die Ladepunkte nur noch die verbleibenden 13 A nutzen.
+Da der Netzzähler diesem Stromkreis zugeordnet ist, wird die Leistung der Ladepunkte so gedrosselt, dass die Grenzwerte am Netzanschluss nicht überschritten werden.
+Ohne Zuordnung des Netzzählers gelten die Grenzwerte direkt für die Summe aller Ladepunkte.
 
 ### Beispiel: Verschachtelte Stromkreise
 
 ```yaml
 circuits:
   - name: main
-    title: Hauptsicherung
+    title: "Hauptstromkreis"
     maxCurrent: 48
   - name: garage
     title: Garage
@@ -85,26 +88,26 @@ loadpoints:
     circuit: main
 ```
 
-Hier haben wir zwei Stromkreise `garage` und `carport`, die beide dem Hauptstromkreis (`parent: main`) untergeordnet sind.
-Der Hauptstromkreis `main` hat eine maximale Stromstärke von 48A.
-Die Stromkreise `garage` und `carport` haben jeweils eine maximale Stromstärke von 32A.
-Die Ladepunkte _Garage A_, _Garage B_ und _Garage C_ sind dem Stromkreis `garage` zugeordnet (`circuit: garage`).
-Die Ladepunkte _Carport A_ und _Carport B_ sind dem Stromkreis `carport` zugeordnet (`circuit: carport`).
-Die Stromkreise `garage`, `carport` und die Wärmepumpe sind direkt am Hauptstromkreis (`main`) angeschlossen.
-Die Regelung stellt sicher, dass zu keinem Zeitpunkt die Grenzen der jeweiligen Stromkreise überschritten werden.
+Hier gibt es zwei Stromkreise, `garage` und `carport`, die beide dem Hauptstromkreis untergeordnet sind (`parent: main`).
+Der Stromkreis `main` hat eine maximale Stromstärke von 48 A.
+Die Stromkreise `garage` und `carport` haben jeweils eine maximale Stromstärke von 32 A.
+Die Ladepunkte Garage A, Garage B und Garage C sind dem Stromkreis `garage` zugeordnet (`circuit: garage`).
+Die Ladepunkte Carport A und Carport B sind dem Stromkreis `carport` zugeordnet (`circuit: carport`).
+Die Stromkreise `garage` und `carport` sowie die Wärmepumpe sind direkt an den Hauptstromkreis (`main`) angeschlossen.
+Die Regelung stellt sicher, dass die Grenzwerte der jeweiligen Stromkreise zu keinem Zeitpunkt überschritten werden.
 
-**Wichtig:** Es muss immer genau einen Hauptstromkreis geben (einen Stromkreis ohne `parent` Eigenschaft).
+**Wichtig:** Es muss immer genau einen Hauptstromkreis geben (einen Stromkreis ohne die Eigenschaft `parent`).
 
 :::note[Externe Begrenzung (§ 14a, § 9)]
-Wenn ein Limit der [externen Begrenzung](/de/external-limit) aktiv ist, begrenzt es die Leistung des Hauptstromkreises.
-Dies wird durch den Hinweis "Verbrauch begrenzt" auf der Lastmanagement-Kachel angezeigt.
+Wenn eine [externe Begrenzung](/de/external-limit) aktiv ist, begrenzt sie die Leistung des Hauptstromkreises.
+Das zeigt der Hinweis **Verbrauch begrenzt** auf der Lastmanagement-Kachel an.
 :::
 
 ## Messwerte
 
-Standardmäßig bildet die Steuerung die aktuelle Leistung und Stromstärke aus der Summe der jeweiligen Ladepunkte.
-Über die Konfiguration eines Zählers (`meter`) am `circuit` kann hier auch die real anliegende Last berücksichtigt werden.
-Dies ist insbesondere sinnvoll, wenn an der Sicherung auch noch weitere Verbraucher angeschlossen sind.
+Standardmäßig berechnet die Regelung die aktuelle Leistung und Stromstärke aus der Summe der jeweils zugeordneten Ladepunkte.
+Wird an einem Stromkreis (`circuit`) ein Zähler (`meter`) konfiguriert, kann auch die tatsächliche Last berücksichtigt werden.
+Das ist besonders sinnvoll, wenn an der Sicherung noch weitere Verbraucher angeschlossen sind.
 
 ```yaml
 site:
@@ -123,23 +126,23 @@ circuits:
     maxCurrent: 32
 ```
 
-Hinweis: Kommt ein Zähler zum Einsatz, der noch keine andere Verwendung (bspw. `grid`) hat, muss er als externer Zähler unter `site.meters.ext` verknüpft werden.
+Hinweis: Kommt ein Zähler zum Einsatz, der noch nicht für einen anderen Zweck (z. B. `grid`) verwendet wird, muss er als externer Zähler unter `site.meters.ext` eingebunden werden.
 
 ## Grenzwerte
 
 An jedem Stromkreis kann sowohl eine maximale Stromstärke pro Phase (`maxCurrent`) als auch eine maximale Leistung (`maxPower`) konfiguriert werden.
 Diese Werte werden, sofern konfiguriert, unabhängig voneinander überwacht.
 
-### externe Grenzwerte
+### Externe Grenzwerte
 
-Bedarfsweise können mit `GetMaxCurrent` und `GetMaxPower` auch externe Grenzwerte definiert werden. Im Fehlerfall gelten die fest definierten Grenzwerte.
+Bei Bedarf können mit `GetMaxCurrent` und `GetMaxPower` auch externe Grenzwerte definiert werden. Im Fehlerfall gelten die fest definierten Grenzwerte.
 
 Beispiel:
 
 ```yaml
 circuits:
   - name: main
-    title: Hauptsicherung
+    title: "Hauptstromkreis"
     maxCurrent: 48
     GetMaxCurrent:
       source: mqtt
@@ -151,36 +154,36 @@ circuits:
 ```
 
 :::note[Hinweis]
-Für die Umsetzung von Regelanweisungen durch den Netzbetreiber kann die externe Begrenzung verwendet werden.
+Mit einer externen Begrenzung lassen sich Steuerungsanweisungen des Netzbetreibers umsetzen.
 Weitere Informationen findest du unter [Externe Begrenzung](/de/external-limit).
 :::
 
 ## Phasenumschaltung
 
-Hast du eine Wallbox mit automatischer Phasenumschaltung (1P/3P), nutzt evcc diese, um die Grenzwerte einzuhalten.
-Reicht die verfügbare Leistung nicht für 3-phasiges Laden, schaltet evcc automatisch auf 1-phasig um.
+Bei Wallboxen mit automatischer Phasenumschaltung (1P/3P) kann das Lastmanagement die Umschaltung nutzen, um innerhalb der konfigurierten Grenzwerte zu laden.
+Reicht die verfügbare Leistung nicht für 3-phasiges Laden, schaltet evcc automatisch auf 1-phasiges Laden um.
 
-Dies gilt auch für Schnellladen und planbasiertes Laden.
-Wenn z. B. durch Lastmanagement nur noch 3,5 kW verfügbar sind, wird auf 1-phasiges Laden (ab 1,4 kW) umgeschaltet, statt die Ladung zu pausieren.
+Das gilt auch im Modus **Schnell** und beim Laden nach Ladeplan.
+Begrenzt das Lastmanagement die verfügbare Leistung z. B. auf 3,5 kW, schaltet evcc auf 1-phasiges Laden (ab 1,4 kW) um, statt den Ladevorgang zu pausieren.
 
 **Voraussetzung:** Die Wallbox muss Phasenumschaltung unterstützen.
 
 ## Wallbox-Konfiguration
 
 Einige Wallboxen bringen eigene Lastmanagement-Funktionen mit.
-Es wird dringend empfohlen, diese zu deaktivieren oder Wallboxen ohne eigene Logik zu verwenden.
+Wir empfehlen dringend, diese zu deaktivieren oder Wallboxen ohne eigene Logik zu verwenden.
 evcc erwartet, dass Geräte seine Steuerbefehle direkt umsetzen.
-Andere Konfigurationen können zu unerwartetem Verhalten führen und müssen eigenständig getestet werden.
+Andere Konfigurationen können zu unerwartetem Verhalten führen und müssen von dir selbst gründlich getestet werden.
 
 ## Einschränkungen
 
 :::note
-Für die kommerzielle Nutzung von Lastmanagement wird später eine separate Lizenz erforderlich sein.
-Private Nutzung mit kleineren Installationen wird kostenlos bleiben.
+Für die kommerzielle Nutzung des Lastmanagements wird später eine separate Lizenz erforderlich sein.
+Die private Nutzung mit kleineren Installationen bleibt kostenlos.
 :::
 
-- Die aktuellen Werte und Grenzen der einzelnen Stromkreise werden auf der Konfigurationsseite im UI angezeigt. Die Visualisierung am Ladepunkt ist in Planung.
-- `priority` Einstellungen am Ladepunkt werden noch nicht berücksichtigt.
+- Die aktuellen Werte und Grenzwerte der einzelnen Stromkreise werden auf der Konfigurationsseite der Oberfläche angezeigt. Eine Visualisierung am Ladepunkt ist geplant.
+- Die Einstellung `priority` am Ladepunkt wird noch nicht berücksichtigt.
 - Neue Ladevorgänge erhalten nur den verbleibenden Spielraum im Stromkreis.
-  Eine aktive Umverteilung auf laufende Ladevorgänge wird noch nicht unterstützt.
-- [Netzladen](/de/features/battery#gridcharge) der Hausbatterie wird nicht berücksichtigt. Wenn die Hausbatterie aktiv aus dem Netz lädt, fließt dieser Verbrauch nicht in die Lastmanagement-Berechnung ein. Bei aktivem [§ 14a Reduzierungssignal](/de/external-limit) wird das Netzladen jedoch automatisch pausiert.
+  Eine Umverteilung zwischen laufenden Ladevorgängen wird noch nicht unterstützt.
+- [Netzladen](/de/features/battery#gridcharge) der Hausbatterie wird nicht berücksichtigt. Wenn die Hausbatterie aktiv aus dem Netz lädt, fließt dieser Verbrauch nicht in die Berechnungen des Lastmanagements ein. Bei aktiven Signalen zur [Leistungsreduzierung nach § 14a](/de/external-limit) wird das Netzladen jedoch automatisch pausiert.

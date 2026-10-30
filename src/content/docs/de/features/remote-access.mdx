@@ -1,8 +1,9 @@
 ---
 title: "Remotezugriff"
-description: "Mit dem Remotezugriff bekommt deine evcc-Instanz eine eigene evcc.cloud-Adresse, sodass du App oder Browser von überall nutzen kannst, ohne Portfreigabe oder VPN."
+description: "Mit dem Remotezugriff bekommt deine evcc-Instanz eine eigene Domain auf evcc.cloud, sodass du sie per App oder Browser von überall erreichst, ohne Portfreigabe oder VPN."
 sidebar:
   order: 11
+translatedFrom: "e23b9381a651"
 ---
 
 import { Steps } from "@astrojs/starlight/components";
@@ -15,7 +16,7 @@ Mit Remotezugriff erreichst du deine evcc-Instanz auch außerhalb deines Heimnet
 Deine Instanz bekommt dafür eine eigene Domain auf `evcc.cloud`.
 Portfreigabe, DynDNS oder VPN sind nicht nötig, da die Instanz die Verbindung selbst nach außen aufbaut.
 
-<SponsorInfoBox lang="de" type="feature" />
+<SponsorInfoBox lang="en" type="feature" />
 
 ## Einrichtung
 
@@ -25,7 +26,7 @@ Portfreigabe, DynDNS oder VPN sind nicht nötig, da die Instanz die Verbindung s
 
    <img
      src={statusImg.src}
-     alt="Integrations-Übersicht mit aktivem Remotezugriff"
+     alt="Integrationsübersicht mit aktivem Remotezugriff"
      style={{ maxWidth: "500px" }}
    />
 
@@ -33,12 +34,12 @@ Portfreigabe, DynDNS oder VPN sind nicht nötig, da die Instanz die Verbindung s
 
    <img
      src={clientsImg.src}
-     alt="Remotezugriff-Verwaltung mit Domain und Client-Liste"
+     alt="Verwaltung des Remotezugriffs mit Domain und Client-Liste"
      style={{ maxWidth: "500px" }}
    />
 
 3. Lege für jedes Gerät, das Zugriff bekommen soll, einen eigenen Client an.
-   Du bekommst Benutzername, Passwort und einen QR-Code mit beiden Daten.
+   Du bekommst Benutzername, Passwort und einen QR-Code, der beides enthält.
    - **App:** Scanne den QR-Code mit der Kamera deines Smartphones.
      Die [evcc-App](/de/features/app) öffnet sich und ist sofort verbunden.
    - **Browser:** Öffne deine persönliche Domain und melde dich mit Benutzername und Passwort an (Basic Auth über HTTPS).
@@ -62,7 +63,7 @@ Portfreigabe, DynDNS oder VPN sind nicht nötig, da die Instanz die Verbindung s
 ## Sicherheit
 
 **Transport.**
-Der Zugriff auf deine Domain läuft über HTTPS mit dem Wildcard-Zertifikat von `*.evcc.cloud`.
+Anfragen an deine Domain gehen über HTTPS mit dem Wildcard-Zertifikat für `*.evcc.cloud`.
 Die Verbindung zwischen Remote-Proxy und deiner lokalen Instanz läuft über einen WebSocket-Tunnel.
 
 **Was der Remote-Proxy sieht.**
@@ -80,12 +81,12 @@ Alle anderen bleiben verbunden.
 Wiederholte Fehlversuche bei der Anmeldung werden automatisch ausgebremst.
 
 **Umfang des Zugriffs.**
-Die Remotezugriff-Zugangsdaten bestehen parallel zu den Sicherheitsmechanismen in evcc selbst.
+Die Zugangsdaten für den Remotezugriff gelten zusätzlich zu den Sicherheitsmechanismen deiner evcc-Instanz.
 Sie gewähren ausschließlich Netzwerkzugang zu deiner Instanz, vergleichbar mit dem Zugriff aus deinem lokalen Netzwerk.
 Für Änderungen an der Konfiguration, Backups, Logs oder einen Neustart ist weiterhin das Administrator-Passwort erforderlich.
 
 **Bindung an das Sponsortoken.**
-Die Registrierung wird gegen `sponsor.evcc.io` geprüft.
+Die Registrierung wird bei `sponsor.evcc.io` geprüft.
 Jeder Sponsor erhält genau eine Domain, die fest mit ihm verknüpft bleibt und nicht erneut vergeben wird.
 
 ## Technische Details
@@ -97,25 +98,25 @@ Den Tunnel baut deine evcc-Instanz selbst nach außen auf, daher ist kein offene
 ```mermaid
 flowchart LR
   subgraph internet [Internet]
-    app["evcc App"]
+    app["evcc-App"]
     browser["Browser"]
     proxy["Remote-Proxy<br/><code>___.evcc.cloud</code>"]
   end
   app <-- HTTPS --> proxy
   browser <-- HTTPS --> proxy
-  proxy <-->|"secure websocket<br/><i>permanent</i>"| evcc["evcc-Instanz<br/><code>evcc.local</code>"]
+  proxy <-->|"sicherer WebSocket<br/><i>dauerhaft</i>"| evcc["evcc-Instanz<br/><code>evcc.local</code>"]
 ```
 
 Beim ersten Aktivieren registriert sich die lokale evcc-Instanz beim Remote-Proxy.
 Im Tausch gegen das Sponsortoken erhält sie ein Verbindungstoken und eine zufällig vergebene Domain.
 Beide werden lokal gespeichert und beim nächsten Start wiederverwendet, um den Tunnel ohne neue Registrierung wieder aufzubauen.
 
-Beim Start öffnet die lokale evcc-Instanz dann eine dauerhafte, TLS-verschlüsselte WebSocket-Verbindung (WSS) zum Remote-Proxy.
+Bei späteren Starts öffnet die lokale evcc-Instanz eine dauerhafte, TLS-verschlüsselte WebSocket-Verbindung (WSS) zum Remote-Proxy.
 Diese Verbindung dient als Tunnel für alle nachfolgenden Zugriffe und wird ausgehend aufgebaut, deswegen ist keine Portfreigabe nötig.
 
 Auf dieser Verbindung läuft [hashicorp/yamux](https://github.com/hashicorp/yamux) als Multiplexer.
-Jeder eingehende HTTP-Request am Remote-Proxy wird zu einem eigenen yamux-Stream auf der bestehenden WebSocket-Verbindung.
-So laufen mehrere parallele Anfragen über eine einzige Verbindung, ohne für jeden Request einen neuen TCP- oder TLS-Handshake auszuhandeln.
+Jede eingehende HTTP-Anfrage am Remote-Proxy wird zu einem eigenen yamux-Stream auf der bestehenden WebSocket-Verbindung.
+So laufen mehrere parallele Anfragen über eine einzige Verbindung, ohne für jede Anfrage einen neuen TCP- oder TLS-Handshake durchzuführen.
 
 WebSocket-Upgrades über den Tunnel funktionieren ebenfalls.
 Das ist wichtig, weil die evcc-Oberfläche Echtzeitdaten selbst über WebSocket bezieht.

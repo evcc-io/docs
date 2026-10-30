@@ -1,3 +1,7 @@
+---
+translatedFrom: "5833eaf825d2"
+---
+
 ## Ereignisse \{#events\}
 
 Nachrichten können für folgende Ereignisse verschickt werden:
@@ -21,15 +25,15 @@ Beide lassen sich mit [Platzhaltern](#placeholders) individuell gestalten.
 Nachricht mit einfacher Syntax, z.&nbsp;B. für das Ereignis `stop`:
 
 ```txt
-${title}: ${vehicleTitle} geladen mit ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
-Sonnenanteil: ${sessionSolarPercentage:%.0f}%
+${title}: ${vehicleTitle} hat ${chargedEnergy:%.1fk}kWh in ${chargeDuration} geladen.
+PV-Anteil: ${sessionSolarPercentage:%.0f}%
 ```
 
 Dieselbe Nachricht mit Go-Template-Syntax, mit Berechnungen (z.&nbsp;B. Umrechnung W → kW) und Bedingungen:
 
 ```txt
 {{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
-Sonnenanteil: {{round .sessionSolarPercentage 0 }}%
+PV-Anteil: {{round .sessionSolarPercentage 0 }}%
 {{- if .sessionPrice}}
 Kosten: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
 {{- end}}
@@ -40,20 +44,20 @@ Kosten: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 
 In Titel und Nachricht können Variablen verwendet werden, um evcc-Informationen anzuzeigen.
 Es gibt zwei Schreibweisen, die auch kombiniert werden können:
 
-- **Einfach**: `${variablenName}`, z.&nbsp;B. `${vehicleTitle}`.
+- **Einfach**: `${variableName}`, z.&nbsp;B. `${vehicleTitle}`.
   Optional mit Formatierung wie `${pvPower:%.1fk}`: neben den üblichen `printf`-Angaben teilt das Suffix `k` den Wert durch 1000 (z.&nbsp;B. Wh → kWh).
-  Zeitdauern wie `${chargeDuration}` werden automatisch sekundengenau ausgegeben (z.&nbsp;B. `1h23m4s`).
-- **Go-Template**: `{{.variablenName}}` — ermöglicht Berechnungen, Bedingungen und [sprig-Funktionen](http://masterminds.github.io/sprig/).
+  Zeitdauern wie `${chargeDuration}` werden auf ganze Sekunden gerundet ausgegeben (z.&nbsp;B. `1h23m4s`).
+- **Go-Template**: `{{.variableName}}` ermöglicht Berechnungen, Bedingungen und [sprig-Funktionen](http://masterminds.github.io/sprig/).
 
 :::note
-Bei Nutzung der Variablen ist auf die korrekte Schreibweise (groß/klein) zu achten!
+Achte bei den Variablen auf die richtige Groß- und Kleinschreibung.
 :::
 
 ### Verfügbare Variablen \{#variables\}
 
 Die verfügbaren Variablen entsprechen den Daten der [REST API](/integrations/rest-api).
 Beim Versand einer Nachricht werden die Daten des auslösenden Ladepunkts und die globalen Daten in einer flachen Struktur zusammengeführt.
-D.&nbsp;h. sowohl globale Werte (z.&nbsp;B. `pvPower`, `grid.Power`) als auch ladepunktspezifische Werte (z.&nbsp;B. `mode`, `chargedEnergy`, `vehicleTitle`) sind direkt verfügbar.
+Dadurch sind sowohl globale Werte (z.&nbsp;B. `pvPower`, `grid.Power`) als auch ladepunktspezifische Werte (z.&nbsp;B. `mode`, `chargedEnergy`, `vehicleTitle`) direkt verfügbar.
 Verschachtelte Werte wie `grid.Power` oder `battery.Soc` sind nur mit der Go-Template-Syntax erreichbar; die Großschreibung der Feldnamen ist dabei erforderlich.
 
 Häufig genutzte Ladepunkt-Variablen:
@@ -64,7 +68,7 @@ Häufig genutzte Ladepunkt-Variablen:
 - `charging`: Ladevorgang aktiv
 - `enabled`: Ladefreigabe erteilt
 - `connected`: Fahrzeug angeschlossen
-- `chargedEnergy`: Geladene Energie der Sitzung in Wh
+- `chargedEnergy`: Geladene Energie des Ladevorgangs in Wh
 - `chargeDuration`: Ladedauer
 - `chargePower`: Aktuelle Ladeleistung in W
 - `connectedDuration`: Anschlussdauer
@@ -74,14 +78,14 @@ Häufig genutzte Ladepunkt-Variablen:
 - `vehicleTitle`: Name des Fahrzeugs
 - `vehicleName`: Technischer Name des Fahrzeugs
 - `vehicleSoc`: Fahrzeug-Ladestand in %
-- `vehicleRange`: Fahrzeug-Reichweite in km
+- `vehicleRange`: Reichweite des Fahrzeugs in km
 - `vehicleOdometer`: Kilometerstand in km
-- `sessionSolarPercentage`: Sonnenanteil der Ladesitzung in %
-- `sessionPrice`: Kosten der Ladesitzung
+- `sessionSolarPercentage`: PV-Anteil des Ladevorgangs in %
+- `sessionPrice`: Kosten des Ladevorgangs
 - `sessionPricePerKWh`: Durchschnittspreis pro kWh
 - `sessionCo2PerKWh`: Durchschnittliche CO₂-Emissionen pro kWh
 - `planActive`: Ladeplan aktiv
-- `smartCostActive`: Günstiges Laden aktiv
+- `smartCostActive`: Smartes Netzladen aktiv
 
 Häufig genutzte globale Variablen:
 
@@ -91,11 +95,11 @@ Häufig genutzte globale Variablen:
 - `grid.Power`: Netzbezug (+) / Einspeisung (−) in W
 - `battery.Power`: Batterieleistung in W
 - `battery.Soc`: Batterie-Ladestand in %
-- `currency`: Tarif-Währung
+- `currency`: Tarifwährung
 - `tariffGrid`: Aktueller Netzpreis pro kWh
 - `tariffFeedIn`: Einspeisevergütung pro kWh
 - `tariffCo2`: Aktuelle CO₂-Intensität
-- `statistics.<zeitraum>.*`: Ladestatistiken für die Zeiträume `30d`, `365d`, `thisYear` und `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
+- `statistics.<period>.*`: Ladestatistiken für die Zeiträume `30d`, `365d`, `thisYear` und `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
 
 Die vollständige Liste aller verfügbaren Felder findest du in der API-Antwort unter `http://evcc.local:7070/api/state`.
 
