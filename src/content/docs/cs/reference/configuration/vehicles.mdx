@@ -1,0 +1,209 @@
+---
+title: "vehicles"
+description: "Popisuje, jak v evcc.yaml zadat vozidla s kapacitou baterie, počtem fází, ikonou, intervalem dotazování a identifikátory (RFID, ID vozidla) pro automatické rozpoznání."
+sidebar:
+  order: 7
+translatedFrom: "28f7a3dffd71"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+Vozidlo představuje konkrétní elektromobil (EV) s jeho baterií. Když je vozidlo nakonfigurované a přiřazené k [nabíjecímu bodu](/cs/reference/configuration/loadpoints#vehicle), může uživatelské rozhraní zobrazovat stav nabíjení, stav nabití, zbývající dobu nabíjení a další data, která se z vozidla automaticky načítají a zpracovávají.
+
+Nabíjení lze také omezit na určitý stav nabití (pouze v uživatelském rozhraní). Protože většina nabíječek tuto informaci nemůže znát (přenáší se jen u velmi specifických kombinací nabíječek), může evcc s touto konfigurací komunikovat přímo s vozidlem přes online rozhraní (API) výrobce vozidla.
+
+Konfigurace `vehicles` je seznam různých vozidel.
+
+**Příklad**:
+
+```yaml
+vehicles:
+  - name: Zoe
+    type: ...
+    ...
+```
+
+Konfigurace známých vozidel najdete v části [Zařízení – vozidla](/cs/vehicles).
+
+Níže jsou vysvětleny jednotlivé parametry.
+
+---
+
+## Povinné parametry
+
+### `name`
+
+Krátké označení nakonfigurovaného vozidla. Hodnota se používá při odkazování na vozidlo v konfiguraci [nabíjecího bodu](/cs/reference/configuration/loadpoints#vehicle).
+
+**Příklad**:
+
+```yaml
+name: zoe
+```
+
+---
+
+### `title`
+
+Název vozidla, který se zobrazí v uživatelském rozhraní.
+
+**Příklad**:
+
+```yaml
+title: Zoe
+```
+
+---
+
+### `type`
+
+Typ rozhraní evcc, který umožňuje komunikaci s vozidlem. Známá vozidla lze začlenit pomocí typu `template`. Vhodný typ (šablonu) pro známá vozidla a návod k ruční konfiguraci `custom` najdete v části [Zařízení – vozidla](/cs/vehicles).
+
+---
+
+## Volitelné parametry
+
+### `capacity`
+
+Využitelná kapacita baterie vozidla v kilowatthodinách (kWh).
+
+Slouží k výpočtu potřebné energie při plánování nabíjení.
+
+**Příklad**:
+
+```yaml
+capacity: 50 # kWh
+```
+
+---
+
+### `phases`
+
+_Maximální_ počet fází, které toto vozidlo může využít (případně včetně nabíjecího kabelu). Interní výchozí hodnota je 3. Možné hodnoty jsou 1, 2 nebo 3.
+
+Některá vozidla, zejména plug-in hybridy, nevyužívají k nabíjení maximálně možné 3 fáze. Pokud je instalován měřič nabíječky, zjistí `evcc` skutečně používané fáze na začátku nabíjení. Před zahájením nabíjení však tato informace k dispozici není. Když u vozidla nakonfigurujete parametr `phases`, může `evcc` v režimu **Chytrý** zahájit nabíjení i s nižším dostupným výkonem.
+
+**Příklad**:
+
+```yaml
+phases: 2
+```
+
+---
+
+### `cache`
+
+Jak dlouho se uchovávají data načtená z datového rozhraní (API) vozidla, než se evcc rozhraní znovu dotáže.
+
+:::note
+Hodnotu je nutné zadat včetně časové jednotky (viz příklad). `m` znamená minuty.
+:::
+
+:::caution
+Měnit výchozí nastavení se **NEDOPORUČUJE**, protože by to mohlo vést k tomu, že výrobce vozidla aktivně zablokuje řízení nabíjení přes evcc. **NA VLASTNÍ NEBEZPEČÍ.**
+:::
+
+Kvůli aktuálním stavovým datům vozidla (např. stav nabití trakční baterie) evcc pravidelně online dotazuje rozhraní výrobce. Aby však servery výrobce nebyly zahlceny neustálými požadavky (což by mohlo vést k zablokování účtu), je implementována cache, která tyto požadavky zachytí a odpoví nedávno načtenými daty až do zde uvedeného maximálního stáří. Protože většina vozidel aktualizuje data jen během probíhajícího nabíjení a ve velmi dlouhých intervalech (běžně 10 až 30 minut), častější dotazy nepřinášejí žádnou přidanou hodnotu.
+
+**Výchozí hodnota:** `15m`
+
+**Příklad**:
+
+```yaml
+cache: 5m
+```
+
+---
+
+### `identifiers`
+
+Seznam jednoho nebo více identifikátorů, podle kterých se vozidlo rozpozná. Pokud je potřeba vozidlo identifikovat u různých nabíječek, může být nutných více identifikátorů. Identifikace je možná pomocí následujících mechanismů:
+
+#### RFID
+
+Pokud má nabíječka rozhraní RFID, lze vozidlu k identifikaci přiřadit kartu RFID. V tom případě je potřeba `RFID Token ID`.
+
+**Příklad**:
+
+```yaml
+identifiers:
+  - 12345ABC # RFID token ID
+```
+
+Poznámka: pokud by se identifikátor mohl interpretovat jako číslo, je nutné ho uvést v uvozovkách.
+
+**Příklad**:
+
+```yaml
+identifiers:
+  - "012345"
+  - "12345e2"
+  - "0x1234"
+```
+
+#### Identifikátor vozidla
+
+Pokud to nabíječka podporuje, přijímá od vozidla identifikátor vozidla. Může to být buď MAC adresa palubní nabíječky, nebo identifikátor trvale nainstalovaného certifikátu Plug & Charge (jiného certifikátu než pro DC nabíjení!).
+
+**Příklad**:
+
+```yaml
+identifiers:
+  - 01:23:45:67:89:0A # MAC address
+```
+
+Některá vozidla generují každý den novou MAC adresu. V tom případě lze použít zástupné znaky, pokud se existující vozidla liší v neměnné části MAC adresy.
+
+```yaml
+identifiers:
+  - 01:23:45:*
+```
+
+---
+
+### `features: ["coarsecurrent"]`
+
+Označuje, že vozidlo nelze regulovat plynulým omezením proudu.
+
+Toto nastavení je vhodné použít pro následující kombinaci:
+
+- Vozidlo dokáže nabíjecí proud měnit jen po celých ampérech
+- Nabíječka dokáže zpracovat jemnější zadání nabíjecího proudu (např. 1 mA)
+
+Při této kombinaci se může stát, že změna proudu o několik mA vede při regulaci k neočekávané změně fázového proudu o 1 A. Regulace pak může začít oscilovat. Tato funkce také omezuje regulaci na hrubé kroky po 1 A.
+
+NELZE ji použít ve spojení se šablonou vozidla. Aby ji bylo možné použít, musí být vozidlo nakonfigurováno jako nativní typ.
+
+**Příklad**:
+
+```yaml
+features: ["coarsecurrent"]
+```
+
+---
+
+### `icon`
+
+Vozidla lze v uživatelském rozhraní zobrazit s různými ikonami. K dispozici jsou tyto možnosti:
+
+- car
+- bike
+- scooter
+- moped
+- motorcycle
+- van
+- bus
+- tractor
+- generic
+- heater
+- cooler
+- waterheater
+
+**Příklad**:
+
+```yaml
+icon: heater
+```
+
+---

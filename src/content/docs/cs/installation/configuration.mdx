@@ -1,0 +1,250 @@
+---
+title: "Konfigurace"
+description: "Po instalaci nastavíte evcc nejlépe ve webovém rozhraní, případně pomocí souboru evcc.yaml, a zjistíte, jak nastavení otestovat a řešit problémy."
+sidebar:
+  order: 11
+translatedFrom: "6672cdb3ee1b"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Po instalaci evcc můžete nakonfigurovat svá zařízení a nastavení.
+Doporučeným způsobem je konfigurace přes webové rozhraní.
+Pro pokročilé uživatele je k dispozici také konfigurace pomocí souboru.
+
+## Přes webové rozhraní
+
+:::tip[Doporučeno]
+Webové rozhraní je nejsnazší a nejrychlejší způsob, jak evcc nastavit.
+:::
+
+### Začínáme
+
+<Steps>
+
+1. **Spusťte evcc**: Po [instalaci](/cs/installation) spusťte evcc podle návodu pro váš systém
+2. **Otevřete prohlížeč**: Přejděte na `http://<your-ip>:7070` (např. `http://evcc.local:7070` nebo `http://192.168.1.50:7070`)
+3. **Set administrator password**: Při prvním spuštění budete vyzváni k nastavení hesla
+4. **Nastavení**: Postupujte podle pokynů na úvodní stránce
+
+</Steps>
+
+### Přidání zařízení
+
+V konfiguraci můžete nastavit tyto součásti:
+
+- **Místo pro nabíjení a topení** (doporučeno): Nabíječky a tepelná čerpadla
+- **Elektrická síť** (doporučeno): Měřič síťové přípojky, tarify elektřiny a zařízení omezující výkon, důležité pro správné řízení energie
+- **Solár a baterie** (volitelné): Fotovoltaické elektrárny a domácí baterie
+- **Vozidla** (volitelné): Integrace vozidel pro kapacitu baterie a stav nabití, umožňuje chytřejší nabíjení
+
+Aby systém běžel, musí být nakonfigurován alespoň jeden měřič nebo nabíjecí bod.
+
+Většina zařízení je dostupná přes IP adresu nebo název hostitele.
+Pole **IP adresa nebo název hostitele** nabízí zařízení nalezená ve vaší síti s jejich adresou, názvem hostitele a výrobcem.
+Zařízení, která odpovídají zvolenému typu zařízení, jsou uvedena v části **Odpovídající**, všechna ostatní v části **Ostatní**.
+Položky, které už používá jiné zařízení, jsou označeny jako **již použito**.
+Pokud odpovídá právě jedno zařízení, vyplní se automaticky.
+Adresu můžete vždy zadat i ručně.
+Vyhledávání běží pouze lokálně, a to jen během konfigurace zařízení.
+Najde jen zařízení ve stejném segmentu sítě jako vaše instance evcc.
+Zařízení v jiných VLAN nebo podsítích se nenajdou.
+V kontejneru Docker to vyžaduje [síťový režim host](/cs/installation/docker#network) (případně macvlan), protože v režimu bridge kontejner lokální síť nevidí.
+
+### Integrace
+
+Kromě toho můžete integrovat různé služby a protokoly:
+
+- **MQTT**: Výměna dat s dalšími systémy v síti
+- **[Oznámení](/cs/notifications)**: Push oznámení a upozornění e-mailem
+- **InfluxDB**: Export dat pro dlouhodobou analýzu
+- **EEBUS**: Komunikace s dalšími zařízeními EEBUS
+- **Server OCPP**: Připojení nabíječek s podporou OCPP
+- **Okruhy**: Sledování a řízení okruhů
+- **Modbus Proxy**: Vícenásobný přístup k zařízením Modbus
+- **Sunny Home Manager**: Integrace přes protokol SEMP
+- **Vnější limit**: Omezení výkonu provozovatelem distribuční soustavy (§ 14a EnWG, § 9 EEG) nebo nadřazeným systémem řízení energie
+
+### Zálohování a obnova \{#backup\}
+
+Webové rozhraní nabízí integrované funkce pro zálohování dat:
+
+- **Záloha**: Stažení databáze pro zálohu dat
+- **Obnovit**: Obnovení dat ze záložního souboru
+- **Reset**: Smazání konfigurace nebo historie nabíjení
+
+## Přes konfigurační soubor
+
+:::note[Tradiční způsob]
+Tento způsob používá soubor `evcc.yaml` a vyžaduje znalost příkazové řádky a souborů YAML. Některé nové funkce lze nastavit pouze přes webové rozhraní.
+:::
+
+### Od nuly
+
+Soubor `evcc.yaml` můžete vytvořit i ručně.
+Zde najdete minimální šablonu, kterou můžete použít jako výchozí bod.
+
+#### Vytvoření
+
+Zkopírujte obsah do nového souboru `evcc.yaml`.
+
+```yaml title="evcc.yaml"
+## minimal configuration example
+
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid
+    pv:
+      - my_pv
+    battery:
+      - my_battery
+
+# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    vehicle: my_car # default vehicle
+
+# meter definitions
+# name can be freely chosen and is used as reference when assigning meters to site and loadpoints
+# for documentation see https://docs.evcc.io/docs/meters
+meters:
+  # replace with your real grid meter
+  - name: my_grid
+    type: template
+    template: demo-meter
+    usage: grid
+    power: -1000 # 1 kW feed-in
+  # replace with your real solar system
+  - name: my_pv
+    type: template
+    template: demo-meter
+    usage: pv
+    power: 4000 # 4 kW production
+  # replace with your real battery
+  - name: my_battery
+    type: template
+    template: demo-battery
+    usage: battery
+    power: -1000 # 1 kW battery charging
+    soc: 50 # 50 % state of charge
+
+# replace with your real charger
+# see https://docs.evcc.io/docs/chargers
+chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: C # charging
+    power: 2000 # 2 kW charging power
+    enabled: true # optional
+
+# replace with your real vehicle (optional)
+# see https://docs.evcc.io/docs/vehicles
+vehicles:
+  - name: my_car
+    type: template
+    template: offline
+    title: blue e-Golf
+    capacity: 50 # in kWh
+
+# enter your real grid tariff and feed-in price
+# see https://docs.evcc.io/docs/tariffs
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.29 # EUR/kWh
+  feedin:
+    type: fixed
+    price: 0.10 # EUR/kWh
+```
+
+S tímto souborem můžete evcc spustit.
+Použijte příslušný návod pro váš systém.
+
+#### Testování
+
+Restartujte evcc a otevřete v prohlížeči `http://<evcc-ip>:7070`.
+Zkontrolujte, zda hodnoty dávají smysl.
+Pokud se zobrazí chybová zpráva, zkontrolujte konfiguraci.
+
+Často jde o chyby v odsazení nebo o překlepy.
+Soubor je zapsán ve [formátu YAML](https://wikipedia.org/wiki/YAML).
+Pomocí online nástroje [YAML Lint](https://www.yamllint.com/) můžete zkontrolovat, zda soubor odpovídá správnému formátu.
+
+#### Úpravy
+
+Soubor obsahuje pouze ukázková zařízení (`demo-charger`, `demo-meter`, `demo-battery`, `offline`).
+Ta mají pevné hodnoty.
+Projděte soubor krok za krokem a upravte hodnoty podle své instalace:
+
+- Nahraďte ukázková zařízení vlastními [měřiči](/cs/meters), [nabíječkami](/cs/chargers) a [vozidly](/cs/vehicles).
+- Pokud nemáte baterii, můžete tuto sekci úplně odstranit.
+- Pokud máte více fotovoltaických elektráren, můžete příslušné sekce zduplikovat.
+- Pokud máte více nabíječek, zkopírujte sekce nabíjecího bodu a nabíječky a upravte názvy.
+
+Mějte na paměti, že se jednotlivé položky na sebe navzájem odkazují.
+V položce `site` (`meters`) jsou měřiče (`grid`, `pv`, `battery`) přiřazeny ke svým rolím.
+K tomu se vždy používá pole `name`.
+Názvy proto musí být jedinečné.
+
+Pokud je to možné, provádějte tyto změny postupně.
+Po každé změně restartujte evcc a zkontrolujte výstup v prohlížeči.
+Tak rychle zjistíte, kde jste případně udělali chybu.
+
+#### Další informace
+
+Soubor [evcc.dist.yaml](https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml) v hlavním projektu obsahuje úplný seznam všech možných konfiguračních voleb.
+Podrobnější vysvětlení voleb najdete v části [Reference → evcc.yaml](/cs/reference/configuration).
+
+Pokud chcete vidět dynamické demo, můžete se podívat i na obsah souboru [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml).
+Tento soubor obsahuje ukázková zařízení založená na JavaScriptu, která simulují omezenou funkčnost.
+Používá se také pro [demo.evcc.io](https://demo.evcc.io).
+
+Chcete-li vlastní instalaci spustit v ukázkovém režimu, stačí spustit evcc s parametrem `--demo`.
+Další informace najdete v [referenci CLI](/cs/reference/cli/evcc).
+
+## Testování
+
+Otestujte, zda konfigurace funguje:
+
+```sh
+evcc -c evcc.yaml
+```
+
+Otevřete prohlížeč a zadejte URL: `http://<your-ip>:7070` (např. `http://evcc.local:7070`).
+Rozhraní evcc by nyní mělo zobrazovat vaše vlastní zařízení.
+
+Pokud vše funguje, můžete soubor `evcc.yaml` přesunout do umístění, které vaše instalace vyžaduje.
+
+## Řešení problémů
+
+Pokud nastanou chyby, můžete pomocí následujících příkazů získat další informace.
+
+- Kontrola syntaxe
+
+  ```sh
+  evcc -c evcc.yaml checkconfig
+  ```
+
+- Měřiče (síť, solár, baterie)
+
+  ```sh
+  evcc -c evcc.yaml -l debug meter
+  ```
+
+- Vozidla
+
+  ```sh
+  evcc -c evcc.yaml -l debug vehicle
+  ```
+
+- Nabíječky
+
+  ```sh
+  evcc -c evcc.yaml -l debug charger
+  ```
+
+Zkontrolujte, zda výstup každého příkazu dává smysl.

@@ -1,0 +1,70 @@
+---
+translatedFrom: "de9f2699a051"
+---
+
+## Jak to funguje \{#how-it-works\}
+
+V běžném provozu nabíjí evcc bez externího omezení výkonu.
+Nabíjecí body pracují se svou běžnou konfigurací a případně je koordinují další omezení [řízení zátěže](/cs/features/loadmanagement).
+
+Když provozovatel sítě pošle signál ke snížení:
+
+1. **Řídicí jednotka FNN**: Kontakt W4 se sepne a evcc aktivuje nastavený limit odběru
+2. **EEBus**: Řídicí jednotka digitálně předá vypočtený celkový limit
+3. **Relé**: Kontakt se sepne a evcc aktivuje nastavený limit výkonu
+
+Limit omezí hlavní okruh [řízení zátěže](/cs/features/loadmanagement) a výkon všech nabíjecích bodů přiřazených k okruhům se odpovídajícím způsobem sníží.
+Pokud je celková spotřeba příliš vysoká, může se nabíjení i zastavit.
+Řízení platí pro všechny režimy (Chytrý, Rychlé).
+
+**Řízení baterie během snížení:**
+Pokud je nastaveno [aktivní řízení baterie](/cs/features/battery#battery-control) a domácí baterie se právě [nabíjí ze sítě](/cs/features/battery#gridcharge), nabíjení ze sítě se automaticky pozastaví.
+Baterie se přepne do režimu _hold_, takže se už nevybíjí.
+Nabíjení baterie ze solárního přebytku je obvykle stále možné.
+Po skončení snížení výkonu se [nabíjení ze sítě](/cs/features/battery#gridcharge) automaticky obnoví.
+
+Když je aktivní regulační limit, zobrazí se na hlavní stránce evcc **banner s upozorněním na regulaci**.
+Limit odběru a omezení exportu do sítě se zobrazují odděleně.
+
+## Protokolování \{#logging\}
+
+Všechny požadavky provozovatele sítě na omezení se automaticky zaznamenávají.
+Data protokolu lze stáhnout jako soubor CSV v části **Konfigurace → Vnější limit**.
+
+Každý záznam obsahuje:
+
+- Čas začátku a konce omezení
+- Druh regulace (snížení odběru nebo omezení exportu do sítě)
+- Naměřený výkon sítě na začátku omezení
+- Nastavený limit výkonu
+
+Tento protokol lze na vyžádání předložit provozovateli sítě jako doklad o dodržení regulačních požadavků.
+
+:::note[Odpovědnost (německé předpisy § 14a, § 9)]
+Kvalifikovaný elektrikář musí po instalaci ověřit, že externí limit funguje podle očekávání.
+Provozovatel zařízení odpovídá za jeho řádný provoz a musí protokol uchovávat nejméně 2 roky.
+:::
+
+## Řízení dalších spotřebičů \{#additional-consumers\}
+
+Kromě nabíjecích bodů lze do německého řízení zátěže podle § 14a zapojit i další řiditelné spotřebiče.
+Týká se to např. tepelných čerpadel nebo bateriových úložišť, která jsou připojena přes EEBus nebo nakonfigurována jako měřiče s dodatečným reléovým výstupem.
+
+Regulace zohledňuje aktuální příkon všech řiditelných spotřebičů.
+Jako další spotřebiče tak automaticky zahrnuje všechny nabíjecí body a všechny měřiče s odpovídajícími spínacími výstupy nebo rozhraním EEBus s případem užití LPC.
+
+Nejprve se utlumí všechny ostatní spotřebiče.
+Zbývající výkon se pak rozdělí mezi aktivní nabíjecí body.
+Kvůli paušálnímu tlumení ostatních spotřebičů může být dostupný nabíjecí výkon pro aktivní nabíjecí body ve výjimečných případech dokonce vyšší než v běžném stavu.
+Pokud nestačí omezit nabíjecí body a utlumit všechny ostatní spotřebiče, nabíjení na nabíjecích bodech se přeruší.
+
+:::note[Dostupnost]
+V současnosti existuje pouze jeden tlumitelný měřič (spotřebič EEBus).
+Tato funkce se dále rozšiřuje a kompatibilní měřiče budou označeny v [dokumentaci zařízení](/cs/meters).
+:::
+
+## Další informace \{#further-information\}
+
+- [Řízení zátěže](/cs/features/loadmanagement): základy rozdělování zátěže
+- [Integrace definovaná uživatelem](/cs/user-defined-devices#external-limit): připojení přes relé nebo vlastní zdroje dat
+- [Pluginy](/cs/reference/plugins): pokročilé konfigurace pluginů

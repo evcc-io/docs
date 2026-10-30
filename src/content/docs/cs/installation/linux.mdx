@@ -1,0 +1,355 @@
+---
+title: "Linux"
+description: "Nainstalujte evcc z repozitáře apt na Debianu, Ubuntu a podobných distribucích, spouštějte ho jako službu systemd, aktualizujte ho nebo se vraťte ke starší verzi."
+sidebar:
+  order: 7
+translatedFrom: "773c2321f20d"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Tento návod popisuje instalaci na linuxových distribucích založených na apt, jako jsou Debian a Ubuntu.
+
+:::tip[Raspberry Pi]
+Pro Raspberry Pi doporučujeme jednodušší instalaci pomocí [evcc Linux Image](/cs/installation/linux-image).
+:::
+
+:::note
+Pro ostatní linuxové distribuce použijte návod pro [Docker](/cs/installation/docker) nebo část [Ruční instalace](#manual).
+:::
+
+## První instalace
+
+<Steps>
+
+1. ### Instalace
+
+   Otevřete terminál a nainstalujte potřebné závislosti:
+
+   ```sh
+   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   ```
+
+   Přidejte repozitář APT pro evcc:
+
+   <Tabs groupId="release-type">
+     <TabItem label="Stabilní verze" default>
+       Aktuální stabilní verze
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/stable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+     <TabItem label="Nightly">
+       Vývojová verze, která se aktualizuje denně a může být nestabilní.
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/unstable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+   </Tabs>
+
+   Aktualizujte seznam balíčků a nainstalujte evcc:
+
+   ```sh
+   sudo apt update
+   sudo apt install -y evcc
+   ```
+
+   :::note
+   Během instalace se vytvoří uživatel `evcc`, proto se ujistěte, že přihlášený uživatel nemá jméno `evcc`.
+   :::
+
+   :::note
+   Pokud se používá sériové rozhraní, může být nutné spustit `sudo usermod -a -G plugdev evcc`. Tím se uživatel `evcc` přidá do skupiny `plugdev`, která uděluje přístup k připojeným zařízením (USB, sériové rozhraní atd.) bez oprávnění roota.
+   :::
+
+2. ### Spuštění
+
+   ```sh
+   sudo systemctl start evcc
+   ```
+
+3. ### Nastavení
+
+   Otevřete webové rozhraní evcc v prohlížeči: [http://localhost:7070](http://localhost:7070).
+   Nastavte heslo administrátora a nakonfigurujte svá zařízení přímo ve webovém rozhraní.
+
+</Steps>
+
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat-square)](https://cloudsmith.com)
+
+Děkujeme společnosti [Cloudsmith](https://cloudsmith.com) za hosting repozitáře!
+
+## Konfigurace
+
+evcc lze nakonfigurovat přes webové rozhraní nebo pomocí konfiguračního souboru.
+
+:::tip[Doporučeno]
+Konfigurace přes webové rozhraní je nejjednodušší způsob, jak evcc nastavit.
+:::
+
+### Webové rozhraní (doporučeno)
+
+Po prvním spuštění můžete evcc konfigurovat přímo v prohlížeči na adrese [http://localhost:7070](http://localhost:7070).
+Nastavení se automaticky ukládají do databáze.
+
+### Konfigurační soubor (tradiční způsob)
+
+Případně můžete použít konfigurační soubor `evcc.yaml`.
+Podrobnosti o vytvoření konfiguračního souboru najdete v části [Konfigurace](/cs/installation/configuration).
+
+:::caution
+Konfigurační soubor musí být uložen v `/etc/evcc.yaml`.
+:::
+
+- Vytvořte konfigurační soubor podle [návodu](/cs/installation/configuration) a uložte ho do `/etc/evcc.yaml`
+
+- Restartujte službu evcc:
+
+  ```sh
+  sudo systemctl restart evcc
+  ```
+
+- Rozhraní evcc otevřete na adrese [http://localhost:7070](http://localhost:7070)
+
+## Aktualizace
+
+Na nejnovější verzi evcc aktualizujete podle tohoto postupu:
+
+- Zkontrolujte ve [vydáních](https://github.com/evcc-io/evcc/releases), zda nejsou pro vaši instalaci uvedeny nekompatibilní změny (BC)
+- Otevřete terminál
+- Aktualizujte seznam balíčků:
+
+  ```sh
+  sudo apt update
+  ```
+
+- Aktualizujte evcc:
+
+  ```sh
+  sudo apt --only-upgrade install -y evcc
+  ```
+
+:::note
+Pokud byl přidán nestabilní repozitář (verze nightly), aktualizace vždy nainstaluje nejnovější dostupnou verzi nightly.
+
+Pokud to už nechcete, můžete nestabilní repozitář odebrat příkazem `sudo rm /etc/apt/sources.list.d/evcc-unstable.list`.
+:::
+
+## Návrat ke starší verzi
+
+Pokud se z jakéhokoli důvodu potřebujete vrátit ke starší verzi, použijte tento příkaz:
+
+```sh
+  sudo apt install evcc=x.xxx.x # Version Number
+```
+
+## Systémová služba \{#systemd\}
+
+evcc běží na pozadí jako systémová služba. Tady je několik užitečných příkazů pro její ovládání:
+
+```sh
+sudo systemctl status evcc # shows status
+sudo systemctl start evcc # start the service, if it isn't already running
+sudo systemctl stop evcc # stops the service
+sudo systemctl restart evcc # restart the service
+sudo systemctl enable evcc # sets the service to run at boot
+sudo systemctl disable evcc # stops the service running at boot
+```
+
+## Testování
+
+Kontrola instalace
+
+- Zobrazte stav služby evcc:
+
+  ```sh
+  sudo systemctl status evcc
+  ```
+
+- Zkontrolujte poslední záznamy v logu služby evcc:
+
+  ```sh
+  sudo journalctl -u evcc --since "yesterday"
+  ```
+
+- Ověřte konfiguraci měřičů:
+
+  ```sh
+  sudo evcc -l debug meter
+  ```
+
+- Ověřte konfiguraci nabíječky:
+
+  ```sh
+  sudo evcc -l debug charger
+  ```
+
+- Ověřte konfiguraci vozidla:
+
+  ```sh
+  sudo evcc -l debug vehicle
+  ```
+
+Otevřete prohlížeč a zadejte následující adresu URL: `http://127.0.0.1:7070`.
+
+:::note
+Pokud prohlížeč neotevíráte na stejném počítači, nahraďte `127.0.0.1` IP adresou nebo názvem hostitele daného počítače.
+:::
+
+## Zálohování a obnova
+
+### Přes webové rozhraní (doporučeno)
+
+Nejjednodušší je zálohovat přes webové rozhraní.
+Podrobnosti najdete v části [Konfigurace → Zálohování a obnova](/cs/installation/configuration#backup).
+
+### Ruční zálohování
+
+Pro obnovení „původního stavu“ po přeinstalaci stačí zálohovat konfigurační soubor `evcc.yaml` (pokud se používá) a databázový soubor `evcc.db`.
+Umístění souborů se vypisuje do logu při spuštění programu.
+Obvykle se konfigurace nachází v `/etc/evcc.yaml` a databáze v `/var/lib/evcc/evcc.db`.
+
+Oba soubory lze zkopírovat linuxovým příkazem `cp`.
+
+Příklad (kopírování z obvyklého umístění do domovského adresáře):
+
+Kopírování yaml: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
+
+Kopírování db: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Proměnné prostředí a parametry CLI \{#environment-variables\}
+
+Při instalaci přes APT běží evcc jako služba systemd.
+Chování evcc můžete upravit pomocí doplňujícího souboru (drop-in) systemd:
+
+```sh
+sudo systemctl edit evcc
+```
+
+:::caution
+Neupravujte přímo `/lib/systemd/system/evcc.service`.
+
+Správce balíčků `apt` tento soubor přepíše při každé aktualizaci balíčku a vaše změny se ztratí.
+Místo toho vždy použijte drop-in soubor systemd přes `systemctl edit evcc`.
+:::
+
+### Příklad
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_LOG=debug,tariff:trace"
+Environment="EVCC_DATABASE_DSN=/usb/evcc/evcc.db"
+Environment="EVCC_NETWORK_HOST=my-evcc.local"
+Environment="EVCC_NETWORK_PORT=80"
+ExecStart=
+ExecStart=/usr/bin/evcc --custom-css /path/to/my.css
+```
+
+:::note
+První řádek `ExecStart=` bez hodnoty je nutný, aby se výchozí příkaz zrušil a nahradil.
+:::
+
+:::tip
+Všechny parametry z `evcc.yaml` lze nastavit jako proměnné prostředí: `EVCC_` + název parametru velkými písmeny.
+
+
+Úplný seznam všech parametrů CLI najdete v [dokumentaci CLI](/cs/reference/cli/evcc).
+:::
+
+## Ruční instalace \{#manual\}
+
+Kromě balíčku APT pro Debian/Ubuntu nabízíme pro Linux i další binární soubory.
+
+### Instalace
+
+- Stáhněte soubor odpovídající vašemu systému:
+  - 64bitový procesor Intel: [evcc_X.XX_linux_amd64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 64bitový procesor ARM: [evcc_X.XX_linux_arm64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 32bitový procesor ARM (např. 32bitový systém pro Raspberry Pi): [evcc_X.XX_linux_armv6.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+
+- Rozbalte stažený soubor (např. dvojklikem).
+- Rozbalená složka obsahuje program `evcc`.
+- Otevřete terminál a přejděte do nové složky.
+- Tímto příkazem ověřte, zda evcc funguje:
+  ```
+  ./evcc -v
+  ```
+- Měla by se zobrazit aktuální verze evcc (např. `evcc version 0.xxx.y`).
+
+### Konfigurace
+
+evcc můžete nakonfigurovat přes webové rozhraní nebo pomocí konfiguračního souboru.
+Podrobnosti najdete v části [Konfigurace](/cs/installation/configuration).
+
+Spusťte evcc příkazem:
+
+```sh
+./evcc
+```
+
+Pak v prohlížeči otevřete [http://localhost:7070](http://localhost:7070) a postupujte podle pokynů.
+
+### Aktualizace a návrat ke starší verzi
+
+Postupujte podle kroků výše a nahraďte spustitelný soubor evcc novou nebo předchozí verzí.
+Konfiguraci není nutné provádět znovu.
+
+### Nastavení služby
+
+Pro produkční provoz je vhodné nastavit evcc jako systémovou službu.
+Díky tomu se evcc spustí při startu počítače a v případě chyby se automaticky restartuje.
+
+:::note
+Tato dokumentace předpokládá, že Linux podporuje `systemd`.
+:::
+
+- Spusťte následující příkaz, který vytvoří nový soubor pro službu a otevře ho v editoru:
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Zkopírujte do souboru následující obsah:
+
+  ```
+  [Unit]
+  Description=evcc
+  Requires=network-online.target
+  After=syslog.target network.target network-online.target
+  Wants=network-online.target
+  StartLimitIntervalSec=10
+  StartLimitBurst=10
+
+  [Service]
+  ExecStart=/usr/local/bin/evcc
+  Restart=always
+  RestartSec=5
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Pokud se soubor `evcc` nachází v jiném adresáři, upravte jeho cestu v `ExecStart`.
+  Předpokládá se také, že konfigurační soubor `evcc.yaml` je uložen v `/etc/evcc.yaml`.
+  Pokud tomu tak není, přidejte na konec `ExecStart` text `-c /yourpath/evcc.yaml`.
+  Místo `yourpath` doplňte příslušný adresář.
+
+- Otestujte službu:
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  Při úspěchu by měl výstup obsahovat: `Active: active (running)`.
+
+- Nastavte automatické spouštění služby při startu systému:
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+Další informace najdete v části [Systémová služba](#systemd) výše.

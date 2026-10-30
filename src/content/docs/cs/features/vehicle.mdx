@@ -1,0 +1,134 @@
+---
+title: "Vozidla"
+description: "Vozidlo hosta, offline vozidla a vozidla s online API nabízejí v evcc různé funkce a o jednu nabíječku se může dělit i více vozidel."
+sidebar:
+  order: 8
+translatedFrom: "5bf55f6f775f"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Pokud v evcc nastavíte své vozidlo nebo vozidla, máte k dispozici další funkce.
+Můžete nastavit [minimální nabití a limity](/cs/features/limits), používat [plány nabíjení](/cs/features/plans) a v [nabíjecích relacích](/cs/features/sessions) získat podrobné vyhodnocení podle vozidla včetně údajů, jako jsou ujeté kilometry.
+
+Nastavení vozidel je volitelné. Protože evcc ve většině případů řídí nabíjení přes nabíječku, funguje nabíjení ze soláru a podle ceny i bez nastaveného vozidla.
+
+## Typy vozidel
+
+Dostupné funkce závisí na typu vozidla. Rozlišují se tyto typy:
+
+### Vozidlo hosta
+
+Pokud nemáte nastavené žádné vozidlo, zobrazí se na nabíjecím bodě vozidlo hosta.
+Jde o standardní vozidlo, které nepodporuje žádné zvláštní funkce.
+I když máte nastavené vlastní vozidlo, můžete na vozidlo hosta kdykoli přepnout.
+To se hodí např. tehdy, když na vašem nabíjecím bodě nabíjí nenastavené vozidlo (třeba nečekaná návštěva).
+evcc pak použije standardní hodnoty výkonu a fází nastavené u nabíjecího bodu.
+V [nabíjecích relacích](/cs/features/sessions) se toto nabíjení přiřadí vozidlu hosta.
+
+### Vozidla bez API (offline)
+
+Pokud vaše vozidlo nemá online rozhraní nebo na nabíjecím bodě nemá připojení k internetu, můžete ho nastavit jako offline vozidlo.
+Přejděte do **Konfigurace → Vozidla → Přidat vozidlo** a v poli **Výrobce** zvolte **Obecné vozidlo (bez API)**.
+Pojmenujte vozidlo v poli **Název** (např. „Zelená Honda e“) a do pole **Kapacita** zadejte kapacitu jeho baterie.
+Protože je teď kapacita baterie známá, lze průběh nabíjení i limit nabíjení zobrazit také v procentech (např. +25 %).
+
+Poznámka: Tuto funkci můžete použít i pro cizí vozidla (auta přátel a rodiny, půjčená nebo služební auta), ke kterým nemáte přístup přes API.
+
+### Vozidla s API (online)
+
+Pokud má vaše vozidlo online rozhraní, má smysl ho nastavit i v evcc.
+Seznam všech podporovaných výrobců najdete v části [Vozidla](/cs/vehicles).
+Přejděte do **Konfigurace → Vozidla → Přidat vozidlo** a v poli **Výrobce** zvolte výrobce svého vozidla, např. Audi.
+V závislosti na výrobci pak zadáte přístupové údaje ke svému účtu vozidla, např. uživatelské jméno a heslo.
+
+evcc má nyní přístup k aktuálnímu stavu nabití.
+V závislosti na výrobci jsou k dispozici i další informace, jako je stav nabíjení, limity vozidla, ujeté kilometry, klimatizace a odhadovaný dojezd.
+
+:::note[Poznámka]
+Aby se šetřila baterie vozidla, aktualizuje evcc stav nabití jen tehdy, když je vozidlo připojené k nabíjecímu bodu.
+U některých výrobců může přístup přes API vozidlo probudit a výrazně zvýšit jeho spotřebu v pohotovostním režimu.
+Toto chování můžete změnit [parametrem `poll`](/cs/reference/configuration/loadpoints#poll) u nabíjecího bodu.
+:::
+
+## Více vozidel \{#multiple-vehicles\}
+
+V evcc můžete nastavit více vozidel i více nabíjecích bodů.
+Pro přiřazení vozidel k nabíjecím bodům existuje několik možností:
+
+### Výchozí vozidlo
+
+Pokud má každé vozidlo vlastní nabíjecí bod, můžete vozidlo nastavit u nabíjecího bodu jako výchozí vozidlo.
+Je to nejjednodušší a doporučené nastavení.
+Přejděte do **Konfigurace → Místo pro nabíjení a topení → [Můj nabíjecí bod]**.
+V části **Vozidla** zvolte své vozidlo jako **Výchozí vozidlo**.
+Když začne nové nabíjení, evcc předpokládá, že jde o výchozí vozidlo.
+Pokud tomu tak není (např. vozidlo hosta), můžete vozidlo přepnout v uživatelském rozhraní.
+
+### Přiřazení v uživatelském rozhraní
+
+Aktuálně přiřazené vozidlo se v uživatelském rozhraní zobrazuje u příslušného nabíjecího bodu.
+Přiřazení změníte kliknutím na název vozidla.
+Tato volba pak platí pro aktuální nabíjení.
+
+<Screenshot
+  name="features/screenshots/vehicle-select"
+  caption="Změna vozidla na nabíjecím bodě"
+/>
+
+### Automatické rozpoznání
+
+Pokud na jednom nabíjecím bodě nabíjí několik vozidel, použije se při připojení automatické rozpoznání.
+Zkontroluje se stav nabíjení všech nastavených vozidel a vybere se nejpravděpodobnější vozidlo.
+Pokud rozpoznání vybralo špatné vozidlo (např. proto, že nabíjí na jiném nabíjecím bodě), můžete přiřazení opravit ručně.
+
+### Rozpoznání pomocí RFID
+
+Pokud má vaše nabíječka čtečku RFID karet, můžete ji použít i k přiřazení.
+Konkrétnímu vozidlu se přitom přiřadí jedna nebo více RFID karet.
+Pokaždé, když se vozidlo znovu připojí k nabíječce, je nutné nabíjení nejprve aktivovat příslušnou RFID kartou na nabíječce.
+
+evcc dostane od nabíječky jedinečný identifikační kód.
+V závislosti na výrobci nabíječky jde buď o RFID kód, nebo o odvozený interní kód, např. uživatelské jméno z konfigurace nabíječky.
+Po přiložení RFID karty se aktuální identifikátor zobrazí na kartě nabíjecího bodu v **Konfigurace → Místo pro nabíjení a topení**.
+Tuto hodnotu zadejte do pole **RFID identifikátor** požadovaného vozidla v **Konfigurace → Vozidla**.
+Ke každému vozidlu můžete uložit více identifikátorů.
+
+### Rozpoznání pomocí Plug & Charge
+
+Pokud vaše nabíječka podporuje normu ISO 15118, lze rozpoznání provést také přímo přes nabíjecí kabel.
+Na trhu je ale zatím k dispozici jen velmi málo nabíječek s touto funkcí.
+
+:::note[Poznámka]
+V nabíječce musí být aktivovaná funkce „PLC spojení s vozidlem“.
+:::
+
+Nastavení je podobné jako u rozpoznání pomocí RFID.
+Vozidlo musí být připojené k nabíječce.
+Identifikátor (např. `01:23:45:67:89:00`) se pak zobrazí na kartě nabíjecího bodu v **Konfigurace → Místo pro nabíjení a topení**.
+Tuto hodnotu zadejte do pole **RFID identifikátor** vozidla.
+
+:::note[Poznámka]
+Pokud vozidlo a nabíječka Plug & Charge nepodporují, vozidla předávají jedinečnou hardwarovou adresu (MAC adresu).
+Někteří výrobci, např. VW a Audi, ji ale každý den mění na jinou náhodnou hodnotu.
+
+V takovém případě můžete použít zástupný znak a zadat jen tu část, která se nemění, např. `01:23:45:*`.
+
+To samozřejmě funguje jen tehdy, pokud se tato část nevyskytuje u více existujících vozidel a zadaný začátek hodnoty je u každého vozidla jiný.
+:::
+
+## Klimatizace
+
+U některých vozidel dokáže evcc přes online připojení rozpoznat, zda vozidlo právě provádí předklimatizaci.
+V takovém případě nabíječka uvolní nejnižší možný výkon, aby vozidlo mohlo klimatizaci napájet z nabíječky.
+
+Může se stát, že klimatizace ve vozidle potřebuje méně než uvolněný výkon.
+Vozidlo pak zbývající dostupný výkon využije k dalšímu nabíjení baterie, i když už byl dosažen nastavený limit stavu nabití.
+
+Jakmile evcc rozpozná, že klimatizace skončila, nabíječku znovu zablokuje, aby z ní vozidlo neodebíralo výkon, když už nenabíjí.
+
+:::note[Poznámka]
+Týká se to jen kombinace vozidel a nabíječek, které komunikují podle normy IEC 61851. To je dnes pravidlem.
+
+U vozidel a nabíječek, které komunikují podle normy ISO 15118, dostane vozidlo přímo od nabíječky přesně tolik energie, kolik si vyžádá.
+:::

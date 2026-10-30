@@ -1,0 +1,851 @@
+---
+title: Zařízení definovaná uživatelem
+description: "Připojte nabíječku, měřič, vozidlo nebo topení, pro které neexistuje vestavěná šablona, a jejich hodnoty i ovládání si definujte sami přes HTTP, MQTT nebo Modbus."
+tableOfContents:
+  maxHeadingLevel: 4
+translatedFrom: "3be6e303b568"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Při vytváření nabíječky, topení, měřiče sítě, domácí baterie, fotovoltaické elektrárny, dalšího spotřebiče, vozidla, tarifu, zařízení pro omezení výkonu nebo služby oznámení můžete v seznamu typů zařízení zvolit možnost **Zařízení nastavené uživatelem** a popsat vlastní logiku na základě [systému pluginů](/cs/reference/plugins).
+
+Můžete tak připojit zařízení, která vestavěné šablony nepokrývají, např. číst aktuální výkon z HTTP endpointu nebo zapisovat cílový proud přes Modbus.
+
+## Jak definovat zařízení
+
+V uživatelském rozhraní nabízí výběr šablon u každého typu zařízení položku **Zařízení nastavené uživatelem**.
+Jejím výběrem otevřete editor pro vlastní konfiguraci.
+Ve výchozím nastavení se vytvoří zařízení s `type: custom`. Typ lze v případě potřeby přepsat jinou hodnotou (např. `type: heatpump`).
+
+```yaml
+power:
+  source: mqtt
+  topic: home/current/imsys/chn2/raw
+```
+
+Případně můžete celou konfiguraci zapsat přímo do `evcc.yaml` s `name`, `type: custom` a blokem atributů pod nimi:
+
+```yaml
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: home/current/imsys/chn2/raw
+```
+
+Všechny ostatní příklady na této stránce používají plochý blok atributů, který zadáváte v uživatelském rozhraní.
+
+Seznam dostupných zdrojů pluginů (`http`, `mqtt`, `modbus`, …) a pomocných funkcí (`calc`, `map`, `watchdog`, …) najdete v [referenci pluginů](/cs/reference/plugins).
+
+## Atributy a funkce
+
+Každé zařízení definované uživatelem popisují tři druhy polí:
+
+- **Atributy pro čtení**: pluginy, které evcc dotazuje, aby získal hodnotu (např. `power`, `soc`, `status`).
+- **Atributy pro zápis**: pluginy, které evcc volá, aby nastavil hodnotu nebo spustil akci (např. `enable`, `maxcurrent`, `wakeup`). Zapisovaná hodnota je v pluginu k dispozici.
+- **Funkce**: seznam `features`, který zapíná nestandardní chování. Dostupné příznaky závisejí na typu zařízení.
+
+Obecný tvar:
+
+```yaml
+# read attributes
+power:
+  source: http
+  uri: http://meter.local/power
+soc:
+  source: mqtt
+  topic: battery/soc
+
+# write attributes
+enable:
+  source: http
+  uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
+maxcurrent:
+  source: mqtt
+  topic: charger/maxcurrent
+  payload: ${maxcurrent:%d}
+
+# features
+features:
+  - heating
+  - integrateddevice
+```
+
+Dostupné názvy atributů a příznaky funkcí se liší podle typu zařízení a jsou uvedeny v následujících sekcích.
+
+## Měřič \{#meter\}
+
+Měřiče výkonu se konfigurují v sekci [`meters`](/cs/reference/configuration/meters).
+Na měřiče definované pod `meters:` lze odkazovat ze `site`:
+
+- `grid`: měřič sítě
+- `pv`: solární měřič
+- `battery`: měřič domácí baterie
+- `charge`: měřič nabíjecího výkonu nabíječky
+- `aux`: měřič spotřeby pro chytré spotřebiče
+- `consumer`: měřič běžného spotřebiče, zaznamenávaný pro statistiky spotřeby
+- `ext`: další měřič, který se nepoužívá pro regulaci ani nezobrazuje v uživatelském rozhraní, pouze se zaznamenává a exportuje
+
+`power` je jediný povinný atribut.
+Ne všechny role měřičů podporují všechny atributy:
+
+- `limitsoc` a `batterymode` se používají výhradně pro měřiče baterie (odkazované ze `site.battery`).
+- `curtail` a `curtailed` se používají společně pro měřiče `pv`, které podporují omezení výkonu (§ 9 EEG).
+- `currents`, `voltages` a `powers` jsou fázové atributy pro měřiče sítě (`grid`) a nabíječky (`charge`), z nichž každý musí obsahovat přesně tři pluginy (jako pole YAML).
+
+Každý plugin musí vracet správný datový typ.
+Pro převod použijte [čtecí pipeline](/cs/reference/plugins#reading).
+
+### Atributy pro čtení
+
+| Atribut        | Typ                   | Povinné | Kontext       | Popis                                                                      |
+| -------------- | --------------------- | ------- | ------------- | -------------------------------------------------------------------------- |
+| `power`        | `float`               | ano     | vše           | Aktuální výkon ve W                                                        |
+| `energy`       | `float`               | ne      | vše           | Stav měřiče v kWh                                                          |
+| `returnenergy` | `float`               | ne      | vše           | Stav měřiče v opačném směru v kWh (viz níže)                               |
+| `maxpower`     | `int`                 | ne      | `pv` (hybrid) | Maximální AC výkon ve W                                                    |
+| `curtailed`    | `int`                 | ne      | `pv`          | Aktuální limit exportu do sítě v % (0 až 100). Pouze společně s `curtail`. |
+| `soc`          | `int`                 | ne      | `battery`     | Stav nabití v %                                                            |
+| `capacity`     | `float`               | ne      | `battery`     | Kapacita v kWh                                                             |
+| `powers`       | `[float,float,float]` | ne      | vše           | Fázové výkony ve W. Pro určení znaménka u proudů bez znaménka.             |
+| `currents`     | `[float,float,float]` | ne      | vše           | Fázové proudy v A. Pro zjištění aktivních fází.                            |
+| `voltages`     | `[float,float,float]` | ne      | vše           | Fázová napětí ve V. Pro zjištění zapojení (1f/3f).                         |
+
+### Znaménka a směry \{#signs-and-directions\}
+
+Co znamená kladná hodnota `power` a oba směry energie, závisí na roli měřiče:
+
+| Role                     | `power` kladné               | `energy`     | `returnenergy`               |
+| ------------------------ | ---------------------------- | ------------ | ---------------------------- |
+| `grid`                   | Odběr ze sítě                | Odebráno     | Exportováno (export do sítě) |
+| `pv`                     | Výroba                       | Vyrobeno     | Spotřebováno (zřídka)        |
+| `battery`                | Vybíjení (záporné: nabíjení) | Vybito       | Nabito                       |
+| `charge`                 | Nabíjení                     | Nabito       | Vybito (V2X)                 |
+| `aux`, `ext`, `consumer` | Spotřeba                     | Spotřebováno | Vyrobeno (zřídka)            |
+
+`energy` a `returnenergy` jsou rostoucí stavy měřiče v kWh, ideálně celkové hodnoty od uvedení měřiče do provozu, jako jsou registry odběru a exportu u měřiče sítě.
+Rozdíly mezi stavy se počítají automaticky, takže plugin musí vracet stav měřiče, a ne hodnoty spotřeby za interval.
+Funguje i počítadlo, které se pravidelně nuluje (např. denně), protože vynulování se rozpozná automaticky.
+Hodnota `0` se považuje za nedostupnou.
+
+Oba atributy jsou volitelné.
+Bez nich se historie energie odvozuje z `power` v čase.
+Skutečné stavy měřiče poskytují přesnější dlouhodobé statistiky.
+
+### Atributy pro zápis \{#meter-write-attributes\}
+
+| Atribut       | Typ   | Povinné | Kontext   | Popis                                                                                                                                                                    |
+| ------------- | ----- | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `limitsoc`    | `int` | ne      | `battery` | Nastaví cíl nabíjení baterie v %. Cíl nabíjení se vypočítá z nakonfigurovaných `MinSoc`, `MaxSoc` a aktuálního stavu nabití (atribut `soc`).                             |
+| `curtail`     | `int` | ne      | `pv`      | Nastaví limit exportu do sítě v % jmenovitého výkonu výroby (0 až 100, `100` = bez limitu). Pouze společně s `curtailed`. Viz [Zařízení pro omezení výkonu](#curtailer). |
+| `batterymode` | `int` | ne      | `battery` | Přímo nastaví režim řízení baterie. Režimy jsou uvedeny níže.                                                                                                            |
+
+#### Režimy baterie \{#battery-modes\}
+
+| Hodnota | Režim        | Chování                                                  |
+| ------- | ------------ | -------------------------------------------------------- |
+| `1`     | `normal`     | Běžný provoz: nabíjení z přebytku, vybíjení pro spotřebu |
+| `2`     | `hold`       | Bez vybíjení, nabíjení z přebytku je stále povoleno      |
+| `3`     | `charge`     | Nabíjení ze sítě, bez vybíjení                           |
+| `4`     | `holdcharge` | Bez nabíjení, vybíjení pro spotřebu je stále povoleno    |
+| `5`     | `discharge`  | Vybíjení do sítě                                         |
+
+Používají se jen ty režimy baterie, které zařízení podporuje.
+Pokud je `batterymode` typu [`switch`](/cs/reference/plugins#switch), podporované režimy se převezmou z jeho hodnot `case`.
+Funguje to i tehdy, když je switch vložený do pluginu [`watchdog`](/cs/reference/plugins#watchdog).
+Každý jiný plugin potřebuje `batterymodes` se seznamem podporovaných režimů, např. `batterymodes: ["normal", "hold", "charge"]`.
+
+### Příklady
+
+Čtení aktuálního výkonu sítě z HTTP endpointu.
+
+```yaml
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+```
+
+Čtení výkonu a stavu nabití domácí baterie a nastavení jejího režimu přes HTTP.
+`switch` pokrývá režimy normal, hold a charge, takže evcc nabízí právě tyto tři.
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    capacity: 10 # kWh
+    power:
+      source: http
+      uri: http://battery.local/api/power
+    soc:
+      source: http
+      uri: http://battery.local/api/soc
+    batterymode:
+      source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "auto"}'
+        - case: 2 # hold
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "hold"}'
+        - case: 3 # charge
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "charge"}'
+```
+
+## Nabíječka \{#charger\}
+
+Výchozí `type: custom` pokrývá nabíječky s plynulým řízením proudu.
+Specializované typy nabíječek pro jiná zařízení najdete v sekcích [Přepínatelná zásuvka](#charger-switchsocket) a [Tepelná čerpadla](#charger-heating).
+
+### Atributy pro čtení
+
+| Atribut        | Typ                   | Povinné | Popis                                                                                           |
+| -------------- | --------------------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `status`       | `string`              | ano     | Stav (A–F)                                                                                      |
+| `enabled`      | `bool`                | ano     | Je nabíjení povoleno?                                                                           |
+| `power`        | `float`               | ne      | Nabíjecí výkon ve W                                                                             |
+| `energy`       | `float`               | ne      | Stav měřiče v kWh                                                                               |
+| `returnenergy` | `float`               | ne      | Stav měřiče v opačném směru v kWh (vybitá energie, V2X)                                         |
+| `identify`     | `string`              | ne      | Aktuální RFID identifikátor                                                                     |
+| `soc`          | `int`                 | ne      | Stav nabití v %                                                                                 |
+| `limitsoc`     | `int`                 | ne      | Limit nabití v %                                                                                |
+| `temp`         | `float`               | ne      | Aktuální teplota v °C (vytápění, alias pro `soc`)                                               |
+| `limittemp`    | `int`                 | ne      | Teplotní limit v °C (vytápění, alias pro `limitsoc`)                                            |
+| `finishtime`   | `string`              | ne      | Odhadovaný čas dokončení nabíjení (RFC3339, Go duration, Unix timestamp nebo zbývající sekundy) |
+| `phases`       | `int`                 | ne      | Počet fyzických fází (1–3)                                                                      |
+| `powers`       | `[float,float,float]` | ne      | Fázové výkony ve W. Pro určení znaménka u proudů bez znaménka.                                  |
+| `currents`     | `[float,float,float]` | ne      | Fázové proudy v A. Pro zjištění aktivních fází.                                                 |
+| `voltages`     | `[float,float,float]` | ne      | Fázová napětí ve V. Pro zjištění zapojení (1f/3f).                                              |
+
+### Atributy pro zápis
+
+| Atribut            | Typ     | Povinné | Popis                                                      |
+| ------------------ | ------- | ------- | ---------------------------------------------------------- |
+| `enable`           | `bool`  | ano     | Povolí/zakáže nabíjení                                     |
+| `maxcurrent`       | `int`   | ano     | Nastaví maximální nabíjecí proud v A                       |
+| `maxcurrentmillis` | `float` | ne      | Nastaví maximální nabíjecí proud v A (s desetinnými místy) |
+| `phases1p3p`       | `int`   | ne      | Přepnout fáze (vyžaduje `tos: true`)                       |
+| `wakeup`           | `bool`  | ne      | Probudí vozidlo                                            |
+
+### Funkce \{#charger-features\}
+
+| Funkce             | Popis                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `integrateddevice` | Bez výběru vozidla. Zařízení běží bez připojeného vozidla a bez nabíjecích relací (např. tepelné čerpadlo, topná tyč, trvale instalovaný spotřebič).                                                                                                                                                                                                               |
+| `heating`          | Zařízení se považuje za topení: stav nabití a limity se zobrazují v °C místo v %.                                                                                                                                                                                                                                                                                  |
+| `continuous`       | Zařízení ve stavu „vypnuto“ dál běží ve vlastním běžném provozu. Uživatelské rozhraní zobrazuje **Běžný režim** místo **Pohotovostní režim**. Požadavek na zvýšení výkonu (např. při solárním přebytku nebo levné energii ze sítě) se označuje jako **Boost**. Režimy se označují **Normální**, **Chytrý** a **Boost** místo **Vypnuto**, **Chytrý** a **Rychlé**. |
+| `switchdevice`     | Zařízení lze pouze zapnout/vypnout (bez plynulého řízení proudu). Maximální proud a volba **Vždy nabíjet** se nezobrazují. Minimální proud a fáze určují výkon pro zapnutí ze soláru. Bez `continuous` se režimy označují **Vypnuto**, **Chytrý** a **Zapnuto**.                                                                                                   |
+
+Běžné kombinace funkcí ve vestavěných šablonách:
+
+**Elektrický ohřívač**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Zásuvka**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Tepelné čerpadlo**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
+```
+
+### Příklady
+
+Dotaz na stav nabíjení nabíječky přes Modbus.
+
+```yaml
+features:
+  - integrateddevice
+enabled:
+  source: modbus
+  id: 4711
+  uri: modbus.local:502
+  rtu: false
+  register:
+    address: 100
+    type: holding
+    decode: uint16
+```
+
+Spínání zásuvky Tasmota zprávou MQTT.
+
+```yaml
+enable:
+  source: mqtt
+  broker: mosquitto.local:883
+  topic: cmd/unu-switch/Power
+  payload: ON
+```
+
+### Přepínatelná zásuvka \{#charger-switchsocket\}
+
+**`type: switchsocket`**
+
+Pro chytré zásuvky a podobná reléová zařízení, která lze pouze zapnout/vypnout bez plynulého řízení proudu.
+Stav nabíjení se odvozuje z aktuálního výkonu (výkon nad `standbypower` znamená nabíjení).
+Podrobnosti o celém nastavení najdete v sekci [Chytré spínače](/cs/smartswitches).
+
+| Atribut        | Typ     | Povinné | Popis                                                                                                                                                       |
+| -------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`      | `bool`  | ano     | Čtení stavu zásuvky (zapnuto/vypnuto)                                                                                                                       |
+| `power`        | `float` | ano     | Aktuální výkon ve W                                                                                                                                         |
+| `energy`       | `float` | ne      | Stav měřiče v kWh                                                                                                                                           |
+| `soc`          | `float` | ne      | Stav nabití v %                                                                                                                                             |
+| `enable`       | `bool`  | ano     | Zapne/vypne zásuvku                                                                                                                                         |
+| `standbypower` | `float` | ne      | Prahový výkon ve W. Nad ním se zařízení považuje za nabíjející, pod ním za zařízení v pohotovostním režimu. Záporná hodnota znamená pevný výkon bez měření. |
+
+### Tepelná čerpadla \{#charger-heating\}
+
+Tepelná čerpadla a podobná zařízení pro vytápění používají vlastní typy nabíječek, každý s vlastními atributy.
+Celé nastavení je popsáno v sekci [Tepelná čerpadla, elektrické ohřívače](/cs/heating).
+
+<Tabs>
+  <TabItem label="Tepelné čerpadlo">
+
+**`type: heatpump`**
+
+Pro invertorová tepelná čerpadla, která přijímají plynulou požadovanou hodnotu výkonu přes Modbus, HTTP nebo jiné rozhraní.
+Cílový topný výkon se zapisuje přímo přes `setmaxpower`.
+
+| Atribut       | Typ     | Povinné | Popis                                |
+| ------------- | ------- | ------- | ------------------------------------ |
+| `power`       | `float` | ne      | Aktuální výkon ve W                  |
+| `energy`      | `float` | ne      | Stav měřiče v kWh                    |
+| `temp`        | `float` | ne      | Aktuální teplota v °C                |
+| `limittemp`   | `int`   | ne      | Interní teplotní limit zařízení v °C |
+| `setmaxpower` | `int`   | ano     | Nastaví maximální topný výkon ve W   |
+| `getmaxpower` | `float` | ne      | Aktuální maximální topný výkon ve W  |
+
+  </TabItem>
+  <TabItem label="SG-Ready">
+
+**`type: sgready`**
+
+Pro tepelná čerpadla, která poskytují standardní rozhraní SG-Ready jako jedinou hodnotu režimu.
+Podporovány jsou tři režimy: `1` snížený, `2` normální, `3` boost.
+
+| Atribut       | Typ     | Povinné | Popis                                                     |
+| ------------- | ------- | ------- | --------------------------------------------------------- |
+| `power`       | `float` | ne      | Aktuální výkon ve W                                       |
+| `energy`      | `float` | ne      | Stav měřiče v kWh                                         |
+| `temp`        | `float` | ne      | Aktuální teplota v °C                                     |
+| `limittemp`   | `int`   | ne      | Interní teplotní limit zařízení v °C                      |
+| `setmode`     | `int`   | ano     | Změnit režim SG-Ready (1: snížený, 2: normální, 3: boost) |
+| `getmode`     | `int`   | ne      | Aktuální režim SG-Ready (1, 2, 3)                         |
+| `setmaxpower` | `int`   | ne      | Nastaví maximální topný výkon ve W                        |
+
+  </TabItem>
+  <TabItem label="SG-Ready přes relé">
+
+**`type: sgready-relay`**
+
+Pro tepelná čerpadla, jejichž vstup SG-Ready je zapojen jako dva bezpotenciálové reléové kontakty (boost + dim).
+Každý kontakt ovládá samostatná dílčí nabíječka, na kterou se odkazuje podle typu, nikoli přes pluginy.
+
+| Atribut     | Typ             | Povinné | Popis                                |
+| ----------- | --------------- | ------- | ------------------------------------ |
+| `power`     | `float`         | ne      | Aktuální výkon ve W                  |
+| `energy`    | `float`         | ne      | Stav měřiče v kWh                    |
+| `temp`      | `float`         | ne      | Aktuální teplota v °C                |
+| `limittemp` | `int`           | ne      | Interní teplotní limit zařízení v °C |
+| `boost`     | `charger-typed` | ano     | Relé pro kontakt SG-Ready boost      |
+| `dim`       | `charger-typed` | ne      | Relé pro kontakt SG-Ready dim        |
+
+  </TabItem>
+</Tabs>
+
+## Vozidlo \{#vehicle\}
+
+Parametry vozidla lze číst také přes pluginy.
+
+### Atributy pro čtení
+
+| Atribut         | Typ      | Povinné | Popis                                                                                           |
+| --------------- | -------- | ------- | ----------------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | ano     | Stav nabití v %                                                                                 |
+| `limitsoc`      | `int`    | ne      | Limit nabití v %                                                                                |
+| `status`        | `string` | ne      | Stav (A–F)                                                                                      |
+| `range`         | `int`    | ne      | Dojezd v km                                                                                     |
+| `odometer`      | `int`    | ne      | Stav tachometru v km                                                                            |
+| `climater`      | `bool`   | ne      | Je klimatizace aktivní?                                                                         |
+| `getmaxcurrent` | `float`  | ne      | Maximální nabíjecí proud v A                                                                    |
+| `finishtime`    | `string` | ne      | Odhadovaný čas dokončení nabíjení (RFC3339, Go duration, Unix timestamp nebo zbývající sekundy) |
+
+### Atributy pro zápis
+
+| Atribut        | Typ    | Povinné | Popis                                 |
+| -------------- | ------ | ------- | ------------------------------------- |
+| `wakeup`       | `bool` | ne      | Probudí vozidlo                       |
+| `chargeenable` | `bool` | ne      | Spustí/zastaví nabíjení               |
+| `maxcurrent`   | `int`  | ne      | Nastaví maximální nabíjecí proud v A  |
+
+### Konfigurace
+
+| Atribut    | Typ      | Povinné | Popis                                   |
+| ---------- | -------- | ------- | --------------------------------------- |
+| `title`    | `string` | ne      | Zobrazovaný název vozidla               |
+| `capacity` | `float`  | ne      | Kapacita baterie v kWh                  |
+| `icon`     | `string` | ne      | Ikona zobrazená v uživatelském rozhraní |
+
+### Funkce \{#vehicle-features\}
+
+| Funkce          | Popis                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `coarsecurrent` | Vozidlo přijímá nabíjecí proud jen v celých krocích po 1 A. Regulace je omezena na hrubé kroky po 1 A, i když by nabíječka dokázala regulovat jemněji. |
+| `streaming`     | Vozidlo data samo posílá, místo aby bylo dotazováno (např. BMW Cardata). Aktualizace stavu nabití mimo aktivní nabíjení se považují za spolehlivé.     |
+| `welcomecharge` | Vozidlo očekává, že nabíječka bude při připojení aktivní, aby spojení vyhodnotilo jako funkční. Jinak hlásí chybu.                                     |
+
+### Příklady
+
+Čtení aktuálního dojezdu ze zpráv MQTT.
+
+```yaml
+title: Green Mazda # display name (optional)
+capacity: 50 # battery capacity in kWh (optional)
+features:
+  - coarsecurrent
+range:
+  source: mqtt
+  topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Probuzení vozidla pomocí HTTP pingu před odesláním dalších dotazů.
+
+```yaml
+wakeup:
+  source: http
+  uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+<a id="onidentify"></a>
+
+`onIdentify` automaticky nastaví režim nabíjení, když je vozidlo rozpoznáno.
+
+```yaml
+soc:
+  source: mqtt
+  topic: car/soc
+onIdentify:
+  mode: smart
+```
+
+Dostupné režimy: `off`, `smart`, `now`.
+Zastaralé hodnoty `pv` a `minpv` jsou stále přijímány a aktivují `smart` s vypnutou nebo zapnutou volbou [Vždy nabíjet](/cs/features/modes#always-charge).
+
+## Tarif a předpověď \{#tariff\}
+
+Pomocí tarifu definovaného uživatelem připojíte evcc přes pluginy k vlastnímu zdroji hodnot.
+Atribut `tariff` určuje, co zdroj představuje a v jaké jednotce jsou hodnoty.
+
+### Atributy pro čtení
+
+Nakonfigurovat je nutné právě jeden z atributů `price` nebo `forecast`.
+
+| Atribut    | Typ      | Popis                                                                                                       |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Aktuální hodnota. Číslo s plovoucí čárkou vrácené pluginem.                                                 |
+| `forecast` | `string` | Předpověď jako řetězec JSON se seznamem časových úseků a hodnot (viz schéma níže). Načítá se každou hodinu. |
+
+### Konfigurace
+
+| Atribut        | Typ        | Povinné | Popis                                                                                                                                                                                   |
+| -------------- | ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`       | `string`   | ne      | `price` (výchozí), `co2`, `solar` nebo `temperature`. Určuje jednotku vracených hodnot: cena v nastavené měně za kWh, intenzita CO₂ v g/kWh, solární předpověď ve W, teplota v °C.      |
+| `charges`      | `float`    | ne      | Pevný příplatek za kWh přičtený ke každé hodnotě. Výchozí `0`.                                                                                                                          |
+| `chargesZones` | `list`     | ne      | Časově závislé příplatky (např. síťové poplatky), které pro určitá období přepisují `charges`. Viz [časově závislé síťové poplatky](/cs/reference/configuration/tariffs#charges-zones). |
+| `tax`          | `float`    | ne      | Procentní daň použitá na výsledek, např. `0.2` pro 20 %. Výchozí `0`.                                                                                                                   |
+| `formula`      | `string`   | ne      | Výraz v Go pro vlastní výpočet, ve kterém jsou k dispozici proměnné `price`, `charges` a `tax`. Viz [příklady](#formula-examples).                                                      |
+| `interval`     | `duration` | ne      | Interval dotazování pro `forecast`. Výchozí `1h`.                                                                                                                                       |
+| `cache`        | `duration` | ne      | Doba uložení v mezipaměti pro `price`. Výchozí `15m`.                                                                                                                                   |
+
+### Funkce \{#tariff-features\}
+
+| Funkce      | Popis                                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------- |
+| `average`   | Zprůměruje jemnější cenové úseky (např. 15minutové hodnoty) na hodinové průměry.                     |
+| `cacheable` | Ukládá načtené hodnoty. Použijí se jako záloha po restartu nebo výpadku poskytovatele (až 24 hodin). |
+
+### Příklady
+
+**Aktuální cena přes HTTP**:
+
+```yaml
+price:
+  source: http
+  uri: https://example.com/api/price
+```
+
+**Předpověď přes HTTP**:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+  jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "value": .[1] }) | tostring'
+```
+
+Plugin musí vracet strukturu JSON se seznamem časových úseků a cen.
+Pole s datem musí mít tvar `YYYY-MM-DDTHH:MM:SSZ` a cena musí být ve správné měnové jednotce (např. EUR).
+evcc interně pracuje s 15minutovými intervaly; pluginy mohou vracet hodinová data, která se převedou automaticky.
+
+```json
+[
+  {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-01T00:15:00Z",
+    "value": 25.0
+  },
+  {
+    "start": "2025-01-01T00:15:00Z",
+    "end": "2025-01-01T00:30:00Z",
+    "value": 26.5
+  },
+  {
+    "start": "2025-01-01T00:30:00Z",
+    "end": "2025-01-01T00:45:00Z",
+    "value": 24.8
+  },
+  {
+    "start": "2025-01-01T00:45:00Z",
+    "end": "2025-01-01T01:00:00Z",
+    "value": 27.2
+  }
+]
+```
+
+<a id="formula-examples"></a>
+
+Pole `formula` přijímá výraz v Go, ve kterém jsou k dispozici proměnné `price`, `charges`, `tax` a časové razítko úseku `ts`.
+K dispozici jsou [knihovna `math`](https://pkg.go.dev/math) a metody [`time.Time`](https://pkg.go.dev/time#Time) na `ts`.
+Vzorec se vyhodnocuje pro aktuální cenu i pro každý úsek předpovědi.
+
+**Cenový strop**:
+
+```yaml
+charges: 0.22
+tax: 0.19
+formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Omezí výsledek na 50 ct/kWh.
+
+**Bez tarifu výkupu energie při záporných cenách na denním trhu** (německé fotovoltaické elektrárny uvedené do provozu po 25. únoru 2025):
+
+```yaml
+formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
+```
+
+Vyplácí pevný tarif výkupu energie 7 ct/kWh, kromě případů, kdy je cena na denním trhu záporná.
+
+## Externí limit \{#external-limit\}
+
+Integrace definovaná uživatelem pro funkci [Externí limit](/cs/external-limit) připojí řídicí jednotku nebo systém řízení energie, který nepokrývá žádná vestavěná integrace.
+V uživatelském rozhraní zvolte **Uživatelem definovaná integrace** v **Konfigurace → Vnější limit**.
+
+Způsob příjmu signálu limitu popisuje jeden ze čtyř typů: `relay` (jeden spínací kontakt), `fnn` (řídicí jednotka FNN s více spínacími kontakty), `eebus` (protokol EEBUS) nebo `custom` (dynamické hodnoty limitu přes pluginy).
+Každý signál se čte přes konfiguraci [pluginu](/cs/reference/plugins) (GPIO, MQTT, HTTP, Modbus).
+Viz také [referenci konfigurace `hems`](/cs/reference/configuration/hems).
+
+### Relé
+
+Připojení přes jeden spínací kontakt je nejjednodušší řešení.
+Řídicí jednotka sepne kontakt, který vyhodnotí vaše instance evcc.
+
+| Atribut       | Typ        | Povinné | Popis                                                                                                |
+| ------------- | ---------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `maxPower`    | `int` (W)  | ano     | Celkový limit výkonu, který platí, dokud je signál aktivní.                                          |
+| `limit`       | plugin     | ano     | Konfigurace pluginu pro čtení spínacího kontaktu. `true`/`1` = omezeno, `false`/`0` = normální stav. |
+| `passthrough` | plugin     | ne      | Předává signál omezení do externího systému.                                                         |
+| `interval`    | `duration` | ne      | Interval dotazování spínacího kontaktu. Výchozí `10s`.                                               |
+
+Limit výkonu vám sdělí provozovatel distribuční soustavy.
+U více řiditelných spotřebních zařízení (SteuVE) se zohledňuje koeficient soudobosti.
+Limit si můžete vypočítat i sami podle vzorce: **Celkový limit = počet SteuVE × 4,2 kW × koeficient soudobosti**. Podrobnosti k výpočtu najdete [zde](https://www.inexogy.com/blog/14a-enwg/).
+
+<Tabs>
+<TabItem label="Raspberry Pi GPIO">
+
+Při použití Raspberry Pi lze pin GPIO číst přímo:
+
+```yaml
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+Další podrobnosti o pluginu GPIO najdete v [dokumentaci pluginů](/cs/reference/plugins#gpio).
+
+</TabItem>
+<TabItem label="MQTT">
+
+Pokud řídicí jednotka nebo brána posílá zprávy MQTT:
+
+```yaml
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem label="HTTP API">
+
+Pro řídicí jednotky s REST API:
+
+```yaml
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Pokud řídicí jednotka nebo brána poskytuje limit výkonu přes Modbus:
+
+```yaml
+type: relay
+maxPower: 4200 # Example for 1 SteuVE
+limit:
+  source: modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
+  timeout: 5s
+  register:
+    type: holding
+    decode: uint16
+    address: 8056
+  # Return value: 0 = not limited, 1 = limited
+```
+
+</TabItem>
+</Tabs>
+
+### Řídicí jednotka FNN \{#external-limit-fnn\}
+
+Řídicí jednotky podle standardu FNN signalizují snížení odběru a omezení výkonu přes samostatné spínací kontakty.
+Snížení odběru (W4) a omezení výkonu (W3, S2, S1) fungují nezávisle na sobě.
+Nakonfigurovat je nutné alespoň jeden ze signálů `w4` nebo `w3`.
+
+| Atribut           | Typ        | Povinné | Popis                                                                        |
+| ----------------- | ---------- | ------- | ---------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | ano¹    | Limit spotřeby, dokud je aktivní signál snížení (W4).                        |
+| `maxCurtailPower` | `int` (W)  | ano²    | Instalovaný solární výkon, základní hodnota pro stupně omezení výkonu.       |
+| `w4`              | plugin     | ne      | Čte signál snížení. Omezí spotřebu na `maxDimPower`.                         |
+| `w3`              | plugin     | ne      | Čte signál omezení výkonu. Omezí export do sítě na 0 % z `maxCurtailPower`.  |
+| `s2`              | plugin     | ne      | Čte signál omezení výkonu. Omezí export do sítě na 30 % z `maxCurtailPower`. |
+| `s1`              | plugin     | ne      | Čte signál omezení výkonu. Omezí export do sítě na 60 % z `maxCurtailPower`. |
+| `interval`        | `duration` | ne      | Interval dotazování spínacích kontaktů. Výchozí `10s`.                       |
+
+¹ povinné, pokud je nakonfigurován `w4`, ² povinné, pokud je nakonfigurován `w3`.
+
+```yaml
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+### EEBUS \{#external-limit-eebus\}
+
+Digitální připojení přes protokol EEBUS.
+Řídicí jednotka komunikuje přímo s vaší instancí evcc a automaticky předává limit výkonu.
+Řídicí jednotku a evcc je nutné jednou [spárovat](/cs/external-limit#eebus-pairing).
+
+| Atribut                               | Typ        | Povinné | Popis                                                    |
+| ------------------------------------- | ---------- | ------- | -------------------------------------------------------- |
+| `ski`                                 | `string`   | ano     | SKI (Subject Key Identifier) řídicí jednotky.            |
+| `contractualConsumptionNominalMax`    | `int` (W)  | ne      | Smluvní maximální příkon.                                |
+| `failsafeConsumptionActivePowerLimit` | `int` (W)  | ne      | Záložní limit příkonu pro případ poruchy.                |
+| `productionNominalMax`                | `int` (W)  | ne      | Instalovaný výkon zdroje (Wp).                           |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | ne      | Záložní limit výkonu exportu do sítě pro případ poruchy. |
+| `failsafeDurationMinimum`             | `duration` | ne      | Minimální doba záložního režimu, např. `2h`.             |
+| `passthrough`                         | plugin     | ne      | Předává signál omezení do externího systému.             |
+
+```yaml
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+### Vlastní \{#external-limit-custom\}
+
+Obecná integrace pro řídicí systémy, které místo spínacích kontaktů poskytují dynamické hodnoty limitu.
+Limit spotřeby a omezení výkonu se čtou přes pluginy a fungují nezávisle na sobě.
+Nakonfigurovat je nutné alespoň jeden z atributů `maxConsumptionPower` nebo `curtailedPercent`.
+
+| Atribut                | Typ        | Povinné | Popis                                                                                                     |
+| ---------------------- | ---------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | ne¹     | Čte celkový limit výkonu ve wattech. `0` = bez limitu.                                                    |
+| `curtailedPercent`     | plugin     | ne¹     | Čte povolený export do sítě v procentech z `productionNominalMax` (0 až 100). `100` = bez omezení výkonu. |
+| `productionNominalMax` | `int` (W)  | ne²     | Instalovaný výkon zdroje (Wp).                                                                            |
+| `interval`             | `duration` | ne      | Interval dotazování pluginů. Výchozí `10s`.                                                               |
+
+¹ povinný je alespoň jeden z nich, ² povinné, pokud je nakonfigurován `curtailedPercent`.
+
+```yaml
+type: custom
+maxConsumptionPower:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .maxPower # Power limit in watts, 0 = no limit
+curtailedPercent:
+  source: mqtt
+  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
+productionNominalMax: 10000 # Installed generator power (Wp)
+```
+
+## Zařízení pro omezení výkonu \{#curtailer\}
+
+Zařízení pro omezení výkonu definované uživatelem omezuje na žádost provozovatele distribuční soustavy (§ 9 EEG) export do sítě z fotovoltaické elektrárny, pokud střídač nelze omezit přes konfiguraci jeho [měřiče](#meter).
+V uživatelském rozhraní zvolte **Zařízení nastavené uživatelem** v **Konfigurace → Síť → Přidat zařízení omezující výkon**.
+Viz také [referenci konfigurace `curtailers`](/cs/reference/configuration/curtailers) a [Externí limit](/cs/external-limit#curtailment-devices).
+
+Zařízení dostává povolený export do sítě v procentech instalovaného výkonu zdroje a musí ho uplatnit na střídači.
+`100` znamená bez limitu.
+
+### Atributy
+
+| Atribut     | Typ    | Povinné | Popis                                                                                                                                         |
+| ----------- | ------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | ano     | Nastaví limit exportu do sítě v % jmenovitého výkonu výroby (0 až 100). Musí podporovat zápis.                                                |
+| `curtailed` | plugin | ano     | Čte aktuální limit exportu do sítě v %. Pokud ho zařízení neumí hlásit, použijte plugin [`error`](/cs/reference/plugins#error) (viz příklad). |
+
+### Příklady
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Střídač neumí hlásit svůj limit, proto `curtailed` vrací `ErrNotAvailable` a limit se zapíše při každé jeho změně.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
+
+## Služba oznámení \{#notification-service\}
+
+Služba oznámení definovaná uživatelem zpracovává zprávy [oznámení](/cs/notifications) přes libovolný [plugin](/cs/reference/plugins), který podporuje zápis, např. shellový skript, HTTP požadavek nebo zprávu MQTT.
+V uživatelském rozhraní zvolte **Zařízení definovaná uživatelem** v **Konfigurace → Oznámení → Služby**.
+
+Zpráva je pluginu předána v parametru `${send}` (nebo jako parametr šablony `{{.send}}`).
+
+### Konfigurace
+
+| Atribut    | Typ      | Povinné | Popis                                                   |
+| ---------- | -------- | ------- | ------------------------------------------------------- |
+| `send`     | plugin   | ano     | Plugin volaný pro každou zprávu. Musí podporovat zápis. |
+| `encoding` | `string` | ne      | Formát hodnoty předávané v `${send}`. Viz níže.         |
+
+Možné hodnoty `encoding` jsou:
+
+| Kódování | Obsah `${send}`                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------ |
+| `json`   | Objekt JSON `{ "msg": msg, "title": title }`. Pole `title` se přidá jen tehdy, je-li pro událost definováno. |
+| `csv`    | `title` a `msg` jako seznam oddělený čárkami                                                                 |
+| `tsv`    | Jako `csv`, ale oddělené tabulátory                                                                          |
+| `title`  | Pouze nadpis                                                                                                 |
+| (žádné)  | Pouze zpráva (`msg`)                                                                                         |
+
+### Příklad
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} connected"
+      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # plugin type
+        source: script
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+V tomto příkladu se volá shellový skript (`cmd`) s argumentem `{"title": "...", "msg": "..."}`.

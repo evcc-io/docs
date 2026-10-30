@@ -1,0 +1,437 @@
+---
+title: "Často kladené otázky"
+description: "Odpovídá na časté otázky ke konfiguraci evcc, hledání chyb, neočekávanému chování při nabíjení, resetu hesla a solární předpovědi."
+toc_max_heading_level: 2
+sidebar:
+  order: 8
+translatedFrom: "f3967fa3eceb"
+---
+
+## Konfigurace \{#configuration\}
+
+### Mám evcc konfigurovat přes webové rozhraní, nebo pomocí konfiguračního souboru?
+
+Doporučujeme používat **webové rozhraní**.
+Po instalaci otevřete evcc v prohlížeči a zařízení nakonfigurujte přímo tam.
+Nastavení se automaticky ukládají do databáze.
+
+**Konfigurační soubor** (`evcc.yaml`) je tradiční způsob a je nadále podporován.
+
+**Důležité**: Některé novější funkce jsou dostupné pouze přes webové rozhraní.
+Oba způsoby lze také používat současně.
+
+Další informace najdete v části [Konfigurace](/cs/installation/configuration).
+
+### Mám konfiguraci v evcc.yaml. Jak přejdu na webové rozhraní? \{#ui-migration\}
+
+Oba způsoby konfigurace můžete používat současně a přecházet postupně.
+
+**Postup:**
+
+1. Nakonfigurujte nové zařízení přímo ve webovém rozhraní v části **Konfigurace**.
+2. Odstraňte odpovídající záznam ze svého `evcc.yaml`.
+3. Opakujte to pro všechna zařízení, dokud nebude váš `evcc.yaml` prázdný.
+
+**Slučování zařízení:**
+
+Nabíjecí body, měřiče sítě, fotovoltaické elektrárny, baterie, vozidla a další měřiče se slučují z obou zdrojů.
+Na stránce konfigurace jsou zařízení z `evcc.yaml` viditelná, ale nelze je upravovat.
+Zařízení z `evcc.yaml` i z webového rozhraní můžete používat současně.
+
+**Konfigurace ve webovém rozhraní má přednost:**
+
+U ostatních nastavení (MQTT, oznámení, InfluxDB, tarify atd.) mají hodnoty z webového rozhraní přednost před hodnotami z `evcc.yaml`.
+Abyste předešli nejasnostem, doporučujeme používat jen jeden zdroj.
+
+**Poznámka:** Na některých místech (externí limit, sponzorský token) je konfigurace ve webovém rozhraní zablokovaná, pokud je už nastavena v `evcc.yaml`.
+Chcete-li ji upravovat ve webovém rozhraní, smažte záznam z `evcc.yaml`.
+
+**Závěr:**
+
+Úplná migrace není povinná.
+`evcc.yaml` můžete dál používat pro určité konfigurace a nové funkce přidávat přes webové rozhraní.
+
+:::note[Automatická migrace neexistuje.]
+Dříve dostupný příkaz `evcc migrate` byl kvůli vysoké složitosti odstraněn.
+Migrujte prosím ručně.
+:::
+
+### Mohu evcc používat bez měřiče sítě?
+
+Měřič sítě je jádrem evcc a pokud je to možné, měl by být součástí instalace.
+Nabíjení řízené solárem je ale možné provozovat i výhradně na základě solárního výkonu.
+
+Mějte však na paměti, že nebudete moci nabíjet pouze ze solárního přebytku, protože potřebné výpočty jsou možné jen tehdy, když je znám výkon sítě.
+V takové konfiguraci evcc nabíjí vozidlo aktuálním výkonem ze solární výroby.
+
+Aby pro dům zůstala část energie, můžete zadat spotřebu typického středně velkého domu, a to pomocí
+konfiguračního parametru [`residualPower`](/cs/reference/configuration/site#residualpower).
+
+**Příklad**:
+
+```yaml
+site:
+  residualPower: 250 # 250W house consumption
+```
+
+### Nemám solární panely. Může mi evcc přesto užitečně sloužit?
+
+Možná ano! evcc nabízí spoustu možností i mimo samotné nabíjení ze soláru. **Upozorňujeme, že všechny tyto možnosti vyžadují měřič sítě.**
+
+Několik nápadů:
+
+- Automatické nabíjení vozidla podle aktuální ceny energie s dynamickým tarifem elektřiny (např. Octopus Energy, Nachtstrom, Tibber, Awatter atd.), viz [Dynamické tarify](/cs/features/dynamic-prices)
+- Vzdálené spuštění / zastavení nabíječky, což se hodí hlavně u nabíječek, které nemají jiné rozhraní pro dálkové ovládání
+- Omezení nabíjení vozidla na určitý stav nabití (vozidlo musí být nakonfigurované)
+
+### Mohu evcc vyzkoušet bez všech komponent (fotovoltaická elektrárna, nabíječka atd.)?
+
+Jistě! Máme k dispozici výběr _demo_ komponent, které pomohou zaplnit mezery.
+
+[Měřič](https://docs.evcc.io/en/docs/meters#demo-meter)
+
+[Nabíječka](https://docs.evcc.io/en/docs/chargers#demo-charger)
+
+### Mohu evcc používat bez integrace solárního střídače?
+
+Ano! Pokud máte měřič sítě a ovladatelnou nabíječku, můžete používat všechny základní funkce evcc, včetně nabíjení ze solárního přebytku.
+Budou vám ale chybět některé vizualizace a statistiky, mimo jiné výpočet solárního podílu nabíjení.
+
+Pokud na výstupní kabel střídače nainstalujete dodatečný měřič (např. Shelly EM), získáte stejné funkce, jako
+kdybyste komunikovali přímo se střídačem.
+
+### Mohu používat více nabíječek?
+
+Ano! Do evcc lze přidat více nabíječek a evcc je řídí současně.
+
+Řízení zátěže napříč více nabíječkami však zatím není podporováno.
+Na této funkci se pracuje.
+
+### Dokáže evcc zabránit tomu, aby se domácí baterie nevybíjely jedna do druhé?
+
+Při řízení nabíjecích bodů a dalších spotřebičů zohledňuje evcc stav nabití nakonfigurovaných domácích baterií.
+Pokud bateriový systém podporuje [aktivní řízení baterie](/cs/features/battery#battery-control), může evcc požadovat určité režimy, např. zabránit vybíjení nebo nabíjet baterii.
+evcc však přímo nekoordinuje nabíjecí a vybíjecí výkon jednotlivých baterií.
+Proto evcc obecně nedokáže zabránit tomu, aby se více domácích baterií navzájem vybíjelo.
+Dostupné možnosti řízení závisí na bateriovém systému.
+
+### Řídí evcc nabíjení a vybíjení mé domácí baterie?
+
+V běžném provozu rozhoduje bateriový systém sám, kdy a jakým výkonem se nabíjí nebo vybíjí.
+evcc při řízení nabíjecích bodů zohledňuje hodnoty jako stav nabití a výkon, ale nabíjecí výkon domácí baterie průběžně nereguluje.
+Pokud systém podporuje [aktivní řízení baterie](/cs/features/battery#battery-control), může evcc požadovat jednotlivé funkce, např. zabránit vybíjení během nabíjení vozidla nebo nabíjet baterii ze sítě.
+Dostupné příkazy závisí na bateriovém systému a označení „ovladatelná“ nemusí nutně znamenat, že evcc může baterii plně řídit nebo nastavit její výkon na libovolnou hodnotu.
+
+### Moje nabíječka nepodporuje přepínání fází. Mohu přesto nabíjet jednofázově?
+
+U malých fotovoltaických elektráren nebo v zimě má smysl nabíjet jednou fází, aby se přebytek využil co nejlépe a bez odběru ze sítě.
+
+U třífázových nabíječek, které nepodporují automatické přepínání fází, můžete fáze 2 a 3 na přívodu k nabíjecímu bodu odpojit pomocí stykače (např. Hager HAB304). Pokud potřebujete plný výkon, tyto fáze jednoduše znovu připojte.
+
+:::danger[Nebezpečí]
+Toto ruční přepínání provádějte pouze tehdy, když vozidlo **NENÍ** připojeno k nabíječce.
+:::
+
+V zimě můžete také jednoduše použít jednofázový nabíjecí kabel.
+
+Nezapomeňte ve webovém rozhraní evcc přepnout nastavení nabíječky na jednofázový režim.
+Tak evcc pozná, kdy je k dispozici dostatečný přebytek pro nabíjení vozidla.
+
+## Hledání chyb
+
+### Něco nefunguje. Co teď?
+
+Nejprve se podívejte do [komunitního fóra](https://github.com/evcc-io/evcc/discussions), zda už váš problém nebyl probírán.
+Vývojáři i uživatelé jsou připraveni pomoci s řešením běžných problémů.
+
+Nejjednodušší cestou k pomoci je **Více → Nahlásit problém** ve webovém rozhraní.
+Tato funkce shromáždí vaši konfiguraci a logy a vytvoří připravený příspěvek na GitHubu.
+
+Stránka [Nahlásit problém](/cs/report-a-problem) vysvětluje, kam váš problém patří a co obsahuje dobré hlášení.
+
+### Hledání syntaktických chyb v evcc.yaml
+
+Yaml je na syntaxi velmi citlivý a chyby nejsou vždy hned vidět.
+
+Lintery jako [onlineyamltools.com](https://onlineyamltools.com/validate-yaml) mohou být velmi užitečné a vyplatí se je použít k nalezení jednoduchých chyb.
+
+### Jak vytvořím soubor logu pro analýzu chyb?
+
+Nejjednodušší cestou je stránka s logy v **Více → Logy**.
+Tam můžete filtrovat podle úrovně a oblasti a stáhnout log jako soubor.
+Co musí log obsahovat, popisuje část [Logy](/cs/report-a-problem#logs).
+
+Pro delší období nebo když webové rozhraní není dostupné, použijte [dlouhodobé logy](/cs/report-a-problem#system-logs) vaší instalace.
+
+### Další poznámky k detekci zařízení
+
+`evcc detect` je speciální příkaz, který se pokouší najít kompatibilní hardware ve vaší síti.
+Zejména může někdy pomoci najít „nová“ zařízení Modbus kompatibilní se SunSpec, jde však spíše o vývojářský / podpůrný nástroj pro diagnostiku a nedokáže poskytnout podrobné výsledky.
+
+## Časté chyby
+
+### Chyba: Charger out of sync: expected disabled, got enabled<br/>Charger logic error: disabled but charging
+
+evcc očekává, že nabíječky přejdou do nového stavu před dalším kontrolním cyklem (po uplynutí nastaveného intervalu `interval`).
+
+Některá zařízení mohou na příkazy občas reagovat trochu pomalu, a evcc pak tento nesoulad stavu hlásí uvedenými chybovými zprávami.
+
+Pokud nemáte žádné jiné problémy, můžete je bez obav ignorovat, nebo zkuste zvýšit [`interval`](/cs/reference/configuration/interval).
+
+### connection refused
+
+To znamená, že zařízení bylo na zadané IP adrese nebo názvu hostitele dosažitelné, ale odmítlo s námi komunikovat.
+
+Možných důvodů je několik, nejčastější jsou tyto:
+
+- Zkontrolujte, zda je ve vašem `evcc.yaml` správně nastaven cílový port.
+- Má cílové zařízení povolený externí přístup? (např. střídače SolarEdge mají Modbus z výroby vypnutý)
+- Zařízení mohlo dosáhnout maximálního počtu současných připojení. Aby se evcc mohl připojit, může být nutné ukončit jiná připojení (např. z jiných systémů domácí automatizace nebo z jiných instancí evcc). Víme o některých zařízeních, která přijímají vždy jen jedno připojení.
+- Ujistěte se, že mezi vámi a cílovým zařízením není firewall, a pokud tam je, že je nastaven tak, aby provoz povoloval.
+
+### i/o timeout
+
+To znamená, že cílový systém na náš požadavek neodpověděl dostatečně rychle.
+
+Obvyklé příčiny:
+
+- Pomalé nebo nekvalitní síťové připojení (zejména u bezdrátových sítí nebo sítí typu Homeplug)
+- Nesprávná nebo nekvalitní kabeláž či zakončení (zejména u RS485)
+- Cílové zařízení může být přetížené
+- Některé funkce, které evcc od zařízení požaduje, mohou být nedostupné (někdy kvůli zastaralému firmwaru nebo nesprávné konfiguraci cílového zařízení)
+- Timeout nebo `interval` dotazování evcc je nastaven příliš krátký
+
+### /tmp/evcc: operation not permitted<br/>bind: address already in use
+
+Tato chyba nastane, pokud evcc už běží (např. jako služba) a pokusíte se ho spustit znovu. **Vždy by měla běžet pouze jedna instance evcc.**
+
+Ke zjištění, zda na pozadí neběží jiná instance evcc, můžete použít program jako `htop`.
+
+Pokud máte důvod spouštět evcc v terminálu, nejprve zastavte službu (např. pomocí `systemctl stop evcc`).
+
+### Webové rozhraní evcc není dostupné
+
+Příčinu chyby zjistíte v logu.
+Jak se k logu dostanete, je popsáno v části [Instalace](/cs/installation) u vašeho způsobu instalace.
+
+### Plugin MQTT hlásí varování `outdated`
+
+Při použití [pluginu MQTT](/cs/reference/plugins#mqtt) můžete parametrem `timeout` určit, jak dlouho zůstává hodnota přijatá přes MQTT platná.
+Pokud během této doby nepřijde nová hodnota, evcc ji považuje za `outdated`.
+Je důležité zde uvést jednotku, např. `timeout: 30s`.
+
+## Nabíjení
+
+### Vozidlo začne po připojení nabíjet, i když není žádný přebytek
+
+Některé nabíječky začnou nabíjet hned po připojení vozidla nebo po přiložení RFID karty. evcc toto chování nemůže vždy ovlivnit, ale rozpozná ho a po krátké době nabíjení zastaví.
+
+### Solární výroba v zimě
+
+V zimních měsících je solární výroba často pod nastaveným minimem.
+Abyste do vozidla dostali co nejvíce energie, můžete vyzkoušet některé z následujících tipů a triků:
+
+#### Pomocí `residualpower`
+
+V konfiguraci v části [`site`](/cs/reference/configuration/site) nastavte [`residualPower`](/cs/reference/configuration/site#residualpower) na **zápornou** hodnotu. Tím určíte, kolik výkonu může dodat síť, aby solární výroba dosáhla potřebného minima. Změny jsou možné přes API.
+
+**Příklad**:
+
+```yaml
+site:
+  residualPower: -1000 # 1000W grid cover in smart mode
+```
+
+Nevýhodou tohoto řešení je, že se výkon ze sítě odebírá i tehdy, když je k dispozici dostatečný přebytek.
+
+#### Pomocí posuvníku solárního podílu
+
+V nastavení nabíjecího bodu snižte posuvník **Solární podíl**, aby jen část minimálního nabíjecího výkonu musela pocházet ze soláru.
+Podrobnosti najdete v části [Nedostatek přebytku?](/cs/features/solar-charging#not-enough-surplus).
+
+### PSA (Peugeot / Citroën / Vauxhall / Opel): Stav nabití se aktualizuje, jen když použiji aplikaci
+
+Jde bohužel o omezení online služby výrobce: PSA dodává zastaralé hodnoty, dokud je neobnoví otevření mobilní aplikace.
+
+Bohužel,
+
+## Heslo
+
+### Zapomněl jsem heslo. Jak ho mohu resetovat? \{#password-reset\}
+
+Heslo je uloženo zašifrované, takže ho nelze přečíst.
+Nové heslo můžete nastavit přes příkazový řádek.
+Před změnou hesla nezapomeňte evcc zastavit.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password set --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+Případně můžete heslo resetovat.
+Při příštím otevření webového rozhraní evcc budete vyzváni k nastavení nového hesla.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password reset --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+### Jak mohu zálohovat a obnovit svou konfiguraci?
+
+Ve webovém rozhraní evcc přejděte do **Konfigurace** → **Zálohování a obnova**.
+
+**Záloha:**
+Stáhne kopii vaší databáze (evcc.db).
+Obsahuje všechna nakonfigurovaná zařízení, služby, plány, nabíjecí relace atd.
+
+**Obnovit:**
+Obnoví dříve staženou databázi.
+Před přepsáním se automaticky vytvoří lokální záloha (`evcc.db.bak`).
+
+:::caution[Pozor]
+Všechny akce jsou chráněny heslem.
+Obnovení zcela přepíše vaše aktuální data.
+:::
+
+**Reset:**
+Jednotlivé oblasti databáze můžete smazat:
+
+- **Nabíjecí relace:** Smaže historii vašich nabíjecích relací.
+- **Konfigurace a nastavení:** Smaže všechna nakonfigurovaná zařízení, služby, plány, mezipaměti atd.
+
+:::caution[Pozor]
+Po resetu konfigurace budete muset znovu nastavit všechna zařízení.
+Váš `evcc.yaml` (pokud existuje) zůstane beze změny.
+:::
+
+Alternativně můžete jednotlivé mezipaměti smazat přes příkazový řádek:
+
+```bash
+evcc cache get
+
+# Clear all caches
+evcc cache clear
+```
+
+## Solární předpověď
+
+V evcc můžete použít různé [solární předpovědi](/cs/tariffs#pv-forecast) a zobrazit si odhadovanou zbývající výrobu pro aktuální a následující dny.
+Jako experimentální funkci jsme navíc zabudovali možnost přizpůsobit předpovědi vaší skutečné výrobě.
+
+### Přizpůsobení předpovědi
+
+Kromě předpovědi evcc zaznamenává také aktuální solární výkon a v průběhu času ho sčítá.
+Totéž se děje s daty předpovědi.
+Porovnáním obou hodnot v průběhu času může evcc předpovědi přizpůsobit vašim skutečným hodnotám výroby.
+Toto přizpůsobení můžete zapnout a vypnout v dialogovém okně předpovědi ve webovém rozhraní.
+
+### Reset dat přizpůsobení
+
+Pokud hodnoty přizpůsobení nejsou správné, můžete je resetovat.
+
+Postup:
+
+1. Zastavte evcc
+2. V příkazovém řádku spusťte následující příkazy
+   ```bash
+   # Reset adjustment history. Confirm with `y`.
+   evcc settings set solarAccForecast 0
+   evcc settings set solarAccYield "{}"
+   ```
+3. Znovu spusťte evcc
+
+Nyní začne evcc sčítat předpovědi od nuly.
+
+## Statistická data \{#statistical-data\}
+
+### Telemetrie a komunitní data \{#telemetry\}
+
+[Web evcc](https://evcc.io/#live) (a dialogové okno „Přehled energie“ ve webovém rozhraní evcc) zobrazuje agregovaná živá data o nabíjení z instalací evcc. Tato data sbíráme na našem centrálním serveru _api.evcc.io_ a účast je zcela dobrovolná.
+
+#### Jak se mohu zapojit?
+
+Jednoduše zapněte přepínač v dialogovém okně „Přehled energie“ ve webovém rozhraní evcc.
+
+**Pro zapojení do komunitních dat je v současnosti potřeba 💚 sponzorský token**. Pomáhá to udržet vysokou kvalitu dat a odfiltrovat chybná nebo podvržená data.
+
+#### Jaká data se v současnosti sbírají?
+
+V současnosti sbíráme následující:
+
+- aktuální nabíjecí výkon
+- aktuální podíl nabíjecího výkonu ze soláru
+- celkovou nabitou energii
+- celkový podíl energie ze soláru
+
+V budoucnu můžeme sbírat více dat, ale **nikdy** to nebudou osobní údaje ani soukromé informace (např. poloha). Vaše soukromí je pro nás opravdu důležité!
+
+#### Co se s daty děje?
+
+Ukládáme množství energie agregované pro každou instanci evcc. **Nesledujeme chování uživatelů v čase** a nemáme zájem to v budoucnu dělat.
+
+Naším cílem je inspirovat více uživatelů k používání evcc, dozvědět se více o tom, jak uživatelé evcc používají, a především ukázat potenciál obnovitelné solární energie využívané pomocí evcc.
+
+Zobrazená data si může kdokoli načíst přes naše [API](https://api.evcc.io/v1/total). Pokud máte skvělý nápad na kreativní vizualizaci, postavte něco a dejte nám vědět!
+
+Více informací o tom, jak data používáme, najdete v našich [Zásadách ochrany osobních údajů](https://sponsor.evcc.io/privacy) (DE).
+
+### Výpočet úspor
+
+V pravém dolním rohu webového rozhraní evcc najdete, kolik procent energie pro nabíjení vašich vozidel pochází ze soláru (např. _85 % solární energie_).
+
+Po kliknutí se zobrazí dialogové okno s dalšími podrobnostmi, mimo jiné s celkovou vypočtenou úsporou oproti nabíjení ze sítě.
+
+Aby byly tyto údaje přesné, ujistěte se, že váš `evcc.yaml` obsahuje odpovídající konfiguraci `tariffs`.
+
+**Příklad**:
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [currency]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [currency]/kWh
+```
+
+Další podrobnosti, mimo jiné o použití dynamických tarifů (např. od Octopus Energy), najdete v části [Konfigurace – Tarify](/cs/tariffs).
+
+_Upozorňujeme, že tyto statistiky jsou orientační a nelze je považovat za zcela přesné._
+
+Při výpočtu úspor evcc používá celkové množství nabité energie a zdroje energie použité během nabíjení (síť, domácí baterie, solár).
+
+**Co je solární energie?**
+
+Solární energie je energie využitá přímo z fotovoltaické elektrárny a energie dodaná případnou domácí baterií.
+evcc předpokládá, že domácí baterie slouží především k ukládání přebytečné vlastní solární energie.
+Pokud se domácí baterie vybíjí i do jiných spotřebičů nebo se nabíjí ze sítě, tento předpoklad nemusí vždy platit.
+Ztráty baterie při převodu na střídavý proud / usměrňování se také nezohledňují.
+
+**Výpočet úspor / efektivní ceny**
+
+Algoritmus rozlišuje mezi odběrem ze sítě a vlastní solární energií (solár a domácí baterie).
+
+Cenová výhoda vaší solární energie se vypočítá z rozdílu mezi cenou odběru ze sítě (např. 30 ct/kWh) a tarifem výkupu energie (např. 8 ct/kWh).
+V tomto příkladu je každá jednotka vyrobené energie o 22 ct (30 ct − 8 ct) levnější než cena odběru ze sítě.
+Pokud jste do vozidla nabili 2 kWh vlastní energie, odpovídá to efektivní úspoře 44 ct.
+
+Pokud jste nabíjeli ze 100 % vlastní solární energií, zobrazená _efektivní cena energie_ by odpovídala nákladům na neexportování do sítě, tj. tarifu výkupu energie (9 ct/kWh).
+Pokud nabíjíte z 50 % solární energií a z 50 % energií ze sítě, _efektivní cena energie_ se odpovídajícím způsobem upraví (např. 19 ct/kWh).
+
+Pokud za export do sítě nic nedostáváte, nastavte cenu výkupu energie na 0 a solární energie se pak považuje za bezplatnou.
+
+**Výpočet solárního podílu**
+
+Pokud odebíráte energii z více zdrojů současně (např. 50 % solár, 50 % síť), je vaše vlastní energie nejprve přidělena domu.
+To zahrnuje všechny spotřebiče, které evcc neřídí.
+Zbývající podíl se pak rozdělí mezi nabíjecí relace.
+Příklad: Vaše fotovoltaická elektrárna vyrábí 3 kW. Tyto 3 kW zcela spotřebuje dům (např. pračka).
+Současně nabíjíte vozidlo výkonem 3 kW (např. v režimu **Rychlé**).
+V tomto případě se domu započítá 100% solární podíl, vozidlu 0 %.
+
+Dynamické ceny (Octopus Energy, Awattar, Tibber atd.) se při určování efektivní ceny energie zohledňují.

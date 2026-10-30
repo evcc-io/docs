@@ -1,0 +1,64 @@
+---
+translatedFrom: "7abdbd4a8ef5"
+---
+
+evcc podporuje chytré zásuvky a ovladatelné spínače.
+Fungují podobně jako nabíječky, ale bez řízení výkonu.
+evcc zásuvku pouze zapíná nebo vypíná.
+Pokud je k dispozici dostatek [přebytku](/cs/features/solar-charging) nebo [levné energie](/cs/features/dynamic-prices), zásuvka se zapne automaticky.
+
+Chytré spínače nastavíte ve webovém rozhraní v části **Konfigurace → Nabíjení a vytápění**.
+
+## Režimy \{#modes\}
+
+Podle použití jsou k dispozici dva režimy.
+Mezi nimi rozhoduje parametr `standbypower` (pohotovostní příkon ve wattech).
+V obou režimech `standbypower` udává, kolik zařízení spotřebovává, což evcc používá k oddělení spotřeby zbytku domu a k výpočtu zbývajícího solárního přebytku.
+Přebytek potřebný k [zapnutí v režimu Chytrý](/cs/features/solar-charging) určuje minimální proud nastavený u nabíjecího bodu.
+
+### Režim nabíjení (výchozí) \{#charging-mode\}
+
+Vhodný pro řízení zařízení napájených z baterie (elektromotocykly, elektrokola, baterie nářadí …).
+Výkon naměřený na spínači se považuje za nabíjecí výkon.
+Pokud klesne pod `standbypower` (výchozí 15&nbsp;W), považuje evcc zařízení za nabité.
+Režim je aktivní vždy, když `standbypower` není záporný.
+Příklad: `standbypower: 50` ukončí nabíjení, jakmile zátěž klesne pod 50&nbsp;W.
+
+<details class="device-config-section">
+<summary>Příklad konfigurace pro evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Statický režim \{#static-mode\}
+
+Vhodný pro běžné spotřebiče, jako jsou tepelná čerpadla, klimatizace nebo topidla.
+Aktivuje se zápornou hodnotou `standbypower`, jejíž absolutní hodnota udává odhadovaný příkon, se kterým evcc počítá při výpočtu přebytku.
+Příklad: `standbypower: -5000` pro zařízení s příkonem asi 5&nbsp;kW.
+
+<details class="device-config-section">
+<summary>Příklad konfigurace pro evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+Režim nabíjení předpokládá, že spínač má vestavěný měřič energie.
+S dodatečným externím [měřičem energie](/cs/meters) toto chování zatím nastavit nelze.
+:::

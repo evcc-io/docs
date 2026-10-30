@@ -1,0 +1,79 @@
+---
+title: "Dynamické tarify"
+description: "Ukazuje, jak nastavit pevný, časově závislý nebo dynamický tarif elektřiny, např. Tibber nebo Awattar, a nechat evcc nabíjet ze sítě v nejlevnějších hodinách."
+sidebar:
+  order: 3
+translatedFrom: "2fcf339d9875"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Pokud vlastní solární energie nestačí, musí se vozidlo čas od času nabíjet energií ze sítě.
+Pokud máte tarif elektřiny s proměnlivými cenami, jako je [Tibber](https://tibber.com/de/) nebo [Awattar](https://www.awattar.de/), můžete s evcc optimalizovat nabíjení ze sítě.
+
+## Nastavení zdroje dat
+
+Cenu elektřiny nastavíte v nabídce **Konfigurace → Tarify a Předpovědní modely → Přidat tarif energie → Přidat tarif pro dodávku energie**.
+Měnu lze změnit v nabídce **Konfigurace → Obecné → Měna**.
+
+### Pevný tarif elektřiny
+
+U pevného tarifu elektřiny zvolte v poli **Poskytovatel** možnost **Pevná cena** a zadejte svou cenu za kWh.
+Tento údaj slouží k výpočtu skutečných nákladů na nabíjení.
+
+### Časově závislý tarif elektřiny
+
+Pokud v určitých časech platí různé ceny, zvolte v poli **Poskytovatel** možnost **Časový tarif**.
+Do pole **Výchozí cena** zadejte svou běžnou cenu.
+Tlačítkem **Přidat zónu** můžete definovat libovolný počet období, ve kterých platí jiná cena, např. ve všední dny od 2 do 6 hodin ráno nebo o víkendu.
+Každá zóna má vlastní cenu a lze ji omezit na určité dny a hodiny.
+
+### Dynamický tarif elektřiny přes API
+
+Pokud máte tarif elektřiny, který se řídí např. cenami na burze elektřiny, můžete ceny získávat také přes API.
+V poli **Poskytovatel** zvolte svého poskytovatele, např. [Tibber](https://tibber.com/de/), a zadejte přístupové údaje specifické pro daného poskytovatele, např. API token.
+
+Seznam všech podporovaných tarifů najdete v části [tarify](/cs/tariffs).
+Pokud má váš poskytovatel rozhraní, ale evcc ho zatím nepodporuje, pošlete prosím [požadavek na novou funkci](https://github.com/evcc-io/evcc/issues/new/choose).
+
+### Časově závislé poplatky za distribuci
+
+Pokud vám provozovatel distribuční soustavy účtuje časově závislé poplatky za distribuci (např. časově proměnné poplatky za distribuci podle § 14a EnWG v Německu), můžete je pomocí `chargesZones` přidat ke kterémukoli tarifu.
+Podrobnosti najdete v části [časově závislé poplatky za distribuci](/cs/reference/configuration/tariffs#charges-zones).
+
+## Chytrý export do sítě
+
+V určitých denních dobách a v určitých regionech může být k dispozici přebytek solární energie. Zároveň může být spotřeba v síti velmi nízká.
+V těchto obdobích vám může dodavatel energie účtovat poplatek za export solární energie do sítě, protože nabídka je vysoká, poptávka nízká a síť je přetížená.
+evcc podporuje chytrý export do sítě a umožňuje nastavit cenovou hranici, při které omezí výkon solárních střídačů, aby k exportu do sítě nedocházelo.
+
+## Nabíjení levnou energií ze sítě
+
+Pokud jste nastavili časově závislý nebo dynamický tarif elektřiny, zobrazí se v dialogovém okně nastavení nabíjecího bodu sekce „Nabíjení levnou energií ze sítě“.
+
+<Screenshot
+  name="features/screenshots/co2-loadpoint-settings"
+  caption="Nastavení nabíjecího bodu"
+/>
+
+Zde vidíte ceny energie na nadcházející hodiny a můžete nastavit cenový strop.
+
+<Screenshot
+  name="features/screenshots/dynamicprice-modal"
+  caption="Snímek obrazovky dialogového okna Smart Grid Nabíjení s nastaveným cenovým stropem"
+/>
+
+Tento limit platí v režimu **Chytrý** aktuálního nabíjecího bodu.
+Když kliknete na „Aplikovat všude“, limit se použije pro všechny nabíjecí body.
+Kromě [nabíjení ze solárního přebytku](/cs/features/solar-charging) se nyní v hodinách s nízkými cenami elektřiny (zelené sloupce) zapne rychlé nabíjení.
+
+## Plán nabíjení
+
+Pomocí [plánů nabíjení](/cs/features/plans) můžete náklady na energii řídit ještě přesněji.
+Stačí zadat množství energie (kWh) nebo cílový stav nabití (%) a požadovaný čas odjezdu.
+Pokud je nastaven časově závislý nebo dynamický tarif elektřiny, plánovací algoritmus automaticky vybere nejlevnější hodiny pro nabíjení.
+
+<Screenshot
+  name="features/screenshots/dynamicprice-plan"
+  caption="Snímek obrazovky dialogového okna plánu nabíjení s nabíjením optimalizovaným podle ceny"
+/>
