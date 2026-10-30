@@ -77,7 +77,7 @@ graph TD;
 
 Wichtig für die Funktionalität ist ein Netzanschlusszähler (`grid` Zähler). Dieser ermittelt die aktuelle Überschussleistung.
 Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss.
-Ein Betrieb ist aber auch ohne Netzanschlusszähler möglich. Mehr dazu findest du [hier](/de/faq#einrichtung).
+Ein Betrieb ist aber auch ohne Netzanschlusszähler möglich. Mehr dazu findest du [hier](/de/faq#configuration).
 
 Die Überschussleistung wird mit der Mindestladeleistung verglichen. Ist diese erreicht, startet die Ladung.
 
