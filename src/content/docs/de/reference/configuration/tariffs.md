@@ -6,7 +6,7 @@ sidebar:
 ---
 
 Hier kannst du deinen Energietarif und gegebenenfalls deine Einspeisevergütung angeben.
-evcc verwendet diese Werte für eine grobe [Ersparnisberechnung](/de/faq#ersparnisberechnung), die in der Web-UI angezeigt wird.
+evcc verwendet diese Werte für eine grobe [Ersparnisberechnung](/de/faq#savings-calculation), die in der Web-UI angezeigt wird.
 Diese Daten werden auch vom [Planer](/de/features/plans) für preis- und CO₂-optimiertes Laden verwendet.
 
 **Struktur**

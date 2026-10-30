@@ -26,7 +26,7 @@ Das neue Ersparnisfeature zeigt dir an wie viel deines Ladestroms durch selbspro
 Der Prozentwert wird unten rechts in der Ecke angezeigt.
 Beim Klick darauf bekommst du weitere Details in einem Dialog angezeigt.
 Dort siehst du neben der Energiemenge auch deinen effektiven Energiepreis und die Gesamtersparnis gegenüber reinem Netzbezug.
-Hier findest du mehr Informationen zur [Berechnung und Preiskonfiguration](/de/faq#ersparnisberechnung).
+Hier findest du mehr Informationen zur [Berechnung und Preiskonfiguration](/de/faq#savings-calculation).
 
 [Sponsoren](/de/sponsorship) finden in dem neuen Dialog unter dem Dankeschön-Konfetti-Button einen, _\*drumroll\*_, Link um unsere neuen evcc Sticker zu bekommen.
 Ihr seid die Besten. Danke für euren Support! 💚🥳
