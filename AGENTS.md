@@ -49,7 +49,7 @@ The nightly/release toggle in the UI switches which collection is used at runtim
 ### Internationalization
 
 - **English is the default locale** (`defaultLocale: "en"` in `astro.config.mjs`) and the only hand-written one: edit `src/content/docs/en/` only.
-- Every other locale in `src/locales.json` is generated from English by the translation pipeline and stamped with `translatedFrom` in the frontmatter. Never edit them by hand: change the English page, then run `/translate <lang>` (or `/translate all`) to bring the other locales back in sync; `node scripts/i18n/status.mjs <lang>` lists what is missing or outdated.
+- Every other locale in `src/locales.json` is generated from English by the translation pipeline and stamped with `translatedFrom` in the frontmatter. Never edit them by hand: change the English page, then run `/translate all` to bring every other locale back in sync at once (`/translate <lang>` only to repair a single locale); `node scripts/i18n/status.mjs <lang>` lists what is missing or outdated.
 - The pipeline follows `scripts/i18n/RULES.md` (what is translated, what stays byte-identical, links, assets) and the per-language style sheets in `scripts/i18n/style/<lang>.md`; `en.md` holds the rules for the source text.
 - Device templates exist in English and German only; device pages in the other locales show English template data with translated UI chrome.
 - Custom UI strings live in `src/content/i18n/<lang>.json` and are read via `Astro.locals.t("key")`, not via `lang === "de" ? … : …` ternaries in components.
@@ -252,7 +252,7 @@ The frontmatter `description` becomes the `<meta name="description">` (search sn
 2. Maintain consistency with existing documentation style
 3. Use clear, concise language suitable for technical documentation
 4. Include code examples where appropriate
-5. **Edit English only** and regenerate the other locales with `/translate <lang>` so they stay in sync
+5. **Edit English only** and regenerate all other locales at once with `/translate all` so they stay in sync
 6. Every new or reworked page gets a frontmatter `description` following "Page Descriptions" above; check it still fits after content changes
 7. Test changes locally with `npm run dev` (serves every locale at `/<lang>/...`)
 
@@ -276,7 +276,7 @@ Commit messages are the exception: no footer, and no `Co-Authored-By` trailer. N
 ## Common Tasks
 
 - Updating device docs: edit YAML in `/templates`, rebuild
-- Updating prose docs: edit the relevant `.md`/`.mdx` under `src/content/docs/en/`, then `/translate <lang>` for the other locales
+- Updating prose docs: edit the relevant `.md`/`.mdx` under `src/content/docs/en/`, then `/translate all` for the other locales
 - Adding a new sidebar entry: update `astro.config.mjs`
 - Adding a new component: drop a `.astro` file into `src/components/`, import via `@components/...`
 - Fixing issues: check both templates and rendered output (`npm run build`)

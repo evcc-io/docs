@@ -2,7 +2,10 @@ const { test } = require("@playwright/test");
 const sharp = require("sharp");
 
 const screenshotBase = "../src/assets";
-const LANGS = (process.env.LANGS || "en,de").split(",");
+// every docs locale unless LANGS restricts it, e.g. LANGS=en,de
+const LANGS =
+  process.env.LANGS?.split(",") ??
+  Object.keys(require("../../../src/locales.json"));
 
 export function loop(body) {
   ["light", "dark"].forEach((theme) => {

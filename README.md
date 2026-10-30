@@ -55,5 +55,5 @@ The CI pipeline checks formatting and will fail if files are not formatted.
 
 English (`src/content/docs/en/`) is the only hand-written locale.
 All other locales are translated automatically from English and stamped with `translatedFrom`.
-Don't edit them by hand: change the English source, then run `/translate <lang>` (rules in `scripts/i18n/RULES.md`).
+Don't edit them by hand: change the English source, then run `/translate all` to update every locale at once (rules in `scripts/i18n/RULES.md`).
 If writing English is hard for you, open the PR anyway and say so; maintainers help with the wording.
