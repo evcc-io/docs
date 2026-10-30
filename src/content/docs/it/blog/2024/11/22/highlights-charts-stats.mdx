@@ -1,0 +1,145 @@
+---
+date: 2024-11-22
+title: "Highlight: grafici e statistiche"
+description: "Highlight di novembre 2024 con grafici per le tue sessioni di ricarica, il boost da batteria sperimentale, tariffe flessibili e inverter ibridi."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner degli highlight"
+  image: "../../../../../en/blog/2024/11/22/charts-stats-banner.webp"
+translatedFrom: "58511509e70c"
+---
+
+Le giornate si accorciano.
+Un buon motivo per fare un piccolo aggiornamento su cosa è successo dall’[ultimo articolo di agosto](/it/blog/2024/08/17/highlights-14a-enwg-ocpp-loadmanagement-elli).
+
+{/* excerpt */}
+
+## Visualizzazione delle sessioni di ricarica
+
+La panoramica delle [sessioni di ricarica](/it/features/sessions) è disponibile già da un po’.
+Oltre ai dati di base come energia caricata, tempi di ricarica, veicolo e chilometraggio, da qualche tempo raccogliamo anche informazioni sulla quota di energia solare autoprodotta, sui prezzi reali e sulle emissioni di CO₂.
+
+Finora questi dati erano disponibili solo come tabella o esportazione CSV per analisi personali.
+Ora abbiamo aggiunto belle visualizzazioni dell’energia caricata, della quota solare, dei costi e delle emissioni di CO₂.
+
+![Visualizzazione della quota solare](../../../../../en/blog/2024/11/22/ipad-stats-solar.webp)
+
+Se hai più punti di ricarica o veicoli, puoi raggruppare e confrontare i dati.
+Nella [documentazione](/it/features/co2) trovi come configurare le [fonti di dati CO₂](/it/features/co2) e i [prezzi dinamici](/it/features/dynamic-prices) necessari.
+
+![Visualizzazione dei costi](../../../../../en/blog/2024/11/22/ipad-stats-per-vehicle.webp)
+
+## Boost da batteria
+
+La prima versione del tanto richiesto [boost da batteria](/it/features/battery#battery-boost) è arrivata nella release come funzione sperimentale 🧪.
+Questa funzione integra la classica ricarica con il surplus solare.
+Quando è attiva, oltre all’energia solare disponibile viene usata anche l’energia accumulata nella batteria domestica per caricare il veicolo.
+Il sistema determina automaticamente la potenza di ricarica massima che la batteria può fornire.
+
+![Boost da batteria](../../../../../en/blog/2024/11/22/ipad-battery-boost.webp)
+
+Il boost si può attivare per ogni punto di ricarica e si disattiva automaticamente quando il veicolo viene scollegato.
+
+Può essere particolarmente utile nelle giornate di sole.
+Se nel pomeriggio vuoi partire da casa con la tua auto, puoi attivare il boost prima di uscire, così l’energia accumulata nella batteria domestica completamente carica passa al veicolo.
+Il veicolo parte con un livello di carica più alto e la batteria domestica ha spazio per accumulare l’energia del sole pomeridiano, che altrimenti avresti immesso in rete.
+
+Altre impostazioni, come limiti di ricarica e una posizione più visibile nell’interfaccia (un pulsante Boost dedicato), sono in programma per una release futura.
+
+## Tariffe flessibili
+
+L’elenco delle [diverse tariffe](/it/tariffs) cresce costantemente.
+Soprattutto nei prossimi anni, il tema delle tariffe dinamiche diventerà sempre più importante.
+
+Fornitori digitali come Tibber, Awattar, Octopus o Ostrom offrono API per il prezzo attuale e le previsioni di prezzo per il giorno successivo.
+Spesso questi prezzi includono già gli oneri di rete e altri costi.
+
+Per le tariffe dinamiche il cui fornitore non offre un’API, è possibile calcolare da sé il prezzo dell’energia sulla base del prezzo day-ahead della borsa elettrica.
+
+Una buona fonte di dati per il prezzo spot è l’interfaccia [Energy Charts](https://api.energy-charts.info) del Fraunhofer ISE.
+Si può usare senza registrazione.
+
+Ecco un esempio di configurazione per la zona di prezzo tedesca:
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # fixed surcharge per kWh (e.g. 20ct grid fee, 2ct provider fees)
+    tax: 0.19 # percentage surcharge (e.g. 19% VAT)
+```
+
+Per calcolare il prezzo finale al consumatore per kWh si usa la formula `(price + charges) * (1 + tax)`.
+Finora questa formula era fissa nel codice.
+
+Per tariffe più complesse, ad es. con un tetto di costo, ora puoi adattare questa formula anche tu.
+Ecco un esempio di tariffa dinamica con un tetto di 50 ct/kWh:
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # fester Aufschlag pro kWh (bspw. 20ct Netzentgelt, 2ct Gebühren)
+    tax: 0.19 # prozentualer Aufschlag (bspw. 19% MwSt.)
+    formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Oltre al prezzo spot (`price`) e ai valori di `charges` e `tax`, hai a disposizione tutta la potenza della libreria [math](https://pkg.go.dev/math) di Go.
+
+## Inverter ibridi con potenza AC limitata
+
+Alcuni inverter ibridi offrono una potenza DC più alta di quella AC.
+Ciò significa che possono gestire ad es. 10 kW di potenza solare, ma fornire solo 8 kW di potenza AC alla rete domestica.
+I 2 kW restanti vengono accumulati lato DC nella batteria.
+Questo ha sempre causato problemi nella regolazione del surplus, perché evcc considera l’intera potenza solare.
+L’opzione di configurazione globale `maxGridSupplyWhileBatteryCharging` (sì, un nome poco felice) era un tentativo di contrastare questi effetti collaterali indesiderati.
+
+Abbiamo sostituito questa opzione con una soluzione più stabile.
+Tutti i [template di inverter](/it/meters) interessati (ad es. Fronius, Growatt, SMA, Sungrow ecc.) ora hanno l’opzione avanzata `maxAcPower`.
+Con questa puoi definire la potenza AC massima (ad es. `maxAcPower: 8000` per 8 kW) per ogni inverter.
+La regolazione del surplus ora tiene conto di questo valore.
+
+## Sponsor cocharge: rendi pubblica la tua stazione di ricarica privata
+
+Siamo lieti di dare il benvenuto alla startup di Brema [cocharge](https://cocharge.de/evcc) come nuovo sponsor.
+
+[![Logo di cocharge](../../../../../en/blog/2024/11/22/cocharge.webp)](https://cocharge.de/evcc)
+
+cocharge permette ai privati di rendere pubblica la propria stazione di ricarica.
+Il tuo caricabatterie compare quindi nelle app dei principali fornitori di carte di ricarica, con orari di apertura definibili a scelta.
+Per chi guida un’auto elettrica, ricaricare e pagare presso la tua stazione funziona come in qualsiasi altra stazione di ricarica pubblica.
+cocharge si occupa dei dettagli tecnici, delle richieste per le quote THG, degli accordi di roaming e della burocrazia.
+**I tuoi guadagni aggiuntivi dalle sessioni di ricarica di terzi vengono pagati ogni mese.**
+
+Il requisito per usare cocharge è un **caricabatterie certificato (eichrechtskonform)** che **supporti OCPP**.
+Il punto di ricarica deve inoltre essere **accessibile al pubblico**.
+Non ci sono costi una tantum né ricorrenti.
+cocharge trattiene solo una commissione del 15% su ogni sessione di ricarica.
+
+Se hai un’[auto aziendale](https://cocharge.de/dienstwagen-laden) e una carta di ricarica del tuo datore di lavoro, questa soluzione può essere particolarmente interessante per te.
+Con la fatturazione automatica ti risparmi la burocrazia.
+In più puoi guadagnare qualcosa se ricarichi con la tua energia solare o con una tariffa dinamica nei momenti convenienti.
+
+Vuoi usare cocharge ed evcc insieme?
+La maggior parte dei caricabatterie certificati ha, oltre a OCPP, anche un’interfaccia locale come Modbus.
+Così puoi rendere pubblica il tuo caricabatterie e in parallelo ottimizzare localmente la potenza di ricarica con evcc.
+
+Se ti interessa e vuoi essere tra i primi utenti, dai un’occhiata a [cocharge.de/evcc](https://cocharge.de/evcc).
+
+## Tanti piccoli miglioramenti
+
+Come sempre ci sono stati anche tanti piccoli miglioramenti, correzioni di bug e il supporto per nuovi caricabatterie, inverter e altri dispositivi.
+Trovi maggiori dettagli nelle [note di rilascio](https://github.com/evcc-io/evcc/releases).
+
+💚 Un grande grazie a tutti coloro che sostengono il progetto con la partecipazione attiva e il sostegno economico.
+
+**Buona ricarica!**<br/>
+Il team evcc<br/>
+Michael, Andi e Uli
