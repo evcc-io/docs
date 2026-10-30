@@ -1,0 +1,64 @@
+---
+translatedFrom: "7abdbd4a8ef5"
+---
+
+evcc prend en charge les prises commutables et les relais pilotables.
+Ces appareils fonctionnent de manière similaire aux chargeurs, mais sans régulation de puissance.
+evcc se contente d’allumer ou d’éteindre la prise.
+Si suffisamment de [surplus](/fr/features/solar-charging) ou d’[énergie bon marché](/fr/features/dynamic-prices) est disponible, la prise est commutée automatiquement.
+
+Configurez vos prises commutables dans l’interface web sous **Configuration → Bornes de recharge et chauffages**.
+
+## Modes \{#modes\}
+
+Selon l’usage, il existe deux modes.
+Le paramètre `standbypower` (puissance de veille en watts) détermine lequel s’applique.
+Dans les deux modes, `standbypower` indique la consommation de l’appareil, qui sert à établir le bilan de consommation du reste de la maison et à calculer le surplus solaire restant.
+Le surplus nécessaire pour [permettre l’activation en mode Intelligent](/fr/features/solar-charging) est défini par le courant minimal dans les paramètres du point de charge.
+
+### Mode de charge (par défaut) \{#charging-mode\}
+
+Adapté au pilotage d’appareils sur batterie (motos électriques, vélos électriques, batteries d’outils…).
+La puissance mesurée au niveau de l’interrupteur est considérée comme puissance de charge.
+Si elle descend sous `standbypower` (15&nbsp;W par défaut), evcc considère l’appareil comme chargé.
+Ce mode est actif dès que `standbypower` n’est pas négatif.
+Exemple : `standbypower: 50` termine la charge dès que la consommation descend sous 50&nbsp;W.
+
+<details class="device-config-section">
+<summary>Exemple de configuration pour evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Mode statique \{#static-mode\}
+
+Adapté aux consommateurs courants comme les pompes à chaleur, les climatiseurs ou les radiateurs.
+Il s’active avec une valeur négative de `standbypower`, dont la valeur absolue correspond à la puissance estimée qu’evcc utilise pour calculer le surplus.
+Exemple : `standbypower: -5000` pour un appareil consommant environ 5&nbsp;kW.
+
+<details class="device-config-section">
+<summary>Exemple de configuration pour evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+Le mode de charge suppose que l’interrupteur dispose d’un compteur d’énergie intégré.
+Il n’est actuellement pas possible d’obtenir ce comportement avec un [compteur d’énergie](/fr/meters) externe supplémentaire.
+:::

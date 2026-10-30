@@ -1,0 +1,134 @@
+---
+title: "Véhicules"
+description: "Explique ce que permettent dans evcc le véhicule invité, les véhicules hors ligne et ceux avec API en ligne, et comment plusieurs véhicules se partagent un chargeur."
+sidebar:
+  order: 8
+translatedFrom: "5bf55f6f775f"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Si vous configurez votre ou vos véhicules dans evcc, des fonctions supplémentaires sont à votre disposition.
+Vous pouvez configurer la [charge minimale et les limites](/fr/features/limits), utiliser des [plans de charge](/fr/features/plans) et obtenir une analyse détaillée par véhicule dans les [sessions de charge](/fr/features/sessions), y compris des informations comme le kilométrage.
+
+Enregistrer des véhicules est facultatif. Comme evcc pilote la charge via le chargeur dans la plupart des cas, la charge solaire et la charge en fonction du prix fonctionnent aussi sans configurer de véhicule.
+
+## Types de véhicules
+
+Les fonctions disponibles dépendent du type de véhicule. On distingue les types suivants :
+
+### Véhicule invité
+
+Si vous n’avez configuré aucun véhicule, le véhicule invité s’affiche au point de charge.
+Il s’agit d’un véhicule standard qui ne prend en charge aucune fonction particulière.
+Même si vous avez configuré votre propre véhicule, vous pouvez passer à tout moment au véhicule invité.
+C’est utile lorsqu’un véhicule non configuré (p. ex. celui d’un visiteur de passage) charge à votre point de charge.
+evcc utilise alors les valeurs standard de puissance et de phases configurées au point de charge.
+Dans les [sessions de charge](/fr/features/sessions), cette charge est attribuée au véhicule invité.
+
+### Véhicules sans API (hors ligne)
+
+Si votre véhicule ne dispose pas d’interface en ligne ou s’il n’y a pas de connexion Internet au point de charge, vous pouvez le configurer comme véhicule hors ligne.
+Allez dans **Configuration → Véhicules → Ajouter un véhicule** et choisissez **Véhicule générique (sans API)** dans le champ **Fabricant**.
+Donnez au véhicule un **Titre** (p. ex. « Honda e verte ») et saisissez la **Capacité** de sa batterie.
+Comme la capacité de la batterie est désormais connue, la progression de la charge et la limite de charge peuvent aussi s’afficher en pourcentage (p. ex. +25 %).
+
+Remarque : vous pouvez aussi utiliser cette fonction pour des véhicules tiers (amis, famille, véhicules de location ou de société) auxquels vous n’avez pas d’accès API.
+
+### Véhicules avec API (en ligne)
+
+Si votre véhicule dispose d’une interface en ligne, il est judicieux de la configurer aussi dans evcc.
+Vous trouverez la liste de tous les fabricants pris en charge sous [Véhicules](/fr/vehicles).
+Allez dans **Configuration → Véhicules → Ajouter un véhicule** et choisissez votre **Fabricant**, p. ex. Audi.
+Selon le fabricant, saisissez ensuite les identifiants de votre compte constructeur, comme le nom d’utilisateur et le mot de passe.
+
+evcc a désormais accès au niveau de charge actuel.
+Selon le fabricant, d’autres informations comme le statut de charge, les limites du véhicule, le kilométrage, la climatisation et l’autonomie estimée sont également disponibles.
+
+:::note[Remarque]
+Pour préserver la batterie du véhicule, evcc ne met à jour le niveau de charge que lorsqu’un véhicule est branché au point de charge.
+Selon le fabricant, l’accès à l’API peut réveiller le véhicule et augmenter nettement sa consommation en veille.
+Vous pouvez modifier ce comportement avec le [paramètre `poll`](/fr/reference/configuration/loadpoints#poll) du point de charge.
+:::
+
+## Plusieurs véhicules \{#multiple-vehicles\}
+
+Vous pouvez configurer plusieurs véhicules et plusieurs points de charge dans evcc.
+Il existe différentes possibilités pour attribuer les véhicules aux points de charge :
+
+### Véhicule par défaut
+
+Si chaque véhicule dispose de son propre point de charge, vous pouvez configurer le véhicule comme véhicule par défaut du point de charge.
+C’est la configuration la plus simple et celle que nous recommandons.
+Allez dans **Configuration → Bornes de recharge et chauffages → [Mon point de charge]**.
+Dans la section **Véhicules**, sélectionnez votre véhicule comme **Véhicule par défaut**.
+Lorsqu’une nouvelle charge démarre, evcc suppose qu’il s’agit du véhicule par défaut.
+Si ce n’est pas le cas (p. ex. véhicule invité), vous pouvez changer de véhicule dans l’interface.
+
+### Attribution via l’interface
+
+Le véhicule actuellement attribué s’affiche dans l’interface au point de charge concerné.
+Vous pouvez modifier l’attribution en cliquant sur le nom du véhicule.
+Cette sélection s’applique alors à la charge en cours.
+
+<Screenshot
+  name="features/screenshots/vehicle-select"
+  caption="Changer de véhicule au point de charge"
+/>
+
+### Détection automatique
+
+Si plusieurs véhicules chargent à un même point de charge, la détection automatique intervient au branchement.
+Le statut de charge de tous les véhicules configurés est vérifié et le véhicule le plus plausible est sélectionné.
+Si la détection a choisi le mauvais véhicule (p. ex. parce qu’il charge à un autre point de charge), vous pouvez corriger l’attribution manuellement.
+
+### Détection par RFID
+
+Si votre chargeur dispose d’un lecteur de cartes RFID, vous pouvez aussi l’utiliser pour l’attribution.
+Pour cela, une ou plusieurs cartes RFID sont attribuées à un véhicule précis.
+Chaque fois que le véhicule est de nouveau branché au chargeur, la charge doit d’abord être autorisée avec la carte RFID correspondante.
+
+evcc reçoit du chargeur un code d’identification unique.
+Selon le fabricant, il s’agit soit du code RFID, soit d’un code interne dérivé, comme un nom d’utilisateur issu de la configuration du chargeur.
+Une fois la charge autorisée avec la carte RFID, l’identifiant actuel s’affiche sur la carte du point de charge sous **Configuration → Bornes de recharge et chauffages**.
+Saisissez cette valeur dans le champ **Identifiant RFID** du véhicule souhaité sous **Configuration → Véhicules**.
+Vous pouvez enregistrer plusieurs identifiants par véhicule.
+
+### Détection via Plug & Charge
+
+Si votre chargeur prend en charge la norme ISO 15118, la détection peut aussi se faire directement via le câble de charge.
+Toutefois, très peu de chargeurs disponibles sur le marché proposent actuellement cette fonction.
+
+:::note[Remarque]
+La fonction « connexion PLC au véhicule » doit être activée dans le chargeur.
+:::
+
+La configuration est similaire à celle de la détection par RFID.
+Le véhicule doit être branché au chargeur.
+L’identifiant (p. ex. `01:23:45:67:89:00`) s’affiche alors sur la carte du point de charge sous **Configuration → Bornes de recharge et chauffages**.
+Saisissez cette valeur dans le champ **Identifiant RFID** du véhicule.
+
+:::note[Remarque]
+Si le véhicule et le chargeur ne prennent pas en charge Plug & Charge, le véhicule transmet une adresse matérielle unique (adresse MAC).
+Certains fabricants comme VW et Audi la remplacent toutefois chaque jour par une autre valeur aléatoire.
+
+Dans ce cas, vous pouvez utiliser un caractère générique et n’indiquer que la partie qui ne change pas, p. ex. `01:23:45:*`.
+
+Cela ne fonctionne évidemment que si ce début de valeur est propre à chacun de vos véhicules.
+:::
+
+## Climatisation
+
+Pour certains véhicules, evcc peut aussi détecter via la connexion en ligne si le véhicule est en train de préclimatiser.
+Dans ce cas, le chargeur autorise la puissance la plus faible possible afin que le véhicule puisse alimenter sa climatisation via le chargeur.
+
+Il peut arriver que la climatisation du véhicule nécessite moins que la puissance autorisée.
+Le véhicule utilise alors la puissance restante disponible pour continuer à charger la batterie, même si une limite de niveau de charge définie est déjà atteinte.
+
+Dès que la fin de la climatisation est détectée, le chargeur est de nouveau verrouillé afin que le véhicule ne puisse plus prélever de puissance sur le chargeur, sauf s’il est déjà en charge.
+
+:::note[Remarque]
+Cela s’applique uniquement aux combinaisons de véhicules et de chargeurs qui communiquent selon la norme IEC 61851. C’est aujourd’hui le cas le plus courant.
+
+Pour les véhicules et chargeurs qui communiquent selon la norme ISO 15118, le véhicule reçoit exactement la quantité d’énergie qu’il demande directement au chargeur.
+:::

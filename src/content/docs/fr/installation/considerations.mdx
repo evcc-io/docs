@@ -1,0 +1,130 @@
+---
+title: "Considérations préalables"
+description: "Si la charge solaire est nouvelle pour vous, découvrez pourquoi evcc a besoin d’un compteur avant réseau, sur quel matériel il tourne bien et comment choisir un chargeur."
+sidebar:
+  hidden: true
+translatedFrom: "4a0ecdd6f848"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Vous avez de bonnes connaissances techniques et savez sur quel matériel installer evcc et quel chargeur, quelle installation photovoltaïque et éventuellement quelle batterie intégrer ?
+Alors passez cette page et allez directement à l’installation.
+
+Si la charge avec le surplus solaire est nouvelle pour vous, vous trouverez ci-dessous quelques informations pour bien démarrer avec evcc.
+
+## Situation de départ
+
+evcc est-il la bonne solution pour la charge avec le surplus solaire dans mon cas ?
+J’ai une installation photovoltaïque et une voiture électrique et je veux essayer.
+Par où commencer ?
+
+Une installation photovoltaïque est particulièrement rentable lorsque vous consommez vous-même l’électricité produite.
+Pour cela, l’électricité doit être consommée exactement au moment où elle est produite, c.-à-d. quand le soleil brille.
+La solution la plus simple : brancher la voiture pour la charger chaque fois que le soleil brille et qu’aucun nuage n’est en vue.
+Malheureusement, il y a des nuages, ou bien l’électricité de l’installation photovoltaïque sert en ce moment au lave-linge.
+Il faut donc automatiser le pilotage de la charge, et c’est exactement ce que fait evcc.
+
+Pour automatiser la charge, il faut connaître le surplus d’électricité actuel, c.-à-d. l’électricité que vous ne consommez pas vous-même et que vous exportez donc vers le réseau.
+Cette information est fournie par le compteur électrique.
+Il peut s’agir du compteur du gestionnaire de réseau ou d’un compteur supplémentaire posé en même temps que l’installation photovoltaïque.
+Ce second cas est généralement celui d’une installation photovoltaïque équipée d’une batterie domestique.
+
+Le compteur doit pouvoir être lu électroniquement.
+Vérifiez sous [Appareils > Solaire, batterie domestique, réseau, compteurs](/fr/meters) si vous y trouvez vos appareils.
+Sinon, vous pouvez aussi les intégrer vous-même en tant qu’[appareils personnalisés](/fr/user-defined-devices).
+
+Autre condition pour automatiser la charge avec le surplus solaire : un chargeur pilotable.
+Les appareils pris en charge sont listés sous [Appareils > Chargeurs](/fr/chargers).
+Si vous n’avez pas (encore) de chargeur, une prise commutable avec mesure de consommation est recommandée pour les essais, p. ex. une TP-Link Tapo P110, disponible pour moins de 20 €.
+Elle pourra plus tard servir à commuter le chargeur de trottinettes ou de vélos électriques.
+Pour la voiture électrique, ce n’est pas une solution durable : d’une part, la puissance de charge ne peut pas être régulée, c.-à-d. adaptée à la production actuelle de l’installation photovoltaïque et à l’autoconsommation.
+D’autre part, il n’y a aucune communication avec la voiture électrique, la commutation se fait donc sous pleine charge, et la prise commutable n’y survivra pas à long terme.
+Les chargeurs, eux, communiquent avec la voiture, de sorte que la voiture a déjà arrêté de charger avant que le chargeur ne coupe.
+
+## Matériel pour installer evcc
+
+evcc est un logiciel open source développé par des bénévoles.
+Il n’y a donc aucune garantie de fonctionnement.
+En contrepartie, il est gratuit.
+Linux, développé selon ce modèle depuis de nombreuses années, montre bien qu’un logiciel open source peut être excellent.
+Cela nécessite toutefois une communauté active.
+Elle répond p. ex. aux [questions des débutants](https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe) ou fait évoluer le logiciel.
+Si vous ne pouvez pas y contribuer, vous pouvez soutenir le projet par le [parrainage](/fr/sponsorship).
+Le parrainage est nécessaire pour certains chargeurs commerciaux.
+
+Pour simplement essayer evcc, inutile d’acheter un Raspberry Pi : vous pouvez commencer avec un vieux PC ou ordinateur portable mis de côté.
+Tous les appareils des 10 dernières années avec un processeur 64 bits compatible Intel et une carte réseau (ou le Wi-Fi) devraient convenir.
+À long terme, la consommation électrique plus élevée et l’encombrement plus important plaident contre un PC ou un ordinateur portable.
+De plus, le mode d’économie d’énergie peut poser des problèmes sur les ordinateurs portables.
+Les appareils déjà présents sur le réseau domestique sont des alternatives à une installation sur Raspberry Pi.
+Il peut s’agir p. ex. d’un serveur de stockage en réseau (NAS) ou d’un système existant comme Home Assistant.
+L’installation est alors plus exigeante, car evcc doit tourner dans une machine virtuelle ou un conteneur.
+
+Pour une bonne stabilité, nous recommandons de raccorder si possible evcc et les appareils utilisés (chargeur, installation photovoltaïque, batterie, etc.) par câble réseau.
+evcc accède aux compteurs, installations photovoltaïques, batteries domestiques et chargeurs par leur adresse IP.
+Lors de la [configuration](/fr/installation/configuration), les appareils trouvés sur votre réseau sont proposés, vous n’avez donc généralement pas besoin de chercher les adresses.
+Si un appareil n’est pas trouvé, son adresse IP figure généralement dans l’interface web du routeur DSL ou câble (p. ex. Fritz!Box).
+Il est utile d’attribuer ces adresses de manière fixe dans le routeur afin qu’elles ne changent pas avec le temps.
+
+## Chargeurs
+
+Les chargeurs existent en différentes variantes.
+La suite décrit les propriétés et fonctions typiques des chargeurs.
+Cela devrait vous aider un peu à choisir un chargeur.
+
+### Puissance de charge
+
+Une première décision concerne la puissance de charge maximale du chargeur.
+Les plus courants sont les chargeurs de 11 kW et de 22 kW.
+La variante de 11 kW est sans doute la plus souvent choisie.
+Il y a deux raisons principales à cela : d’une part, de nombreux véhicules ne peuvent charger qu’à 11 kW AC au maximum, et d’autre part, les chargeurs de 11 kW peuvent être mis en service après une simple déclaration (notification) auprès du gestionnaire de réseau.
+Les chargeurs de 22 kW nécessitent une autorisation du gestionnaire de réseau.
+Celle-ci peut n’être accordée que sous certaines conditions.
+Le gestionnaire de réseau peut p. ex. exiger que la charge puisse être coupée par un signal de commande en cas de pénurie d’énergie.
+Cela peut faire grimper les coûts d’installation.
+Si un chargeur de 22 kW porte la puissance de raccordement de la maison au-delà de 30 kW, le gestionnaire de réseau peut facturer une participation au renforcement du réseau pour la puissance excédentaire.
+La puissance de charge maximale ou le courant maximal peuvent se régler dans les chargeurs à l’aide de commutateurs.
+L’installateur doit les régler correctement en fonction de la puissance maximale autorisée (gestionnaire de réseau) et de l’installation (disjoncteur, protection différentielle, section de câble, longueur de câble, etc.).
+Des erreurs à ce niveau peuvent vite entraîner des pannes ou des incendies.
+En cas de sinistre, l’assurance demandera le procès-verbal d’installation ou la facture de l’installateur agréé par le gestionnaire de réseau.
+
+### Interface de communication
+
+evcc a besoin d’un moyen de communiquer avec le chargeur.
+Presque tous les chargeurs modernes en disposent.
+Sous [Appareils > Chargeurs](/fr/chargers), vous trouverez la liste des chargeurs actuellement pris en charge.
+Les interfaces physiques possibles sont Ethernet, Wi-Fi, LTE ou une liaison série via un bus RS485 (p. ex. interface Modbus RTU).
+Souvent, plusieurs interfaces sont présentes en même temps.
+Un protocole adapté entre le chargeur et evcc est nécessaire pour piloter la charge.
+[OCPP (Open Charge Point Protocol)](https://en.wikipedia.org/wiki/OCPP) est un standard ouvert qui s’est désormais imposé dans le monde entier.
+
+Outre la communication entre le chargeur et evcc, la communication entre le chargeur et le véhicule compte aussi.
+Dans le cas le plus simple, le chargeur peut seulement signaler le courant de charge, entre 6 A et 32 A.
+Selon que le chargeur est raccordé au réseau en monophasé ou en triphasé, le véhicule charge alors avec au moins 1,38 kW ou 4,14 kW.
+Vous trouverez plus d’informations sous [Fonctionnalités > Charge avec le surplus solaire](/fr/features/solar-charging).
+Pour pouvoir charger aussi bien de faibles surplus solaires que des surplus plus importants, la commutation automatique 1p/3p est recommandée.
+Les chargeurs qui prennent en charge cette fonction sont signalés comme tels dans la [liste](/fr/chargers).
+Si le chargeur ne prend pas en charge la commutation automatique, les phases 2 et 3 peuvent éventuellement être coupées manuellement pendant les mois d’hiver à l’aide d’un interrupteur-sectionneur placé en amont (p. ex. Hager HAB304).
+
+Avec cette communication minimale entre le chargeur et le véhicule, le chargeur ne peut ni identifier le véhicule branché ni interroger son niveau de charge actuel.
+Pour obtenir ces informations, evcc passe par les interfaces (API) du constructeur du véhicule.
+L’étendue des informations disponibles varie et peut inclure p. ex. la climatisation ou la position du véhicule.
+L’utilisation de ces API est parfois payante chez le constructeur.
+
+Certains chargeurs implémentent déjà le protocole relativement récent [ISO 15118](https://en.wikipedia.org/wiki/ISO_15118), qui exige des extensions matérielles et logicielles et sert à « Plug & Charge » et « Autocharge » sur les bornes de recharge rapide publiques.
+Il permet p. ex. de déterminer l’identité du véhicule branché et son niveau de charge, et de définir la puissance de charge séparément pour chaque phase.
+Encore faut-il que le véhicule prenne lui aussi correctement en charge la fonction concernée.
+Il ne faut pas s’attendre à ce que les véhicules plus anciens soient encore équipés a posteriori pour prendre en charge l’ISO 15118.
+Il en va de même pour les chargeurs.
+Si le matériel nécessaire à la communication selon l’ISO 15118 n’est pas installé, il n’y a aucun espoir.
+
+### Voitures de fonction et usage professionnel
+
+Un compteur étalonné est particulièrement intéressant pour les conducteurs de voitures de fonction et les particuliers qui veulent justifier leurs frais de déplacement auprès de l’administration fiscale.
+Certains fabricants proposent donc aussi leur chargeur dans une variante avec compteur électrique étalonné.
+Il permet de documenter la quantité d’énergie chargée à chaque session de charge.
+Même sans visée fiscale, ce compteur est utile, car il permet de mesurer précisément les pertes lors de la charge.
+Les chargeurs fonctionnent souvent le plus efficacement à la puissance de charge maximale.
+Avec de faibles courants de charge, en revanche, les pertes lors de la charge sont souvent plus élevées.
+Si cela ne joue qu’un rôle secondaire pour la charge avec le surplus solaire uniquement, c’est un facteur de coût important lors de la charge avec l’électricité du réseau.

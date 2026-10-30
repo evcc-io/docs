@@ -1,0 +1,209 @@
+---
+title: "vehicles"
+description: "Définissez vos véhicules dans evcc.yaml avec leur capacité de batterie, leurs phases, la durée du cache, leur icône et les identifiants pour la détection automatique."
+sidebar:
+  order: 7
+translatedFrom: "28f7a3dffd71"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+Un véhicule représente un véhicule électrique précis avec sa batterie. Lorsqu’un véhicule est configuré et attribué à un [point de charge](/fr/reference/configuration/loadpoints#vehicle), l’interface utilisateur peut afficher le statut de charge, le niveau de charge, le temps de charge restant et d’autres données récupérées et traitées automatiquement depuis le véhicule.
+
+Il est également possible de limiter la charge à un niveau de charge précis (uniquement dans l’interface). Comme la plupart des chargeurs ne connaissent pas le niveau de charge du véhicule (seules quelques combinaisons très particulières le transmettent), cette configuration permet à evcc de communiquer directement avec le véhicule via l’interface en ligne (API) du constructeur.
+
+La configuration `vehicles` est une liste des différents véhicules.
+
+**Par exemple** :
+
+```yaml
+vehicles:
+  - name: Zoe
+    type: ...
+    ...
+```
+
+Vous trouverez les configurations des véhicules connus sous [Appareils - Véhicules](/fr/vehicles).
+
+Les différents paramètres sont expliqués ci-dessous.
+
+---
+
+## Paramètres obligatoires
+
+### `name`
+
+Une désignation courte du véhicule configuré. Cette valeur sert à référencer le véhicule dans la configuration du [point de charge](/fr/reference/configuration/loadpoints#vehicle).
+
+**Par exemple** :
+
+```yaml
+name: zoe
+```
+
+---
+
+### `title`
+
+Une description du véhicule qui s’affiche dans l’interface utilisateur.
+
+**Par exemple** :
+
+```yaml
+title: Zoe
+```
+
+---
+
+### `type`
+
+Il s’agit du type d’interface evcc qui permet de communiquer avec le véhicule. Les véhicules connus peuvent être intégrés avec le type `template`. Vous trouverez le type (de modèle) adapté aux véhicules connus ainsi que les instructions pour la configuration manuelle `custom` sous [Appareils - Véhicules](/fr/vehicles).
+
+---
+
+## Paramètres facultatifs
+
+### `capacity`
+
+La capacité utile de la batterie du véhicule en kilowattheures (kWh).
+
+Elle sert à calculer le besoin en énergie pour la planification de la charge.
+
+**Par exemple** :
+
+```yaml
+capacity: 50 # kWh
+```
+
+---
+
+### `phases`
+
+Le nombre _maximal_ de phases que ce véhicule peut utiliser (câble de charge compris, le cas échéant). La valeur interne par défaut est 3. Les valeurs possibles sont 1, 2 ou 3.
+
+Certains véhicules, en particulier les hybrides rechargeables, n’utilisent pas les 3 phases maximales possibles pour la charge. Si un compteur de charge est installé, `evcc` peut certes déterminer les phases réellement utilisées au début d’un processus de charge, mais cette information n’est pas disponible avant le début de la charge. Si vous configurez `phases` sur le véhicule, `evcc` peut démarrer la charge avec une puissance disponible plus faible en mode **Intelligent**.
+
+**Par exemple** :
+
+```yaml
+phases: 2
+```
+
+---
+
+### `cache`
+
+Durée pendant laquelle les réponses de l’API du véhicule sont mises en cache et les nouvelles requêtes bloquées.
+
+:::note
+La valeur doit être indiquée avec l’unité de temps accolée (voir l’exemple). `m` signifie minutes.
+:::
+
+:::caution
+Il est **DÉCONSEILLÉ** de modifier les réglages par défaut, car le constructeur du véhicule pourrait alors empêcher activement la commande de la charge via evcc. **À VOS RISQUES ET PÉRILS.**
+:::
+
+Pour obtenir les données d’état actuelles du véhicule (p. ex. le niveau de charge de la batterie de traction), l’interface en ligne du constructeur est interrogée régulièrement. Pour ne pas surcharger les serveurs du constructeur avec des requêtes permanentes (ce qui pourrait entraîner la suspension du compte), un cache intercepte ces requêtes et répond avec les dernières données récupérées, jusqu’à l’âge maximal indiqué ici. Comme la plupart des véhicules ne mettent à jour leurs données qu’à très grands intervalles pendant une charge en cours (des intervalles de 10 à 30 minutes sont courants), des requêtes plus fréquentes n’apportent rien.
+
+**Valeur par défaut :** `15m`
+
+**Par exemple** :
+
+```yaml
+cache: 5m
+```
+
+---
+
+### `identifiers`
+
+Une liste d’un ou plusieurs identifiants permettant d’identifier le véhicule. Si le véhicule doit être identifié à différents chargeurs, plusieurs identifiants peuvent être nécessaires. L’identification peut se faire à l’aide des mécanismes suivants :
+
+#### RFID
+
+Si le chargeur dispose d’une interface RFID, vous pouvez attribuer une carte RFID à un véhicule pour l’identifier. Dans ce cas, le `RFID Token ID` est nécessaire.
+
+**Par exemple** :
+
+```yaml
+identifiers:
+  - 12345ABC # RFID token ID
+```
+
+Remarque : si l’identifiant peut être interprété comme un nombre, les guillemets sont obligatoires.
+
+**Par exemple** :
+
+```yaml
+identifiers:
+  - "012345"
+  - "12345e2"
+  - "0x1234"
+```
+
+#### Identifiant du véhicule
+
+Si le chargeur le prend en charge, il reçoit un identifiant du véhicule. Il peut s’agir de l’adresse MAC du chargeur embarqué ou de l’identifiant d’un certificat Plug & Charge installé de façon permanente (différent du certificat utilisé pour la charge DC !).
+
+**Par exemple** :
+
+```yaml
+identifiers:
+  - 01:23:45:67:89:0A # MAC address
+```
+
+Certains véhicules génèrent une nouvelle adresse MAC chaque jour. Dans ce cas, vous pouvez utiliser des caractères génériques si les véhicules présents diffèrent dans la partie fixe de l’adresse MAC.
+
+```yaml
+identifiers:
+  - 01:23:45:*
+```
+
+---
+
+### `features: ["coarsecurrent"]`
+
+Indique qu’un véhicule ne peut pas être régulé avec une limitation continue du courant.
+
+Ce réglage doit être utilisé pour la combinaison suivante :
+
+- Le véhicule ne peut régler son courant que par pas de 1 A
+- Le chargeur peut traiter des consignes de courant de charge plus fines (p. ex. 1 mA)
+
+Dans cette combinaison, il peut arriver que des variations de quelques mA du courant entraînent une modification inattendue du courant de phase de 1 A lors de la régulation. La régulation peut alors se mettre à osciller. Cette fonctionnalité limite aussi la régulation à des pas grossiers de 1 A.
+
+Elle NE PEUT PAS être utilisée avec un modèle de véhicule. Pour l’utiliser, le véhicule doit être configuré avec un type natif.
+
+**Par exemple** :
+
+```yaml
+features: ["coarsecurrent"]
+```
+
+---
+
+### `icon`
+
+Les véhicules peuvent être affichés avec différentes icônes dans l’interface. Les options disponibles sont :
+
+- car
+- bike
+- scooter
+- moped
+- motorcycle
+- van
+- bus
+- tractor
+- generic
+- heater
+- cooler
+- waterheater
+
+**Par exemple** :
+
+```yaml
+icon: heater
+```
+
+---

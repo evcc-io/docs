@@ -1,0 +1,851 @@
+---
+title: Appareils personnalisés
+description: "Intégrez un chargeur, un compteur, un véhicule ou un chauffage sans modèle intégré en définissant vous-même ses valeurs et commandes via HTTP, MQTT ou Modbus."
+tableOfContents:
+  maxHeadingLevel: 4
+translatedFrom: "3be6e303b568"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Lors de la création d’un chargeur, d’un chauffage, d’un compteur avant réseau, d’une batterie domestique, d’une installation photovoltaïque, d’un autre consommateur, d’un véhicule, d’un tarif, d’un appareil de bridage ou d’un service de notification, vous pouvez choisir l’option **Appareil personnalisé** dans la liste des types d’appareils et décrire votre propre logique à l’aide du [système de plugins](/fr/reference/plugins).
+
+Vous pouvez ainsi intégrer des appareils qui ne sont pas couverts par un modèle intégré, p. ex. lire la puissance actuelle depuis un point de terminaison HTTP ou écrire un courant cible via Modbus.
+
+## Définir un appareil
+
+Dans l’interface, chaque type d’appareil propose une entrée **Appareil personnalisé** dans le sélecteur de modèle.
+Ce choix ouvre l’éditeur de votre propre configuration.
+Un appareil avec `type: custom` est créé par défaut. Le type peut être remplacé par une autre valeur si nécessaire (p. ex. `type: heatpump`).
+
+```yaml
+power:
+  source: mqtt
+  topic: home/current/imsys/chn2/raw
+```
+
+Vous pouvez aussi écrire la configuration complète directement dans `evcc.yaml` avec `name`, `type: custom` et le bloc d’attributs en dessous :
+
+```yaml
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: home/current/imsys/chn2/raw
+```
+
+Tous les autres exemples de cette page utilisent la forme plate du bloc d’attributs que vous saisissez dans l’interface.
+
+Pour la liste des sources de plugins disponibles (`http`, `mqtt`, `modbus`, …) et des fonctions auxiliaires (`calc`, `map`, `watchdog`, …), consultez la [référence des plugins](/fr/reference/plugins).
+
+## Attributs et fonctionnalités
+
+Chaque appareil personnalisé est décrit par trois sortes de champs :
+
+- **Attributs de lecture** : plugins interrogés par evcc pour obtenir une valeur (p. ex. `power`, `soc`, `status`).
+- **Attributs d’écriture** : plugins appelés par evcc pour définir une valeur ou déclencher une action (p. ex. `enable`, `maxcurrent`, `wakeup`). La valeur à écrire est disponible dans le plugin.
+- **Fonctionnalités** : liste `features` qui active un comportement différent de celui par défaut. Les options disponibles dépendent du type d’appareil.
+
+Forme générale :
+
+```yaml
+# read attributes
+power:
+  source: http
+  uri: http://meter.local/power
+soc:
+  source: mqtt
+  topic: battery/soc
+
+# write attributes
+enable:
+  source: http
+  uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
+maxcurrent:
+  source: mqtt
+  topic: charger/maxcurrent
+  payload: ${maxcurrent:%d}
+
+# features
+features:
+  - heating
+  - integrateddevice
+```
+
+Les noms d’attributs et les options de fonctionnalités disponibles diffèrent selon le type d’appareil et sont listés dans les sections ci-dessous.
+
+## Compteur \{#meter\}
+
+Les compteurs de puissance sont configurés dans la section [`meters`](/fr/reference/configuration/meters).
+Dans la section `site`, les compteurs définis sous `meters:` sont affectés aux rôles suivants :
+
+- `grid` : compteur avant réseau
+- `pv` : compteur solaire
+- `battery` : compteur de la batterie domestique
+- `charge` : compteur de la puissance de charge du chargeur
+- `aux` : compteur de consommation pour les consommateurs intelligents
+- `consumer` : compteur d’un consommateur ordinaire, pris en compte dans les statistiques de consommation
+- `ext` : compteur supplémentaire qui n’est ni utilisé pour la régulation ni affiché dans l’interface, mais seulement journalisé et exporté
+
+`power` est le seul attribut obligatoire.
+Tous les rôles de compteur ne prennent pas en charge tous les attributs :
+
+- `limitsoc` et `batterymode` sont utilisés exclusivement pour les compteurs de batterie (référencés depuis `site.battery`).
+- `curtail` et `curtailed` s’utilisent ensemble pour les compteurs `pv` qui prennent en charge le bridage (§ 9 EEG).
+- `currents`, `voltages` et `powers` sont des attributs de phase qui doivent chacun être configurés avec exactement trois entrées de plugin (sous forme de tableau YAML) et s’appliquent aux compteurs avant réseau (`grid`) et aux chargeurs (`charge`).
+
+Chaque plugin doit renvoyer le bon type de données.
+Pour la conversion, utilisez les [pipelines de lecture](/fr/reference/plugins#reading).
+
+### Attributs de lecture
+
+| Attribut       | Type                  | Obligatoire | Contexte       | Description                                                                        |
+| -------------- | --------------------- | ----------- | -------------- | ---------------------------------------------------------------------------------- |
+| `power`        | `float`               | oui         | tous           | Puissance actuelle en W                                                            |
+| `energy`       | `float`               | non         | tous           | Index du compteur en kWh                                                           |
+| `returnenergy` | `float`               | non         | tous           | Index du compteur dans le sens inverse en kWh (voir ci-dessous)                    |
+| `maxpower`     | `int`                 | non         | `pv` (hybride) | Puissance AC maximale en W                                                         |
+| `curtailed`    | `int`                 | non         | `pv`           | Limite actuelle d’export vers le réseau en % (0 à 100). Uniquement avec `curtail`. |
+| `soc`          | `int`                 | non         | `battery`      | Niveau de charge en %                                                              |
+| `capacity`     | `float`               | non         | `battery`      | Capacité en kWh                                                                    |
+| `powers`       | `[float,float,float]` | non         | tous           | Puissances par phase en W. Pour détecter le signe des courants non signés.         |
+| `currents`     | `[float,float,float]` | non         | tous           | Courants par phase en A. Pour détecter les phases actives.                         |
+| `voltages`     | `[float,float,float]` | non         | tous           | Tensions par phase en V. Pour détecter le raccordement (1p/3p).                    |
+
+### Signes et sens \{#signs-and-directions\}
+
+La signification d’une valeur `power` positive et des deux sens d’énergie dépend du rôle du compteur :
+
+| Rôle                     | `power` positif             | `energy` | `returnenergy`                  |
+| ------------------------ | --------------------------- | -------- | ------------------------------- |
+| `grid`                   | Import du réseau            | Importé  | Exporté (export vers le réseau) |
+| `pv`                     | Production                  | Produit  | Consommé (rare)                 |
+| `battery`                | Décharge (négatif : charge) | Déchargé | Chargé                          |
+| `charge`                 | Charge                      | Chargé   | Déchargé (V2X)                  |
+| `aux`, `ext`, `consumer` | Consommation                | Consommé | Produit (rare)                  |
+
+`energy` et `returnenergy` sont des index de compteur croissants en kWh, idéalement des cumuls depuis la mise en service, comme les registres d’import et d’export d’un compteur avant réseau.
+Les différences entre les relevés étant calculées automatiquement, le plugin doit renvoyer un index de compteur et non des valeurs de consommation par intervalle.
+Un compteur qui se remet à zéro périodiquement (p. ex. chaque jour) fonctionne aussi, car la remise à zéro est détectée automatiquement.
+Une valeur de `0` est considérée comme non disponible.
+
+Les deux attributs sont facultatifs.
+Sans eux, l’historique d’énergie est déduit de `power` au fil du temps.
+De vrais index de compteur donnent des statistiques à long terme plus précises.
+
+### Attributs d’écriture \{#meter-write-attributes\}
+
+| Attribut      | Type  | Obligatoire | Contexte  | Description                                                                                                                                                                                  |
+| ------------- | ----- | ----------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | non         | `battery` | Définit l’objectif de charge de la batterie en %. L’objectif de charge est calculé à partir des valeurs configurées `MinSoc` et `MaxSoc` et du niveau de charge actuel (attribut `soc`).     |
+| `curtail`     | `int` | non         | `pv`      | Définit la limite d’export vers le réseau en % de la puissance de production nominale (0 à 100, `100` = aucune limite). Uniquement avec `curtailed`. Voir [Appareil de bridage](#curtailer). |
+| `batterymode` | `int` | non         | `battery` | Définit directement le mode de pilotage de la batterie. Les modes sont listés ci-dessous.                                                                                                    |
+
+#### Modes de batterie \{#battery-modes\}
+
+| Valeur | Mode         | Comportement                                                                    |
+| ------ | ------------ | ------------------------------------------------------------------------------- |
+| `1`    | `normal`     | Fonctionnement normal : charge depuis le surplus, décharge pour la consommation |
+| `2`    | `hold`       | Empêche la décharge, la charge depuis le surplus reste autorisée                |
+| `3`    | `charge`     | Charge depuis le réseau, pas de décharge                                        |
+| `4`    | `holdcharge` | Empêche la charge, la décharge pour la consommation reste autorisée             |
+| `5`    | `discharge`  | Décharge vers le réseau                                                         |
+
+Seuls les modes de batterie pris en charge par l’appareil sont utilisés.
+Si `batterymode` est un [`switch`](/fr/reference/plugins#switch), les modes pris en charge sont déduits de ses valeurs `case`.
+Cela fonctionne aussi lorsque ce plugin est encapsulé dans un [`watchdog`](/fr/reference/plugins#watchdog).
+Tout autre plugin nécessite `batterymodes` avec la liste des modes pris en charge, p. ex. `batterymodes: ["normal", "hold", "charge"]`.
+
+### Exemples
+
+Lire la puissance actuelle du réseau depuis un point de terminaison HTTP.
+
+```yaml
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+```
+
+Lire la puissance et le niveau de charge d’une batterie domestique et définir son mode via HTTP.
+Comme le `switch` couvre les modes normal, hold et charge, evcc propose exactement ces trois modes.
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    capacity: 10 # kWh
+    power:
+      source: http
+      uri: http://battery.local/api/power
+    soc:
+      source: http
+      uri: http://battery.local/api/soc
+    batterymode:
+      source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "auto"}'
+        - case: 2 # hold
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "hold"}'
+        - case: 3 # charge
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "charge"}'
+```
+
+## Chargeur \{#charger\}
+
+Le `type: custom` par défaut couvre les chargeurs avec pilotage continu du courant.
+Pour les autres appareils, des types de chargeurs spécialisés sont décrits dans les sections [Prise commutable](#charger-switchsocket) et [Pompes à chaleur](#charger-heating).
+
+### Attributs de lecture
+
+| Attribut       | Type                  | Obligatoire | Description                                                                               |
+| -------------- | --------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| `status`       | `string`              | oui         | Statut (A à F)                                                                            |
+| `enabled`      | `bool`                | oui         | La charge est-elle activée ?                                                              |
+| `power`        | `float`               | non         | Puissance de charge en W                                                                  |
+| `energy`       | `float`               | non         | Index du compteur en kWh                                                                  |
+| `returnenergy` | `float`               | non         | Index du compteur dans le sens inverse en kWh (énergie déchargée, V2X)                    |
+| `identify`     | `string`              | non         | Identifiant RFID actuel                                                                   |
+| `soc`          | `int`                 | non         | Niveau de charge en %                                                                     |
+| `limitsoc`     | `int`                 | non         | Limite de charge en %                                                                     |
+| `temp`         | `float`               | non         | Température actuelle en °C (chauffage, alias de `soc`)                                    |
+| `limittemp`    | `int`                 | non         | Limite de température en °C (chauffage, alias de `limitsoc`)                              |
+| `finishtime`   | `string`              | non         | Heure de fin de charge estimée (RFC3339, durée Go, horodatage Unix ou secondes restantes) |
+| `phases`       | `int`                 | non         | Nombre de phases physiques (1 à 3)                                                        |
+| `powers`       | `[float,float,float]` | non         | Puissances par phase en W. Pour détecter le signe des courants non signés.                |
+| `currents`     | `[float,float,float]` | non         | Courants par phase en A. Pour détecter les phases actives.                                |
+| `voltages`     | `[float,float,float]` | non         | Tensions par phase en V. Pour détecter le raccordement (1p/3p).                           |
+
+### Attributs d’écriture
+
+| Attribut           | Type    | Obligatoire | Description                                                |
+| ------------------ | ------- | ----------- | ---------------------------------------------------------- |
+| `enable`           | `bool`  | oui         | Activer / désactiver la charge                             |
+| `maxcurrent`       | `int`   | oui         | Définir le courant de charge maximal en A                  |
+| `maxcurrentmillis` | `float` | non         | Définir le courant de charge maximal en A (avec décimales) |
+| `phases1p3p`       | `int`   | non         | Effectuer la commutation de phases (nécessite `tos: true`) |
+| `wakeup`           | `bool`  | non         | Réveiller le véhicule                                      |
+
+### Fonctionnalités \{#charger-features\}
+
+| Fonctionnalité     | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Pas de sélection de véhicule. L’appareil fonctionne sans véhicule connecté et sans sessions de charge (p. ex. pompe à chaleur, résistance électrique, consommateur installé à demeure).                                                                                                                                                                                                                               |
+| `heating`          | L’appareil est traité comme un chauffage : le niveau de charge et les limites s’affichent en °C au lieu de %.                                                                                                                                                                                                                                                                                                         |
+| `continuous`       | L’appareil continue de fonctionner en mode normal autonome lorsqu’il est « désactivé ». L’interface affiche « Opération normale » au lieu de « En attente ». Une demande d’augmentation de puissance (p. ex. en cas de surplus solaire ou d’énergie bon marché du réseau) est libellée « Boost ». Les modes s’appellent **Normal**, **Intelligent** et **Boost** au lieu d’**Arrêté**, **Intelligent** et **Rapide**. |
+| `switchdevice`     | L’appareil peut seulement être allumé ou éteint (pas de pilotage continu du courant). Le courant maximal et l’option **Toujours en charge** ne sont pas affichés. Le courant minimal et les phases déterminent la puissance d’activation solaire. Sans `continuous`, les modes s’appellent **Arrêté**, **Intelligent** et **Enclenché**.                                                                              |
+
+Combinaisons de fonctionnalités courantes dans les modèles intégrés :
+
+**Résistance électrique** :
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Prise** :
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Pompe à chaleur** :
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
+```
+
+### Exemples
+
+Interroger le statut de charge d’un chargeur via Modbus.
+
+```yaml
+features:
+  - integrateddevice
+enabled:
+  source: modbus
+  id: 4711
+  uri: modbus.local:502
+  rtu: false
+  register:
+    address: 100
+    type: holding
+    decode: uint16
+```
+
+Commuter une prise Tasmota via un message MQTT.
+
+```yaml
+enable:
+  source: mqtt
+  broker: mosquitto.local:883
+  topic: cmd/unu-switch/Power
+  payload: ON
+```
+
+### Prise commutable \{#charger-switchsocket\}
+
+**`type: switchsocket`**
+
+Pour les prises intelligentes et les appareils à relais similaires qui peuvent seulement être allumés ou éteints, sans pilotage continu du courant.
+Le statut de charge est déduit de la puissance actuelle (au-dessus de `standbypower`, l’appareil est considéré comme en charge).
+Tous les détails de mise en place se trouvent dans la page [Prises commutables](/fr/smartswitches).
+
+| Attribut       | Type    | Obligatoire | Description                                                                                                |
+| -------------- | ------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| `enabled`      | `bool`  | oui         | Lire l’état de la prise (allumée/éteinte)                                                                  |
+| `power`        | `float` | oui         | Puissance actuelle en W                                                                                    |
+| `energy`       | `float` | non         | Index du compteur en kWh                                                                                   |
+| `soc`          | `float` | non         | Niveau de charge en %                                                                                      |
+| `enable`       | `bool`  | oui         | Allumer/éteindre la prise                                                                                  |
+| `standbypower` | `float` | non         | Seuil de puissance en W. Au-dessus : en charge ; en dessous : en attente. Négatif : statique (sans mesure) |
+
+### Pompes à chaleur \{#charger-heating\}
+
+Les pompes à chaleur et les dispositifs de chauffage similaires utilisent des types de chargeurs dédiés, chacun avec ses propres attributs.
+La mise en place complète est décrite dans la page [Pompes à chaleur, résistances électriques](/fr/heating).
+
+<Tabs>
+  <TabItem label="Pompe à chaleur">
+
+**`type: heatpump`**
+
+Pour les pompes à chaleur à vitesse variable (Inverter) qui acceptent une consigne de puissance continue via Modbus, HTTP ou un protocole similaire.
+La puissance de chauffage cible est écrite directement via `setmaxpower`.
+
+| Attribut      | Type    | Obligatoire | Description                                       |
+| ------------- | ------- | ----------- | ------------------------------------------------- |
+| `power`       | `float` | non         | Puissance actuelle en W                           |
+| `energy`      | `float` | non         | Index du compteur en kWh                          |
+| `temp`        | `float` | non         | Température actuelle en °C                        |
+| `limittemp`   | `int`   | non         | Limite de température interne de l’appareil en °C |
+| `setmaxpower` | `int`   | oui         | Définir la puissance de chauffage maximale en W   |
+| `getmaxpower` | `float` | non         | Puissance de chauffage maximale actuelle en W     |
+
+  </TabItem>
+  <TabItem label="SG-Ready">
+
+**`type: sgready`**
+
+Pour les pompes à chaleur qui exposent l’interface standard SG-Ready sous forme d’une valeur de mode unique.
+Trois modes sont pris en charge : `1` réduit, `2` normal, `3` boost.
+
+| Attribut      | Type    | Obligatoire | Description                                                  |
+| ------------- | ------- | ----------- | ------------------------------------------------------------ |
+| `power`       | `float` | non         | Puissance actuelle en W                                      |
+| `energy`      | `float` | non         | Index du compteur en kWh                                     |
+| `temp`        | `float` | non         | Température actuelle en °C                                   |
+| `limittemp`   | `int`   | non         | Limite de température interne de l’appareil en °C            |
+| `setmode`     | `int`   | oui         | Changer le mode SG-Ready (1 : réduit, 2 : normal, 3 : boost) |
+| `getmode`     | `int`   | non         | Mode SG-Ready actuel (1, 2, 3)                               |
+| `setmaxpower` | `int`   | non         | Définir la puissance de chauffage maximale en W              |
+
+  </TabItem>
+  <TabItem label="SG-Ready via relais">
+
+**`type: sgready-relay`**
+
+Pour les pompes à chaleur dont l’entrée SG-Ready est câblée sous forme de deux contacts secs de relais (boost + dim).
+Chaque contact est piloté par un sous-chargeur distinct, référencé par son type et non via des plugins.
+
+| Attribut    | Type            | Obligatoire | Description                                       |
+| ----------- | --------------- | ----------- | ------------------------------------------------- |
+| `power`     | `float`         | non         | Puissance actuelle en W                           |
+| `energy`    | `float`         | non         | Index du compteur en kWh                          |
+| `temp`      | `float`         | non         | Température actuelle en °C                        |
+| `limittemp` | `int`           | non         | Limite de température interne de l’appareil en °C |
+| `boost`     | `charger-typed` | oui         | Relais du contact boost SG-Ready                  |
+| `dim`       | `charger-typed` | non         | Relais du contact dim SG-Ready                    |
+
+  </TabItem>
+</Tabs>
+
+## Véhicule \{#vehicle\}
+
+Les paramètres du véhicule peuvent aussi être lus via des plugins.
+
+### Attributs de lecture
+
+| Attribut        | Type     | Obligatoire | Description                                                                               |
+| --------------- | -------- | ----------- | ----------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | oui         | Niveau de charge en %                                                                     |
+| `limitsoc`      | `int`    | non         | Limite de charge en %                                                                     |
+| `status`        | `string` | non         | Statut (A à F)                                                                            |
+| `range`         | `int`    | non         | Autonomie en km                                                                           |
+| `odometer`      | `int`    | non         | Kilométrage en km                                                                         |
+| `climater`      | `bool`   | non         | Climatisation active ?                                                                    |
+| `getmaxcurrent` | `float`  | non         | Courant de charge maximal en A                                                            |
+| `finishtime`    | `string` | non         | Heure de fin de charge estimée (RFC3339, durée Go, horodatage Unix ou secondes restantes) |
+
+### Attributs d’écriture
+
+| Attribut       | Type   | Obligatoire | Description                               |
+| -------------- | ------ | ----------- | ----------------------------------------- |
+| `wakeup`       | `bool` | non         | Réveiller le véhicule                     |
+| `chargeenable` | `bool` | non         | Démarrer/arrêter la charge                |
+| `maxcurrent`   | `int`  | non         | Définir le courant de charge maximal en A |
+
+### Configuration
+
+| Attribut   | Type     | Obligatoire | Description                                 |
+| ---------- | -------- | ----------- | ------------------------------------------- |
+| `title`    | `string` | non         | Nom affiché du véhicule                     |
+| `capacity` | `float`  | non         | Capacité de la batterie en kWh              |
+| `icon`     | `string` | non         | Icône affichée dans l’interface utilisateur |
+
+### Fonctionnalités \{#vehicle-features\}
+
+| Fonctionnalité  | Description                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coarsecurrent` | Le véhicule n’accepte le courant de charge que par pas entiers de 1 A. La logique de régulation est limitée à des pas grossiers de 1 A, même si le chargeur pourrait réguler plus finement. |
+| `streaming`     | Le véhicule envoie lui-même ses données au lieu d’être interrogé (p. ex. BMW Cardata). Les mises à jour du niveau de charge en dehors d’une charge active sont considérées comme fiables.   |
+| `welcomecharge` | Le véhicule attend que le chargeur soit actif lors de la connexion pour considérer la liaison comme fonctionnelle. Sinon, il signale une erreur.                                            |
+
+### Exemples
+
+Lire l’autonomie actuelle depuis des messages MQTT.
+
+```yaml
+title: Green Mazda # display name (optional)
+capacity: 50 # battery capacity in kWh (optional)
+features:
+  - coarsecurrent
+range:
+  source: mqtt
+  topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Réveiller une voiture via un ping HTTP avant d’envoyer d’autres requêtes.
+
+```yaml
+wakeup:
+  source: http
+  uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+<a id="onidentify"></a>
+
+`onIdentify` définit automatiquement le mode de charge lorsque le véhicule est détecté.
+
+```yaml
+soc:
+  source: mqtt
+  topic: car/soc
+onIdentify:
+  mode: smart
+```
+
+Modes disponibles : `off`, `smart`, `now`.
+Les valeurs obsolètes `pv` et `minpv` sont toujours acceptées et activent `smart` avec [Toujours en charge](/fr/features/modes#always-charge) désactivé ou activé.
+
+## Tarif et prévision \{#tariff\}
+
+Un tarif personnalisé relie evcc à une source de valeurs de votre choix via le mécanisme de plugins.
+L’attribut `tariff` détermine ce que représente la source et l’unité utilisée pour les valeurs.
+
+### Attributs de lecture
+
+Il faut configurer soit `price`, soit `forecast`, mais pas les deux.
+
+| Attribut   | Type     | Description                                                                                                                             |
+| ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Valeur actuelle. Nombre à virgule flottante renvoyé par le plugin.                                                                      |
+| `forecast` | `string` | Prévision sous forme de chaîne JSON avec une liste de périodes et de valeurs (voir le schéma ci-dessous). Interrogée toutes les heures. |
+
+### Configuration
+
+| Attribut       | Type       | Obligatoire | Description                                                                                                                                                                                                  |
+| -------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tariff`       | `string`   | non         | `price` (par défaut), `co2`, `solar` ou `temperature`. Définit l’unité des valeurs renvoyées : prix dans la devise configurée par kWh, intensité de CO₂ en g/kWh, prévision solaire en W, température en °C. |
+| `charges`      | `float`    | non         | Majoration fixe par kWh ajoutée à chaque valeur. Par défaut `0`.                                                                                                                                             |
+| `chargesZones` | `list`     | non         | Majorations horaires (p. ex. frais de réseau) qui remplacent `charges` pour certaines périodes. Voir [frais de réseau horaires](/fr/reference/configuration/tariffs#charges-zones).                          |
+| `tax`          | `float`    | non         | Taxe en pourcentage appliquée au résultat, p. ex. `0.2` pour 20 %. Par défaut `0`.                                                                                                                           |
+| `formula`      | `string`   | non         | Expression Go pour un calcul personnalisé, avec `price`, `charges` et `tax` disponibles. Voir les [exemples](#formula-examples).                                                                             |
+| `interval`     | `duration` | non         | Intervalle d’interrogation pour `forecast`. Par défaut `1h`.                                                                                                                                                 |
+| `cache`        | `duration` | non         | Durée de mise en cache pour `price`. Par défaut `15m`.                                                                                                                                                       |
+
+### Fonctionnalités \{#tariff-features\}
+
+| Fonctionnalité | Description                                                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `average`      | Convertit les créneaux de prix plus courts (p. ex. au quart d’heure) en moyennes horaires.                                    |
+| `cacheable`    | Conserve les valeurs récupérées. Elles servent de repli après un redémarrage ou une panne du fournisseur (jusqu’à 24 heures). |
+
+### Exemples
+
+**Prix actuel via HTTP** :
+
+```yaml
+price:
+  source: http
+  uri: https://example.com/api/price
+```
+
+**Prévision via HTTP** :
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+  jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "value": .[1] }) | tostring'
+```
+
+Le plugin doit renvoyer une structure JSON contenant une liste de périodes et de prix.
+Les champs de date doivent être au format `YYYY-MM-DDTHH:MM:SSZ` et le prix dans la bonne unité monétaire (p. ex. EUR).
+evcc travaille en interne avec des intervalles de 15 minutes ; les plugins peuvent renvoyer des données horaires, qui sont converties automatiquement.
+
+```json
+[
+  {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-01T00:15:00Z",
+    "value": 25.0
+  },
+  {
+    "start": "2025-01-01T00:15:00Z",
+    "end": "2025-01-01T00:30:00Z",
+    "value": 26.5
+  },
+  {
+    "start": "2025-01-01T00:30:00Z",
+    "end": "2025-01-01T00:45:00Z",
+    "value": 24.8
+  },
+  {
+    "start": "2025-01-01T00:45:00Z",
+    "end": "2025-01-01T01:00:00Z",
+    "value": 27.2
+  }
+]
+```
+
+<a id="formula-examples"></a>
+
+Le champ `formula` accepte une expression Go dans laquelle `price`, `charges`, `tax` et l’horodatage du créneau `ts` sont disponibles.
+Vous pouvez aussi utiliser la [bibliothèque `math`](https://pkg.go.dev/math) et les méthodes de [`time.Time`](https://pkg.go.dev/time#Time) sur `ts`.
+La formule s’exécute pour le prix actuel et pour chaque créneau de prévision.
+
+**Plafond de prix** :
+
+```yaml
+charges: 0.22
+tax: 0.19
+formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Plafonne le résultat à 50 ct/kWh.
+
+**Pas de tarif d’export vers le réseau en cas de prix day-ahead négatifs** (installations photovoltaïques allemandes mises en service après le 25 février 2025) :
+
+```yaml
+formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
+```
+
+Applique un tarif fixe d’export vers le réseau de 7 ct/kWh, sauf lorsque le prix du marché day-ahead est négatif.
+
+## Limite externe \{#external-limit\}
+
+Une intégration personnalisée pour la fonctionnalité [Limite externe](/fr/external-limit) raccorde un boîtier de commande ou un système de gestion de l’énergie qui n’est pas couvert par une intégration fournie.
+Dans l’interface, choisissez **Intégration personnalisée** sous **Configuration → Limite externe**.
+
+Le type indique comment le signal de limitation est reçu. Il en existe quatre : `relay` (contact de commutation unique), `fnn` (boîtier de commande FNN à plusieurs contacts de commutation), `eebus` (protocole EEBUS) ou `custom` (valeurs de limite dynamiques via des plugins).
+Chaque signal est lu via une configuration de [plugin](/fr/reference/plugins) (GPIO, MQTT, HTTP, Modbus).
+Voir aussi la [référence de configuration `hems`](/fr/reference/configuration/hems).
+
+### Relais
+
+Le raccordement via un contact de commutation unique est la solution la plus simple.
+Le boîtier de commande active un contact qui est évalué par votre instance evcc.
+
+| Attribut      | Type       | Obligatoire | Description                                                                                             |
+| ------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| `maxPower`    | `int` (W)  | oui         | Limite de puissance totale appliquée tant que le signal est actif.                                      |
+| `limit`       | plugin     | oui         | Configuration de plugin pour lire le contact de commutation. `true`/`1` = limité, `false`/`0` = normal. |
+| `passthrough` | plugin     | non         | Transmet le signal de limitation à un système externe.                                                  |
+| `interval`    | `duration` | non         | Intervalle d’interrogation du contact de commutation. Par défaut `10s`.                                 |
+
+La limite de puissance vous est communiquée par le gestionnaire de réseau.
+Pour plusieurs dispositifs de consommation pilotables (SteuVE), le facteur de simultanéité est pris en compte.
+Vous pouvez aussi calculer la limite vous-même avec la formule : **Limite totale = nombre de SteuVE × 4,2 kW × facteur de simultanéité**. Les détails du calcul se trouvent [ici](https://www.inexogy.com/blog/14a-enwg/).
+
+<Tabs>
+<TabItem label="Raspberry Pi GPIO">
+
+Avec un Raspberry Pi, la broche GPIO peut être lue directement :
+
+```yaml
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+Pour plus de détails sur le plugin GPIO, consultez la [documentation des plugins](/fr/reference/plugins#gpio).
+
+</TabItem>
+<TabItem label="MQTT">
+
+Si le boîtier de commande ou la passerelle envoie des messages MQTT :
+
+```yaml
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem label="API HTTP">
+
+Pour les boîtiers de commande avec API REST :
+
+```yaml
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Si le boîtier de commande ou une passerelle fournit la limite de puissance via Modbus :
+
+```yaml
+type: relay
+maxPower: 4200 # Example for 1 SteuVE
+limit:
+  source: modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
+  timeout: 5s
+  register:
+    type: holding
+    decode: uint16
+    address: 8056
+  # Return value: 0 = not limited, 1 = limited
+```
+
+</TabItem>
+</Tabs>
+
+### Boîtier de commande FNN \{#external-limit-fnn\}
+
+Les boîtiers de commande conformes à la norme FNN signalent la réduction de puissance et le bridage via des contacts de commutation distincts.
+La réduction de la consommation (W4) et le bridage (W3, S2, S1) fonctionnent indépendamment.
+Au moins un des signaux `w4` ou `w3` doit être configuré.
+
+| Attribut          | Type       | Obligatoire | Description                                                                           |
+| ----------------- | ---------- | ----------- | ------------------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | oui¹        | Limite de consommation tant que le signal de réduction (W4) est actif.                |
+| `maxCurtailPower` | `int` (W)  | oui²        | Puissance solaire installée, valeur de base des paliers de bridage.                   |
+| `w4`              | plugin     | non         | Lit le signal de réduction. Limite la consommation à `maxDimPower`.                   |
+| `w3`              | plugin     | non         | Lit le signal de bridage. Limite l’export vers le réseau à 0 % de `maxCurtailPower`.  |
+| `s2`              | plugin     | non         | Lit le signal de bridage. Limite l’export vers le réseau à 30 % de `maxCurtailPower`. |
+| `s1`              | plugin     | non         | Lit le signal de bridage. Limite l’export vers le réseau à 60 % de `maxCurtailPower`. |
+| `interval`        | `duration` | non         | Intervalle d’interrogation des contacts de commutation. Par défaut `10s`.             |
+
+¹ obligatoire lorsque `w4` est configuré, ² obligatoire lorsque `w3` est configuré.
+
+```yaml
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+### EEBUS \{#external-limit-eebus\}
+
+Le raccordement se fait numériquement via le protocole EEBUS.
+Le boîtier de commande communique directement avec votre instance evcc et transmet automatiquement la limite de puissance.
+Le boîtier de commande et evcc doivent être [appairés](/fr/external-limit#eebus-pairing) une fois.
+
+| Attribut                              | Type       | Obligatoire | Description                                                   |
+| ------------------------------------- | ---------- | ----------- | ------------------------------------------------------------- |
+| `ski`                                 | `string`   | oui         | SKI (Subject Key Identifier) du boîtier de commande.          |
+| `contractualConsumptionNominalMax`    | `int` (W)  | non         | Puissance de consommation maximale contractuelle.             |
+| `failsafeConsumptionActivePowerLimit` | `int` (W)  | non         | Limite de sécurité pour la puissance de consommation.         |
+| `productionNominalMax`                | `int` (W)  | non         | Puissance de production installée (Wc).                       |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | non         | Limite de sécurité pour la puissance d’export vers le réseau. |
+| `failsafeDurationMinimum`             | `duration` | non         | Durée minimale du mode de sécurité, p. ex. `2h`.              |
+| `passthrough`                         | plugin     | non         | Transmet le signal de limitation à un système externe.        |
+
+```yaml
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+### Intégration personnalisée \{#external-limit-custom\}
+
+Cette intégration générique s’adresse aux systèmes de commande qui fournissent des valeurs de limite dynamiques au lieu de contacts de commutation.
+La limite de consommation et le bridage sont lus via des plugins et fonctionnent indépendamment l’un de l’autre.
+Au moins un des attributs `maxConsumptionPower` ou `curtailedPercent` doit être configuré.
+
+| Attribut               | Type       | Obligatoire | Description                                                                                                               |
+| ---------------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | non¹        | Lit la limite de puissance totale en watts. `0` = aucune limite.                                                          |
+| `curtailedPercent`     | plugin     | non¹        | Lit la part d’export vers le réseau autorisée, en pourcentage de `productionNominalMax` (0 à 100). `100` = aucun bridage. |
+| `productionNominalMax` | `int` (W)  | non²        | Puissance de production installée (Wc).                                                                                   |
+| `interval`             | `duration` | non         | Intervalle d’interrogation des plugins. Par défaut `10s`.                                                                 |
+
+¹ au moins l’un des deux est obligatoire, ² obligatoire lorsque `curtailedPercent` est configuré.
+
+```yaml
+type: custom
+maxConsumptionPower:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .maxPower # Power limit in watts, 0 = no limit
+curtailedPercent:
+  source: mqtt
+  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
+productionNominalMax: 10000 # Installed generator power (Wp)
+```
+
+## Appareil de bridage \{#curtailer\}
+
+Un appareil de bridage personnalisé limite l’export vers le réseau de l’installation photovoltaïque à la demande du gestionnaire de réseau (§ 9 EEG) lorsque l’onduleur ne peut pas être bridé via la configuration de son [compteur](#meter).
+Dans l’interface, choisissez **Appareil personnalisé** sous **Configuration → Réseau → Ajouter un appareil limitant**.
+Voir aussi la [référence de configuration `curtailers`](/fr/reference/configuration/curtailers) et [Limite externe](/fr/external-limit#curtailment-devices).
+
+L’appareil reçoit la part d’export vers le réseau autorisée, en pourcentage de la puissance de production installée, et doit l’appliquer à l’onduleur.
+`100` signifie aucune limite.
+
+### Attributs
+
+| Attribut    | Type   | Obligatoire | Description                                                                                                                                                                |
+| ----------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | oui         | Définit la limite d’export vers le réseau en % de la puissance de production nominale (0 à 100). Doit prendre en charge l’accès en écriture.                               |
+| `curtailed` | plugin | oui         | Lit la limite actuelle d’export vers le réseau en %. Si l’appareil ne peut pas la communiquer, utilisez le plugin [`error`](/fr/reference/plugins#error) (voir l’exemple). |
+
+### Exemples
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Comme l’onduleur ne peut pas communiquer sa limite, `curtailed` renvoie `ErrNotAvailable` et la limite est écrite à chaque changement.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
+
+## Service de notification \{#notification-service\}
+
+Un service de notification personnalisé traite les messages de [notification](/fr/notifications) via n’importe quel [plugin](/fr/reference/plugins) avec accès en écriture, p. ex. un script shell, une requête HTTP ou un message MQTT.
+Dans l’interface, choisissez **Service défini par l'utilisateur** sous **Configuration → Notifications → Services**.
+
+Le message est transmis au plugin dans le paramètre `${send}` (ou sous forme de paramètre de modèle `{{.send}}`).
+
+### Configuration
+
+| Attribut   | Type     | Obligatoire | Description                                                                    |
+| ---------- | -------- | ----------- | ------------------------------------------------------------------------------ |
+| `send`     | plugin   | oui         | Plugin appelé pour chaque message. Doit prendre en charge l’accès en écriture. |
+| `encoding` | `string` | non         | Format de la valeur fournie dans `${send}`. Voir ci-dessous.                   |
+
+Les valeurs possibles de `encoding` sont :
+
+| Encodage | Contenu de `${send}`                                                                                             |
+| -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `json`   | Objet JSON `{ "msg": msg, "title": title }`. Le champ `title` n’est ajouté que s’il est défini pour l’événement. |
+| `csv`    | `title` et `msg` sous forme de liste séparée par des virgules                                                    |
+| `tsv`    | Comme `csv`, mais séparé par des tabulations                                                                     |
+| `title`  | Uniquement le titre                                                                                              |
+| (aucun)  | Uniquement le message (`msg`)                                                                                    |
+
+### Exemple
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} connected"
+      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # plugin type
+        source: script
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+Dans cet exemple, un script shell (`cmd`) est appelé avec l’argument `{"title": "...", "msg": "..."}`.

@@ -1,0 +1,113 @@
+---
+translatedFrom: "bbae10b17f51"
+---
+
+## Configuration des relais SG-Ready \{#sgready-configuration\}
+
+### Configuration avec relais boost \{#boost-relay\}
+
+Cet exemple montre comment configurer une pompe à chaleur avec un Shelly 1 pour le mode boost et un Shelly 3EM pour la mesure de puissance.
+On utilise pour cela le type `sgready-relay`.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Configuration avec relais boost et dim \{#boost-dim-relay\}
+
+Si votre pompe à chaleur prend en charge les modes boost et dim, vous pouvez configurer un second relais pour le contact dim.
+En mode dim, la consommation de la pompe à chaleur est réduite.
+C’est utile pour limiter la consommation en cas de contraintes sur le réseau ou dans le cadre du § 14a EnWG.
+
+Vous pouvez utiliser soit deux relais distincts, soit un relais à plusieurs canaux (p. ex. un Shelly avec différentes valeurs de `channel`).
+Outre Shelly, d’autres [relais pilotables](/fr/smartswitches) sont également possibles.
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Vous pouvez ajouter en option la température actuelle (`temp`), la limite de température interne de l’appareil (`limittemp`), la puissance (`power`) et l’énergie (`energy`) [via un plugin](/fr/reference/plugins).
+Ces valeurs servent uniquement à l’affichage et ne pilotent pas la pompe à chaleur.
+
+## Affichage de l’état \{#status-display\}
+
+Comme les pompes à chaleur appliquent leur propre logique de chauffage indépendamment d’evcc, l’interface affiche deux états :
+
+- **Opération normale** : aucune intervention, la pompe à chaleur suit sa propre régulation.
+- **Boost activé** : une demande d’augmentation de la puissance.
+  Tant que la pompe à chaleur n’a pas encore réagi (p. ex. en raison de durées minimales de fonctionnement ou de périodes de blocage), l’état affiche « Boost demandé… ».
+
+Les types de pompes à chaleur préconfigurés et les modèles correspondants définissent déjà les [indicateurs de fonctions](/fr/user-defined-devices#charger-features) nécessaires.
+Pour les configurations personnalisées via `type: custom`, définissez la combinaison adéquate de `integrateddevice`, `heating`, `continuous` et, le cas échéant, `switchdevice`.
+
+## Chauffe-eau électriques \{#electric-water-heaters\}
+
+Les chauffages électriques simples peuvent seulement être allumés ou éteints par evcc.
+Ils sont généralement raccordés via une [prise commutable](/fr/smartswitches).
+Avec un surplus suffisant, evcc active la prise (enable) et la désactive à nouveau lorsque les conditions l’exigent (disable).
+
+Pour les chauffages électriques spéciaux dotés de leur propre régulation continue, evcc transmet à l’appareil la puissance actuellement disponible.
+Cette puissance disponible est adaptée en permanence à la situation actuelle, comme lors de la charge d’un véhicule.
+
+evcc propose des limites réglables qui vous permettent de définir la température souhaitée.
+Il ne faut pas les considérer comme une fonction de sécurité.
+La régulation de la température doit normalement être assurée par la fonction thermostat du chauffage lui-même.
+
+:::danger
+Votre chauffe-eau électrique doit toujours disposer de sa propre limite de température, qui empêche de manière fiable toute surchauffe en cas de panne ou de dysfonctionnement d’evcc, ou d’erreur de manipulation.
+:::
