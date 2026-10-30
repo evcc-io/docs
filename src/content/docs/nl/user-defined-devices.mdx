@@ -1,0 +1,851 @@
+---
+title: Gebruikersgedefinieerde apparaten
+description: "Toont hoe u een lader, meter, voertuig of verwarmingstoestel zonder ingebouwde template koppelt door uitlezen en aansturen zelf via HTTP, MQTT of Modbus in te stellen."
+tableOfContents:
+  maxHeadingLevel: 4
+translatedFrom: "3be6e303b568"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Bij het aanmaken van een lader, verwarmer, netmeter, thuisbatterij, zonnepanelensysteem, andere verbruiker, voertuig, tarief, opwekbegrenzingsapparaat of meldingsdienst kunt u in de lijst met apparaattypes de optie **Gebruiker-gedefiniëerd apparaat** kiezen en uw eigen logica beschrijven op basis van het [pluginsysteem](/nl/reference/plugins).
+
+Zo kunt u apparaten koppelen waarvoor geen ingebouwde template bestaat, bijv. het actuele vermogen uit een HTTP-endpoint lezen of een doelstroom via Modbus schrijven.
+
+## Een apparaat definiëren
+
+In de gebruikersinterface bevat de templatekeuze van elk apparaattype een item **Gebruiker-gedefiniëerd apparaat**.
+Als u dit kiest, opent de editor voor uw eigen configuratie.
+Standaard wordt een apparaat met `type: custom` aangemaakt. Het type kan indien nodig door een andere waarde worden vervangen (bijv. `type: heatpump`).
+
+```yaml
+power:
+  source: mqtt
+  topic: home/current/imsys/chn2/raw
+```
+
+U kunt de volledige configuratie ook direct in `evcc.yaml` schrijven, met `name`, `type: custom` en het attributenblok eronder:
+
+```yaml
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: home/current/imsys/chn2/raw
+```
+
+Alle andere voorbeelden op deze pagina gebruiken de platte vorm van het attributenblok die u in de gebruikersinterface invoert.
+
+De lijst met beschikbare pluginbronnen (`http`, `mqtt`, `modbus`, …) en hulpfuncties (`calc`, `map`, `watchdog`, …) vindt u in de [pluginreferentie](/nl/reference/plugins).
+
+## Attributen en features
+
+Elk gebruikersgedefinieerd apparaat wordt beschreven met drie soorten velden:
+
+- **Leesattributen**: plugins die evcc aanroept om een waarde op te halen (bijv. `power`, `soc`, `status`).
+- **Schrijfattributen**: plugins die evcc aanroept om een waarde in te stellen of een actie te starten (bijv. `enable`, `maxcurrent`, `wakeup`). De te schrijven waarde is in de plugin beschikbaar.
+- **Features**: de lijst `features` schakelt afwijkend gedrag in. De beschikbare features hangen af van het apparaattype.
+
+Algemene opbouw:
+
+```yaml
+# read attributes
+power:
+  source: http
+  uri: http://meter.local/power
+soc:
+  source: mqtt
+  topic: battery/soc
+
+# write attributes
+enable:
+  source: http
+  uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
+maxcurrent:
+  source: mqtt
+  topic: charger/maxcurrent
+  payload: ${maxcurrent:%d}
+
+# features
+features:
+  - heating
+  - integrateddevice
+```
+
+De beschikbare attribuutnamen en features verschillen per apparaattype en staan in de secties hieronder.
+
+## Meter \{#meter\}
+
+Vermogensmeters worden in de sectie [`meters`](/nl/reference/configuration/meters) geconfigureerd.
+Naar meters die onder `meters:` zijn gedefinieerd, kan vanuit `site` worden verwezen:
+
+- `grid`: Netmeter
+- `pv`: Meter voor zonne-energie
+- `battery`: Meter van de thuisbatterij
+- `charge`: Meter voor het laadvermogen van de lader
+- `aux`: Verbruiksmeter voor intelligente verbruikers
+- `consumer`: Meter voor een gewone verbruiker, die voor de verbruiksstatistieken wordt vastgelegd
+- `ext`: Extra meter die niet voor de regeling wordt gebruikt en niet in de gebruikersinterface verschijnt, maar alleen wordt gelogd en geëxporteerd
+
+`power` is het enige verplichte attribuut.
+Niet elke meterrol ondersteunt alle attributen:
+
+- `limitsoc` en `batterymode` worden uitsluitend gebruikt voor batterijmeters (waarnaar vanuit `site.battery` wordt verwezen).
+- `curtail` en `curtailed` worden samen gebruikt voor `pv`-meters die opwekbegrenzing ondersteunen (§ 9 EEG).
+- `currents`, `voltages` en `powers` zijn faseattributen die elk met precies drie pluginitems (als YAML-array) moeten worden geconfigureerd en gelden voor netmeters (`grid`) en laders (`charge`).
+
+Elke plugin moet het juiste datatype teruggeven.
+Gebruik voor de omzetting de [leespijplijnen](/nl/reference/plugins#reading).
+
+### Leesattributen
+
+| Attribuut      | Type                  | Verplicht | Context        | Beschrijving                                                                                       |
+| -------------- | --------------------- | --------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `power`        | `float`               | ja        | alle           | Actueel vermogen in W                                                                              |
+| `energy`       | `float`               | nee       | alle           | Meterstand in kWh                                                                                  |
+| `returnenergy` | `float`               | nee       | alle           | Meterstand in omgekeerde richting in kWh (zie hieronder)                                           |
+| `maxpower`     | `int`                 | nee       | `pv` (hybride) | Maximaal AC-vermogen in W                                                                          |
+| `curtailed`    | `int`                 | nee       | `pv`           | Actuele terugleveringslimiet in % (0 tot 100). Alleen samen met `curtail`.                         |
+| `soc`          | `int`                 | nee       | `battery`      | Laadniveau in %                                                                                    |
+| `capacity`     | `float`               | nee       | `battery`      | Capaciteit in kWh                                                                                  |
+| `powers`       | `[float,float,float]` | nee       | alle           | Fasevermogens in W. Hiermee wordt de richting bepaald als de stromen zonder teken worden geleverd. |
+| `currents`     | `[float,float,float]` | nee       | alle           | Fasestromen in A. Voor het herkennen van actieve fasen.                                            |
+| `voltages`     | `[float,float,float]` | nee       | alle           | Fasespanningen in V. Voor het herkennen van de aansluiting (1p/3p).                                |
+
+### Tekens en richtingen \{#signs-and-directions\}
+
+Wat een positieve `power`-waarde en de twee energierichtingen betekenen, hangt af van de meterrol:
+
+| Rol                      | `power` positief           | `energy`     | `returnenergy`              |
+| ------------------------ | -------------------------- | ------------ | --------------------------- |
+| `grid`                   | Netafname                  | Afgenomen    | Teruggeleverd (aan het net) |
+| `pv`                     | Productie                  | Geproduceerd | Verbruikt (zelden)          |
+| `battery`                | Ontladen (negatief: laden) | Ontladen     | Geladen                     |
+| `charge`                 | Laden                      | Geladen      | Ontladen (V2X)              |
+| `aux`, `ext`, `consumer` | Verbruik                   | Verbruikt    | Geproduceerd (zelden)       |
+
+`energy` en `returnenergy` zijn oplopende meterstanden in kWh, idealiter totalen over de hele levensduur, zoals de afname- en terugleverregisters van een netmeter.
+De verschillen tussen de standen worden automatisch berekend, dus de plugin moet een meterstand teruggeven en geen verbruikswaarden per interval.
+Een teller die periodiek (bijv. dagelijks) wordt teruggezet, werkt ook, omdat het terugzetten automatisch wordt herkend.
+Een stand van `0` wordt als niet beschikbaar behandeld.
+
+Beide attributen zijn optioneel.
+Zonder deze attributen wordt de energiegeschiedenis afgeleid uit het verloop van `power`.
+Echte meterstanden geven nauwkeurigere statistieken op de lange termijn.
+
+### Schrijfattributen \{#meter-write-attributes\}
+
+| Attribuut     | Type  | Verplicht | Context   | Beschrijving                                                                                                                                                                   |
+| ------------- | ----- | --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `limitsoc`    | `int` | nee       | `battery` | Laaddoel voor de batterij in % instellen. Het laaddoel wordt berekend uit de geconfigureerde `MinSoc`, `MaxSoc` en het actuele laadniveau (attribuut `soc`).                   |
+| `curtail`     | `int` | nee       | `pv`      | Terugleveringslimiet in % van het nominale opwekvermogen instellen (0 tot 100, `100` = geen limiet). Alleen samen met `curtailed`. Zie [Opwekbegrenzingsapparaat](#curtailer). |
+| `batterymode` | `int` | nee       | `battery` | De regelmodus van de batterij direct instellen. De modi staan hieronder.                                                                                                       |
+
+#### Batterijmodi \{#battery-modes\}
+
+| Waarde | Modus        | Gedrag                                                       |
+| ------ | ------------ | ------------------------------------------------------------ |
+| `1`    | `normal`     | Normale werking: laden met overschot, ontladen voor verbruik |
+| `2`    | `hold`       | Ontladen blokkeren, laden met overschot blijft toegestaan    |
+| `3`    | `charge`     | Laden vanuit het net, niet ontladen                          |
+| `4`    | `holdcharge` | Laden blokkeren, ontladen voor verbruik blijft toegestaan    |
+| `5`    | `discharge`  | Ontladen naar het net                                        |
+
+Alleen de batterijmodi die het apparaat ondersteunt, worden gebruikt.
+Als `batterymode` een [`switch`](/nl/reference/plugins#switch) is, worden de ondersteunde modi uit de `case`-waarden afgeleid.
+Dat werkt ook wanneer de switch in een [`watchdog`](/nl/reference/plugins#watchdog) is verpakt.
+Elke andere plugin heeft `batterymodes` nodig met de ondersteunde modi, bijv. `batterymodes: ["normal", "hold", "charge"]`.
+
+### Voorbeelden
+
+Lees het actuele netvermogen uit een HTTP-endpoint.
+
+```yaml
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+```
+
+Lees vermogen en laadniveau van een thuisbatterij en stel de modus via HTTP in.
+De `switch` dekt de modi normal, hold en charge af, dus biedt evcc precies deze drie aan.
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    capacity: 10 # kWh
+    power:
+      source: http
+      uri: http://battery.local/api/power
+    soc:
+      source: http
+      uri: http://battery.local/api/soc
+    batterymode:
+      source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "auto"}'
+        - case: 2 # hold
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "hold"}'
+        - case: 3 # charge
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "charge"}'
+```
+
+## Lader \{#charger\}
+
+Het standaardtype `type: custom` dekt laders met traploze stroomregeling af.
+Gespecialiseerde ladertypes voor andere apparaten staan beschreven onder [Schakelbaar stopcontact](#charger-switchsocket) en [Warmtepompen](#charger-heating).
+
+### Leesattributen
+
+| Attribuut      | Type                  | Verplicht | Beschrijving                                                                                       |
+| -------------- | --------------------- | --------- | -------------------------------------------------------------------------------------------------- |
+| `status`       | `string`              | ja        | Status (A..F)                                                                                      |
+| `enabled`      | `bool`                | ja        | Is laden ingeschakeld?                                                                             |
+| `power`        | `float`               | nee       | Laadvermogen in W                                                                                  |
+| `energy`       | `float`               | nee       | Meterstand in kWh                                                                                  |
+| `returnenergy` | `float`               | nee       | Meterstand in omgekeerde richting in kWh (ontladen energie, V2X)                                   |
+| `identify`     | `string`              | nee       | Actuele RFID-identificatie                                                                         |
+| `soc`          | `int`                 | nee       | Laadniveau in %                                                                                    |
+| `limitsoc`     | `int`                 | nee       | Laadlimiet in %                                                                                    |
+| `temp`         | `float`               | nee       | Actuele temperatuur in °C (verwarming, alias voor `soc`)                                           |
+| `limittemp`    | `int`                 | nee       | Temperatuurlimiet in °C (verwarming, alias voor `limitsoc`)                                        |
+| `finishtime`   | `string`              | nee       | Geschatte eindtijd van het laden (RFC3339, Go-duur, Unix-tijdstempel of resterende seconden)       |
+| `phases`       | `int`                 | nee       | Aantal fysieke fasen (1..3)                                                                        |
+| `powers`       | `[float,float,float]` | nee       | Fasevermogens in W. Hiermee wordt de richting bepaald als de stromen zonder teken worden geleverd. |
+| `currents`     | `[float,float,float]` | nee       | Fasestromen in A. Voor het herkennen van actieve fasen.                                            |
+| `voltages`     | `[float,float,float]` | nee       | Fasespanningen in V. Voor het herkennen van de aansluiting (1p/3p).                                |
+
+### Schrijfattributen
+
+| Attribuut          | Type    | Verplicht | Beschrijving                                       |
+| ------------------ | ------- | --------- | -------------------------------------------------- |
+| `enable`           | `bool`  | ja        | Laden in- of uitschakelen                          |
+| `maxcurrent`       | `int`   | ja        | Maximale laadstroom in A instellen                 |
+| `maxcurrentmillis` | `float` | nee       | Maximale laadstroom in A instellen (met decimalen) |
+| `phases1p3p`       | `int`   | nee       | Fasen omschakelen (vereist `tos: true`)            |
+| `wakeup`           | `bool`  | nee       | Voertuig wekken                                    |
+
+### Features \{#charger-features\}
+
+| Feature            | Beschrijving                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Geen voertuigselectie. Het apparaat werkt zonder aangesloten voertuig en zonder laadsessies (bijv. warmtepomp, verwarmingselement, vast geïnstalleerde verbruiker).                                                                                                                                                                                            |
+| `heating`          | Apparaat als verwarming behandelen: laadniveau en limieten worden in °C in plaats van % weergegeven.                                                                                                                                                                                                                                                           |
+| `continuous`       | Het apparaat blijft in de eigen normale werking draaien wanneer het “uitgeschakeld” is. De gebruikersinterface toont “Normale werking” in plaats van “Stand-by”. Een verzoek om meer vermogen (bijv. bij een zonneoverschot of goedkope netstroom) heet “Boost”. De modi heten **Normaal**, **Slim** en **Boost** in plaats van **Uit**, **Slim** en **Snel**. |
+| `switchdevice`     | Het apparaat kan alleen aan/uit worden geschakeld (geen traploze stroomregeling). Maximale stroom en de optie **Altijd laden** worden niet getoond. Minimale stroom en fasen bepalen het inschakelvermogen voor zonne-energie. Zonder `continuous` heten de modi **Uit**, **Slim** en **Aan**.                                                                 |
+
+Gebruikelijke combinaties van features in ingebouwde templates:
+
+**Elektrische verwarming**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Stopcontact**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Warmtepomp**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
+```
+
+### Voorbeelden
+
+Vraag de laadstatus van een lader op via Modbus.
+
+```yaml
+features:
+  - integrateddevice
+enabled:
+  source: modbus
+  id: 4711
+  uri: modbus.local:502
+  rtu: false
+  register:
+    address: 100
+    type: holding
+    decode: uint16
+```
+
+Schakel een Tasmota-stopcontact via een MQTT-bericht.
+
+```yaml
+enable:
+  source: mqtt
+  broker: mosquitto.local:883
+  topic: cmd/unu-switch/Power
+  payload: ON
+```
+
+### Schakelbaar stopcontact \{#charger-switchsocket\}
+
+**`type: switchsocket`**
+
+Voor slimme stopcontacten en vergelijkbare relaisapparaten die alleen aan/uit kunnen worden geschakeld, zonder traploze stroomregeling.
+De laadstatus wordt afgeleid uit het actuele vermogen (een vermogen boven `standbypower` betekent dat er geladen wordt).
+Alle details over het instellen staan onder [Slimme schakelaars](/nl/smartswitches).
+
+| Attribuut      | Type    | Verplicht | Beschrijving                                                                                   |
+| -------------- | ------- | --------- | ---------------------------------------------------------------------------------------------- |
+| `enabled`      | `bool`  | ja        | Status van het stopcontact lezen (aan/uit)                                                     |
+| `power`        | `float` | ja        | Actueel vermogen in W                                                                          |
+| `energy`       | `float` | nee       | Meterstand in kWh                                                                              |
+| `soc`          | `float` | nee       | Laadniveau in %                                                                                |
+| `enable`       | `bool`  | ja        | Stopcontact aan/uit schakelen                                                                  |
+| `standbypower` | `float` | nee       | Vermogensdrempel in W. Daarboven: laden, daaronder: stand-by. Negatief: statisch (geen meting) |
+
+### Warmtepompen \{#charger-heating\}
+
+Warmtepompen en vergelijkbare verwarmingstoestellen gebruiken eigen ladertypes, elk met eigen attributen.
+Hoe u dit instelt, staat beschreven onder [Warmtepompen, elektrische verwarming](/nl/heating).
+
+<Tabs>
+  <TabItem label="Warmtepomp">
+
+**`type: heatpump`**
+
+Voor invertergestuurde warmtepompen die een traploze vermogensinstelwaarde via Modbus, HTTP of iets vergelijkbaars accepteren.
+Het gewenste verwarmingsvermogen wordt direct via `setmaxpower` geschreven.
+
+| Attribuut     | Type    | Verplicht | Beschrijving                                |
+| ------------- | ------- | --------- | ------------------------------------------- |
+| `power`       | `float` | nee       | Actueel vermogen in W                       |
+| `energy`      | `float` | nee       | Meterstand in kWh                           |
+| `temp`        | `float` | nee       | Actuele temperatuur in °C                   |
+| `limittemp`   | `int`   | nee       | Apparaatinterne temperatuurlimiet in °C     |
+| `setmaxpower` | `int`   | ja        | Maximaal verwarmingsvermogen in W instellen |
+| `getmaxpower` | `float` | nee       | Actueel maximaal verwarmingsvermogen in W   |
+
+  </TabItem>
+  <TabItem label="SG-Ready">
+
+**`type: sgready`**
+
+Voor warmtepompen die de standaard SG-Ready-interface als één moduswaarde aanbieden.
+Er worden drie modi ondersteund: `1` verlaagd, `2` normaal, `3` boost.
+
+| Attribuut     | Type    | Verplicht | Beschrijving                                                |
+| ------------- | ------- | --------- | ----------------------------------------------------------- |
+| `power`       | `float` | nee       | Actueel vermogen in W                                       |
+| `energy`      | `float` | nee       | Meterstand in kWh                                           |
+| `temp`        | `float` | nee       | Actuele temperatuur in °C                                   |
+| `limittemp`   | `int`   | nee       | Apparaatinterne temperatuurlimiet in °C                     |
+| `setmode`     | `int`   | ja        | SG-Ready-modus wijzigen (1: verlaagd, 2: normaal, 3: boost) |
+| `getmode`     | `int`   | nee       | Actuele SG-Ready-modus (1, 2, 3)                            |
+| `setmaxpower` | `int`   | nee       | Maximaal verwarmingsvermogen in W instellen                 |
+
+  </TabItem>
+  <TabItem label="SG-Ready via relais">
+
+**`type: sgready-relay`**
+
+Voor warmtepompen waarvan de SG-Ready-ingang als twee potentiaalvrije relaiscontacten (boost + dim) is bedraad.
+Elk contact wordt aangestuurd door een aparte sublader die via zijn eigen ladertype wordt geconfigureerd, niet via plugins.
+
+| Attribuut   | Type            | Verplicht | Beschrijving                            |
+| ----------- | --------------- | --------- | --------------------------------------- |
+| `power`     | `float`         | nee       | Actueel vermogen in W                   |
+| `energy`    | `float`         | nee       | Meterstand in kWh                       |
+| `temp`      | `float`         | nee       | Actuele temperatuur in °C               |
+| `limittemp` | `int`           | nee       | Apparaatinterne temperatuurlimiet in °C |
+| `boost`     | `charger-typed` | ja        | Relais voor het SG-Ready-boostcontact   |
+| `dim`       | `charger-typed` | nee       | Relais voor het SG-Ready-dimcontact     |
+
+  </TabItem>
+</Tabs>
+
+## Voertuig \{#vehicle\}
+
+Ook voertuigparameters kunnen via plugins worden gelezen.
+
+### Leesattributen
+
+| Attribuut       | Type     | Verplicht | Beschrijving                                                                                 |
+| --------------- | -------- | --------- | -------------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | ja        | Laadniveau in %                                                                              |
+| `limitsoc`      | `int`    | nee       | Laadlimiet in %                                                                              |
+| `status`        | `string` | nee       | Status (A..F)                                                                                |
+| `range`         | `int`    | nee       | Actieradius in km                                                                            |
+| `odometer`      | `int`    | nee       | Kilometerstand in km                                                                         |
+| `climater`      | `bool`   | nee       | Klimaatregeling actief?                                                                      |
+| `getmaxcurrent` | `float`  | nee       | Maximale laadstroom in A                                                                     |
+| `finishtime`    | `string` | nee       | Geschatte eindtijd van het laden (RFC3339, Go-duur, Unix-tijdstempel of resterende seconden) |
+
+### Schrijfattributen
+
+| Attribuut      | Type   | Verplicht | Beschrijving                       |
+| -------------- | ------ | --------- | ---------------------------------- |
+| `wakeup`       | `bool` | nee       | Voertuig wekken                    |
+| `chargeenable` | `bool` | nee       | Laadproces starten/stoppen         |
+| `maxcurrent`   | `int`  | nee       | Maximale laadstroom in A instellen |
+
+### Configuratie
+
+| Attribuut  | Type     | Verplicht | Beschrijving                        |
+| ---------- | -------- | --------- | ----------------------------------- |
+| `title`    | `string` | nee       | Weergavenaam van het voertuig       |
+| `capacity` | `float`  | nee       | Batterijcapaciteit in kWh           |
+| `icon`     | `string` | nee       | Pictogram in de gebruikersinterface |
+
+### Features \{#vehicle-features\}
+
+| Feature         | Beschrijving                                                                                                                                                                             |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coarsecurrent` | Het voertuig accepteert laadstroom alleen in hele stappen van 1 A. De regeling wordt beperkt tot grove stappen van 1 A, ook als de lader fijner zou kunnen regelen.                      |
+| `streaming`     | Het voertuig stuurt zelf gegevens in plaats van te worden opgevraagd (bijv. BMW Cardata). Updates van het laadniveau worden ook als betrouwbaar behandeld wanneer er niet geladen wordt. |
+| `welcomecharge` | Het voertuig verwacht dat de lader bij het aansluiten actief is om de verbinding als werkend te registreren. Anders meldt het een fout.                                                  |
+
+### Voorbeelden
+
+Lees de actuele actieradius uit MQTT-berichten.
+
+```yaml
+title: Green Mazda # display name (optional)
+capacity: 50 # battery capacity in kWh (optional)
+features:
+  - coarsecurrent
+range:
+  source: mqtt
+  topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Wek een auto via een HTTP-ping voordat verdere opvragingen worden verstuurd.
+
+```yaml
+wakeup:
+  source: http
+  uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+<a id="onidentify"></a>
+
+`onIdentify` stelt de laadmodus automatisch in wanneer het voertuig wordt herkend.
+
+```yaml
+soc:
+  source: mqtt
+  topic: car/soc
+onIdentify:
+  mode: smart
+```
+
+Beschikbare modi: `off`, `smart`, `now`.
+De verouderde waarden `pv` en `minpv` worden nog geaccepteerd en activeren `smart` met [Altijd laden](/nl/features/modes#always-charge) uit of aan.
+
+## Tarief en voorspelling \{#tariff\}
+
+Een gebruikersgedefinieerd tarief koppelt evcc via het pluginmechanisme aan een eigen waardebron.
+Het attribuut `tariff` bepaalt wat de bron weergeeft en welke eenheid de waarden hebben.
+
+### Leesattributen
+
+Precies één van `price` en `forecast` moet zijn geconfigureerd.
+
+| Attribuut  | Type     | Beschrijving                                                                                                           |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Actuele waarde. Float die de plugin teruggeeft.                                                                        |
+| `forecast` | `string` | Voorspelling als JSON-string met een lijst van tijdvakken en waarden (zie schema hieronder). Wordt elk uur opgevraagd. |
+
+### Configuratie
+
+| Attribuut      | Type       | Verplicht | Beschrijving                                                                                                                                                                                                                   |
+| -------------- | ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tariff`       | `string`   | nee       | `price` (standaard), `co2`, `solar` of `temperature`. Bepaalt de eenheid van de teruggegeven waarden: prijs in de ingestelde valuta per kWh, CO₂-intensiteit in g/kWh, voorspelling van zonne-energie in W, temperatuur in °C. |
+| `charges`      | `float`    | nee       | Vaste opslag per kWh die bij elke waarde wordt opgeteld. Standaard `0`.                                                                                                                                                        |
+| `chargesZones` | `list`     | nee       | Tijdsafhankelijke opslagen (bijv. netbeheerkosten) die `charges` voor bepaalde periodes vervangen. Zie [tijdsafhankelijke netbeheerkosten](/nl/reference/configuration/tariffs#charges-zones).                                 |
+| `tax`          | `float`    | nee       | Belastingpercentage dat op het resultaat wordt toegepast, bijv. `0.2` voor 20%. Standaard `0`.                                                                                                                                 |
+| `formula`      | `string`   | nee       | Go-expressie voor een eigen berekening, waarin `price`, `charges` en `tax` beschikbaar zijn. Zie [voorbeelden](#formula-examples).                                                                                             |
+| `interval`     | `duration` | nee       | Opvraaginterval voor `forecast`. Standaard `1h`.                                                                                                                                                                               |
+| `cache`        | `duration` | nee       | Cacheduur voor `price`. Standaard `15m`.                                                                                                                                                                                       |
+
+### Features \{#tariff-features\}
+
+| Feature     | Beschrijving                                                                                                                |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `average`   | Middelt fijnmazige prijsvakken (bijv. kwartierwaarden) tot uurgemiddelden.                                                  |
+| `cacheable` | Slaat opgehaalde waarden op. Wordt na een herstart of een storing bij de aanbieder als terugvaloptie gebruikt (tot 24 uur). |
+
+### Voorbeelden
+
+**Actuele prijs via HTTP**:
+
+```yaml
+price:
+  source: http
+  uri: https://example.com/api/price
+```
+
+**Voorspelling via HTTP**:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+  jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "value": .[1] }) | tostring'
+```
+
+De plugin moet een JSON-structuur teruggeven met een lijst van tijdvakken en prijzen.
+Datumvelden moeten de vorm `YYYY-MM-DDTHH:MM:SSZ` hebben en de prijs moet in de juiste valuta-eenheid staan (bijv. EUR).
+evcc werkt intern met intervallen van 15 minuten; plugins mogen ook uurwaarden teruggeven, die automatisch worden omgezet.
+
+```json
+[
+  {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-01T00:15:00Z",
+    "value": 25.0
+  },
+  {
+    "start": "2025-01-01T00:15:00Z",
+    "end": "2025-01-01T00:30:00Z",
+    "value": 26.5
+  },
+  {
+    "start": "2025-01-01T00:30:00Z",
+    "end": "2025-01-01T00:45:00Z",
+    "value": 24.8
+  },
+  {
+    "start": "2025-01-01T00:45:00Z",
+    "end": "2025-01-01T01:00:00Z",
+    "value": 27.2
+  }
+]
+```
+
+<a id="formula-examples"></a>
+
+Het veld `formula` accepteert een Go-expressie waarin `price`, `charges`, `tax` en het tijdstempel van het tijdvak `ts` beschikbaar zijn.
+De [`math`-bibliotheek](https://pkg.go.dev/math) en de methoden van [`time.Time`](https://pkg.go.dev/time#Time) op `ts` zijn beschikbaar.
+De formule wordt uitgevoerd voor de actuele prijs en voor elk tijdvak van de voorspelling.
+
+**Prijsplafond**:
+
+```yaml
+charges: 0.22
+tax: 0.19
+formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Begrenst het resultaat tot 50 ct/kWh.
+
+**Geen terugleververgoeding bij negatieve day-aheadprijzen** (Duitse zonnepanelensystemen die na 25 februari 2025 in gebruik zijn genomen):
+
+```yaml
+formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
+```
+
+Betaalt een vaste terugleververgoeding van 7 ct/kWh, behalve wanneer de prijs op de day-aheadmarkt negatief is.
+
+## Externe limiet \{#external-limit\}
+
+Een gebruikersgedefinieerde integratie voor de functie [Externe limiet](/nl/external-limit) koppelt een stuurbox of energiebeheersysteem dat niet door een ingebouwde integratie wordt ondersteund.
+Kies in de gebruikersinterface **Gebruiker-gedefiniëerde integratie** onder **Configuratie → Externe limiet**.
+
+Het type bepaalt op welke van vier manieren het limietsignaal binnenkomt: `relay` (één schakelcontact), `fnn` (FNN-stuurbox met meerdere schakelcontacten), `eebus` (EEBUS-protocol) of `custom` (dynamische limietwaarden via plugins).
+Elk signaal wordt gelezen via een [pluginconfiguratie](/nl/reference/plugins) (GPIO, MQTT, HTTP, Modbus).
+Zie ook de [configuratiereferentie voor `hems`](/nl/reference/configuration/hems).
+
+### Relais
+
+De aansluiting via één schakelcontact is de eenvoudigste oplossing.
+De stuurbox activeert een contact dat door uw evcc-installatie wordt uitgelezen.
+
+| Attribuut     | Type       | Verplicht | Beschrijving                                                                                            |
+| ------------- | ---------- | --------- | ------------------------------------------------------------------------------------------------------- |
+| `maxPower`    | `int` (W)  | ja        | Totale vermogenslimiet die wordt toegepast zolang het signaal actief is.                                |
+| `limit`       | plugin     | ja        | Pluginconfiguratie voor het lezen van het schakelcontact. `true`/`1` = begrensd, `false`/`0` = normaal. |
+| `passthrough` | plugin     | nee       | Geeft het begrenzingssignaal door aan een extern systeem.                                               |
+| `interval`    | `duration` | nee       | Opvraaginterval voor het schakelcontact. Standaard `10s`.                                               |
+
+De vermogenslimiet krijgt u van de netbeheerder.
+Bij meerdere aanstuurbare verbruiksapparaten (SteuVE) wordt rekening gehouden met de gelijktijdigheidsfactor.
+U kunt de limiet ook zelf berekenen met de formule: **Totale limiet = aantal SteuVE × 4,2 kW × gelijktijdigheidsfactor**. Details over de berekening vindt u [hier](https://www.inexogy.com/blog/14a-enwg/).
+
+<Tabs>
+<TabItem label="Raspberry Pi GPIO">
+
+Bij gebruik van een Raspberry Pi kan de GPIO-pin direct worden gelezen:
+
+```yaml
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+Meer details over de GPIO-plugin vindt u in de [plugindocumentatie](/nl/reference/plugins#gpio).
+
+</TabItem>
+<TabItem label="MQTT">
+
+Als de stuurbox of gateway MQTT-berichten verstuurt:
+
+```yaml
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem label="HTTP API">
+
+Voor stuurboxen met een REST API:
+
+```yaml
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Als de stuurbox of een gateway de vermogenslimiet via Modbus aanbiedt:
+
+```yaml
+type: relay
+maxPower: 4200 # Example for 1 SteuVE
+limit:
+  source: modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
+  timeout: 5s
+  register:
+    type: holding
+    decode: uint16
+    address: 8056
+  # Return value: 0 = not limited, 1 = limited
+```
+
+</TabItem>
+</Tabs>
+
+### FNN-stuurbox \{#external-limit-fnn\}
+
+Stuurboxen volgens de FNN-standaard signaleren dimmen en opwekbegrenzing via afzonderlijke schakelcontacten.
+Het dimmen van het verbruik (W4) en de opwekbegrenzing (W3, S2, S1) werken onafhankelijk van elkaar.
+Minstens één van de signalen `w4` en `w3` moet zijn geconfigureerd.
+
+| Attribuut         | Type       | Verplicht | Beschrijving                                                                                |
+| ----------------- | ---------- | --------- | ------------------------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | ja¹       | Verbruikslimiet zolang het dimsignaal (W4) actief is.                                       |
+| `maxCurtailPower` | `int` (W)  | ja²       | Geïnstalleerd vermogen van het zonnepanelensysteem, basiswaarde voor de begrenzingsstappen. |
+| `w4`              | plugin     | nee       | Leest het dimsignaal. Begrenst het verbruik tot `maxDimPower`.                              |
+| `w3`              | plugin     | nee       | Leest het begrenzingssignaal. Begrenst de teruglevering tot 0% van `maxCurtailPower`.       |
+| `s2`              | plugin     | nee       | Leest het begrenzingssignaal. Begrenst de teruglevering tot 30% van `maxCurtailPower`.      |
+| `s1`              | plugin     | nee       | Leest het begrenzingssignaal. Begrenst de teruglevering tot 60% van `maxCurtailPower`.      |
+| `interval`        | `duration` | nee       | Opvraaginterval voor de schakelcontacten. Standaard `10s`.                                  |
+
+¹ verplicht wanneer `w4` is geconfigureerd, ² verplicht wanneer `w3` is geconfigureerd.
+
+```yaml
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+### EEBUS \{#external-limit-eebus\}
+
+De digitale aansluiting via het EEBUS-protocol.
+De stuurbox communiceert direct met uw evcc-installatie en geeft de vermogenslimiet automatisch door.
+Stuurbox en evcc moeten eenmalig worden [gekoppeld](/nl/external-limit#eebus-pairing).
+
+| Attribuut                             | Type       | Verplicht | Beschrijving                                              |
+| ------------------------------------- | ---------- | --------- | --------------------------------------------------------- |
+| `ski`                                 | `string`   | ja        | SKI (Subject Key Identifier) van de stuurbox.             |
+| `contractualConsumptionNominalMax`    | `int` (W)  | nee       | Contractueel maximaal verbruiksvermogen.                  |
+| `failsafeConsumptionActivePowerLimit` | `int` (W)  | nee       | Failsafe-limiet voor het verbruiksvermogen.               |
+| `productionNominalMax`                | `int` (W)  | nee       | Geïnstalleerd opwekvermogen (Wp).                         |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | nee       | Failsafe-limiet voor het terugleveringsvermogen.          |
+| `failsafeDurationMinimum`             | `duration` | nee       | Minimale failsafe-duur, bijv. `2h`.                       |
+| `passthrough`                         | plugin     | nee       | Geeft het begrenzingssignaal door aan een extern systeem. |
+
+```yaml
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+### Gebruikersgedefinieerd \{#external-limit-custom\}
+
+De generieke integratie voor aansturingssystemen die dynamische limietwaarden leveren in plaats van schakelcontacten.
+Verbruikslimiet en opwekbegrenzing worden via plugins gelezen en werken onafhankelijk van elkaar.
+Minstens één van `maxConsumptionPower` en `curtailedPercent` moet zijn geconfigureerd.
+
+| Attribuut              | Type       | Verplicht | Beschrijving                                                                                                           |
+| ---------------------- | ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | nee¹      | Leest de totale vermogenslimiet in watt. `0` = geen limiet.                                                            |
+| `curtailedPercent`     | plugin     | nee¹      | Leest de toegestane teruglevering als percentage van `productionNominalMax` (0 tot 100). `100` = geen opwekbegrenzing. |
+| `productionNominalMax` | `int` (W)  | nee²      | Geïnstalleerd opwekvermogen (Wp).                                                                                      |
+| `interval`             | `duration` | nee       | Opvraaginterval voor de plugins. Standaard `10s`.                                                                      |
+
+¹ minstens één van beide is verplicht, ² verplicht wanneer `curtailedPercent` is geconfigureerd.
+
+```yaml
+type: custom
+maxConsumptionPower:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .maxPower # Power limit in watts, 0 = no limit
+curtailedPercent:
+  source: mqtt
+  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
+productionNominalMax: 10000 # Installed generator power (Wp)
+```
+
+## Opwekbegrenzingsapparaat \{#curtailer\}
+
+Een gebruikersgedefinieerd opwekbegrenzingsapparaat begrenst de teruglevering van het zonnepanelensysteem op verzoek van de netbeheerder (§ 9 EEG) wanneer de omvormer niet via zijn [meterconfiguratie](#meter) kan worden begrensd.
+Kies in de gebruikersinterface **Gebruiker-gedefiniëerd apparaat** onder **Configuratie → Netaansluiting → Voeg opwekbegrenzingsapparaat toe**.
+Zie ook de [configuratiereferentie voor `curtailers`](/nl/reference/configuration/curtailers) en [Externe limiet](/nl/external-limit#curtailment-devices).
+
+Het apparaat ontvangt de toegestane teruglevering als percentage van het geïnstalleerde opwekvermogen en moet deze op de omvormer toepassen.
+`100` betekent geen limiet.
+
+### Attributen
+
+| Attribuut   | Type   | Verplicht | Beschrijving                                                                                                                                                   |
+| ----------- | ------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | ja        | Stelt de terugleveringslimiet in % van het nominale opwekvermogen in (0 tot 100). Moet schrijftoegang ondersteunen.                                            |
+| `curtailed` | plugin | ja        | Leest de actuele terugleveringslimiet in %. Als het apparaat die niet kan melden, gebruikt u de plugin [`error`](/nl/reference/plugins#error) (zie voorbeeld). |
+
+### Voorbeelden
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+De omvormer kan zijn limiet niet melden, daarom geeft `curtailed` de waarde `ErrNotAvailable` terug en wordt de limiet geschreven zodra deze verandert.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
+
+## Meldingsdienst \{#notification-service\}
+
+Een gebruikersgedefinieerde meldingsdienst verwerkt [meldingen](/nl/notifications) via een willekeurige [plugin](/nl/reference/plugins) met schrijftoegang, bijv. een shellscript, HTTP-verzoek of MQTT-bericht.
+Kies in de gebruikersinterface **Gebruiker-gedefiniëerde dienst** onder **Configuratie → Meldingen → Diensten**.
+
+Het bericht wordt aan de plugin doorgegeven in de parameter `${send}` (of als templateparameter `{{.send}}`).
+
+### Configuratie
+
+| Attribuut  | Type     | Verplicht | Beschrijving                                                                     |
+| ---------- | -------- | --------- | -------------------------------------------------------------------------------- |
+| `send`     | plugin   | ja        | Plugin die voor elk bericht wordt aangeroepen. Moet schrijftoegang ondersteunen. |
+| `encoding` | `string` | nee       | Formaat van de waarde in `${send}`. Zie hieronder.                               |
+
+De mogelijke waarden voor `encoding` zijn:
+
+| Encoding | Inhoud van `${send}`                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `json`   | JSON-object `{ "msg": msg, "title": title }`. Het veld `title` wordt alleen toegevoegd als het voor de gebeurtenis is gedefinieerd. |
+| `csv`    | `title` en `msg` als kommagescheiden lijst                                                                                          |
+| `tsv`    | Zoals `csv`, maar gescheiden door tabs                                                                                              |
+| `title`  | Alleen de titel                                                                                                                     |
+| (geen)   | Alleen het bericht (`msg`)                                                                                                          |
+
+### Voorbeeld
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} connected"
+      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # plugin type
+        source: script
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+In dit voorbeeld wordt een shellscript (`cmd`) aangeroepen met het argument `{"title": "...", "msg": "..."}`.

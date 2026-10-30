@@ -1,0 +1,134 @@
+---
+title: "Voertuigen"
+description: "Hier leest u wat het gastvoertuig, offline voertuigen en voertuigen met een online API in evcc kunnen en hoe meerdere voertuigen één lader delen."
+sidebar:
+  order: 8
+translatedFrom: "5bf55f6f775f"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Configureert u uw voertuig of voertuigen in evcc, dan krijgt u extra functies.
+U kunt [minimale lading & limieten](/nl/features/limits) instellen, [laadplannen](/nl/features/plans) gebruiken en in de [laadsessies](/nl/features/sessions) een gedetailleerd overzicht per voertuig zien, inclusief gegevens zoals de kilometerstand.
+
+Voertuigen configureren is optioneel. Omdat evcc het laden in de meeste gevallen via de lader aanstuurt, werkt laden op zonne-energie en op basis van de prijs ook zonder voertuigconfiguratie.
+
+## Voertuigtypen
+
+Welke functies beschikbaar zijn, hangt af van het voertuigtype. We onderscheiden de volgende typen:
+
+### Gastvoertuig
+
+Hebt u geen voertuig geconfigureerd, dan wordt op het laadpunt het gastvoertuig weergegeven.
+Dit is een generiek voertuig zonder speciale functies.
+Ook als u uw eigen voertuig hebt geconfigureerd, kunt u op elk moment naar het gastvoertuig overschakelen.
+Dat is handig als bijv. een niet-geconfigureerd voertuig (zoals een onverwachte bezoeker) op uw laadpunt laadt.
+evcc gebruikt dan de standaardwaarden voor vermogen en fasen die op het laadpunt zijn ingesteld.
+Onder [Laadsessies](/nl/features/sessions) wordt deze laadsessie aan het gastvoertuig toegewezen.
+
+### Voertuigen zonder API (offline)
+
+Heeft uw voertuig geen online interface of is er op het laadpunt geen internetverbinding, dan kunt u het als offline voertuig configureren.
+Ga naar **Configuratie → Voertuigen → Voeg voertuig toe** en kies in het veld **Fabrikant** de optie **Generic vehicle (without API)**.
+Geef het voertuig een **Titel** (bijv. “Groene Honda e”) en voer de **Capaciteit** van de batterij in.
+Nu de batterijcapaciteit bekend is, kunnen de laadvoortgang en de laadlimiet ook in procenten worden weergegeven (bijv. +25%).
+
+Opmerking: u kunt deze functie ook gebruiken voor voertuigen van anderen (vrienden, familie, huur- of leaseauto’s) waarvoor u geen API-toegang hebt.
+
+### Voertuigen met API (online)
+
+Heeft uw voertuig een online interface, dan is het zinvol om die ook in evcc te configureren.
+Een lijst van alle ondersteunde fabrikanten vindt u onder [Voertuigen](/nl/vehicles).
+Ga naar **Configuratie → Voertuigen → Voeg voertuig toe** en kies uw **Fabrikant**, bijv. Audi.
+Afhankelijk van de fabrikant voert u daarna de toegangsgegevens van uw voertuigaccount in, zoals gebruikersnaam en wachtwoord.
+
+evcc heeft nu toegang tot het actuele laadniveau.
+Afhankelijk van de fabrikant zijn ook andere gegevens beschikbaar, zoals laadstatus, voertuiglimieten, kilometerstand, klimaatregeling en geschatte actieradius.
+
+:::note[Opmerking]
+Om de voertuigbatterij te sparen, werkt evcc het laadniveau alleen bij als er een voertuig op het laadpunt is aangesloten.
+Afhankelijk van de fabrikant kan API-toegang het voertuig wekken en het stand-byverbruik flink verhogen.
+U kunt dit gedrag aanpassen met de [`poll`-parameter](/nl/reference/configuration/loadpoints#poll) op het laadpunt.
+:::
+
+## Meerdere voertuigen \{#multiple-vehicles\}
+
+U kunt in evcc meerdere voertuigen en meerdere laadpunten configureren.
+Er zijn verschillende manieren om voertuigen aan laadpunten toe te wijzen:
+
+### Standaardvoertuig
+
+Heeft elk voertuig een eigen laadpunt, dan kunt u het voertuig op het laadpunt als standaardvoertuig configureren.
+Dit is de eenvoudigste en aanbevolen configuratie.
+Ga naar **Configuratie → Laadpunten & verwarmers → [Mijn laadpunt]**.
+Selecteer in het gedeelte **Voertuigen** uw voertuig als **Standaard voertuig**.
+Begint er op dat laadpunt een nieuwe laadsessie, dan gaat evcc ervan uit dat het om het standaardvoertuig gaat.
+Is dat niet het geval (bijv. een gastvoertuig), dan kunt u het voertuig in de gebruikersinterface wijzigen.
+
+### Toewijzing via de gebruikersinterface
+
+Het momenteel toegewezen voertuig wordt in de gebruikersinterface bij het betreffende laadpunt weergegeven.
+U kunt de toewijzing wijzigen door op de voertuignaam te klikken.
+Deze keuze geldt dan voor de huidige laadsessie.
+
+<Screenshot
+  name="features/screenshots/vehicle-select"
+  caption="Voertuig wisselen op het laadpunt"
+/>
+
+### Automatische herkenning
+
+Laden er meerdere voertuigen op één laadpunt, dan wordt bij het aansluiten automatische herkenning gebruikt.
+De laadstatus van alle geconfigureerde voertuigen wordt gecontroleerd en het meest aannemelijke voertuig wordt gekozen.
+Heeft de herkenning het verkeerde voertuig gekozen (bijv. omdat dat op een ander laadpunt laadt), dan kunt u de toewijzing handmatig corrigeren.
+
+### Herkenning via RFID
+
+Heeft uw lader een RFID-kaartlezer, dan kunt u die ook voor de toewijzing gebruiken.
+Daarbij wijst u een of meer RFID-kaarten aan een bepaald voertuig toe.
+Telkens wanneer het voertuig opnieuw op de lader wordt aangesloten, moet de laadsessie eerst met de bijbehorende RFID-kaart op de lader worden geautoriseerd.
+
+evcc ontvangt van de lader een unieke identificatiecode.
+Afhankelijk van de fabrikant is dat de RFID-code of een afgeleide interne code, zoals een gebruikersnaam uit de configuratie van de lader.
+Na het autoriseren met de RFID-kaart verschijnt de actuele code op de kaart van het laadpunt onder **Configuratie → Laadpunten & verwarmers**.
+Voer deze waarde in het veld **RFID-Nummer** van het gewenste voertuig in onder **Configuratie → Voertuigen**.
+U kunt per voertuig meerdere codes opslaan.
+
+### Herkenning via Plug & Charge
+
+Ondersteunt uw lader de norm ISO 15118, dan kan de herkenning ook rechtstreeks via de laadkabel plaatsvinden.
+Er zijn op dit moment echter maar heel weinig laders met deze functie op de markt.
+
+:::note[Opmerking]
+De functie “PLC-verbinding met het voertuig” moet in de lader zijn ingeschakeld.
+:::
+
+Het instellen gaat net als bij de RFID-herkenning.
+Het voertuig moet op de lader zijn aangesloten.
+De code (bijv. `01:23:45:67:89:00`) wordt dan op de laadpuntkaart onder **Configuratie → Laadpunten & verwarmers** weergegeven.
+Voer deze waarde in het veld **RFID-Nummer** van het voertuig in.
+
+:::note[Opmerking]
+Ondersteunen voertuig en lader geen Plug & Charge, dan geven de voertuigen een uniek hardwareadres (MAC-adres) door.
+Sommige fabrikanten, zoals VW en Audi, wijzigen dit echter elke dag in een andere willekeurige waarde.
+
+In dat geval kunt u een jokerteken gebruiken en alleen het deel opgeven dat niet verandert, bijv. `01:23:45:*`.
+
+Dat werkt natuurlijk alleen als dit deel niet bij meerdere bestaande voertuigen voorkomt en het opgegeven begin per voertuig anders is.
+:::
+
+## Klimaatregeling
+
+Bij sommige voertuigen kan evcc via de online verbinding ook herkennen of het voertuig op dat moment preconditioneert.
+In dat geval wordt op de lader het laagst mogelijke vermogen vrijgegeven, zodat het voertuig de klimaatregeling met stroom van de lader kan laten werken.
+
+Het kan gebeuren dat de klimaatregeling in het voertuig minder nodig heeft dan het vrijgegeven vermogen.
+Het voertuig gebruikt het resterende beschikbare vermogen dan om de batterij verder te laden, ook als een ingestelde limiet voor het laadniveau al bereikt is.
+
+Zodra evcc herkent dat de klimaatregeling klaar is, wordt de lader weer vergrendeld, zodat het voertuig geen vermogen meer van de lader kan afnemen, tenzij het al aan het laden is.
+
+:::note[Opmerking]
+Dit geldt alleen voor combinaties van voertuigen en laders die via de norm IEC 61851 communiceren. Dat is tegenwoordig de regel.
+
+Bij voertuigen en laders die via de norm ISO 15118 communiceren, krijgt het voertuig precies de hoeveelheid energie die het rechtstreeks bij de lader opvraagt.
+:::

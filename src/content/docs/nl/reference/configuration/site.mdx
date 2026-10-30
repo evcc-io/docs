@@ -1,0 +1,252 @@
+---
+title: "site"
+description: "Beschrijf uw thuisinstallatie in evcc.yaml: wijs net-, zonne-energie-, thuisbatterij- en andere meters toe en stem de overschotregeling af met residualPower."
+sidebar:
+  order: 2
+translatedFrom: "fe6894529e96"
+---
+
+import prioritySoc from "../../../en/reference/configuration/img/prioritysoc.webp";
+import bufferSoc from "../../../en/reference/configuration/img/buffersoc.webp";
+import bufferStartSoc from "../../../en/reference/configuration/img/bufferstartsoc.webp";
+
+De sectie site beschrijft uw thuisinstallatie met de apparaten die evcc gebruikt, en regelt het beschikbare vermogen.
+
+Om het laden met zonneoverschot te regelen, is een uitleesbare meter direct achter het netaansluitpunt nodig. Daarnaast kunnen ook apparaten voor zonne-energie en thuisbatterij(en) worden opgegeven. Bij meerdere apparaten wordt het vermogen automatisch opgeteld of, bij thuisbatterijen, het gemiddelde laadniveau berekend.
+
+**Voorbeeld**:
+
+```yaml
+site:
+  title: Home # display name for UI
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv:
+      - mypv1 # first pv meter reference
+      - mypv9 # second pv meter reference
+    battery:
+      - mybat5 # battery meter reference
+    aux:
+      - myaux1 # self-regulating consumer
+    consumer:
+      - myconsumer1 # regular consumer, recorded for consumption statistics
+    ext:
+      - myext1 # for data logging, load management, etc.
+  curtailers:
+    - my_curtailer # curtailment device reference
+  residualPower: 100
+```
+
+---
+
+## Verplichte parameters
+
+### `title`
+
+De omschrijving van het laadpunt wordt ook in de UI weergegeven.
+
+**Voorbeeld**:
+
+```yaml
+title: Home
+```
+
+---
+
+### `meters`
+
+Legt vast welke geconfigureerde meters (meetapparaten voor stroom) als welk type meetpunt worden gebruikt. Zo wordt de apparaatdefinitie logisch gekoppeld aan het beoogde gebruik. Zo krijgt een meter, die op zich voor alles geschikt is, een functie op basis van zijn plaats in de thuisinstallatie.
+
+:::note
+Er moet minstens één `grid`-element of minstens één `pv`-element zijn geconfigureerd!
+
+Zonder minstens één van deze vermeldingen kan evcc niet worden gebruikt!
+:::
+
+**Voorbeeld**:
+
+```yaml
+site:
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv: mypv1 # pv meter reference
+    battery: mybat2 # battery meter reference
+    aux: myaux1
+```
+
+---
+
+## Optionele parameters
+
+### `meters.grid`
+
+Legt de [`meter`](/nl/reference/configuration/meters) (meetapparaat voor stroom) vast die de meetwaarden van het netaansluitpunt levert.
+
+**Mogelijke waarden**: Waarde van een parameter `name` in de configuratie [`meters`](#meters).
+
+**Voorbeeld**:
+
+```yaml
+grid: mygridmeter # grid meter reference
+```
+
+---
+
+### `meters.pv`
+
+Legt de [`meter`](/nl/reference/configuration/meters) vast waarvan evcc de meetwaarden van de zonne-energieproductie ophaalt.
+Er kunnen meerdere apparaten worden opgegeven. De vermogensgegevens worden automatisch opgeteld.
+
+**Mogelijke waarden**: Een enkele waarde of een lijst met waarden van een parameter name in de configuratie [`meters`](#meters). De lijstvorm kan ook met een enkele waarde worden gebruikt.
+
+**Voorbeeld**:
+
+```yaml
+pv: myonlypv # single pv meter reference
+```
+
+of
+
+```yaml
+pv: # (pvs = deprecated)
+  - myoldpv # first pv meter reference
+  - mynewestpv # second pv meter reference
+```
+
+---
+
+### `meters.battery`
+
+Legt de [`meter`](/nl/reference/configuration/meters) vast die meetgegevens van de batterij(en) leveren.
+Er kunnen meerdere apparaten worden opgegeven. De vermogensgegevens worden automatisch opgeteld en uit het laadniveau van de batterijen wordt een gemiddelde berekend.
+
+**Mogelijke waarden**: Een enkele waarde of een lijst met waarden van een parameter `name` in de configuratie [`meters`](#meters). De lijstvorm kan ook met een enkele waarde worden gebruikt.
+
+**Voorbeeld**:
+
+```yaml
+battery: myonlybat # single battery meter reference
+```
+
+of
+
+```yaml
+battery: # (batteries = deprecated)
+  - mysmallbat # first battery meter reference
+  - myhugebat # second battery meter reference
+```
+
+### `meters.aux`
+
+Meters voor externe apparaten die hun eigen overschotregeling hebben, maar niet direct door evcc worden aangestuurd, bijv. een zelfregelend verwarmingselement. Hun vermogen telt mee in het beschikbare overschot voor het laden van voertuigen, in de veronderstelling dat het apparaat zijn verbruik verlaagt wanneer evcc dat vermogen aan het laden toewijst. Meerdere meters worden opgeteld.
+
+**Mogelijke waarden**: Een enkele waarde of een lijst met waarden van een parameter `name` in de configuratie [`meters`](#meters). De lijstvorm kan ook met een enkele waarde worden gebruikt.
+
+**Voorbeeld**:
+
+```yaml
+aux: myaux # single aux meter reference
+```
+
+of
+
+```yaml
+aux:
+  - myaux1 # first aux meter reference
+  - myaux2 # second aux meter reference
+```
+
+### `meters.consumer`
+
+Meters voor gewone verbruikers zoals een wasmachine of vaatwasser, die alleen voor de verbruiksstatistieken worden geregistreerd. Anders dan bij `aux` telt dit vermogen niet mee in het beschikbare overschot voor het laden van voertuigen.
+
+**Mogelijke waarden**: Een enkele waarde of een lijst met waarden van een parameter `name` in de configuratie [`meters`](#meters). De lijstvorm kan ook met een enkele waarde worden gebruikt.
+
+**Voorbeeld**:
+
+```yaml
+consumer: myconsumer # single consumer meter reference
+```
+
+of
+
+```yaml
+consumer:
+  - myconsumer1 # first consumer meter reference
+  - myconsumer2 # second consumer meter reference
+```
+
+### `meters.ext`
+
+Meters die niet voor de regeling worden gebruikt en niet in de UI verschijnen, bijv. onderverdelingen of alternatieve net- of zonne-energiemeters. Hun gegevens worden alleen gelogd en geëxporteerd en tellen niet mee in het overschot of de verbruiksstatistieken.
+
+**Mogelijke waarden**: Een enkele waarde of een lijst met waarden van een parameter `name` in de configuratie [`meters`](#meters). De lijstvorm kan ook met een enkele waarde worden gebruikt.
+
+**Voorbeeld**:
+
+```yaml
+ext: myext # single ext meter reference
+```
+
+of
+
+```yaml
+ext:
+  - myext1 # first ext meter reference
+  - myext2 # second ext meter reference
+```
+
+### `curtailers`
+
+Opwekbegrenzers uit de configuratie [`curtailers`](/nl/reference/configuration/curtailers) die de teruglevering op verzoek van de netbeheerder begrenzen (§ 9 EEG).
+Ze worden samen met de begrensbare `pv`-meters toegepast wanneer de integratie [`hems`](/nl/reference/configuration/hems) een limiet doorgeeft.
+
+**Mogelijke waarden**: Een lijst met waarden van een parameter `name` in de configuratie [`curtailers`](/nl/reference/configuration/curtailers).
+
+**Voorbeeld**:
+
+```yaml
+curtailers:
+  - my_curtailer # curtailment device reference
+```
+
+### `residualPower`
+
+Stelt het beoogde werkpunt van de overschotregeling aan de netaansluiting (netmeter) in. De standaardwaarde is 0 W.
+Positieve waarden verschuiven de doelwaarde richting teruglevering, negatieve waarden richting netafname.
+Uiteindelijk bepaalt deze waarde de _rusttoestand_ van de regelkring, waarnaar de regelaar toe regelt.
+
+Vooral in combinatie met andere onafhankelijke overschotregelingen, zoals een thuisbatterij, moet deze waarde worden aangepast om een gedefinieerd systeemgedrag met duidelijke prioriteiten te krijgen.
+
+Wilt u in de modus **Slim** een deel netafname toestaan, dan kunt u een negatieve waarde instellen die overeenkomt met het maximale aandeel netafname.
+
+#### `grid` `meter` aanwezig
+
+- Positieve waarde: resterend terugleververmogen
+- Negatieve waarde: resterend netafnamevermogen
+
+#### Alleen `pv` `meter` aanwezig
+
+- Positieve waarde: typisch huishoudelijk verbruik, gebruikt om het zonneoverschot te schatten.
+- Negatieve waarde: het opgegeven vermogen wordt bij het vermogen uit zonne-energie opgeteld en verhoogt het beschikbare laadvermogen (let op: netafname).
+
+:::note
+Als er een thuisbatterij aanwezig is, wordt sterk aangeraden hier een kleine waarde in te vullen, bijv. tussen 100 en 300 W, zodat de batterij volgens de ingestelde prioriteiten kan laden (zie `prioritySoc`). Anders ziet de onafhankelijke regeling van de thuisbatterij geen bruikbaar overschot. Ook zonder batterij voorkomt dit tijdelijke netafname bij snelle wisselingen in opwekking en belasting.
+:::
+
+**Voorbeeld “thuisbatterij”**:
+
+```yaml
+residualPower: 100
+```
+
+**Voorbeeld “aandeel netafname”**:
+
+Het laden moet in de modus **Slim** met minstens 6 A (enkelfasig) starten, ook als er maar 50% zonneoverschot is (de rest uit het net).
+Minimaal laadvermogen: 1 fase × 6 A × 230 V = 1.380 W, daarvan 50%: 690 W.
+
+Zie ook het [alternatief met enable/disable om een deel zonne-energie en netafname toe te staan](/nl/features/solar-charging).
+
+```yaml
+residualPower: -690
+```
