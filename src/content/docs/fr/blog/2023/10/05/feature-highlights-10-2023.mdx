@@ -6,7 +6,7 @@ authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "b24e05c428f3"
+translatedFrom: "24a3a98a0947"
 ---
 
 import Video from "@components/Video.astro";
@@ -25,7 +25,7 @@ import sessionvaluesPoster from "../../../../../en/blog/2023/10/05/sessionvalues
 
 Depuis le dernier article de blog, il s’est passé beaucoup de choses. Nous avons ajouté de nombreuses fonctionnalités et corrigé quelques bugs. Dans cet article, nous présentons quelques-unes de ces nouveautés.
 
-## Visualisation du planificateur de charge \{#charging-planner-visualization\}
+## Visualisation du plan de charge \{#charging-planner-visualization\}
 
 Le planificateur de charge existe depuis un certain temps dans evcc.
 Vous indiquez à quel moment votre véhicule doit avoir atteint le niveau de charge souhaité et evcc trouve les meilleurs créneaux.
@@ -37,19 +37,19 @@ Depuis quelques versions, l’algorithme n’est plus une boîte noire, car nous
 
 Comment fonctionne l’algorithme ?
 
-5. Le surplus d’énergie solaire est prioritaire
-6. Périodes où l’électricité du réseau est bon marché (si un [tarif dynamique](/fr/features/dynamic-prices) existe)
-7. Périodes où l’électricité du réseau est propre (si une [interface CO₂](/fr/features/co2) est configurée)
-8. Créneaux peu avant le départ
+1. Le surplus d’énergie solaire est prioritaire
+2. Périodes où l’électricité du réseau est bon marché (si un [tarif dynamique](/fr/features/dynamic-prices) existe)
+3. Périodes où l’électricité du réseau est propre (si une [intégration CO₂](/fr/features/co2) est configurée)
+4. Créneaux peu avant le départ
 
-**Perspectives :** nous expérimentons actuellement avec les données de prévision solaire de [Solcast](https://solcast.com/).
+**Perspectives :** nous testons actuellement les données de prévision solaire de [Solcast](https://solcast.com/).
 Elles permettent à l’algorithme de prendre des décisions encore meilleures.
-Si l’heure de départ prévue est en journée, il peut p. ex. être judicieux de ne pas charger complètement le véhicule avec l’électricité bon marché de la nuit, mais de laisser de la place pour le surplus de la journée.
+Si l’heure cible tombe en journée, il peut être judicieux, p. ex., de ne pas charger complètement le véhicule avec l’énergie bon marché de la nuit, mais de laisser de la place pour le surplus de la journée.
 
 ## Charge minimale réglable dans l’interface
 
 La fonction de charge minimale existe depuis longtemps dans evcc.
-Elle est utile si vous rentrez avec seulement quelques pour cent et voulez être sûr d’avoir toujours assez d’autonomie pour un imprévu.
+Elle est utile si vous rentrez avec une batterie presque vide et voulez être sûr d’avoir toujours assez d’autonomie pour un imprévu.
 
 Jusqu’à présent, elle ne pouvait être réglée que via le fichier de configuration ou l’API.
 Vous pouvez désormais aussi la régler dans l’interface sous **Planification** → **Arrivée** → **Charge min. %**.
@@ -64,24 +64,24 @@ Quand votre propre surplus solaire ne suffit pas, vous pouvez aussi utiliser l�
 Si vous cliquez sur le prix de l’électricité du réseau ou sur les émissions de CO₂ dans le diagramme du flux d’énergie, la boîte de dialogue **Charge réseau intelligente** s’ouvre.
 
 Vous pouvez y définir un seuil pour le prix ou les émissions de CO₂.
-Si cette valeur est dépassée, evcc fait temporairement passer en charge rapide tous les points de charge en mode **Solaire**.
+Si le prix ou les émissions passent sous cette valeur, evcc fait temporairement passer en charge rapide tous les points de charge en mode Solaire.
 
 <Video src={dynamicpricesVideo} poster={dynamicpricesPoster} />
 
-Cette fonction nécessite d’avoir configuré soit un prix dynamique de l’électricité, soit une intégration CO₂.
+Cette fonction nécessite d’avoir configuré soit un tarif dynamique, soit une intégration CO₂.
 
-Autre petite amélioration : avec la plupart des prix dynamiques de l’électricité, vous pouvez désormais corriger les prix fournis par l’API avec des **majorations en pourcentage ou fixes** (`charges` / `tax`).
+Autre petite amélioration : avec la plupart des tarifs dynamiques, vous pouvez désormais corriger les prix fournis par l’API avec des **majorations en pourcentage ou fixes** (`charges` / `tax`).
 Tibber et Octopus Energy (UK) fournissent déjà des valeurs incluant les majorations.
-Avec Awattar, Nordpool Estonia et Energinet, vous pouvez maintenant les ajouter.
+Avec awattar, Nordpool Estonia et Energinet, vous pouvez maintenant les ajouter.
 
-Au passage : si vous avez un tarif dynamique qui n’est pas encore pris en charge mais qui propose une API, ouvrez une issue sur GitHub.
+Au passage : si vous avez un tarif dynamique qui n’est pas encore pris en charge mais qui propose une API, ouvrez un ticket sur GitHub.
 
 ## Paramètres de la batterie \{#battery-settings\}
 
 Un énorme avantage d’evcc par rapport à d’autres solutions de charge au surplus est l’intégration de la batterie domestique.
 La valeur de configuration [`prioritySoc`](/fr/features/battery) permet de choisir si le surplus d’énergie solaire doit d’abord être **chargé dans la batterie domestique ou dans le véhicule**.
 
-En général, evcc essaie d’empêcher la batterie domestique de se décharger dans la batterie du véhicule en mode **Solaire**, afin d’éviter des pertes de conversion inutiles.
+En général, evcc essaie d’empêcher la batterie domestique de se décharger dans la batterie du véhicule en mode Solaire, afin d’éviter des pertes de conversion inutiles.
 Avec la valeur [`bufferSoc`](/fr/features/battery), vous pouvez toutefois **réserver volontairement une partie de la batterie domestique pour soutenir la charge**.
 
 Vous pouvez également faire démarrer automatiquement la charge dès que la batterie a atteint un certain niveau de charge ([`bufferStartSoc`](/fr/features/battery)).
@@ -92,7 +92,7 @@ La charge automatique démarre même si le soleil ne brille pas.
 ## Part solaire en %, prix et CO₂ par session de charge
 
 Nous avons aussi quelque chose pour les amateurs d’analyse de données.
-Nous enregistrons désormais pour chaque session de charge la part d’énergie solaire autoproduite (en %), le prix (total et par kWh), la durée de charge et les émissions moyennes de CO₂.
+Nous enregistrons désormais pour chaque session de charge la part d’énergie solaire autoproduite (en %), le coût total et le prix par kWh, la durée de charge et les émissions moyennes de CO₂.
 Vous pouvez basculer entre ces valeurs directement dans la session de charge.
 
 <Video src={sessionvaluesVideo} poster={sessionvaluesPoster} />
@@ -102,7 +102,7 @@ Vous pouvez basculer entre ces valeurs directement dans la session de charge.
 Si vous avez remarqué que la part d’énergie solaire a légèrement baissé depuis l’une des dernières versions, cela vient de notre nouveau calcul.
 Jusqu’à présent, evcc répartissait toujours de façon égale la proportion d’énergie du réseau et d’énergie autoproduite entre la consommation de la maison et les sessions de charge.
 
-Nous sommes maintenant passés à un nouveau modèle dans lequel la consommation de la maison reçoit d’abord l’énergie autoproduite et le mix restant va aux sessions de charge.
+Nous sommes maintenant passés à un nouveau modèle dans lequel la consommation de la maison reçoit d’abord l’électricité solaire autoproduite et le mix restant va aux sessions de charge.
 Merci à [@MarkusGH](https://github.com/MarkusGH) pour l’implémentation.
 Vous trouverez plus de détails sur ce modèle [dans la documentation](/fr/faq#savings-calculation).
 
@@ -143,7 +143,7 @@ Nous avons aussi un concept pour prendre en charge **plusieurs plans de charge**
 **Révision des modes :** evcc a commencé comme une application de charge au surplus solaire.
 Entre-temps, l’interaction avec la batterie domestique joue aussi un rôle majeur.
 Le sujet de la **charge favorable au réseau** basée sur les tarifs dynamiques ou les émissions de CO₂ prend aussi de l’ampleur.
-C’est pourquoi nous allons revoir nos modes de charge (actuellement **Solaire** et **Min+Solaire**) et apporter plus de flexibilité.
+C’est pourquoi nous allons revoir nos modes de charge (actuellement Solaire et Min+Solaire) et apporter plus de flexibilité.
 
 ## Autres nouveautés
 

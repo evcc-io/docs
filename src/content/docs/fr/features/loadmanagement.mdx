@@ -1,9 +1,9 @@
 ---
 title: "Gestion de la charge"
-description: "La gestion de la charge regroupe les points de charge en circuits limités en courant ou en puissance, pour que plusieurs chargeurs ne surchargent jamais l’installation."
+description: "La gestion de la charge regroupe les points de charge en circuits limités en courant ou en puissance, pour ne jamais surcharger votre installation électrique."
 sidebar:
   order: 12
-translatedFrom: "6421abf2b4a4"
+translatedFrom: "56826048a083"
 ---
 
 :::caution[Expérimental]
@@ -11,9 +11,9 @@ La fonction de gestion de la charge est encore expérimentale. Elle peut ne pas 
 :::
 
 La fonction de gestion de la charge (équilibrage de charge) permet de limiter la puissance utilisée par les chargeurs afin d’éviter de surcharger les circuits et de faire déclencher les disjoncteurs.
-Limiter la puissance peut aussi éviter des pics de consommation imprévus.
+Limiter la puissance peut aussi être utile si vous voulez éviter des pics de consommation élevés imprévus.
 Pour cela, un point de charge peut être affecté à un `circuit`.
-Un `circuit` peut avoir une valeur de courant maximale (`maxCurrent`) et/ou une valeur de puissance maximale (`maxPower`).
+Un `circuit` peut avoir un courant maximal (`maxCurrent`), une puissance maximale (`maxPower`) ou les deux.
 Le système fonctionne de manière hiérarchique, c.-à-d. qu’un circuit peut faire partie d’un circuit de niveau supérieur.
 
 :::note[Configuration via l’interface]
@@ -24,7 +24,7 @@ Les circuits se définissent sous **Configuration → Gestion de la charge**.
 La saisie se fait au format YAML et correspond au contenu sous `circuits:` dans les exemples qui suivent.
 Nous travaillons à remplacer cette saisie par un formulaire.
 
-Chaque point de charge peut ensuite être affecté à un circuit sous **Configuration → Bornes de recharge et chauffages → [nom]** (un redémarrage est nécessaire).
+Chaque point de charge peut ensuite être affecté à un circuit sous **Configuration → Bornes de recharge et chauffages → [nom]** (redémarrage nécessaire).
 :::
 
 ## Configuration
@@ -36,22 +36,25 @@ Chaque point de charge peut ensuite être affecté à un circuit.
 
 ```yaml
 circuits:
-  - name: main # if there is only one circuit defined the name needs to be 'main'
-    title: "main circuit" # name for the UI (not implemented in UI yet)
-    maxCurrent: 63 # 63A (optional)
-    maxPower: 30000 # 30kW (optional)
-    meter: grid # optional
+  - name: main # nom unique, les autres circuits y font référence via parent
+    title: "circuit principal" # nom pour l’interface (pas encore implémenté dans l’interface)
+    maxCurrent: 63 # 63 A (facultatif)
+    maxPower: 30000 # 30 kW (facultatif)
+    meter: grid # facultatif
 
 loadpoints:
   - title: Garage
     circuit: main
+    # ...
+  - title: Carport
+    circuit: main
+    # ...
 ```
 
-Cette configuration ne définit qu’un circuit principal.
-Le circuit a un courant maximal de 63 A.
-Si d’autres consommateurs comme un four ou une pompe à chaleur utilisent au total 50 A (mesurés par un compteur), le chargeur ne pourra utiliser que 13 A.
-Le circuit a une limite de 30 kW.
-Comme le compteur avant réseau est affecté à ce circuit, la puissance des points de charge est réduite de sorte que les limites ne soient pas dépassées au raccordement au réseau.
+Cette configuration définit le circuit principal `main` avec une puissance maximale de 30 kW et un courant maximal de 63 A par phase.
+Les points de charge _Garage_ et _Carport_ sont affectés à ce circuit.
+Si d’autres consommateurs, p. ex. un four ou une pompe à chaleur, tirent 50 A au total (ce qui suppose un compteur), les points de charge ne peuvent utiliser que les 13 A restants.
+Comme le compteur avant réseau est affecté à ce circuit, la puissance des points de charge est réduite pour que les limites ne soient pas dépassées au point de raccordement.
 Sans compteur avant réseau affecté, les limites s’appliquent directement à la somme de tous les points de charge.
 
 ### Exemple : circuits imbriqués
@@ -59,7 +62,7 @@ Sans compteur avant réseau affecté, les limites s’appliquent directement à 
 ```yaml
 circuits:
   - name: main
-    title: "main circuit"
+    title: "circuit principal"
     maxCurrent: 48
   - name: garage
     title: Garage
@@ -81,11 +84,11 @@ loadpoints:
     circuit: carport
   - title: Carport B
     circuit: carport
-  - title: Heat Pump
+  - title: Pompe à chaleur
     circuit: main
 ```
 
-Nous avons ici deux circuits, `garage` et `carport`, qui sont tous deux des sous-circuits du circuit principal (`parent: main`).
+Cet exemple définit deux circuits, `garage` et `carport`, tous deux sous-circuits du circuit principal (`parent: main`).
 Le circuit `main` a un courant maximal de 48 A.
 Les circuits `garage` et `carport` ont chacun un courant maximal de 32 A.
 Les points de charge Garage A, Garage B et Garage C sont affectés au circuit `garage` (`circuit: garage`).
@@ -103,8 +106,8 @@ Cela est signalé par l’indication « Consommation limitée » sur la carte 
 ## Mesure
 
 Par défaut, la régulation calcule la puissance et le courant actuels à partir de la somme des points de charge concernés.
-Si vous affectez un `meter` à un `circuit`, la régulation tient aussi compte de la consommation réelle.
-C’est particulièrement utile si d’autres consommateurs sont aussi raccordés au même fusible.
+Si un `meter` est configuré sur un `circuit`, la régulation peut aussi tenir compte de la consommation réelle du circuit.
+C’est particulièrement utile lorsque d’autres consommateurs sont branchés derrière le même fusible.
 
 ```yaml
 site:
@@ -123,7 +126,7 @@ circuits:
     maxCurrent: 32
 ```
 
-Remarque : si le compteur n’a pas déjà un autre rôle (p. ex. `grid`), il doit être déclaré comme compteur externe sous `site.meters.ext`.
+Remarque : si le compteur du circuit n’a pas déjà un autre rôle (p. ex. `grid`), il doit être déclaré comme compteur externe sous `site.meters.ext`.
 
 ## Limites
 
@@ -139,7 +142,7 @@ Exemple :
 ```yaml
 circuits:
   - name: main
-    title: "main circuit"
+    title: "circuit principal"
     maxCurrent: 48
     GetMaxCurrent:
       source: mqtt
@@ -160,7 +163,7 @@ Pour plus d’informations, consultez [Limite externe](/fr/external-limit).
 Pour les chargeurs avec commutation automatique de phases (1P/3P), la gestion de la charge peut utiliser cette capacité pour charger dans les limites configurées.
 Lorsque la puissance disponible ne suffit pas pour une charge triphasée, evcc passe automatiquement en charge monophasée.
 
-Cela vaut aussi en mode rapide et pour les plans de charge.
+Cela vaut aussi pour la charge rapide et la charge planifiée.
 Par exemple, si la gestion de la charge limite la puissance disponible à 3,5 kW, evcc passe en charge monophasée (à partir de 1,4 kW) au lieu de mettre la charge en pause.
 
 **Prérequis :** le chargeur doit prendre en charge la commutation de phases.
@@ -172,7 +175,7 @@ Il est fortement recommandé de les désactiver ou d’utiliser des chargeurs sa
 evcc attend des appareils qu’ils suivent directement ses commandes.
 D’autres configurations peuvent entraîner un comportement inattendu et doivent être testées soigneusement par vos soins.
 
-## Restrictions
+## Limitations
 
 :::note
 Une licence distincte sera nécessaire ultérieurement pour l’utilisation commerciale de la gestion de la charge.
@@ -183,4 +186,4 @@ L’utilisation privée pour les petites installations restera gratuite.
 - Les réglages `priority` du point de charge ne sont pas encore pris en compte.
 - Les nouvelles sessions ne reçoivent que la marge restante du circuit.
   Le rééquilibrage entre les sessions actives n’est pas encore pris en charge.
-- La [charge depuis le réseau](/fr/features/battery#gridcharge) de la batterie domestique n’est pas prise en compte. Lorsque la batterie domestique se charge activement depuis le réseau, cette consommation n’est pas incluse dans les calculs de la gestion de la charge. Toutefois, lorsqu’un signal de [réduction de puissance § 14a](/fr/external-limit) est actif, la charge depuis le réseau est automatiquement mise en pause.
+- La [recharge de la batterie domestique depuis le réseau](/fr/features/battery#gridcharge) n’est pas prise en compte. Lorsque la batterie domestique se charge activement depuis le réseau, cette consommation n’est pas incluse dans les calculs de la gestion de la charge. Toutefois, lorsqu’un signal de [réduction de puissance § 14a](/fr/external-limit) est actif, la charge depuis le réseau est automatiquement mise en pause.

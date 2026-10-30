@@ -6,7 +6,7 @@ authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "261c638cde95"
+translatedFrom: "be2964228ce3"
 ---
 
 Od posledního příspěvku na blogu uběhlo několik měsíců. Je tedy čas na krátké shrnutí a přehled toho, co se v evcc za posledních jedenáct vydání (v0.81 až v0.91) událo.
@@ -21,7 +21,7 @@ Seznam hardwaru podporovaného evcc neustále roste.
 
 Přidali jsme několik integrací nabíječek. Protože evcc nyní podporuje i velmi rozšířený [Bender Controller](https://github.com/evcc-io/evcc/pull/3103), mohli jsme výrazně rozšířit nabídku podporovaných zařízení.
 
-Toto jsou výrobci, kteří přibyli od začátku roku: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity Vestel, Webasto. [(Všechny nabíječky)](/cs/chargers)
+Toto jsou výrobci, kteří přibyli od začátku roku: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity, Vestel, Webasto. [(Všechny nabíječky)](/cs/chargers)
 
 ### Vozidla 🚗 🛵
 
@@ -29,7 +29,7 @@ Audi (e-tron), Cupra, Jaguar, Landrover, Mercedes, Silence S01, Smart. [(Všechn
 
 ### Střídače ☀️ 🔋
 
-SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [(Všechny měřiče)](/cs/meters)
+SMA (Smart Energy Hybrid), Huawei (SUN2000), Solarwatt, Solax, Varta. [(Všechny měřiče)](/cs/meters)
 
 ### Měřiče sítě 📟
 
@@ -41,15 +41,15 @@ Nabíječky od Easee a Warp nyní mohou také využívat [funkci RFID pro rozpo
 
 ## Vylepšené přepínání fází (1P/3P)
 
-První verze přepínání fází pro podporované nabíječky je v evcc k dispozici od poloviny loňského roku. Mohli jsme tak nasbírat zkušenosti a na jejich základě jsme v únoru mechanismus [zásadně přepracovali](https://github.com/evcc-io/evcc/pull/2613). Přepínání fází je díky tomu mnohem spolehlivější a lépe se chová i v situacích s neznámou nebo nevěrohodnou konfigurací či naměřenými hodnotami.
+První verze přepínání fází pro podporované nabíječky je v evcc k dispozici od poloviny loňského roku. Mohli jsme tak nasbírat zkušenosti a na jejich základě jsme v únoru mechanismus [zásadně přepracovali](https://github.com/evcc-io/evcc/pull/2613). Přepínání fází je díky tomu mnohem spolehlivější a lépe se chová i v situacích s neznámou nebo nevěrohodnou konfigurací či s nevěrohodnými naměřenými hodnotami.
 
 ## Šablony a dokumentace
 
-[V prosinci](/cs/blog/2021/12/12/version-0-73#evcc-configure) jsme položili základy jednoduššího prvního nastavení pomocí průvodce nastavením v příkazové řádce `evcc configure`.
+[V prosinci](/cs/blog/2021/12/12/version-0-73#evcc-configure) jsme položili základy jednoduššího prvního nastavení pomocí průvodce nastavením v příkazovém řádku `evcc configure`.
 
-Syntaxe konfigurace evcc je velmi flexibilní a výkonná. Zařízení, která zatím nejsou oficiálně podporovaná, lze často připojit čistě konfigurací, pokud znáte např. příslušné registry Modbus nebo struktury JSON daného rozhraní. V nyní archivovaném repozitáři `evcc-io/config` jsme shromažďovali ukázkové konfigurace, které jste si mohli zkopírovat a vložit do vlastní konfigurace.
+Syntaxe konfigurace evcc je velmi flexibilní a mocná. Například zařízení, která zatím nejsou oficiálně podporovaná, lze často připojit čistě konfigurací, pokud znáte příslušné registry Modbus a struktury JSON daného rozhraní. V nyní archivovaném repozitáři `evcc-io/config` jsme shromažďovali ukázkové konfigurace, které jste si mohli zkopírovat a vložit do vlastní konfigurace.
 
-Spolu s průvodcem v příkazové řádce jsme zavedli koncept **šablon**. Šablony nám umožňují čistě zapouzdřit opakující se kód a interní znalosti o zařízeních (protokoly, adresy, datové typy, názvy polí). Následující příklad nastavení měřiče sítě Solarlog tuto změnu docela dobře ilustruje:
+Spolu s průvodcem v příkazovém řádku jsme zavedli koncept **šablon**. Šablony nám umožňují čistě zapouzdřit opakující se kód a interní znalosti o zařízeních (protokoly, adresy, datové typy, názvy polí). Následující příklad nastavení měřiče sítě Solarlog tuto změnu docela dobře ilustruje:
 
 Předtím:
 
@@ -88,7 +88,7 @@ meters:
     host: 192.168.0.77
 ```
 
-Uživatel nyní potřebuje znát jen název hostitele nebo IP adresu svého zařízení Solarlog a zadat ji. Protokol a datová struktura jsou zapouzdřené v šabloně `solarlog`.
+Uživatel nyní potřebuje znát a zadat jen název hostitele nebo IP adresu svého zařízení Solarlog. Protokol a datová struktura jsou zapouzdřené v šabloně `solarlog`.
 
 Šablony navíc obsahují strukturovaný popis všech povinných a volitelných parametrů a také výchozí hodnoty a lokalizované nápovědy.
 

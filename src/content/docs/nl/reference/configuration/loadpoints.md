@@ -3,7 +3,7 @@ title: "loadpoints"
 description: "Richt laadpunten in via evcc.yaml: koppel een lader, meter en voertuig, kies de standaardmodus en stem het opvragen van voertuiggegevens, de drempels en de fasen af."
 sidebar:
   order: 3
-translatedFrom: "3b374858a668"
+translatedFrom: "05c846a87f23"
 ---
 
 `loadpoints` (laadpunten) is een lijst met laadpunten. Elk laadpunt combineert een lader, voertuigen en zo nodig een meter met optionele parameters. Een minimale configuratie vereist een lader.
@@ -12,10 +12,10 @@ translatedFrom: "3b374858a668"
 
 ```yaml
 loadpoints:
-  - title: Garage # display name for UI
-    charger: charger # charger reference
-    vehicle: audi # reference to standard vehicle
-    mode: smart # charge mode (off, smart, now)
+  - title: Garage # weergavenaam in de UI
+    charger: charger # verwijzing naar de lader
+    vehicle: audi # verwijzing naar het standaardvoertuig
+    mode: smart # laadmodus (off, smart, now)
 ```
 
 Verwijzingen komen altijd overeen met de waarden van de parameter `name` (bijv. `charger`) in de betreffende apparaatconfiguratie.
@@ -56,7 +56,7 @@ Hierbij komt de waarde `charger` overeen met de waarde van de parameter `name` i
 
 ### `meter`
 
-Verwijzing naar een `meter`-configuratie (stroommeter).
+Verwijzing naar een `meter`-configuratie.
 
 Deze vermelding is alleen nodig als de gebruikte lader zelf geen stroom meet of als evcc de meetwaarden niet uit de lader kan uitlezen. Ook in dat geval is deze vermelding optioneel, omdat evcc ervan uitgaat dat de ingestelde maximale stroom ook voor het laden wordt gebruikt.
 
@@ -66,7 +66,7 @@ Deze vermelding is alleen nodig als de gebruikte lader zelf geen stroom meet of 
 meter: charge
 ```
 
-Hierbij komt de waarde `charge` overeen met de waarde van de parameter `name` in de [stroommeterdefinitie](/nl/reference/configuration/meters#name).
+Hierbij komt de waarde `charge` overeen met de waarde van de parameter `name` in de [meterdefinitie](/nl/reference/configuration/meters#name).
 
 ---
 
@@ -74,7 +74,7 @@ Hierbij komt de waarde `charge` overeen met de waarde van de parameter `name` in
 
 `vehicle`: Verwijzing naar een `vehicle`-configuratie die als standaardvoertuig aan het laadpunt wordt toegewezen.
 
-Wordt er een voertuig op de lader aangesloten, dan gaat evcc ervan uit dat het om dit standaardvoertuig gaat. De automatische voertuigherkenning wordt overgeslagen. Is er een ander voertuig verbonden (bijv. een gastvoertuig), dan kan dit later handmatig worden toegewezen.
+Wordt er een voertuig op de lader aangesloten, dan gaat evcc ervan uit dat het om dit standaardvoertuig gaat. De automatische voertuigherkenning wordt overgeslagen. Is er een ander voertuig aangesloten (bijv. een gastvoertuig), dan kan dit later handmatig worden toegewezen.
 
 **Voorbeeld**:
 
@@ -99,7 +99,7 @@ Met de parameter `mode` legt u vast welke laadmodus moet worden gebruikt nadat h
 
 **Standaardwaarde:** `smart`
 
-De verouderde waarden `pv` en `minpv` worden bij het schrijven nog geaccepteerd:
+De verouderde waarden `pv` en `minpv` worden bij het instellen nog geaccepteerd:
 `pv` activeert `smart` en schakelt [Altijd laden](/nl/features/modes#always-charge) uit, `minpv` activeert `smart` en schakelt Altijd laden in.
 
 :::caution[Ingrijpende wijziging]
@@ -109,7 +109,7 @@ Integraties kunnen het nieuwe modusschema herkennen aan de aanwezigheid van `loa
 :::
 
 :::note
-Over het algemeen heeft een elektrische auto minimaal 1,4 kW vermogen per fase nodig om te laden. Bij laders en voertuigen die via de norm ISO15118 communiceren, is in totaal minstens 1,4 kW vermogen nodig, ongeacht het aantal fasen waarmee wordt geladen.
+Over het algemeen heeft een elektrische auto minimaal 1,4 kW vermogen per fase nodig om te laden. Bij laders en voertuigen die via de norm ISO 15118 communiceren, is in totaal minstens 1,4 kW vermogen nodig, ongeacht het aantal fasen waarmee wordt geladen.
 :::
 
 **Voorbeeld**:
@@ -122,7 +122,7 @@ mode: smart
 
 ### `soc`
 
-Legt de standaardinstellingen vast voor de omgang met het laadniveau van een verbonden voertuig.
+Legt de standaardinstellingen vast voor de omgang met het laadniveau van een aangesloten voertuig.
 
 **Voorbeeld**:
 
@@ -138,8 +138,11 @@ soc:
 
 Legt vast hoe de voertuig-API’s worden gebruikt om actuele informatie over het voertuig op te halen.
 
+Als bij de lader de `features`-vlag `integrateddevice` is geconfigureerd, worden de gegevens continu opgehaald.
+In dat geval zijn geen `poll`-instellingen nodig en worden ingestelde waarden genegeerd.
+
 :::caution
-Het wijzigen van de standaardinstellingen wordt **NIET** aanbevolen, omdat dit de voertuigbatterij kan leegtrekken of de voertuigfabrikant het aansturen van het laden via evcc actief kan blokkeren. **Gebruik op eigen risico**.
+Het wijzigen van de standaardinstellingen wordt **niet** aanbevolen, omdat dit de voertuigbatterij kan leegtrekken of de voertuigfabrikant het aansturen van het laden via evcc actief kan blokkeren. **Gebruik op eigen risico**.
 :::
 
 #### `poll.mode`
@@ -148,7 +151,7 @@ Legt vast onder welke voorwaarden de voertuiggegevens worden opgehaald.
 
 **Mogelijke waarden**:
 
-- `charging`: Gegevens **ALLEEN** tijdens een laadsessie bijwerken (aanbevolen standaard).
+- `charging`: Gegevens **alleen** tijdens een laadsessie bijwerken (aanbevolen standaard).
 - `connected`: Gegevens bijwerken als het voertuig op de lader is aangesloten (niet alleen tijdens het laden); de parameter `interval` bepaalt de frequentie.
 - `always`: Gegevens altijd bijwerken, ook als het voertuig niet op de lader is aangesloten; de parameter [`interval`](#pollinterval) bepaalt de frequentie (alleen ondersteund voor één voertuig per laadpunt).
 
@@ -162,7 +165,7 @@ mode: charging
 
 #### `poll.interval`
 
-Legt vast hoe vaak het voertuig om gegevens wordt gevraagd als het **NIET** laadt.
+Legt vast hoe vaak het voertuig om gegevens wordt gevraagd als het **niet** laadt.
 
 **Standaardwaarde:** `60m`
 
@@ -174,11 +177,11 @@ interval: 60m
 
 #### `estimate`
 
-Legt vast of evcc het actuele laadniveau tussen twee opvragingen van voertuiggegevens berekent (interpoleert).
+Schat het actuele laadniveau op basis van de gemeten laadenergie (extrapolatie) tussen de opvragingen van voertuiggegevens die met `interval` zijn ingesteld.
 
 **Mogelijke waarden**:
 
-- `true`: evcc interpoleert het laadniveau tussen de opvragingen van voertuiggegevens (aanbevolen).
+- `true`: evcc extrapoleert het laadniveau tussen de opvragingen van voertuiggegevens (aanbevolen).
 - `false`: evcc gebruikt alleen het laadniveau dat het voertuig doorgeeft.
 
 **Standaardwaarde:** `true`
@@ -186,7 +189,7 @@ Legt vast of evcc het actuele laadniveau tussen twee opvragingen van voertuiggeg
 **Voorbeeld**:
 
 ```yaml
-estimate: false # No interpolation
+estimate: false # geen extrapolatie
 ```
 
 ---
@@ -252,7 +255,7 @@ Legt het gedrag vast bij het stoppen van het laden met zonneoverschot in de modu
 
 ```yaml
 disable:
-  threshold: 200 # maximum import power (W)
+  threshold: 200 # maximaal netafnamevermogen (W)
   delay: 10m
 ```
 
@@ -267,7 +270,7 @@ Legt de vermogensdrempel op het netaansluitpunt vast in watt (W).
 **Voorbeeld**:
 
 ```yaml
-threshold: 200 # Maximum grid consumption of 200W is allowed
+threshold: 200 # maximaal 200 W netafname toegestaan
 ```
 
 :::note
@@ -304,15 +307,15 @@ Legt het aantal fasen vast waarmee de lader is aangesloten.
 
 Deze parameter verandert niets aan de fysieke aansluiting van de lader, maar wordt gebruikt om het minimale startvermogen voor laden met zonneoverschot te bepalen (in combinatie met `minCurrent`).
 
-Sinds kort gebruikt evcc de spanningen per fase als de meter van de lader ze levert. Op basis van de spanningen wordt de waarde `phases` automatisch via de API aangepast. Als de lader met een schakelaar op 1P of 3P wordt gezet, is handmatig aanpassen van de waarde `phases` niet meer nodig.
+Sinds kort worden de binnenkomende spanningen gebruikt als de meter van de lader ze levert. Op basis van de spanningen wordt de waarde `phases` automatisch via de API aangepast. Als de lader met een schakelaar op 1P of 3P wordt gezet, is handmatig aanpassen van de waarde `phases` niet meer nodig.
 
 Als laden met 1P/3P niet via een schakelaar maar via de bijbehorende laadkabel gebeurt, veroorzaakt dit “automatische” gedrag problemen. In dat geval moet de waarde `phases` in `vehicle` overeenkomstig worden aangepast. Omdat deze waarde niet via de API kan worden gewijzigd, kunt u het als volgt oplossen:
 
 Configureer het voertuig twee keer: één keer met `phases: 1` en één keer met `phases: 3`. Kies afhankelijk van de gewenste laadmodus het passende voertuig in de UI.
 
-Is een bekend voertuig verbonden, dan wordt voor de berekening de laagste waarde van `vehicle: phases` en `loadpoint: phases` gebruikt. Bij onbekende voertuigen wordt alleen `loadpoint: phases` meegenomen.
+Is een bekend voertuig aangesloten, dan wordt voor de berekening de laagste waarde van `vehicle: phases` en `loadpoint: phases` gebruikt. Bij onbekende voertuigen wordt alleen `loadpoint: phases` meegenomen.
 
-Terwijl het voertuig laadt en de lader of de laadmeter fasestromen levert, wordt het werkelijke aantal fasen herkend en (zolang het voertuig verbonden blijft) voor verdere berekeningen gebruikt. Dit werkt alleen bij driefasige laadpunten.
+Terwijl het voertuig laadt en de lader of de laadmeter fasestromen levert, wordt het werkelijke aantal fasen herkend en (zolang het voertuig aangesloten blijft) gebruikt voor verdere berekeningen van de werkelijke schakeldrempels. Dit werkt alleen bij driefasige laadpunten.
 
 **Standaardwaarde:** `3`
 
@@ -361,7 +364,7 @@ Bij meerdere laadpunten heeft deze parameter geen invloed op de volgorde waarin 
 Deze prioritering werkt in de modus `smart`. Als [Altijd laden](/nl/features/modes#always-charge) actief is, wordt het laden niet onderbroken, maar alleen tot het minimum teruggebracht.
 
 :::note
-Als voor een voertuig een prioriteit is vastgelegd, overschrijft die de prioriteit van het laadpunt waarmee het is verbonden.
+Als voor een voertuig een prioriteit is vastgelegd, overschrijft die de prioriteit van het laadpunt waarop het is aangesloten.
 :::
 
 **Standaardwaarde:** `0`

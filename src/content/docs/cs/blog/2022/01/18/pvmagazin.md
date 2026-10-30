@@ -1,15 +1,15 @@
 ---
 date: 2022-01-18
-title: "evcc v pv magazinu"
-description: "V lednu 2022 vyzpovídal pv magazin hlavního vývojáře Andrease Lindeho a uživatele Tjarka Tjadena o open source řízení nabíjení s evcc."
+title: "evcc v časopise pv magazine"
+description: "V lednu 2022 vyzpovídal časopis pv magazine hlavního vývojáře Andrease Lindeho a uživatele Tjarka Tjadena o open source řízení nabíjení s evcc."
 authors: [naltatis]
 prev: false
 next: false
-translatedFrom: "ecb087cb9a56"
+translatedFrom: "f21f27a14d0b"
 ---
 
-Náš hlavní vývojář [Andreas Linde](https://twitter.com/DerAndereAndi) a náš uživatel [Tjarko Tjaden](https://twitter.com/TjarkoTjaden) poskytli pv magazinu Deutschland rozhovor na téma [Jak s open source správcem nabíjení zvládnout rozhraní k nabíječce a fotovoltaické elektrárně](https://www.pv-magazine.de/2022/01/14/mit-open-source-lademanager-schnittstellen-zu-wallbox-und-photovoltaik-anlage-meistern/).
+Náš hlavní vývojář [Andreas Linde](https://twitter.com/DerAndereAndi) a náš uživatel [Tjarko Tjaden](https://twitter.com/TjarkoTjaden) poskytli německému vydání časopisu pv magazine rozhovor na téma [Jak s open source správcem nabíjení zvládnout rozhraní k nabíječce a fotovoltaické elektrárně](https://www.pv-magazine.de/2022/01/14/mit-open-source-lademanager-schnittstellen-zu-wallbox-und-photovoltaik-anlage-meistern/).
 
-[![Rozhovor v pv magazinu](../../../../../en/blog/2022/01/18/pv-magazin.png)](https://www.pv-magazine.de/2022/01/14/mit-open-source-lademanager-schnittstellen-zu-wallbox-und-photovoltaik-anlage-meistern/)
+[![Rozhovor v časopise pv magazine](../../../../../en/blog/2022/01/18/pv-magazin.png)](https://www.pv-magazine.de/2022/01/14/mit-open-source-lademanager-schnittstellen-zu-wallbox-und-photovoltaik-anlage-meistern/)
 
 <!-- excerpt -->

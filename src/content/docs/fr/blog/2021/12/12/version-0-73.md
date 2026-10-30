@@ -6,10 +6,10 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4f5a2d6ac51a"
+translatedFrom: "3c89983a8f03"
 ---
 
-Voici aujourd’hui une petite mise à jour, principalement avec quelques corrections de bugs et d’autres améliorations.
+Voici aujourd’hui une petite mise à jour, qui apporte surtout des corrections de bugs et quelques autres améliorations.
 
 <!-- excerpt -->
 
@@ -17,14 +17,15 @@ Voici aujourd’hui une petite mise à jour, principalement avec quelques correc
 
 La commande de création guidée d’un fichier de configuration et les modèles sur lesquels elle repose ont reçu les améliorations suivantes :
 
-- Pour un point de charge, il est désormais possible de choisir si les réglages de charge par défaut doivent être rétablis lorsque le câble de charge est débranché. Plus d’informations dans notre documentation sous `resetOnDisconnect`.
-- Des réglages de charge par défaut propres à chaque véhicule peuvent désormais être définis. En mode interactif, ils sont disponibles avec `evcc configure --advanced`. Plus d’informations dans la documentation sous `onIdentify`.
-- Les appareils Modbus génèrent désormais des configurations correctes.
+- Pour un point de charge, il est désormais possible de choisir si les réglages de charge par défaut sont rétablis lorsque le câble de charge est débranché. Plus d’informations dans notre documentation sous `resetOnDisconnect`
+- Des réglages de charge par défaut propres à chaque véhicule peuvent désormais être définis. En mode interactif, ils sont disponibles avec `evcc configure --advanced`. Plus d’informations dans la documentation sous `onIdentify`
+- Les appareils Modbus génèrent désormais des configurations correctes
 - Meilleure gestion du cas où un fichier `evcc.yaml` existe déjà dans le dossier courant mais avec d’autres droits d’accès.
 
 ## Détection de la position
 
-Pour certains véhicules, **evcc** peut désormais détecter la position actuelle. Cette information n’est toutefois pas encore utilisée activement.
+Pour certains véhicules, **evcc** peut désormais détecter leur position actuelle.
+Cette information n’est toutefois pas encore utilisée activement.
 
 ## Téléchargement et installation
 

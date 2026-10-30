@@ -270,10 +270,10 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | --- | --- |
 | Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc | Choose OS ? → Other specific-purpose OS ? → Home assistants and home automation ? → evcc ? |
 | Configuration → Backup & Restore | Opsætning → Sikkerhedskopiering og gendannelse |
-| Configuration → Charging & Heating | Opsætning → Charging & Heating ? |
 | Configuration → Charging points & heaters → [My Charging Point] | Opsætning → Ladere og varmelegemer → [My Charging Point] ? |
 | Configuration → Charging points & heaters → [name] | Opsætning → Ladere og varmelegemer → [name] ? |
 | Configuration → Charging points & heaters | Opsætning → Ladere og varmelegemer |
+| Configuration → Device overview | Opsætning → Device overview ? |
 | Configuration → EEBUS | Opsætning → EEBUS |
 | Configuration → EEBus | Opsætning → EEBUS |
 | Configuration → Experimental | Opsætning → Eksperimentel |
@@ -288,6 +288,7 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | Configuration → Optimizer 🧪 | Opsætning → Optimizer 🧪 ? |
 | Configuration → Remote Access | Opsætning → Fjernadgang |
 | Configuration → Sponsorship | Opsætning → Sponsorat |
+| Configuration → Sunny Home Manager | Opsætning → Sunny Home Manager |
 | Configuration → Tariffs & forecasts → Add forecast → Add CO₂ forecast | Opsætning → Tariffer og prognoser → Tilføj prognose → Tilføj CO₂ prognose |
 | Configuration → Tariffs & forecasts → Add tariff → Add grid import tariff | Opsætning → Tariffer og prognoser → Tilføj tarif → Tilføj elnet import tarif |
 | Configuration → Vehicles → Add vehicle | Opsætning → Køretøjer → Tilføj køretøj |

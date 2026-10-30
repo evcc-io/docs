@@ -1,16 +1,16 @@
 ---
 title: "Modbus"
-description: "Hier leest u hoe evcc via Modbus met meters en laders communiceert, serieel via RS485, via TCP of via een RTU-naar-TCP-converter, en hoe u elke variant configureert."
+description: "Legt uit hoe evcc via Modbus met meters en laders communiceert, serieel over RS485, over TCP of via een RTU-naar-TCP-converter, en hoe u elke variant configureert."
 sidebar:
   order: 4
-translatedFrom: "8cbbf87533c1"
+translatedFrom: "01c339d6465c"
 ---
 
-Sommige apparaten, zoals meters ([`meters`](/nl/reference/configuration/meters#modbus)) of laders ([`chargers`](/nl/reference/configuration/chargers)), worden via het Modbus-protocol aangesloten en aangesproken.
+Sommige apparaten, zoals meters ([`meters`](/nl/reference/configuration/meters#modbus)) of laders ([`chargers`](/nl/reference/configuration/chargers)), worden via het Modbus-protocol aangesloten en aangestuurd.
 
 De `meter`-configuratie omvat het type fysieke verbinding (interface), optionele technische interfaceparameters, het gebruikte Modbus-protocol, de unieke Modbus-ID van het apparaat op de bus en het nummer en type van het register dat gelezen of geschreven moet worden.
 
-Het is belangrijk om te weten dat er drie verschillende Modbus-protocollen bestaan: Modbus RTU, Modbus ASCII en Modbus TCP. Deze kunnen technisch gezien over verschillende soorten interfaces worden overgedragen. De klassieke variant is Modbus RTU over een seriële RS485-businterface, die bij de meeste meters en sommige laders wordt gebruikt. Apparaten met een eigen netwerkinterface (ethernet/wifi) worden daarentegen meestal via het Modbus-TCP-protocol aangesproken.
+Het is belangrijk om te weten dat er drie verschillende Modbus-protocollen bestaan: Modbus RTU, Modbus ASCII en Modbus TCP. Deze kunnen technisch gezien over verschillende soorten interfaces worden overgedragen. De klassieke variant is Modbus RTU over een seriële RS485-businterface, die bij de meeste meters en sommige laders wordt gebruikt. Apparaten met een eigen netwerkinterface (ethernet/wifi) worden daarentegen meestal via het Modbus-TCP-protocol aangestuurd.
 
 Als een serieel Modbus-apparaat via een interfaceconverter over een netwerk (ethernet/wifi/PowerLAN) moet worden aangesloten, wordt het Modbus-RTU-protocol over een TCP/IP-verbinding gebruikt. Het Modbus-RTU-protocol wordt daarbij rechtstreeks over het netwerk overgedragen (d.w.z. “getunneld”). Hoewel de transportmethode (TCP/IP) dezelfde is, is het protocol NIET hetzelfde als Modbus TCP. Het is essentieel om onderscheid te maken tussen het protocol en de transportmethode. “Modbus (RTU) over TCP” is iets anders dan Modbus TCP!
 
@@ -37,7 +37,7 @@ Op een seriële RS485-bus kunnen meerdere apparaten met identieke communicatiepa
 Apparaten met verschillende seriële communicatieparameters op één bus combineren is niet mogelijk en leidt tot onvoorspelbare communicatiefouten.
 :::
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 source: modbus
@@ -51,7 +51,7 @@ comset: "8E1"
 
 Als het apparaat rechtstreeks via een eigen netwerkverbinding (Modbus TCP) is aangesloten, moet een `uri` bestaande uit HOSTNAME:PORT of IP:PORT worden opgegeven:
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 source: modbus
@@ -63,7 +63,7 @@ uri: 192.168.0.11:502
 
 Als een serieel apparaat via een tussengeschakelde transparante RS485-IP-interfaceconverter (zonder protocolvertaling) is aangesloten, moet het protocol met `rtu: true` ook worden omgeschakeld naar Modbus RTU over de TCP/IP-verbinding.
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 source: modbus
@@ -93,9 +93,7 @@ De ingebouwde voorgedefinieerde apparaatmodellen `model` zijn identiek aan die v
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Elk `model` dat hiervan afwijkt, wordt
-
-behandeld als _SunSpec_-apparaattype.
+Elk `model` dat hiervan afwijkt, wordt behandeld als _SunSpec_-apparaattype.
 
 Met `value` legt u de waarde vast die van het apparaat moet worden gelezen. Alle ondersteunde waarden zijn voorgedefinieerd in [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
 
@@ -103,14 +101,14 @@ Bij een _SunSpec_-compatibele omvormer of meter worden de te lezen waarden in he
 
 Het apparaatmodel `model` en de Modbus-ID `id` zijn altijd vereist:
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 source: modbus
 ---
 model: sdm
 value: Power
-scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
+scale: -1 # schaalfactor (decimaal getal) voor het resultaat, bijv. voor omrekening van kW naar W
 ```
 
 ## Waarden omkeren
@@ -133,7 +131,7 @@ meters:
   - name: my-meter
     type: modbus
     model: sdm
-    power: -Power # inverts the power value
+    power: -Power # keert de vermogenswaarde om
 ```
 
 ### Voorbeelden
@@ -145,7 +143,7 @@ meters:
   - name: pv-meter
     type: modbus
     model: sdm
-    power: -Power # Power will be inverted (e.g. +1000 W becomes -1000 W)
+    power: -Power # vermogen wordt omgekeerd (bijv. +1.000 W wordt -1.000 W)
 ```
 
 #### Omgekeerde fasevermogens
@@ -157,9 +155,9 @@ meters:
     model: sdm
     power: Power
     powers:
-      - -PowerL1 # Phase 1 inverted
-      - -PowerL2 # Phase 2 inverted
-      - -PowerL3 # Phase 3 inverted
+      - -PowerL1 # fase 1 omgekeerd
+      - -PowerL2 # fase 2 omgekeerd
+      - -PowerL3 # fase 3 omgekeerd
 ```
 
 #### Omgekeerde stromen (afzonderlijke fasen)
@@ -171,9 +169,9 @@ meters:
     model: sdm
     power: Power
     currents:
-      - -CurrentL1 # Current Phase 1 inverted
-      - CurrentL2 # Current Phase 2 normal
-      - -CurrentL3 # Current Phase 3 inverted
+      - -CurrentL1 # stroom fase 1 omgekeerd
+      - CurrentL2 # stroom fase 2 normaal
+      - -CurrentL3 # stroom fase 3 omgekeerd
 ```
 
 ### Toepassingen
@@ -182,7 +180,7 @@ meters:
 Als een stroomsensor of meter fysiek in de verkeerde richting is geïnstalleerd, kunt u de waarden softwarematig corrigeren.
 
 **Teruglevering vs. verbruik**:
-Voor meters van zonnepanelensystemen waarbij de tekenconventie moet worden omgekeerd.
+Voor meters van zonnepanelensystemen waarbij het voorteken moet worden omgekeerd.
 
 **Verschillend georiënteerde stroomtransformatoren**:
 Voor meerfasige installaties met verschillend georiënteerde stroomtransformatoren.
@@ -190,35 +188,35 @@ Voor meerfasige installaties met verschillend georiënteerde stroomtransformator
 ## Handmatige configuratie
 
 Als het Modbus-apparaat niet rechtstreeks wordt ondersteund of als er andere waarden dan die van de voorgedefinieerde modellen moeten worden gelezen of geschreven, kunnen de Modbus-registers ook handmatig worden geconfigureerd.
-Daarvoor definieert u naast de algemene Modbus-instellingen (zie hierboven) een `register` in plaats van de `value` die voorgedefinieerde apparaten gebruiken. Het is niet toegestaan om zowel `value` als `register` op te geven.
+Daarvoor moet naast de algemene Modbus-instellingen (zie hierboven) een `register` worden gedefinieerd in plaats van de `value` die voorgedefinieerde apparaten gebruiken. Het is niet toegestaan om zowel `value` als `register` op te geven.
 
 De definitie van een register vereist de volgende parameters:
 
 - `address`: het registeradres
-- `type`: het registertype. Leestypen zijn `coil`, `input` en `holding`, schrijftypen zijn `writeholding`, `writeholdings`, `writecoil`
+- `type`: het registertype. Toegestane leestypen zijn `coil`, `input` en `holding`, schrijftypen zijn `writeholding`, `writeholdings` en `writecoil`
 - `decode`: het type codering van de gegevens. Toegestaan zijn: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Bij type `coil` wordt de codering genegeerd, maar die moet wel worden opgegeven. Bij type `writecoil` moet `bool8` worden opgegeven.
-- `bitmask`: een optionele specificatie. De opgegeven waarde wordt met een AND-bewerking op de gelezen waarde toegepast om afzonderlijke bits uit te lezen.
+- `bitmask`: optioneel. De opgegeven waarde wordt met een AND-bewerking op de gelezen waarde toegepast om afzonderlijke bits uit te lezen.
 
 Andere toegestane parameters van een handmatige configuratie zijn:
 
-- `scale`: kommagetal waarmee gelezen waarden kunnen worden omgerekend (bijv. W naar kW of omgekeerd). De gelezen en gedecodeerde ruwe waarde wordt met deze waarde vermenigvuldigd.
+- `scale`: decimaal getal waarmee gelezen waarden kunnen worden omgerekend (bijv. W naar kW of omgekeerd). De gelezen en gedecodeerde ruwe waarde wordt met deze waarde vermenigvuldigd.
 - `timeout`: Modbus-timeout. Zonder eenheid is de waarde in ns, anders geeft u de eenheid op, bijv. 10s voor 10 seconden.
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 source: modbus
 ---
 register:
   address: 40070
-  type: holding # coil, holding or input
+  type: holding # coil, holding of input
   decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
-  bitmask: 2 # Optional: a bitmask that is applied to the read value. Here the mask is 0000000000000010b, ignored if value is 0
-scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 2s # timeout, without unit in ns
+  bitmask: 2 # optioneel: bitmasker dat op de gelezen waarde wordt toegepast. Hier is het masker 0000000000000010b, genegeerd als de waarde 0 is
+scale: -1.0 # schaalfactor (decimaal getal) voor het resultaat, bijv. voor omrekening van kW naar W
+timeout: 2s # timeout, zonder eenheid in ns
 ```
 
-Bij de decoderingen `int32s/uint32s` wordt de bytevolgorde omgedraaid, wat handig is voor E3/DC-apparaten.
+Bij de decoderingen `int32s/uint32s` wordt de woordvolgorde omgedraaid (het minst significante woord eerst), wat handig is voor E3/DC-apparaten.
 
 ### Registers schrijven
 
@@ -227,62 +225,62 @@ Zowel holding registers als coils kunnen worden geschreven. Daarvoor moet `type:
 `type: writeholding` schrijft altijd een 16-bitsregister (int of bool16). Daarom moet bij `decode` altijd `uint16` worden opgegeven.
 `type: writecoil` schrijft een coil. Bij `decode` moet `bool8` worden opgegeven.
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 source: modbus
 ---
 register:
   address: 40070
-  type: writeholding # writeholding, writeholdings or writecoil
+  type: writeholding # writeholding, writeholdings of writecoil
 ```
 
 ### Volledig voorbeeld
 
-Een volledig voorbeeld voor een gebruikergedefinieerde lader met Modbus-interface (hier een Phoenix EM-CP-PP-ETH met het IP-adres 192.168.1.10) kan er zo uitzien:
+Een volledig voorbeeld voor een door de gebruiker gedefinieerde lader met Modbus-interface (hier een Phoenix EM-CP-PP-ETH met het IP-adres 192.168.1.10) kan er zo uitzien:
 
-**Voorbeeld:**
+**Voorbeeld**:
 
 ```yaml
 chargers:
   - type: custom
     name: CustomCharger
     status:
-      # Read the status of the charger
-      # Either A,B,C or F
+      # status van de lader lezen
+      # A, B, C of F
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       timeout: 3s
       register:
         address: 100
-        type: input # Read an input register
+        type: input # input register lezen
         decode: int16
     enabled:
-      # Is the charger enabled (1) or not (0)
+      # is de lader ingeschakeld (1) of niet (0)
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: coil # Read a coil
-        decode: bool16 # Doesn't matter but required
+        type: coil # coil lezen
+        decode: bool16 # maakt niet uit, maar is verplicht
     enable:
-      # Enable the charger
+      # lader inschakelen
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: writecoil # Write a coil
+        type: writecoil # coil schrijven
         decode: bool8
     maxcurrent:
-      # Set the maximum current
+      # maximale stroom instellen
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 300
-        type: writeholding # Write a holding register
+        type: writeholding # holding register schrijven
         decode: uint16
 ```

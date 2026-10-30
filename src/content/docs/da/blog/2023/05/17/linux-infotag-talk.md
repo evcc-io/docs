@@ -6,12 +6,12 @@ authors: [naltatis]
 tags: [talk]
 prev: false
 next: false
-translatedFrom: "afcd36cd6cc8"
+translatedFrom: "07c6b972af45"
 ---
 
 [![Banner for den 19. Linux Infotag](../../../../../en/blog/2023/05/17/lit-banner.webp)](https://www.luga.de/static/LIT-2023/)
 
-I slutningen af april blev den [19. Linux Infotag](https://www.luga.de/static/LIT-2023/) afholdt efter en lang coronapause. Linux Infotag er et open source-community-arrangement, der organiseres af [Linux User Group Augsburg e.V. (LUGA)](https://www.luga.de/).
+I slutningen af april blev den [19. Linux Infotag](https://www.luga.de/static/LIT-2023/) afholdt efter en lang coronapause. Linux Infotag er et open source-arrangement for fællesskabet, der organiseres af [Linux User Group Augsburg e.V. (LUGA)](https://www.luga.de/).
 
 <!-- excerpt -->
 
@@ -21,10 +21,10 @@ Blandt mange andre spændende emner fik vi i år mulighed for at præsentere vor
 
 [![YouTube-skærmbillede](../../../../../en/blog/2023/05/17/youtube.webp)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
-[YouTube: Open Source Sonne tanken - Wallboxen mit evcc smarter machen](https://www.youtube.com/watch?v=qN8JwBWOlzw)
+[YouTube: Open Source Sonne tanken - Wallboxen mit evcc smarter machen (de)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
 Ud over den generelle introduktion til emnet opladning af elbiler med egen solstrøm handlede det også om smart opladning fra elnettet, og jeg gav et indblik i udviklingsprocessen og vores finansieringsmodel. Så tag gerne et kig.
 
-Du finder slides fra foredraget på [Speaker Deck.](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen) 👇
+Du finder slides fra foredraget på [Speaker Deck](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen). 👇
 
 [![Miniature af slides](../../../../../en/blog/2023/05/17/slides.webp)](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen)

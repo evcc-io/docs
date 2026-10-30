@@ -1,15 +1,15 @@
 ---
 date: 2022-05-08
 title: "Gestion des phases, modèles et lituanien"
-description: "Récapitulatif des versions 0.81 à 0.91 de mai 2022 avec de nombreux chargeurs et véhicules, une meilleure commutation de phases, des modèles et le lituanien."
+description: "Récapitulatif de mai 2022 des versions 0.81 à 0.91 avec de nombreux nouveaux chargeurs et véhicules, une meilleure commutation de phases, des modèles et le lituanien."
 authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "261c638cde95"
+translatedFrom: "be2964228ce3"
 ---
 
-Quelques mois se sont écoulés depuis le dernier article de blog. Il est donc temps de vous présenter un bref résumé et un aperçu de ce qui s’est passé chez evcc au cours des onze dernières versions (v0.81 à v0.91).
+Quelques mois se sont écoulés depuis le dernier article de blog. Il est donc temps de vous donner un bref résumé et un aperçu de ce qui s’est passé chez evcc au cours des onze dernières versions (v0.81 à v0.91).
 
 <!-- excerpt -->
 
@@ -21,7 +21,7 @@ La liste du matériel pris en charge par evcc ne cesse de s’allonger.
 
 Nous avons ajouté quelques intégrations de chargeurs. Comme evcc prend désormais aussi en charge le très répandu [Bender Controller](https://github.com/evcc-io/evcc/pull/3103), nous avons pu élargir considérablement la gamme d’appareils pris en charge.
 
-Voici les fabricants ajoutés depuis le début de l’année : Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity Vestel, Webasto. [(Tous les chargeurs)](/fr/chargers)
+Voici les fabricants ajoutés depuis le début de l’année : Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity, Vestel, Webasto. [(Tous les chargeurs)](/fr/chargers)
 
 ### Véhicules 🚗 🛵
 
@@ -29,7 +29,7 @@ Audi (e-tron), Cupra, Jaguar, Landrover, Mercedes, Silence S01, Smart. [(Tous le
 
 ### Onduleurs ☀️ 🔋
 
-SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [(Tous les compteurs)](/fr/meters)
+SMA (Smart Energy Hybrid), Huawei (SUN2000), Solarwatt, Solax, Varta. [(Tous les compteurs)](/fr/meters)
 
 ### Compteurs avant réseau 📟
 
@@ -88,21 +88,21 @@ meters:
     host: 192.168.0.77
 ```
 
-L’utilisateur n’a plus qu’à connaître le nom d’hôte ou l’adresse IP de son instance Solarlog et à le saisir. Le protocole et la structure des données sont encapsulés dans le modèle `solarlog`.
+L’utilisateur n’a plus qu’à connaître le nom d’hôte ou l’adresse IP de son appareil Solarlog et à le saisir. Le protocole et la structure des données sont encapsulés dans le modèle `solarlog`.
 
 De plus, les modèles comportent une description structurée de tous les paramètres obligatoires et facultatifs, ainsi que des valeurs par défaut et des textes d’aide localisés.
 
-[Depuis mars](https://github.com/evcc-io/docs/pull/92), nous avons adapté la [documentation des appareils sur docs.evcc.io](/fr/chargers) aux modèles. Les anciennes syntaxes fonctionnent bien sûr toujours. Comme les futures fonctionnalités telles que la configuration via le navigateur (oui, elle arrivera 😄) reposent sur `type: template`, nous vous recommandons de convertir dès maintenant vos configurations existantes au nouveau format.
+[Depuis mars](https://github.com/evcc-io/docs/pull/92), nous avons converti la [documentation des appareils sur docs.evcc.io](/fr/chargers) au format des modèles. Les anciennes syntaxes fonctionnent bien sûr toujours. Comme les futures fonctionnalités telles que la configuration via le navigateur (oui, elle arrivera 😄) reposent sur `type: template`, nous vous recommandons de convertir dès maintenant vos configurations existantes au nouveau format.
 
 ## Nouvelle langue : le lituanien 🇱🇹
 
-Avec la v0.91, nous avons reçu une nouvelle traduction. L’interface evcc est désormais aussi disponible en lituanien. C’est la quatrième langue après l’allemand, l’anglais et l’italien. Un grand merci à [RTTTC](https://github.com/RTTTC) 💚.
+Avec la v0.91, nous avons reçu une nouvelle traduction de l’interface. L’interface evcc est désormais aussi disponible en lituanien. C’est la quatrième langue, en plus de l’allemand, de l’anglais et de l’italien. Merci beaucoup à [RTTTC](https://github.com/RTTTC) 💚.
 
 Comme nos connaissances linguistiques sont relativement limitées, nous sommes toujours reconnaissants pour les contributions de traduction. Il n’existe actuellement pas de documentation à ce sujet, mais si cela vous intéresse, jetez simplement un œil à la [pull request de RTTC](https://github.com/evcc-io/evcc/pull/3205).
 
 ## Et ensuite ?
 
-Certains d’entre vous l’ont peut-être déjà vu. Avec la prochaine version, evcc recevra une interface utilisateur entièrement repensée. Elle est déjà disponible dans les builds nightly actuels, et vous trouverez [ici](https://github.com/evcc-io/evcc/discussions/3149) et [ici](https://github.com/evcc-io/evcc/pull/2889) des informations sur le processus de développement. Mais nous en reparlerons dans le prochain article de blog.
+Certains d’entre vous l’ont peut-être déjà vu. Avec la prochaine version, evcc recevra une interface utilisateur entièrement repensée. Elle est déjà disponible dans les versions nightly actuelles, et vous trouverez [ici](https://github.com/evcc-io/evcc/discussions/3149) et [ici](https://github.com/evcc-io/evcc/pull/2889) des informations sur le processus de développement. Mais nous en reparlerons dans le prochain article de blog.
 
 ## Corrections de bugs
 

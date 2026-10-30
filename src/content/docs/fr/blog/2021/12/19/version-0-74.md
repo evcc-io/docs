@@ -6,10 +6,10 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4ec9acb9cce2"
+translatedFrom: "df005046697e"
 ---
 
-Voici aujourd’hui une petite mise à jour, principalement avec quelques corrections de bugs et d’autres améliorations.
+La mise à jour du jour est modeste : surtout des corrections de bugs et quelques autres améliorations.
 
 ## Minuteries dans l’interface
 
@@ -20,11 +20,11 @@ L’interface vous affiche désormais les minuteries qui tournent en arrière-pl
 <!-- excerpt -->
 
 - En mode Solaire :
-  - Quand la charge est interrompue
-  - Quand la charge reprend
-- Commutation de phases 1p3p :
-  - Quand le passage en 3p a lieu
-  - Quand le retour en 1p a lieu
+  - Quand la charge sera interrompue
+  - Quand la charge reprendra
+- Commutation de phases 1P/3P :
+  - Quand le passage en 3P aura lieu
+  - Quand le retour en 1P aura lieu
 
 Le nombre de phases utilisées pour la charge est également affiché.
 
@@ -32,7 +32,7 @@ Le nombre de phases utilisées pour la charge est également affiché.
 
 ![Interface de charge programmée](../../../../../en/blog/2021/12/19/zielladen.png)
 
-La fonction de charge programmée est de retour. Elle permet de charger le véhicule électrique jusqu’au niveau de charge souhaité pour une date et une heure données.
+La charge programmée est de retour. Elle permet de charger le véhicule électrique jusqu’au niveau de charge souhaité pour une date et une heure données.
 
 ## Téléchargement et installation
 

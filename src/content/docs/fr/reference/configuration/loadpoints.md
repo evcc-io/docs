@@ -3,19 +3,19 @@ title: "loadpoints"
 description: "Configurez les points de charge dans evcc.yaml avec chargeur, compteur et véhicule, choisissez le mode par défaut et ajustez l’interrogation, les seuils et les phases."
 sidebar:
   order: 3
-translatedFrom: "3b374858a668"
+translatedFrom: "05c846a87f23"
 ---
 
 `loadpoints` (points de charge) est une liste de points de charge qui associe pour chacun un chargeur, des véhicules et, si nécessaire, un compteur, avec d’autres paramètres facultatifs. Une configuration minimale nécessite un chargeur.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 loadpoints:
-  - title: Garage # display name for UI
-    charger: charger # charger reference
-    vehicle: audi # reference to standard vehicle
-    mode: smart # charge mode (off, smart, now)
+  - title: Garage # nom affiché dans l’interface
+    charger: charger # référence au chargeur
+    vehicle: audi # référence au véhicule par défaut
+    mode: smart # mode de charge (off, smart, now)
 ```
 
 Les références correspondent toujours aux valeurs du paramètre `name` (p. ex. `charger`) dans la configuration de l’appareil concerné.
@@ -30,7 +30,7 @@ Voici maintenant l’explication de tous les paramètres possibles.
 
 Une désignation du point de charge, affichée dans l’interface utilisateur.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 title: Garage
@@ -42,7 +42,7 @@ title: Garage
 
 Référence à une configuration `charger`.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 charger: charger
@@ -60,7 +60,7 @@ Référence à une configuration `meter` (compteur électrique).
 
 Cette entrée n’est nécessaire que si le chargeur utilisé n’effectue pas sa propre mesure du courant ou si evcc ne peut pas lire les valeurs mesurées depuis le chargeur. Même dans ce cas, cette entrée reste facultative, car evcc suppose que le courant maximal réglé est aussi utilisé pour la charge.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 meter: charge
@@ -74,9 +74,9 @@ La valeur `charge` correspond ici à la valeur du paramètre `name` dans la [dé
 
 `vehicle` : référence à une configuration `vehicle` attribuée au point de charge comme véhicule par défaut.
 
-Lorsqu’un véhicule est branché au chargeur, evcc suppose que c’est ce véhicule qui est connecté. La détection automatique du véhicule est ignorée. Si un autre véhicule est connecté (p. ex. un véhicule invité), il peut être attribué manuellement par la suite.
+Lorsqu’un véhicule est branché au chargeur, evcc suppose que c’est ce véhicule qui est connecté. La détection automatique du véhicule n’a pas lieu. Si un autre véhicule est connecté (p. ex. un véhicule invité), il peut être attribué manuellement par la suite.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 vehicle: renault
@@ -94,7 +94,7 @@ Le paramètre `mode` vous permet d’indiquer le mode de charge à utiliser apr�
 **Valeurs possibles** :
 
 - `off` : la charge est arrêtée, même si un véhicule est connecté au chargeur.
-- `smart` : charge avec le surplus solaire, les heures bon marché d’un tarif dynamique et les plans de charge. Pause si aucune énergie bon marché n’est disponible.
+- `smart` : charge avec le surplus solaire, les heures bon marché d’un tarif dynamique et les plans de charge. La charge est suspendue si aucune énergie bon marché n’est disponible.
 - `now` : la charge démarre immédiatement à la puissance maximale possible.
 
 **Valeur par défaut :** `smart`
@@ -103,16 +103,16 @@ Les valeurs obsolètes `pv` et `minpv` sont encore acceptées en écriture :
 `pv` active `smart` et désactive [Toujours en charge](/fr/features/modes#always-charge), `minpv` active `smart` et active « Toujours en charge ».
 
 :::caution[Changement incompatible]
-Les lectures de l’état et de l’API (`/api/state`, websocket, MQTT) indiquent `smart` au lieu de `pv` ; `minpv` n’apparaît plus en lecture.
+En lecture, l’état et l’API (`/api/state`, websocket, MQTT) renvoient `smart` au lieu de `pv` ; `minpv` n’apparaît plus en lecture.
 Les automatisations externes qui comparent avec `pv` ou `minpv` lors de la lecture doivent être mises à jour.
 Les intégrations peuvent détecter le nouveau schéma des modes grâce à la présence de `loadpoints[].alwaysCharge` dans `/api/state`.
 :::
 
 :::note
-En général, un véhicule électrique a besoin d’au moins 1,4 kW de puissance par phase pour charger. Avec les chargeurs et véhicules qui communiquent selon la norme ISO15118, il faut au total au moins 1,4 kW de puissance, quel que soit le nombre de phases utilisées pour la charge.
+En général, un véhicule électrique a besoin d’au moins 1,4 kW de puissance par phase pour charger. Avec les chargeurs et véhicules qui communiquent selon la norme ISO 15118, il faut au total au moins 1,4 kW de puissance, quel que soit le nombre de phases utilisées pour la charge.
 :::
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 mode: smart
@@ -124,7 +124,7 @@ mode: smart
 
 Définit les réglages par défaut pour la gestion du niveau de charge d’un véhicule connecté.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 soc:
@@ -137,6 +137,9 @@ soc:
 #### `poll`
 
 Définit comment les API du véhicule sont utilisées pour récupérer des informations en temps réel sur le véhicule.
+
+Si le drapeau `integrateddevice` est configuré dans les `features` du chargeur, les données sont récupérées en continu.
+Dans ce cas, aucun réglage `poll` n’est nécessaire, et ceux qui sont définis sont ignorés.
 
 :::caution
 Il est **DÉCONSEILLÉ** de modifier les réglages par défaut, car cela peut décharger la batterie du véhicule ou amener le constructeur à bloquer activement le pilotage de la charge par evcc. **À vos propres risques**.
@@ -154,7 +157,7 @@ Définit dans quelles conditions les données du véhicule sont récupérées.
 
 **Valeur par défaut :** `charging`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 mode: charging
@@ -166,7 +169,7 @@ Définit à quelle fréquence le véhicule est interrogé lorsqu’il ne charge 
 
 **Valeur par défaut :** `60m`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 interval: 60m
@@ -174,33 +177,33 @@ interval: 60m
 
 #### `estimate`
 
-Calcule (interpole) le niveau de charge actuel entre deux interrogations des données du véhicule.
+Estime le niveau de charge actuel à partir de l’énergie de charge mesurée (extrapolation) entre les interrogations du véhicule définies par `interval`.
 
 **Valeurs possibles** :
 
-- `true` : evcc interpole les valeurs du niveau de charge entre les interrogations des données du véhicule (recommandé).
+- `true` : evcc extrapole les valeurs du niveau de charge entre les interrogations des données du véhicule (recommandé).
 - `false` : evcc utilise uniquement les valeurs du niveau de charge renvoyées par le véhicule.
 
 **Valeur par défaut :** `true`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-estimate: false # No interpolation
+estimate: false # pas d’extrapolation
 ```
 
 ---
 
 ### `enable`
 
-Définit le comportement au démarrage de la charge avec le surplus solaire en mode Intelligent. Il définit en outre le comportement lors de la commutation automatique des phases de 1p à 3p.
+Définit le comportement au démarrage de la charge avec le surplus solaire en mode Intelligent. Il définit en outre le comportement lors de la commutation automatique du monophasé au triphasé.
 
 :::note
 Pour autoriser une part d’énergie du réseau, utilisez plutôt le curseur **Part solaire** dans les paramètres du point de charge (voir [Pas assez de surplus ?](/fr/features/solar-charging#not-enough-surplus)).
 Le curseur est désactivé tant qu’un seuil `enable` ou `disable` est défini.
 :::
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 enable:
@@ -216,14 +219,14 @@ Définit le seuil de puissance au point de raccordement au réseau, en watts (W)
 
 **Valeur par défaut :** `0`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 threshold: 0
 ```
 
 :::note
-Si un décalage de puissance résiduelle pour le point de fonctionnement visé par la régulation du surplus est défini pour le site evcc avec le paramètre `residualPower`, il faut tenir compte de cette valeur lors du réglage de `threshold`.
+Si le site définit `residualPower` (décalage du point de fonctionnement visé par la régulation du surplus), tenez compte de cette valeur pour régler `threshold`.
 
 Par exemple, si `residualPower` vaut 200 (la régulation d’evcc fixe le point de fonctionnement visé à 200 W d’export vers le réseau), une valeur `threshold` de 100 pour `enable` ne signifie pas que la charge démarre à 100 W d’import du réseau. La puissance d’export restante est au contraire réduite de 100 W, et la charge démarre à 100 W d’export vers le réseau.
 
@@ -236,7 +239,7 @@ Définit pendant combien de temps le `threshold` doit être atteint.
 
 **Valeur par défaut :** `1m`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 delay: 1m
@@ -246,13 +249,13 @@ delay: 1m
 
 ### `disable`
 
-Définit le comportement à l’arrêt de la charge avec le surplus solaire en mode Intelligent. Il définit en outre le comportement lors de la commutation automatique des phases de 3p à 1p.
+Définit le comportement à l’arrêt de la charge avec le surplus solaire en mode Intelligent. Il définit en outre le comportement lors de la commutation automatique du triphasé au monophasé.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 disable:
-  threshold: 200 # maximum import power (W)
+  threshold: 200 # puissance d’import maximale (W)
   delay: 10m
 ```
 
@@ -264,14 +267,14 @@ Définit le seuil de puissance au point de raccordement au réseau, en watts (W)
 
 **Valeur par défaut :** `0`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-threshold: 200 # Maximum grid consumption of 200W is allowed
+threshold: 200 # import du réseau de 200 W maximum autorisé
 ```
 
 :::note
-Si un décalage de puissance résiduelle pour le point de fonctionnement visé par la régulation du surplus est défini pour le site evcc avec le paramètre `residualPower`, il faut tenir compte de cette valeur lors du réglage de `threshold`. Reportez-vous à l’exemple dans la remarque sur le `threshold` de [`enable`](#enable).
+Si le site définit `residualPower` (décalage du point de fonctionnement visé par la régulation du surplus), tenez compte de cette valeur pour régler `threshold`. Reportez-vous à l’exemple dans la remarque sur le `threshold` de [`enable`](#enable).
 :::
 
 :::caution
@@ -284,7 +287,7 @@ Définit pendant combien de temps le `threshold` doit être atteint.
 
 **Valeur par défaut :** `3m`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 delay: 10m
@@ -294,7 +297,7 @@ delay: 10m
 
 ### `phases`
 
-:::note[obsolète en YAML]
+:::note[Obsolète en YAML]
 Cette valeur peut désormais être réglée dans la boîte de dialogue des paramètres du point de charge.
 :::
 
@@ -304,21 +307,21 @@ Définit le nombre de phases avec lequel le chargeur est raccordé.
 
 Ce paramètre ne modifie pas le raccordement physique du chargeur, mais sert à déterminer la puissance minimale de démarrage pour la charge avec le surplus solaire (en combinaison avec `minCurrent`).
 
-Depuis peu, les tensions entrantes sont évaluées si le compteur du chargeur les fournit. En fonction des tensions, la valeur `phases` est modifiée automatiquement via l’API. Lorsque le chargeur est réglé en 1p ou 3p à l’aide d’un commutateur, il n’est plus nécessaire de modifier manuellement la valeur `phases`.
+Depuis peu, les tensions de phase sont évaluées si le compteur du chargeur les fournit. En fonction des tensions, la valeur `phases` est modifiée automatiquement via l’API. Lorsque le chargeur est réglé en monophasé ou en triphasé à l’aide d’un commutateur, il n’est plus nécessaire de modifier manuellement la valeur `phases`.
 
-Lorsque la charge en 1p/3p est réalisée avec le câble de charge correspondant plutôt qu’avec un commutateur, ce comportement « automatique » pose problème. Dans ce cas, la valeur `phases` doit être adaptée en conséquence dans le `vehicle`. Comme cette valeur ne peut pas être modifiée via l’API, la solution de contournement suivante peut être utilisée :
+Lorsque la charge en monophasé ou en triphasé est réalisée avec le câble de charge correspondant plutôt qu’avec un commutateur, ce comportement « automatique » pose problème. Dans ce cas, la valeur `phases` doit être adaptée en conséquence dans le `vehicle`. Comme cette valeur ne peut pas être modifiée via l’API, la solution de contournement suivante peut être utilisée :
 
-Configurez le véhicule deux fois : une fois avec `phases: 1` et une fois avec `phases: 3`. Selon le mode de charge souhaité, sélectionnez le véhicule correspondant dans l’interface.
+Configurez le véhicule deux fois : une fois avec `phases: 1` et une fois avec `phases: 3`. Selon le nombre de phases souhaité, sélectionnez le véhicule correspondant dans l’interface.
 
 Si un véhicule connu est connecté, la plus petite valeur entre `vehicle: phases` et `loadpoint: phases` est utilisée pour le calcul. Pour les véhicules inconnus, seul `loadpoint: phases` est pris en compte.
 
-Pendant la charge du véhicule, si le chargeur ou le compteur de charge fournit les courants par phase, le nombre réel de phases est détecté et utilisé pour les calculs suivants (tant que le véhicule reste connecté). Cela ne fonctionne que pour les points de charge triphasés.
+Pendant la charge du véhicule, si le chargeur ou le compteur de charge fournit les courants par phase, le nombre réel de phases est détecté, puis utilisé pour calculer les seuils de commutation tant que le véhicule reste connecté. Cela ne fonctionne que pour les points de charge triphasés.
 
 **Valeur par défaut :** `3`
 
 **Valeurs possibles :** `1|3`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 phases: 1
@@ -336,14 +339,14 @@ La valeur détermine si la commutation automatique des phases est activée ou d�
 
 **Valeurs possibles :** `0|1|3`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 phases: 0
 ```
 
 :::note
-Si le point de charge n’est pas associé à un chargeur mais à l’une des prises pilotables prises en charge (AVM FritzDECT, Shelly, Tasmota, TP-Link, etc.), `phases` doit être réglé sur **1** pour garantir un pilotage correct de la charge.
+Si le point de charge n’est pas associé à un chargeur mais à l’une des prises commutables compatibles (AVM FritzDECT, Shelly, Tasmota, TP-Link, etc.), `phases` doit être réglé sur **1** pour garantir un pilotage correct de la charge.
 :::
 
 ---
@@ -366,7 +369,7 @@ Si une priorité est définie pour un véhicule, elle remplace la priorité du p
 
 **Valeur par défaut :** `0`
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 priority: 2

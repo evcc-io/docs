@@ -1,12 +1,12 @@
 ---
 date: 2022-05-08
 title: "Gestione delle fasi, template e lituano"
-description: "A maggio 2022 riassumiamo le release di evcc dalla 0.81 alla 0.91: nuovi caricabatterie e veicoli, commutazione delle fasi migliorata, template e interfaccia in lituano."
+description: "Riepilogo di maggio 2022: le release di evcc dalla 0.81 alla 0.91 portano molti nuovi caricabatterie e veicoli, fasi gestite meglio, template e interfaccia in lituano."
 authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "261c638cde95"
+translatedFrom: "be2964228ce3"
 ---
 
 Sono passati alcuni mesi dall’ultimo articolo del blog. È quindi il momento di darti un breve riepilogo e una panoramica di ciò che è successo in evcc nelle ultime undici release (da v0.81 a v0.91).
@@ -21,7 +21,7 @@ L’elenco dell’hardware supportato da evcc cresce costantemente.
 
 Abbiamo aggiunto alcune integrazioni di caricabatterie. Dato che evcc ora supporta anche il diffusissimo [Bender Controller](https://github.com/evcc-io/evcc/pull/3103), abbiamo potuto ampliare in modo significativo la gamma di dispositivi supportati.
 
-Ecco i produttori aggiunti dall’inizio dell’anno: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity Vestel, Webasto. [(Tutti i caricabatterie)](/it/chargers)
+Ecco i produttori aggiunti dall’inizio dell’anno: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity, Vestel, Webasto. [(Tutti i caricabatterie)](/it/chargers)
 
 ### Veicoli 🚗 🛵
 
@@ -29,7 +29,7 @@ Audi (e-tron), Cupra, Jaguar, Landrover, Mercedes, Silence S01, Smart. [(Tutti i
 
 ### Inverter ☀️ 🔋
 
-SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [(Tutti i contatori)](/it/meters)
+SMA (Smart Energy Hybrid), Huawei (SUN2000), Solarwatt, Solax, Varta. [(Tutti i contatori)](/it/meters)
 
 ### Contatori di rete 📟
 
@@ -45,7 +45,7 @@ La prima versione della commutazione delle fasi per i caricabatterie supportati 
 
 ## Template e documentazione
 
-[A dicembre](/it/blog/2021/12/12/version-0-73#evcc-configure) abbiamo posto le basi per semplificare la configurazione iniziale con la procedura guidata da riga di comando `evcc configure`.
+[A dicembre](/it/blog/2021/12/12/version-0-73#evcc-configure) abbiamo posto le basi per una configurazione iniziale più semplice con la procedura guidata da riga di comando `evcc configure`.
 
 La sintassi di configurazione di evcc è molto flessibile e potente. Ad esempio, i dispositivi non ancora supportati ufficialmente si possono spesso collegare solo tramite configurazione, se si conoscono i relativi registri Modbus e le strutture JSON dell’interfaccia. Nel repository `evcc-io/config`, ora archiviato, avevamo raccolto configurazioni di esempio da copiare e incollare nella propria configurazione.
 
@@ -90,7 +90,7 @@ meters:
 
 Ora l’utente deve solo conoscere e inserire il nome host o l’indirizzo IP della propria istanza Solarlog: protocollo e struttura dei dati sono incapsulati nel template `solarlog`.
 
-Inoltre i template ricevono anche una descrizione strutturata di tutti i parametri obbligatori e facoltativi, oltre a valori predefiniti e testi di aiuto localizzati.
+Inoltre i template contengono una descrizione strutturata di tutti i parametri obbligatori e facoltativi, oltre a valori predefiniti e testi di aiuto localizzati.
 
 [Da marzo](https://github.com/evcc-io/docs/pull/92) abbiamo riscritto la [documentazione dei dispositivi su docs.evcc.io](/it/chargers) basandola sui template. Naturalmente le sintassi precedenti funzionano ancora. Dato che funzioni future come la configurazione via web (sì, arriverà 😄) si basano su `type: template`, ti consigliamo di convertire già ora le tue configurazioni esistenti al nuovo formato.
 
@@ -102,7 +102,7 @@ Dato che le nostre conoscenze linguistiche sono piuttosto limitate, siamo sempre
 
 ## Cosa ci aspetta?
 
-Forse l’hai già notato. Con la prossima release evcc riceverà un’interfaccia utente completamente ridisegnata. È già disponibile nelle attuali nightly build e [qui](https://github.com/evcc-io/evcc/discussions/3149) e [qui](https://github.com/evcc-io/evcc/pull/2889) trovi informazioni sul processo di sviluppo. Ma ne parleremo meglio nel prossimo articolo del blog.
+Forse l’hai già visto. Con la prossima release evcc riceverà un’interfaccia utente completamente ridisegnata. È già disponibile nelle attuali nightly build e [qui](https://github.com/evcc-io/evcc/discussions/3149) e [qui](https://github.com/evcc-io/evcc/pull/2889) trovi informazioni sul processo di sviluppo. Ma ne parleremo meglio nel prossimo articolo del blog.
 
 ## Correzioni di bug
 

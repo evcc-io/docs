@@ -1,9 +1,9 @@
 ---
 title: "vehicles"
-description: "Zo definieert u voertuigen in evcc.yaml, met batterijcapaciteit, fasen, cachetijd, RFID- of voertuig-ID’s voor automatische herkenning en het pictogram."
+description: "Zo definieert u voertuigen in evcc.yaml, met batterijcapaciteit, fasen, cachetijd, RFID- of voertuig-ID’s voor automatische herkenning en het weergegeven pictogram."
 sidebar:
   order: 7
-translatedFrom: "28f7a3dffd71"
+translatedFrom: "60b036d74f88"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -11,11 +11,11 @@ import SponsorshipRequired from "@components/SponsorshipRequired.astro";
 
 Een voertuig staat voor een bepaalde elektrische auto (EV) met zijn batterij. Als een voertuig is geconfigureerd en aan een [laadpunt](/nl/reference/configuration/loadpoints#vehicle) is toegewezen, kan de gebruikersinterface de laadstatus, het laadniveau, de resterende laadtijd en andere gegevens tonen die automatisch uit het voertuig worden opgehaald en verwerkt.
 
-Het is ook mogelijk om het laden te beperken tot een bepaald laadniveau (alleen via de UI). Omdat de meeste laders dit niet kunnen weten (het wordt alleen bij zeer specifieke ladercombinaties doorgegeven), kan evcc met deze configuratie rechtstreeks met het voertuig communiceren via de online-interface (API) van de voertuigfabrikant.
+Het is ook mogelijk om het laden te beperken tot een bepaald laadniveau (alleen via de gebruikersinterface). Omdat de meeste laders het laadniveau niet kennen (het wordt alleen bij zeer specifieke combinaties van lader en voertuig doorgegeven), kan evcc met deze configuratie rechtstreeks met het voertuig communiceren via de online-interface (API) van de voertuigfabrikant.
 
 De configuratie `vehicles` is een lijst van verschillende voertuigen.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 vehicles:
@@ -36,7 +36,7 @@ Hieronder worden de verschillende parameters toegelicht.
 
 Een korte aanduiding van het geconfigureerde voertuig. De waarde wordt gebruikt om naar het voertuig te verwijzen in de configuratie van het [laadpunt](/nl/reference/configuration/loadpoints#vehicle).
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 name: zoe
@@ -48,7 +48,7 @@ name: zoe
 
 Een omschrijving van het voertuig die in de gebruikersinterface wordt weergegeven.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 title: Zoe
@@ -68,9 +68,9 @@ Dit is het evcc-interfacetype waarmee met het voertuig wordt gecommuniceerd. Bek
 
 De bruikbare capaciteit van de voertuigbatterij in kilowattuur (kWh).
 
-Wordt gebruikt om de energiebehoefte voor de laadplanning te berekenen.
+Deze waarde wordt gebruikt om de benodigde energie voor laadplannen te berekenen.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 capacity: 50 # kWh
@@ -80,11 +80,11 @@ capacity: 50 # kWh
 
 ### `phases`
 
-Het _maximale_ aantal fasen dat dit voertuig kan gebruiken (eventueel beperkt door de laadkabel). De interne standaardwaarde is 3. Mogelijke waarden zijn 1, 2 of 3.
+Het _maximale_ aantal fasen dat dit voertuig kan gebruiken (eventueel inclusief de laadkabel). De interne standaardwaarde is 3. Mogelijke waarden zijn 1, 2 of 3.
 
-Sommige voertuigen, vooral plug-in hybrides, gebruiken bij het laden niet de maximaal mogelijke 3 fasen. Als er een laadmeter is geïnstalleerd, kan `evcc` de daadwerkelijk gebruikte fasen bij het begin van een laadproces bepalen, maar vóór de start van het laden is deze informatie niet beschikbaar. Door de parameter `phases` bij het voertuig te configureren, kan `evcc` het laadproces in de modus Slim al bij een lager beschikbaar vermogen starten.
+Sommige voertuigen, vooral plug-in hybrides, gebruiken bij het laden niet de maximaal mogelijke 3 fasen. Als er een laadmeter is geïnstalleerd, kan `evcc` de daadwerkelijk gebruikte fasen bij het begin van een laadsessie bepalen, maar vóór de start van het laden is deze informatie niet beschikbaar. Door de parameter `phases` bij het voertuig te configureren, kan `evcc` het laden in de modus **Slim** al bij een lager beschikbaar vermogen starten.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 phases: 2
@@ -94,7 +94,7 @@ phases: 2
 
 ### `cache`
 
-Hoe lang opgehaalde gegevens worden bewaard en nieuwe verzoeken aan de gegevensinterface (API) van het voertuig worden tegengehouden.
+Hoe lang opgehaalde gegevens worden bewaard en nieuwe verzoeken aan de online-interface (API) van de voertuigfabrikant worden tegengehouden.
 
 :::note
 De waarde moet met de bijbehorende tijdseenheid worden opgegeven (zie voorbeeld). `m` staat voor minuten.
@@ -104,11 +104,11 @@ De waarde moet met de bijbehorende tijdseenheid worden opgegeven (zie voorbeeld)
 Het wordt **NIET** aanbevolen om de standaardinstellingen te wijzigen, omdat de voertuigfabrikant de laadaansturing via evcc dan actief zou kunnen blokkeren. **OP EIGEN RISICO.**
 :::
 
-Om actuele statusgegevens van het voertuig te bepalen (bijv. het laadniveau van de tractiebatterij), wordt de interface van de fabrikant regelmatig online opgevraagd. Om de servers van de voertuigfabrikant echter niet te overspoelen met voortdurende verzoeken (wat tot blokkering van het account kan leiden), is er een cache die deze verzoeken onderschept en tot de hier opgegeven maximale leeftijd met de laatst opgehaalde gegevens antwoordt. Omdat de meeste voertuigen hun gegevens alleen tijdens een lopend laadproces en met zeer grote tussenpozen bijwerken (10 tot 30 minuten is gebruikelijk), hebben frequentere verzoeken geen meerwaarde.
+Om actuele statusgegevens van het voertuig te bepalen (bijv. het laadniveau van de tractiebatterij), wordt de online-interface van de voertuigfabrikant regelmatig opgevraagd. Om de servers van de voertuigfabrikant echter niet te overspoelen met voortdurende verzoeken (wat tot blokkering van het account kan leiden), is er een cache die deze verzoeken onderschept en, zolang de hier ingestelde tijd niet is verstreken, met de laatst opgehaalde gegevens antwoordt. Omdat de meeste voertuigen hun gegevens alleen tijdens een lopende laadsessie en met zeer grote tussenpozen bijwerken (10 tot 30 minuten is gebruikelijk), hebben frequentere verzoeken geen meerwaarde.
 
 **Standaardwaarde:** `15m`
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 cache: 5m
@@ -118,22 +118,22 @@ cache: 5m
 
 ### `identifiers`
 
-Een lijst van een of meer ID’s om het voertuig te herkennen. Als het voertuig aan verschillende laders moet worden herkend, kunnen meerdere ID’s nodig zijn. De herkenning kan via de volgende mechanismen plaatsvinden:
+Een lijst van een of meer ID’s om het voertuig te herkennen. Als het voertuig bij verschillende laders moet worden herkend, kunnen meerdere ID’s nodig zijn. De herkenning kan via de volgende mechanismen plaatsvinden:
 
 #### RFID
 
 Als de lader een RFID-interface heeft, kan voor de herkenning een RFID-kaart aan een voertuig worden toegewezen. In dat geval is de `RFID Token ID` nodig.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 identifiers:
-  - 12345ABC # RFID token ID
+  - 12345ABC # RFID-token-ID
 ```
 
-Let op: als de ID als getal kan worden geïnterpreteerd, zijn aanhalingstekens verplicht
+Let op: als de ID als getal kan worden geïnterpreteerd, zijn aanhalingstekens verplicht.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 identifiers:
@@ -144,13 +144,13 @@ identifiers:
 
 #### Voertuig-ID
 
-Als de lader dit ondersteunt, ontvangt hij van het voertuig een voertuig-ID. Dit kan het MAC-adres van de boordlader zijn of een ID van een vast geïnstalleerd Plug & Charge-certificaat (een ander certificaat dan voor DC-laden!).
+Als de lader dit ondersteunt, ontvangt hij van het voertuig een voertuig-ID. Dit kan het MAC-adres van de boordlader zijn of een ID van een vast geïnstalleerd Plug & Charge-certificaat (niet hetzelfde certificaat als bij DC-laden!).
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 identifiers:
-  - 01:23:45:67:89:0A # MAC address
+  - 01:23:45:67:89:0A # MAC-adres
 ```
 
 Sommige voertuigen genereren elke dag een nieuw MAC-adres. In dat geval kunnen wildcards worden gebruikt als de aanwezige voertuigen verschillen in het deel van het MAC-adres dat niet verandert.
@@ -171,11 +171,11 @@ Deze instelling moet voor de volgende combinatie worden gebruikt:
 - Voertuig kan alleen in stappen van hele ampères regelen
 - Lader kan fijnere laadstroomwaarden verwerken (bijv. 1 mA)
 
-Bij deze combinatie kan het gebeuren dat wijzigingen van enkele mA in de stroom bij het regelen tot een onverwachte verandering van de fasestroom met 1 A leiden. De regeling kan dan gaan oscilleren. Deze functievlag beperkt de regeling ook tot grove stappen van 1 A.
+Bij deze combinatie kan het gebeuren dat wijzigingen van enkele mA in de stroom bij het regelen tot een onverwachte verandering van de fasestroom met 1 A leiden. De regeling kan dan gaan oscilleren. Deze functievlag beperkt de regeling daarom tot grove stappen van 1 A.
 
 De functievlag kan NIET samen met een voertuigtemplate worden gebruikt. Om de functievlag te gebruiken, moet het voertuig als native type worden geconfigureerd.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 features: ["coarsecurrent"]
@@ -185,7 +185,7 @@ features: ["coarsecurrent"]
 
 ### `icon`
 
-Voertuigen kunnen in de UI met verschillende pictogrammen worden weergegeven. De beschikbare opties zijn:
+Voertuigen kunnen in de gebruikersinterface met verschillende pictogrammen worden weergegeven. De beschikbare opties zijn:
 
 - car
 - bike
@@ -200,7 +200,7 @@ Voertuigen kunnen in de UI met verschillende pictogrammen worden weergegeven. De
 - cooler
 - waterheater
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 icon: heater

@@ -1,15 +1,15 @@
 ---
 date: 2021-12-12
 title: "Versie 0.73"
-description: "Release notes voor evcc 0.73 uit december 2021 met verbeteringen aan de wizard evcc configure, voertuigspecifieke standaardlaadinstellingen en eerste locatieherkenning."
+description: "Release notes voor evcc 0.73 uit december 2021 met een verbeterd evcc configure, voertuigspecifieke standaardlaadinstellingen en een eerste vorm van locatieherkenning."
 authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4f5a2d6ac51a"
+translatedFrom: "3c89983a8f03"
 ---
 
-Vandaag is er een kleine update, vooral met enkele bugfixes en verdere verbeteringen.
+Vandaag verschijnt er een kleine update met vooral enkele bugfixes en verdere verbeteringen.
 
 <!-- excerpt -->
 
@@ -17,14 +17,15 @@ Vandaag is er een kleine update, vooral met enkele bugfixes en verdere verbeteri
 
 De opdracht voor het begeleid aanmaken van een configuratiebestand en de onderliggende templates hebben de volgende verbeteringen gekregen:
 
-- Bij een laadpunt kan nu worden ingesteld of de standaardlaadinstellingen worden hersteld wanneer de laadkabel wordt losgekoppeld. Meer daarover in onze documentatie onder `resetOnDisconnect`
-- Er kunnen nu voertuigspecifieke standaardlaadwaarden worden ingesteld. Interactief zijn die beschikbaar met `evcc configure --advanced`. Meer daarover in de documentatie onder `onIdentify`
-- Apparaten met Modbus genereren nu correcte configuraties
+- Bij een laadpunt kunt u nu instellen of de standaardlaadinstellingen worden hersteld wanneer de laadkabel wordt losgekoppeld. Meer daarover in onze documentatie onder `resetOnDisconnect`
+- Er kunnen nu voertuigspecifieke standaardlaadinstellingen worden ingesteld. Interactief zijn die beschikbaar met `evcc configure --advanced`. Meer daarover in de documentatie onder `onIdentify`
+- Modbus-apparaten genereren nu correcte configuraties
 - Betere afhandeling wanneer er al een bestand `evcc.yaml` in de huidige map staat, maar met andere toegangsrechten.
 
 ## Locatieherkenning
 
-Voor enkele voertuigen kan **evcc** nu de huidige locatie herkennen. Dit wordt momenteel echter nog niet actief gebruikt.
+Voor enkele voertuigen kan **evcc** nu de huidige locatie herkennen.
+Dit wordt echter nog niet actief gebruikt.
 
 ## Download & installatie
 

@@ -1,14 +1,14 @@
 ---
 title: "meters"
-description: "Définissez dans evcc.yaml les compteurs du réseau, de l’installation photovoltaïque, de la batterie domestique et des consommateurs, et découvrez la convention de signe."
+description: "Définissez dans evcc.yaml les compteurs du réseau, du solaire, de la batterie domestique et des consommateurs, avec la convention de signe et les types disponibles."
 sidebar:
   order: 5
-translatedFrom: "dfa0dfa3f1e6"
+translatedFrom: "731e5e09d04f"
 ---
 
 Les _meters_ (compteurs) sont une liste d’appareils de la maison capables de mesurer la puissance et la consommation d’énergie, la production solaire ou l’utilisation de la batterie domestique. Un `meter` définit un point de mesure de l’énergie et peut être un appareil physique (p. ex. un compteur au point de raccordement au réseau), un onduleur solaire (AC ou DC dans le cas des onduleurs hybrides) ou un onduleur de batterie.
 
-Les chargeurs peuvent disposer d’un compteur intégré, ou un compteur externe peut y être raccordé. Si un chargeur dispose d’un compteur intégré, il n’est pas nécessaire de créer une entrée pour lui dans `meters`. Si le chargeur ne dispose pas d’un tel compteur, evcc utilise le compteur configuré ici et attribué au chargeur sous [`meters`](/fr/reference/configuration/loadpoints#meter) dans la configuration du point de charge, ou suppose que la puissance de charge réglée est effectivement utilisée.
+Les chargeurs peuvent disposer d’un compteur intégré, ou un compteur externe peut y être raccordé. Si un chargeur dispose d’un compteur intégré, il n’est pas nécessaire de créer une entrée pour lui dans `meters`. Si le chargeur ne dispose pas d’un tel compteur, evcc utilise le compteur configuré ici et attribué au chargeur sous [`meter`](/fr/reference/configuration/loadpoints#meter) dans la configuration du point de charge, ou suppose que la puissance de charge réglée est effectivement utilisée.
 
 evcc applique une convention de signe cohérente pour les valeurs de puissance et de courant (`power`, `powers`, `currents`) :
 
@@ -20,7 +20,7 @@ Si l’appareil renvoie des valeurs avec le signe inverse, vous pouvez le corrig
 
 La configuration `meters` est une liste des différents appareils disponibles.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 meters:
@@ -36,7 +36,7 @@ meters:
     type: ...
 ```
 
-Vous trouverez les configurations des appareils connus sous [Appareils - Installation domestique](/fr/meters).
+Vous trouverez les configurations des appareils connus sous [Appareils → Installation domestique](/fr/meters).
 
 Les différents paramètres sont expliqués ci-dessous.
 
@@ -48,7 +48,7 @@ Les différents paramètres sont expliqués ci-dessous.
 
 Une désignation courte du compteur. Cette valeur sert à référencer l’appareil dans la configuration du [site](/fr/reference/configuration/site) ou du [point de charge](/fr/reference/configuration/loadpoints#meter).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 name: charger1
@@ -58,9 +58,9 @@ name: charger1
 
 ### `type`
 
-Il s’agit du type de compteur propre à evcc qui permet de communiquer avec l’appareil. Vous trouverez le type adapté aux appareils connus sous [Appareils - Installation domestique](/fr/meters).
+Il s’agit du type de compteur propre à evcc qui permet de communiquer avec l’appareil. Vous trouverez le type adapté aux appareils connus sous [Appareils → Installation domestique](/fr/meters).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 type: modbus
@@ -81,7 +81,7 @@ Les titres et les icônes (selon l’utilisation) ne peuvent être définis que 
 
 Ce type de compteur permet de lisser des valeurs de mesure fluctuantes. Il fonctionne avec toutes les utilisations de compteur (`usage`). Le paramètre `decay` indique le pourcentage de la nouvelle valeur pris en compte dans le calcul.
 
-**Par exemple**
+**Exemple** :
 
 ```yaml
 meters:
@@ -96,7 +96,7 @@ meters:
     ...
 ```
 
-Dans cet exemple, 10 % de la nouvelle valeur est pris en compte. Après 10 cycles, la valeur la plus ancienne sort du calcul. La durée de ce processus dépend de l’`interval`.
+Dans cet exemple, 10 % de la nouvelle valeur est prise en compte. Après 10 cycles, la valeur la plus ancienne sort du calcul. Cette durée dépend du paramètre `interval`.
 
 ---
 
@@ -104,7 +104,7 @@ Dans cet exemple, 10 % de la nouvelle valeur est pris en compte. Après 10 cycl
 
 Appareils raccordés via l’interface Modbus et pris en charge par le projet [MBMD (ModBus Measurement Daemon)](https://github.com/volkszaehler/mbmd#supported-devices).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
   type: modbus
@@ -122,7 +122,7 @@ En plus des paramètres définis ici, d’autres paramètres sont nécessaires. 
 
 Définit la grandeur MBMD qui fournit la puissance, généralement `Power`.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 power: Power
@@ -134,7 +134,7 @@ power: Power
 
 Définit la grandeur MBMD qui fournit l’énergie, généralement `Sum`.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 energy: Sum
@@ -148,7 +148,7 @@ energy: Sum
 
 Définit la grandeur MBMD qui fournit le niveau de charge de la batterie, généralement `ChargeState`.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 soc: ChargeState
@@ -160,7 +160,7 @@ soc: ChargeState
 
 Appareils LG ESS Home 8/10.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 type: lgess
@@ -177,7 +177,7 @@ Les paramètres `uri` et `password` ne sont nécessaires pour un appareil `meter
 
 ##### `usage`
 
-Indique quelles mesures sont nécessaires ici.
+Indique quelles mesures l’appareil doit fournir.
 
 **Valeurs possibles** :
 
@@ -191,7 +191,7 @@ Indique quelles mesures sont nécessaires ici.
 
 Définit l’URL de l’appareil LG ESS dans le réseau domestique.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 uri: https://192.0.2.2/
@@ -203,7 +203,7 @@ uri: https://192.0.2.2/
 
 Le numéro d’enregistrement de l’onduleur LG ESS HOME doit être saisi ici.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 password: "DE200..."
@@ -213,9 +213,9 @@ password: "DE200..."
 
 ### `openwb`
 
-Utilisation des mesures d’un chargeur OpenWB
+Pour utiliser les mesures d’un chargeur OpenWB.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 type: openwb
@@ -223,15 +223,11 @@ usage: grid
 broker: 192.0.2.2
 ```
 
-:::note
-Les paramètres `uri` et `password` ne sont nécessaires pour un appareil `meter` que si plusieurs appareils sont configurés.
-:::
-
 #### Paramètres obligatoires
 
 ##### `usage`
 
-Indique quelles mesures sont nécessaires ici.
+Indique quelles mesures l’appareil doit fournir.
 
 **Valeurs possibles** :
 
@@ -245,7 +241,7 @@ Indique quelles mesures sont nécessaires ici.
 
 Définit le nom d’hôte ou l’adresse IP ainsi que le port de l’OpenWB dans le réseau domestique.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 broker: 192.0.2.2:1883
@@ -257,7 +253,7 @@ broker: 192.0.2.2:1883
 
 Pour utiliser le SMA Home Manager 2.0, le SMA Energy Meter ou un onduleur SMA. Les appareils doivent prendre en charge le protocole Speedwire.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 type: sma
@@ -278,7 +274,7 @@ Il suffit de définir soit `uri`, soit `serial`.
 
 Définit le nom d’hôte ou l’adresse IP de l’appareil dans le réseau domestique.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 uri: 192.0.2.2
@@ -288,7 +284,7 @@ uri: 192.0.2.2
 
 Définit le numéro de série de l’appareil dont les mesures doivent être reçues.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 serial: 12345678
@@ -298,9 +294,9 @@ serial: 12345678
 
 ##### `interface`
 
-Les messages multicast ne peuvent être reçus que sur une interface réseau donnée. Il s’agit généralement de la première interface du système. Si ce n’est pas l’interface reliée au compteur, l’interface doit être indiquée explicitement.
+Les messages multicast ne peuvent être reçus que sur une interface réseau donnée. Il s’agit généralement de la première interface du système. Si le compteur est joignable par une autre interface, indiquez-la explicitement.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 interface: eth0
@@ -312,7 +308,7 @@ interface: eth0
 
 _`tesla`_ : pour utiliser les mesures d’une Tesla Powerwall.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 type: tesla
@@ -327,7 +323,7 @@ password: "***"
 
 ##### `usage`
 
-Indique quelles mesures sont nécessaires ici.
+Indique quelles mesures l’appareil doit fournir.
 
 **Valeurs possibles** :
 
@@ -341,7 +337,7 @@ Indique quelles mesures sont nécessaires ici.
 
 Définit le nom d’hôte ou l’adresse IP de l’appareil dans le réseau domestique.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 uri: 192.0.2.2
@@ -353,7 +349,7 @@ uri: 192.0.2.2
 
 Le mot de passe de l’utilisateur _customer_ doit être saisi ici.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
 password: "ThePassword"
@@ -363,45 +359,45 @@ password: "ThePassword"
 
 ### `custom`
 
-Implémentation standard dans laquelle chaque valeur est définie via des [plugins](/fr/user-defined-devices#meter).
+Implémentation générique dans laquelle chaque valeur est fournie par des [plugins](/fr/user-defined-devices#meter).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
   type: custom
-  power: # Power (W)
-    source: # Plugin Type
+  power: # Puissance (W)
+    source: # Type de plugin
     ...
-  energy: # Energy (kWh)
-    source: # Plugin Type
+  energy: # Énergie (kWh)
+    source: # Type de plugin
     ...
-  returnenergy: # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: # Énergie dans le sens inverse (kWh)
+    source: # Type de plugin
     ...
-  soc: # Battery SOC (%)
-    source: # Plugin Type
+  soc: # Niveau de charge de la batterie (%)
+    source: # Type de plugin
     ...
-  capacity: # Optional Battery Capacity (kWh)
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  capacity: # Capacité de la batterie, facultative (kWh)
+  currents: # Courant (A) par phase
+    - source: # Type de plugin phase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Type de plugin phase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Type de plugin phase 3
       ...
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Puissance (W) par phase
+    - source: # Type de plugin phase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Type de plugin phase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Type de plugin phase 3
       ...
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Tension (V) par phase
+    - source: # Type de plugin phase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Type de plugin phase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Type de plugin phase 3
       ...
   ...
 ```
@@ -414,11 +410,11 @@ Implémentation standard dans laquelle chaque valeur est définie via des [plugi
 
 Définition de plugin qui renvoie la puissance en watts (W).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  power: ... # Power (W)
-    source: # Plugin Type
+  power: ... # Puissance (W)
+    source: # Type de plugin
     ...
 ```
 
@@ -430,11 +426,11 @@ Définition de plugin qui renvoie la puissance en watts (W).
 
 Définition de plugin qui renvoie l’énergie consommée en kilowattheures (kWh).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  energy: ... # Energy (kWh)
-    source: # Plugin Type
+  energy: ... # Énergie (kWh)
+    source: # Type de plugin
     ...
 ```
 
@@ -444,11 +440,11 @@ Définition de plugin qui renvoie l’énergie consommée en kilowattheures (kWh
 
 Définition de plugin qui renvoie l’énergie dans le sens inverse en kilowattheures (kWh), p. ex. l’export vers le réseau.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  returnenergy: ... # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: ... # Énergie dans le sens inverse (kWh)
+    source: # Type de plugin
     ...
 ```
 
@@ -458,11 +454,11 @@ Définition de plugin qui renvoie l’énergie dans le sens inverse en kilowatth
 
 Définition de plugin qui renvoie le niveau de charge de la batterie en pourcentage (%).
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  soc: ... # Battery SOC (%)
-    source: # Plugin Type
+  soc: ... # Niveau de charge de la batterie (%)
+    source: # Type de plugin
     ...
 ```
 
@@ -478,15 +474,15 @@ Indique la capacité de la batterie. Elle n’est utile qu’en présence de plu
 
 Une liste de définitions de plugin qui renvoient le courant en ampères (A) par phase.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  currents: # Courant (A) par phase
+    - source: # Type de plugin phase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Type de plugin phase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Type de plugin phase 3
       ...
   ...
 ```
@@ -497,15 +493,15 @@ Une liste de définitions de plugin qui renvoient le courant en ampères (A) par
 
 Une liste de définitions de plugin qui renvoient la puissance en watts (W) par phase.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Puissance (W) par phase
+    - source: # Type de plugin phase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Type de plugin phase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Type de plugin phase 3
       ...
   ...
 ```
@@ -516,15 +512,15 @@ Une liste de définitions de plugin qui renvoient la puissance en watts (W) par 
 
 Une liste de définitions de plugin qui renvoient la tension en volts (V) par phase.
 
-**Par exemple** :
+**Exemple** :
 
 ```yaml
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Tension (V) par phase
+    - source: # Type de plugin phase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Type de plugin phase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Type de plugin phase 3
       ...
   ...
 ```

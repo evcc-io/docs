@@ -6,10 +6,10 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "19fb68e22d3a"
+translatedFrom: "daec48020930"
 ---
 
-Dnes na konci roku přichází ještě jedna aktualizace s několika novinkami.
+Ještě před koncem roku přichází jedna aktualizace s několika novinkami.
 
 <!-- excerpt -->
 
@@ -19,7 +19,8 @@ Nově jsou podporované elektromobily Dacia a Smart EQ a také nabíječka Inn
 
 ## Opravy chyb
 
-Tato verze obsahuje řadu oprav chyb a mnoho drobných vylepšení. Podrobný seznam si můžete prohlédnout přes odkaz na přehled změn níže.
+Tato verze obsahuje řadu oprav chyb a mnoho drobných vylepšení.
+Podrobný seznam si můžete prohlédnout přes odkaz na přehled změn níže.
 
 ## Stažení a instalace
 

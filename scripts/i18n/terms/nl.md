@@ -268,10 +268,10 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | --- | --- |
 | Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc | Choose OS ? → Other specific-purpose OS ? → Home assistants and home automation ? → evcc ? |
 | Configuration → Backup & Restore | Configuratie → Backup & Herstel |
-| Configuration → Charging & Heating | Configuratie → Charging & Heating ? |
 | Configuration → Charging points & heaters → [My Charging Point] | Configuratie → Laadpunten & verwarmers → [My Charging Point] ? |
 | Configuration → Charging points & heaters → [name] | Configuratie → Laadpunten & verwarmers → [name] ? |
 | Configuration → Charging points & heaters | Configuratie → Laadpunten & verwarmers |
+| Configuration → Device overview | Configuratie → Device overview ? |
 | Configuration → EEBUS | Configuratie → EEBUS |
 | Configuration → EEBus | Configuratie → EEBUS |
 | Configuration → Experimental | Configuratie → Experimenteel |
@@ -286,6 +286,7 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | Configuration → Optimizer 🧪 | Configuratie → Optimizer 🧪 ? |
 | Configuration → Remote Access | Configuratie → Toegang op afstand |
 | Configuration → Sponsorship | Configuratie → Sponsoring |
+| Configuration → Sunny Home Manager | Configuratie → Sunny Home Manager |
 | Configuration → Tariffs & forecasts → Add forecast → Add CO₂ forecast | Configuratie → Tarieven & voorspellingen → Voorspelling toevoegen → CO₂-voorspelling toevoegen |
 | Configuration → Tariffs & forecasts → Add tariff → Add grid import tariff | Configuratie → Tarieven & voorspellingen → Tarief toevoegen → Net-import Tarief Toevoegen |
 | Configuration → Vehicles → Add vehicle | Configuratie → Voertuigen → Voeg voertuig toe |

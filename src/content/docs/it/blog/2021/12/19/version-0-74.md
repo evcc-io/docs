@@ -6,7 +6,7 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4ec9acb9cce2"
+translatedFrom: "df005046697e"
 ---
 
 Oggi arriva un piccolo aggiornamento, soprattutto con alcune correzioni di bug e altri miglioramenti.
@@ -19,14 +19,14 @@ L’interfaccia ora ti mostra i timer che girano in background:
 
 <!-- excerpt -->
 
-- In modalità solare:
-  - Quando viene interrotta la ricarica
-  - Quando riprende la ricarica
+- In modalità **Solare**:
+  - Quando la ricarica verrà sospesa
+  - Quando la ricarica riprenderà
 - Commutazione delle fasi 1P/3P:
-  - Quando si passa a 3P
-  - Quando si torna a 1P
+  - Quando passerà a 3P
+  - Quando tornerà a 1P
 
-Inoltre viene mostrato anche con quante fasi si sta caricando.
+Viene mostrato anche con quante fasi si sta caricando.
 
 ## Ricarica a obiettivo
 

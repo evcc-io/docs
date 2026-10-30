@@ -3,7 +3,7 @@ title: "Konfigurace"
 description: "Přehled konfigurace pomocí souboru evcc.yaml vysvětluje, kde soubor najdete, jak je strukturovaný a které sekce popisují vaši lokalitu a zařízení."
 sidebar:
   order: 1
-translatedFrom: "b5e9667916e0"
+translatedFrom: "7c938df548c1"
 ---
 
 evcc lze konfigurovat dvěma způsoby:
@@ -77,10 +77,10 @@ graph TD;
 
 ### Jak evcc funguje? (Pohled pod kapotu)
 
-Aby systém fungoval, je důležitý měřič elektřiny. Ten
-nám umožňuje kdykoli vypočítat přebytečný výkon. Měření
-vyráběného výkonu je zajímavé, ale na funkci nemá vliv, až na
-[jednu výjimku](/cs/faq#configuration)
+Aby systém fungoval, je důležitý měřič sítě (měřič `grid`).
+Ten určuje aktuální přebytečný výkon.
+Měření vyráběného výkonu přitom na funkci nemá vliv.
+Provoz evcc bez měřiče sítě je také možný, viz [FAQ](/cs/faq#configuration).
 
 Přebytečný výkon se porovnává s minimálním výkonem potřebným k nabíjení. Pokud
 stačí, nabíjení se spustí.
@@ -114,8 +114,8 @@ jednotlivých parametrů.
 
 ### Lokalita
 
-[Lokalita](/cs/reference/configuration/site) popisuje vaši domácí instalaci
-a zařízení v ní a řídí dostupný výkon.
+[Lokalita](/cs/reference/configuration/site) popisuje místo se stávajícími a potřebnými zařízeními
+domácí instalace a řídí dostupný výkon.
 
 ### Nabíjecí bod
 

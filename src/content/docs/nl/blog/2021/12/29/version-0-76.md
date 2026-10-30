@@ -6,10 +6,10 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "19fb68e22d3a"
+translatedFrom: "daec48020930"
 ---
 
-Vandaag is er aan het eind van het jaar nog een update met enkele vernieuwingen.
+Voor het einde van het jaar is er nog een update met een paar nieuwe functies.
 
 <!-- excerpt -->
 
@@ -19,7 +19,8 @@ De EV’s van Dacia en Smart EQ worden nu ondersteund, net als de lader Innogy e
 
 ## Bugfixes
 
-Deze versie bevat een reeks bugfixes en veel kleine verbeteringen. Een gedetailleerd overzicht vindt u via de changelog-link hieronder.
+Deze versie bevat een reeks bugfixes en veel kleine verbeteringen.
+Een gedetailleerd overzicht vindt u via de changelog-link hieronder.
 
 ## Download & installatie
 

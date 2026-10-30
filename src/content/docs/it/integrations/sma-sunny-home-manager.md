@@ -1,9 +1,9 @@
 ---
 title: "Sunny Home Manager"
-description: "evcc rende visibili i suoi punti di ricarica a un SMA Sunny Home Manager 2.0 nel Sunny Portal e, se vuoi, gli permette di regolare la potenza di ricarica."
+description: "Spiega come evcc rende visibili i punti di ricarica nel Sunny Portal di uno SMA Sunny Home Manager 2.0 e, se vuoi, gli permette di influire sulla potenza di ricarica."
 sidebar:
   order: 5
-translatedFrom: "3e7eabc9fd7e"
+translatedFrom: "64de8f1d87ba"
 ---
 
 evcc supporta l’integrazione con lo [SMA Sunny Home Manager 2.0 (SHM)](https://www.sma.de/produkte/energiemanagement/sunny-home-manager).
@@ -22,13 +22,13 @@ L’endpoint SEMP è raggiungibile all’indirizzo `http://[evcc-IP]:7070/semp/`
 
 ## Configurazione nel Sunny Home Manager
 
-Dopo aver configurato evcc, i punti di ricarica vengono proposti automaticamente come nuovi dispositivi nel Sunny Portal in **Configurazione > Panoramica apparecchi**.
+Dopo che li hai configurati in evcc, i punti di ricarica compaiono automaticamente come nuovi dispositivi nel Sunny Portal in **Configurazione → Panoramica apparecchi**.
 Lì puoi attivarli e seguire la procedura guidata di configurazione.
-Per i dettagli sulla configurazione consulta il [manuale SMA](https://manuals.sma.de/HM-20/en-US/10426801547.html).
+Per i dettagli sulla configurazione consulta il [manuale SMA](https://manuals.sma.de/HM-20/it-IT/10426801547.html).
 
 ## ID dei dispositivi
 
-Sul lato evcc non serve alcuna configurazione.
+In evcc non serve alcuna configurazione.
 evcc genera automaticamente gli ID dei dispositivi necessari.
 
 Ogni punto di ricarica riceve un ID univoco nel formato:
@@ -42,5 +42,5 @@ Le singole parti indicano:
 - **AAAAAAAA**: l’ID del produttore (8 cifre esadecimali)
 - **BBBBBBBBBBBB**: l’ID del dispositivo (12 cifre esadecimali)
 
-Se vuoi usare ID diversi da quelli generati (ad es. quando passi a un altro hardware per evcc), puoi copiare gli ID esistenti dall’endpoint `/semp/` del vecchio sistema e inserirli in **Impostazioni > Sunny Home Manager**.
+Se vuoi usare ID diversi da quelli generati (ad es. quando passi a un altro hardware per evcc), puoi copiare gli ID esistenti dall’endpoint `/semp/` del vecchio sistema e adattarli in **Configurazione → Sunny Home Manager**.
 In questo modo lo SHM continua a riconoscere i dispositivi.

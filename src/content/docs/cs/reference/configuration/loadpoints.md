@@ -3,7 +3,7 @@ title: "loadpoints"
 description: "Nastavte v evcc.yaml nabíjecí body, propojte nabíječku, měřič a vozidlo, zvolte výchozí režim a dolaďte dotazování vozidla, prahové hodnoty a fáze."
 sidebar:
   order: 3
-translatedFrom: "3b374858a668"
+translatedFrom: "05c846a87f23"
 ---
 
 Seznam `loadpoints` obsahuje nabíjecí body. Každý z nich spojuje nabíječku, vozidla a v případě potřeby i měřič s dalšími volitelnými parametry. Minimální konfigurace vyžaduje nabíječku.
@@ -12,10 +12,10 @@ Seznam `loadpoints` obsahuje nabíjecí body. Každý z nich spojuje nabíječk
 
 ```yaml
 loadpoints:
-  - title: Garage # display name for UI
-    charger: charger # charger reference
-    vehicle: audi # reference to standard vehicle
-    mode: smart # charge mode (off, smart, now)
+  - title: Garáž # zobrazovaný název v uživatelském rozhraní
+    charger: charger # odkaz na nabíječku
+    vehicle: audi # odkaz na výchozí vozidlo
+    mode: smart # režim nabíjení (off, smart, now)
 ```
 
 Odkazy vždy odpovídají hodnotám parametru `name` (např. `charger`) v konfiguraci příslušného zařízení.
@@ -33,7 +33,7 @@ Popis nabíjecího bodu, který se zobrazuje v uživatelském rozhraní (UI).
 **Příklad**:
 
 ```yaml
-title: Garage
+title: Garáž
 ```
 
 ---
@@ -48,7 +48,7 @@ Odkaz na konfiguraci `charger`.
 charger: charger
 ```
 
-Hodnota `charger` přitom odpovídá hodnotě parametru `name` v [definici nabíječky](/cs/reference/configuration/chargers#name).
+Hodnota `charger` odpovídá hodnotě parametru `name` v [definici nabíječky](/cs/reference/configuration/chargers#name).
 
 ---
 
@@ -66,7 +66,7 @@ Tato položka je potřeba jen tehdy, pokud použitá nabíječka sama neměří 
 meter: charge
 ```
 
-Hodnota `charge` přitom odpovídá hodnotě parametru `name` v [definici měřiče](/cs/reference/configuration/meters#name).
+Hodnota `charge` odpovídá hodnotě parametru `name` v [definici měřiče](/cs/reference/configuration/meters#name).
 
 ---
 
@@ -82,7 +82,7 @@ Když se k nabíječce připojí vozidlo, předpokládá se, že jde o toto vo
 vehicle: renault
 ```
 
-Hodnota `renault` přitom odpovídá hodnotě parametru `name` v [definici vozidla](/cs/reference/configuration/vehicles#name).
+Hodnota `renault` odpovídá hodnotě parametru `name` v [definici vozidla](/cs/reference/configuration/vehicles#name).
 
 ---
 
@@ -100,10 +100,10 @@ Parametrem `mode` můžete určit režim nabíjení, který se má použít po o
 **Výchozí hodnota:** `smart`
 
 Zastaralé hodnoty `pv` a `minpv` jsou při zápisu stále přijímány:
-`pv` aktivuje `smart` a vypne [Vždy nabíjet](/cs/features/modes#always-charge), `minpv` aktivuje `smart` a Vždy nabíjet zapne.
+`pv` aktivuje `smart` a vypne [Vždy nabíjet](/cs/features/modes#always-charge), `minpv` aktivuje `smart` a zapne Vždy nabíjet.
 
 :::caution[Nekompatibilní změna]
-Čtení stavu a API (`/api/state`, websocket, MQTT) hlásí `smart` místo `pv`, hodnota `minpv` se při čtení už vůbec neobjevuje.
+Při čtení stavu přes API (`/api/state`, websocket, MQTT) se vrací `smart` místo `pv` a hodnota `minpv` se už vůbec neobjevuje.
 Externí automatizace, které při čtení porovnávají hodnotu s `pv` nebo `minpv`, je nutné upravit.
 Integrace mohou nové schéma režimů rozpoznat podle přítomnosti `loadpoints[].alwaysCharge` v `/api/state`.
 :::
@@ -137,6 +137,9 @@ soc:
 #### `poll`
 
 Určuje, jak se API vozidla používají k získávání aktuálních informací o vozidle.
+
+Pokud má nabíječka v `features` nakonfigurovaný příznak `integrateddevice`, data se načítají průběžně.
+V tom případě nastavení `poll` není potřeba, a pokud je zadáno, ignoruje se.
 
 :::caution
 Měnit výchozí nastavení **NEDOPORUČUJEME**, protože to může vést k vybití baterie vozidla nebo k tomu, že výrobce vozidla aktivně zablokuje řízení nabíjení přes evcc. **Na vlastní riziko**.
@@ -174,11 +177,11 @@ interval: 60m
 
 #### `estimate`
 
-Výpočet (interpolace) aktuálního stavu nabití mezi dotazy na data vozidla.
+Odhaduje aktuální stav nabití z naměřené nabité energie (extrapolace) v době mezi dotazy na vozidlo, jejichž četnost určuje parametr `interval`.
 
 **Možné hodnoty**:
 
-- `true`: evcc interpoluje hodnoty stavu nabití mezi dotazy na data vozidla (doporučeno).
+- `true`: evcc extrapoluje hodnoty stavu nabití mezi dotazy na data vozidla (doporučeno).
 - `false`: evcc používá pouze hodnoty stavu nabití, které vrací vozidlo.
 
 **Výchozí hodnota:** `true`
@@ -186,7 +189,7 @@ Výpočet (interpolace) aktuálního stavu nabití mezi dotazy na data vozidla.
 **Příklad**:
 
 ```yaml
-estimate: false # No interpolation
+estimate: false # Bez extrapolace
 ```
 
 ---
@@ -252,7 +255,7 @@ Určuje chování při zastavování nabíjení ze solárního přebytku v rež
 
 ```yaml
 disable:
-  threshold: 200 # maximum import power (W)
+  threshold: 200 # maximální výkon odběru (W)
   delay: 10m
 ```
 
@@ -267,7 +270,7 @@ Určuje prahovou hodnotu výkonu na předávacím místě k síti ve wattech (W
 **Příklad**:
 
 ```yaml
-threshold: 200 # Maximum grid consumption of 200W is allowed
+threshold: 200 # Povolen je odběr ze sítě maximálně 200 W
 ```
 
 :::note
@@ -306,13 +309,13 @@ Tento parametr nemění fyzické připojení nabíječky, ale slouží k určen
 
 Nově se vyhodnocují vstupní napětí, pokud je měřič nabíječky poskytuje. Na základě napětí se hodnota `phases` automaticky mění přes API. V případech, kdy se nabíječka přepíná mezi jednou a třemi fázemi přepínačem, už ruční změny hodnoty `phases` nejsou nutné.
 
-V případech, kdy se jednofázové nebo třífázové nabíjení realizuje odpovídajícím nabíjecím kabelem, a ne přepínačem, způsobuje toto „automatické“ chování problémy. V takovém případě je nutné odpovídajícím způsobem upravit hodnotu `phases` ve `vehicle`. Protože tuto hodnotu nelze měnit přes API, lze použít následující řešení:
+V případech, kdy se jednofázové nebo třífázové nabíjení realizuje odpovídajícím nabíjecím kabelem, a ne přepínačem, způsobuje toto „automatické“ chování problémy. V takovém případě je nutné odpovídajícím způsobem upravit hodnotu `phases` v konfiguraci vozidla (`vehicle`). Protože tuto hodnotu nelze měnit přes API, lze použít následující řešení:
 
 Nakonfigurujte vozidlo dvakrát: jednou s `phases: 1` a jednou s `phases: 3`. Podle požadovaného režimu nabíjení pak v uživatelském rozhraní vyberte příslušné vozidlo.
 
 Pokud je připojeno známé vozidlo, použije se pro výpočet nižší z hodnot `vehicle: phases` a `loadpoint: phases`. U neznámých vozidel se zohledňuje pouze `loadpoint: phases`.
 
-Pokud během nabíjení vozidla nabíječka nebo měřič nabíjení poskytují proudy jednotlivých fází, zjistí se skutečný počet fází a (dokud vozidlo zůstává připojeno) použije se pro další výpočty. Funguje to jen u třífázových nabíjecích bodů.
+Pokud během nabíjení vozidla nabíječka nebo měřič nabíjení poskytují proudy jednotlivých fází, zjistí se skutečný počet fází a (dokud vozidlo zůstává připojeno) použije se pro další výpočty skutečných prahů přepínání. Funguje to jen u třífázových nabíjecích bodů.
 
 **Výchozí hodnota:** `3`
 
@@ -356,7 +359,7 @@ Prioritní nabíjecí bod dostane nabíjecí výkon ostatních neprioritních ne
 
 Vyšší hodnoty znamenají vyšší prioritu. Nabíjecí body bez této položky mají `priority: 0`.
 
-Pokud je k dispozici více nabíjecích bodů, tento parametr neovlivňuje pořadí, ve kterém se nabíjecí relace spouštějí. Pokud však nabíjí nabíjecí bod s nižší prioritou, může se zapnout nabíjecí bod s vyšší prioritou, jakmile získá přístup k nevyužitému nabíjecímu výkonu.
+Pokud je k dispozici více nabíjecích bodů, tento parametr neovlivňuje pořadí, ve kterém se nabíjecí relace spouštějí. Pokud však nabíjí bod s nižší prioritou, může se bod s vyšší prioritou zapnout, pokud je k dispozici nevyužitý nabíjecí výkon.
 
 Tato prioritizace funguje v režimu **Chytrý** (`smart`). Když je aktivní [Vždy nabíjet](/cs/features/modes#always-charge), nabíjení se nepřeruší, pouze se sníží na minimum.
 

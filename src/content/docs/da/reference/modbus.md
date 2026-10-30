@@ -3,38 +3,38 @@ title: "Modbus"
 description: "Sådan kommunikerer evcc med målere og opladere via Modbus, serielt over RS485, over TCP eller gennem en RTU-til-TCP-konverter, og sådan sætter du det op."
 sidebar:
   order: 4
-translatedFrom: "8cbbf87533c1"
+translatedFrom: "01c339d6465c"
 ---
 
 Nogle enheder, f.eks. målere ([`meters`](/da/reference/configuration/meters#modbus)) eller opladere ([`chargers`](/da/reference/configuration/chargers)), tilsluttes og adresseres via Modbus-protokollen.
 
 `meter`-konfigurationen omfatter typen af fysisk forbindelse (interface), valgfrie tekniske interfaceparametre, den anvendte Modbus-protokol, enhedens unikke Modbus-ID på bussen samt nummeret og typen af det register, der skal læses eller skrives.
 
-Det er vigtigt at være opmærksom på, at der findes tre forskellige Modbus-protokoller: Modbus RTU, Modbus ASCII og Modbus TCP. Teknisk set kan de overføres via forskellige typer interfaces. Den klassiske variant er Modbus RTU via et serielt RS485-businterface, som bruges af de fleste målere og nogle opladere. Enheder med et indbygget netværksinterface (Ethernet/WiFi) adresseres derimod typisk via Modbus TCP-protokollen.
+Det er vigtigt at være opmærksom på, at der findes tre forskellige Modbus-protokoller: Modbus RTU, Modbus ASCII og Modbus TCP. Teknisk set kan de overføres via forskellige typer interfaces. Den klassiske variant er Modbus RTU via et serielt RS485-businterface, som bruges af de fleste målere og nogle opladere. Enheder med et indbygget netværksinterface (Ethernet/WiFi) adresseres derimod typisk via Modbus-TCP-protokollen.
 
-Hvis en seriel Modbus-enhed skal tilsluttes gennem en interfacekonverter via et netværk (Ethernet/WiFi/PowerLAN), køres Modbus RTU-protokollen over en TCP/IP-forbindelse. Protokollen overføres uændret over netværket (dvs. ”tunnelleret”). Selvom transportmetoden (TCP/IP) er den samme, er protokollen IKKE den samme som Modbus TCP. Det er afgørende at skelne mellem protokol og transportmetode. ”Modbus (RTU) over TCP” er noget andet end Modbus TCP!
+Hvis en seriel Modbus-enhed skal tilsluttes gennem en interfacekonverter via et netværk (Ethernet/WiFi/PowerLAN), køres Modbus-RTU-protokollen over en TCP/IP-forbindelse. Protokollen overføres uændret over netværket (dvs. _tunnelleret_). Selvom transportmetoden (TCP/IP) er den samme, er protokollen IKKE den samme som Modbus TCP. Det er afgørende at skelne mellem protokol og transportmetode. ”Modbus (RTU) over TCP” er noget andet end Modbus TCP!
 
 :::caution
-Advarsel: Der findes mere avancerede interfacekonvertere, som også kan oversætte selve Modbus-protokollen mellem Modbus RTU og Modbus TCP, hvis funktionen er slået til!
+Advarsel: Der findes mere avancerede interfacekonvertere, som valgfrit kan oversætte selve Modbus-protokollen mellem Modbus RTU og Modbus TCP!
 
 Hvis denne funktion er aktiv, skal evcc kommunikere med konverteren via Modbus TCP, mens konverteren kommunikerer med den serielle enhed via Modbus RTU og oversætter de to protokoller i begge retninger.
 I så fald skal enhedens specifikation og konfiguration gennemgås omhyggeligt, ellers virker kommunikationen muligvis ikke!
 :::
 
-Ved en konfiguration med interfacekonverter bestemmes den serielle buskonfiguration udelukkende på konverteren. evcc-konfigurationen vedrører så kun strækningen frem til konverteren.
+Ved en konfiguration med interfacekonverter indstilles den serielle buskonfiguration udelukkende på konverteren. evcc-konfigurationen vedrører så kun forbindelsen frem til konverteren.
 
 ## Fysisk forbindelse
 
 ### Seriel forbindelse (RS485)
 
-Hvis enheden er tilsluttet direkte via en RS485-adapter (Modbus RTU), skal `device` og de serielle kommunikationsparametre `baudrate` og `comset` angives i overensstemmelse med enhedens konfiguration. Se den pågældende brugsanvisning, datablade eller systemindstillinger.
+Hvis enheden er tilsluttet direkte via en RS485-adapter (Modbus RTU), skal `device` og de serielle kommunikationsparametre `baudrate` og `comset` angives i overensstemmelse med enhedens konfiguration. Se enhedens brugsanvisning, datablad eller systemindstillinger.
 
 :::note
 Flere enheder med identiske kommunikationsparametre kan køre på en seriel RS485-bus, hvis hver enhed får tildelt et unikt Modbus-ID. Hvis ikke alle enheder på en bus kan konfigureres med ensartede kommunikationsindstillinger (men med forskellige ID'er), er det nødvendigt at opdele dem i flere uafhængige bussystemer.
 :::
 
 :::caution
-Det er ikke muligt at blande enheder med forskellige serielle kommunikationsparametre på samme bus, og det fører til uforudsigelige kommunikationsfejl.
+Enheder med forskellige serielle kommunikationsparametre må ikke blandes på samme bus, da det fører til uforudsigelige kommunikationsfejl.
 :::
 
 **Eksempel**:
@@ -74,7 +74,7 @@ rtu: true # Modbus RTU over TCP
 
 ## Foruddefinerede enheder
 
-De integrerede, foruddefinerede enhedsmodeller `model` er identiske med [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
+De integrerede, foruddefinerede enhedsmodeller (`model`) svarer til dem i [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
 
      ABB       ABB A/B-Series meters
      DDM       DDM18SD
@@ -93,13 +93,11 @@ De integrerede, foruddefinerede enhedsmodeller `model` er identiske med [MBMD](h
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Enhver `model`, der afviger fra disse,
+Enhver `model`, der afviger fra disse, behandles som en _SunSpec_-enhedstype.
 
-behandles som en _SunSpec_-enhedstype.
+Med `value` angiver du den værdi, der skal læses fra enheden. Alle understøttede værdier er foruddefinerede i [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
 
-Med `value` angiver du den værdi, der skal læses fra enheden. Alle understøttede værdier er foruddefineret i [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
-
-For en _SunSpec_-kompatibel inverter eller måler angives de værdier, der skal læses, i formatet `model:[block:]point` i henhold til _SunSpec_-definitionen. Hvis du f.eks. vil hente DC-effekten på den anden streng i en trefaset solcelleinverter (svarende til SunSpec Model 103), gøres det sådan: `value: 103:2:W`.
+For en _SunSpec_-kompatibel inverter eller måler angives de værdier, der skal læses, i formatet `model:[block:]point` i henhold til _SunSpec_-definitionen. Hvis du f.eks. vil hente DC-effekten på den anden streng i en trefaset solcelleinverter (svarende til SunSpec Model 103), skriver du: `value: 103:2:W`.
 
 Enhedens `model` og slave-ID'et `id` er altid påkrævet:
 
@@ -110,12 +108,12 @@ source: modbus
 ---
 model: sdm
 value: Power
-scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
+scale: -1 # kommatalsfaktor, der anvendes på resultatet, f.eks. til omregning fra kW til W
 ```
 
 ## Negering af værdier
 
-For MBMD-målere kan måleværdier vendes ved at sætte et `-` (minustegn) foran aliasnavnet.
+For MBMD-målere kan fortegnet på måleværdierne vendes ved at sætte et `-` (minustegn) foran aliasnavnet.
 Det er nyttigt, når målere bruges i forskellige konfigurationer eller monteringsretninger, og fortegnet på måleværdierne skal tilpasses.
 
 ### Understøttede målinger
@@ -133,7 +131,7 @@ meters:
   - name: my-meter
     type: modbus
     model: sdm
-    power: -Power # inverts the power value
+    power: -Power # vender effektværdien
 ```
 
 ### Eksempler
@@ -145,7 +143,7 @@ meters:
   - name: pv-meter
     type: modbus
     model: sdm
-    power: -Power # Power will be inverted (e.g. +1000 W becomes -1000 W)
+    power: -Power # Effekten vendes (f.eks. bliver +1000 W til -1000 W)
 ```
 
 #### Vendt effekt pr. fase
@@ -157,9 +155,9 @@ meters:
     model: sdm
     power: Power
     powers:
-      - -PowerL1 # Phase 1 inverted
-      - -PowerL2 # Phase 2 inverted
-      - -PowerL3 # Phase 3 inverted
+      - -PowerL1 # Fase 1 vendt
+      - -PowerL2 # Fase 2 vendt
+      - -PowerL3 # Fase 3 vendt
 ```
 
 #### Vendte strømme (enkelte faser)
@@ -171,9 +169,9 @@ meters:
     model: sdm
     power: Power
     currents:
-      - -CurrentL1 # Current Phase 1 inverted
-      - CurrentL2 # Current Phase 2 normal
-      - -CurrentL3 # Current Phase 3 inverted
+      - -CurrentL1 # Strøm fase 1 vendt
+      - CurrentL2 # Strøm fase 2 normal
+      - -CurrentL3 # Strøm fase 3 vendt
 ```
 
 ### Typiske anvendelser
@@ -181,7 +179,7 @@ meters:
 **Forkert monterede målere**:
 Hvis en strømsensor eller måler er fysisk installeret i den forkerte retning, kan du rette værdierne i softwaren.
 
-**Eksport til elnettet vs. forbrug**:
+**Eksport til elnettet kontra forbrug**:
 For solcellemålere, hvor fortegnskonventionen skal vendes.
 
 **Forskellig orientering af strømtransformere**:
@@ -195,13 +193,13 @@ Til det formål skal der ud over de generelle Modbus-indstillinger (se ovenfor) 
 Definitionen af et register kræver følgende parametre:
 
 - `address`: Registeradressen
-- `type`: Registertypen, tilladte læsetyper er `coil`, `input`, `holding`, skrivetyper er `writeholding`, `writeholdings`, `writecoil`
+- `type`: Registertypen. Tilladte læsetyper er `coil`, `input` og `holding`, og tilladte skrivetyper er `writeholding`, `writeholdings` og `writecoil`.
 - `decode`: Dataenes kodningstype. Tilladte værdier er: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. For typen `coil` ignoreres kodningen, men den skal stadig angives. For typen `writecoil` skal `bool8` angives.
 - `bitmask`: En valgfri angivelse. Den angivne værdi kombineres med den læste værdi via AND for at udtrække enkelte bits.
 
 Andre tilladte parametre i en manuel konfiguration er:
 
-- `scale`: Decimaltal, der kan bruges til at omregne læste værdier (f.eks. W til kW eller omvendt). Værdien ganges med den læste og afkodede råværdi.
+- `scale`: Kommatal, der kan bruges til at omregne læste værdier (f.eks. W til kW eller omvendt). Værdien ganges med den læste og afkodede råværdi.
 - `timeout`: Modbus-timeout. Uden enhed er værdien i ns, ellers angives enheden, f.eks. 10s for 10 sekunder.
 
 **Eksempel**:
@@ -211,14 +209,14 @@ source: modbus
 ---
 register:
   address: 40070
-  type: holding # coil, holding or input
-  decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
-  bitmask: 2 # Optional: a bitmask that is applied to the read value. Here the mask is 0000000000000010b, ignored if value is 0
-scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 2s # timeout, without unit in ns
+  type: holding # coil, holding eller input
+  decode: int32 # int16|32|64, uint16|32|64, float32|64 og u|int32s + float32s
+  bitmask: 2 # Valgfri: en bitmaske, der anvendes på den læste værdi. Her er masken 0000000000000010b. Den ignoreres, hvis værdien er 0
+scale: -1.0 # kommatalsfaktor, der anvendes på resultatet, f.eks. til omregning fra kW til W
+timeout: 2s # timeout, uden enhed i ns
 ```
 
-Ved kodningerne `int32s/uint32s` byttes byterækkefølgen om, hvilket er nyttigt for E3/DC-enheder.
+Ved kodningerne `int32s/uint32s` byttes ordrækkefølgen om (mindst betydende ord først), hvilket er nyttigt for E3/DC-enheder.
 
 ### Skrivning af registre
 
@@ -234,7 +232,7 @@ source: modbus
 ---
 register:
   address: 40070
-  type: writeholding # writeholding, writeholdings or writecoil
+  type: writeholding # writeholding, writeholdings eller writecoil
 ```
 
 ### Komplet eksempel
@@ -248,41 +246,41 @@ chargers:
   - type: custom
     name: CustomCharger
     status:
-      # Read the status of the charger
-      # Either A,B,C or F
+      # Læs opladerens status
+      # Enten A, B, C eller F
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       timeout: 3s
       register:
         address: 100
-        type: input # Read an input register
+        type: input # Læs et input-register
         decode: int16
     enabled:
-      # Is the charger enabled (1) or not (0)
+      # Er opladeren aktiveret (1) eller ej (0)
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: coil # Read a coil
-        decode: bool16 # Doesn't matter but required
+        type: coil # Læs en coil
+        decode: bool16 # Uden betydning, men påkrævet
     enable:
-      # Enable the charger
+      # Aktivér opladeren
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: writecoil # Write a coil
+        type: writecoil # Skriv en coil
         decode: bool8
     maxcurrent:
-      # Set the maximum current
+      # Indstil den maksimale strøm
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 300
-        type: writeholding # Write a holding register
+        type: writeholding # Skriv et holding-register
         decode: uint16
 ```

@@ -1,13 +1,13 @@
 ---
 title: "Sunny Home Manager"
-description: "Legt uit hoe evcc zijn laadpunten zichtbaar maakt voor een SMA Sunny Home Manager 2.0 in de Sunny Portal en de Home Manager desgewenst het laadvermogen laat beïnvloeden."
+description: "evcc maakt zijn laadpunten zichtbaar voor een SMA Sunny Home Manager 2.0 in de Sunny Portal en laat de Home Manager desgewenst het laadvermogen beïnvloeden."
 sidebar:
   order: 5
-translatedFrom: "3e7eabc9fd7e"
+translatedFrom: "64de8f1d87ba"
 ---
 
 evcc ondersteunt de koppeling met de [SMA Sunny Home Manager 2.0 (SHM)](https://www.sma.de/produkte/energiemanagement/sunny-home-manager).
-Deze koppeling maakt laadpunten zichtbaar in de Sunny Portal en maakt optioneel aansturing door de SHM mogelijk.
+Deze koppeling maakt laadpunten zichtbaar in de Sunny Portal en laat de SHM ze desgewenst ook aansturen.
 
 ## Hoe het werkt
 
@@ -22,9 +22,9 @@ Het SEMP-endpoint is bereikbaar op `http://[evcc-IP]:7070/semp/` en toont een XM
 
 ## Instellen in de Sunny Home Manager
 
-Nadat evcc is geconfigureerd, worden de laadpunten in de Sunny Portal automatisch als nieuwe apparaten voorgesteld onder **Configuratie → Apparaatoverzicht**.
+Zodra uw laadpunten in evcc zijn ingesteld, verschijnen ze in de Sunny Portal automatisch als nieuwe apparaten onder **Configuratie → Apparaatoverzicht**.
 Daar kunt u ze activeren en de configuratiewizard doorlopen.
-Zie de [handleiding van SMA](https://manuals.sma.de/HM-20/en-US/10426801547.html) voor details over het instellen.
+Zie de [handleiding van SMA](https://manuals.sma.de/HM-20/nl-NL/10426801547.html) voor details over het instellen.
 
 ## Apparaat-ID’s
 
@@ -37,10 +37,10 @@ Elk laadpunt krijgt een unieke ID in het formaat:
 F-AAAAAAAA-BBBBBBBBBBBB-00
 ```
 
-Daarbij is:
+Hierin staat:
 
-- **AAAAAAAA**: de Vendor ID (8 tekens, hexadecimaal)
-- **BBBBBBBBBBBB**: de Device ID (12 tekens, hexadecimaal)
+- **AAAAAAAA**: de leveranciers-ID (8 tekens, hexadecimaal)
+- **BBBBBBBBBBBB**: de apparaat-ID (12 tekens, hexadecimaal)
 
-Als u deze automatisch gegenereerde ID’s wilt vervangen (bijv. bij een overstap naar andere evcc-hardware), kunt u de bestaande ID’s uit het `/semp/`-endpoint van het oude systeem kopiëren en aanpassen onder **Configuratie → Sunny Home Manager**.
+Als u deze automatische toewijzing wilt overschrijven (bijv. bij een overstap naar andere evcc-hardware), kunt u de bestaande ID’s uit het `/semp/`-endpoint van het oude systeem kopiëren en aanpassen onder **Configuratie → Sunny Home Manager**.
 Zo blijft de SHM de apparaten herkennen.

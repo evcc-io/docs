@@ -6,33 +6,33 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4ec9acb9cce2"
+translatedFrom: "df005046697e"
 ---
 
-I dag kommer der en lille opdatering, hovedsageligt med nogle fejlrettelser og flere forbedringer.
+Dagens opdatering er lille og indeholder hovedsageligt fejlrettelser og yderligere forbedringer.
 
 ## Timere i brugerfladen
 
-Brugerfladen viser nu de timere, der kører i baggrunden:
+Brugerfladen viser dig nu de timere, der kører i baggrunden:
 
 ![Timer for faseskift](../../../../../en/blog/2021/12/19/1p3p.png)
 
 <!-- excerpt -->
 
 - I Sol-tilstand:
-  - Hvornår opladningen afbrydes
+  - Hvornår opladningen sættes på pause
   - Hvornår opladningen genoptages
 - 1p3p-faseskift:
   - Hvornår der skiftes op til 3p
   - Hvornår der skiftes ned til 1p
 
-Derudover vises det også, hvor mange faser der oplades med.
+Den viser også, hvor mange faser der bruges til opladningen.
 
 ## Målopladning
 
 ![Brugerflade for målopladning](../../../../../en/blog/2021/12/19/zielladen.png)
 
-Funktionen til målopladning er tilbage. Med den kan man oplade elbilen til det ønskede opladningsniveau inden en bestemt dato og et bestemt klokkeslæt.
+Målopladning er tilbage. Med den kan du oplade elbilen til det ønskede opladningsniveau inden en bestemt dato og et bestemt klokkeslæt.
 
 ## Download og installation
 

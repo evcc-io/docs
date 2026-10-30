@@ -1,9 +1,9 @@
 ---
 title: "Modbus"
-description: "Vysvětluje, jak evcc komunikuje s měřiči a nabíječkami přes Modbus, ať už sériově přes RS485, přes TCP nebo přes převodník RTU na TCP, a jak vše nastavit."
+description: "Měřiče a nabíječky s rozhraním Modbus lze k evcc připojit sériově (RS485), po síti (TCP) nebo převodníkem RTU na TCP a tady zjistíte, jak je nastavit."
 sidebar:
   order: 4
-translatedFrom: "8cbbf87533c1"
+translatedFrom: "01c339d6465c"
 ---
 
 Některá zařízení, např. měřiče ([`meters`](/cs/reference/configuration/meters#modbus)) nebo nabíječky ([`chargers`](/cs/reference/configuration/chargers)), se připojují a adresují pomocí protokolu Modbus.
@@ -12,29 +12,29 @@ Konfigurace `meter` obsahuje typ fyzického připojení (rozhraní), volitelné 
 
 Je důležité vědět, že existují tři různé protokoly Modbus: Modbus RTU, Modbus ASCII a Modbus TCP. Technicky je lze přenášet přes různé typy rozhraní. Klasickou variantou je Modbus RTU přes sériové rozhraní sběrnice RS485, které používá většina měřičů a některé nabíječky. Zařízení s nativním síťovým rozhraním (Ethernet/Wi-Fi) se naproti tomu obvykle adresují protokolem Modbus TCP.
 
-Pokud je potřeba sériové zařízení Modbus připojit přes převodník rozhraní po síti (Ethernet/Wi-Fi/PowerLAN), vytvoří se spojení s protokolem Modbus RTU přes TCP/IP. Protokol Modbus RTU se přitom přenáší po síti přímo (tj. je „tunelován“). I když je způsob přenosu (TCP/IP) stejný, protokol _není_ totožný s Modbus TCP. Je zásadní rozlišovat mezi protokolem a způsobem přenosu. „Modbus (RTU) over TCP“ je něco jiného než Modbus TCP!
+Pokud je potřeba sériové zařízení Modbus připojit přes převodník rozhraní po síti (Ethernet/Wi-Fi/PowerLAN), vytvoří se spojení s protokolem Modbus RTU přes TCP/IP. Protokol Modbus RTU se přitom přenáší po síti přímo (tj. je _tunelován_). I když je způsob přenosu (TCP/IP) stejný, protokol _není_ totožný s Modbus TCP. Je zásadní rozlišovat mezi protokolem a způsobem přenosu. _Modbus RTU přes TCP_ je něco jiného než Modbus TCP!
 
 :::caution
-Pozor: Existují složitější převodníky rozhraní, které umějí volitelně překládat samotný protokol Modbus mezi Modbus RTU a Modbus TCP!
+Existují i složitější převodníky rozhraní, které umějí volitelně překládat samotný protokol Modbus mezi Modbus RTU a Modbus TCP!
 
 Pokud je tato funkce aktivní, musí evcc s převodníkem komunikovat přes Modbus TCP, zatímco převodník komunikuje se sériovým zařízením přes Modbus RTU a oba protokoly obousměrně překládá.
 V takovém případě je třeba pečlivě dbát na specifikaci a konfiguraci zařízení, jinak komunikace nemusí fungovat!
 :::
 
-V případě konfigurace s převodníkem rozhraní se konfigurace sériové sběrnice určuje pouze na převodníku. Konfigurace v evcc se pak týká jen spojení mezi evcc a převodníkem.
+Pokud používáte převodník rozhraní, nastavuje se sériová sběrnice pouze na převodníku. Nastavení v evcc se pak týká jen spojení mezi evcc a převodníkem.
 
 ## Fyzické připojení
 
 ### Sériové připojení (RS485)
 
-Pokud je zařízení připojeno přímo přes adaptér RS485 (Modbus RTU), musí být `device` a sériové komunikační parametry `baudrate` a `comset` zadány podle konfigurace zařízení. Najdete je v příslušném návodu k obsluze, v datových listech nebo v nastavení systému.
+Pokud je zařízení připojeno přímo přes adaptér RS485 (Modbus RTU), musí být `device` a sériové komunikační parametry `baudrate` a `comset` zadány podle konfigurace zařízení. Najdete je v návodu k obsluze, v datovém listu nebo v nastavení zařízení.
 
 :::note
-Na jedné sériové sběrnici RS485 může pracovat více zařízení se stejnými komunikačními parametry, pokud má každé zařízení přiřazeno jedinečné Modbus ID. Pokud nelze všem zařízením na sběrnici nastavit stejné komunikační parametry (každému s jiným ID), je nutné je rozdělit do několika nezávislých sběrnicových systémů.
+Na jedné sériové sběrnici RS485 může pracovat více zařízení se stejnými komunikačními parametry, pokud má každé zařízení přiřazeno jedinečné Modbus ID. Pokud nelze všem zařízením na sběrnici nastavit stejné komunikační parametry (a každému jiné ID), je nutné je rozdělit na několik samostatných sběrnic.
 :::
 
 :::caution
-Kombinovat na jedné sběrnici zařízení s různými sériovými komunikačními parametry není možné a vede to k nepředvídatelným chybám komunikace.
+Zařízení s různými sériovými komunikačními parametry na jedné sběrnici kombinovat nelze, vede to k nepředvídatelným chybám komunikace.
 :::
 
 **Například**:
@@ -61,7 +61,7 @@ uri: 192.168.0.11:502
 
 ### Sériové zařízení přes síťové připojení (s převodníkem rozhraní)
 
-Pokud je sériové zařízení připojeno přes vložený transparentní převodník rozhraní RS485-IP (bez překladu protokolu), musí se pomocí `rtu: true` přepnout i protokol na Modbus RTU přes spojení TCP/IP.
+Pokud je sériové zařízení připojeno přes transparentní převodník RS485-IP (bez překladu protokolu), je nutné pomocí `rtu: true` přepnout protokol na Modbus RTU přes TCP/IP.
 
 **Například**:
 
@@ -69,12 +69,12 @@ Pokud je sériové zařízení připojeno přes vložený transparentní převod
 source: modbus
 id: 1
 uri: 192.168.0.10:502
-rtu: true # Modbus RTU over TCP
+rtu: true # Modbus RTU přes TCP
 ```
 
 ## Předdefinovaná zařízení
 
-Integrované předdefinované modely zařízení `model` jsou totožné s [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
+Předdefinované modely zařízení (`model`) odpovídají modelům z [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
 
      ABB       ABB A/B-Series meters
      DDM       DDM18SD
@@ -93,15 +93,13 @@ Integrované předdefinované modely zařízení `model` jsou totožné s [MBMD
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Každý `model`, který se od těchto liší, se
-
-považuje za typ zařízení _SunSpec_.
+Každý `model`, který se od těchto liší, se považuje za typ zařízení _SunSpec_.
 
 Pomocí `value` určíte hodnotu, která se má ze zařízení číst. Všechny podporované hodnoty jsou předdefinované v [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
 
 U střídače nebo měřiče kompatibilního se _SunSpec_ se čtené hodnoty zadávají ve formátu `model:[block:]point` podle definice _SunSpec_. Například DC výkon na druhém stringu třífázového solárního střídače (odpovídá SunSpec Model 103) se čte takto: `value: 103:2:W`.
 
-Model zařízení `model` a slave ID `id` jsou vždy povinné:
+Model zařízení `model` a Modbus ID `id` jsou vždy povinné:
 
 **Například**:
 
@@ -110,21 +108,21 @@ source: modbus
 ---
 model: sdm
 value: Power
-scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
+scale: -1 # desetinný koeficient, kterým se násobí výsledek, např. pro převod kW na W
 ```
 
-## Negace hodnot
+## Invertování hodnot
 
 U měřičů MBMD lze naměřené hodnoty invertovat tak, že před název aliasu přidáte `-` (znaménko minus).
 To se hodí, když se měřiče používají v různých konfiguracích nebo orientacích montáže a je potřeba upravit znaménko naměřených hodnot.
 
 ### Podporovaná měření
 
-Negace funguje u následujících měření MBMD:
+Invertování funguje u následujících měření MBMD:
 
-- `power` – celkový výkon
-- `currents` – proudy jednotlivých fází (pole)
-- `powers` – výkony jednotlivých fází (pole)
+- `power`: celkový výkon
+- `currents`: proudy jednotlivých fází (pole)
+- `powers`: výkony jednotlivých fází (pole)
 
 ### Syntaxe
 
@@ -133,7 +131,7 @@ meters:
   - name: my-meter
     type: modbus
     model: sdm
-    power: -Power # inverts the power value
+    power: -Power # invertuje hodnotu výkonu
 ```
 
 ### Příklady
@@ -145,7 +143,7 @@ meters:
   - name: pv-meter
     type: modbus
     model: sdm
-    power: -Power # Power will be inverted (e.g. +1000 W becomes -1000 W)
+    power: -Power # výkon se invertuje (např. z +1000 W bude -1000 W)
 ```
 
 #### Invertované výkony fází
@@ -157,9 +155,9 @@ meters:
     model: sdm
     power: Power
     powers:
-      - -PowerL1 # Phase 1 inverted
-      - -PowerL2 # Phase 2 inverted
-      - -PowerL3 # Phase 3 inverted
+      - -PowerL1 # fáze 1 invertovaná
+      - -PowerL2 # fáze 2 invertovaná
+      - -PowerL3 # fáze 3 invertovaná
 ```
 
 #### Invertované proudy (jednotlivé fáze)
@@ -171,9 +169,9 @@ meters:
     model: sdm
     power: Power
     currents:
-      - -CurrentL1 # Current Phase 1 inverted
-      - CurrentL2 # Current Phase 2 normal
-      - -CurrentL3 # Current Phase 3 inverted
+      - -CurrentL1 # proud fáze 1 invertovaný
+      - CurrentL2 # proud fáze 2 beze změny
+      - -CurrentL3 # proud fáze 3 invertovaný
 ```
 
 ### Případy použití
@@ -182,7 +180,7 @@ meters:
 Pokud je proudový senzor nebo měřič fyzicky namontován v opačném směru, můžete hodnoty opravit softwarově.
 
 **Export do sítě vs. spotřeba**:
-U solárních měřičů, u kterých je potřeba obrátit znaménkovou konvenci.
+Hodí se u solárních měřičů, u kterých je potřeba invertovat znaménko.
 
 **Různá orientace proudových transformátorů**:
 U vícefázových instalací s různě orientovanými proudovými transformátory.
@@ -211,14 +209,14 @@ source: modbus
 ---
 register:
   address: 40070
-  type: holding # coil, holding or input
+  type: holding # coil, holding nebo input
   decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
-  bitmask: 2 # Optional: a bitmask that is applied to the read value. Here the mask is 0000000000000010b, ignored if value is 0
-scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 2s # timeout, without unit in ns
+  bitmask: 2 # volitelné: bitová maska, která se použije na přečtenou hodnotu. Zde je maska 0000000000000010b, při hodnotě 0 se ignoruje
+scale: -1.0 # desetinný koeficient, kterým se násobí výsledek, např. pro převod kW na W
+timeout: 2s # časový limit, bez jednotky v ns
 ```
 
-U dekódování `int32s/uint32s` se prohodí pořadí bajtů, což se hodí u zařízení E3/DC.
+U dekódování `int32s/uint32s` se prohodí pořadí slov (nejméně významné slovo jako první), což se hodí u zařízení E3/DC.
 
 ### Zápis registrů
 
@@ -234,12 +232,12 @@ source: modbus
 ---
 register:
   address: 40070
-  type: writeholding # writeholding, writeholdings or writecoil
+  type: writeholding # writeholding, writeholdings nebo writecoil
 ```
 
 ### Kompletní příklad
 
-Kompletní příklad nabíječky definované uživatelem s rozhraním Modbus (zde Phoenix EM-CP-PP-ETH s IP adresou 192.168.1.10) může vypadat takto:
+Kompletní příklad nabíječky definované uživatelem s rozhraním Modbus (zde Phoenix EM-CP-PP-ETH s IP adresou 192.168.1.10) může vypadat následovně.
 
 **Například**:
 
@@ -248,41 +246,41 @@ chargers:
   - type: custom
     name: CustomCharger
     status:
-      # Read the status of the charger
-      # Either A,B,C or F
+      # Čtení stavu nabíječky
+      # buď A, B, C, nebo F
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       timeout: 3s
       register:
         address: 100
-        type: input # Read an input register
+        type: input # čtení input registru
         decode: int16
     enabled:
-      # Is the charger enabled (1) or not (0)
+      # Je nabíječka povolená (1), nebo ne (0)
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: coil # Read a coil
-        decode: bool16 # Doesn't matter but required
+        type: coil # čtení coilu
+        decode: bool16 # nehraje roli, ale je povinné
     enable:
-      # Enable the charger
+      # Povolení nabíječky
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: writecoil # Write a coil
+        type: writecoil # zápis coilu
         decode: bool8
     maxcurrent:
-      # Set the maximum current
+      # Nastavení maximálního proudu
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 300
-        type: writeholding # Write a holding register
+        type: writeholding # zápis holding registru
         decode: uint16
 ```

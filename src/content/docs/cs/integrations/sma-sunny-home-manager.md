@@ -1,9 +1,9 @@
 ---
 title: "Sunny Home Manager"
-description: "Vysvětluje, jak evcc zviditelní své nabíjecí body pro SMA Sunny Home Manager 2.0 v Sunny Portalu a volitelně mu umožní ovlivňovat nabíjecí výkon."
+description: "evcc zpřístupní své nabíjecí body pro SMA Sunny Home Manager 2.0, takže se zobrazí v Sunny Portalu, a volitelně mu umožní ovlivňovat nabíjecí výkon."
 sidebar:
   order: 5
-translatedFrom: "3e7eabc9fd7e"
+translatedFrom: "64de8f1d87ba"
 ---
 
 evcc podporuje integraci se [SMA Sunny Home Managerem 2.0 (SHM)](https://www.sma.de/produkte/energiemanagement/sunny-home-manager).
@@ -22,8 +22,8 @@ SEMP endpoint je dostupný na adrese `http://[evcc-IP]:7070/semp/` a zobrazuje X
 
 ## Nastavení v Sunny Home Manageru
 
-Po nakonfigurování evcc se nabíjecí body v Sunny Portalu automaticky nabídnou jako nová zařízení v části **Konfigurace > Přehled zařízení**.
-Tam je můžete aktivovat a projít průvodcem konfigurací.
+Jakmile máte nabíjecí body v evcc nastavené, Sunny Portal je automaticky nabídne jako nová zařízení v části **Konfigurace → Přehled zařízení**.
+Tam je můžete aktivovat a nastavit pomocí průvodce konfigurací.
 Podrobnosti k nastavení najdete v [příručce SMA](https://manuals.sma.de/HM-20/en-US/10426801547.html).
 
 ## ID zařízení
@@ -42,5 +42,5 @@ Jednotlivé části znamenají:
 - **AAAAAAAA**: ID výrobce (8 znaků, hexadecimálně)
 - **BBBBBBBBBBBB**: ID zařízení (12 znaků, hexadecimálně)
 
-Pokud nechcete automaticky přidělená ID použít (např. při přechodu na jiný hardware pro evcc), můžete zkopírovat stávající ID z endpointu `/semp/` starého systému a zadat je v části **Nastavení > Sunny Home Manager**.
+Pokud chcete toto automatické přidělování obejít (např. při přesunu vaší instance evcc na nový hardware), můžete zkopírovat stávající ID z endpointu `/semp/` starého systému a upravit je v části **Konfigurace → Sunny Home Manager**.
 Tím zajistíte, že SHM zařízení dál rozpozná.

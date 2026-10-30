@@ -1,17 +1,17 @@
 ---
 title: "modbusproxy"
-description: "Configurez le proxy Modbus dans evcc.yaml pour que d’autres systèmes partagent avec votre instance evcc la connexion Modbus à un onduleur ou à un compteur."
+description: "Configurez le proxy Modbus dans evcc.yaml pour partager la connexion Modbus d’un onduleur ou d’un compteur entre votre instance evcc et d’autres systèmes."
 sidebar:
   order: 18
-translatedFrom: "cd5b4859740b"
+translatedFrom: "7191bc3757f6"
 ---
 
 Le paramètre `modbusproxy` est une liste d’appareils mis à disposition des systèmes tiers via Modbus TCP sur le réseau.
 
-Certains appareils n’autorisent qu’un nombre très limité de clients Modbus TCP. Dans le pire des cas, une seule connexion est autorisée, comme c’est le cas pour les composants SolarEdge. De plus, un seul maître est autorisé sur les bus série Modbus RTU RS485.
+Certains appareils n’autorisent qu’un nombre très limité de clients Modbus TCP. Dans le pire des cas, une seule connexion est autorisée, comme pour les composants SolarEdge. De plus, un seul maître est autorisé sur les bus série Modbus RTU RS485.
 Grâce à `modbusproxy`, evcc peut servir de proxy Modbus et partager des connexions Modbus existantes avec d’autres systèmes. evcc communique ainsi directement avec l’appareil, tandis que les autres systèmes communiquent avec evcc, qui regroupe les connexions et les transmet à l’appareil cible.
 
-La configuration `modbusproxy` est une liste de différentes configurations de proxy.
+Chaque entrée de `modbusproxy` définit un proxy distinct.
 
 **Par exemple** :
 
@@ -60,7 +60,7 @@ port: 5021
 
 L’adresse IP et le port de l’appareil cible, au format URI habituel.
 
-Chaque port indiqué doit être unique et ne pas être déjà utilisé par une autre application sur le même hôte, mais il ne doit pas nécessairement différer du port de l’appareil cible. Il est donc possible de définir une configuration pour le port 502 qui renvoie au port 502 de l’appareil cible.
+Chaque port indiqué doit être unique et ne pas être déjà utilisé par une autre application sur l’hôte evcc, mais il peut être identique au port de l’appareil cible. Vous pouvez donc définir une configuration pour le port 502 qui redirige vers le port 502 de l’appareil cible.
 
 **Par exemple** :
 
@@ -71,7 +71,7 @@ Chaque port indiqué doit être unique et ne pas être déjà utilisé par une a
 
 ### `rtu`
 
-Modbus TCP est généralement utilisé pour communiquer avec des appareils cibles en réseau. Si nécessaire, vous pouvez passer à Modbus RTU over TCP en indiquant `rtu: true`. Un cas d’usage typique concerne les convertisseurs RS485-TCP transparents simples (sans conversion de protocole). Ce réglage doit correspondre à la configuration de l’appareil. Il est ignoré pour les appareils cibles série.
+Modbus TCP est généralement utilisé pour communiquer avec des appareils cibles en réseau. Si nécessaire, vous pouvez passer à Modbus RTU over TCP en indiquant `rtu: true`. Un cas d’usage typique concerne les convertisseurs RS485-TCP simples et transparents (sans conversion de protocole). Ce paramètre doit correspondre à la configuration de l’appareil. Il est ignoré pour les appareils cibles raccordés par liaison série.
 
 **Par exemple** :
 
@@ -81,7 +81,7 @@ rtu: true
 
 ### `readonly`
 
-Ce paramètre permet d’empêcher les accès en écriture Modbus par des systèmes tiers.
+Ce paramètre permet d’empêcher les systèmes tiers d’écrire sur l’appareil via Modbus.
 
 **Valeurs possibles** :
 
@@ -97,7 +97,7 @@ L’intégration Home Assistant pour les onduleurs Huawei, par exemple, nécessi
 :::caution
 Le proxy ne vérifie pas qui se connecte.
 Avec `readonly: false` (la valeur par défaut), tout appareil de votre réseau qui peut atteindre le port peut écrire sur l’appareil cible.
-N’exploitez le proxy que dans un réseau de confiance.
+N’utilisez le proxy que dans un réseau de confiance.
 :::
 
 **Par exemple** :

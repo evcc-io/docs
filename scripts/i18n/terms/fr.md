@@ -258,10 +258,10 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | --- | --- |
 | Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc | Choose OS ? → Other specific-purpose OS ? → Home assistants and home automation ? → evcc ? |
 | Configuration → Backup & Restore | Configuration → Sauvegarde et restauration |
-| Configuration → Charging & Heating | Configuration → Charging & Heating ? |
 | Configuration → Charging points & heaters → [My Charging Point] | Configuration → Bornes de recharge et chauffages → [My Charging Point] ? |
 | Configuration → Charging points & heaters → [name] | Configuration → Bornes de recharge et chauffages → [name] ? |
 | Configuration → Charging points & heaters | Configuration → Bornes de recharge et chauffages |
+| Configuration → Device overview | Configuration → Device overview ? |
 | Configuration → EEBUS | Configuration → EEBUS |
 | Configuration → EEBus | Configuration → EEBUS |
 | Configuration → Experimental | Configuration → Expérimental |
@@ -276,6 +276,7 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | Configuration → Optimizer 🧪 | Configuration → Optimizer 🧪 ? |
 | Configuration → Remote Access | Configuration → Accès à distance |
 | Configuration → Sponsorship | Configuration → Parrainage |
+| Configuration → Sunny Home Manager | Configuration → Sunny Home Manager |
 | Configuration → Tariffs & forecasts → Add forecast → Add CO₂ forecast | Configuration → Tarifs & prévisions → Ajouter une prévision → Ajouter les prévisions de CO₂ |
 | Configuration → Tariffs & forecasts → Add tariff → Add grid import tariff | Configuration → Tarifs & prévisions → Ajouter un tarif → Ajouter un tarif pour l'import du réseau |
 | Configuration → Vehicles → Add vehicle | Configuration → Véhicules → Ajouter un véhicule |

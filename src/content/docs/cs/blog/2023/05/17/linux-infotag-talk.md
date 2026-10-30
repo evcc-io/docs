@@ -6,7 +6,7 @@ authors: [naltatis]
 tags: [talk]
 prev: false
 next: false
-translatedFrom: "afcd36cd6cc8"
+translatedFrom: "07c6b972af45"
 ---
 
 [![Banner 19. Linux Infotagu](../../../../../en/blog/2023/05/17/lit-banner.webp)](https://www.luga.de/static/LIT-2023/)
@@ -21,10 +21,10 @@ Vedle mnoha dalších zajímavých témat jsme letos měli možnost představit 
 
 [![Snímek obrazovky z YouTube](../../../../../en/blog/2023/05/17/youtube.webp)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
-[YouTube: Open Source Sonne tanken - Wallboxen mit evcc smarter machen](https://www.youtube.com/watch?v=qN8JwBWOlzw)
+[YouTube: Open Source Sonne tanken - Wallboxen mit evcc smarter machen (de)](https://www.youtube.com/watch?v=qN8JwBWOlzw)
 
-Kromě obecného úvodu do nabíjení elektromobilů vlastní solární energií šlo i o chytré nabíjení ze sítě a o pohled do našeho procesu vývoje a modelu financování. Klidně se podívejte.
+Kromě obecného úvodu do nabíjení elektromobilů vlastní solární energií se přednáška věnovala i chytrému nabíjení ze sítě a já jsem nabídl pohled do našeho procesu vývoje a modelu financování. Klidně se podívejte.
 
-Slajdy z přednášky najdete na [Speaker Decku.](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen) 👇
+Slajdy z přednášky najdete na [Speaker Decku](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen). 👇
 
 [![Náhled slajdů](../../../../../en/blog/2023/05/17/slides.webp)](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen)

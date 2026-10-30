@@ -3,7 +3,7 @@ title: "vehicles"
 description: "Definisci i veicoli in evcc.yaml con capacità della batteria, fasi, tempo di cache, identificatori RFID o del veicolo per il riconoscimento automatico e l’icona."
 sidebar:
   order: 7
-translatedFrom: "28f7a3dffd71"
+translatedFrom: "60b036d74f88"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -11,7 +11,7 @@ import SponsorshipRequired from "@components/SponsorshipRequired.astro";
 
 Un veicolo rappresenta uno specifico veicolo elettrico (EV) con la sua batteria. Se un veicolo è configurato e assegnato a un [punto di ricarica](/it/reference/configuration/loadpoints#vehicle), l’interfaccia utente può mostrare lo stato di ricarica, il livello di carica, il tempo di ricarica residuo e altri dati che evcc recupera dal veicolo ed elabora automaticamente.
 
-È anche possibile limitare la ricarica a un determinato livello di carica (solo tramite interfaccia). Poiché la maggior parte dei caricabatterie non conosce il livello di carica (lo ricevono solo poche combinazioni molto specifiche di caricabatterie e veicolo), con questa configurazione evcc può comunicare direttamente con il veicolo tramite l’interfaccia online (API) del costruttore del veicolo.
+È anche possibile limitare la ricarica a un determinato livello di carica (solo tramite interfaccia). Poiché la maggior parte dei caricabatterie non conosce il livello di carica (viene trasmesso solo in combinazioni molto specifiche di caricabatterie), con questa configurazione evcc può comunicare direttamente con il veicolo tramite l’interfaccia online (API) del costruttore del veicolo.
 
 La configurazione `vehicles` è un elenco di veicoli diversi.
 
@@ -58,7 +58,7 @@ title: Zoe
 
 ### `type`
 
-È il tipo di interfaccia di evcc che permette la comunicazione con il veicolo. I veicoli noti si possono integrare con il tipo `template`. Il modello adatto per i veicoli noti e le istruzioni per la configurazione manuale `custom` si trovano in [Dispositivi - Veicoli](/it/vehicles).
+È il tipo di interfaccia di evcc che permette la comunicazione con il veicolo. I veicoli noti si possono integrare con il tipo `template`. Il tipo (template) adatto per i veicoli noti e le istruzioni per la configurazione manuale `custom` si trovano in [Dispositivi - Veicoli](/it/vehicles).
 
 ---
 
@@ -80,9 +80,9 @@ capacity: 50 # kWh
 
 ### `phases`
 
-Il numero _massimo_ di fasi che questo veicolo può usare (eventualmente incluso il cavo di ricarica). Il valore interno predefinito è 3. I valori possibili sono 1, 2 o 3.
+Il numero _massimo_ di fasi che questo veicolo può usare (tenendo conto anche del cavo di ricarica). Il valore predefinito è 3. I valori possibili sono 1, 2 o 3.
 
-Alcuni veicoli, in particolare gli ibridi plug-in, non usano per la ricarica il massimo possibile di 3 fasi. Se è installato un contatore di ricarica, `evcc` può determinare le fasi effettivamente usate all’inizio di un processo di ricarica, ma questa informazione non è disponibile prima che la ricarica inizi. Configurando il parametro `phases` sul veicolo, `evcc` può avviare il processo di ricarica con una potenza disponibile inferiore in modalità intelligente.
+Alcuni veicoli, in particolare gli ibridi plug-in, non usano per la ricarica il massimo possibile di 3 fasi. Se è installato un contatore di ricarica, `evcc` può determinare le fasi effettivamente usate all’inizio della ricarica, ma questa informazione non è disponibile prima che la ricarica inizi. Configurando il parametro `phases` sul veicolo, `evcc` può avviare la ricarica con una potenza disponibile inferiore in modalità intelligente.
 
 **Ad esempio**:
 
@@ -104,7 +104,7 @@ Il valore va indicato con l’unità di tempo associata (vedi esempio). `m` sta 
 **NON** è consigliato modificare le impostazioni predefinite, perché il costruttore del veicolo potrebbe impedire attivamente il controllo della ricarica tramite evcc. **A TUO RISCHIO.**
 :::
 
-Per determinare i dati di stato attuali del veicolo (ad es. il livello di carica della batteria di trazione), l’interfaccia del costruttore viene interrogata online a intervalli regolari. Per evitare però di sovraccaricare i server del costruttore del veicolo con richieste continue (che potrebbero portare al blocco dell’account), è implementata una cache che intercetta queste richieste e risponde con i dati recuperati di recente fino all’età massima indicata qui. Poiché la maggior parte dei veicoli aggiorna i dati solo durante un processo di ricarica in corso e a intervalli molto ampi (sono comuni da 10 a 30 minuti), richieste più frequenti non offrono alcun valore aggiunto.
+Per determinare i dati di stato attuali del veicolo (ad es. il livello di carica della batteria di trazione), l’interfaccia del costruttore viene interrogata online a intervalli regolari. Per evitare però di sovraccaricare i server del costruttore del veicolo con richieste continue (che potrebbero portare al blocco dell’account), è implementata una cache che intercetta queste richieste e risponde con i dati recuperati di recente fino all’età massima indicata qui. Poiché la maggior parte dei veicoli aggiorna i dati solo durante una ricarica in corso e a intervalli molto ampi (sono comuni da 10 a 30 minuti), richieste più frequenti non offrono alcun valore aggiunto.
 
 **Valore predefinito:** `15m`
 
@@ -118,7 +118,7 @@ cache: 5m
 
 ### `identifiers`
 
-Un elenco di uno o più identificatori per identificare il veicolo. Se il veicolo deve essere identificato presso caricabatterie diversi, possono servire più identificatori. L’identificazione è possibile con i seguenti meccanismi:
+Un elenco di uno o più identificatori con cui riconoscere il veicolo. Se il veicolo deve essere identificato presso caricabatterie diversi, possono servire più identificatori. L’identificazione è possibile con i seguenti meccanismi:
 
 #### RFID
 
@@ -128,7 +128,7 @@ Se il caricabatterie ha un’interfaccia RFID, a un veicolo si può assegnare un
 
 ```yaml
 identifiers:
-  - 12345ABC # RFID token ID
+  - 12345ABC # ID del token RFID
 ```
 
 Nota: se l’identificatore può essere interpretato come numero, le virgolette sono obbligatorie.
@@ -150,7 +150,7 @@ Se il caricabatterie lo supporta, riceve dal veicolo un identificatore del veico
 
 ```yaml
 identifiers:
-  - 01:23:45:67:89:0A # MAC address
+  - 01:23:45:67:89:0A # indirizzo MAC
 ```
 
 Alcuni veicoli generano ogni giorno un nuovo indirizzo MAC. In questo caso si possono usare dei caratteri jolly, se i veicoli presenti si distinguono nella parte invariabile dell’indirizzo MAC.
@@ -168,12 +168,12 @@ Indica che un veicolo non può essere regolato con una limitazione continua dell
 
 Questa impostazione va usata per la seguente combinazione:
 
-- il veicolo può regolare solo a passi di ampere interi
-- il caricabatterie può elaborare indicazioni della corrente di ricarica più fini (ad es. 1 mA)
+- il veicolo può regolare la corrente solo a passi di ampere interi
+- il caricabatterie può elaborare valori di corrente di ricarica più fini (ad es. 1 mA)
 
 In questa combinazione può succedere che variazioni di corrente di pochi mA causino una variazione inattesa di 1 A nella corrente di fase usata per la regolazione. La regolazione può allora iniziare a oscillare. Questa funzionalità limita inoltre la regolazione a passi grossolani di 1 A.
 
-NON si può usare insieme a un modello di veicolo. Per usarla, il veicolo deve essere configurato come tipo nativo.
+NON si può usare insieme a un template di veicolo. Per usarla, il veicolo deve essere configurato come tipo nativo.
 
 **Ad esempio**:
 

@@ -1,7 +1,7 @@
 ---
 date: 2026-09-25
 title: "Points forts : mode Intelligent, page batterie, part solaire"
-description: "Points forts de septembre 2026 : les versions 0.315 et 0.316 d’evcc apportent le mode Intelligent, une page de batterie domestique remaniée et le curseur de part solaire."
+description: "Points forts de septembre 2026 : evcc 0.315 et 0.316 apportent le nouveau mode Intelligent, une page de batterie domestique remaniée et le curseur de part solaire."
 authors: [naltatis]
 tags: [release, highlights]
 prev: false
@@ -9,11 +9,11 @@ next: false
 cover:
   alt: "Bannière des points forts"
   image: "../../../../../en/blog/2026/09/25/highlights-smart-battery-solar-share.webp"
-translatedFrom: "da2b70ffef25"
+translatedFrom: "c42f3cc77b71"
 ---
 
 Depuis le [dernier article sur les points forts](/fr/blog/2026/08/19/highlights-release-process-optimizer-customize), deux versions avec de nouvelles fonctionnalités sont sorties : [0.315](https://github.com/evcc-io/evcc/releases/tag/0.315.0) et [0.316](https://github.com/evcc-io/evcc/releases/tag/0.316.0).
-Cet article couvre les deux.
+Cet article présente les deux.
 Les grands sujets : les modes de charge sont réorganisés avec **Intelligent** et **Toujours en charge**, la page de la batterie domestique a été remaniée, le nouveau curseur **Part solaire** remplace les seuils en watts déroutants, et l’optimiseur se rapproche de plus en plus du moment où il prendra les commandes.
 
 {/* excerpt */}
@@ -43,9 +43,9 @@ Tout ce qu’evcc décide de lui-même se passe en mode **Intelligent** :
 **Intelligent** est aussi le mode dans lequel fonctionnera le futur optimiseur.
 
 Le mode **Min+Solaire** disparaît.
-Il se comportait comme **Solaire** tout en fournissant toujours au moins la puissance minimale, ce qui est important pour les véhicules qui supportent mal les démarrages et arrêts répétés de la charge, ou pour les installations avec peu de surplus solaire.
+Il se comportait comme le mode **Solaire**, mais sans pauses et toujours avec au moins la puissance minimale, ce qui est important pour les véhicules qui supportent mal les démarrages et arrêts répétés de la charge, ou pour les installations avec peu de surplus solaire.
 Mais ce concept n’a de sens que pour la charge de véhicules, pas pour les appareils commutables, les chauffages ou les pompes à chaleur.
-C’est pourquoi il devient l’option **Toujours en charge** dans le menu déroulant du bouton **Intelligent** des points de charge pour véhicules, au lieu d’être un mode à part entière.
+C’est pourquoi il n’est plus un mode à part entière : sur les points de charge pour véhicules, il devient l’option **Toujours en charge**, accessible depuis le menu déroulant du bouton **Intelligent**.
 Elle peut être activée en permanence ou, avec le bouton **1x**, uniquement pour la session de charge en cours.
 Dans les paramètres du véhicule, vous pouvez définir une valeur par défaut pour chaque véhicule.
 
@@ -54,7 +54,7 @@ Dans les paramètres du véhicule, vous pouvez définir une valeur par défaut p
 Les libellés des modes s’adaptent à l’appareil : un chargeur affiche **Arrêté / Intelligent / Rapide**, un appareil commutable **Arrêté / Intelligent / Enclenché**, une pompe à chaleur **Normal / Intelligent / Boost**.
 La nouvelle [page sur les modes](/fr/features/modes) explique en détail tous les modes et [Toujours en charge](/fr/features/modes#always-charge).
 
-Il s’agit d’un changement incompatible pour les intégrations.
+Ce changement n’est pas rétrocompatible pour les intégrations.
 L’API, MQTT et le websocket renvoient désormais `smart` au lieu de `pv`, et `minpv` n’apparaît plus en lecture.
 L’écriture des anciennes valeurs fonctionne toujours : `pv` bascule en **Intelligent**, `minpv` bascule en **Intelligent** avec **Toujours en charge** activé, de sorte que les automatisations existantes conservent leur comportement.
 Si votre intégration compare des valeurs avec `pv` ou `minpv`, il est temps de la mettre à jour.
@@ -73,7 +73,7 @@ Les paramètres d’utilisation (priorité, tampon de charge et démarrage autom
 ![Page Batterie avec cartes d’état, historique du niveau de charge et paramètres d’utilisation](../../../../../en/blog/2026/09/25/battery-page.webp)
 
 Si vous aviez activé les fonctionnalités expérimentales, vous connaissez déjà cette page.
-Avec la [0.316](https://github.com/evcc-io/evcc/pull/33434), elle est la page par défaut pour tout le monde.
+Avec la [0.316](https://github.com/evcc-io/evcc/pull/33434), elle devient la page par défaut pour tout le monde.
 
 **Modes de pilotage de la batterie :** le pilotage de la batterie est désormais plus fin.
 Chaque batterie indique les modes qu’elle prend en charge : fonctionnement normal, blocage de la décharge, charge depuis le réseau, blocage de la charge et décharge vers le réseau.
@@ -108,34 +108,34 @@ L’[optimiseur](/fr/features/optimizer) calcule un plan pour toute votre maison
 Il est encore expérimental et se contente de conseiller : il montre ce qu’il ferait, mais n’agit pas encore.
 Beaucoup de choses ont changé au cours des deux dernières versions :
 
-- L’horizon couvre désormais [48 heures plus le reste de la journée](https://github.com/evcc-io/evcc/pull/32893), et le graphique marque les changements de jour avec le jour de la semaine.
-- La consommation du foyer est [répartie en profils individuels](https://github.com/evcc-io/evcc/pull/33749) : la consommation de base, le chauffage et les points de charge sans capacité de véhicule connue sont affichés séparément.
-- La prévision de la consommation du foyer s’est améliorée, p. ex. pour les [chauffages](https://github.com/evcc-io/evcc/pull/28232) et pour les foyers où quelques après-midi très gourmands [faussaient la consommation de base](https://github.com/evcc-io/evcc/pull/33700).
+- L’horizon couvre désormais [le reste de la journée et les 48 heures suivantes](https://github.com/evcc-io/evcc/pull/32893), et le graphique indique le jour de la semaine à chaque changement de jour.
+- La consommation de la maison est [répartie en profils individuels](https://github.com/evcc-io/evcc/pull/33749) : la consommation de base, le chauffage et les points de charge sans capacité de véhicule connue sont affichés séparément.
+- La prévision de la consommation de la maison s’est améliorée, p. ex. pour les [chauffages](https://github.com/evcc-io/evcc/pull/28232) et pour les maisons où quelques après-midi très gourmands [faussaient la consommation de base](https://github.com/evcc-io/evcc/pull/33700).
 - La page d’optimisation [affiche un message tant qu’aucun plan n’existe, apparaît dans le menu dès que l’optimiseur est activé et propose un lien](https://github.com/evcc-io/evcc/pull/33750) pour signaler les plans invraisemblables.
 - Les plans sont [recalculés immédiatement](https://github.com/evcc-io/evcc/pull/33467) lorsqu’un plan de charge change côté véhicule, et l’objectif de niveau de charge du plan [tombe dans le bon créneau](https://github.com/evcc-io/evcc/pull/33832).
-- La charge depuis le réseau et la décharge ne sont planifiées que pour les batteries qui [prennent réellement en charge ce mode](https://github.com/evcc-io/evcc/pull/33860).
+- La charge depuis le réseau et la décharge vers le réseau ne sont planifiées que pour les batteries qui [prennent réellement en charge ce mode](https://github.com/evcc-io/evcc/pull/33860).
 
 Si vous ne l’avez pas encore essayé : activez les fonctionnalités expérimentales sous **Configuration → Expérimental**, activez l’optimiseur et vérifiez si le plan semble plausible pour votre maison.
 L’optimiseur nécessite un [jeton de parrain](/fr/sponsorship).
-Le calcul s’exécute sur un service cloud sans état que nous hébergeons et qui ne stocke aucune donnée.
-Vous pouvez aussi faire tourner ce service vous-même, voir [contexte technique](/fr/features/optimizer#technical).
+Le calcul s’exécute sur un service cloud que nous hébergeons et qui ne conserve aucune donnée.
+Vous pouvez aussi faire tourner ce service vous-même : voir la section [Contexte technique](/fr/features/optimizer#technical).
 Chaque retour nous est précieux.
 
-La prochaine grande étape est le **mode automatique** : l’optimiseur ne se contentera plus de suggérer, il décidera quand la batterie se charge ou se maintient et quand les points de charge en mode **Intelligent** démarrent et s’arrêtent.
+La prochaine grande étape est le **mode automatique** : l’optimiseur ne se contentera plus de suggérer, il décidera quand charger la batterie ou maintenir son niveau, et quand les points de charge en mode **Intelligent** démarrent et s’arrêtent.
 La [pull request](https://github.com/evcc-io/evcc/pull/32881) est en préparation, et nous avons déjà reçu beaucoup de retours.
 Si vous aimez l’aventure, récupérez l’une des versions de test dans les commentaires de la pull request, essayez-la et dites-nous comment ça se passe.
-Il reste encore du travail, mais nous avons hâte de l’intégrer à la nightly.
+Il reste encore du travail, mais nous avons hâte de l’intégrer à la version nightly.
 
 ## Petites améliorations
 
 - **Accès à distance :** [n’est plus expérimental](/fr/features/remote-access). La carte est visible sous **Configuration** sans l’option expérimentale, et une option de réinitialisation supprime la configuration et les identifiants. Nous avons présenté l’accès à distance dans les [points forts de juillet](/fr/blog/2026/07/18/highlights-remote-access-widgets-optimizer).
-- **Appareils limitants :** lorsque le gestionnaire de réseau demande de réduire l’export vers le réseau (§ 9 EEG), evcc demande normalement directement à chaque onduleur solaire de réduire sa puissance. Dans certaines installations, cette commande doit plutôt passer par une unité centrale, p. ex. le SMA Sunny Home Manager 2.0 ou le contrôle d’export SolarEdge. Ces appareils ont désormais leur propre [classe d’appareils](https://github.com/evcc-io/evcc/pull/32416), configurée à côté du compteur avant réseau, au lieu de se faire passer pour un compteur. Voir la [page sur la limite externe](/fr/external-limit#curtailment-devices).
+- **Appareils de bridage :** lorsque le gestionnaire de réseau exige une baisse de l’export vers le réseau (§ 9 EEG), evcc demande normalement à chaque onduleur solaire de réduire sa puissance. Dans certaines installations, cette commande doit plutôt passer par une unité centrale, p. ex. le SMA Sunny Home Manager 2.0 ou le contrôle d’export SolarEdge. Ces appareils ont désormais leur propre [classe d’appareils](https://github.com/evcc-io/evcc/pull/32416), configurée à côté du compteur avant réseau, au lieu de se faire passer pour un compteur. Voir la [page sur la limite externe](/fr/external-limit#curtailment-devices).
 - **Format de date :** le format de date suivait jusqu’ici la langue choisie, ce qui ne couvre pas les différences régionales, p. ex. l’anglais en Europe. Vous pouvez maintenant choisir l’ordre jour en premier, mois en premier ou ISO dans les [paramètres de l’interface utilisateur](https://github.com/evcc-io/evcc/pull/29321). Merci à [webalexeu](https://github.com/webalexeu).
 - **Indicateur de phases :** l’affichage des phases sur le point de charge a changé. Auparavant, il y avait une barre par phase active et les phases inactives étaient simplement masquées. Désormais, un chargeur triphasé [affiche toujours trois segments](https://github.com/evcc-io/evcc/pull/33173), avec les segments actifs mis en évidence : vous voyez ainsi d’un coup d’œil s’il charge sur une ou trois phases.
 - **Polestar :** l’intégration obtenue par rétro-ingénierie est remplacée par l’[API officielle Polestar Data Portal](https://github.com/evcc-io/evcc/pull/33814). Merci à [loebse](https://github.com/loebse).
 - **Nissan :** la connexion utilise désormais [MyNISSAN OneID](https://github.com/evcc-io/evcc/pull/33316), depuis que Nissan a abandonné les anciens identifiants NissanConnect. Merci à [alex-irrgang](https://github.com/alex-irrgang).
 - **Škoda :** la nouvelle API officielle MyŠkoda est prise en charge, voir l’[article de blog dédié](/fr/blog/2026/08/27/skoda-vehicle-api).
-- **Home Assistant :** l’app evcc [détecte automatiquement l’instance Home Assistant et le jeton](https://github.com/evcc-io/evcc/pull/33000), si bien que les appareils Home Assistant apparaissent comme appareils détectés sans aucune configuration manuelle, merci à [wlcrs](https://github.com/wlcrs). Les batteries Home Assistant prennent désormais en charge les [modes blocage de la charge et décharge vers le réseau](https://github.com/evcc-io/evcc/pull/33841), merci à [igotsoul](https://github.com/igotsoul). Deux changements incompatibles : le pilotage du courant en milliampères du [chargeur Home Assistant](https://github.com/evcc-io/evcc/pull/33858) est désormais facultatif, et le [préréglage minsoc/maxsoc de la batterie](https://github.com/evcc-io/evcc/pull/33707) a été supprimé.
+- **Home Assistant :** l’app evcc [détecte automatiquement l’instance Home Assistant et le jeton](https://github.com/evcc-io/evcc/pull/33000), si bien que les appareils Home Assistant apparaissent comme appareils détectés sans aucune configuration manuelle, merci à [wlcrs](https://github.com/wlcrs). Les batteries Home Assistant prennent désormais en charge les [modes blocage de la charge et décharge vers le réseau](https://github.com/evcc-io/evcc/pull/33841), merci à [igotsoul](https://github.com/igotsoul). Deux changements non rétrocompatibles : le pilotage du courant en milliampères du [chargeur Home Assistant](https://github.com/evcc-io/evcc/pull/33858) est désormais facultatif, et le [préréglage minsoc/maxsoc de la batterie](https://github.com/evcc-io/evcc/pull/33707) a été supprimé.
 
 ## Nouveaux appareils pris en charge
 
@@ -159,7 +159,7 @@ Vous trouverez les détails dans les notes de version de la [0.315](https://gith
 💚 Un grand merci à toutes celles et ceux qui font avancer le projet : par le code, les idées, les tests, les discussions et le soutien financier, sans lequel le projet ne serait pas possible sous cette forme.
 
 Les jours raccourcissent.
-Profitez bien du soleil. 😉
+Utilisez le soleil à bon escient. 😉
 Bonne charge !
 
 **Cordialement**<br />

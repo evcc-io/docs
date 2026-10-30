@@ -1,14 +1,14 @@
 ---
 title: "meters"
-description: "Sådan definerer du målere i evcc.yaml til elnet, sol, hjemmebatteri og forbrugsenheder, hvilken fortegnskonvention der gælder, og hvilke målertyper der findes."
+description: "Sådan definerer du målere i evcc.yaml til elnet, sol, hjemmebatteri og forbrugsenheder, med fortegnskonventionen og de målertyper, der findes."
 sidebar:
   order: 5
-translatedFrom: "dfa0dfa3f1e6"
+translatedFrom: "731e5e09d04f"
 ---
 
 _Målere_ (elmålere) er en liste over enheder i huset, der kan måle effekt- og energiforbrug, solproduktion eller brugen af hjemmebatteriet. En `meter` definerer et målepunkt for energi og kan være en fysisk enhed (f.eks. en måler ved tilslutningspunktet til elnettet), en solcelleinverter (AC eller DC ved hybridinvertere) eller en batteriinverter.
 
-Opladere kan have en indbygget måler, eller der kan tilsluttes en ekstern. Hvis en oplader har en indbygget måler, skal der ikke oprettes en post til den under `meters`. Hvis opladeren ikke har en sådan måler, bruger evcc den måler, der er konfigureret her og tildelt opladeren under [`meters`](/da/reference/configuration/loadpoints#meter) i konfigurationen af ladepunktet, eller går ud fra, at den indstillede ladeeffekt faktisk bliver brugt.
+Opladere kan have en indbygget måler, eller der kan tilsluttes en ekstern. Hvis en oplader har en indbygget måler, behøver der ikke at blive oprettet en post til den under `meters`. Hvis opladeren ikke har en sådan måler, bruger evcc den måler, der er konfigureret her og tildelt opladeren under [`meter`](/da/reference/configuration/loadpoints#meter) i konfigurationen af ladepunktet, eller går ud fra, at den indstillede ladeeffekt faktisk bliver brugt.
 
 evcc bruger en ensartet fortegnskonvention for effekt- og strømværdier (`power`, `powers`, `currents`):
 
@@ -72,7 +72,7 @@ De forskellige mulige typer og deres yderligere parametre er dokumenteret nedenf
 
 :::note[Bemærk]
 Målerens ekstra felter `title` og `icon` understøttes af tekniske årsager ikke i filen `evcc.yaml`.
-Titler og ikoner (afhængigt af anvendelsen) kan kun defineres for målere, der er oprettet via konfigurationsfladen.
+Titler og ikoner (afhængigt af anvendelsen) kan kun defineres for målere, der er oprettet via brugerfladen.
 :::
 
 ## Understøttede typer
@@ -81,7 +81,7 @@ Titler og ikoner (afhængigt af anvendelsen) kan kun defineres for målere, der 
 
 Denne målertype kan udjævne svingende måleværdier. Den kan bruges i alle måleranvendelser (`usage`). Parameteren `decay` angiver, hvor stor en procentdel af den nye værdi der indgår i beregningen.
 
-**Eksempel**
+**Eksempel**:
 
 ```yaml
 meters:
@@ -102,7 +102,7 @@ I dette eksempel indgår 10 % af den nye værdi. Efter 10 cyklusser er den ælds
 
 ### `modbus`
 
-Enheder, der er tilsluttet via ModBus-grænsefladen og understøttes af projektet [MBMD (ModBus Measurement Daemon)](https://github.com/volkszaehler/mbmd#supported-devices).
+Enheder, der er tilsluttet via Modbus-grænsefladen og understøttes af projektet [MBMD (ModBus Measurement Daemon)](https://github.com/volkszaehler/mbmd#supported-devices).
 
 **Eksempel**:
 
@@ -181,9 +181,9 @@ Definerer, hvilke målinger der skal bruges her.
 
 **Mulige værdier**:
 
-- **`grid`**: Til målinger ved tilslutningspunktet til elnettet
-- **`pv`**: Til målinger af solproduktionen
-- **`battery`**: Til målinger af hjemmebatteriet
+- **`grid`**: til målinger ved tilslutningspunktet til elnettet
+- **`pv`**: til målinger af solproduktionen
+- **`battery`**: til målinger af hjemmebatteriet
 
 ---
 
@@ -201,7 +201,7 @@ uri: https://192.0.2.2/
 
 ##### `password`
 
-Her skal registreringsnummeret for LG ESS Home-inverteren indtastes.
+Her skal registreringsnummeret for LG ESS HOME-inverteren indtastes.
 
 **Eksempel**:
 
@@ -213,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Brug af målinger fra en OpenWB-oplader
+Til brug af målinger fra en OpenWB-oplader.
 
 **Eksempel**:
 
@@ -223,10 +223,6 @@ usage: grid
 broker: 192.0.2.2
 ```
 
-:::note
-Parametrene `uri` og `password` er kun påkrævede for en `meter`-enhed, hvis der er konfigureret flere enheder.
-:::
-
 #### Påkrævede parametre
 
 ##### `usage`
@@ -235,9 +231,9 @@ Definerer, hvilke målinger der skal bruges her.
 
 **Mulige værdier**:
 
-- **`grid`**: Til målinger ved tilslutningspunktet til elnettet
-- **`pv`**: Til målinger af solproduktionen
-- **`battery`**: Til målinger af hjemmebatteriet
+- **`grid`**: til målinger ved tilslutningspunktet til elnettet
+- **`pv`**: til målinger af solproduktionen
+- **`battery`**: til målinger af hjemmebatteriet
 
 ---
 
@@ -331,9 +327,9 @@ Definerer, hvilke målinger der skal bruges her.
 
 **Mulige værdier**:
 
-- **`grid`**: Til målinger ved tilslutningspunktet til elnettet
-- **`pv`**: Til målinger af solproduktionen
-- **`battery`**: Til målinger af hjemmebatteriet
+- **`grid`**: til målinger ved tilslutningspunktet til elnettet
+- **`pv`**: til målinger af solproduktionen
+- **`battery`**: til målinger af hjemmebatteriet
 
 ---
 
@@ -369,39 +365,39 @@ Standardimplementering, hvor de enkelte værdier defineres via [plugins](/da/use
 
 ```yaml
   type: custom
-  power: # Power (W)
-    source: # Plugin Type
+  power: # Effekt (W)
+    source: # Plugin-type
     ...
-  energy: # Energy (kWh)
-    source: # Plugin Type
+  energy: # Energi (kWh)
+    source: # Plugin-type
     ...
-  returnenergy: # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: # Energi i modsat retning (kWh)
+    source: # Plugin-type
     ...
-  soc: # Battery SOC (%)
-    source: # Plugin Type
+  soc: # Batteriets opladningsniveau (%)
+    source: # Plugin-type
     ...
-  capacity: # Optional Battery Capacity (kWh)
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  capacity: # Valgfri batterikapacitet (kWh)
+  currents: # Strøm (A) pr. fase
+    - source: # Fase 1: plugin-type
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Fase 2: plugin-type
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Fase 3: plugin-type
       ...
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Effekt (W) pr. fase
+    - source: # Fase 1: plugin-type
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Fase 2: plugin-type
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Fase 3: plugin-type
       ...
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Spænding (V) pr. fase
+    - source: # Fase 1: plugin-type
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Fase 2: plugin-type
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Fase 3: plugin-type
       ...
   ...
 ```
@@ -417,8 +413,8 @@ Plugin-definition, der leverer effekten i watt (W).
 **Eksempel**:
 
 ```yaml
-  power: ... # Power (W)
-    source: # Plugin Type
+  power: ... # Effekt (W)
+    source: # Plugin-type
     ...
 ```
 
@@ -433,8 +429,8 @@ Plugin-definition, der leverer den forbrugte energi i kilowatttimer (kWh).
 **Eksempel**:
 
 ```yaml
-  energy: ... # Energy (kWh)
-    source: # Plugin Type
+  energy: ... # Energi (kWh)
+    source: # Plugin-type
     ...
 ```
 
@@ -447,8 +443,8 @@ Plugin-definition, der leverer energien i modsat retning i kilowatttimer (kWh), 
 **Eksempel**:
 
 ```yaml
-  returnenergy: ... # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: ... # Energi i modsat retning (kWh)
+    source: # Plugin-type
     ...
 ```
 
@@ -461,8 +457,8 @@ Plugin-definition, der leverer batteriets opladningsniveau i procent (%).
 **Eksempel**:
 
 ```yaml
-  soc: ... # Battery SOC (%)
-    source: # Plugin Type
+  soc: ... # Batteriets opladningsniveau (%)
+    source: # Plugin-type
     ...
 ```
 
@@ -481,12 +477,12 @@ En liste med plugin-definitioner, der leverer strømmen i ampere (A) pr. fase.
 **Eksempel**:
 
 ```yaml
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  currents: # Strøm (A) pr. fase
+    - source: # Fase 1: plugin-type
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Fase 2: plugin-type
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Fase 3: plugin-type
       ...
   ...
 ```
@@ -500,12 +496,12 @@ En liste med plugin-definitioner, der leverer effekten i watt (W) pr. fase.
 **Eksempel**:
 
 ```yaml
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Effekt (W) pr. fase
+    - source: # Fase 1: plugin-type
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Fase 2: plugin-type
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Fase 3: plugin-type
       ...
   ...
 ```
@@ -519,12 +515,12 @@ En liste med plugin-definitioner, der leverer spændingen i volt (V) pr. fase.
 **Eksempel**:
 
 ```yaml
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Spænding (V) pr. fase
+    - source: # Fase 1: plugin-type
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Fase 2: plugin-type
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Fase 3: plugin-type
       ...
   ...
 ```

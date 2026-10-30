@@ -6,20 +6,21 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "19fb68e22d3a"
+translatedFrom: "daec48020930"
 ---
 
-Pour finir l’année, voici une dernière mise à jour avec quelques nouveautés.
+Avant la fin de l’année, voici encore une mise à jour avec quelques nouveautés.
 
 <!-- excerpt -->
 
-## Nouveaux véhicules et chargeur
+## Davantage de véhicules et un chargeur
 
 Les véhicules électriques Dacia et Smart EQ sont désormais pris en charge, ainsi que le chargeur Innogy eBox.
 
 ## Corrections de bugs
 
-Cette version contient une série de corrections de bugs et de nombreuses petites améliorations. N’hésitez pas à consulter la liste détaillée via le lien vers le journal des modifications ci-dessous.
+Cette version contient une série de corrections de bugs et de nombreuses petites améliorations.
+N’hésitez pas à consulter la liste détaillée via le lien vers le journal des modifications ci-dessous.
 
 ## Téléchargement et installation
 

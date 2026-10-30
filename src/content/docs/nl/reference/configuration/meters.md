@@ -3,12 +3,12 @@ title: "meters"
 description: "Zo definieert u in evcc.yaml meters voor net, zonne-energie, thuisbatterij en verbruikers, met de tekenconventie en de beschikbare metertypes."
 sidebar:
   order: 5
-translatedFrom: "dfa0dfa3f1e6"
+translatedFrom: "731e5e09d04f"
 ---
 
 De lijst _meters_ (meetapparaten) bevat de apparaten in huis die vermogen en energieverbruik, de productie van zonne-energie of het gebruik van de thuisbatterij kunnen meten. Een `meter` definieert een meetpunt voor energie en kan een fysiek apparaat zijn (bijv. een meter op het netaansluitpunt), een omvormer van het zonnepanelensysteem (AC of DC bij hybride omvormers) of een batterijomvormer.
 
-Laders kunnen een ingebouwde meter hebben of een extern aangesloten meter gebruiken. Als een lader een interne stroommeter heeft, hoeft daarvoor geen vermelding in `meters` te worden aangemaakt. Als de lader zo’n meter niet heeft, gebruikt evcc de meter die hier is geconfigureerd en in de configuratie van het laadpunt onder [`meters`](/nl/reference/configuration/loadpoints#meter) aan de lader is toegewezen, of gaat evcc ervan uit dat het ingestelde laadvermogen ook daadwerkelijk wordt gebruikt.
+Laders kunnen een ingebouwde meter hebben of een extern aangesloten meter gebruiken. Als een lader een ingebouwde meter heeft, hoeft daarvoor geen vermelding in `meters` te worden aangemaakt. Heeft de lader geen eigen meter, dan gebruikt evcc de meter die hier is geconfigureerd en in de configuratie van het laadpunt onder [`meter`](/nl/reference/configuration/loadpoints#meter) aan de lader is toegewezen. Is die er ook niet, dan gaat evcc ervan uit dat het ingestelde laadvermogen daadwerkelijk wordt gebruikt.
 
 evcc gebruikt een consistente tekenconventie voor vermogens- en stroomwaarden (`power`, `powers`, `currents`):
 
@@ -20,7 +20,7 @@ Als het apparaat waarden met het omgekeerde teken levert, kan dit in de [pluginc
 
 De configuratie `meters` is een lijst van de verschillende beschikbare apparaten.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 meters:
@@ -48,7 +48,7 @@ Hieronder worden de verschillende parameters toegelicht.
 
 Een korte aanduiding van de meter. De waarde wordt gebruikt om naar het apparaat te verwijzen in de configuratie van de [locatie](/nl/reference/configuration/site) of van het [laadpunt](/nl/reference/configuration/loadpoints#meter).
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 name: charger1
@@ -60,7 +60,7 @@ name: charger1
 
 Dit is het evcc-specifieke metertype waarmee met het apparaat wordt gecommuniceerd. Het passende type voor bekende apparaten vindt u onder [Apparaten - Huisinstallatie](/nl/meters).
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 type: modbus
@@ -81,7 +81,7 @@ Titels en pictogrammen (afhankelijk van het gebruik) kunnen alleen worden ingest
 
 Dit metertype kan schommelende meterwaarden afvlakken. Het kan voor elk gebruik van een meter (`usage`) worden ingezet. De parameter `decay` geeft aan welk percentage van de nieuwe waarde in de berekening wordt meegenomen.
 
-**Bijvoorbeeld**
+**Voorbeeld**:
 
 ```yaml
 meters:
@@ -104,7 +104,7 @@ In dit voorbeeld wordt 10% van de nieuwe waarde meegenomen. Na 10 cycli valt de 
 
 Apparaten die via de Modbus-interface zijn aangesloten en door het project [MBMD (ModBus Measurement Daemon)](https://github.com/volkszaehler/mbmd#supported-devices) worden ondersteund.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
   type: modbus
@@ -116,13 +116,13 @@ Apparaten die via de Modbus-interface zijn aangesloten en door het project [MBMD
 
 #### Verplichte parameters
 
-Naast de hier gedefinieerde parameters zijn nog extra parameters nodig. Deze staan in de documentatie over [Modbus](/nl/reference/modbus).
+Naast de hier gedefinieerde parameters zijn nog andere parameters nodig. Deze staan in de documentatie over [Modbus](/nl/reference/modbus).
 
 ##### `power`
 
 Definieert de MBMD-meetwaarde die het vermogen levert, meestal `Power`.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 power: Power
@@ -134,7 +134,7 @@ power: Power
 
 Definieert de MBMD-meetwaarde die de energie levert, meestal `Sum`.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 energy: Sum
@@ -148,7 +148,7 @@ energy: Sum
 
 Definieert de MBMD-meetwaarde die het laadniveau van de batterij levert, meestal `ChargeState`.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 soc: ChargeState
@@ -160,7 +160,7 @@ soc: ChargeState
 
 Apparaten van het type LG ESS Home 8/10.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 type: lgess
@@ -191,7 +191,7 @@ Definieert welke metingen hier nodig zijn.
 
 Definieert de URL van het LG ESS-apparaat in het thuisnetwerk.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 uri: https://192.0.2.2/
@@ -203,7 +203,7 @@ uri: https://192.0.2.2/
 
 Hier moet het registratienummer van de LG ESS HOME-omvormer worden ingevuld.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 password: "DE200..."
@@ -213,19 +213,15 @@ password: "DE200..."
 
 ### `openwb`
 
-Gebruik van metingen van een OpenWB-lader
+Gebruikt de metingen van een OpenWB-lader.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 type: openwb
 usage: grid
 broker: 192.0.2.2
 ```
-
-:::note
-De parameters `uri` en `password` zijn voor een `meter`-apparaat alleen nodig als er meerdere apparaten zijn geconfigureerd.
-:::
 
 #### Verplichte parameters
 
@@ -245,7 +241,7 @@ Definieert welke metingen hier nodig zijn.
 
 Definieert de hostnaam of het IP-adres en de poort van de OpenWB in het thuisnetwerk.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 broker: 192.0.2.2:1883
@@ -257,7 +253,7 @@ broker: 192.0.2.2:1883
 
 Voor het gebruik van de SMA Home Manager 2.0, de SMA Energy Meter of een SMA-omvormer. De apparaten moeten het Speedwire-protocol ondersteunen.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 type: sma
@@ -278,7 +274,7 @@ Het volstaat om `uri` of `serial` te definiëren.
 
 Definieert de hostnaam of het IP-adres van het apparaat in het thuisnetwerk.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 uri: 192.0.2.2
@@ -288,7 +284,7 @@ uri: 192.0.2.2
 
 Definieert het serienummer van het apparaat waarvan metingen moeten worden ontvangen.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 serial: 12345678
@@ -300,7 +296,7 @@ serial: 12345678
 
 Multicastberichten kunnen alleen op een bepaalde netwerkinterface worden ontvangen. Meestal is dat de eerste interface van het systeem. Als dat niet de interface is die met de meter is verbonden, moet de interface expliciet worden opgegeven.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 interface: eth0
@@ -312,7 +308,7 @@ interface: eth0
 
 _`tesla`_: voor het gebruik van metingen van een Tesla Powerwall.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 type: tesla
@@ -341,7 +337,7 @@ Definieert welke metingen hier nodig zijn.
 
 Definieert de hostnaam of het IP-adres van het apparaat in het thuisnetwerk.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 uri: 192.0.2.2
@@ -353,7 +349,7 @@ uri: 192.0.2.2
 
 Hier moet het wachtwoord van de gebruiker _customer_ worden ingevuld.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
 password: "ThePassword"
@@ -365,43 +361,43 @@ password: "ThePassword"
 
 Standaardimplementatie waarbij de afzonderlijke waarden via [plugins](/nl/user-defined-devices#meter) worden gedefinieerd.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
   type: custom
-  power: # Power (W)
-    source: # Plugin Type
+  power: # Vermogen (W)
+    source: # Plugintype
     ...
-  energy: # Energy (kWh)
-    source: # Plugin Type
+  energy: # Energie (kWh)
+    source: # Plugintype
     ...
-  returnenergy: # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: # Energie in omgekeerde richting (kWh)
+    source: # Plugintype
     ...
-  soc: # Battery SOC (%)
-    source: # Plugin Type
+  soc: # Laadniveau batterij (%)
+    source: # Plugintype
     ...
-  capacity: # Optional Battery Capacity (kWh)
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  capacity: # Optionele batterijcapaciteit (kWh)
+  currents: # Stroom (A) per fase
+    - source: # Plugintype fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Plugintype fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Plugintype fase 3
       ...
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Vermogen (W) per fase
+    - source: # Plugintype fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Plugintype fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Plugintype fase 3
       ...
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Spanning (V) per fase
+    - source: # Plugintype fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Plugintype fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Plugintype fase 3
       ...
   ...
 ```
@@ -414,11 +410,11 @@ Standaardimplementatie waarbij de afzonderlijke waarden via [plugins](/nl/user-d
 
 Plugindefinitie die het vermogen in watt (W) levert.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  power: ... # Power (W)
-    source: # Plugin Type
+  power: ... # Vermogen (W)
+    source: # Plugintype
     ...
 ```
 
@@ -430,11 +426,11 @@ Plugindefinitie die het vermogen in watt (W) levert.
 
 Plugindefinitie die de verbruikte energie in kilowattuur (kWh) levert.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  energy: ... # Energy (kWh)
-    source: # Plugin Type
+  energy: ... # Energie (kWh)
+    source: # Plugintype
     ...
 ```
 
@@ -444,11 +440,11 @@ Plugindefinitie die de verbruikte energie in kilowattuur (kWh) levert.
 
 Plugindefinitie die de energie in omgekeerde richting in kilowattuur (kWh) levert, bijv. teruglevering.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  returnenergy: ... # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: ... # Energie in omgekeerde richting (kWh)
+    source: # Plugintype
     ...
 ```
 
@@ -458,11 +454,11 @@ Plugindefinitie die de energie in omgekeerde richting in kilowattuur (kWh) lever
 
 Plugindefinitie die het laadniveau van de batterij in procent (%) levert.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  soc: ... # Battery SOC (%)
-    source: # Plugin Type
+  soc: ... # Laadniveau batterij (%)
+    source: # Plugintype
     ...
 ```
 
@@ -470,7 +466,7 @@ Plugindefinitie die het laadniveau van de batterij in procent (%) levert.
 
 #### `capacity`
 
-Opgave van de batterijcapaciteit. Alleen zinvol als er meerdere batterijen aanwezig zijn. Wordt gebruikt om het totale laadniveau te bepalen.
+De capaciteit van de batterij. Dit is alleen zinvol als er meerdere batterijen zijn. De waarde wordt dan gebruikt om het totale laadniveau te berekenen.
 
 ---
 
@@ -478,15 +474,15 @@ Opgave van de batterijcapaciteit. Alleen zinvol als er meerdere batterijen aanwe
 
 Een lijst van plugindefinities die de stroom in ampère (A) per fase leveren.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  currents: # Stroom (A) per fase
+    - source: # Plugintype fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Plugintype fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Plugintype fase 3
       ...
   ...
 ```
@@ -497,15 +493,15 @@ Een lijst van plugindefinities die de stroom in ampère (A) per fase leveren.
 
 Een lijst van plugindefinities die het vermogen in watt (W) per fase leveren.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Vermogen (W) per fase
+    - source: # Plugintype fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Plugintype fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Plugintype fase 3
       ...
   ...
 ```
@@ -516,15 +512,15 @@ Een lijst van plugindefinities die het vermogen in watt (W) per fase leveren.
 
 Een lijst van plugindefinities die de spanning in volt (V) per fase leveren.
 
-**Bijvoorbeeld**:
+**Voorbeeld**:
 
 ```yaml
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Spanning (V) per fase
+    - source: # Plugintype fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Plugintype fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Plugintype fase 3
       ...
   ...
 ```

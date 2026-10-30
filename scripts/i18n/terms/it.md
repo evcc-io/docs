@@ -265,10 +265,10 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | --- | --- |
 | Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc | Choose OS ? → Other specific-purpose OS ? → Home assistants and home automation ? → evcc ? |
 | Configuration → Backup & Restore | Configurazione → Backup e ripristino |
-| Configuration → Charging & Heating | Configurazione → Charging & Heating ? |
 | Configuration → Charging points & heaters → [My Charging Point] | Configurazione → Ricarica e riscaldamento → [My Charging Point] ? |
 | Configuration → Charging points & heaters → [name] | Configurazione → Ricarica e riscaldamento → [name] ? |
 | Configuration → Charging points & heaters | Configurazione → Ricarica e riscaldamento |
+| Configuration → Device overview | Configurazione → Device overview ? |
 | Configuration → EEBUS | Configurazione → EEBus |
 | Configuration → EEBus | Configurazione → EEBus |
 | Configuration → Experimental | Configurazione → Sperimentale |
@@ -283,6 +283,7 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | Configuration → Optimizer 🧪 | Configurazione → Optimizer 🧪 ? |
 | Configuration → Remote Access | Configurazione → Accesso remoto |
 | Configuration → Sponsorship | Configurazione → Sponsorizzazione |
+| Configuration → Sunny Home Manager | Configurazione → Sunny Home Manager |
 | Configuration → Tariffs & forecasts → Add forecast → Add CO₂ forecast | Configurazione → Tariffe e previsioni → Aggiungi previsioni → Aggiungi le previsioni di CO₂ |
 | Configuration → Tariffs & forecasts → Add tariff → Add grid import tariff | Configurazione → Tariffe e previsioni → Aggiungi tariffa → Aggiungi tariffa di importazione griglia |
 | Configuration → Vehicles → Add vehicle | Configurazione → Veicoli → Aggiungi veicolo |

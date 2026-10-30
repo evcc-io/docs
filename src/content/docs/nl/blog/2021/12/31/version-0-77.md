@@ -6,16 +6,18 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "6130d48ec9d4"
+translatedFrom: "df99778322bc"
 ---
 
-Op de valreep van 2021 komt er toch nog een update met een paar bugfixes. Het jaar moet tenslotte positief eindigen ;)
+Op de valreep van 2021 komt er nog een update met een paar bugfixes.
+Het jaar moet tenslotte positief eindigen ;)
 
 <!-- excerpt -->
 
 ## Bugfixes
 
-Ten opzichte van versie 0.76 hebben we correcties doorgevoerd voor het gebruik van enkele apparaten en de afhandeling van de timers voor de PV-modus in de UI. Een gedetailleerd overzicht vindt u via de changelog-link hieronder.
+Ten opzichte van versie 0.76 hebben we correcties toegevoegd voor het gebruik van enkele apparaten en voor de afhandeling van de timers voor de PV-modus in de UI.
+Een gedetailleerd overzicht vindt u via de changelog-link hieronder.
 
 ## Download & installatie
 

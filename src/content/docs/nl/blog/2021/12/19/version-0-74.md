@@ -6,10 +6,10 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4ec9acb9cce2"
+translatedFrom: "df005046697e"
 ---
 
-Vandaag is er een kleine update, vooral met enkele bugfixes en verdere verbeteringen.
+De update van vandaag is klein en bevat vooral enkele bugfixes en verdere verbeteringen.
 
 ## Timers in de UI
 
@@ -20,19 +20,19 @@ De interface toont u nu de timers die op de achtergrond lopen:
 <!-- excerpt -->
 
 - In de PV-modus:
-  - Wanneer wordt het laden onderbroken
-  - Wanneer wordt het laden hervat
+  - Wanneer het laden wordt onderbroken
+  - Wanneer het laden wordt hervat
 - 1p3p-faseomschakeling:
-  - Wanneer wordt opgeschakeld naar 3p
-  - Wanneer wordt teruggeschakeld naar 1p
+  - Wanneer er wordt opgeschakeld naar 3p
+  - Wanneer er wordt teruggeschakeld naar 1p
 
-Daarnaast wordt ook weergegeven met hoeveel fasen er geladen wordt.
+Daarnaast wordt weergegeven met hoeveel fasen er geladen wordt.
 
 ## Doelladen
 
 ![UI voor doelladen](../../../../../en/blog/2021/12/19/zielladen.png)
 
-De functie doelladen is terug. Daarmee laadt u de EV uiterlijk op een bepaalde datum en tijd tot het gewenste laadniveau.
+Doelladen is terug. Daarmee laadt u de EV uiterlijk op een bepaalde datum en tijd tot het gewenste laadniveau.
 
 ## Download & installatie
 

@@ -6,7 +6,7 @@ authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "261c638cde95"
+translatedFrom: "be2964228ce3"
 ---
 
 De laatste blogpost is alweer een paar maanden geleden. Tijd dus voor een korte samenvatting en een overzicht van wat er bij evcc is gebeurd in de laatste elf releases (v0.81 tot v0.91).
@@ -21,7 +21,7 @@ De lijst met hardware die evcc ondersteunt, groeit gestaag.
 
 We hebben enkele integraties voor laders toegevoegd. Omdat evcc nu ook de zeer populaire [Bender Controller](https://github.com/evcc-io/evcc/pull/3103) ondersteunt, konden we het aanbod aan ondersteunde apparaten flink uitbreiden.
 
-Dit zijn de fabrikanten die sinds het begin van het jaar zijn toegevoegd: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity Vestel, Webasto. [(Alle laders)](/nl/chargers)
+Dit zijn de fabrikanten die sinds het begin van het jaar zijn toegevoegd: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity, Vestel, Webasto. [(Alle laders)](/nl/chargers)
 
 ### Voertuigen 🚗 🛵
 
@@ -29,7 +29,7 @@ Audi (e-tron), Cupra, Jaguar, Landrover, Mercedes, Silence S01, Smart. [(Alle vo
 
 ### Omvormers ☀️ 🔋
 
-SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [(Alle meters)](/nl/meters)
+SMA (Smart Energy Hybrid), Huawei (SUN2000), Solarwatt, Solax, Varta. [(Alle meters)](/nl/meters)
 
 ### Netmeters 📟
 
@@ -41,7 +41,7 @@ De laders van Easee en Warp kunnen nu ook de [RFID-functie van evcc voor voertui
 
 ## Verbeterd fasebeheer (1P/3P)
 
-De eerste versie van faseomschakeling voor ondersteunde laders is sinds medio vorig jaar beschikbaar in evcc. We hebben daar ervaring mee opgedaan en op basis daarvan in februari [het mechanisme grondig herzien](https://github.com/evcc-io/evcc/pull/2613). Daardoor is de faseomschakeling veel betrouwbaarder en gedraagt ze zich ook beter bij onbekende of onplausibele configuratie- of meetwaarden.
+De eerste versie van faseomschakeling voor ondersteunde laders is sinds medio vorig jaar beschikbaar in evcc. We hebben daar ervaring mee opgedaan en op basis daarvan in februari [het mechanisme grondig herzien](https://github.com/evcc-io/evcc/pull/2613). Daardoor is de faseomschakeling veel betrouwbaarder en gedraagt ze zich ook beter bij onbekende of onwaarschijnlijke configuratie- of meetwaarden.
 
 ## Templates en documentatie
 
@@ -96,13 +96,13 @@ Daarnaast krijgen templates ook een gestructureerde beschrijving van alle verpli
 
 ## Nieuwe taal: Litouws 🇱🇹
 
-Met v0.91 kregen we een nieuwe vertaling. De evcc-UI is nu ook in het Litouws beschikbaar. Dat is de vierde taal naast Duits, Engels en Italiaans. Hartelijk dank [RTTTC](https://github.com/RTTTC) 💚.
+Met v0.91 kregen we een nieuwe vertaling. De evcc-UI is nu ook in het Litouws beschikbaar. Dat is de vierde taal naast Duits, Engels en Italiaans. Hartelijk dank, [RTTTC](https://github.com/RTTTC) 💚.
 
 Omdat onze talenkennis vrij beperkt is, zijn we altijd dankbaar voor bijdragen aan vertalingen. Er is hiervoor momenteel geen documentatie, maar als u interesse hebt, kijk dan gewoon naar [de pull request van RTTC](https://github.com/evcc-io/evcc/pull/3205).
 
 ## Wat komt er hierna?
 
-Sommigen van u hebben het misschien al gezien. Met de volgende release krijgt evcc een volledig vernieuwde gebruikersinterface. Die is al beschikbaar in de huidige nightly builds. [Hier](https://github.com/evcc-io/evcc/discussions/3149) en [hier](https://github.com/evcc-io/evcc/pull/2889) vindt u informatie over het ontwikkelproces. Maar daarover meer in de volgende blogpost.
+Sommigen van u hebben het misschien al gezien. Met de volgende release krijgt evcc een volledig vernieuwde gebruikersinterface. Die is al beschikbaar in de huidige nightly builds. Informatie over het ontwikkelproces vindt u [hier](https://github.com/evcc-io/evcc/discussions/3149) en [hier](https://github.com/evcc-io/evcc/pull/2889). Maar daarover meer in de volgende blogpost.
 
 ## Bugfixes
 

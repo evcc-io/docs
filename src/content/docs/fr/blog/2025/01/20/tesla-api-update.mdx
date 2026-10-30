@@ -1,7 +1,7 @@
 ---
 date: 2025-01-20
 title: "v0.133 - Compte Tesla Developer requis"
-description: "Notes de version d’evcc 0.133 de janvier 2025 : l’API Tesla Fleet devient payante, il vous faut votre propre compte Tesla Developer, et le service tesla.evcc.io s’arrête."
+description: "Notes de version d’evcc 0.133 de janvier 2025 : l’API Tesla Fleet devient payante, un compte Tesla Developer personnel est requis et le service tesla.evcc.io s’arrête."
 authors: [naltatis]
 tags: [release]
 prev: false
@@ -9,7 +9,7 @@ next: false
 cover:
   alt: "Mise à jour de l’API Tesla"
   image: "../../../../../en/blog/2025/01/20/tesla-api-update-wide.webp"
-translatedFrom: "04d6b7983faa"
+translatedFrom: "abfdb68354cd"
 ---
 
 À partir de la version 0.133 d’evcc, un [compte Tesla Developer](https://developer.tesla.com/) est nécessaire.
@@ -47,7 +47,7 @@ Tesla offre aux particuliers un crédit API mensuel de 10 $, ce qui devrait suf
 
 Avec la version 0.133, nous avons adapté la communication avec l’API Tesla pour que vous puissiez utiliser votre propre compte Tesla Developer.
 Les anciens jetons générés avec [tesla.evcc.io](https://tesla.evcc.io) ne fonctionneront plus.
-Nous avons envisagé d’étendre notre processus de génération de jetons pour que vous puissiez utiliser votre propre compte Tesla Developer.
+Nous avons envisagé d’adapter notre propre outil de génération de jetons à cet usage.
 Heureusement, [myteslamate.com](https://app.myteslamate.com) propose déjà cette fonction.
 Vous pouvez y générer des **jetons d’accès et de rafraîchissement** avec votre compte Developer.
 Nous avons donc décidé de ne pas réinventer la roue.
@@ -66,7 +66,7 @@ Pour la configuration dans evcc, vous avez besoin de trois informations :
 
 Suivez les instructions sur [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/) pour générer ces informations.
 
-Comme vous allez travailler en parallèle sur myteslamate.com et developer.tesla.com, nous vous recommandons d’effectuer ces étapes dans deux fenêtres de navigateur ouvertes côte à côte.
+Comme vous allez travailler en parallèle sur myteslamate.com et developer.tesla.com, nous vous recommandons d’effectuer ces étapes en parallèle dans deux fenêtres de navigateur.
 À la fin du processus, un script doit être téléchargé et exécuté sur votre ordinateur dans le terminal ou la console.
 
 Lors de la connexion, une boîte de dialogue d’autorisations s’affiche.
@@ -77,21 +77,22 @@ Pour fonctionner avec un chargeur classique (pas un Tesla Wall Connector), evcc 
 - Localisation du véhicule _(pour la détection du véhicule, pas encore implémentée)_
 - Commandes du véhicule _(pour le réveil)_
 
-Une fois le processus terminé avec succès, saisissez les informations dans la configuration d’evcc.
+Une fois le processus terminé avec succès, saisissez les informations dans la configuration d’evcc :
 
 Exemple :
 
-```yaml {5-7}
+```yaml {6-8}
 vehicles:
-  - type: template
+  - name: my_car
+    type: template
     template: tesla
     title: Tesla Model 3
-    clientId: aaaaaa-11111-... # from developer.tesla.com
-    accessToken: ey1234567890... # from myteslamate.com
-    refreshToken: EU_1234567890... # from myteslamate.com
+    clientId: aaaaaa-11111-... # depuis developer.tesla.com
+    accessToken: ey1234567890... # depuis myteslamate.com
+    refreshToken: EU_1234567890... # depuis myteslamate.com
 ```
 
-Vous pouvez suivre le crédit API consommé dans la [vue d’ensemble du portail Tesla Developer](https://developer.tesla.com/dashboard/).
+Vous pouvez suivre le crédit API consommé dans la [tableau de bord du portail Tesla Developer](https://developer.tesla.com/dashboard/).
 
 :::note
 Le projet evcc n’a aucun lien avec myteslamate.com.
@@ -111,20 +112,21 @@ Ces commandes n’utilisent pas votre crédit API Tesla.
 Nous supposons que vous avez déjà effectué les [étapes décrites ci-dessus](#vehicle).
 Connectez-vous à nouveau sur myteslamate.com et suivez les instructions pour configurer le proxy de commandes payant.
 Copiez le **jeton de proxy** depuis la section **Use MyTeslamate API**.
-Insérez ce jeton dans votre configuration evcc :
+Insérez ce jeton dans votre configuration d’evcc :
 
-```yaml {8}
+```yaml {9}
 vehicles:
-  - type: template
+  - name: my_car
+    type: template
     template: tesla
     title: Tesla Model 3
-    clientId: aaaaaa-11111-... # from developer.tesla.com
-    accessToken: ey1234567890... # from myteslamate.com
-    refreshToken: EU_1234567890... # from myteslamate.com
-    proxyToken: aaaaa-bbbbb-... # from myteslamate.com
+    clientId: aaaaaa-11111-... # depuis developer.tesla.com
+    accessToken: ey1234567890... # depuis myteslamate.com
+    refreshToken: EU_1234567890... # depuis myteslamate.com
+    proxyToken: aaaaa-bbbbb-... # depuis myteslamate.com
 ```
 
-Avec cette configuration, evcc envoie les commandes de charge au proxy de myteslamate.com, qui les signe avec votre application Tesla et les transmet à l’API officielle de Tesla.
+Avec cette configuration, evcc envoie les commandes de charge au proxy de myteslamate.com, qui les signe avec votre application Tesla et les transmet à l’API d’origine de Tesla.
 
 :::caution[Le jeton de proxy donne des droits très étendus.]
 Il est recommandé de limiter les autorisations sur myteslamate.com aux fonctions nécessaires.
@@ -140,9 +142,9 @@ Pour continuer à utiliser l’API Tesla, une mise à jour vers la version 0.133
 ## Autres possibilités
 
 La communication avec l’API Tesla dans evcc n’est pas liée à myteslamate.com.
-Vous pouvez générer vous-même les jetons avec l’infrastructure correspondante (URL de callback publique nécessaire) et les saisir dans la configuration evcc mentionnée ci-dessus.
+Vous pouvez générer vous-même les jetons avec l’infrastructure correspondante (une URL de rappel publique est nécessaire) et les saisir dans la configuration d’evcc mentionnée ci-dessus.
 
-Des intégrations alternatives via des services comme [TeslaLogger](https://docs.evcc.io/docs/vehicles#teslalogger), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [TeslaBleHttpProxy](https://docs.evcc.io/docs/vehicles#tesla-ble), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [Tessie](https://docs.evcc.io/docs/vehicles#tessie) ou [Tronity](https://docs.evcc.io/docs/vehicles#tronity) sont également possibles.
+Des intégrations alternatives via des services comme [TeslaLogger](https://docs.evcc.io/docs/vehicles#teslalogger), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [TeslaBleHttpProxy](https://docs.evcc.io/docs/vehicles#tesla-ble), [Tessie](https://docs.evcc.io/docs/vehicles#tessie) ou [Tronity](https://docs.evcc.io/docs/vehicles#tronity) sont également possibles.
 
 Les propriétaires d’un Tesla Wall Connector peuvent aussi continuer à utiliser [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy) comme « Command Proxy » local.
 

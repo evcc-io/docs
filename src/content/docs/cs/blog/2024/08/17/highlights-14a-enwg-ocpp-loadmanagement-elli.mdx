@@ -6,10 +6,10 @@ authors: [naltatis]
 tags: [release, highlights]
 prev: false
 next: false
-translatedFrom: "5b72a3321eef"
+translatedFrom: "7dd8f1e71013"
 ---
 
-Dnes vyšla verze evcc [0.130](https://github.com/evcc-io/evcc/releases).
+Dnes vyšla [verze 0.130](https://github.com/evcc-io/evcc/releases) evcc.
 Protože od posledního příspěvku o novém vydání uběhla už nějaká doba, přinášíme přehled novinek z posledních vydání.
 
 ![evcc 0.130](../../../../../en/blog/2024/08/17/v0.130-banner.webp)
@@ -34,8 +34,8 @@ Zajímavé je zde technické provedení.
 Provozovatel sítě nepřistupuje k nabíječce přímo, ale signál ke snížení výkonu předává přes Smart Meter Gateway (SMGW).
 Systém řízení energie v domě pak musí příslušné spotřebiče omezit.
 
-S evcc můžete tento požadavek (omezení) splnit už dnes u všech nabíječek, aniž byste je museli vypínat, např. pomocí bezpotenciálového kontaktu.
-Nabíjecí body mohou po dobu omezení dál běžet se svým minimálním výkonem (např. 4,1 kW).
+S evcc můžete tento požadavek (omezení) splnit už dnes u všech nabíječek, aniž byste je museli natvrdo vypínat (např. přes bezpotenciálový kontakt).
+Nabíjecí body mohou po dobu omezení dál nabíjet minimálním výkonem (např. 4,2 kW).
 To znamená, že v tomto scénáři lze použít jakoukoli nabíječku podporovanou evcc.
 Není nutné kupovat novou nabíječku se speciální podporou komunikace se SMGW nebo se zařízením Steuerbox.
 
@@ -52,14 +52,18 @@ Alternativou k EEBus je komunikace přes jednoduchý spínací kontakt jednotky
 Ten lze s evcc propojit např. přes pin GPIO.
 Pokud Steuerbox přijme signál ke snížení, kontakt se sepne, evcc to rozpozná a sníží maximální výkon nabíječek.
 
-Toto jednodušší řešení s kontaktem lze použít i se stávajícími (rádiovými) přijímači hromadného dálkového ovládání (FRSE).
+Toto jednodušší řešení s kontaktem lze použít i se stávajícími (rádiovými) přijímači hromadného dálkového ovládání (HDO, v Německu FRSE).
 Ty nejsou součástí § 14a EnWG, ale jsou tolerovány jako přechodné řešení.
 
 V praxi zatím nasazení této funkce brzdí to, že v terénu ještě nejsou nainstalované jednotky Steuerbox.
 Ty se budou zavádět v nadcházejících měsících.
 Pokud už takové zařízení máte, neváhejte se nám ozvat.
 
-### Nabíjení domácí baterie ze sítě
+## Nabíjení domácí baterie ze sítě
+
+V [minulém příspěvku o novém vydání](/cs/blog/2024/02/01/v0124-new-tesla-api) jsme představili funkci „Zabránit vybíjení při rychlém nabíjení“, první funkci, při které evcc aktivně řídí domácí baterii.
+Ve verzi 0.130 jsme řízení baterie dále rozšířili.
+Domácí baterii nyní můžete záměrně nabíjet i elektřinou ze sítě.
 
 Jde o experimentální funkci, která je dostupná, pokud váš střídač podporuje aktivní řízení baterie ([viz dokumentace](/cs/meters)) a máte dynamický tarif.
 V takovém případě můžete nastavit cenový strop.
@@ -92,14 +96,14 @@ V aktuálním vydání jsme proto podporu vestavěného měřiče odstranili a�
 
 ![smutná nabíječka Elli](../../../../../en/blog/2024/08/17/sad-elli.webp)
 
-Pokud plánujete koupit nabíječku, kterou má být možné řídit pomocí evcc, můžeme vás od těchto zařízení jen odrazovat.
+Pokud plánujete koupit nabíječku, kterou chcete řídit pomocí evcc, tato zařízení vám rozhodně nedoporučujeme.
 Elli ohlásila produkt další generace, [ElliCharger 2](https://www.elli.eco/de/privatkunden/produkte/wallbox).
 Podle toho, co zatím víme, jde o mnohem vyspělejší zařízení.
 Nic to ale nemění na tom, že nabíječky první generace, které se stále aktivně prodávají, jsou z hlediska kvality softwaru rozhraní naprosto nepřijatelné.
 
 Pokud takovou nabíječku vlastníte a týkají se vás výše popsané problémy, doporučujeme obrátit se na zákaznickou podporu Elli.
-Že vyjdou aktualizace softwaru, v to příliš nedoufáme.
-Jejich přístup, kdy se technicky dobrý hardware vymění za novější jen proto, že se software už neudržuje, ale podle nás opravdu udržitelný není.
+Ve vydání aktualizací softwaru příliš nedoufáme.
+Vyměnit technicky dobrý hardware za novější jen proto, že se software už neudržuje, však podle nás opravdu udržitelné není.
 
 Uvítali bychom také přímý technický kontakt s Elli.
 Všechny naše dosavadní pokusy však byly neúspěšné.
@@ -115,6 +119,7 @@ S rostoucím počtem funkcí se toto zobrazení stalo poněkud nepružným a s
 Proto jsme tuto oblast přepracovali.
 Stav nabíječky se dál zobrazuje jako krátký text („Připojeno“, „Nabíjení“ atd.).
 Doplňující informace, jako je solární časovač, plán nabíjení, cenový strop, klimatizace nebo limit vozidla, se nyní v případě potřeby zobrazují jako ikona s vysvětlujícím popiskem.
+Zobrazení je tak přehlednější a pružnější.
 
 Zde je přehled nových ikon a popisků:
 
@@ -122,11 +127,11 @@ Zde je přehled nových ikon a popisků:
 
 ## OCPP: stabilita, funkce a sponzorství
 
-Podpora OCPP je v evcc už dlouho.
+Provozovat evcc jako server OCPP je možné už poměrně dlouho.
 V posledních měsících jsme se na toto téma znovu zaměřili a do stability a funkčnosti naší implementace [vložili spoustu práce](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged+sort%3Aupdated-desc+ocpp).
 Dosud bylo u některých nabíječek potřeba nastavit speciální konfigurační parametry.
 Ty jsou nyní až na několik málo výjimek zbytečné.
-Funkce jako data měřiče, intervaly dotazování, signály ping a heartbeat se nyní nastavují automaticky.
+Nastavení jako data měřiče, intervaly dotazování, ping a heartbeat se nyní konfigurují automaticky.
 Protože stále existují nabíječky, které plně nedodržují standard, museli jsme implementovat některá zvláštní ošetření pro konkrétní zařízení.
 Uživatel si jich nyní nevšimne.
 
@@ -150,7 +155,7 @@ Pokud vaše nabíječka nefunguje podle očekávání, chceme to vědět také �
 
 Od verze 0.130 se podpora OCPP stává funkcí, která vyžaduje 💚 sponzorství.
 Jsme si vědomi, že tato změna může být nepříjemná pro uživatele, kteří evcc dosud používali zdarma.
-Přesto jsme se k této změně rozhodli.
+Přesto jsme se k tomuto kroku rozhodli.
 Vedou nás k tomu hlavně dva důvody:
 
 1. U mnoha nových komerčních nabíječek se OCPP stalo preferovaným komunikačním protokolem a často jediným rozhraním pro řízení. Proto považujeme za férové, zejména vůči uživatelům jiných nabíječek, aby OCPP bylo dostupné jen se sponzorstvím, které pak pomáhá celému projektu.
@@ -167,7 +172,7 @@ Doufáme, že pro tuto změnu máte pochopení.
 - **Opravy chyb:** Jako vždy jsme opravili mnoho chyb a zlepšili stabilitu.
 - **Nová zařízení:** Seznam podporovaných nabíječek, střídačů, měřičů a tarifů neustále rozšiřujeme.
 
-Další podrobnosti najdete vždy v [poznámkách k vydáním](https://github.com/evcc-io/evcc/releases) a v pull requestech a diskusích, na které odkazují.
+Další podrobnosti najdete vždy v [poznámkách k vydání](https://github.com/evcc-io/evcc/releases) a v pull requestech a diskusích, na které odkazují.
 
 ## Noví sponzoři
 
@@ -177,7 +182,7 @@ Pracovat na open source projektu, který je téměř celý financovaný komunito
 Jak vidíme, evcc se nyní bere vážně i ve firemním světě.
 Projevuje se to tím, že nás výrobci občas oslovují přímo, aby zajistili dobrou integraci svých zařízení.
 
-Jako firemní sponzory se nám podařilo získat [CUBOS](https://www.cubos.com), firmu působící v oblasti fotovoltaiky a komerční nabíjecí infrastruktury, [lekker Energie](https://www.lekker.de), dodavatele energie z Berlína, a [Victron Energy](https://www.victronenergy.com), výrobce otevřených a modulárních systémů střídačů, baterií a nabíjení.
+Jako finanční firemní sponzory se nám podařilo získat [CUBOS](https://www.cubos.com), firmu působící v oblasti fotovoltaiky a komerční nabíjecí infrastruktury, [lekker Energie](https://www.lekker.de), dodavatele energie z Berlína, a [Victron Energy](https://www.victronenergy.com), výrobce otevřených a modulárních systémů střídačů, baterií a nabíjení.
 
 **Příjemné nabíjení!**<br/>
 Tým evcc<br/>

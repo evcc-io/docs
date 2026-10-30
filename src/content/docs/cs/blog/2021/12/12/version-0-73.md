@@ -6,7 +6,7 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4f5a2d6ac51a"
+translatedFrom: "3c89983a8f03"
 ---
 
 Dnes přichází malá aktualizace hlavně s několika opravami chyb a dalšími vylepšeními.
@@ -15,16 +15,17 @@ Dnes přichází malá aktualizace hlavně s několika opravami chyb a další
 
 ## `evcc configure`
 
-Průvodce vytvořením konfiguračního souboru i šablony, na kterých je postavený, dostaly tato vylepšení:
+Průvodce pro vytvoření konfiguračního souboru i šablony, na kterých stojí, dostaly tato vylepšení:
 
 - U nabíjecího bodu lze nyní nastavit, zda se mají po odpojení nabíjecího kabelu obnovit výchozí nastavení nabíjení. Více najdete v naší dokumentaci pod `resetOnDisconnect`.
 - Nově lze nastavit výchozí hodnoty nabíjení pro jednotlivá vozidla. Interaktivně jsou k dispozici přes `evcc configure --advanced`. Více najdete v dokumentaci pod `onIdentify`.
-- Pro zařízení s rozhraním Modbus se nyní generují správné konfigurace.
+- Pro zařízení s rozhraním Modbus se nyní generují správné konfigurace.
 - Lepší zacházení se situací, kdy soubor `evcc.yaml` v aktuální složce už existuje, ale má jiná přístupová práva.
 
 ## Rozpoznání polohy
 
-U některých vozidel nyní **evcc** dokáže rozpoznat aktuální polohu. Zatím se to ale aktivně nevyužívá.
+U některých vozidel nyní **evcc** dokáže rozpoznat aktuální polohu.
+Zatím se to ale aktivně nevyužívá.
 
 ## Stažení a instalace
 

@@ -1,9 +1,9 @@
 ---
 title: "Konfiguration"
-description: "Se, hvor evcc.yaml ligger, hvordan filen er opbygget, og hvilke sektioner der beskriver dit anlæg og dine enheder."
+description: "Få overblik over den filbaserede konfiguration med evcc.yaml, hvor filen ligger, hvordan den er opbygget, og hvilke sektioner der beskriver dit anlæg og dine enheder."
 sidebar:
   order: 1
-translatedFrom: "b5e9667916e0"
+translatedFrom: "7c938df548c1"
 ---
 
 evcc kan konfigureres på to måder:
@@ -36,7 +36,7 @@ Du kan angive en anden sti ved opstart: `evcc -c /path/to/evcc.yaml`
 ### Opbygning
 
 Konfigurationsfilen indeholder flere sektioner.
-For at kunne henvise mellem sektionerne har enheder en `name`-parameter til identifikation.
+For at sektionerne kan henvise til hinanden, har enhederne en `name`-parameter, der identificerer dem.
 
 En eksempelfil med mange parametre finder du her:
 https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml
@@ -46,7 +46,7 @@ konfigurationen:
 
 ```mermaid
 graph TD;
-    site("site (Zuhause)")
+    site("site (Hjem)")
     subgraph loadpoints
       loadpointA("Carport (charger: KEBA)")
       loadpointB("Garage (charger: Wallbe)")
@@ -75,12 +75,12 @@ graph TD;
     meterBattery -- meters.batterys --> site
 ```
 
-### Hvordan fungerer evcc? (et kig under motorhjelmen)
+### Hvordan fungerer evcc? (et kig under kølerhjelmen)
 
-For at systemet kan fungere, er en elnetsmåler vigtig. Den
-gør det muligt til ethvert tidspunkt at beregne overskudseffekten. Det er interessant at måle den
-producerede effekt, men det har ingen betydning for funktionen, med
-[denne undtagelse](/da/faq#configuration).
+For at systemet kan fungere, er en elnetsmåler (`grid`-måler) vigtig.
+Den bestemmer den aktuelle overskudseffekt.
+Måling af den producerede effekt har her ingen betydning for funktionen.
+Det er også muligt at køre evcc uden elnetsmåler, se [FAQ](/da/faq#configuration).
 
 Overskudseffekten sammenlignes med den minimale effekt, der kræves til opladning. Hvis
 den rækker, startes opladningen.
@@ -92,13 +92,12 @@ oplysninger.
 
 F.eks.: `phases: 1` og `minCurrent: 8`
 
-1 (faser) x 8 A (minCurrent) x 230 V (netspænding) = 1.840 W (minimal effekt, der kræves til opladning)
+1 (faser) × 8 A (minCurrent) × 230 V (netspænding) = 1.840 W (minimal effekt, der kræves til opladning)
 
 #### Muligheder for justering
 
 Normalt svarer overskudseffekten til den tilgængelige ladeeffekt.
-Den tilgængelige ladeeffekt kan dog justeres individuelt med
-flere parametre. Det er:
+Den tilgængelige ladeeffekt kan dog justeres individuelt med følgende parametre:
 
 - Anlæg: `residualpower`
 - Anlæg: `prioritySoc`
@@ -135,7 +134,7 @@ omfatter:
 
 - Effekt importeret fra og eksporteret til elnettet
 - Effekt produceret af solcelleanlægget
-- Køretøjets ladestrøm (hvis opladeren ikke selv understøtter det)
+- Køretøjets ladestrøm (hvis opladeren ikke selv måler den)
 - Effektflow for hjemmebatteri(er)
 
 ### Enheder til effektbegrænsning

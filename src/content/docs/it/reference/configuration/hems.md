@@ -80,7 +80,7 @@ Per altri esempi di collegamento (GPIO, MQTT, HTTP), vedi [integrazioni definite
 ## `type: fnn`
 
 Collegamento tramite una centralina di controllo FNN con contatti di commutazione separati.
-La riduzione di potenza del consumo (W4) e la limitazione dell’immissione in rete (W3, S2, S1) vengono segnalate tramite contatti singoli.
+La riduzione di potenza del consumo (W4) e la limitazione della produzione (W3, S2, S1) vengono segnalate tramite contatti singoli.
 
 ```yaml
 hems:

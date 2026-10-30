@@ -6,7 +6,7 @@ authors: [naltatis]
 tags: [release, highlights]
 prev: false
 next: false
-translatedFrom: "5b72a3321eef"
+translatedFrom: "7dd8f1e71013"
 ---
 
 Vandaag is [versie 0.130](https://github.com/evcc-io/evcc/releases) van evcc verschenen.
@@ -31,11 +31,11 @@ Het staat netbeheerders toe om bij een hoge netbelasting het vermogen van grote 
 Als de klant met deze regeling instemt, profiteert hij van lagere nettarieven.
 
 De technische uitvoering is hier interessant.
-De netbeheerder grijpt niet direct in op de lader, maar geeft het signaal om het vermogen te verlagen door via de Smart Meter Gateway (SMGW).
+De netbeheerder grijpt niet direct in op de lader, maar stuurt het signaal om het vermogen te verlagen via de Smart Meter Gateway (SMGW).
 Het energiemanagementsysteem in huis moet vervolgens het vermogen van de betreffende verbruikers verlagen.
 
 Met evcc kunt u vandaag al voor alle laders aan deze eis (dimmen) voldoen, zonder ze bijv. via een potentiaalvrij contact uit te hoeven schakelen.
-De laadpunten kunnen in deze periode op hun minimale vermogen (bijv. 4,1 kW) blijven laden.
+De laadpunten kunnen in deze periode op hun minimale vermogen (bijv. 4,2 kW) blijven laden.
 Dat betekent dat elke lader die evcc ondersteunt in dit scenario kan worden gebruikt.
 U hoeft geen nieuwe lader te kopen met speciale ondersteuning voor communicatie met de SMGW of Steuerbox.
 
@@ -46,7 +46,7 @@ De SMGW zelf biedt geen zinvolle manier om met het thuisnetwerk te communiceren.
 Dat gebeurt via een zogenaamde Steuerbox, die achter de SMGW wordt aangesloten.
 Deze gecertificeerde box stuurt het signaal via EEBUS door naar de betreffende apparaten.
 evcc heeft de EEBUS-interface naar de Steuerbox geïmplementeerd.
-Komt er een signaal binnen om het vermogen te verlagen, dan reageert evcc en verlaagt het vermogen van de laders dienovereenkomstig.
+Komt er een signaal binnen om het vermogen te verlagen, dan reageert evcc en regelt de laders dienovereenkomstig.
 
 Een alternatief voor EEBUS is communicatie via een eenvoudig schakelcontact van de Steuerbox.
 Dat kan dan bijv. via een GPIO-pin met evcc worden verbonden.
@@ -59,7 +59,11 @@ In de praktijk zijn er nog nauwelijks Steuerboxen geïnstalleerd waarmee deze fu
 Die worden de komende maanden uitgerold.
 Hebt u al zo’n apparaat, neem dan gerust contact met ons op.
 
-### Netladen van de thuisbatterij
+## Netladen van de thuisbatterij
+
+In de [vorige releaseblogpost](/nl/blog/2024/02/01/v0124-new-tesla-api) hebben we “Ontladen tijdens snelladen voorkomen” geïntroduceerd, de eerste functie waarbij evcc de thuisbatterij actief aanstuurt.
+In versie 0.130 hebben we de batterijsturing verder uitgebreid.
+U kunt de thuisbatterij nu ook bewust met netstroom laden.
 
 Dit is een experimentele functie die beschikbaar is als uw omvormer actieve batterijsturing ondersteunt ([zie documentatie](/nl/meters)) en u een dynamisch tarief hebt.
 In dat geval kunt u een prijslimiet instellen.
@@ -88,7 +92,7 @@ Het probleem is echter dat dit product al jaren op de markt is en de fabrikant g
 
 [Deze bijdrage](https://github.com/evcc-io/evcc/discussions/15367) vat de technische problemen samen die optreden bij het aansturen en uitlezen van de lader.
 De onbetrouwbare meetgegevens waren en zijn een blijvende bron van fouten.
-In de huidige release hebben we daarom de ondersteuning voor de ingebouwde meter verwijderd en raden we alle eigenaren van deze lader aan om een aparte meter ervoor te plaatsen.
+In de huidige release hebben we daarom de ondersteuning voor de ingebouwde meter verwijderd en raden we alle eigenaren van deze lader aan om een aparte meter vóór de lader te plaatsen.
 
 ![Verdrietige Elli Charger](../../../../../en/blog/2024/08/17/sad-elli.webp)
 
@@ -97,9 +101,9 @@ Elli heeft een product van de volgende generatie aangekondigd, de [ElliCharger 2
 Voor zover we nu weten, is dat een veel volwassener apparaat.
 Dat verandert echter niets aan het feit dat de laders van de eerste generatie, die vandaag nog actief worden verkocht, qua softwarekwaliteit van de interface absoluut onaanvaardbaar zijn.
 
-Als u zo’n lader hebt en last hebt van de hierboven beschreven problemen, raden we u aan contact op te nemen met de klantenservice van Elli.
+Hebt u zo’n lader en last van de hierboven beschreven problemen, raden we u aan contact op te nemen met de klantenservice van Elli.
 We hebben weinig hoop dat er nog software-updates komen.
-Technisch goede hardware vervangen alleen omdat de software niet meer wordt onderhouden, vinden we echter niet echt duurzaam.
+Hun aanpak om technisch goede hardware door nieuwere te vervangen, alleen omdat de software niet meer wordt onderhouden, vinden we echter niet echt duurzaam.
 
 We zouden ook graag direct technisch contact met Elli hebben.
 Tot nu toe zijn al onze pogingen echter zonder succes gebleven.
@@ -107,14 +111,15 @@ Tot nu toe zijn al onze pogingen echter zonder succes gebleven.
 ## Statusindicatoren bij het laadpunt
 
 Een visuele wijziging die onlangs in evcc is doorgevoerd, is de herziening van de statusteksten.
-Tot nu toe werden boven de laadniveaubalk meldingen getoond als “Overschot beschikbaar. Start over 1:22 min…” of “Laadplan actief. Start om 23:12.”
+Tot nu toe werden boven de laadniveaubalk meldingen getoond zoals “Overschot beschikbaar. Start over 1:22 min…” of “Laadplan actief. Start om 23:12.”
 
 ![Twee laadpunten met nieuwe statusindicatoren](../../../../../en/blog/2024/08/17/status-icons.webp)
 
 Met het groeiende aantal functies was deze weergave wat onflexibel geworden en konden parallelle toestanden, zoals PV-timer, laadplan en prijslimiet, niet tegelijk worden weergegeven.
-Daarom hebben we dit gebied herzien.
+Daarom hebben we dit deel van het scherm herzien.
 De status van de lader wordt nog steeds als korte tekst weergegeven (“Verbonden”, “Laden”, …).
-Aanvullende informatie zoals PV-timer, laadplan, prijslimiet, klimatisering of de voertuiglimiet wordt nu, als die relevant is, weergegeven als pictogram met een verklarende tooltip.
+Aanvullende informatie zoals PV-timer, laadplan, prijslimiet, klimaatregeling of de voertuiglimiet wordt nu, als die relevant is, als pictogram getoond met een verklarende tooltip.
+Daardoor is de weergave overzichtelijker en flexibeler.
 
 Hier een overzicht van de nieuwe pictogrammen en tooltips:
 
@@ -122,7 +127,7 @@ Hier een overzicht van de nieuwe pictogrammen en tooltips:
 
 ## OCPP: stabiliteit, functies & sponsoring
 
-OCPP-ondersteuning zit al lang in evcc.
+evcc als OCPP-server gebruiken is al vrij lang mogelijk.
 De afgelopen maanden hebben we ons opnieuw op dit onderwerp gericht en [veel werk gestoken](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged+sort%3Aupdated-desc+ocpp) in de stabiliteit en functionaliteit van onze implementatie.
 Tot nu toe waren voor sommige laders speciale configuratieparameters nodig bij het instellen.
 Die zijn nu, op een paar uitzonderingen na, allemaal overbodig.
@@ -132,12 +137,12 @@ Die zijn nu voor de gebruiker onzichtbaar.
 
 ### RFID en autorisatie
 
-De grootste verandering of vernieuwing vanuit het oogpunt van de gebruiker is de standaardconforme ondersteuning van autorisatie.
+Voor gebruikers is de grootste vernieuwing de standaardconforme ondersteuning van autorisatie.
 Daarmee is nu ook [voertuigherkenning via RFID](/nl/features/vehicle#detection-via-rfid) mogelijk.
 Direct laden zonder autorisatie is nog steeds mogelijk.
 Daarvoor moet de betreffende functie in de lader (“Autostart”, “Freies Laden”, “Free Vending” of iets vergelijkbaars) zijn ingeschakeld.
 Heeft uw lader deze instelling niet (wat vrij zeldzaam is), dan kunt u het eerdere gedrag van evcc ook herstellen met de parameter `remotestart: true`.
-Dan start evcc het laden zonder autorisatie door het apparaat.
+Dan start evcc het laden zonder dat de lader het eerst autoriseert.
 
 ### Veel laders getest
 
@@ -159,7 +164,7 @@ Daar zijn vooral twee redenen voor:
 
 We hopen op uw begrip voor deze wijziging.
 
-## Verdere verbeteringen
+## Overige verbeteringen
 
 - **Log-UI:** logs kunnen nu direct in de webinterface worden bekeken, gefilterd en geëxporteerd.
 - **Talen:** evcc ondersteunt nu 27 talen. Hartelijk dank aan alle vertalers.
@@ -172,13 +177,13 @@ Meer details vindt u altijd in de [changelogs van de releases](https://github.co
 ## Nieuwe sponsors
 
 We willen ook iedereen bedanken die het project via sponsoring steunt.
-Aan een open-sourceproject werken dat bijna volledig door de community en de gebruikers wordt gefinancierd, is best gaaf.
+Aan een opensourceproject werken dat bijna volledig door de community en de gebruikers wordt gefinancierd, is best gaaf.
 
 We merken dat evcc inmiddels ook in het bedrijfsleven serieus wordt genomen.
 Dat blijkt uit het feit dat fabrikanten soms direct contact met ons opnemen om een goede integratie van hun apparaten te waarborgen.
 
-Als nieuwe zakelijke sponsors verwelkomen we [CUBOS](https://www.cubos.com), een bedrijf op het gebied van zonne-energie en commerciële laadinfrastructuur, [lekker Energie](https://www.lekker.de), een energieleverancier uit Berlijn en [Victron Energy](https://www.victronenergy.com), een fabrikant van open en modulaire omvormer-, batterij- en laadsystemen.
+Drie bedrijven steunen ons nu financieel als sponsor: [CUBOS](https://www.cubos.com), actief in zonne-energie en commerciële laadinfrastructuur, de Berlijnse energieleverancier [lekker Energie](https://www.lekker.de) en [Victron Energy](https://www.victronenergy.com), fabrikant van open en modulaire omvormer-, batterij- en laadsystemen.
 
 **Veel laadplezier!**<br/>
-het evcc-team<br/>
+Het evcc-team<br/>
 Michael, Andi & Uli

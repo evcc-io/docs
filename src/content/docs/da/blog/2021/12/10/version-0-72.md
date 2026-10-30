@@ -6,10 +6,10 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "853d43f3c405"
+translatedFrom: "fe9b6c445f25"
 ---
 
-Der er sket meget de seneste uger, og i dag vil vi gerne fortælle lidt mere udførligt om alt det nye, der er at opdage i version 0.72.
+Der er sket meget de seneste uger, og i dag vil vi gerne fortælle lidt mere udførligt om, hvad der er nyt at opdage i version 0.72.
 
 ![Eksempel på evcc configure](../../../../../en/blog/2021/12/10/configure.gif)
 
@@ -17,17 +17,17 @@ Der er sket meget de seneste uger, og i dag vil vi gerne fortælle lidt mere udf
 
 ## Enklere installation
 
-Indtil nu har det krævet en del teknisk viden om det pågældende styresystem at komme i gang med **evcc**. Til Linux (Debian, Ubuntu, Raspberry Pi OS) og macOS findes der nu en markant forenklet installation. **evcc** understøtter nu installation via pakkehåndteringerne `apt` på Linux og [`homebrew`](https://brew.sh) på macOS.
+Indtil nu har det krævet en del teknisk viden om dit styresystem at komme i gang med **evcc**. Linux (Debian, Ubuntu, Raspberry Pi OS) og macOS har nu en markant enklere installation. **evcc** kan nu installeres med pakkehåndteringerne `apt` på Linux og [`homebrew`](https://brew.sh) på macOS.
 
-Til det formål har vi endnu en gang revideret installationsvejledningerne og dermed forenklet installationen yderligere. Kig gerne forbi den [tilhørende dokumentation](/da/installation).
+Vi har igen omarbejdet installationsvejledningerne for at gøre installationen endnu enklere. Tag et kig på den [tilhørende dokumentation](/da/installation).
 
 ## Enklere konfiguration
 
-Opsætningen af **evcc** har også indtil nu været meget teknisk præget. Det gælder både formateringsreglerne for [YAML](https://yaml.org), som bestemmer konfigurationens syntaks, og udformningen og tilpasningen af konfigurationen af ens egne enheder i konfigurationsfilen. For nogle er det ret høje forhindringer. Men projektet er stadig ungt og teamet lille, især når man tænker på, at det for udviklerne ”kun” er en hobby.
+Opsætningen af **evcc** har også indtil nu været meget teknisk. Uanset om det er formateringsreglerne for [YAML](https://yaml.org), som definerer konfigurationens syntaks, eller arbejdet med at beskrive og tilpasse dine egne enheder i konfigurationsfilen, er det en ret høj barriere for nogle. Men projektet er stadig ungt og teamet lille, især når man tænker på, at det for udviklerne ”kun” er en hobby.
 
-For at sænke barrieren lidt introducerer vi i version 0.72 en ny funktion: guidet konfiguration med `evcc configure`.
+For at sænke disse forhindringer lidt introducerer den nye version 0.72 af **evcc** en ny funktion: guidet konfiguration med `evcc configure`.
 
-Med denne kommando kan man interaktivt oprette en fungerende konfigurationsfil til sin egen installation! Der er sikkert stadig nogle problemer og fejl hist og her, men vi håber, det er et godt første skridt i den rigtige retning.
+Med denne kommando kan du interaktivt oprette en fungerende konfigurationsfil til din egen installation! Der vil helt sikkert opstå nogle problemer og fejl hist og her, men vi håber, det er et godt første skridt i den rigtige retning.
 
 ## Download og installation
 

@@ -1,12 +1,12 @@
 ---
 title: "MQTT-API"
-description: "Viser alle MQTT-topics, evcc udgiver om dit anlæg, ladepunkter, køretøjer og hjemmebatteri, og topics, du kan skrive til for at ændre tilstande, grænser eller ladeplaner."
+description: "Her ser du alle MQTT-topics, evcc udgiver om anlæg, ladepunkter, køretøjer og hjemmebatteri, og dem, du kan skrive til til at ændre tilstande, grænser eller ladeplaner."
 sidebar:
   order: 2
-translatedFrom: "57bf7b20695d"
+translatedFrom: "2c690ff491d7"
 ---
 
-[API-tilstanden](/da/reference/state) udgives også via MQTT.
+[API-statussen](/da/reference/state) udgives også via MQTT.
 Hvert felt bliver sit eget topic, og indlejrede objekter og lister omdannes til individuelle undertopics (indekset starter ved `1`).
 
 ## Skrivebeskyttede topics
@@ -35,7 +35,7 @@ Alle ladepunkt-id'er starter ved `1`.
 - `evcc/loadpoints/<id>/title`: ladepunktets titel
 - `evcc/loadpoints/<id>/connected`: køretøj tilsluttet (true/false)
 - `evcc/loadpoints/<id>/charging`: lader i øjeblikket (true/false)
-- `evcc/loadpoints/<id>/enabled`: oplader aktiveret (true/false)
+- `evcc/loadpoints/<id>/enabled`: ladepunkt aktiveret (true/false)
 - `evcc/loadpoints/<id>/mode`: ladetilstand (`off`, `smart`, `now`)
 - `evcc/loadpoints/<id>/alwaysCharge`: indstillingen Oplad altid (`off`, `on`, `once`)
 - `evcc/loadpoints/<id>/chargePower`: aktuel ladeeffekt (W)
@@ -43,7 +43,7 @@ Alle ladepunkt-id'er starter ved `1`.
 - `evcc/loadpoints/<id>/chargeDuration`: ladevarighed (ns)
 - `evcc/loadpoints/<id>/chargeRemainingDuration`: resterende ladevarighed (ns)
 - `evcc/loadpoints/<id>/chargeRemainingEnergy`: resterende energi (Wh)
-- `evcc/loadpoints/<id>/chargeTotalImport`: lademålerens samlede stand (Wh)
+- `evcc/loadpoints/<id>/chargeTotalImport`: lademålerens samlede målerstand (Wh)
 - `evcc/loadpoints/<id>/vehicleName`: køretøjets identifikator
 - `evcc/loadpoints/<id>/vehicleTitle`: køretøjets visningsnavn
 - `evcc/loadpoints/<id>/vehicleSoc`: køretøjets opladningsniveau (%)
@@ -57,7 +57,7 @@ Alle ladepunkt-id'er starter ved `1`.
 
 :::caution[Flere topics]
 Denne liste er ikke komplet.
-Brug [MQTT Explorer](https://mqtt-explorer.com/) for at se alle tilgængelige topics.
+Brug [MQTT Explorer](https://mqtt-explorer.com/) til at se alle tilgængelige topics.
 :::
 
 ## Skrivbare topics
@@ -71,7 +71,7 @@ mosquitto_pub -t "evcc/loadpoints/1/phasesConfigured/set" -m "3"
 Tidspunkter angives i UTC i formatet `yyyy-mm-ddThh:mm:ssZ`, f.eks. `2023-03-05T07:00:00Z` (= 5. marts 2023, kl. 8.00 CET).
 
 Følgende strenge genkendes som tomme værdier: `nil`, `null`, `none`, `-`.
-Brug dem til at nulstille tidligere indstillede grænser:
+Brug dem til at nulstille tidligere indstillede tærskler:
 
 ```bash
 mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
@@ -83,7 +83,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/bufferSoc`: opladningsniveau for batteribuffer
 - `evcc/site/bufferStartSoc`: opladningsniveau for start af batteribuffer
 - `evcc/site/residualPower`: resteffekt mod elnettet
-- `evcc/site/batteryGridChargeLimit`: prisgrænse for smart opladning fra elnettet
+- `evcc/site/batteryGridChargeLimit`: prisgrænse for batteriopladning fra elnettet
 - `evcc/site/batteryDischargeControl`: aktiver/deaktiver styring af batteriafladning (true/false)
 - `evcc/site/batteryMode`: ekstern batteritilstand (`normal`, `hold`, `charge`, `holdcharge`, `discharge`), styrer alle styrbare batterier direkte, tilsidesætter andre evcc-tilstande og nulstilles efter 60 s
 - `evcc/site/smartCostLimit`: prisgrænse for smart opladning fra elnettet for alle ladepunkter
@@ -98,16 +98,16 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/loadpoints/<id>/limitEnergy`: energigrænse i kWh, gælder kun for offline-køretøjer
 - `evcc/loadpoints/<id>/planEnergy`: ladeplanens energi (JSON-payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
 - `evcc/loadpoints/<id>/phasesConfigured`: konfigurerede faser
-- `evcc/loadpoints/<id>/minCurrent`: minimal strømstyrke
-- `evcc/loadpoints/<id>/maxCurrent`: maksimal strømstyrke
+- `evcc/loadpoints/<id>/minCurrent`: minimal ladestrøm
+- `evcc/loadpoints/<id>/maxCurrent`: maksimal ladestrøm
 - `evcc/loadpoints/<id>/solarShare`: solandel af minimumsladeeffekten (0–1)
-- `evcc/loadpoints/<id>/enableThreshold`: tærskelværdi
-- `evcc/loadpoints/<id>/enableDelay`: forsinkelse (s)
-- `evcc/loadpoints/<id>/disableThreshold`: tærskelværdi
-- `evcc/loadpoints/<id>/disableDelay`: forsinkelse (s)
+- `evcc/loadpoints/<id>/enableThreshold`: tærskel for aktivering
+- `evcc/loadpoints/<id>/enableDelay`: forsinkelse for aktivering (s)
+- `evcc/loadpoints/<id>/disableThreshold`: tærskel for deaktivering
+- `evcc/loadpoints/<id>/disableDelay`: forsinkelse for deaktivering (s)
 - `evcc/loadpoints/<id>/batteryboost`: batteriboost aktiveret (1/0)
 - `evcc/loadpoints/<id>/batteryBoostLimit`: grænse for opladningsniveau ved batteriboost
-- `evcc/loadpoints/<id>/priority`: prioritet
+- `evcc/loadpoints/<id>/priority`: prioritetsværdi
 - `evcc/loadpoints/<id>/smartCostLimit`: prisgrænse for smart opladning fra elnettet
 - `evcc/loadpoints/<id>/smartFeedInPriorityLimit`: grænse for eksportprioritet
 - `evcc/loadpoints/<id>/planStrategy`: ladeplanens strategi (JSON)

@@ -6,7 +6,7 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "4f5a2d6ac51a"
+translatedFrom: "3c89983a8f03"
 ---
 
 Oggi arriva un piccolo aggiornamento, soprattutto con alcune correzioni di bug e altri miglioramenti.
@@ -17,14 +17,15 @@ Oggi arriva un piccolo aggiornamento, soprattutto con alcune correzioni di bug e
 
 Il comando per la creazione guidata di un file di configurazione e i template sottostanti hanno ricevuto i seguenti miglioramenti:
 
-- Per un punto di ricarica ora si può impostare se, allo scollegamento del cavo di ricarica, debbano essere ripristinate le impostazioni di ricarica predefinite. Maggiori dettagli nella nostra documentazione alla voce `resetOnDisconnect`
-- Ora si possono configurare valori di ricarica predefiniti specifici per veicolo. In modo interattivo sono disponibili con `evcc configure --advanced`. Maggiori dettagli nella documentazione alla voce `onIdentify`
-- Per i dispositivi Modbus ora vengono generate configurazioni corrette
+- Per un punto di ricarica ora si può impostare se, allo scollegamento del cavo di ricarica, debbano essere ripristinate le impostazioni di ricarica predefinite. Maggiori dettagli nella nostra documentazione alla voce `resetOnDisconnect`.
+- Ora si possono configurare valori di ricarica predefiniti specifici per veicolo. In modo interattivo sono disponibili con `evcc configure --advanced`. Maggiori dettagli nella documentazione alla voce `onIdentify`.
+- Per i dispositivi Modbus ora vengono generate configurazioni corrette.
 - Gestione migliorata quando nella cartella corrente esiste già un file `evcc.yaml` ma con permessi di accesso diversi.
 
 ## Rilevamento della posizione
 
-Per alcuni veicoli **evcc** ora è in grado di rilevare la posizione attuale. Al momento però questa informazione non viene ancora usata attivamente.
+Per alcuni veicoli **evcc** ora è in grado di rilevare la posizione attuale.
+Al momento però questa informazione non viene ancora usata attivamente.
 
 ## Download e installazione
 

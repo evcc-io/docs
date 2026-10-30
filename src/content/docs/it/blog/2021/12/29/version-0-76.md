@@ -6,20 +6,21 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "19fb68e22d3a"
+translatedFrom: "daec48020930"
 ---
 
-Oggi, a fine anno, arriva ancora un aggiornamento con alcune novità.
+Prima della fine dell’anno arriva ancora un aggiornamento con alcune novità.
 
 <!-- excerpt -->
 
-## Altri veicoli e caricabatterie
+## Altri veicoli e un caricabatterie
 
 Ora sono supportati i veicoli elettrici Dacia e Smart EQ, così come il caricabatterie Innogy eBox.
 
 ## Correzioni di bug
 
-Questa versione contiene una serie di correzioni di bug e molti piccoli miglioramenti. Trovi un elenco dettagliato tramite il link al changelog qui sotto.
+Questa versione contiene una serie di correzioni di bug e molti piccoli miglioramenti.
+Trovi un elenco dettagliato tramite il link al changelog qui sotto.
 
 ## Download e installazione
 

@@ -3,13 +3,13 @@ title: "MQTT-API"
 description: "Toont alle MQTT-topics die evcc over uw locatie, laadpunten, voertuigen en thuisbatterij publiceert, en de topics waarmee u modi, limieten of laadplannen wijzigt."
 sidebar:
   order: 2
-translatedFrom: "57bf7b20695d"
+translatedFrom: "2c690ff491d7"
 ---
 
 De [API-status](/nl/reference/state) wordt ook via MQTT gepubliceerd.
-Elk veld wordt een eigen topic. Geneste objecten en lijsten worden omgezet in afzonderlijke subtopics (de index begint bij `1`).
+Elk veld wordt een eigen topic, en geneste objecten en lijsten worden omgezet in afzonderlijke subtopics (de index begint bij `1`).
 
-## Leesbare topics
+## Alleen-lezen-topics
 
 ### Locatie
 
@@ -35,7 +35,7 @@ Alle laadpunt-ID’s beginnen bij `1`.
 - `evcc/loadpoints/<id>/title`: titel van het laadpunt
 - `evcc/loadpoints/<id>/connected`: voertuig aangesloten (true/false)
 - `evcc/loadpoints/<id>/charging`: laadt momenteel (true/false)
-- `evcc/loadpoints/<id>/enabled`: lader vrijgegeven (true/false)
+- `evcc/loadpoints/<id>/enabled`: laadpunt ingeschakeld (true/false)
 - `evcc/loadpoints/<id>/mode`: laadmodus (`off`, `smart`, `now`)
 - `evcc/loadpoints/<id>/alwaysCharge`: optie altijd laden (`off`, `on`, `once`)
 - `evcc/loadpoints/<id>/chargePower`: huidig laadvermogen (W)
@@ -68,10 +68,10 @@ Om een schrijfbaar topic te wijzigen, voegt u `/set` aan het topic toe en stuurt
 mosquitto_pub -t "evcc/loadpoints/1/phasesConfigured/set" -m "3"
 ```
 
-Tijden worden in UTC opgegeven, in het formaat `yyyy-mm-ddThh:mm:ssZ`, bijv. `2023-03-05T07:00:00Z` (= 5 maart 2023, 8:00 CET).
+Tijden worden in UTC opgegeven, in het formaat `yyyy-mm-ddThh:mm:ssZ`, bijv. `2023-03-05T07:00:00Z` (= 5 maart 2023, 08:00 CET).
 
 De volgende strings worden als lege waarde herkend: `nil`, `null`, `none`, `-`.
-Gebruik deze om eerder ingestelde limieten te wissen:
+Gebruik deze om eerder ingestelde drempelwaarden te wissen:
 
 ```bash
 mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
@@ -81,7 +81,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 
 - `evcc/site/prioritySoc`: laadniveau voor batterijprioriteit
 - `evcc/site/bufferSoc`: laadniveau voor de batterijbuffer
-- `evcc/site/bufferStartSoc`: startlaadniveau voor de batterijbuffer
+- `evcc/site/bufferStartSoc`: laadniveau waarop de batterijbuffer start
 - `evcc/site/residualPower`: restvermogen op het net
 - `evcc/site/batteryGridChargeLimit`: prijslimiet voor het laden van de thuisbatterij met netstroom
 - `evcc/site/batteryDischargeControl`: ontladingsregeling van de batterij in- of uitschakelen (true/false)
@@ -92,14 +92,14 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 ### Laadpunten
 
 - `evcc/loadpoints/<id>/mode`: laadmodus (`off`, `smart`, `now`)
-- `evcc/loadpoints/<id>/alwaysCharge`: optie altijd laden (`off`, `on`, `once`), alleen in de modus **Slim**
+- `evcc/loadpoints/<id>/alwaysCharge`: optie altijd laden (`off`, `on`, `once`), alleen in de modus Slim
 - `evcc/loadpoints/<id>/minSoc`: minimaal laadniveau
 - `evcc/loadpoints/<id>/limitSoc`: laadlimiet in %, alleen van toepassing op online voertuigen
 - `evcc/loadpoints/<id>/limitEnergy`: energielimiet in kWh, alleen van toepassing op offline voertuigen
 - `evcc/loadpoints/<id>/planEnergy`: energie van het laadplan (JSON-payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
 - `evcc/loadpoints/<id>/phasesConfigured`: ingestelde fasen
-- `evcc/loadpoints/<id>/minCurrent`: minimale stroomsterkte
-- `evcc/loadpoints/<id>/maxCurrent`: maximale stroomsterkte
+- `evcc/loadpoints/<id>/minCurrent`: minimale laadstroom
+- `evcc/loadpoints/<id>/maxCurrent`: maximale laadstroom
 - `evcc/loadpoints/<id>/solarShare`: aandeel zonne-energie in het minimale laadvermogen (0–1)
 - `evcc/loadpoints/<id>/enableThreshold`: inschakeldrempel
 - `evcc/loadpoints/<id>/enableDelay`: inschakelvertraging (s)

@@ -1,9 +1,9 @@
 ---
 title: "Configurazione"
-description: "Scopri dove si trova il file evcc.yaml, com’è strutturato e quali sezioni descrivono il tuo sito e i tuoi dispositivi."
+description: "Questa panoramica mostra dove si trova il file evcc.yaml, com’è strutturato e quali sezioni descrivono il tuo sito e i tuoi dispositivi."
 sidebar:
   order: 1
-translatedFrom: "b5e9667916e0"
+translatedFrom: "7c938df548c1"
 ---
 
 evcc si può configurare in due modi:
@@ -75,12 +75,12 @@ graph TD;
     meterBattery -- meters.batterys --> site
 ```
 
-### Come funziona evcc? (Uno sguardo all’interno)
+### Come funziona evcc? (uno sguardo all’interno)
 
-Perché il sistema funzioni serve un contatore di energia elettrica, che
-permette di calcolare in ogni momento la potenza in surplus. Misurare la
-potenza prodotta è interessante, ma non ha effetto sul funzionamento, con
-[questa eccezione](/it/faq#configuration).
+Perché il sistema funzioni è importante un contatore di rete (contatore `grid`).
+Questo determina la potenza in surplus attuale.
+La misura della potenza prodotta non influisce sulla regolazione.
+È possibile anche usare evcc senza contatore di rete, vedi le [FAQ](/it/faq#configuration).
 
 La potenza in surplus viene confrontata con la potenza minima necessaria per la ricarica. Se
 è sufficiente, la ricarica viene avviata.
@@ -92,13 +92,13 @@ informazioni.
 
 Ad esempio: `phases: 1` e `minCurrent: 8`
 
-1 (fasi) x 8 A (minCurrent) x 230 V (tensione di rete) = 1.840 W (potenza minima necessaria per la ricarica)
+1 (fasi) × 8 A (minCurrent) × 230 V (tensione di rete) = 1.840 W (potenza minima necessaria per la ricarica)
 
 #### Possibilità di intervento
 
 Normalmente la potenza in surplus corrisponde alla potenza di ricarica disponibile.
 La potenza di ricarica disponibile si può però regolare individualmente con
-i seguenti parametri:
+diversi parametri. Sono i seguenti:
 
 - Sito: `residualpower`
 - Sito: `prioritySoc`
@@ -115,7 +115,7 @@ parametro.
 
 ### Sito
 
-Un [sito](/it/reference/configuration/site) descrive l’impianto domestico con i suoi dispositivi
+Un [sito](/it/reference/configuration/site) descrive l’impianto domestico con i dispositivi necessari
 e regola la potenza disponibile.
 
 ### Punto di ricarica
@@ -126,7 +126,7 @@ i _caricabatterie_ e i _veicoli_ presenti e tutto ciò di cui un punto di ricari
 ### Caricabatterie
 
 [Caricabatterie](/it/reference/configuration/chargers) contiene un elenco di caricabatterie e delle loro proprietà, ad es.
-come evcc comunica con loro.
+come vengono indirizzati.
 
 ### Contatori
 
@@ -147,11 +147,11 @@ principale di un impianto con più inverter.
 ### Veicoli
 
 Per limitare il livello di carica delle auto elettriche a un valore specifico, qui puoi indicare
-i [veicoli](/it/reference/configuration/vehicles) presenti e i dati di accesso online.
+i tuoi [veicoli](/it/reference/configuration/vehicles) e le credenziali del rispettivo account online.
 
 ### HEMS
 
-evcc può comunicare i dati dei punti di ricarica e le relative correnti di ricarica a un altro
+evcc può inoltrare i punti di ricarica e le relative correnti di ricarica a un altro
 [sistema di gestione energetica domestica (HEMS)](/it/reference/configuration/hems), che può usare queste
 informazioni ad es. per controllare la batteria domestica.
 

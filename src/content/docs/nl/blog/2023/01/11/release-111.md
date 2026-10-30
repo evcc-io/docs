@@ -6,28 +6,34 @@ authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "2770b38763f5"
+translatedFrom: "ff6ba87e7923"
 ---
 
 ![evcc v0.111](../../../../../en/blog/2023/01/11/banner-evcc-release-111.webp)
 
-Precies op 11 januari hebben we met release 0.111 weer een aantal nieuwe functies klaarstaan, die we hier kort aan u willen voorstellen.
+Precies op tijd, op 11 januari, brengt release 0.111 een aantal nieuwe functies, die we hier kort willen voorstellen.
 
 <!-- excerpt -->
 
 ## 🧞‍♂️ Nieuwe laadplanner: hernieuwbare netstroom gebruiken
 
-De functie voor doelladen bestaat al enige tijd in evcc. Daarmee kunt u een doeltijd instellen waarop het aangesloten voertuig een bepaald laadniveau moet bereiken. De functie is bijv. handig om de auto voor langere ritten precies op tijd voor vertrek op te laden.
+De functie voor doelladen bestaat al enige tijd in evcc.
+Daarmee kunt u een doeltijd instellen waarop het aangesloten voertuig een bepaald laadniveau moet bereiken.
+De functie is bijv. handig om de auto voor langere ritten precies op tijd voor vertrek op te laden.
 
 ![Doelladen](../../../../../en/blog/2023/01/11/zielladen.webp)
 
-De laadstrategie was tot nu toe vrij eenvoudig: het laden wordt zo laat mogelijk gestart, zodat de batterij precies bij vertrek het gewenste niveau heeft bereikt. Dat spaart de batterij, omdat deze niet lang op een hoog laadniveau blijft staan.
+De laadstrategie was tot nu toe vrij eenvoudig: het laden start zo laat mogelijk, zodat de batterij precies bij vertrek het gewenste niveau heeft bereikt.
+Dat spaart de batterij, omdat deze niet lang op een hoog laadniveau blijft staan.
 
-Met deze release wordt de laadplanner slimmer en houdt deze rekening met dynamische stroomprijzen en CO₂-gegevens. Zo wordt het laden gepland in tijdvakken waarin er bijzonder veel hernieuwbare stroom op het net is. Dat bespaart geld, ontlast het stroomnet en vermindert de behoefte aan fossiele energiebronnen.
+Met deze release wordt de laadplanner slimmer en houdt deze rekening met dynamische energieprijzen en CO₂-gegevens.
+Het laden wordt gepland in tijdvakken waarin er bijzonder veel hernieuwbare stroom op het net is.
+Dat bespaart geld, ontlast het net en vermindert de behoefte aan fossiele brandstoffen.
 
 ### 📈 Beursprijzen met awattar en Tibber
 
-De uurtarieven van awattar en Tibber ondersteunen we al langer. Tot nu toe hadden we echter alleen een eenvoudige aansturing die het laden start onder een vooraf te configureren stroomprijs (`cheap`).
+De uurtarieven van awattar en Tibber ondersteunen we al langer.
+Tot nu toe hadden we echter alleen een eenvoudige aansturing die het laden start zodra de stroomprijs onder een vooraf ingestelde grens (`cheap`) komt.
 
 Nu worden de uurprijzen ook in de laadplanning gebruikt en laadt de auto wanneer de netstroom bijzonder goedkoop is.
 
@@ -38,7 +44,7 @@ tariffs:
   grid:
     type: template
     template: awattar
-    region: de # or at
+    region: de # of at
 ```
 
 Configuratie voor Tibber
@@ -48,12 +54,13 @@ tariffs:
   grid:
     type: template
     template: tibber
-    token: "476...963a4" # access token
+    token: "476...963a4" # toegangstoken
 ```
 
 ### 📊 Handmatige tijdafhankelijke tarieven
 
-Het is nu ook mogelijk om tijdafhankelijke tarieven in te stellen. Hier een voorbeeldconfiguratie voor goedkope energie ’s nachts en nog goedkopere energie in het weekend:
+U kunt nu ook tijdafhankelijke tarieven invoeren.
+Hier is een voorbeeldconfiguratie met goedkope energie ’s nachts en nog goedkopere energie in het weekend:
 
 ```yaml
 tariffs:
@@ -68,13 +75,16 @@ tariffs:
         price: 0.15 # EUR/kWh
 ```
 
-Ook deze prijsgegevens worden meegenomen in het nieuwe planningsalgoritme.
+Ook deze prijzen worden meegenomen in het nieuwe planningsalgoritme.
 
-### 🌱 CO₂-gegevens van GrünStromIndex en ElectricityMap
+### 🌱 CO₂-gegevens van GrünStromIndex en Electricity Maps
 
-Wie geen dynamisch stroomtarief heeft, kan toch klimaatvriendelijk laden. Daarvoor gebruiken we nu CO₂-gegevens. Op dit moment hebben we twee bronnen geïmplementeerd. We staan echter open voor verdere suggesties.
+Ook zonder dynamisch stroomtarief kunt u klimaatvriendelijk laden.
+Daarvoor integreren we nu CO₂-gegevens.
+Op dit moment ondersteunen we twee bronnen, maar we staan open voor verdere suggesties.
 
-[GrünStromIndex](https://gruenstromindex.de) levert regionale voorspellingen over hoe schoon de netstroom in Duitsland is. U hoeft alleen uw postcode in te vullen.
+[GrünStromIndex](https://gruenstromindex.de) levert regionale voorspellingen over hoe schoon de netstroom in Duitsland is.
+U hoeft alleen uw postcode in te vullen.
 
 ```yaml
 planner:
@@ -83,7 +93,9 @@ planner:
   zip: 12349
 ```
 
-[Electricity Map](https://app.electricitymaps.com/map) levert wereldwijde voorspellingen. Voor gebruik in evcc hebt u een token en het URL-prefix nodig. Deze gegevens krijgt u met het [gratis account in het API-portaal](https://api-portal.electricitymaps.com/).
+[Electricity Maps](https://app.electricitymaps.com/map) levert wereldwijd voorspellingen.
+Voor gebruik met evcc hebt u een token en het URL-prefix nodig.
+Beide krijgt u met een [gratis account in het API-portaal](https://api-portal.electricitymaps.com/).
 
 ```yaml
 planner:
@@ -96,7 +108,8 @@ planner:
 
 ## Vooruitblik
 
-Voor een van de volgende releases werken we aan een visuele weergave van het laadplan. Dan kunt u ook de door het algoritme berekende tijdvakken en de concrete kosten- of CO₂-besparing zien.
+Voor een van de volgende releases werken we aan een visuele weergave van het laadplan.
+Dan ziet u ook de door het algoritme berekende tijdvakken en de werkelijke kosten- of CO₂-besparing.
 
 ## Meer nieuwe functies
 
@@ -109,5 +122,5 @@ Naast de gebruikelijke kleine verbeteringen en bugfixes bevat deze release nog e
 - 🏳️‍🌈 Drie nieuwe UI-talen
 
 **Bedankt voor uw steun!**<br />
-evcc-kernteam<br />
+Het evcc-kernteam<br />
 [@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) en [@naltatis](https://github.com/naltatis)

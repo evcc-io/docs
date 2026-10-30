@@ -14,7 +14,7 @@ Appen tilbyder tre enhedstyper:
 
 - **Ladepunkt** med ladetilstand, ladegrænse, ladeeffekt, sessionsenergi, køretøjets opladningsniveau og rækkevidde samt tilslutnings- og opladningsstatus
 - **Anlæg** med solproduktion, elnettets effekt og husets forbrug
-- **Hjemmebatteri** med batterieffekt, batteriniveau og indstillinger for batteristyring
+- **Hjemmebatteri** med batterieffekt, opladningsniveau og indstillinger for batteristyring
 
 Med flowkort kan du indstille ladetilstand, ladegrænse samt minimal og maksimal ladestrøm.
 Flowbetingelser reagerer på ladetilstand, opladningsstatus og tilslutningsstatus.

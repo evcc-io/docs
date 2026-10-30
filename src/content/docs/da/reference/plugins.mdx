@@ -3,13 +3,13 @@ title: Plugins
 description: "Plugins læser og skriver enkelte værdier via Modbus, HTTP, MQTT, scripts m.m. og udgør byggestenene i brugerdefinerede enheder."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "548618bdc920"
+translatedFrom: "ffe5935de8c0"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
 
 Plugins læser og skriver enkelte værdier på en enhed, f.eks. en enkelt effektmåling, en ønsket strømstyrke eller en aktiveringskommando.
-De ligger til grund for de medfølgende enhedsskabeloner, og du henviser direkte til dem, når du opbygger en [brugerdefineret enhed](/da/user-defined-devices) af `type: custom`.
+De ligger til grund for de medfølgende enhedsskabeloner, og du bruger dem direkte, når du opbygger en [brugerdefineret enhed](/da/user-defined-devices) af `type: custom`.
 
 Plugins kan bruges til følgende kategorier:
 
@@ -36,7 +36,7 @@ Plugins bruges også af [notifikationer](/da/notifications) til at sende livscyk
 
 ### Liste over hjælpere
 
-- [Calc-plugin](#calc) - Metaplugin til aritmetisk sammenkædning af output fra andre plugins.
+- [Calc-plugin](#calc) - Metaplugin til aritmetisk kombination af output fra andre plugins.
 - [Combined-plugin](#combined) - Metaplugin specifikt til `charger`, der samler de boolske statusværdier for tilsluttet (_plugged_) og lader op (_charging_) til én samlet opladningsstatus.
 - [Const-plugin](#const) - Specielt plugin, der blot returnerer en konstant værdi.
 - [Error-plugin](#error) - Specielt plugin, der returnerer en kendt fejlværdi.
@@ -88,7 +88,7 @@ evcc genkender dem og omsætter dem til interne fejlkoder i stedet for at behand
 Det er f.eks. nyttigt til brugerdefinerede køretøjsintegrationer, hvor datakilden kender køretøjets tilstand.
 
 - `ErrAsleep`: Køretøjet sover. evcc kan vælge at vække køretøjet og prøve igen.
-- `ErrMustRetry`: Operationen skal prøves igen (f.eks. på grund af en begrænsning af antallet af forespørgsler).
+- `ErrMustRetry`: Operationen bør prøves igen (f.eks. fordi der er sendt for mange forespørgsler).
 - `ErrNotAvailable`: Værdien er ikke tilgængelig. evcc behandler det som en permanent fejl indtil næste genstart.
 
 Hvis et plugin returnerer strengen `ErrAsleep` som svar, genererer evcc den tilsvarende interne fejl.
@@ -129,7 +129,7 @@ Et pinout-diagram til Raspberry Pi finder du f.eks. på [pinout.xyz](https://pin
 ```yaml
 source: gpio
 function: read
-pin: 17 # BCM pin number
+pin: 17 # BCM-pinnummer
 ```
 
 **Eksempel på skrivning**:
@@ -137,7 +137,7 @@ pin: 17 # BCM pin number
 ```yaml
 source: gpio
 function: write
-pin: 27 # BCM pin number
+pin: 27 # BCM-pinnummer
 ```
 
 :::note
@@ -164,7 +164,7 @@ Følgende Go-pakker er automatisk tilgængelige og behøver ikke at blive import
 source: go
 script: |
   res := 500.0
-  res * 2 // returns 1000.0
+  res * 2 // returnerer 1000.0
 ```
 
 **Eksempel med tidsfunktioner**:
@@ -173,11 +173,11 @@ script: |
 source: go
 script: |
   hour := time.Now().Hour()
-  price := 50.0 // Night tariff
+  price := 50.0 // nattarif
   if hour >= 9 && hour < 17 {
-    price = 100.0 // Tariff price during business hours
+    price = 100.0 // tarifpris i arbejdstiden
   }
-  price
+  price // returnerer 50.0 eller 100.0 afhængigt af tidspunktet på dagen
 ```
 
 **Eksempel med strengbehandling**:
@@ -186,7 +186,7 @@ script: |
 source: go
 script: |
   text := "hello world"
-  strings.ToUpper(text) // returns "HELLO WORLD"
+  strings.ToUpper(text) // returnerer "HELLO WORLD"
 ```
 
 Når `go`-pluginet bruges til skrivning, overføres den værdi, der skal skrives, til scriptet som en variabel:
@@ -198,7 +198,7 @@ maxcurrent:
   source: go
   script: |
     fmt.Printf("Setting charge current: %d A\n", maxcurrent)
-    // maxcurrent variable is automatically available
+    // variablen maxcurrent er automatisk tilgængelig
 ```
 
 #### Input- og outputtransformationer \{#transformations\}
@@ -216,14 +216,14 @@ Dette eksempel viser betinget logik, som ikke kan opnås med simple Calc-operati
 power:
   source: go
   script: |
-    // Power based on SoC and standby
+    // effekt baseret på opladningsniveau og standby
     power := 5000.0 // normal
     if standby {
-      power = 0.0 // no load in standby
+      power = 0.0 // ingen belastning i standby
     } else if soc < 20.0 {
-      power = 1000.0 // low
+      power = 1000.0 // lav
     }
-    power
+    power // returnerer 5000.0 (standby=false, soc>=20)
   in:
     - name: soc
       type: float
@@ -306,7 +306,7 @@ auth:
   source: <plugin-name>
   user: <username>
   password: <password>
-  # additional plugin-specific parameters
+  # yderligere plugin-specifikke parametre
 ```
 
 Det gør det muligt at integrere enheder med særlige krav til autentificering uden at ændre selve HTTP-pluginets kode.
@@ -317,8 +317,8 @@ Attributter får præfikset `attr`.
 :::
 
 :::tip
-Til at teste jq-forespørgsler er onlineværktøjer som [jqplay.org](https://jqplay.org/) nyttige.
-Til regex-tests er [regex101.com](https://regex101.com/) en god mulighed.
+Onlineværktøjer som [jqplay.org](https://jqplay.org/) er nyttige til at teste jq-forespørgsler.
+[regex101.com](https://regex101.com/) er godt til at teste regulære udtryk.
 :::
 
 **Eksempel på læsning**:
@@ -326,30 +326,30 @@ Til regex-tests er [regex101.com](https://regex101.com/) en god mulighed.
 ```yaml
 source: http
 uri: https://volkszaehler/api/data/<uuid>.json?from=now
-method: GET # default HTTP method
+method: GET # standard-HTTP-metode
 headers:
   - content-type: application/json
-auth: # basic authentication
+auth: # basic-autentificering
   type: basic
   user: foo
   password: bar
-insecure: false # set to true to trust self-signed certificates
-jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # factor applied to result, e.g. for kW to W conversion
-cache: 60s # response cache duration
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+insecure: false # sæt til true for at stole på selvsignerede certifikater
+jq: .data.tuples[0][1] # fortolk svarets JSON
+scale: 0.001 # faktor, der anvendes på resultatet, f.eks. til omregning fra W til kW
+cache: 60s # hvor længe svaret caches
+timeout: 10s # timeout i Go-varighedsformat, se https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
 source: http
 uri: http://charger/status
-jq: .total_power > 10 # Converts a json integer to a boolean value
+jq: .total_power > 10 # konverterer et JSON-heltal til en boolsk værdi
 ```
 
 **Eksempel på skrivning**:
 
 ```yaml
-body: %v # only applicable for PUT or POST requests
+body: %v # gælder kun for PUT- eller POST-forespørgsler
 ```
 
 ```yaml
@@ -379,7 +379,7 @@ evcc indeholder en JavaScript-fortolker med biblioteket [Underscore.js](https://
 source: js
 script: |
   var res = 500;
-  2 * res; // returns 1000
+  2 * res; // returnerer 1000
 ```
 
 Når `js`-pluginet bruges til skrivning, overføres den værdi, der skal skrives, til scriptet som en variabel:
@@ -440,8 +440,8 @@ Til dataudtræk er pipeline-parametrene beskrevet under [Læsning](#reading) til
 ```yaml
 source: mqtt
 topic: mbmd/sdm1-1/Power
-timeout: 30s # don't accept values older than timeout
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+timeout: 30s # accepter ikke værdier, der er ældre end timeout
+scale: 0.001 # faktor, der anvendes på resultatet, f.eks. til omregning fra Wh til kWh
 ```
 
 **Parametre (skrivning)**:
@@ -451,7 +451,7 @@ scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
 | topic     | string | ja       | MQTT-topic, der skrives til                                              |
 | payload   | string | nej      | Payload-skabelon (bruger værdien i standardformat, hvis den ikke er sat) |
 
-Ved skriveadgang leveres dataene med attributten `payload`.
+Ved skrivning leveres dataene med attributten `payload`.
 Hvis denne parameter mangler i konfigurationen, skrives værdien i standardformatet.
 
 **Eksempel på skrivning**:
@@ -518,7 +518,7 @@ timeout: 5s
 
 ```yaml
 source: script
-cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
+cmd: /home/user/my-script.sh ${enable:%b} # formatér den boolske enable som 0/1
 timeout: 5s
 ```
 
@@ -530,12 +530,12 @@ timeout: 5s
 
 ```yaml
 source: sma
-uri: 192.168.4.51 # alternative to serial
-serial: 123456 # alternative to uri
-value: ActivePowerPlus # ID of value to read
-password: "0000" # optional (default: 0000)
-interface: eth0 # optional
-scale: 1 # optional scale factor for value
+uri: 192.168.4.51 # alternativ til serial
+serial: 123456 # alternativ til uri
+value: ActivePowerPlus # ID for den værdi, der skal læses
+password: "0000" # valgfri (standard: 0000)
+interface: eth0 # valgfri
+scale: 1 # valgfri skaleringsfaktor for værdien
 ```
 
 Understøttede værdier for `value` finder du i diagnoseoutputtet fra kommandoen `evcc meter` (med konfigurerede `meter`-enheder fra SMA).
@@ -555,9 +555,9 @@ Til dataudtræk er pipeline-parametrene beskrevet under [Læsning](#reading) til
 ```yaml
 source: http
 uri: ws://<volkszaehler host:port>/socket
-jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
-timeout: 30s # error if no update received in 30 seconds
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # fortolk beskedens JSON
+scale: 0.001 # faktor, der anvendes på resultatet, f.eks. til omregning fra Wh til kWh
+timeout: 30s # fejl, hvis der ikke er modtaget en opdatering inden for 30 sekunder
 ```
 
 ## Hjælpere
@@ -588,12 +588,12 @@ mul:
   ...
 ```
 
-De grundlæggende regnearter addition (add), multiplikation (mul), division (div), fortegnsvending (sign), absolut værdi (abs), minimumsværdi (min) og maksimumsværdi (max) understøttes som operander.
+Følgende operationer understøttes: addition (add), multiplikation (mul), division (div), fortegnsvending (sign), absolutværdi (abs), minimumsværdi (min) og maksimumsværdi (max).
 
-Med `scale: -1` på en af værdierne kan der udføres en simpel subtraktion, med `scale: 0.001` en division, f.eks. til omregning af kWh til Wh.
+Med `scale: -1` på en af værdierne kan der udføres en simpel subtraktion, med `scale: 0.001` en division, f.eks. til omregning af Wh til kWh.
 
 Med `sign:` (alle positive tal bliver til +1, alle negative tal til -1, 0 forbliver 0) kan fortegn overføres til andre værdier (sammen med `mul`).
-F.eks. for at overføre effektens ”retning” (eksport eller import) til de målte strømme for målere.
+Det bruges f.eks. til at overføre effektens ”retning” (eksport eller import) til de målte strømme for målere.
 
 Med `abs:` beregnes den absolutte værdi af et tal.
 
@@ -614,7 +614,7 @@ Konstante hjælpeværdier (f.eks. til offsets) kan genereres som operander med `
 
 ### Combined <Badge text="læsning" variant="tip" size="small" /> \{#combined\}
 
-Statuspluginet `combined` bruges til at omsætte blandede boolske statusværdier for `Plugged` (tilsluttet) / `Charging` (lader op) til en evcc-kompatibel opladningsstatus A..F.
+Statuspluginet `combined` bruges til at omsætte de to boolske statusværdier `Plugged` (tilsluttet) og `Charging` (lader op) til en evcc-kompatibel opladningsstatus A..F.
 Det bruges f.eks. sammen med en OpenWB-MQTT-integration.
 
 **Eksempel på læsning**:
@@ -737,20 +737,20 @@ For at sænke skrives negative værdier (f.eks. `-300`).
 ```yaml
 setmaxpower:
   source: delta
-  get: # Read current total from device
+  get: # læs den aktuelle sum fra enheden
     source: modbus
     uri: 192.168.1.50:502
     id: 50
     register:
-      address: 2012 # Device's internal sum register
+      address: 2012 # enhedens interne sumregister
       type: input
       decode: uint16
-  set: # Write calculated delta
+  set: # skriv den beregnede delta
     source: modbus
     uri: 192.168.1.50:502
     id: 50
     register:
-      address: 2201 # Delta register
+      address: 2201 # deltaregister
       type: writeholding
       decode: uint16
 ```
@@ -762,23 +762,23 @@ Delta-pluginet kombineres ofte med [watchdog-pluginet](#watchdog), når enheden 
 ```yaml
 setmaxpower:
   source: watchdog
-  timeout: 60s # Resend every 30 seconds
+  timeout: 60s # send igen hvert 30. sekund
   set:
-    source: delta # Convert absolute values to deltas
-    get: # Read current total
+    source: delta # konverter absolutte værdier til deltaer
+    get: # læs den aktuelle sum
       source: modbus
       uri: 192.168.1.50:502
       id: 50
       register:
-        address: 2012 # Total register
+        address: 2012 # sumregister
         type: input
         decode: uint16
-    set: # Write delta
+    set: # skriv delta
       source: modbus
       uri: 192.168.1.50:502
       id: 50
       register:
-        address: 2201 # Delta register
+        address: 2201 # deltaregister
         type: writeholding
         decode: uint16
 ```
@@ -799,8 +799,8 @@ Det bruges, når en enhed returnerer harmløse fejl, der kan ignoreres.
 
 1. Det indlejrede `set`-plugin udføres
 2. Hvis der opstår en fejl, kontrolleres det, om fejlmeddelelsen starter med strengen fra `error`
-3. Hvis ja, ignoreres fejlen, og der returneres succes
-4. Hvis nej, sendes fejlen videre som normalt
+3. I så fald ignoreres fejlen, og der returneres succes
+4. Ellers sendes fejlen videre som normalt
 
 **Understøttede datatyper**: `int64`, `float64`, `bool`, `[]byte`
 
@@ -843,8 +843,8 @@ Afhængigt af inputværdien udføres enten `if`- eller `else`-pluginet.
 
 **Sådan fungerer det**:
 
-- For `bool`-værdier: `true` kører `if`, `false` kører `else`
-- For `int64`-værdier: `> 0` kører `if`, ellers køres `else`
+- For `bool`-værdier: `true` udfører `if`, `false` udfører `else`
+- For `int64`-værdier: `> 0` udfører `if`, ellers udføres `else`
 
 **Understøttede datatyper**: `int64`, `bool`
 
@@ -900,10 +900,10 @@ Hvis der ikke findes en passende værdi i tabellen, opstår der en fejl.
 getmode:
   source: map
   values:
-    0: 2 # Device "Free" → evcc "normal"
-    1: 1 # Device "Forced off" → evcc "reduced"
-    2: 3 # Device "Recommended on" → evcc "boost"
-    3: 3 # Device "Forced on" → evcc "boost"
+    0: 2 # enhed ”Fri” → evcc ”normal”
+    1: 1 # enhed ”Tvunget slukket” → evcc ”reduced”
+    2: 3 # enhed ”Anbefalet tændt” → evcc ”boost”
+    3: 3 # enhed ”Tvunget tændt” → evcc ”boost”
   get:
     source: modbus
     uri: 192.168.1.10:502
@@ -920,9 +920,9 @@ getmode:
 setmode:
   source: map
   values:
-    1: 1 # evcc "reduced" → Device "Forced off"
-    2: 0 # evcc "normal" → Device "Free"
-    3: 3 # evcc "boost" → Device "Forced on"
+    1: 1 # evcc ”reduced” → enhed ”Tvunget slukket”
+    2: 0 # evcc ”normal” → enhed ”Fri”
+    3: 3 # evcc ”boost” → enhed ”Tvunget tændt”
   set:
     source: modbus
     uri: 192.168.1.10:502
@@ -997,7 +997,7 @@ Udførelsen stopper straks ved en fejl.
 **Anvendelser**:
 
 - Udføre flere HTTP-kald efter hinanden
-- Kombinere med `sleep`-pluginet for tidsforsinkede handlinger
+- Kombinere med `sleep`-pluginet til tidsforsinkede handlinger
 - Skrive flere Modbus-registre samtidig
 - Sende værdier videre til flere mål
 
@@ -1062,12 +1062,12 @@ batterymode:
 3. Andet trin: `mqtt` sender en besked til `home/battery/status` med payload `mode_3`
 4. Færdig
 
-Værdien løber gennem alle plugins, hvor `switch` udfører forskellige handlinger afhængigt af værdien, og `mqtt` altid giver besked til sidst.
+Værdien løber gennem alle plugins: `switch` udfører forskellige handlinger afhængigt af værdien, og `mqtt` giver altid besked til sidst.
 
 ### Sleep <Badge text="skrivning" variant="caution" size="small" /> \{#sleep\}
 
 `sleep`-pluginet tilføjer en forsinkelse.
-Det bruges typisk i et `sequence`-plugin til at skabe tidsintervaller mellem handlinger.
+Det bruges typisk i et `sequence`-plugin til at lægge pauser ind mellem handlinger.
 
 **Parametre**:
 
@@ -1178,7 +1178,7 @@ Watchdog-pluginet overvåger skriveoperationer og gentager dem automatisk med ha
 
 1. **Start**: Hvis `initial` er konfigureret, skrives denne værdi én gang ved opstart
 2. **Skrivning**: Når en værdi skrives, kontrollerer pluginet, om den står i listen `reset`
-3. **Watchdog aktiv**: Hvis værdien **ikke** står i `reset`, starter watchdoggen og skriver automatisk værdien igen hvert `timeout/2` sekund
+3. **Watchdog aktiv**: Hvis værdien **ikke** står i `reset`, starter watchdoggen og skriver automatisk værdien igen med halvdelen af `timeout`-intervallet
 4. **Watchdog stopper**: Hvis værdien står i `reset`, udføres der ingen gentagelser
 
 **Parameteren reset**:
@@ -1197,7 +1197,7 @@ Watchdog-pluginet overvåger skriveoperationer og gentager dem automatisk med ha
 
 - Sikrer, at timeouts mellem opdateringer overholdes
 - Watchdoggen stoppes under forsinkelsen og genstartes med den nye værdi, når den udløber
-- Nyttig, når enheder kræver en minimal ventetid mellem tilstandsskift
+- Nyttig, når enheder kræver en minimumsventetid mellem tilstandsskift
 - Forsinkelsen beregnes ud fra tiden siden sidste opdatering
 - Reset-værdier skrives altid med det samme (uden forsinkelse)
 
@@ -1225,7 +1225,7 @@ I dette eksempel gentages værdierne automatisk hvert 30. sekund, undtagen når 
 
 - Pluginet starter
 - Skriv værdien `100` → watchdoggen **kører**, værdien gentages hvert 30. sekund
-- Efter 2 minutter: Værdien `100` er skrevet 4 gange (0 s, 30 s, 60 s, 90 s, 120 s)
+- Efter 2 minutter: Værdien `100` er skrevet 5 gange (ved 0, 30, 60, 90 og 120 s)
 - Skriv værdien `200` → watchdoggen **kører videre**, nu med den nye værdi `200` hvert 30. sekund
 - Skriv værdien `0` → watchdoggen **stopper** (da `0` er defineret i `reset`)
 - Ingen yderligere gentagelser, før en ny værdi != `0` skrives
@@ -1236,20 +1236,20 @@ I dette eksempel gentages værdierne automatisk hvert 30. sekund, undtagen når 
 batterymode:
   source: watchdog
   timeout: 60s
-  reset: 1 # Stop repetitions in normal operation
+  reset: 1 # stop gentagelser ved normal drift
   set:
     source: switch
     switch:
       - case: 1 # normal
         set:
           source: modbus
-          # ... Modbus configuration for normal operation
+          # ... Modbus-konfiguration til normal drift
       - case: 2 # hold
         set:
           source: modbus
-          # ... Modbus configuration for hold mode
+          # ... Modbus-konfiguration til hold-tilstand
       - case: 3 # charge
         set:
           source: modbus
-          # ... Modbus configuration for charge mode
+          # ... Modbus-konfiguration til opladningstilstand
 ```

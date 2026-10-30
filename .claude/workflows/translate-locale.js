@@ -25,7 +25,14 @@ export const meta = {
 
 // args: { phase: 'core'|'blog'|'site'|'blog+site'|'all', commit: boolean, scratch: '/abs/dir',
 //         locales: [{ lang, name, docs, site, batches: [{ id, tier, kind, files, words }] }] }
-const { locales, phase = "all", commit = false, scratch, enStat = "" } = args;
+const {
+  locales,
+  phase = "all",
+  commit = false,
+  scratch,
+  enStat = "",
+  screenshots = true,
+} = args;
 const MODEL = "claude-opus-5-5";
 const SEV = ["critical", "major", "minor", "nit"];
 const KINDS = {
@@ -378,7 +385,7 @@ log(
 
 // screenshots: independent of translation, sequential across locales, started now (core phase only)
 const shots = {};
-if (KINDS.includes("docs"))
+if (KINDS.includes("docs") && screenshots)
   for (const L of locales)
     shots[L.lang] = shotLock(() =>
       call(P.shots, vars(L), {

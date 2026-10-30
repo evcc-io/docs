@@ -1,15 +1,15 @@
 ---
 title: Plugins
-description: "Plugins lezen en schrijven afzonderlijke waarden via Modbus, HTTP, MQTT, scripts en meer, en vormen de bouwstenen van gebruikergedefinieerde apparaten."
+description: "Plugins lezen en schrijven afzonderlijke waarden via Modbus, HTTP, MQTT, scripts en meer, en vormen de bouwstenen van gebruikersgedefinieerde apparaten."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "548618bdc920"
+translatedFrom: "ffe5935de8c0"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
 
 Plugins lezen en schrijven afzonderlijke waarden op een apparaat, bijv. een enkele vermogensmeting, een doelstroom of een inschakelcommando.
-Ze vormen de basis van de meegeleverde apparaatsjablonen en worden direct gebruikt wanneer u een [gebruikergedefinieerd apparaat](/nl/user-defined-devices) van `type: custom` opbouwt.
+Ze vormen de basis van de meegeleverde apparaatsjablonen en worden direct gebruikt wanneer u een [gebruikersgedefinieerd apparaat](/nl/user-defined-devices) van `type: custom` opbouwt.
 
 Plugins kunnen voor de volgende categorieën worden gebruikt:
 
@@ -28,7 +28,7 @@ Plugins worden ook door [meldingen](/nl/notifications) gebruikt om levenscyclusg
 - [HTTP-plugin](#http) - Plugin die via een HTTP-API met eindapparaten communiceert.
 - [JavaScript-plugin](#javascript) - Plugin die waarden via een JavaScript-script levert of ontvangt.
 - [Modbus-plugin](#modbus) - Plugin voor het uitlezen van een apparaat met Modbus-ondersteuning.
-- [MQTT-plugin](#mqtt) - Plugin voor indirecte communicatie met apparaten via MQTT.
+- [MQTT-plugin](#mqtt) - Plugin voor indirecte communicatie met MQTT-compatibele apparaten via MQTT.
 - [Prometheus-plugin](#prometheus) - Plugin voor het uitlezen van metrics uit Prometheus met PromQL.
 - [Shell-plugin](#shell) - Plugin die een shellscript kan uitvoeren om gegevens op te halen of om gegevens te ontvangen die moeten worden geschreven.
 - [SMA/Speedwire-plugin](#speedwire) - Plugin speciaal voor SMA-apparaten die via het Speedwire-protocol kunnen communiceren.
@@ -38,7 +38,7 @@ Plugins worden ook door [meldingen](/nl/notifications) gebruikt om levenscyclusg
 
 - [Calc-plugin](#calc) - Metaplugin voor het rekenkundig combineren van uitvoer van andere plugins.
 - [Combined-plugin](#combined) - Metaplugin speciaal voor `charger` om de booleaanse statuswaarden voor verbonden (_plugged_) en laden (_charging_) te combineren tot één laadstatus.
-- [Const-plugin](#const) - Speciale plugin die eenvoudig een constante waarde teruggeeft.
+- [Const-plugin](#const) - Speciale plugin die alleen een constante waarde teruggeeft.
 - [Error-plugin](#error) - Speciale plugin die een bekende foutwaarde teruggeeft.
 - [Convert-plugin](#convert) - Metaplugin voor conversie van gegevenstypen bij het schrijven (bijv. float naar int).
 - [Delta-plugin](#delta) - Metaplugin voor het omzetten van absolute waarden in delta- of incrementwaarden bij het schrijven.
@@ -58,14 +58,14 @@ Een plugin hoort bij een attribuut van een apparaat.
 De attribuutnaam (bijv. `power`, `enable`, `soc`) bepaalt de rol, `source` kiest het plugintype en de overige sleutels zijn pluginspecifieke parameters.
 
 ```yaml
-<attribute>:
+<attribuut>:
   source: <plugin>
   <p-attr1>: ...
   <p-attr2>: ...
 ```
 
 Elke plugin wordt gebruikt in een **lees**- of een **schrijf**context. Sommige parameters zijn maar in een van beide zinvol.
-De volledige attribuutlijsten van meters, laders, voertuigen en tarieven vindt u bij [gebruikergedefinieerde apparaten](/nl/user-defined-devices).
+De volledige attribuutlijsten van meters, laders, voertuigen en tarieven vindt u bij [gebruikersgedefinieerde apparaten](/nl/user-defined-devices).
 
 ### Lezen \{#reading\}
 
@@ -85,7 +85,7 @@ Mogelijke parameters voor het extraheren van gegevens zijn:
 
 De plugins [HTTP](#http), [MQTT](#mqtt) en [Websocket](#websocket) kunnen speciale foutstrings teruggeven.
 evcc herkent deze en zet ze om in interne foutcodes in plaats van ze als gegevens te behandelen.
-Dat is bijv. handig voor gebruikergedefinieerde voertuigintegraties waarbij de gegevensbron de toestand van het voertuig kent.
+Dat is bijv. handig voor gebruikersgedefinieerde voertuigintegraties waarbij de gegevensbron de toestand van het voertuig kent.
 
 - `ErrAsleep`: Het voertuig slaapt. evcc kan besluiten het voertuig te wekken en het opnieuw te proberen.
 - `ErrMustRetry`: De bewerking moet opnieuw worden geprobeerd (bijv. vanwege rate limiting).
@@ -96,11 +96,11 @@ De [Error-plugin](#error) gebruikt hetzelfde mechanisme om een vaste foutwaarde 
 
 ### Schrijven \{#writing\}
 
-Bij het schrijven kunnen parameters in de configuratie plaatshouders bevatten, die door de te schrijven waarde worden vervangen.
+Bij het schrijven kunnen parameters in de configuratie door plaatshouders worden vervangen.
 De gegevens worden geleverd in de vorm `${var[:format]}`.
 Als er geen formaat is opgegeven, worden de gegevens in het Go-standaardformaat %v geleverd.
 De variabelen worden door de bijbehorende waarde vervangen voordat de plugin wordt uitgevoerd.
-Daarnaast kunnen alle functies van de Go Template Library worden gebruikt voor complexere gegevenstransformaties.
+Daarnaast kunnen alle functies van de Go-templatebibliotheek worden gebruikt voor complexere gegevenstransformaties.
 
 ## Plugins
 
@@ -129,7 +129,7 @@ Een pinoverzicht van de Raspberry Pi vindt u bijv. op [pinout.xyz](https://pinou
 ```yaml
 source: gpio
 function: read
-pin: 17 # BCM pin number
+pin: 17 # BCM-pinnummer
 ```
 
 **Schrijfvoorbeeld**:
@@ -137,7 +137,7 @@ pin: 17 # BCM pin number
 ```yaml
 source: gpio
 function: write
-pin: 27 # BCM pin number
+pin: 27 # BCM-pinnummer
 ```
 
 :::note
@@ -164,7 +164,7 @@ De volgende Go-packages zijn automatisch beschikbaar en hoeven niet te worden ge
 source: go
 script: |
   res := 500.0
-  res * 2 // returns 1000.0
+  res * 2 // geeft 1000.0 terug
 ```
 
 **Voorbeeld met tijdfuncties**:
@@ -173,11 +173,11 @@ script: |
 source: go
 script: |
   hour := time.Now().Hour()
-  price := 50.0 // Night tariff
+  price := 50.0 // Nachttarief
   if hour >= 9 && hour < 17 {
-    price = 100.0 // Tariff price during business hours
+    price = 100.0 // Tariefprijs tijdens kantooruren
   }
-  price
+  price // geeft 50.0 of 100.0 terug, afhankelijk van het tijdstip
 ```
 
 **Voorbeeld met stringverwerking**:
@@ -185,8 +185,8 @@ script: |
 ```yaml
 source: go
 script: |
-  text := "hello world"
-  strings.ToUpper(text) // returns "HELLO WORLD"
+  text := "hallo wereld"
+  strings.ToUpper(text) // geeft "HALLO WERELD" terug
 ```
 
 Als de `go`-plugin voor schrijven wordt gebruikt, wordt de te schrijven waarde als variabele aan het script doorgegeven:
@@ -197,8 +197,8 @@ Als de `go`-plugin voor schrijven wordt gebruikt, wordt de te schrijven waarde a
 maxcurrent:
   source: go
   script: |
-    fmt.Printf("Setting charge current: %d A\n", maxcurrent)
-    // maxcurrent variable is automatically available
+    fmt.Printf("Laadstroom instellen: %d A\n", maxcurrent)
+    // de variabele maxcurrent is automatisch beschikbaar
 ```
 
 #### Invoer- en uitvoertransformaties \{#transformations\}
@@ -216,14 +216,14 @@ Dit voorbeeld toont voorwaardelijke logica die met eenvoudige Calc-bewerkingen n
 power:
   source: go
   script: |
-    // Power based on SoC and standby
-    power := 5000.0 // normal
+    // Vermogen op basis van SoC en stand-by
+    power := 5000.0 // normaal
     if standby {
-      power = 0.0 // no load in standby
+      power = 0.0 // geen belasting in stand-by
     } else if soc < 20.0 {
-      power = 1000.0 // low
+      power = 1000.0 // laag
     }
-    power
+    power // geeft 5000.0 terug (standby=false, soc>=20)
   in:
     - name: soc
       type: float
@@ -275,8 +275,8 @@ Voor HTTP-verzoeken zijn verschillende authenticatiemethoden beschikbaar:
 ```yaml
 auth:
   type: basic
-  user: <username>
-  password: <password>
+  user: <gebruikersnaam>
+  password: <wachtwoord>
 ```
 
 **Bearer-token** (bijv. voor JWT):
@@ -292,8 +292,8 @@ auth:
 ```yaml
 auth:
   type: digest
-  user: <username>
-  password: <password>
+  user: <gebruikersnaam>
+  password: <wachtwoord>
 ```
 
 **Aangepaste authenticatie**:
@@ -303,10 +303,10 @@ Deze worden via de parameter `source` gekoppeld:
 
 ```yaml
 auth:
-  source: <plugin-name>
-  user: <username>
-  password: <password>
-  # additional plugin-specific parameters
+  source: <pluginnaam>
+  user: <gebruikersnaam>
+  password: <wachtwoord>
+  # extra pluginspecifieke parameters
 ```
 
 Zo kunnen apparaten met bijzondere authenticatie-eisen worden geïntegreerd zonder de code van de hele HTTP-plugin aan te passen.
@@ -326,30 +326,30 @@ Voor regex-tests is [regex101.com](https://regex101.com/) een goede optie.
 ```yaml
 source: http
 uri: https://volkszaehler/api/data/<uuid>.json?from=now
-method: GET # default HTTP method
+method: GET # standaard HTTP-methode
 headers:
   - content-type: application/json
-auth: # basic authentication
+auth: # basic-authenticatie
   type: basic
   user: foo
   password: bar
-insecure: false # set to true to trust self-signed certificates
-jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # factor applied to result, e.g. for kW to W conversion
-cache: 60s # response cache duration
-timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+insecure: false # op true zetten om zelfondertekende certificaten te vertrouwen
+jq: .data.tuples[0][1] # JSON-antwoord parsen
+scale: 0.001 # factor voor het resultaat, bijv. voor omrekening van W naar kW
+cache: 60s # cacheduur van het antwoord
+timeout: 10s # time-out in het Go-duurformaat, zie https://golang.org/pkg/time/#ParseDuration
 ```
 
 ```yaml
 source: http
 uri: http://charger/status
-jq: .total_power > 10 # Converts a json integer to a boolean value
+jq: .total_power > 10 # Zet een JSON-integer om in een booleaanse waarde
 ```
 
 **Schrijfvoorbeeld**:
 
 ```yaml
-body: %v # only applicable for PUT or POST requests
+body: %v # alleen voor PUT- of POST-verzoeken
 ```
 
 ```yaml
@@ -379,7 +379,7 @@ De `js`-plugin kan via de parameter `script` JavaScript-code uitvoeren. Dat is z
 source: js
 script: |
   var res = 500;
-  2 * res; // returns 1000
+  2 * res; // geeft 1000 terug
 ```
 
 Als de `js`-plugin voor schrijven wordt gebruikt, wordt de te schrijven waarde als variabele aan het script doorgegeven:
@@ -399,7 +399,7 @@ De `js`-plugin ondersteunt dezelfde [invoer- en uitvoertransformaties](#transfor
 
 De `modbus`-plugin kan gegevens lezen van elk apparaat met Modbus-ondersteuning of elke SunSpec-compatibele omvormer.
 Veel energiemeters zijn al voorgeconfigureerd (zie [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
-Het is ook mogelijk Modbus-registers te schrijven om extra laders te integreren.
+Het is ook mogelijk Modbus-registers te schrijven om ook andere laders te integreren.
 
 **Voorbeeld**:
 
@@ -431,7 +431,7 @@ In de [MBMD-documentatie](https://github.com/volkszaehler/mbmd) staat een voorbe
 
 De plugin geeft een fout terug als er binnen de duur van `timeout` geen nieuwe waarde is ontvangen.
 Als `timeout` niet is ingesteld, worden waarden van elke leeftijd geaccepteerd zodra het eerste bericht is ontvangen.
-Het wordt aanbevolen een time-out in te stellen, zodat wordt opgemerkt wanneer de bron geen actuele gegevens meer levert.
+Stel bij voorkeur een time-out in, zodat evcc merkt wanneer de bron geen actuele gegevens meer levert.
 
 Voor het extraheren van gegevens zijn de pipelineparameters uit [Lezen](#reading) beschikbaar (`regex`, `jq`, `quote` enz.).
 
@@ -440,8 +440,8 @@ Voor het extraheren van gegevens zijn de pipelineparameters uit [Lezen](#reading
 ```yaml
 source: mqtt
 topic: mbmd/sdm1-1/Power
-timeout: 30s # don't accept values older than timeout
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+timeout: 30s # geen waarden accepteren die ouder zijn dan timeout
+scale: 0.001 # factor voor het resultaat, bijv. voor omrekening van Wh naar kWh
 ```
 
 **Parameters (schrijven)**:
@@ -518,7 +518,7 @@ timeout: 5s
 
 ```yaml
 source: script
-cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
+cmd: /home/user/my-script.sh ${enable:%b} # booleaanse enable als 0/1 formatteren
 timeout: 5s
 ```
 
@@ -530,12 +530,12 @@ De `sma`-plugin biedt een interface naar SMA-apparaten die het Speedwire-protoco
 
 ```yaml
 source: sma
-uri: 192.168.4.51 # alternative to serial
-serial: 123456 # alternative to uri
-value: ActivePowerPlus # ID of value to read
-password: "0000" # optional (default: 0000)
-interface: eth0 # optional
-scale: 1 # optional scale factor for value
+uri: 192.168.4.51 # alternatief voor serial
+serial: 123456 # alternatief voor uri
+value: ActivePowerPlus # ID van de te lezen waarde
+password: "0000" # optioneel (standaard: 0000)
+interface: eth0 # optioneel
+scale: 1 # optionele schaalfactor voor de waarde
 ```
 
 Ondersteunde waarden voor `value` vindt u in de diagnose-uitvoer van het commando `evcc meter` (met geconfigureerde SMA-apparaten van het type `meter`).
@@ -555,9 +555,9 @@ Voor het extraheren van gegevens zijn de pipelineparameters uit [Lezen](#reading
 ```yaml
 source: http
 uri: ws://<volkszaehler host:port>/socket
-jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
-scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
-timeout: 30s # error if no update received in 30 seconds
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # JSON-bericht parsen
+scale: 0.001 # factor voor het resultaat, bijv. voor omrekening van Wh naar kWh
+timeout: 30s # fout als er binnen 30 seconden geen update binnenkomt
 ```
 
 ## Hulpplugins
@@ -582,28 +582,29 @@ source: calc
 mul:
 - source: calc
   sign:
-    source: ... (power)
+    source: ... (vermogen)
   ...
-- source: ... (current)
+- source: ... (stroom)
   ...
 ```
 
-De plugin ondersteunt de basisbewerkingen optellen (add), vermenigvuldigen (mul), delen (div), tekenomkering (sign), absolute waarde (abs), minimumwaarde (min) en maximumwaarde (max).
+De plugin ondersteunt de basisbewerkingen optellen (add), vermenigvuldigen (mul), delen (div), tekenbepaling (sign), absolute waarde (abs), minimumwaarde (min) en maximumwaarde (max).
 
-Met `scale: -1` op een van de waarden kan eenvoudig worden afgetrokken, met `scale: 0.001` gedeeld, bijv. voor de omrekening van kWh naar Wh.
+Met `scale: -1` op een van de waarden kan eenvoudig worden afgetrokken, met `scale: 0.001` gedeeld, bijv. voor de omrekening van Wh naar kWh.
 
-Met `sign:` (elk positief getal wordt +1, elk negatief getal wordt -1, 0 blijft 0) kan het teken (plus of min) op andere waarden worden overgedragen (in combinatie met `mul`).
+Met `sign:` wordt elk positief getal +1, elk negatief getal -1 en blijft 0 gelijk.
+In combinatie met `mul` kan zo het teken op andere waarden worden overgedragen.
 Zo kan bijv. bij meters de “richting” van het vermogen (teruglevering of netafname) op de gemeten stromen worden overgedragen.
 
 Met `abs:` wordt de absolute waarde van een getal berekend.
 
-Met `min:` en `max:` wordt respectievelijk de minimumwaarde en de maximumwaarde berekend.
+Met `min:` en `max:` worden respectievelijk de minimumwaarde en de maximumwaarde berekend.
 
 De `calc`-plugin is bijv. handig voor:
 
 - Het optellen van vermogenswaarden van afzonderlijke strings van zonnepanelen (optellen)
 - Het berekenen van het schijnbare vermogen uit spanning en stroom (vermenigvuldigen)
-- Het combineren van afzonderlijke vermogenswaarden voor netafname en teruglevering tot één waarde met teken (aftrekken).
+- Het combineren van afzonderlijke vermogenswaarden voor netafname en teruglevering tot één waarde met teken (aftrekken)
 - Het berekenen van vulniveaus in procenten (delen)
 - Het bepalen van de juiste richting van de stroom (sign)
 - Het wegwerken van bekende offsets (optellen met de `const`-plugin)
@@ -737,20 +738,20 @@ Om te verlagen worden negatieve waarden geschreven (bijv. `-300`).
 ```yaml
 setmaxpower:
   source: delta
-  get: # Read current total from device
+  get: # Huidig totaal van het apparaat lezen
     source: modbus
     uri: 192.168.1.50:502
     id: 50
     register:
-      address: 2012 # Device's internal sum register
+      address: 2012 # Intern somregister van het apparaat
       type: input
       decode: uint16
-  set: # Write calculated delta
+  set: # Berekende delta schrijven
     source: modbus
     uri: 192.168.1.50:502
     id: 50
     register:
-      address: 2201 # Delta register
+      address: 2201 # Deltaregister
       type: writeholding
       decode: uint16
 ```
@@ -762,23 +763,23 @@ De Delta-plugin wordt vaak gecombineerd met de [Watchdog-plugin](#watchdog) wann
 ```yaml
 setmaxpower:
   source: watchdog
-  timeout: 60s # Resend every 30 seconds
+  timeout: 60s # Elke 30 seconden opnieuw versturen
   set:
-    source: delta # Convert absolute values to deltas
-    get: # Read current total
+    source: delta # Absolute waarden omzetten in delta’s
+    get: # Huidig totaal lezen
       source: modbus
       uri: 192.168.1.50:502
       id: 50
       register:
-        address: 2012 # Total register
+        address: 2012 # Totaalregister
         type: input
         decode: uint16
-    set: # Write delta
+    set: # Delta schrijven
       source: modbus
       uri: 192.168.1.50:502
       id: 50
       register:
-        address: 2201 # Delta register
+        address: 2201 # Deltaregister
         type: writeholding
         decode: uint16
 ```
@@ -810,7 +811,7 @@ Hij wordt gebruikt wanneer een apparaat onschuldige fouten teruggeeft die kunnen
 batterymode:
   source: switch
   switch:
-    - case: 1 # normal
+    - case: 1 # normaal
       set:
         source: const
         value: 2
@@ -900,10 +901,10 @@ Als er geen passende waarde in de tabel staat, treedt er een fout op.
 getmode:
   source: map
   values:
-    0: 2 # Device "Free" → evcc "normal"
-    1: 1 # Device "Forced off" → evcc "reduced"
-    2: 3 # Device "Recommended on" → evcc "boost"
-    3: 3 # Device "Forced on" → evcc "boost"
+    0: 2 # Apparaat "Vrij" → evcc "normaal"
+    1: 1 # Apparaat "Geforceerd uit" → evcc "gereduceerd"
+    2: 3 # Apparaat "Aanbevolen aan" → evcc "boost"
+    3: 3 # Apparaat "Geforceerd aan" → evcc "boost"
   get:
     source: modbus
     uri: 192.168.1.10:502
@@ -920,9 +921,9 @@ getmode:
 setmode:
   source: map
   values:
-    1: 1 # evcc "reduced" → Device "Forced off"
-    2: 0 # evcc "normal" → Device "Free"
-    3: 3 # evcc "boost" → Device "Forced on"
+    1: 1 # evcc "gereduceerd" → apparaat "Geforceerd uit"
+    2: 0 # evcc "normaal" → apparaat "Vrij"
+    3: 3 # evcc "boost" → apparaat "Geforceerd aan"
   set:
     source: modbus
     uri: 192.168.1.10:502
@@ -1025,12 +1026,12 @@ batterymode:
   set:
     - source: switch
       switch:
-        - case: 1 # normal
+        - case: 1 # normaal
           set:
             source: http
             uri: http://battery.local/api/mode
             body: "automatic"
-        - case: 3 # charge
+        - case: 3 # laden
           set:
             source: sequence
             set:
@@ -1062,7 +1063,7 @@ batterymode:
 3. Tweede stap: `mqtt` stuurt een bericht naar `home/battery/status` met payload `mode_3`
 4. Klaar
 
-De waarde loopt door alle plugins, waarbij `switch` afhankelijk van de waarde verschillende acties uitvoert en `mqtt` aan het eind altijd een melding stuurt.
+De waarde loopt door alle plugins, waarbij `switch` afhankelijk van de waarde verschillende acties uitvoert en `mqtt` aan het eind altijd een bericht stuurt.
 
 ### Sleep <Badge text="schrijven" variant="caution" size="small" /> \{#sleep\}
 
@@ -1118,12 +1119,12 @@ Afhankelijk van de invoerwaarde wordt de bijbehorende actie uitgevoerd.
 setmode:
   source: switch
   switch:
-    - case: 1 # reduced
+    - case: 1 # gereduceerd
       set:
         source: http
         uri: http://device.local/api/mode
         body: "eco"
-    - case: 2 # normal
+    - case: 2 # normaal
       set:
         source: http
         uri: http://device.local/api/mode
@@ -1178,7 +1179,7 @@ De Watchdog-plugin bewaakt schrijfbewerkingen en herhaalt ze automatisch na de h
 
 1. **Start**: Als `initial` is geconfigureerd, wordt deze waarde bij het opstarten eenmalig geschreven
 2. **Schrijven**: Bij het schrijven van een waarde controleert de plugin of die in de lijst `reset` staat
-3. **Watchdog actief**: Als de waarde **niet** in `reset` staat, start de watchdog en schrijft hij de waarde automatisch elke `timeout/2` seconden opnieuw
+3. **Watchdog actief**: Als de waarde **niet** in `reset` staat, start de watchdog en schrijft hij de waarde automatisch opnieuw met een interval van de helft van `timeout`
 4. **Watchdog stopt**: Als de waarde in `reset` staat, worden er geen herhalingen uitgevoerd
 
 **Parameter reset**:
@@ -1225,10 +1226,10 @@ In dit voorbeeld worden waarden automatisch elke 30 s herhaald, behalve wanneer 
 
 - De plugin start
 - Waarde `100` schrijven → watchdog **loopt**, de waarde wordt elke 30 s herhaald
-- Na 2 minuten: waarde `100` is 4x geschreven (0 s, 30 s, 60 s, 90 s, 120 s)
+- Na 2 minuten: waarde `100` is 5 keer geschreven (op 0, 30, 60, 90 en 120 s)
 - Waarde `200` schrijven → watchdog **blijft** lopen, nu met de nieuwe waarde `200` elke 30 s
 - Waarde `0` schrijven → watchdog **stopt** (omdat `0` in `reset` is gedefinieerd)
-- Geen verdere herhalingen totdat een nieuwe waarde != `0` wordt geschreven
+- Geen verdere herhalingen totdat een nieuwe waarde anders dan `0` wordt geschreven
 
 **Voorbeeld met batterijsturing** (`batterymode` gebruikt de waarden 1=normal, 2=hold, 3=charge, 4=holdcharge, 5=discharge):
 
@@ -1236,20 +1237,20 @@ In dit voorbeeld worden waarden automatisch elke 30 s herhaald, behalve wanneer 
 batterymode:
   source: watchdog
   timeout: 60s
-  reset: 1 # Stop repetitions in normal operation
+  reset: 1 # Herhalingen stoppen bij normale werking
   set:
     source: switch
     switch:
-      - case: 1 # normal
+      - case: 1 # normaal
         set:
           source: modbus
-          # ... Modbus configuration for normal operation
-      - case: 2 # hold
+          # ... Modbus-configuratie voor normale werking
+      - case: 2 # vasthouden
         set:
           source: modbus
-          # ... Modbus configuration for hold mode
-      - case: 3 # charge
+          # ... Modbus-configuratie voor de vasthoudmodus
+      - case: 3 # laden
         set:
           source: modbus
-          # ... Modbus configuration for charge mode
+          # ... Modbus-configuratie voor de laadmodus
 ```

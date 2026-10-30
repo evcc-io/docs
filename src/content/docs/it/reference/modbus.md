@@ -3,34 +3,34 @@ title: "Modbus"
 description: "Spiega come evcc comunica con contatori e caricabatterie tramite Modbus, in seriale via RS485, via TCP o con un convertitore RTU-TCP, e come configurare ogni variante."
 sidebar:
   order: 4
-translatedFrom: "8cbbf87533c1"
+translatedFrom: "01c339d6465c"
 ---
 
-Alcuni dispositivi, come i contatori ([`meters`](/it/reference/configuration/meters#modbus)) o i caricabatterie ([`chargers`](/it/reference/configuration/chargers)), sono collegati e comunicano tramite il protocollo Modbus.
+Alcuni dispositivi, come i contatori ([`meters`](/it/reference/configuration/meters#modbus)) o i caricabatterie ([`chargers`](/it/reference/configuration/chargers)), sono collegati e indirizzati tramite il protocollo Modbus.
 
 La configurazione `meter` comprende il tipo di collegamento fisico (interfaccia), parametri tecnici opzionali dell’interfaccia, il protocollo Modbus usato, l’ID Modbus univoco del dispositivo sul bus e il numero e il tipo del registro da leggere o scrivere.
 
-È importante sapere che esistono tre diversi protocolli Modbus: Modbus RTU, Modbus ASCII e Modbus TCP. Tecnicamente possono essere trasmessi su diversi tipi di interfaccia. La variante classica è Modbus RTU su un’interfaccia bus seriale RS485, usata dalla maggior parte dei contatori o da alcuni caricabatterie. I dispositivi con un’interfaccia di rete nativa (Ethernet/WiFi), invece, comunicano di solito tramite il protocollo Modbus TCP.
+È importante sapere che esistono tre diversi protocolli Modbus: Modbus RTU, Modbus ASCII e Modbus TCP. Tecnicamente possono essere trasmessi su diversi tipi di interfaccia. La variante classica è Modbus RTU su un’interfaccia bus seriale RS485, usata dalla maggior parte dei contatori e da alcuni caricabatterie. I dispositivi con un’interfaccia di rete nativa (Ethernet/Wi-Fi), invece, comunicano di solito tramite il protocollo Modbus TCP.
 
-Se un dispositivo Modbus seriale deve essere collegato in rete (Ethernet/WiFi/PowerLAN) tramite un convertitore di interfaccia, si stabilisce una connessione con protocollo Modbus RTU su TCP/IP. Il protocollo Modbus RTU viene trasmesso direttamente sulla rete (cioè “incapsulato”). Anche se il metodo di trasporto (TCP/IP) è lo stesso, il protocollo NON è lo stesso di Modbus TCP. È fondamentale distinguere tra protocollo e metodo di trasporto. “Modbus (RTU) over TCP” è diverso da Modbus TCP!
+Se un dispositivo Modbus seriale deve essere collegato in rete (Ethernet/Wi-Fi/PowerLAN) tramite un convertitore di interfaccia, si stabilisce una connessione con protocollo Modbus RTU su TCP. Il protocollo Modbus RTU viene trasmesso direttamente sulla rete (cioè “incapsulato”). Anche se il metodo di trasporto (TCP/IP) è lo stesso, il protocollo NON è lo stesso di Modbus TCP. È fondamentale distinguere tra protocollo e metodo di trasporto. “Modbus RTU su TCP” è diverso da Modbus TCP!
 
 :::caution
-Attenzione: esistono convertitori di interfaccia più complessi che possono anche tradurre il protocollo Modbus stesso tra Modbus RTU e Modbus TCP!
+Esistono convertitori di interfaccia più complessi che possono anche tradurre il protocollo Modbus stesso tra Modbus RTU e Modbus TCP!
 
 Se questa funzione è attiva, evcc deve comunicare con il convertitore tramite Modbus TCP, mentre il convertitore comunica con il dispositivo seriale tramite Modbus RTU e traduce i due protocolli in entrambe le direzioni.
 In questo caso occorre prestare molta attenzione alle specifiche e alla configurazione del dispositivo, altrimenti la comunicazione potrebbe non funzionare!
 :::
 
-Nel caso di una configurazione con convertitore di interfaccia, la configurazione del bus seriale si definisce solo sul convertitore. La configurazione di evcc riguarda quindi solo il tratto fino al convertitore.
+Se usi un convertitore di interfaccia, i parametri del bus seriale si impostano solo sul convertitore. In evcc si configura quindi solo il tratto fino al convertitore.
 
 ## Collegamento fisico
 
 ### Collegamento seriale (RS485)
 
-Se il dispositivo è collegato direttamente tramite un adattatore RS485 (Modbus RTU), occorre indicare `device` e i parametri di comunicazione seriale `baudrate` e `comset` in base alla configurazione del dispositivo. Consulta il relativo manuale d’uso, le schede tecniche o le impostazioni dell’impianto.
+Se il dispositivo è collegato direttamente tramite un adattatore RS485 (Modbus RTU), occorre indicare `device` e i parametri di comunicazione seriale `baudrate` e `comset` in base alla configurazione del dispositivo. Consulta il relativo manuale d’uso, le schede tecniche o le impostazioni del sistema.
 
 :::note
-Su un bus seriale RS485 si possono far funzionare più dispositivi con parametri di comunicazione identici, se a ciascun dispositivo è assegnato un ID Modbus univoco. Se non tutti i dispositivi di un bus possono essere configurati con impostazioni di comunicazione uniformi (ma con ID diversi), è necessario suddividerli in più sistemi bus indipendenti.
+Su un bus seriale RS485 si possono far funzionare più dispositivi con parametri di comunicazione identici, se a ciascun dispositivo è assegnato un ID Modbus univoco. Se non tutti i dispositivi di un bus possono usare gli stessi parametri di comunicazione (ma con ID diversi), occorre suddividerli su più bus indipendenti.
 :::
 
 :::caution
@@ -61,7 +61,7 @@ uri: 192.168.0.11:502
 
 ### Dispositivo seriale tramite connessione di rete (con convertitore di interfaccia)
 
-Se un dispositivo seriale è collegato tramite un convertitore RS485-IP trasparente (senza traduzione del protocollo), occorre impostare con `rtu: true` il protocollo Modbus RTU anche sulla connessione TCP/IP.
+Se un dispositivo seriale è collegato tramite un convertitore di interfaccia RS485-IP trasparente interposto (senza traduzione del protocollo), occorre indicare `rtu: true`, così il protocollo Modbus RTU viene usato anche sulla connessione TCP/IP.
 
 **Ad esempio**:
 
@@ -69,12 +69,12 @@ Se un dispositivo seriale è collegato tramite un convertitore RS485-IP traspare
 source: modbus
 id: 1
 uri: 192.168.0.10:502
-rtu: true # Modbus RTU over TCP
+rtu: true # Modbus RTU su TCP
 ```
 
 ## Dispositivi predefiniti
 
-I modelli di dispositivo integrati (`model`) sono identici a quelli di [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
+I modelli di dispositivo predefiniti integrati (`model`) sono identici a quelli di [MBMD](https://github.com/volkszaehler/mbmd/blob/master/docs/mbmd_run.md#options):
 
      ABB       ABB A/B-Series meters
      DDM       DDM18SD
@@ -93,9 +93,7 @@ I modelli di dispositivo integrati (`model`) sono identici a quelli di [MBMD](ht
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Qualsiasi `model` diverso da questi viene
-
-trattato come tipo di dispositivo _SunSpec_.
+Qualsiasi `model` diverso da questi viene trattato come tipo di dispositivo _SunSpec_.
 
 Con `value` si definisce il valore da leggere dal dispositivo. Tutti i valori supportati sono predefiniti in [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
 
@@ -110,7 +108,7 @@ source: modbus
 ---
 model: sdm
 value: Power
-scale: -1 # floating point factor applied to result, e.g. for kW to W conversion
+scale: -1 # fattore in virgola mobile applicato al risultato, ad es. per convertire kW in W
 ```
 
 ## Inversione dei valori
@@ -122,9 +120,9 @@ Per i contatori MBMD, i valori di misura possono essere invertiti anteponendo al
 
 L’inversione funziona per le seguenti misure MBMD:
 
-- `power` - potenza totale
-- `currents` - correnti per fase (array)
-- `powers` - potenze per fase (array)
+- `power`: potenza totale
+- `currents`: correnti per fase (array)
+- `powers`: potenze per fase (array)
 
 ### Sintassi
 
@@ -133,7 +131,7 @@ meters:
   - name: my-meter
     type: modbus
     model: sdm
-    power: -Power # inverts the power value
+    power: -Power # inverte il valore della potenza
 ```
 
 ### Esempi
@@ -145,7 +143,7 @@ meters:
   - name: pv-meter
     type: modbus
     model: sdm
-    power: -Power # Power will be inverted (e.g. +1000 W becomes -1000 W)
+    power: -Power # la potenza viene invertita (ad es. +1000 W diventa -1000 W)
 ```
 
 #### Potenze di fase invertite
@@ -157,9 +155,9 @@ meters:
     model: sdm
     power: Power
     powers:
-      - -PowerL1 # Phase 1 inverted
-      - -PowerL2 # Phase 2 inverted
-      - -PowerL3 # Phase 3 inverted
+      - -PowerL1 # fase 1 invertita
+      - -PowerL2 # fase 2 invertita
+      - -PowerL3 # fase 3 invertita
 ```
 
 #### Correnti invertite (singole fasi)
@@ -171,9 +169,9 @@ meters:
     model: sdm
     power: Power
     currents:
-      - -CurrentL1 # Current Phase 1 inverted
-      - CurrentL2 # Current Phase 2 normal
-      - -CurrentL3 # Current Phase 3 inverted
+      - -CurrentL1 # corrente fase 1 invertita
+      - CurrentL2 # corrente fase 2 normale
+      - -CurrentL3 # corrente fase 3 invertita
 ```
 
 ### Casi d’uso
@@ -181,11 +179,11 @@ meters:
 **Contatori montati in modo errato**:
 Se un sensore di corrente o un contatore è installato fisicamente nella direzione sbagliata, puoi correggere i valori via software.
 
-**Immissione in rete e consumo**:
-Per contatori solari in cui la convenzione dei segni deve essere invertita.
+**Immissione in rete o consumo**:
+Per i contatori dell’impianto fotovoltaico in cui la convenzione dei segni va invertita.
 
-**Orientamenti diversi dei TA**:
-Per installazioni multifase con trasformatori di corrente orientati in modo diverso.
+**Orientamenti diversi dei trasformatori di corrente**:
+Per installazioni multifase con trasformatori di corrente (TA) orientati in modo diverso.
 
 ## Configurazione manuale
 
@@ -195,9 +193,9 @@ A questo scopo, oltre alle impostazioni Modbus generali (vedi sopra), occorre de
 La definizione di un registro richiede i seguenti parametri:
 
 - `address`: l’indirizzo del registro
-- `type`: il tipo di registro. I tipi di lettura consentiti sono `coil`, `input` e `holding`, quelli di scrittura sono `writeholding`, `writeholdings`, `writecoil`
+- `type`: il tipo di registro. I tipi di lettura consentiti sono `coil`, `input` e `holding`, quelli di scrittura sono `writeholding`, `writeholdings` e `writecoil`
 - `decode`: il tipo di codifica dei dati. Sono consentiti: `int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s`. Per il tipo `coil` la codifica viene ignorata, ma deve comunque essere indicata. Per il tipo `writecoil` occorre indicare `bool8`.
-- `bitmask`: un’indicazione opzionale. Il valore indicato viene combinato in AND con il valore letto per estrarre singoli bit.
+- `bitmask`: opzionale. Il valore viene combinato in AND con il valore letto per estrarre singoli bit.
 
 Altri parametri consentiti in una configurazione manuale sono:
 
@@ -211,20 +209,20 @@ source: modbus
 ---
 register:
   address: 40070
-  type: holding # coil, holding or input
-  decode: int32 # int16|32|64, uint16|32|64, float32|64 and u|int32s + float32s
-  bitmask: 2 # Optional: a bitmask that is applied to the read value. Here the mask is 0000000000000010b, ignored if value is 0
-scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversion
-timeout: 2s # timeout, without unit in ns
+  type: holding # coil, holding o input
+  decode: int32 # int16|32|64, uint16|32|64, float32|64 e u|int32s + float32s
+  bitmask: 2 # opzionale: maschera di bit applicata al valore letto. Qui la maschera è 0000000000000010b, ignorata se il valore è 0
+scale: -1.0 # fattore in virgola mobile applicato al risultato, ad es. per convertire kW in W
+timeout: 2s # timeout, senza unità in ns
 ```
 
-Per le codifiche `int32s/uint32s` l’ordine dei byte viene invertito, il che è utile per i dispositivi E3/DC.
+Per le codifiche `int32s/uint32s` l’ordine delle word viene invertito (prima la word meno significativa), il che è utile per i dispositivi E3/DC.
 
 ### Scrittura dei registri
 
-Si possono scrivere sia gli holding register sia i coil. A questo scopo occorre indicare `type: writeholding` per gli holding register oppure `type: writecoil` per i coil. Per scrivere più registri (function code 16) è disponibile il tipo `writeholdings`.
+Si possono scrivere sia gli holding register sia i coil. A questo scopo occorre indicare `type: writeholding` per gli holding register oppure `type: writecoil` per i coil. Per scrivere più registri (codice funzione 16) è disponibile il tipo `writeholdings`.
 
-`type: writeholding` scrive sempre un registro a 16 bit (int o bool16). Per questo, per `decode` occorre indicare sempre `uint16`.
+`type: writeholding` scrive sempre un registro a 16 bit (int o bool16). Per questo `decode` deve essere sempre `uint16`.
 `type: writecoil` scrive un coil. Per `decode` occorre indicare `bool8`.
 
 **Ad esempio**:
@@ -234,12 +232,12 @@ source: modbus
 ---
 register:
   address: 40070
-  type: writeholding # writeholding, writeholdings or writecoil
+  type: writeholding # writeholding, writeholdings o writecoil
 ```
 
 ### Esempio completo
 
-Un esempio completo di caricabatterie definito dall’utente con interfaccia Modbus (qui un Phoenix EM-CP-PP-ETH con indirizzo IP 192.168.1.10) potrebbe essere il seguente:
+Ecco un esempio completo di caricabatterie definito dall’utente con interfaccia Modbus (qui un Phoenix EM-CP-PP-ETH con indirizzo IP 192.168.1.10):
 
 **Ad esempio**:
 
@@ -248,41 +246,41 @@ chargers:
   - type: custom
     name: CustomCharger
     status:
-      # Read the status of the charger
-      # Either A,B,C or F
+      # legge lo stato del caricabatterie
+      # A, B, C oppure F
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       timeout: 3s
       register:
         address: 100
-        type: input # Read an input register
+        type: input # legge un input register
         decode: int16
     enabled:
-      # Is the charger enabled (1) or not (0)
+      # il caricabatterie è abilitato (1) o no (0)
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: coil # Read a coil
-        decode: bool16 # Doesn't matter but required
+        type: coil # legge un coil
+        decode: bool16 # irrilevante ma obbligatorio
     enable:
-      # Enable the charger
+      # abilita il caricabatterie
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 400
-        type: writecoil # Write a coil
+        type: writecoil # scrive un coil
         decode: bool8
     maxcurrent:
-      # Set the maximum current
+      # imposta la corrente massima
       source: modbus
       id: 180
       uri: 192.168.1.10:502
       register:
         address: 300
-        type: writeholding # Write a holding register
+        type: writeholding # scrive un holding register
         decode: uint16
 ```

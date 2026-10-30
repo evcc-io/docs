@@ -1,15 +1,15 @@
 ---
 title: "modbusproxy"
-description: "Beschrijft hoe u in evcc.yaml de Modbus-proxy instelt, zodat andere systemen samen met uw evcc-installatie één Modbus-verbinding met een omvormer of meter gebruiken."
+description: "Met de Modbus-proxy in evcc.yaml gebruiken andere systemen samen met uw evcc-installatie één Modbus-verbinding met een omvormer of meter."
 sidebar:
   order: 18
-translatedFrom: "cd5b4859740b"
+translatedFrom: "7191bc3757f6"
 ---
 
 De instelling `modbusproxy` is een lijst van apparaten die via Modbus TCP in het netwerk beschikbaar worden gesteld voor systemen van derden.
 
 Sommige apparaten staan slechts een zeer beperkt aantal Modbus-TCP-clients toe. In het slechtste geval is maar één verbinding toegestaan, zoals bij componenten van SolarEdge. Daarnaast is in seriële RS485-bussystemen met Modbus RTU maar één master toegestaan.
-Met `modbusproxy` kan evcc worden ingericht als Modbus-proxy die bestaande Modbus-verbindingen met andere systemen deelt. Zo communiceert evcc direct met het apparaat, terwijl andere systemen met evcc communiceren en evcc de verbindingen bundelt en naar het doelapparaat doorstuurt.
+Met `modbusproxy` werkt uw evcc-installatie als Modbus-proxy die bestaande Modbus-verbindingen met andere systemen deelt. Alleen uw evcc-installatie communiceert dan direct met het apparaat. Andere systemen verbinden met de proxy, die hun verzoeken bundelt en naar het doelapparaat doorstuurt.
 
 De configuratie `modbusproxy` is een lijst van verschillende proxyconfiguraties.
 
@@ -31,7 +31,7 @@ modbusproxy:
 :::note
 Voor _inkomende_ verbindingen (van systemen van derden zoals domotica of loggers) ondersteunt de proxyfunctie uitsluitend Modbus TCP.
 
-Voor _uitgaande_ verbindingen naar het op te vragen doelapparaat (bijv. omvormer, energiemeter) kan het protocol worden vertaald volgens de configuratie van het doelapparaat.
+Voor _uitgaande_ verbindingen naar het doelapparaat dat wordt uitgelezen (bijv. omvormer, meter) kan het protocol worden vertaald volgens de configuratie van het doelapparaat.
 :::
 
 :::tip[Sponsortoken vereist]
@@ -60,7 +60,7 @@ port: 5021
 
 Het IP-adres en de poort van het doelapparaat in de gangbare URI-notatie.
 
-Elke opgegeven poort moet uniek zijn en mag niet al door een andere toepassing op dezelfde host worden gebruikt, maar hoeft niet te verschillen van de poort van het doelapparaat. U kunt dus ook een configuratie voor poort 502 definiëren die naar poort 502 op het doelapparaat verwijst.
+Elke opgegeven poort moet uniek zijn en mag niet al door een andere toepassing op de evcc-host worden gebruikt, maar hoeft niet te verschillen van de poort van het doelapparaat. U kunt dus ook een configuratie voor poort 502 definiëren die naar poort 502 op het doelapparaat verwijst.
 
 **Voorbeeld**:
 
@@ -71,7 +71,7 @@ Elke opgegeven poort moet uniek zijn en mag niet al door een andere toepassing o
 
 ### `rtu`
 
-Modbus TCP wordt doorgaans gebruikt voor communicatie met doelapparaten in het netwerk. Indien nodig kunt u met `rtu: true` overschakelen op Modbus RTU over TCP. Een typische toepassing zijn eenvoudige transparante RS485-TCP-converters (zonder protocolvertaling). Dit moet overeenkomen met de configuratie van het apparaat. Voor seriële doelsystemen wordt het genegeerd.
+Modbus TCP wordt doorgaans gebruikt voor communicatie met doelapparaten in het netwerk. Indien nodig kunt u met `rtu: true` overschakelen op Modbus RTU over TCP. Een typische toepassing zijn eenvoudige transparante RS485-naar-TCP-converters (zonder protocolvertaling). De instelling moet overeenkomen met de configuratie van het apparaat. Bij seriële doelapparaten wordt ze genegeerd.
 
 **Voorbeeld**:
 
@@ -85,9 +85,9 @@ Met deze parameter kunt u schrijftoegang via Modbus door systemen van derden ver
 
 **Mogelijke waarden**:
 
-- `true`: Schrijftoegang wordt zonder antwoord geblokkeerd
-- `deny`: Schrijftoegang wordt geblokkeerd met een Modbus-foutmelding als antwoord
-- `false`: Schrijftoegang wordt doorgestuurd
+- `true`: schrijftoegang wordt zonder antwoord geblokkeerd
+- `deny`: schrijftoegang wordt geblokkeerd met een Modbus-foutmelding als antwoord
+- `false`: schrijftoegang wordt doorgestuurd
 
 Functiecodes die de proxy niet zelf afhandelt, zoals de fabrikantspecifieke functiecode 0x41 van Huawei, kunnen schrijfbewerkingen bevatten.
 Beide alleen-lezenmodi blokkeren ze daarom met een Modbus-foutmelding.
@@ -96,7 +96,7 @@ De Home Assistant-integratie voor Huawei-omvormers heeft bijvoorbeeld `readonly:
 
 :::caution
 De proxy controleert niet wie verbinding maakt.
-Met `readonly: false` (de standaardwaarde) kan elk apparaat in uw netwerk dat de poort kan bereiken naar het doelapparaat schrijven.
+Met `readonly: false` (de standaardwaarde) kan elk apparaat in uw netwerk dat de poort bereikt, naar het doelapparaat schrijven.
 Gebruik de proxy alleen in een vertrouwd netwerk.
 :::
 

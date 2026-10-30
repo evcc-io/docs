@@ -3,15 +3,15 @@ title: "modbusproxy"
 description: "Sådan opsætter du Modbus-proxyen i evcc.yaml, så andre systemer kan dele en Modbus-forbindelse til en inverter eller måler med din evcc-installation."
 sidebar:
   order: 18
-translatedFrom: "cd5b4859740b"
+translatedFrom: "7191bc3757f6"
 ---
 
 Indstillingen `modbusproxy` er en liste over enheder, der stilles til rådighed for tredjepartssystemer via Modbus TCP på netværket.
 
-Nogle enheder tillader kun et meget begrænset antal Modbus TCP-klienter. I værste fald tillades kun en enkelt forbindelse, som det er tilfældet med komponenter fra SolarEdge. Desuden må der i serielle Modbus RTU RS485-bussystemer kun være én master.
-Med `modbusproxy` kan evcc opsættes som Modbus-proxy, der kan dele eksisterende Modbus-forbindelser med andre systemer. Dermed kommunikerer evcc direkte med enheden, mens andre systemer kommunikerer med evcc, som samler forbindelserne og videresender dem til den tilsluttede enhed.
+Nogle enheder tillader kun et meget begrænset antal Modbus-TCP-klienter. I værste fald tillades kun en enkelt forbindelse, som det er tilfældet med komponenter fra SolarEdge. Desuden må der i serielle RS485-bussystemer med Modbus RTU kun være én master.
+Med `modbusproxy` kan din evcc-installation fungere som Modbus-proxy, der kan dele eksisterende Modbus-forbindelser med andre systemer. Så er det kun evcc, der kommunikerer direkte med enheden, mens andre systemer kommunikerer med evcc, som samler forbindelserne og videresender dem til enheden.
 
-Konfigurationen `modbusproxy` er en liste over forskellige proxykonfigurationer.
+Indstillingen `modbusproxy` kan indeholde flere proxyer.
 
 **Eksempel**:
 
@@ -29,14 +29,14 @@ modbusproxy:
 ```
 
 :::note
-_Indgående_ (fra tredjepartssystemer som hjemmeautomatisering og dataloggere) understøtter proxyfunktionen udelukkende Modbus TCP.
+For _indgående_ forbindelser (fra tredjepartssystemer som hjemmeautomatiseringssystemer og dataloggere) understøtter proxyfunktionen udelukkende Modbus TCP.
 
-_Udgående_ mod den enhed, der skal aflæses (f.eks. inverter, energimåler), kan protokollen oversættes i henhold til enhedens konfiguration.
+For _udgående_ forbindelser til den enhed, der skal aflæses (f.eks. inverter eller energimåler), kan protokollen oversættes i henhold til enhedens konfiguration.
 :::
 
 :::tip[Sponsortoken påkrævet]
 
-Mere om sponsorat af evcc finder du på [siden om sponsorat](/da/sponsorship).
+Mere om sponsoratet finder du på [siden om sponsorat](/da/sponsorship).
 
 :::
 
@@ -46,7 +46,7 @@ Mere om sponsorat af evcc finder du på [siden om sponsorat](/da/sponsorship).
 
 ### `port`
 
-Den lokale TCP/IP-port, som proxyserveren lytter på, og hvor indgående Modbus TCP-forbindelser fra tredjepartssystemer accepteres.
+Den lokale TCP/IP-port, som proxyserveren lytter på, og hvor indgående Modbus-TCP-forbindelser fra tredjepartssystemer accepteres.
 
 **Eksempel**:
 
@@ -58,9 +58,9 @@ port: 5021
 
 ### `uri`
 
-Målenhedens IP-adresse og port i almindeligt URI-format.
+Enhedens IP-adresse og port i almindeligt URI-format.
 
-Hver angivet port skal være entydig og må ikke allerede være i brug af et andet program på samme vært, men den behøver ikke at være forskellig fra enhedens port. Det er derfor gyldigt at definere en konfiguration for port 502, der henviser til port 502 på enheden.
+Hver angivet port skal være unik og må ikke allerede bruges af et andet program på evcc-værten, men den behøver ikke at være forskellig fra enhedens port. Det er derfor gyldigt at definere en konfiguration for port 502, der henviser til port 502 på enheden.
 
 **Eksempel**:
 
@@ -71,7 +71,7 @@ Hver angivet port skal være entydig og må ikke allerede være i brug af et and
 
 ### `rtu`
 
-Modbus TCP bruges typisk til kommunikation med enheder på netværket. Om nødvendigt kan du skifte til Modbus RTU over TCP ved at angive `rtu: true`. Et typisk anvendelsestilfælde er simple transparente RS485-TCP-konvertere (uden protokoloversættelse). Det skal svare til enhedens konfiguration. Det ignoreres for serielle enheder.
+Modbus TCP bruges typisk til kommunikation med enheder på netværket. Om nødvendigt kan du skifte til Modbus RTU over TCP ved at angive `rtu: true`. Det bruges typisk til simple, transparente RS485-TCP-konvertere (uden protokoloversættelse). Indstillingen skal svare til enhedens konfiguration og ignoreres for serielle enheder.
 
 **Eksempel**:
 

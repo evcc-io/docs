@@ -1,12 +1,12 @@
 ---
 date: 2023-01-11
 title: "Version 0.111"
-description: "Notes de version d’evcc 0.111 de janvier 2023 avec un planificateur plus intelligent qui exploite les prix d’awattar et de Tibber, les tarifs manuels et les données CO₂."
+description: "Notes de version d’evcc 0.111 de janvier 2023 avec un planificateur de charge plus malin utilisant les prix dynamiques d’awattar et Tibber, les tarifs manuels et le CO₂."
 authors: [naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "2770b38763f5"
+translatedFrom: "ff6ba87e7923"
 ---
 
 ![evcc v0.111](../../../../../en/blog/2023/01/11/banner-evcc-release-111.webp)
@@ -17,17 +17,23 @@ Pile le 11 janvier, la version 0.111 arrive avec quelques nouvelles fonctions qu
 
 ## 🧞‍♂️ Nouveau planificateur de charge : utiliser l’électricité renouvelable du réseau
 
-La fonction de charge planifiée existe dans evcc depuis un certain temps. Elle vous permet de définir une heure cible à laquelle le véhicule connecté doit atteindre un certain niveau de charge. La fonction est p. ex. pratique pour recharger la voiture à temps avant un long trajet.
+La fonction de charge planifiée existe dans evcc depuis un certain temps.
+Elle vous permet de définir une heure cible à laquelle le véhicule connecté doit atteindre un certain niveau de charge.
+Elle est pratique, p. ex., pour recharger la voiture à temps avant un long trajet.
 
 ![Charge planifiée](../../../../../en/blog/2023/01/11/zielladen.webp)
 
-La stratégie de charge utilisée jusqu’ici était relativement simple : la charge démarre le plus tard possible, de sorte que la batterie atteigne le niveau souhaité juste à temps pour le départ. Cela ménage la batterie, car elle ne reste pas longtemps à un niveau de charge élevé.
+La stratégie de charge utilisée jusqu’ici était relativement simple : la charge démarre le plus tard possible, de sorte que la batterie atteigne le niveau souhaité juste à temps pour le départ.
+Cela ménage la batterie, car elle ne reste pas longtemps à un niveau de charge élevé.
 
-Avec cette version, le planificateur de charge devient plus intelligent et prend en compte les prix dynamiques de l’énergie et les données CO₂. La charge est ainsi planifiée sur des créneaux où la part d’électricité renouvelable dans le réseau est élevée. Cela permet d’économiser de l’argent, soulage le réseau électrique et réduit le besoin en énergies fossiles.
+Avec cette version, le planificateur de charge devient plus intelligent et prend en compte les prix dynamiques de l’énergie et les données CO₂.
+La charge est planifiée sur des créneaux où la part d’électricité renouvelable dans le réseau est particulièrement élevée.
+Cela permet d’économiser de l’argent, soulage le réseau électrique et réduit le besoin en énergies fossiles.
 
 ### 📈 Prix du marché spot avec awattar et Tibber
 
-Les tarifs horaires d’awattar et de Tibber sont intégrés depuis un moment déjà. Jusqu’ici, nous n’avions cependant qu’un pilotage simple, qui autorise la charge en dessous d’un prix de l’électricité configuré à l’avance (`cheap`).
+Les tarifs horaires d’awattar et de Tibber sont intégrés depuis un moment déjà.
+Jusqu’ici, nous n’avions cependant qu’un pilotage simple, qui autorise la charge en dessous d’un prix de l’électricité configuré à l’avance (`cheap`).
 
 Désormais, les prix horaires sont aussi utilisés dans la planification de la charge et la voiture charge quand l’électricité du réseau est particulièrement bon marché.
 
@@ -38,7 +44,7 @@ tariffs:
   grid:
     type: template
     template: awattar
-    region: de # or at
+    region: de # ou at
 ```
 
 Configuration pour Tibber
@@ -48,12 +54,13 @@ tariffs:
   grid:
     type: template
     template: tibber
-    token: "476...963a4" # access token
+    token: "476...963a4" # jeton d’accès
 ```
 
 ### 📊 Tarifs manuels par plages horaires
 
-Il est désormais aussi possible de définir des tarifs par plages horaires. Voici un exemple de configuration avec une énergie bon marché la nuit et encore moins chère le week-end :
+Il est désormais aussi possible de définir des tarifs par plages horaires.
+Voici un exemple de configuration avec une énergie bon marché la nuit et encore moins chère le week-end :
 
 ```yaml
 tariffs:
@@ -70,11 +77,14 @@ tariffs:
 
 Ces données de prix sont elles aussi prises en compte par le nouvel algorithme de planification.
 
-### 🌱 Données CO₂ de GrünStromIndex et ElectricityMap
+### 🌱 Données CO₂ de GrünStromIndex et Electricity Maps
 
-Même sans tarif dynamique, vous pouvez charger en ménageant le climat. Pour cela, nous intégrons désormais des données CO₂. Nous avons implémenté deux sources pour l’instant, mais nous sommes ouverts à d’autres suggestions.
+Même sans tarif dynamique, vous pouvez charger de façon plus respectueuse du climat.
+Pour cela, nous intégrons désormais des données CO₂.
+Nous prenons actuellement en charge deux sources, mais nous sommes ouverts à d’autres suggestions.
 
-[GrünStromIndex](https://gruenstromindex.de) fournit des prévisions régionales sur la propreté de l’électricité du réseau en Allemagne. Il vous suffit d’indiquer votre code postal.
+[GrünStromIndex](https://gruenstromindex.de) fournit des prévisions régionales sur la part d’électricité verte dans le réseau en Allemagne.
+Il vous suffit d’indiquer votre code postal.
 
 ```yaml
 planner:
@@ -83,7 +93,9 @@ planner:
   zip: 12349
 ```
 
-[Electricity Map](https://app.electricitymaps.com/map) fournit des prévisions dans le monde entier. Pour l’utiliser dans evcc, vous avez besoin d’un jeton et du préfixe d’URL. Vous les obtenez en créant un [compte gratuit sur le portail API](https://api-portal.electricitymaps.com/).
+[Electricity Maps](https://app.electricitymaps.com/map) fournit des prévisions dans le monde entier.
+Pour l’utiliser avec evcc, vous avez besoin d’un jeton et du préfixe d’URL.
+Vous les obtenez en créant un [compte gratuit sur le portail API](https://api-portal.electricitymaps.com/).
 
 ```yaml
 planner:
@@ -96,7 +108,8 @@ planner:
 
 ## Perspectives
 
-Pour l’une des prochaines versions, nous travaillons à une représentation visuelle du plan de charge. Vous pourrez alors voir les créneaux calculés par l’algorithme ainsi que l’économie concrète en coût ou en CO₂.
+Pour l’une des prochaines versions, nous travaillons à une représentation visuelle du plan de charge.
+Vous pourrez alors voir les créneaux calculés par l’algorithme ainsi que les économies réalisées en coût ou en CO₂.
 
 ## Autres nouveautés
 

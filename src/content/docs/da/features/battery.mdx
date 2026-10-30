@@ -3,7 +3,7 @@ title: "Hjemmebatteri"
 description: "Sådan fordeler evcc soloverskuddet mellem køretøjet og dit hjemmebatteri, og sådan bruger du batteriboost og aktiv batteristyring."
 sidebar:
   order: 6
-translatedFrom: "5414284f5f20"
+translatedFrom: "88352c30868d"
 ---
 
 import Screenshot from "@components/Screenshot.astro";
@@ -28,7 +28,7 @@ Du indstiller denne adfærd på siden **Batteri**, som du åbner fra navigations
 />
 
 Siden viser den aktuelle tilstand for hvert batteri og opladningsniveauet over de seneste dage.
-Under **Batteri anvendelse** indstiller du, op til hvilket opladningsniveau hjemmebatteriet oplades først.
+Under **Batteri anvendelse** indstiller du, hvilket opladningsniveau hjemmebatteriet skal oplades til først.
 Over dette niveau får ladepunkterne overskuddet.
 
 <Screenshot
@@ -37,16 +37,16 @@ Over dette niveau får ladepunkterne overskuddet.
 />
 
 Eksempel: Du sætter grænsen til 50 %. Det betyder, at solenergien først går til hjemmebatteriet.
-Når batteriet når et opladningsniveau på 50 %, får ladepunkter i tilstanden Smart overskuddet.
+Når batteriet når et opladningsniveau på 50 %, frigives ladepunkter i tilstanden **Smart**.
 Ladeeffekten reguleres, så hjemmebatteriet holder sit opladningsniveau.
 Hvis overskuddet overstiger batteriets maksimale ladeeffekt, oplades køretøjet allerede, før grænsen er nået.
 Hvis intet køretøj er tilsluttet eller køretøjet er fuldt opladet, går overskydende energi fortsat til batteriet.
 
 ## Batteriunderstøttet opladning af køretøjet
 
-I tilstanden Smart forsøger evcc at styre opladningen, så der kun bruges solenergi direkte.
+I tilstanden **Smart** forsøger evcc at styre opladningen, så der kun bruges solenergi direkte.
 Afladning af hjemmebatteriet undgås.
-Med funktionen **Batteriunderstøttet opladning af køretøjet** kan du udtrykkeligt frigive en del af dit hjemmebatteri til opladning af køretøjet.
+Med funktionen **Batteriunderstøttet opladning af køretøjet** kan du bevidst frigive en del af dit hjemmebatteri til opladning af køretøjet.
 
 Under **Batteri som opladningsbuffer** indstiller du, fra hvilket opladningsniveau den lagrede energi må bruges til køretøjet.
 
@@ -57,9 +57,10 @@ Under **Batteri som opladningsbuffer** indstiller du, fra hvilket opladningsnive
 
 Eksempel: Du frigiver området over 75 % til batteriunderstøttet opladning.
 Dit hjemmebatteri er allerede blevet fyldt op til 100 % i løbet af dagen.
-Du tilslutter dit køretøj i tilstanden Smart.
+Du tilslutter dit køretøj, og ladepunktet står i tilstanden **Smart**.
 Ud over det tilgængelige overskud bruges nu også de frigivne øverste 25 % af hjemmebatteriet til at oplade køretøjet.
-Hvis der ikke er noget overskud og hjemmebatteriets opladningsniveau er faldet til 75 %, stoppes opladningen.
+Hvis der ikke er mere overskud, fortsætter opladningen med minimumseffekt, indtil hjemmebatteriets opladningsniveau er faldet til 75 %.
+Batteriunderstøttelsen slutter tidligere, hvis hjemmebatteriet ikke kan levere minimumseffekten (f.eks. på grund af dets maksimale afladningseffekt), så der skulle importeres strøm fra elnettet.
 
 Batteriunderstøttelse har ingen effekt med [Oplad altid](/da/features/modes#always-charge), da opladningen aldrig sættes på pause i den tilstand.
 
@@ -71,9 +72,9 @@ Omvejen gennem hjemmebatteriet giver altid konverteringstab, som afhængigt af s
 
 ### Automatisk start
 
-I tilstanden Smart starter opladningen først, når der er overskud til rådighed.
+I tilstanden **Smart** starter opladningen først, når der er overskud til rådighed.
 Hvis du tilslutter dit køretøj, når der ikke er noget overskud, starter opladningen ikke.
-Heller ikke selvom der er nok frigivet energi i hjemmebatteriet.
+Det gælder også, selv om der er nok frigivet energi i hjemmebatteriet.
 
 Du kan ændre denne adfærd med indstillingen ”Start solopladning automatisk …”.
 Hvis du f.eks. sætter den til ”… når batteriet er over 90 %”, starter opladningen, når hjemmebatteriet har nået dette niveau.
@@ -123,7 +124,7 @@ I brugergrænsefladen beregnes et gennemsnitligt opladningsniveau ud fra de enke
 Denne værdi er grundlaget for de styringsfunktioner, der er beskrevet ovenfor.
 
 Eksempel: Du har et hjemmebatteri på 5 kWh, der er opladet til 50 %. Derudover har du et hjemmebatteri på 10 kWh med et opladningsniveau på 80 %.
-Det giver en gennemsnitsværdi på 70 %, da 10,5 kWh (2,5 kWh + 8 kWh) af 15 kWh (5 kWh + 10 kWh) er fyldt.
+Det giver en gennemsnitsværdi på 70 %, da 10,5 kWh (2,5 kWh + 8 kWh) af 15 kWh (5 kWh + 10 kWh) er opladet.
 
 Du kan se de enkelte opladningsniveauer på siden **Batteri**.
 
@@ -136,23 +137,23 @@ Mange nyere batteri- eller hybridinvertere tilbyder en grænseflade til dette.
 
 ### Afladningsspærre
 
-Scenarie 1: Du skal spontant af sted til en aftale og vil hurtigt oplade dit køretøj.
+Scenarie 1: Du skal pludselig af sted til en aftale og vil hurtigt oplade dit køretøj.
 Du vil dog ikke have, at hjemmebatteriet bliver helt afladet af den grund.
 
-Scenarie 2: Du har en dynamisk eltarif og vil oplade dit køretøj om natten, fordi energien er særlig billig på det tidspunkt.
+Scenarie 2: Du har en dynamisk tarif og vil oplade dit køretøj om natten, fordi energien er særlig billig på det tidspunkt.
 Hjemmebatteriet vil dog forsøge at dække ladebehovet, så længe det har energi tilbage.
 Den billige nattestrøm bliver først brugt, når hjemmebatteriet er tomt.
 
 Hvis dit system understøtter aktiv batteristyring, kan du aktivere indstillingen ”Forhindrer hjemmebatteriet at aflade i hurtig mode og ved planlagt opladning” på siden **Batteri**.
-Det sætter hjemmebatteriet i en spærret tilstand, når en hurtig opladning er aktiv. Det kan udløses af tilstanden Hurtig, smart opladning fra elnettet, ladeplaner eller minimumsopladning.
+Det sætter hjemmebatteriet i en spærret tilstand, når en hurtig opladning er aktiv. Det kan udløses af tilstanden **Hurtig**, smart opladning fra elnettet, ladeplaner eller minimumsopladning.
 
 Spærringen gælder, så længe den hurtige opladning varer.
 Hjemmebatteriet aflades ikke i dette tidsrum.
 
 ### Opladning fra elnettet \{#gridcharge\}
 
-Scenarie: Du har en dynamisk eltarif og vil oplade dit hjemmebatteri med billig strøm om natten.
-F.eks. fordi det overskud, der produceres i løbet af dagen, ikke rækker.
+Scenarie: Du har en dynamisk tarif og vil oplade dit hjemmebatteri med billig strøm om natten.
+Det kan f.eks. være, fordi overskuddet i løbet af dagen ikke rækker.
 
 <Screenshot
   name="features/screenshots/battery-grid-charging"
@@ -171,13 +172,13 @@ Når effektreduktionen slutter, genoptages opladningen fra elnettet automatisk.
 :::
 
 :::caution[Belastningsstyring]
-Hjemmebatteriets opladning fra elnettet tages ikke i betragtning af [belastningsstyringen](/da/features/loadmanagement).
+[Belastningsstyringen](/da/features/loadmanagement) tager ikke højde for hjemmebatteriets opladning fra elnettet.
 Hvis hjemmebatteriet f.eks. trækker 9 kW fra elnettet, indgår dette forbrug ikke i belastningsstyringens beregninger.
 Det gælder ikke for signaler om effektreduktion efter § 14a, for i så fald sættes opladningen fra elnettet automatisk på pause som beskrevet ovenfor.
 :::
 
-Du kan valgfrit indstille et maksimalt opladningsniveau, som batteriet oplades til fra elnettet.
+Du kan også vælge at indstille et maksimalt opladningsniveau, som batteriet oplades til fra elnettet.
 Når batteriet når denne værdi, stoppes opladningen fra elnettet automatisk.
 Indstillingen **Maksimal opladning** (`maxsoc`) findes i enhedskonfigurationen for dit batterisystem.
 
-Under [Sol, hjemmebatteri, elnet, målere](/da/meters) kan du se på mærket **Aktiv batteristyring**, om dit system understøtter batteristyring, og om `maxsoc` er tilgængelig.
+Under [Sol, batteri, elnet, målere](/da/meters) kan du se på mærket **Aktiv batteristyring**, om dit system understøtter batteristyring, og om `maxsoc` er tilgængelig.

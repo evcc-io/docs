@@ -1,12 +1,12 @@
 ---
 date: 2024-08-17
 title: "Highlight: § 14a EnWG, OCPP"
-description: "Highlight della release 0.130 di evcc di agosto 2024 con gestione del carico e riduzione secondo il § 14a EnWG, carica da rete della batteria domestica e progressi OCPP."
+description: "Gli highlight di evcc 0.130 di agosto 2024 portano la gestione del carico con riduzione § 14a EnWG, la carica da rete della batteria domestica e progressi OCPP."
 authors: [naltatis]
 tags: [release, highlights]
 prev: false
 next: false
-translatedFrom: "5b72a3321eef"
+translatedFrom: "7dd8f1e71013"
 ---
 
 Oggi è uscita la [versione 0.130](https://github.com/evcc-io/evcc/releases) di evcc.
@@ -35,7 +35,7 @@ Il gestore di rete non accede direttamente al caricabatterie, ma trasmette il se
 Il sistema di gestione dell’energia della casa deve poi ridurre la potenza dei consumatori interessati.
 
 Con evcc puoi già oggi soddisfare questo requisito di riduzione per tutti i caricabatterie, senza doverli spegnere, ad es. tramite un contatto a potenziale zero.
-Durante questo periodo i punti di ricarica possono continuare a funzionare alla loro potenza minima (ad es. 4,1 kW).
+Durante la riduzione i punti di ricarica possono continuare a funzionare alla loro potenza minima (ad es. 4,2 kW).
 Questo significa che in questo scenario puoi usare qualsiasi caricabatterie supportato da evcc.
 Non serve comprare un nuovo caricabatterie con un supporto specifico per la comunicazione con lo SMGW o la Steuerbox.
 
@@ -44,7 +44,7 @@ Non serve comprare un nuovo caricabatterie con un supporto specifico per la comu
 In caso di sovraccarico della rete, il gestore di rete invia un segnale allo SMGW.
 Lo SMGW stesso non offre un modo adatto per comunicare con la rete domestica.
 Per questo si usa una cosiddetta Steuerbox, collegata a valle dello SMGW.
-Questa scatola certificata inoltra il segnale ai rispettivi dispositivi tramite EEBus.
+Questo dispositivo certificato inoltra il segnale ai rispettivi dispositivi tramite EEBus.
 evcc ha implementato l’interfaccia EEBus verso la Steuerbox.
 Quando arriva un segnale di riduzione, evcc reagisce e regola di conseguenza i caricabatterie.
 
@@ -52,14 +52,18 @@ Un’alternativa a EEBus è la comunicazione tramite un semplice contatto di com
 Questo può poi essere collegato a evcc, ad es. tramite un pin GPIO.
 Quando la Steuerbox riceve un segnale di riduzione, il contatto si chiude, evcc lo rileva e riduce la potenza massima dei caricabatterie.
 
-Questa soluzione più semplice con il contatto si può usare anche con i ricevitori di telecomando centralizzato già esistenti ((Funk)Rundsteuerempfänger, FRSE).
+Questa soluzione più semplice con il contatto si può usare anche con i ricevitori di telecomando centralizzato già esistenti (Funk-Rundsteuerempfänger, FRSE).
 Questi non fanno parte del § 14a EnWG, ma sono tollerati come soluzione transitoria.
 
 In pratica, per usare questa funzione mancano ancora le Steuerbox installate sul campo.
 Verranno distribuite nei prossimi mesi.
 Se hai già un dispositivo del genere, contattaci pure.
 
-### Carica da rete della batteria domestica
+## Carica da rete della batteria domestica
+
+Nell’[ultimo articolo del blog sulle release](/it/blog/2024/02/01/v0124-new-tesla-api) abbiamo presentato “Impedisci la scarica durante la ricarica veloce”, la prima funzione con cui evcc controlla attivamente la batteria domestica.
+Con la versione 0.130 abbiamo ampliato ulteriormente il controllo della batteria.
+Ora puoi anche caricare di proposito la batteria domestica con energia dalla rete.
 
 Questa è una funzione sperimentale ed è disponibile se il tuo inverter supporta il controllo attivo della batteria ([vedi documentazione](/it/meters)) e hai una tariffa dinamica.
 In questo caso puoi impostare un limite di prezzo.
@@ -69,7 +73,7 @@ Se il prezzo scende sotto questo limite, evcc carica la batteria domestica con e
 
 Questa funzione può essere particolarmente utile nei mesi invernali.
 Se durante il giorno è prevista poca energia solare, di notte puoi caricare la batteria con energia economica dalla rete.
-In questo modo superi i periodi con prezzi dell’energia elevati.
+In questo modo copri i periodi con prezzi dell’energia elevati.
 
 Nell’implementazione attuale il limite di prezzo fisso è volutamente semplice ed è solo un primo passo su questo fronte.
 Se non vuoi controllare e adattare regolarmente il limite tramite l’interfaccia web, puoi già costruire soluzioni più intelligenti (ad es. basate sull’orario o sulle previsioni) usando la nuova API.
@@ -79,7 +83,7 @@ Se non vuoi controllare e adattare regolarmente il limite tramite l’interfacci
 Un caricabatterie piuttosto diffuso è l’Elli Charger del gruppo VW.
 Viene venduto anche con i nomi “VW ID. Charger”, “Skoda iV Charger”, “Cupra Charger” o “Audi Wallbox” ed esiste in diverse varianti a seconda del marchio, che terminano con “Connect”, “plus”, “Pro”, “Connect+” o “pro” ([vedi panoramica](https://github.com/evcc-io/evcc/pull/7757#issuecomment-1529477695)).
 
-Purtroppo negli ultimi anni il supporto di questo caricabatterie non è stato motivo di gioia.
+Purtroppo negli ultimi anni il supporto di questo caricabatterie non è stato una gioia.
 [DerAndereAndi](https://github.com/DerAndereAndi) ci ha investito molta passione e molto tempo.
 Grazie di cuore 🙌!
 La qualità del firmware è piuttosto scarsa e ci sono molti bug.
@@ -92,12 +96,12 @@ Nella release attuale abbiamo quindi rimosso il supporto per il contatore integr
 
 ![Elli Charger triste](../../../../../en/blog/2024/08/17/sad-elli.webp)
 
-Se hai intenzione di comprare un caricabatterie da controllare con evcc, possiamo solo sconsigliarti questi dispositivi.
+Se hai intenzione di comprare un caricabatterie da controllare con evcc, non possiamo che sconsigliarti questi dispositivi.
 Elli ha annunciato un prodotto di nuova generazione, l’[ElliCharger 2](https://www.elli.eco/de/privatkunden/produkte/wallbox).
 Da quanto sappiamo finora, si tratta di un dispositivo molto più maturo.
 Questo però non cambia il fatto che i caricabatterie della prima generazione, ancora oggi in vendita, sono assolutamente inaccettabili per quanto riguarda la qualità del software delle interfacce.
 
-Se possiedi un caricabatterie di questo tipo e sei interessato dai problemi descritti sopra, ti consigliamo di contattare l’assistenza clienti di Elli.
+Se possiedi un caricabatterie di questo tipo e riscontri i problemi descritti sopra, ti consigliamo di contattare l’assistenza clienti di Elli.
 Abbiamo poche speranze che arrivino aggiornamenti software.
 Tuttavia riteniamo che il loro approccio di sostituire un hardware tecnicamente valido con uno più nuovo, solo perché il software non viene più mantenuto, non sia davvero sostenibile.
 
@@ -111,10 +115,11 @@ Finora sopra la barra del livello di carica venivano mostrati messaggi come “S
 
 ![Due punti di ricarica con i nuovi indicatori di stato](../../../../../en/blog/2024/08/17/status-icons.webp)
 
-Con il numero crescente di funzioni, questa visualizzazione è diventata un po’ rigida e gli stati paralleli, come timer fotovoltaico, piano di ricarica e limite di prezzo, non potevano essere mostrati contemporaneamente.
+Con il numero crescente di funzioni, questa visualizzazione è diventata un po’ rigida e gli stati paralleli, come timer solare, piano di ricarica e limite di prezzo, non potevano essere mostrati contemporaneamente.
 Per questo abbiamo rivisto quest’area.
-Lo stato del caricabatterie viene ancora mostrato come breve testo (“Connesso”, “In carica”, ...).
-Le informazioni aggiuntive come timer fotovoltaico, piano di ricarica, limite di prezzo, climatizzazione o il limite del veicolo vengono ora mostrate, quando rilevanti, come icona con un tooltip esplicativo.
+Lo stato del caricabatterie viene ancora mostrato come breve testo (“Connesso”, “In carica” ecc.).
+Le informazioni aggiuntive come timer solare, piano di ricarica, limite di prezzo, climatizzazione o il limite del veicolo vengono ora mostrate, quando rilevanti, come icona con un tooltip esplicativo.
+In questo modo la visualizzazione è più chiara e flessibile.
 
 Ecco una panoramica delle nuove icone e dei tooltip:
 
@@ -122,7 +127,7 @@ Ecco una panoramica delle nuove icone e dei tooltip:
 
 ## OCPP: stabilità, funzioni e sponsorizzazione
 
-Il supporto OCPP è una funzione di evcc da molto tempo.
+Usare evcc come server OCPP è possibile già da parecchio tempo.
 Negli ultimi mesi ci siamo concentrati di nuovo su questo tema e abbiamo [lavorato molto](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged+sort%3Aupdated-desc+ocpp) sulla stabilità e sulle funzionalità della nostra implementazione.
 Finora per alcuni caricabatterie servivano parametri di configurazione speciali durante il setup.
 Ora, con pochissime eccezioni, sono tutti superflui.
@@ -177,8 +182,8 @@ Poter lavorare a un progetto open source finanziato quasi interamente dalla comm
 Ci accorgiamo che ora evcc viene preso sul serio anche nel mondo aziendale.
 Lo dimostra il fatto che i produttori a volte ci contattano direttamente per garantire una buona integrazione dei loro dispositivi.
 
-Siamo riusciti a ottenere come sponsor aziendali [CUBOS](https://www.cubos.com), un’azienda attiva nel fotovoltaico e nelle infrastrutture di ricarica commerciali, [lekker Energie](https://www.lekker.de), un fornitore di energia di Berlino, e [Victron Energy](https://www.victronenergy.com), un produttore di sistemi aperti e modulari di inverter, batterie e ricarica.
+Siamo riusciti a ottenere come sponsor aziendali finanziari [CUBOS](https://www.cubos.com), un’azienda attiva nel fotovoltaico e nelle infrastrutture di ricarica commerciali, [lekker Energie](https://www.lekker.de), un fornitore di energia di Berlino, e [Victron Energy](https://www.victronenergy.com), un produttore di sistemi aperti e modulari di inverter, batterie e ricarica.
 
 **Buona ricarica!**<br/>
-il team evcc<br/>
-Michael, Andi & Uli
+Il team di evcc<br/>
+Michael, Andi e Uli

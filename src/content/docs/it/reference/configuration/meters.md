@@ -1,14 +1,14 @@
 ---
 title: "meters"
-description: "Definisci in evcc.yaml i contatori per rete, impianto fotovoltaico, batteria domestica e consumatori, con la convenzione dei segni e i tipi di contatore disponibili."
+description: "Definisci in evcc.yaml i contatori per rete, impianto fotovoltaico, batteria domestica e consumatori, e scopri la convenzione dei segni e i tipi di contatore disponibili."
 sidebar:
   order: 5
-translatedFrom: "dfa0dfa3f1e6"
+translatedFrom: "731e5e09d04f"
 ---
 
-I _contatori_ (dispositivi di misura) sono un elenco di dispositivi della casa che possono misurare potenza e consumo di energia, produzione solare o utilizzo della batteria domestica. Un `meter` definisce un punto di misurazione dell’energia e può essere un dispositivo fisico (ad es. un contatore al punto di connessione alla rete), un inverter solare (AC o, nel caso di inverter ibridi, DC) o un inverter per batterie.
+I _contatori_ (dispositivi di misura della corrente) sono un elenco di dispositivi della casa che possono misurare potenza e consumo di energia, produzione solare o utilizzo della batteria domestica. Un `meter` definisce un punto di misurazione dell’energia e può essere un dispositivo fisico (ad es. un contatore al punto di connessione alla rete), un inverter solare (AC o, nel caso di inverter ibridi, DC) o un inverter per batterie.
 
-I caricabatterie possono avere un contatore integrato oppure un contatore collegato esternamente. Se un caricabatterie ha un dispositivo interno di misura della corrente, non serve creare una voce in `meters`. Se il caricabatterie non ha un contatore di questo tipo, evcc usa il contatore configurato qui e assegnato al caricabatterie in [`meters`](/it/reference/configuration/loadpoints#meter) nella configurazione del punto di ricarica, oppure presume che la potenza di ricarica impostata venga effettivamente usata.
+I caricabatterie possono avere un contatore integrato oppure un contatore collegato esternamente. Se un caricabatterie ha un contatore integrato, non serve creare una voce in `meters`. Se il caricabatterie non ha un contatore di questo tipo, evcc usa il contatore configurato qui e assegnato al caricabatterie in [`meter`](/it/reference/configuration/loadpoints#meter) nella configurazione del punto di ricarica, oppure presume che la potenza di ricarica impostata venga effettivamente usata.
 
 evcc usa una convenzione dei segni coerente per i valori di potenza e corrente (`power`, `powers`, `currents`):
 
@@ -81,7 +81,7 @@ Titoli e icone (a seconda del caso d’uso) si possono definire solo per i conta
 
 Questo tipo di contatore può livellare valori di misura fluttuanti. Si può usare con qualsiasi utilizzo (`usage`) del contatore. Il parametro `decay` indica la percentuale del nuovo valore che entra nel calcolo.
 
-**Ad esempio**
+**Ad esempio**:
 
 ```yaml
 meters:
@@ -177,7 +177,7 @@ I parametri `uri` e `password` sono necessari per un dispositivo `meter` solo se
 
 ##### `usage`
 
-Definisce quali misurazioni servono qui.
+Definisce quali misurazioni usare.
 
 **Valori possibili**:
 
@@ -213,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Uso delle misurazioni di un caricabatterie OpenWB
+Per usare le misurazioni di un caricabatterie OpenWB.
 
 **Ad esempio**:
 
@@ -223,15 +223,11 @@ usage: grid
 broker: 192.0.2.2
 ```
 
-:::note
-I parametri `uri` e `password` sono necessari per un dispositivo `meter` solo se sono configurati più dispositivi.
-:::
-
 #### Parametri obbligatori
 
 ##### `usage`
 
-Definisce quali misurazioni servono qui.
+Definisce quali misurazioni usare.
 
 **Valori possibili**:
 
@@ -310,7 +306,7 @@ interface: eth0
 
 ### `tesla`
 
-_`tesla`_: per usare le misurazioni di una Tesla Powerwall.
+_`tesla`_: Per usare le misurazioni di una Tesla Powerwall.
 
 **Ad esempio**:
 
@@ -327,7 +323,7 @@ password: "***"
 
 ##### `usage`
 
-Definisce quali misurazioni servono qui.
+Definisce quali misurazioni usare.
 
 **Valori possibili**:
 
@@ -369,39 +365,39 @@ Implementazione standard, in cui i singoli valori vengono definiti tramite [plug
 
 ```yaml
   type: custom
-  power: # Power (W)
-    source: # Plugin Type
+  power: # Potenza (W)
+    source: # Tipo di plugin
     ...
-  energy: # Energy (kWh)
-    source: # Plugin Type
+  energy: # Energia (kWh)
+    source: # Tipo di plugin
     ...
-  returnenergy: # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: # Energia nel verso opposto (kWh)
+    source: # Tipo di plugin
     ...
-  soc: # Battery SOC (%)
-    source: # Plugin Type
+  soc: # Livello di carica della batteria (%)
+    source: # Tipo di plugin
     ...
-  capacity: # Optional Battery Capacity (kWh)
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  capacity: # Capacità della batteria, opzionale (kWh)
+  currents: # Corrente (A) per fase
+    - source: # Tipo di plugin fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Tipo di plugin fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Tipo di plugin fase 3
       ...
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Potenza (W) per fase
+    - source: # Tipo di plugin fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Tipo di plugin fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Tipo di plugin fase 3
       ...
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Tensione (V) per fase
+    - source: # Tipo di plugin fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Tipo di plugin fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Tipo di plugin fase 3
       ...
   ...
 ```
@@ -417,8 +413,8 @@ Definizione del plugin che restituisce la potenza in watt (W).
 **Ad esempio**:
 
 ```yaml
-  power: ... # Power (W)
-    source: # Plugin Type
+  power: ... # Potenza (W)
+    source: # Tipo di plugin
     ...
 ```
 
@@ -433,8 +429,8 @@ Definizione del plugin che restituisce l’energia consumata in chilowattora (kW
 **Ad esempio**:
 
 ```yaml
-  energy: ... # Energy (kWh)
-    source: # Plugin Type
+  energy: ... # Energia (kWh)
+    source: # Tipo di plugin
     ...
 ```
 
@@ -442,13 +438,13 @@ Definizione del plugin che restituisce l’energia consumata in chilowattora (kW
 
 ##### `returnenergy`
 
-Definizione del plugin che restituisce l’energia in direzione inversa in chilowattora (kWh), ad es. l’immissione in rete.
+Definizione del plugin che restituisce l’energia nel verso opposto in chilowattora (kWh), ad es. l’immissione in rete.
 
 **Ad esempio**:
 
 ```yaml
-  returnenergy: ... # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: ... # Energia nel verso opposto (kWh)
+    source: # Tipo di plugin
     ...
 ```
 
@@ -461,8 +457,8 @@ Definizione del plugin che restituisce il livello di carica della batteria in pe
 **Ad esempio**:
 
 ```yaml
-  soc: ... # Battery SOC (%)
-    source: # Plugin Type
+  soc: ... # Livello di carica della batteria (%)
+    source: # Tipo di plugin
     ...
 ```
 
@@ -481,12 +477,12 @@ Un elenco di definizioni di plugin che restituiscono la corrente in ampere (A) p
 **Ad esempio**:
 
 ```yaml
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  currents: # Corrente (A) per fase
+    - source: # Tipo di plugin fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Tipo di plugin fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Tipo di plugin fase 3
       ...
   ...
 ```
@@ -500,12 +496,12 @@ Un elenco di definizioni di plugin che restituiscono la potenza in watt (W) per 
 **Ad esempio**:
 
 ```yaml
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Potenza (W) per fase
+    - source: # Tipo di plugin fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Tipo di plugin fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Tipo di plugin fase 3
       ...
   ...
 ```
@@ -519,12 +515,12 @@ Un elenco di definizioni di plugin che restituiscono la tensione in volt (V) per
 **Ad esempio**:
 
 ```yaml
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Tensione (V) per fase
+    - source: # Tipo di plugin fase 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Tipo di plugin fase 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Tipo di plugin fase 3
       ...
   ...
 ```

@@ -9,7 +9,7 @@ next: false
 cover:
   alt: "Bannière des nouveautés"
   image: "../../../../../en/blog/2024/11/22/charts-stats-banner.webp"
-translatedFrom: "58511509e70c"
+translatedFrom: "a2eae6887c9f"
 ---
 
 Les jours raccourcissent.
@@ -20,10 +20,10 @@ Une bonne raison de faire un petit point sur ce qui a été fait depuis le [dern
 ## Visualisation des sessions de charge
 
 L’aperçu des [sessions de charge](/fr/features/sessions) est disponible depuis un moment.
-En plus des données de base comme l’énergie consommée, les durées de charge, le véhicule et le kilométrage, nous collectons depuis un certain temps des informations sur la part d’énergie solaire autoproduite, les prix réels et les émissions de CO₂.
+En plus des données de base comme l’énergie chargée, les durées de charge, le véhicule et le kilométrage, nous collectons depuis un certain temps des informations sur la part d’énergie solaire autoproduite, les prix réels et les émissions de CO₂.
 
 Auparavant, ces données n’étaient disponibles que sous forme de tableau ou d’export CSV pour vos propres analyses.
-Nous avons maintenant ajouté de belles visualisations de votre énergie de charge, de la part solaire, des coûts et des émissions de CO₂.
+Nous avons maintenant ajouté de belles visualisations de votre énergie chargée, de la part solaire, des coûts et des émissions de CO₂.
 
 ![Visualisation de la part solaire](../../../../../en/blog/2024/11/22/ipad-stats-solar.webp)
 
@@ -47,17 +47,17 @@ Cela peut être particulièrement pratique par temps ensoleillé.
 Si vous voulez partir de chez vous en voiture dans l’après-midi, vous pouvez activer le boost avant votre départ pour transférer au véhicule l’énergie de votre batterie domestique pleine.
 Votre véhicule part avec un niveau de charge plus élevé et votre batterie domestique a de la place pour stocker l’énergie du soleil de l’après-midi, que vous auriez sinon exportée vers le réseau.
 
-D’autres paramètres, comme la définition de limites de charge, et une place plus visible dans l’interface (sous forme de bouton Boost) sont prévus pour une prochaine version.
+Une prochaine version apportera d’autres paramètres, comme des limites de charge, et rendra la fonction plus visible dans l’interface grâce à un bouton Boost.
 
 ## Tarifs flexibles
 
 La liste des [différents tarifs](/fr/tariffs) ne cesse de s’allonger.
 Le sujet des tarifs dynamiques va gagner en importance, surtout dans les années à venir.
 
-Des fournisseurs tournés vers le numérique comme Tibber, Awattar, Octopus ou Ostrom proposent des API pour le prix actuel et les prévisions de prix du lendemain.
+Des fournisseurs tournés vers le numérique comme Tibber, awattar, Octopus ou Ostrom proposent des API pour le prix actuel et les prévisions de prix du lendemain.
 Ces prix incluent souvent déjà les frais de réseau et d’autres coûts.
 
-Pour les tarifs dynamiques dont le fournisseur ne propose pas d’API, il est possible de déterminer soi-même le prix de l’électricité à partir du prix day-ahead de la bourse de l’électricité.
+Pour les tarifs dynamiques dont le fournisseur ne propose pas d’API, il est possible de déterminer soi-même le prix de l’électricité à partir du prix spot (day-ahead) de la bourse de l’électricité.
 
 Une bonne source de données pour le prix spot est l’interface [Energy Charts](https://api.energy-charts.info) du Fraunhofer ISE.
 Elle peut être utilisée sans inscription préalable.
@@ -70,8 +70,8 @@ tariffs:
     type: template
     template: energy-charts-api
     bzn: DE-LU
-    charges: 0.22 # fixed surcharge per kWh (e.g. 20ct grid fee, 2ct provider fees)
-    tax: 0.19 # percentage surcharge (e.g. 19% VAT)
+    charges: 0.22 # majoration fixe par kWh (p. ex. 20 ct de frais de réseau, 2 ct de frais du fournisseur)
+    tax: 0.19 # majoration en pourcentage (p. ex. 19 % de TVA)
 ```
 
 La formule `(price + charges) * (1 + tax)` sert à calculer le prix final par kWh pour le consommateur.
@@ -86,8 +86,8 @@ tariffs:
     type: template
     template: energy-charts-api
     bzn: DE-LU
-    charges: 0.22 # fester Aufschlag pro kWh (bspw. 20ct Netzentgelt, 2ct Gebühren)
-    tax: 0.19 # prozentualer Aufschlag (bspw. 19% MwSt.)
+    charges: 0.22 # majoration fixe par kWh (p. ex. 20 ct de frais de réseau, 2 ct de frais du fournisseur)
+    tax: 0.19 # majoration en pourcentage (p. ex. 19 % de TVA)
     formula: math.Min(0.5, (price + charges) * (1 + tax))
 ```
 
@@ -98,13 +98,13 @@ En plus du prix spot (`price`) et des valeurs de `charges` et `tax`, vous dispos
 Certains onduleurs hybrides offrent une puissance DC supérieure à leur puissance AC.
 Ils peuvent donc, p. ex., traiter 10 kW de puissance solaire, mais ne fournir que 8 kW de puissance AC au réseau domestique.
 Les 2 kW restants sont stockés côté DC dans la batterie.
-Cela a toujours posé des problèmes dans la régulation du surplus, car evcc calcule avec la puissance solaire totale.
+Cela a toujours posé des problèmes dans la régulation du surplus, car evcc se base sur la puissance solaire totale.
 L’option de configuration globale `maxGridSupplyWhileBatteryCharging` (oui, un nom maladroit) était une tentative de contrer ces effets secondaires indésirables.
 
 Nous avons remplacé cette option par une solution plus stable.
-Tous les [modèles d’onduleurs](/fr/meters) concernés (p. ex. Fronius, Growatt, SMA, Sungrow) disposent désormais de l’option avancée `maxAcPower`.
+Tous les [modèles d’onduleurs](/fr/meters) concernés (p. ex. Fronius, Growatt, SMA, Sungrow, etc.) disposent désormais de l’option avancée `maxAcPower`.
 Celle-ci vous permet de définir la puissance AC maximale (p. ex. `maxAcPower: 8000` pour 8 kW) par onduleur.
-La régulation du surplus tient désormais compte de cette valeur.
+La régulation du surplus tient désormais compte de cette valeur en conséquence.
 
 ## Sponsor cocharge : ouvrez votre point de charge privé au public
 
@@ -128,7 +128,7 @@ Non seulement la facturation automatique vous épargne la paperasse,
 mais vous pouvez aussi gagner de l’argent en plus si vous chargez avec votre propre électricité solaire ou avec un tarif dynamique aux heures avantageuses.
 
 Utiliser cocharge et evcc ensemble ?
-La plupart des chargeurs certifiés disposent aussi, en plus d’OCPP, d’une interface locale comme Modbus.
+La plupart des chargeurs certifiés disposent, en plus d’OCPP, d’une interface locale comme Modbus.
 Vous pouvez alors ouvrir votre point de charge au public et optimiser localement la puissance de charge en parallèle avec evcc.
 
 Si cela vous intéresse et que vous voulez faire partie des premiers utilisateurs, jetez un œil à [cocharge.de/evcc](https://cocharge.de/evcc).

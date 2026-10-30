@@ -3,7 +3,7 @@ title: "Configuration"
 description: "Configurez evcc avec le fichier evcc.yaml et découvrez où il se trouve, comment il est structuré et quelles sections décrivent votre installation et vos appareils."
 sidebar:
   order: 1
-translatedFrom: "b5e9667916e0"
+translatedFrom: "7c938df548c1"
 ---
 
 evcc peut être configuré de deux manières :
@@ -77,12 +77,12 @@ graph TD;
 
 ### Comment fonctionne evcc ? (coup d’œil sous le capot)
 
-Pour que le système fonctionne, un compteur électrique est important. Il
-permet de calculer à tout moment la puissance du surplus. Mesurer la
-puissance produite est intéressant, mais n’a aucun effet sur le fonctionnement, à
-[cette exception près](/fr/faq#configuration)
+Pour que le système fonctionne, un compteur avant réseau (compteur `grid`) est important.
+Il détermine le surplus actuel.
+La mesure de la production n’intervient pas dans cette régulation.
+Il est aussi possible d’utiliser evcc sans compteur avant réseau, voir la [FAQ](/fr/faq#configuration).
 
-La puissance du surplus est comparée à la puissance minimale nécessaire pour charger. Si
+Le surplus est comparé à la puissance minimale nécessaire pour charger. Si
 elle suffit, la charge démarre.
 
 La puissance minimale nécessaire pour charger est calculée à partir des valeurs `minCurrent`
@@ -96,7 +96,7 @@ Par exemple : `phases: 1` et `minCurrent: 8`
 
 #### Possibilités d’ajustement
 
-Normalement, la puissance du surplus correspond à la puissance de charge disponible.
+Normalement, le surplus correspond à la puissance de charge disponible.
 La puissance de charge disponible peut toutefois être ajustée individuellement à l’aide
 des paramètres suivants :
 
@@ -115,8 +115,8 @@ paramètres.
 
 ### Site
 
-Un [site](/fr/reference/configuration/site) décrit l’installation domestique et ses appareils,
-et régule la puissance disponible.
+Un [site](/fr/reference/configuration/site) décrit le lieu, avec les appareils existants et nécessaires de
+l’installation domestique, et se charge de réguler la puissance disponible.
 
 ### Point de charge
 
@@ -125,7 +125,7 @@ les _chargeurs_, les _véhicules_ existants et tout ce dont un point de charge a
 
 ### Chargeurs
 
-Les [chargeurs](/fr/reference/configuration/chargers) contiennent la liste des chargeurs et leurs propriétés, p. ex.
+La section [chargeurs](/fr/reference/configuration/chargers) contient la liste des chargeurs et leurs propriétés, p. ex.
 la manière de communiquer avec eux.
 
 ### Compteurs
@@ -147,7 +147,7 @@ principal d’une installation comportant plusieurs onduleurs.
 ### Véhicules
 
 Pour limiter le niveau de charge des véhicules électriques à une valeur donnée, vous pouvez indiquer
-ici les [véhicules](/fr/reference/configuration/vehicles) existants et leurs données d’accès en ligne.
+ici vos [véhicules](/fr/reference/configuration/vehicles) et leurs données d’accès en ligne.
 
 ### HEMS
 

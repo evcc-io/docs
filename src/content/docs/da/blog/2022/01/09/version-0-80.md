@@ -6,39 +6,39 @@ authors: [derandereandi, naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "c8cad4e6288a"
+translatedFrom: "9db66286559a"
 ---
 
-Også i år fortsætter vi med flere opdateringer :) Ud over de mindre opdateringer med 0.78 og 0.79 er der nu også et par større ændringer med version 0.80.
+Også i år bliver opdateringerne ved med at komme :) Ud over de mindre opdateringer i 0.78 og 0.79 bringer version 0.80 et par større ændringer.
 
 <!-- excerpt -->
 
 ## `evcc configure`-forbedringer
 
-Når man opretter en konfiguration med `evcc configure`, bliver man først spurgt om sin egen erfaring. På den måde kan øvede brugere indstille konfigurationen lidt mere præcist på de tekniske områder. Denne tilstand er fortsat også direkte tilgængelig via `evcc configure --advanced`. Vi anbefaler dog ikke denne tilstand til begyndere, da den kræver mere erfaring.
+Når du opretter en konfiguration med `evcc configure`, bliver du nu først spurgt om dit erfaringsniveau. På den måde kan øvede brugere finjustere de tekniske detaljer i konfigurationen. Denne tilstand er fortsat også direkte tilgængelig via `evcc configure --advanced`. Vi anbefaler den dog ikke til begyndere, da den kræver mere knowhow.
 
-Derudover er der flere enhedstemplates, rettelser til eksisterende templates og flere indstillingsmuligheder.
+Derudover er der flere enhedsskabeloner, rettelser til eksisterende skabeloner og flere indstillinger.
 
 ## Solandel og besparelse
 
 ![Dialogboks for besparelse](../../../../../en/blog/2022/01/09/ersparnis.png)
 
-Den nye besparelsesfunktion viser dig, hvor meget af din ladestrøm der kunne dækkes af selvproduceret solenergi.
+Den nye besparelsesfunktion viser dig, hvor meget af din ladeenergi der blev dækket af selvproduceret solenergi.
 Procentværdien vises nederst i højre hjørne.
-Når du klikker på den, får du vist flere detaljer i en dialogboks.
-Dér ser du ud over energimængden også din effektive energipris og den samlede besparelse sammenlignet med ren import fra elnettet.
-Her finder du mere information om [beregning og priskonfiguration](/da/faq#savings-calculation).
+Klik på den for at se flere detaljer i en dialogboks.
+Ud over energimængden viser den din effektive energipris og din samlede besparelse sammenlignet med ren import fra elnettet.
+Mere information om [beregning og priskonfiguration](/da/faq#savings-calculation) finder du i FAQ'en.
 
-Under tak-konfetti-knappen i den nye dialogboks finder [sponsorer](/da/sponsorship) (_\*trommehvirvel\*_) et link til vores nye evcc-klistermærker.
+[Sponsorer](/da/sponsorship) finder, _\*trommehvirvel\*_, et link til vores nye evcc-klistermærker bag tak-konfetti-knappen i den nye dialogboks.
 I er de bedste. Tak for jeres støtte! 💚🥳
 
 ## Docker
 
-Hvis du bruger Docker, kan du nu altid bruge den aktuelle version via tagget `latest`. Med tagget `nightly` kommer der nye builds hver dag, som til gengæld ikke er lige så gennemtestede. Mere information om Docker-installationen finder du her: [Docker, Synology](/da/installation/docker)
+Hvis du bruger Docker, kan du nu bruge tagget `latest` for altid at få den aktuelle version. Tagget `nightly` leverer nye builds hver dag, som måske endnu ikke er lige så gennemtestede. Mere information om Docker-installationen finder du her: [Docker, Synology](/da/installation/docker)
 
 ## Fejlrettelser
 
-Denne version indeholder naturligvis igen en række fejlrettelser og mange små forbedringer. Se gerne en detaljeret liste via changelog-linket nedenfor.
+Som altid indeholder denne version en række fejlrettelser og mange små forbedringer. Se changelog-linkene nedenfor for en detaljeret liste.
 
 ## Download og installation
 

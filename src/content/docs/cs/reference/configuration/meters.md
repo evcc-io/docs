@@ -1,20 +1,20 @@
 ---
 title: "meters"
-description: "Popisuje, jak v evcc.yaml definovat měřiče pro síť, solár, domácí baterii a spotřebiče, jaká platí znaménková konvence a které typy měřičů existují."
+description: "V evcc.yaml definujete měřiče pro síť, solár, domácí baterii a spotřebiče podle jednotné znaménkové konvence a zvolíte vhodný typ měřiče."
 sidebar:
   order: 5
-translatedFrom: "dfa0dfa3f1e6"
+translatedFrom: "731e5e09d04f"
 ---
 
 _Měřiče_ (elektroměry) jsou zařízení v domě, která dokážou měřit výkon a spotřebu energie, výrobu ze soláru nebo využití domácí baterie. `meter` definuje bod měření energie a může jít o fyzické zařízení (např. měřič v předávacím místě sítě), solární střídač (AC, nebo u hybridních střídačů DC) nebo bateriový střídač.
 
-Nabíječky mohou mít integrovaný měřič, nebo může být měřič připojen externě. Pokud má nabíječka vlastní měřič, není pro ni potřeba vytvářet záznam v `meters`. Pokud nabíječka takový měřič nemá, použije evcc měřič nakonfigurovaný zde a přiřazený nabíječce v konfiguraci nabíjecího bodu pod [`meters`](/cs/reference/configuration/loadpoints#meter), nebo předpokládá, že nastavený nabíjecí výkon se skutečně odebírá.
+Nabíječky mohou mít integrovaný měřič, nebo může být měřič připojen externě. Pokud má nabíječka vlastní měřič, není pro ni potřeba vytvářet záznam v `meters`. Pokud nabíječka takový měřič nemá, použije evcc měřič nakonfigurovaný zde a přiřazený nabíječce v konfiguraci nabíjecího bodu pod [`meter`](/cs/reference/configuration/loadpoints#meter), nebo předpokládá, že se nastavený nabíjecí výkon skutečně odebírá.
 
 evcc používá pro hodnoty výkonu a proudu (`power`, `powers`, `currents`) jednotnou znaménkovou konvenci:
 
 - **Kladné (+)** pro energii, která přichází: odběr ze sítě, výroba ze soláru, vybíjení domácí baterie
 - **Záporné (-)** pro energii, která odchází: export do sítě, pohotovostní spotřeba solárního střídače, nabíjení domácí baterie
-- **Spotřebiče** (nabíječka, měřiče aux) jsou vždy **kladné (+)**
+- **Spotřebiče** (nabíječka, pomocné měřiče) jsou vždy **kladné (+)**
 
 Pokud zařízení vrací hodnoty s opačným znaménkem, lze to opravit v [konfiguraci pluginu](/cs/reference/plugins) pomocí `scale: -1`.
 
@@ -58,7 +58,7 @@ name: charger1
 
 ### `type`
 
-Typ měřiče specifický pro evcc, který umožňuje komunikaci se zařízením. Vhodný typ pro známá zařízení najdete v části [Zařízení – domácí instalace](/cs/meters).
+Typ, přes který evcc s měřičem komunikuje. Vhodný typ pro známá zařízení najdete v části [Zařízení – domácí instalace](/cs/meters).
 
 **Příklad**:
 
@@ -81,7 +81,7 @@ Názvy a ikony (podle způsobu použití) lze definovat pouze pro měřiče vyt
 
 Tento typ měřiče dokáže vyhladit kolísající naměřené hodnoty. Lze ho použít pro všechna využití měřiče (`usage`). Parametr `decay` udává, kolik procent nové hodnoty se započítá do výpočtu.
 
-**Příklad**:
+**Příklad**
 
 ```yaml
 meters:
@@ -120,7 +120,7 @@ Kromě zde definovaných parametrů jsou nutné další parametry. Jsou uvedeny 
 
 ##### `power`
 
-Definuje naměřenou hodnotu MBMD, která vrací výkon, obvykle `Power`.
+Definuje naměřenou hodnotu MBMD pro výkon, obvykle `Power`.
 
 **Příklad**:
 
@@ -213,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Měření z nabíječky OpenWB
+Použití měření z nabíječky OpenWB
 
 **Příklad**:
 
@@ -222,10 +222,6 @@ type: openwb
 usage: grid
 broker: 192.0.2.2
 ```
-
-:::note
-Parametry `uri` a `password` jsou u zařízení `meter` nutné pouze tehdy, je-li nakonfigurováno více zařízení.
-:::
 
 #### Povinné parametry
 
@@ -369,39 +365,39 @@ Standardní implementace, u které se jednotlivé hodnoty definují pomocí [pl
 
 ```yaml
   type: custom
-  power: # Power (W)
-    source: # Plugin Type
+  power: # Výkon (W)
+    source: # Typ pluginu
     ...
-  energy: # Energy (kWh)
-    source: # Plugin Type
+  energy: # Energie (kWh)
+    source: # Typ pluginu
     ...
-  returnenergy: # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: # Energie v opačném směru (kWh)
+    source: # Typ pluginu
     ...
-  soc: # Battery SOC (%)
-    source: # Plugin Type
+  soc: # Stav nabití baterie (%)
+    source: # Typ pluginu
     ...
-  capacity: # Optional Battery Capacity (kWh)
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  capacity: # Volitelná kapacita baterie (kWh)
+  currents: # Proud (A) na fázi
+    - source: # Typ pluginu pro fázi 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Typ pluginu pro fázi 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Typ pluginu pro fázi 3
       ...
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Výkon (W) na fázi
+    - source: # Typ pluginu pro fázi 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Typ pluginu pro fázi 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Typ pluginu pro fázi 3
       ...
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Napětí (V) na fázi
+    - source: # Typ pluginu pro fázi 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Typ pluginu pro fázi 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Typ pluginu pro fázi 3
       ...
   ...
 ```
@@ -417,8 +413,8 @@ Definice pluginu, který vrací výkon ve wattech (W).
 **Příklad**:
 
 ```yaml
-  power: ... # Power (W)
-    source: # Plugin Type
+  power: ... # Výkon (W)
+    source: # Typ pluginu
     ...
 ```
 
@@ -433,8 +429,8 @@ Definice pluginu, který vrací spotřebovanou energii v kilowatthodinách (kWh
 **Příklad**:
 
 ```yaml
-  energy: ... # Energy (kWh)
-    source: # Plugin Type
+  energy: ... # Energie (kWh)
+    source: # Typ pluginu
     ...
 ```
 
@@ -447,8 +443,8 @@ Definice pluginu, který vrací energii v opačném směru v kilowatthodinách
 **Příklad**:
 
 ```yaml
-  returnenergy: ... # Energy in reverse direction (kWh)
-    source: # Plugin Type
+  returnenergy: ... # Energie v opačném směru (kWh)
+    source: # Typ pluginu
     ...
 ```
 
@@ -461,8 +457,8 @@ Definice pluginu, který vrací stav nabití baterie v procentech (%).
 **Příklad**:
 
 ```yaml
-  soc: ... # Battery SOC (%)
-    source: # Plugin Type
+  soc: ... # Stav nabití baterie (%)
+    source: # Typ pluginu
     ...
 ```
 
@@ -481,12 +477,12 @@ Seznam definic pluginů, které vracejí proud v ampérech (A) pro každou fáz
 **Příklad**:
 
 ```yaml
-  currents: # Current (A) per phase
-    - source: # Phase 1 Plugin Type
+  currents: # Proud (A) na fázi
+    - source: # Typ pluginu pro fázi 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Typ pluginu pro fázi 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Typ pluginu pro fázi 3
       ...
   ...
 ```
@@ -500,12 +496,12 @@ Seznam definic pluginů, které vracejí výkon ve wattech (W) pro každou fázi
 **Příklad**:
 
 ```yaml
-  powers: # Power (W) per phase
-    - source: # Phase 1 Plugin Type
+  powers: # Výkon (W) na fázi
+    - source: # Typ pluginu pro fázi 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Typ pluginu pro fázi 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Typ pluginu pro fázi 3
       ...
   ...
 ```
@@ -519,12 +515,12 @@ Seznam definic pluginů, které vracejí napětí ve voltech (V) pro každou fá
 **Příklad**:
 
 ```yaml
-  voltages: # Voltage (V) per phase
-    - source: # Phase 1 Plugin Type
+  voltages: # Napětí (V) na fázi
+    - source: # Typ pluginu pro fázi 1
       ...
-    - source: # Phase 2 Plugin Type
+    - source: # Typ pluginu pro fázi 2
       ...
-    - source: # Phase 3 Plugin Type
+    - source: # Typ pluginu pro fázi 3
       ...
   ...
 ```

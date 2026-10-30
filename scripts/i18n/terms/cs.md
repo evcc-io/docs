@@ -267,10 +267,10 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | --- | --- |
 | Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc | Choose OS ? → Other specific-purpose OS ? → Home assistants and home automation ? → evcc ? |
 | Configuration → Backup & Restore | Konfigurace → Zálohování a obnova |
-| Configuration → Charging & Heating | Konfigurace → Charging & Heating ? |
 | Configuration → Charging points & heaters → [My Charging Point] | Konfigurace → Místo pro nabíjení a topení → [My Charging Point] ? |
 | Configuration → Charging points & heaters → [name] | Konfigurace → Místo pro nabíjení a topení → [name] ? |
 | Configuration → Charging points & heaters | Konfigurace → Místo pro nabíjení a topení |
+| Configuration → Device overview | Konfigurace → Device overview ? |
 | Configuration → EEBUS | Konfigurace → EEBus |
 | Configuration → EEBus | Konfigurace → EEBus |
 | Configuration → Experimental | Konfigurace → Experimentální |
@@ -285,6 +285,7 @@ Pre-composed `A → B` paths from the English docs. Segments without a UI match 
 | Configuration → Optimizer 🧪 | Konfigurace → Optimizer 🧪 ? |
 | Configuration → Remote Access | Konfigurace → Vzdálený přístup |
 | Configuration → Sponsorship | Konfigurace → Sponzorství |
+| Configuration → Sunny Home Manager | Konfigurace → Sunny Home Manager |
 | Configuration → Tariffs & forecasts → Add forecast → Add CO₂ forecast | Konfigurace → Tarify a Předpovědní modely → Přidat předpovědní model → Přidat předpověď uhlíkové stopy |
 | Configuration → Tariffs & forecasts → Add tariff → Add grid import tariff | Konfigurace → Tarify a Předpovědní modely → Přidat tarif energie → Přidat tarif pro dodávku energie |
 | Configuration → Vehicles → Add vehicle | Konfigurace → Vozidla → Přidat vozidlo |

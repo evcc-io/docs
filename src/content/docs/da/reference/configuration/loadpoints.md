@@ -3,7 +3,7 @@ title: "loadpoints"
 description: "Sæt ladepunkter op i evcc.yaml ved at koble oplader, måler og køretøj sammen, vælge standardtilstanden og finjustere køretøjsforespørgsler, tærskler og faser."
 sidebar:
   order: 3
-translatedFrom: "3b374858a668"
+translatedFrom: "05c846a87f23"
 ---
 
 `loadpoints` er listen over dine ladepunkter. Hvert ladepunkt samler en oplader, køretøjer og om nødvendigt en måler med yderligere valgfrie parametre. En minimal konfiguration kræver en oplader.
@@ -12,10 +12,10 @@ translatedFrom: "3b374858a668"
 
 ```yaml
 loadpoints:
-  - title: Garage # display name for UI
-    charger: charger # charger reference
-    vehicle: audi # reference to standard vehicle
-    mode: smart # charge mode (off, smart, now)
+  - title: Garage # visningsnavn i brugerfladen
+    charger: charger # reference til opladeren
+    vehicle: audi # reference til standardkøretøjet
+    mode: smart # ladetilstand (off, smart, now)
 ```
 
 Referencer svarer altid til værdierne af `name`-parameteren (f.eks. `charger`) i den pågældende enhedskonfiguration.
@@ -94,7 +94,7 @@ Med parameteren `mode` kan du angive den ladetilstand, der skal bruges, når kø
 **Mulige værdier**:
 
 - `off`: Opladningen stoppes, selv om et køretøj er tilsluttet opladeren.
-- `smart`: Opladningen bruger soloverskud, billige timer fra en dynamisk tarif og ladeplaner og sættes på pause, når der ikke er billig energi til rådighed.
+- `smart`: Opladningen bruger soloverskud, billige timer fra en dynamisk tarif samt ladeplaner, og den sættes på pause, når der ikke er billig energi til rådighed.
 - `now`: Opladningen starter med det samme med den størst mulige effekt.
 
 **Standardværdi:** `smart`
@@ -138,6 +138,9 @@ soc:
 
 Definerer, hvordan køretøjs-API'er bruges til at hente aktuelle oplysninger om køretøjet.
 
+Hvis opladeren har `features`-flaget `integrateddevice` konfigureret, hentes dataene løbende.
+I så fald er der ikke brug for `poll`-indstillinger, og eventuelt angivne indstillinger ignoreres.
+
 :::caution
 Det anbefales **IKKE** at ændre standardindstillingerne, da det kan føre til, at køretøjets batteri aflades, eller at køretøjsproducenten aktivt forhindrer styring af opladningen via evcc. **Brug på eget ansvar**.
 :::
@@ -174,11 +177,11 @@ interval: 60m
 
 #### `estimate`
 
-Det aktuelle opladningsniveau beregnes (interpoleres) mellem forespørgslerne til køretøjet.
+Det aktuelle opladningsniveau estimeres ud fra den målte ladeenergi (ekstrapolation) mellem de forespørgsler til køretøjet, som `interval` fastlægger.
 
 **Mulige værdier**:
 
-- `true`: evcc interpolerer opladningsniveauet mellem forespørgslerne til køretøjet (anbefalet).
+- `true`: evcc ekstrapolerer opladningsniveauet mellem forespørgslerne til køretøjet (anbefalet).
 - `false`: evcc bruger kun de værdier for opladningsniveauet, som køretøjet returnerer.
 
 **Standardværdi:** `true`
@@ -186,7 +189,7 @@ Det aktuelle opladningsniveau beregnes (interpoleres) mellem forespørgslerne ti
 **Eksempel**:
 
 ```yaml
-estimate: false # No interpolation
+estimate: false # ingen ekstrapolation
 ```
 
 ---
@@ -225,7 +228,7 @@ threshold: 0
 :::note
 Hvis du har forskudt overskudsreguleringens målværdi med parameteren `residualPower`, skal du tage højde for denne værdi, når du angiver `threshold`-værdien.
 
-Hvis `residualPower` f.eks. er sat til 200 (evcc-reguleringen lægger målværdien på 200 W eksport til elnettet), betyder en `enable`-`threshold`-værdi på 100 ikke, at opladningen starter ved 100 W import fra elnettet. I stedet reduceres den tilbageværende effekt til eksport til elnettet med 100 W, så opladningen starter ved 100 W eksport til elnettet.
+Hvis `residualPower` f.eks. er sat til 200 (evcc-reguleringen lægger målværdien på 200 W eksport til elnettet), betyder en `enable`-`threshold`-værdi på 100 ikke, at opladningen starter ved 100 W import fra elnettet. I stedet reduceres den resterende eksport til elnettet med 100 W, så opladningen starter ved 100 W eksport.
 
 For at starte opladningen ved 100 W import fra elnettet skal `threshold`-værdien i dette tilfælde sættes til 300.
 :::
@@ -252,7 +255,7 @@ Definerer, hvordan opladning med soloverskud stopper i tilstanden Smart. Derudov
 
 ```yaml
 disable:
-  threshold: 200 # maximum import power (W)
+  threshold: 200 # maksimal effekt importeret fra elnettet (W)
   delay: 10m
 ```
 
@@ -267,7 +270,7 @@ Definerer effekttærsklen ved tilslutningspunktet til elnettet i watt (W).
 **Eksempel**:
 
 ```yaml
-threshold: 200 # Maximum grid consumption of 200W is allowed
+threshold: 200 # maksimalt 200 W import fra elnettet er tilladt
 ```
 
 :::note
@@ -304,15 +307,15 @@ Definerer antallet af faser, som opladeren er tilsluttet med.
 
 Parameteren ændrer ikke opladerens fysiske tilslutning, men bruges til at bestemme den minimale starteffekt for opladning med soloverskud (i kombination med `minCurrent`).
 
-Hvis opladerens måler leverer de indgående spændinger, bliver de evalueret. Ud fra spændingerne ændres `phases`-værdien automatisk via API. Hvis opladeren skiftes mellem 1p og 3p med en kontakt, er det ikke længere nødvendigt at ændre `phases`-værdien manuelt.
+Hvis opladerens måler leverer fasespændingerne, evalueres de. Ud fra spændingerne ændres `phases`-værdien automatisk via API. Hvis opladeren skiftes mellem 1p og 3p med en kontakt, er det ikke længere nødvendigt at ændre `phases`-værdien manuelt.
 
 Hvis der i stedet skiftes mellem 1p og 3p med ladekablet frem for en kontakt, giver denne ”automatiske” adfærd problemer. I så fald skal `phases`-værdien tilpasses i `vehicle`. Da denne værdi ikke kan ændres via API, kan følgende løsning bruges:
 
-Konfigurer køretøjet to gange: én gang med `phases: 1` og én gang med `phases: 3`. Vælg det passende køretøj i brugerfladen afhængigt af den ønskede ladetilstand.
+Konfigurer køretøjet to gange: én gang med `phases: 1` og én gang med `phases: 3`. Vælg det passende køretøj i brugerfladen afhængigt af det ønskede antal faser.
 
 Hvis et kendt køretøj er tilsluttet, bruges den laveste værdi af `vehicle: phases` og `loadpoint: phases` til beregningen. For ukendte køretøjer tages der kun hensyn til `loadpoint: phases`.
 
-Mens køretøjet oplader, og opladeren eller lademåleren leverer fasestrømme, registreres det faktiske antal faser, og (så længe køretøjet forbliver tilsluttet) bruges det til de videre beregninger. Det virker kun for trefasede ladepunkter.
+Mens køretøjet oplader, og opladeren eller lademåleren leverer fasestrømme, registreres det faktiske antal faser. Så længe køretøjet forbliver tilsluttet, bruges det til at beregne de faktiske skiftetærskler. Det virker kun for trefasede ladepunkter.
 
 **Standardværdi:** `3`
 

@@ -1,16 +1,16 @@
 ---
 title: "Load management"
-description: "Load management deelt laadpunten in circuits in met een maximale stroom of een maximaal vermogen, zodat meerdere laders uw elektrische installatie nooit overbelasten."
+description: "Load management verdeelt laadpunten over circuits met een maximale stroom of een maximaal vermogen, zodat meerdere laders uw elektrische installatie nooit overbelasten."
 sidebar:
   order: 12
-translatedFrom: "6421abf2b4a4"
+translatedFrom: "56826048a083"
 ---
 
 :::caution[Experimenteel]
 De functie load management is nog experimenteel. In combinatie met sommige andere functies werkt ze mogelijk niet zoals verwacht.
 :::
 
-Met de functie load management/load balancing kunt u het vermogen van laders begrenzen, zodat de circuits niet overbelast raken en zekeringen niet doorslaan.
+Met load management (in de UI: **Load Balancing**) kan het vermogen van laders worden begrensd, zodat de circuits niet overbelast raken en zekeringen niet doorslaan.
 Het begrenzen van het vermogen kan ook nuttig zijn als u onbedoeld hoge verbruikspieken wilt vermijden.
 Hiervoor kan een laadpunt aan een `circuit` worden toegewezen.
 Een `circuit` kan een maximale stroom (`maxCurrent`) en/of een maximaal vermogen (`maxPower`) hebben.
@@ -21,7 +21,7 @@ Deze pagina beschrijft de configuratie via het bestand `evcc.yaml`.
 Configuratie is ook mogelijk via de UI.
 
 Circuits kunt u definiëren onder **Configuratie → Load Balancing**.
-De invoer gebruikt YAML-formaat en komt overeen met de inhoud onder `circuits:` in de volgende voorbeelden.
+De invoer is in YAML-formaat en komt overeen met de inhoud onder `circuits:` in de volgende voorbeelden.
 We werken eraan om dit te vervangen door een formulier.
 
 Daarna kunt u elk laadpunt onder **Configuratie → Laadpunten & verwarmers → [naam]** aan een circuit toewijzen (herstart vereist).
@@ -36,21 +36,24 @@ Daarna kan elk laadpunt aan een circuit worden toegewezen.
 
 ```yaml
 circuits:
-  - name: main # if there is only one circuit defined the name needs to be 'main'
-    title: "main circuit" # name for the UI (not implemented in UI yet)
-    maxCurrent: 63 # 63A (optional)
-    maxPower: 30000 # 30kW (optional)
-    meter: grid # optional
+  - name: main # unieke naam, andere circuits verwijzen ernaar via parent
+    title: "hoofdcircuit" # naam voor de UI (nog niet in de UI geïmplementeerd)
+    maxCurrent: 63 # 63A (optioneel)
+    maxPower: 30000 # 30kW (optioneel)
+    meter: grid # optioneel
 
 loadpoints:
   - title: Garage
     circuit: main
+    # ...
+  - title: Carport
+    circuit: main
+    # ...
 ```
 
-Deze configuratie stelt alleen een hoofdcircuit in.
-Het circuit heeft een maximale stroom van 63 A.
-Als andere verbruikers zoals een oven of warmtepomp (hiervoor is een meter nodig) samen 50 A gebruiken, mag de lader nog maar 13 A gebruiken.
-Het circuit heeft een limiet van 30 kW.
+Deze configuratie definieert het hoofdcircuit `main` met een maximaal vermogen van 30 kW en een maximale stroom van 63 A per fase.
+De laadpunten _Garage_ en _Carport_ zijn aan dit circuit toegewezen.
+Als andere verbruikers zoals een oven of warmtepomp (hiervoor is een meter nodig) samen 50 A gebruiken, mogen de laadpunten nog maar de resterende 13 A gebruiken.
 Omdat de netmeter aan dit circuit is toegewezen, wordt het vermogen van de laadpunten zo begrensd dat de limieten op de netaansluiting niet worden overschreden.
 Zonder toegewezen netmeter gelden de limieten direct voor de som van alle laadpunten.
 
@@ -59,7 +62,7 @@ Zonder toegewezen netmeter gelden de limieten direct voor de som van alle laadpu
 ```yaml
 circuits:
   - name: main
-    title: "main circuit"
+    title: "hoofdcircuit"
     maxCurrent: 48
   - name: garage
     title: Garage
@@ -81,7 +84,7 @@ loadpoints:
     circuit: carport
   - title: Carport B
     circuit: carport
-  - title: Heat Pump
+  - title: Warmtepomp
     circuit: main
 ```
 
@@ -123,7 +126,7 @@ circuits:
     maxCurrent: 32
 ```
 
-Let op: gebruikt u een meter die nog geen andere rol heeft (bijv. `grid`), dan moet u die onder `site.meters.ext` als externe meter toevoegen.
+Let op: als een meter wordt gebruikt die nog geen andere rol heeft (bijv. `grid`), moet deze onder `site.meters.ext` als externe meter worden gekoppeld.
 
 ## Limieten
 
@@ -139,7 +142,7 @@ Voorbeeld:
 ```yaml
 circuits:
   - name: main
-    title: "main circuit"
+    title: "hoofdcircuit"
     maxCurrent: 48
     GetMaxCurrent:
       source: mqtt
@@ -151,26 +154,26 @@ circuits:
 ```
 
 :::note[Opmerking]
-Met een externe limiet kunnen stuursignalen van de netbeheerder worden uitgevoerd.
+Met een externe limiet kunnen stuurverzoeken van de netbeheerder worden opgevolgd.
 Meer informatie vindt u onder [Externe limiet](/nl/external-limit).
 :::
 
-## Fasewisseling
+## Faseomschakeling
 
-Bij laders met automatische fasewisseling (1P/3P) kan load management deze omschakeling gebruiken om binnen de ingestelde limieten te laden.
-Als het beschikbare vermogen niet voldoende is om 3-fasig te laden, schakelt evcc automatisch over naar 1-fasig laden.
+Bij laders met automatische faseomschakeling (1P/3P) kan load management deze omschakeling gebruiken om binnen de ingestelde limieten te laden.
+Als het beschikbare vermogen niet voldoende is om driefasig te laden, schakelt evcc automatisch over naar eenfasig laden.
 
 Dit geldt ook in de modus **Snel** en bij laden volgens een laadplan.
-Als load management het beschikbare vermogen bijv. op 3,5 kW begrenst, schakelt evcc over naar 1-fasig laden (vanaf 1,4 kW) in plaats van het laden te pauzeren.
+Als load management het beschikbare vermogen bijv. op 3,5 kW begrenst, schakelt evcc over naar eenfasig laden (vanaf 1,4 kW) in plaats van het laden te pauzeren.
 
-**Vereiste:** de lader moet fasewisseling ondersteunen.
+**Vereiste:** de lader moet faseomschakeling ondersteunen.
 
 ## Configuratie van de lader
 
 Sommige laders hebben hun eigen functies voor load management.
 We raden sterk aan deze uit te schakelen of laders zonder ingebouwde intelligentie te gebruiken.
 evcc verwacht dat apparaten zijn commando’s direct opvolgen.
-Andere configuraties kunnen tot onverwacht gedrag leiden en moet u zelf grondig testen.
+Andere configuraties kunnen tot onverwacht gedrag leiden en moeten zelf grondig worden getest.
 
 ## Beperkingen
 
@@ -181,6 +184,6 @@ Privégebruik bij kleinere installaties blijft kosteloos.
 
 - De actuele waarden en limieten van afzonderlijke circuits worden weergegeven op de configuratiepagina in de UI. Weergave bij het laadpunt is gepland.
 - Instellingen voor `priority` bij het laadpunt worden nog niet meegenomen.
-- Nieuwe laadsessies krijgen alleen de resterende ruimte van het circuit.
+- Nieuwe laadsessies krijgen alleen de resterende capaciteit van het circuit.
   Herverdeling over actieve laadsessies wordt nog niet ondersteund.
-- [Netladen](/nl/features/battery#gridcharge) van de thuisbatterij wordt niet meegenomen. Wanneer de thuisbatterij actief uit het net laadt, wordt dit verbruik niet meegerekend in de berekeningen van load management. Tijdens actieve signalen voor [vermogensreductie volgens § 14a](/nl/external-limit) wordt netladen echter automatisch gepauzeerd.
+- [Netladen](/nl/features/battery#gridcharge) van de thuisbatterij wordt niet meegenomen. Wanneer de thuisbatterij actief uit het net laadt, houdt load management geen rekening met dit verbruik. Tijdens actieve signalen voor [vermogensreductie volgens § 14a](/nl/external-limit) wordt netladen echter automatisch gepauzeerd.

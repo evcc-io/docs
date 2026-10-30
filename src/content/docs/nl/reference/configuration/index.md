@@ -1,9 +1,9 @@
 ---
 title: "Configuratie"
-description: "Hier leest u waar het configuratiebestand evcc.yaml staat, hoe het is opgebouwd en welke secties uw locatie en apparaten beschrijven."
+description: "Overzicht van de configuratie via evcc.yaml: waar het bestand staat, hoe het is opgebouwd en welke secties uw locatie en apparaten beschrijven."
 sidebar:
   order: 1
-translatedFrom: "b5e9667916e0"
+translatedFrom: "7c938df548c1"
 ---
 
 evcc kan op twee manieren worden geconfigureerd:
@@ -77,10 +77,10 @@ graph TD;
 
 ### Hoe werkt evcc? (een kijkje onder de motorkap)
 
-Voor de werking van het systeem is een elektriciteitsmeter belangrijk. Daarmee
-kan op elk moment het overschotvermogen worden berekend. Het meten van het
-opgewekte vermogen is interessant, maar heeft geen invloed op de werking, met
-[deze uitzondering](/nl/faq#configuration).
+Voor de werking van het systeem is een netmeter (`grid`-meter) belangrijk.
+Die bepaalt het actuele overschotvermogen.
+Het meten van het opgewekte vermogen heeft hierbij geen invloed op de werking.
+evcc zonder netmeter gebruiken is ook mogelijk, zie de [FAQ](/nl/faq#configuration).
 
 Het overschotvermogen wordt vergeleken met het minimale vermogen dat nodig is om te laden. Is
 dit voldoende, dan start het laden.
@@ -92,7 +92,7 @@ informatie.
 
 Bijvoorbeeld: `phases: 1` en `minCurrent: 8`
 
-1 (fasen) x 8 A (minCurrent) x 230 V (netspanning) = 1.840 W (minimaal vermogen om te laden)
+1 (fase) × 8 A (minCurrent) × 230 V (netspanning) = 1.840 W (minimaal vermogen om te laden)
 
 #### Mogelijkheden om bij te sturen
 
@@ -115,13 +115,13 @@ instellingen.
 
 ### Locatie
 
-Een [locatie](/nl/reference/configuration/site) beschrijft uw thuisinstallatie met de apparaten die evcc gebruikt,
+Een [locatie](/nl/reference/configuration/site) beschrijft de locatie met de aanwezige en benodigde apparaten van de thuisinstallatie
 en regelt het beschikbare vermogen.
 
 ### Laadpunt
 
 Een [laadpunt](/nl/reference/configuration/loadpoints) beschrijft de laadinfrastructuur en combineert
-de aanwezige _laders_, _voertuigen_ en alles wat een laadpunt verder nodig heeft.
+de _laders_, _voertuigen_ en alles wat een laadpunt verder nodig heeft.
 
 ### Laders
 
@@ -130,24 +130,24 @@ de manier waarop evcc ermee communiceert.
 
 ### Meters
 
-De sectie [Meters](/nl/reference/configuration/meters) bevat een lijst met apparaten die verschillende energiestromen meten. Daartoe
+De sectie [Meters](/nl/reference/configuration/meters) bevat een lijst met apparaten die verschillende vermogensstromen meten. Daartoe
 behoren:
 
 - Vermogen van netafname en teruglevering
 - Door zonne-energie opgewekt vermogen
 - Laadstroom van de elektrische auto (als de lader dit niet zelf ondersteunt)
-- Energiestroom van de thuisbatterij(en)
+- Vermogensstroom van de thuisbatterij(en)
 
-### Opwekbegrenzers
+### Opwekbegrenzingsapparaten
 
-[Opwekbegrenzers](/nl/reference/configuration/curtailers) zijn apparaten die alleen de teruglevering van het zonnepanelensysteem
+[Opwekbegrenzingsapparaten](/nl/reference/configuration/curtailers) zijn apparaten die alleen de teruglevering van het zonnepanelensysteem
 op verzoek van de netbeheerder begrenzen (§ 9 EEG), bijv. de SMA Sunny Home Manager 2.0 of de master-omvormer
 van een installatie met meerdere omvormers.
 
 ### Voertuigen
 
 Om het laden van elektrische auto’s tot een bepaald laadniveau te begrenzen, kunt u hier
-de aanwezige [voertuigen](/nl/reference/configuration/vehicles) en online toegangsgegevens opgeven.
+uw [voertuigen](/nl/reference/configuration/vehicles) en hun online toegangsgegevens opgeven.
 
 ### HEMS
 

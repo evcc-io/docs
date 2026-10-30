@@ -1,25 +1,26 @@
 ---
 date: 2021-12-29
 title: "Version 0.76"
-description: "Udgivelsesnoter for evcc 0.76 fra december 2021 med understøttelse af køretøjerne Dacia og Smart EQ, opladeren Innogy eBox og en række fejlrettelser."
+description: "Udgivelsesnoter for evcc 0.76 fra december 2021 med understøttelse af køretøjer fra Dacia og Smart EQ, opladeren Innogy eBox og en række fejlrettelser."
 authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "19fb68e22d3a"
+translatedFrom: "daec48020930"
 ---
 
-Her ved årets afslutning kommer der i dag endnu en opdatering med nogle nyheder.
+Inden årets udgang kommer der endnu en opdatering med et par nye funktioner.
 
 <!-- excerpt -->
 
-## Flere køretøjer og en ny oplader
+## Flere køretøjer og en oplader
 
-Elbilerne fra Dacia og Smart EQ understøttes nu, og det samme gælder opladeren Innogy eBox.
+Elbiler fra Dacia og Smart EQ understøttes nu, og det samme gør opladeren Innogy eBox.
 
 ## Fejlrettelser
 
-Denne version indeholder en række fejlrettelser og mange små forbedringer. Se gerne en detaljeret liste via changelog-linket nedenfor.
+Denne version indeholder en række fejlrettelser og mange små forbedringer.
+Se gerne den detaljerede liste via changelog-linket nedenfor.
 
 ## Download og installation
 

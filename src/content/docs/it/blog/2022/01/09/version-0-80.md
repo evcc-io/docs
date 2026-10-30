@@ -6,10 +6,10 @@ authors: [derandereandi, naltatis]
 tags: [release]
 prev: false
 next: false
-translatedFrom: "c8cad4e6288a"
+translatedFrom: "9db66286559a"
 ---
 
-Anche quest’anno si continua con nuovi aggiornamenti :) Oltre agli aggiornamenti minori con la 0.78 e la 0.79, ora con la versione 0.80 arrivano anche alcune modifiche più grandi.
+Anche quest’anno gli aggiornamenti continuano :) Oltre agli aggiornamenti minori della 0.78 e della 0.79, la versione 0.80 porta alcune modifiche più grandi.
 
 <!-- excerpt -->
 
@@ -25,12 +25,12 @@ Inoltre ci sono altri template di dispositivi, correzioni ai template esistenti 
 
 La nuova funzione di risparmio ti mostra quanta parte dell’energia di ricarica è stata coperta dall’energia solare autoprodotta.
 Il valore percentuale viene mostrato nell’angolo in basso a destra.
-Cliccandoci sopra, una finestra di dialogo ti mostra ulteriori dettagli.
+Se ci clicchi sopra, si apre una finestra di dialogo con ulteriori dettagli.
 Lì, oltre alla quantità di energia, vedi anche il tuo prezzo effettivo dell’energia e il risparmio totale rispetto al solo prelievo dalla rete.
-Qui trovi maggiori informazioni su [calcolo e configurazione dei prezzi](/it/faq#savings-calculation).
+Maggiori informazioni su [calcolo e configurazione dei prezzi](/it/faq#savings-calculation) si trovano nelle FAQ.
 
 Gli [sponsor](/it/sponsorship) trovano nella nuova finestra di dialogo, sotto il pulsante dei coriandoli di ringraziamento, … _\*rullo di tamburi\*_ … un link per ricevere i nostri nuovi adesivi evcc.
-Siete i migliori. Grazie per il vostro supporto! 💚🥳
+Voi sponsor siete i migliori. Grazie per il vostro supporto! 💚🥳
 
 ## Docker
 
@@ -38,7 +38,7 @@ Chi usa Docker ora ottiene sempre la versione attuale con il tag `latest`. Con i
 
 ## Correzioni di bug
 
-Naturalmente anche questa versione contiene una serie di correzioni di bug e molti piccoli miglioramenti. Trovi un elenco dettagliato tramite il link al changelog qui sotto.
+Come sempre, questa versione contiene una serie di correzioni di bug e molti piccoli miglioramenti. Trovi un elenco dettagliato tramite il link al changelog qui sotto.
 
 ## Download e installazione
 
