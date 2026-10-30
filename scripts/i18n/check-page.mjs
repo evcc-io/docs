@@ -93,8 +93,11 @@ function skeleton(body, offset, file, lang, errors) {
         errors.push(`L${line}: relative asset ${t} does not resolve`);
       return `asset:${relative(docsParent, abs)}`;
     }
-    if (lang === "en") return t.replace(/^\/en(?=\/|#|$)/, "/{lang}");
-    return t.replace(new RegExp(`^/${lang}(?=/|#|$)`), "/{lang}");
+    // locale prefix -> placeholder, without building a regex from the argument
+    const p = `/${lang}`;
+    return t === p || t.startsWith(`${p}/`) || t.startsWith(`${p}#`)
+      ? `/{lang}${t.slice(p.length)}`
+      : t;
   };
 
   const tokens = [];

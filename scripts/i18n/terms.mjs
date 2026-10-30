@@ -36,7 +36,8 @@ for (const [k, v] of Object.entries(enUi)) {
   const key = v.trim().toLowerCase();
   byValue.set(key, [...(byValue.get(key) ?? []), k]);
 }
-const cell = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
+const cell = (s) =>
+  String(s).replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
 const value = (k) => (ui[k] ? ui[k] : "(untranslated in UI)");
 // distinct <lang> values for a set of keys: "value (key, key)"
 const values = (keys) => {
