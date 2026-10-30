@@ -19,7 +19,10 @@ loop((screenshot, { lang }) => {
     const moreTab = page.getByTestId("tab-more");
     await moreTab.click();
     await moreTab
-      .getByRole("button", { name: await t(lang, "main.vehicleSettings.menu") })
+      .getByRole("button", {
+        name: await t(lang, "main.vehicleSettings.menu"),
+        exact: true,
+      })
       .click();
     await expect(page.locator(MODAL)).toBeVisible();
   }
