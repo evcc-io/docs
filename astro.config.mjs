@@ -15,7 +15,8 @@ import { matchesGlob } from "node:path";
 import locales from "./src/locales.json" with { type: "json" };
 
 const LANGS = Object.keys(locales);
-const LANG_GLOB = `{${LANGS.join(",")}}`;
+// a one-item brace like {en} is not expanded, so a single locale stays plain
+const LANG_GLOB = LANGS.length > 1 ? `{${LANGS.join(",")}}` : LANGS[0];
 
 // UI dictionaries (src/content/i18n/<lang>.json) also feed the site title and
 // sidebar labels, so new locales only add their own JSON file.

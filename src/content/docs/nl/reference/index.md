@@ -3,7 +3,7 @@ title: "Referentie"
 description: "De technische referentie beschrijft het configuratiebestand met al zijn instellingen en de Modbus-verbindingen van ondersteunde apparaten."
 sidebar:
   order: 1
-translatedFrom: "b0f51e2951f3"
+translatedFrom: "da5496e357a4"
 ---
 
 Hieronder vindt u technische documentatie over verschillende aspecten van evcc.
@@ -14,4 +14,4 @@ Hieronder vindt u technische documentatie over verschillende aspecten van evcc.
 
 ### Modbus
 
-[Documentatie over Modbus, het protocol dat veel ondersteunde apparaten gebruiken.](/nl/reference/modbus)
+[Apparaten aansluiten via Modbus, het protocol dat veel ondersteunde apparaten gebruiken.](/nl/reference/modbus)

@@ -3,7 +3,7 @@ title: "Références"
 description: "La référence technique décrit le fichier de configuration et ses paramètres ainsi que les connexions Modbus des appareils pris en charge."
 sidebar:
   order: 1
-translatedFrom: "b0f51e2951f3"
+translatedFrom: "da5496e357a4"
 ---
 
 Vous trouverez ci-dessous la documentation technique de différents aspects d’evcc.
@@ -14,4 +14,4 @@ Vous trouverez ci-dessous la documentation technique de différents aspects d’
 
 ### Modbus
 
-[La documentation du protocole Modbus, utilisé par plusieurs appareils pris en charge.](/fr/reference/modbus)
+[Connecter des appareils via Modbus, le protocole utilisé par de nombreux appareils pris en charge.](/fr/reference/modbus)

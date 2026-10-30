@@ -13,4 +13,4 @@ Below is technical documentation on various aspects of evcc.
 
 ### Modbus
 
-[Documentation for Modbus, which is used in turn by various of the devices supported.](/en/reference/modbus)
+[How to connect devices via Modbus, which many supported devices use.](/en/reference/modbus)

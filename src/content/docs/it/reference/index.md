@@ -3,7 +3,7 @@ title: "Riferimenti"
 description: "Raccoglie la documentazione tecnica, dal file di configurazione con le sue impostazioni fino al collegamento Modbus dei dispositivi supportati."
 sidebar:
   order: 1
-translatedFrom: "b0f51e2951f3"
+translatedFrom: "da5496e357a4"
 ---
 
 Di seguito trovi la documentazione tecnica su vari aspetti di evcc.
@@ -14,4 +14,4 @@ Di seguito trovi la documentazione tecnica su vari aspetti di evcc.
 
 ### Modbus
 
-[Documentazione sul protocollo Modbus, usato da vari dispositivi supportati.](/it/reference/modbus)
+[Collegare i dispositivi tramite Modbus, il protocollo usato da molti dispositivi supportati.](/it/reference/modbus)

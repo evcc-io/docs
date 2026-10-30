@@ -3,6 +3,7 @@
 - Address the reader with "du", "din", "dit" and "dine", lowercase, consistent with the evcc UI.
 - Use the imperative for steps the reader performs ("Åbn **Opsætning**") and impersonal phrasing for technical requirements ("Måleren skal levere effekten").
 - Headings use sentence case: only the first word and proper names are capitalised.
+- Highlight blog posts are titled "Højdepunkter: …" (not "Highlights"), lowercase after the colon.
 - Write compounds closed as one word (ladepunkt, hjemmebatteri, solcelleanlæg, elnetsmåler, ladeplan).
 - Use a hyphen after abbreviations and symbols: CO₂-grænse, OCPP-forbindelse, MQTT-broker, evcc-installation.
 - Numbers: decimal comma and thousands period (1,4 kW, 11.200 W), a space between number and unit and before percent (50 %).
