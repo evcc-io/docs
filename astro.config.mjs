@@ -152,7 +152,11 @@ export default defineConfig({
             title: "evcc",
             description:
               "Documentation for evcc, the open-source charge controller for solar surplus and dynamic-tariff EV charging. " +
-              "English pages live under /en, German under /de (append .md to any page URL for markdown). " +
+              "English pages live under /en and are the source for the translations under " +
+              LANGS.filter((l) => l !== "en")
+                .map((l) => `/${l}`)
+                .join(", ") +
+              ". Append .md to any page URL for markdown. " +
               "Supported devices (chargers, meters, vehicles, tariffs) are listed in https://docs.evcc.io/llms-devices.txt.",
             // Bundles and index stay English; other locales keep their .md routes.
             exclude: LANGS.filter((l) => l !== "en").map((l) => `${l}/**`),
