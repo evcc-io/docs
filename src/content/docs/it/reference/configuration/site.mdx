@@ -1,0 +1,252 @@
+---
+title: "site"
+description: "Descrivi il tuo impianto domestico in evcc.yaml, assegna i contatori di rete, dell’impianto fotovoltaico e della batteria domestica e regola il surplus con residualPower."
+sidebar:
+  order: 2
+translatedFrom: "fe6894529e96"
+---
+
+import prioritySoc from "../../../en/reference/configuration/img/prioritysoc.webp";
+import bufferSoc from "../../../en/reference/configuration/img/buffersoc.webp";
+import bufferStartSoc from "../../../en/reference/configuration/img/bufferstartsoc.webp";
+
+Descrive l’impianto domestico con i suoi dispositivi e regola la potenza disponibile.
+
+Per regolare la ricarica con il surplus solare serve un contatore leggibile installato subito dopo il punto di connessione alla rete. Si possono inoltre indicare dispositivi per la potenza solare e per una o più batterie domestiche. Se i dispositivi sono più di uno, le loro potenze vengono sommate automaticamente oppure, nel caso delle batterie domestiche, viene calcolato il livello di carica medio.
+
+**Ad esempio**:
+
+```yaml
+site:
+  title: Home # display name for UI
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv:
+      - mypv1 # first pv meter reference
+      - mypv9 # second pv meter reference
+    battery:
+      - mybat5 # battery meter reference
+    aux:
+      - myaux1 # self-regulating consumer
+    consumer:
+      - myconsumer1 # regular consumer, recorded for consumption statistics
+    ext:
+      - myext1 # for data logging, load management, etc.
+  curtailers:
+    - my_curtailer # curtailment device reference
+  residualPower: 100
+```
+
+---
+
+## Parametri obbligatori
+
+### `title`
+
+La descrizione del punto di ricarica viene mostrata anche nell’interfaccia.
+
+**Ad esempio**:
+
+```yaml
+title: Home
+```
+
+---
+
+### `meters`
+
+Definisce quale contatore configurato (dispositivo di misura) va usato per ciascun tipo di punto di misura. In questo modo la definizione del dispositivo viene collegata logicamente al suo utilizzo. A un contatore inizialmente generico viene così assegnato uno scopo in base alla sua posizione nell’impianto domestico.
+
+:::note
+È necessario configurare almeno un elemento `grid` o almeno un elemento `pv`.
+
+Senza almeno una di queste voci evcc non funziona.
+:::
+
+**Ad esempio**:
+
+```yaml
+site:
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv: mypv1 # pv meter reference
+    battery: mybat2 # battery meter reference
+    aux: myaux1
+```
+
+---
+
+## Parametri facoltativi
+
+### `meters.grid`
+
+Definisce il [`meter`](/it/reference/configuration/meters) (dispositivo di misura) che fornisce le misure del punto di connessione alla rete.
+
+**Valori possibili**: valore di un parametro `name` nella configurazione [`meters`](#meters).
+
+**Ad esempio**:
+
+```yaml
+grid: mygridmeter # grid meter reference
+```
+
+---
+
+### `meters.pv`
+
+Definisce i [`meter`](/it/reference/configuration/meters) (dispositivi di misura) da cui evcc legge le misure della produzione solare.
+Si possono indicare più dispositivi. I dati di potenza vengono sommati automaticamente.
+
+**Valori possibili**: un singolo valore o un elenco di valori di un parametro name nella configurazione [`meters`](#meters). La forma a elenco si può usare anche con valori singoli.
+
+**Ad esempio**:
+
+```yaml
+pv: myonlypv # single pv meter reference
+```
+
+oppure
+
+```yaml
+pv: # (pvs = deprecated)
+  - myoldpv # first pv meter reference
+  - mynewestpv # second pv meter reference
+```
+
+---
+
+### `meters.battery`
+
+Definisce i [`meter`](/it/reference/configuration/meters) (dispositivi di misura) che forniscono i dati di misura di una o più batterie.
+Si possono indicare più dispositivi. I dati di potenza vengono sommati automaticamente e dal livello di carica delle batterie viene calcolata una media.
+
+**Valori possibili**: un singolo valore o un elenco di valori di un parametro `name` nella configurazione [`meters`](#meters). La forma a elenco si può usare anche con valori singoli.
+
+**Ad esempio**:
+
+```yaml
+battery: myonlybat # single battery meter reference
+```
+
+oppure
+
+```yaml
+battery: # (batteries = deprecated)
+  - mysmallbat # first battery meter reference
+  - myhugebat # second battery meter reference
+```
+
+### `meters.aux`
+
+Contatori per dispositivi esterni che eseguono una propria regolazione del surplus ma non sono controllati direttamente da evcc, ad es. una resistenza elettrica a regolazione autonoma. La loro potenza conta come surplus disponibile per la ricarica del veicolo, partendo dal presupposto che il dispositivo riduca il proprio consumo quando evcc destina quella potenza alla ricarica. Più contatori vengono sommati.
+
+**Valori possibili**: un singolo valore o un elenco di valori di un parametro `name` nella configurazione [`meters`](#meters). La forma a elenco si può usare anche con valori singoli.
+
+**Esempio**:
+
+```yaml
+aux: myaux # single aux meter reference
+```
+
+oppure
+
+```yaml
+aux:
+  - myaux1 # first aux meter reference
+  - myaux2 # second aux meter reference
+```
+
+### `meters.consumer`
+
+Contatori per consumatori normali come una lavatrice o una lavastoviglie, registrati solo per le statistiche di consumo. A differenza di `aux`, questa potenza non viene considerata nel surplus disponibile per la ricarica del veicolo.
+
+**Valori possibili**: un singolo valore o un elenco di valori di un parametro `name` nella configurazione [`meters`](#meters). La forma a elenco si può usare anche con valori singoli.
+
+**Esempio**:
+
+```yaml
+consumer: myconsumer # single consumer meter reference
+```
+
+oppure
+
+```yaml
+consumer:
+  - myconsumer1 # first consumer meter reference
+  - myconsumer2 # second consumer meter reference
+```
+
+### `meters.ext`
+
+Contatori che non vengono usati per la regolazione né mostrati nell’interfaccia, ad es. sottoquadri o contatori di rete o solari alternativi. I loro dati vengono solo registrati ed esportati, senza essere considerati nel surplus o nelle statistiche di consumo.
+
+**Valori possibili**: un singolo valore o un elenco di valori di un parametro `name` nella configurazione [`meters`](#meters). La forma a elenco si può usare anche con valori singoli.
+
+**Esempio**:
+
+```yaml
+ext: myext # single ext meter reference
+```
+
+oppure
+
+```yaml
+ext:
+  - myext1 # first ext meter reference
+  - myext2 # second ext meter reference
+```
+
+### `curtailers`
+
+Dispositivi limitatori della configurazione [`curtailers`](/it/reference/configuration/curtailers) che limitano l’immissione in rete su richiesta del gestore di rete (§ 9 EEG).
+Vengono applicati insieme ai contatori `pv` limitabili quando l’integrazione [`hems`](/it/reference/configuration/hems) segnala un limite.
+
+**Valori possibili**: un elenco di valori di un parametro `name` nella configurazione [`curtailers`](/it/reference/configuration/curtailers).
+
+**Esempio**:
+
+```yaml
+curtailers:
+  - my_curtailer # curtailment device reference
+```
+
+### `residualPower`
+
+Imposta il punto di lavoro desiderato della regolazione del surplus al punto di connessione alla rete (contatore di rete). Il valore predefinito è 0 W.
+I valori positivi spostano il punto di lavoro verso l’immissione in rete, quelli negativi verso il prelievo dalla rete.
+In definitiva questo valore definisce lo “stato di riposo” del circuito di regolazione, verso cui il regolatore deve regolare.
+
+Soprattutto in combinazione con altri sistemi di regolazione del surplus indipendenti, come una batteria domestica, questo valore va adattato per ottenere un comportamento del sistema definito, con priorità chiare.
+
+Se in modalità intelligente deve restare o essere consentita una certa quota di prelievo dalla rete, si può configurare un valore negativo pari alla quota massima di prelievo dalla rete.
+
+#### Con `meter` di tipo `grid`
+
+- Valore positivo: potenza di immissione in rete residua
+- Valore negativo: potenza di prelievo dalla rete residua
+
+#### Solo `meter` di tipo `pv`
+
+- Valore positivo: consumo domestico tipico, usato per stimare il surplus solare.
+- Valore negativo: la potenza indicata viene aggiunta alla potenza solare e aumenta la potenza di ricarica disponibile (attenzione: prelievo dalla rete)
+
+:::note
+Con una batteria domestica si consiglia vivamente di inserire qui un valore piccolo, ad es. tra 100 e 300 W, così da permettere la carica della batteria secondo le priorità configurate (vedi `prioritySoc`). Altrimenti la regolazione indipendente della batteria domestica non vede alcun surplus utilizzabile. Allo stesso modo, anche senza batteria, si evita un prelievo temporaneo dalla rete durante rapide variazioni di produzione e carico.
+:::
+
+**Esempio “Batteria domestica”**:
+
+```yaml
+residualPower: 100
+```
+
+**Esempio “Quota di prelievo dalla rete”**:
+
+In modalità intelligente la ricarica deve partire con almeno 6 A (monofase) anche con solo il 50% di surplus solare (il resto dalla rete).
+Potenza di ricarica minima: 1 fase × 6 A × 230 V = 1.380 W, il 50% di questa: 690 W
+
+Vedi anche l’[alternativa con enable/disable per consentire una quota di solare e di prelievo dalla rete](/it/features/solar-charging).
+
+```yaml
+residualPower: -690
+```

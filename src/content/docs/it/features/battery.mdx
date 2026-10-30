@@ -1,0 +1,183 @@
+---
+title: "Batteria domestica"
+description: "Spiega come evcc coordina la ricarica dell’auto e la batteria domestica, dalla priorità sul surplus fino al boost da batteria e al controllo attivo della batteria."
+sidebar:
+  order: 6
+translatedFrom: "1a176518f8c1"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Oggi molti impianti fotovoltaici sono abbinati a una batteria domestica.
+La batteria accumula il surplus solare e la rende di nuovo disponibile quando serve.
+
+evcc offre diverse funzioni per ottimizzare l’interazione tra l’auto elettrica e la batteria domestica.
+Se la batteria o l’inverter ibrido sono configurati, evcc conosce il livello di carica della batteria domestica e può tenerne conto nella regolazione della ricarica dell’auto elettrica.
+
+## Dove va prima l’energia solare? \{#priority\}
+
+Le batterie domestiche reagiscono molto rapidamente al surplus disponibile e assorbono questa energia.
+Nel caso standard, quindi, la batteria domestica verrebbe prima caricata completamente e solo dopo il surplus restante andrebbe all’auto elettrica.
+
+Se hai una batteria domestica più grande, può avere senso iniziare prima la ricarica dell’auto elettrica.
+Puoi configurare questo comportamento nella pagina **Batteria**, che apri dalla barra di navigazione.
+
+<Screenshot
+  name="features/screenshots/battery-navigation"
+  caption="Pagina Batteria nella barra di navigazione"
+/>
+
+La pagina mostra lo stato attuale di ogni batteria e il livello di carica degli ultimi giorni.
+In **Uso della batteria** imposti il livello di carica fino al quale la batteria domestica viene caricata con priorità.
+Al di sopra di questo livello il surplus va ai punti di ricarica.
+
+<Screenshot
+  name="features/screenshots/battery-priority"
+  caption="Priorità tra casa e auto"
+/>
+
+Esempio: imposti il limite al 50%. Questo significa che l’energia solare fluisce prima nella batteria domestica.
+Quando la batteria raggiunge un livello di carica del 50%, i punti di ricarica in modalità intelligente vengono abilitati.
+La potenza di ricarica viene regolata in modo che la batteria domestica mantenga il suo livello di carica.
+Se il surplus supera la potenza di carica massima della batteria, il veicolo viene ricaricato già prima che venga raggiunto il limite.
+Se non è collegato alcun veicolo o il veicolo è completamente carico, il surplus continua ad andare nella batteria.
+
+## Ricarica del veicolo supportata dalla batteria
+
+In modalità intelligente, evcc cerca di regolare la ricarica in modo da usare direttamente solo l’energia solare.
+La scarica della batteria domestica viene evitata.
+Con la funzione **Ricarica del veicolo supportata dalla batteria** puoi rendere esplicitamente disponibile una parte della batteria domestica per la ricarica dell’auto elettrica.
+
+In **Batteria come tampone di carica** imposti il livello al di sopra del quale l’energia accumulata può andare all’auto elettrica.
+
+<Screenshot
+  name="features/screenshots/battery-buffer"
+  caption="Ricarica del veicolo supportata dalla batteria"
+/>
+
+Esempio: rendi disponibile l’intervallo sopra il 75% per la ricarica supportata dalla batteria.
+Durante il giorno la batteria domestica si è già caricata fino al 100%.
+Colleghi l’auto elettrica in modalità intelligente.
+Oltre al surplus disponibile, per ricaricare l’auto elettrica ora viene usato anche il 25% superiore della batteria domestica che hai reso disponibile.
+Se non c’è surplus disponibile e il livello di carica della batteria domestica è sceso al 75%, la ricarica si ferma.
+
+Il supporto della batteria non ha effetto con [Carica sempre](/it/features/modes#always-charge), perché in quel caso la ricarica non va mai in pausa.
+
+Questa funzione è particolarmente utile se hai una batteria domestica la cui capacità copre più del tuo consumo domestico abituale.
+Così puoi ricaricare l’auto ad es. la sera, quando resta poco sole.
+
+Efficienza e perdite di conversione: in generale è consigliabile ricaricare l’auto direttamente con l’energia solare, se possibile.
+La deviazione attraverso la batteria domestica comporta sempre perdite di conversione che, a seconda dell’impianto, possono arrivare al [5-10%](https://solar.htw-berlin.de/studien/stromspeicher-inspektion-2024/).
+
+### Avvio automatico
+
+In modalità intelligente, la ricarica parte solo quando c’è surplus disponibile.
+Se colleghi l’auto quando non c’è surplus disponibile, la ricarica non parte.
+Nemmeno se nella batteria domestica c’è abbastanza energia disponibile.
+
+Puoi modificare questo comportamento con l’opzione “Avvia automaticamente la ricarica solare…”.
+Se ad es. la imposti su “... Quando la % della batteria è maggiore del 90%”, la ricarica parte quando la batteria domestica ha raggiunto questo livello.
+Come nell’esempio precedente, la ricarica termina quando il livello di carica della batteria domestica è sceso al limite impostato (qui 75%).
+
+<Screenshot
+  name="features/screenshots/battery-bufferstart"
+  caption="Avvio automatico"
+/>
+
+## Boost da batteria
+
+Il boost da batteria supporta la modalità **Intelligente** con la potenza della batteria domestica.
+Oltre alla potenza disponibile dall’impianto fotovoltaico viene usata la massima potenza disponibile della batteria domestica.
+Per portare la batteria domestica alla sua massima potenza di uscita è necessario un piccolo prelievo dalla rete.
+
+L’attivazione del boost avviene in due passaggi.
+Prima scegli un limite per il **Boost da batteria** nelle impostazioni del punto di ricarica.
+In questo modo attivi la funzione e stabilisci fino a che punto la batteria domestica può essere scaricata.
+
+<Screenshot
+  name="features/screenshots/battery-boost"
+  caption="Impostare il limite del boost da batteria"
+/>
+
+Accanto alla barra di avanzamento del punto di ricarica compare poi un pulsante boost.
+Fai clic su di esso per avviare il boost per la sessione di ricarica in corso.
+Il riempimento verde del pulsante mostra quanta energia di boost resta prima che la batteria domestica raggiunga il limite.
+Un nuovo clic sul pulsante ferma il boost.
+Il boost termina anche quando l’auto viene scollegata o la modalità viene cambiata.
+
+<Screenshot
+  name="features/screenshots/battery-boost-button"
+  caption="Pulsante boost attivo sul punto di ricarica"
+/>
+
+Esempio:
+Il boost è utile se l’auto sta per lasciare il punto di ricarica e nelle ore successive ci sarà surplus solare.
+Così l’auto parte con più energia possibile e la batteria domestica si ricarica mentre l’auto è via.
+
+Le impostazioni di priorità descritte sopra non valgono per questa sessione di ricarica.
+
+## Più batterie
+
+Naturalmente puoi configurare anche più batterie in evcc.
+Nell’interfaccia utente viene calcolato un livello di carica medio a partire dai rispettivi livelli di carica e dalle capacità delle batterie.
+Questo valore è la base per le funzioni di controllo descritte sopra.
+
+Esempio: hai una batteria domestica da 5 kWh carica al 50%. Inoltre hai una batteria domestica da 10 kWh con un livello di carica dell’80%.
+Ne risulta un valore medio del 70%, perché sono carichi 10,5 kWh (2,5 kWh + 8 kWh) su 15 kWh (5 kWh + 10 kWh).
+
+I singoli livelli di carica sono visibili nella pagina **Batteria**.
+
+## Controllo attivo della batteria \{#battery-control\}
+
+Le funzioni descritte sopra sono compatibili con tutti i sistemi di batterie.
+evcc adatta semplicemente la regolazione della ricarica dell’auto elettrica in base al livello di carica della batteria domestica.
+In alcuni casi, però, questa regolazione non basta ed è necessario controllare direttamente la batteria.
+Molti inverter per batterie o ibridi recenti offrono un’interfaccia a questo scopo.
+
+### Blocco della scarica
+
+Scenario 1: devi andare a un appuntamento all’improvviso e vuoi ricaricare l’auto rapidamente.
+Però non vuoi che la batteria domestica si scarichi completamente per questo.
+
+Scenario 2: hai una tariffa elettrica dinamica e vuoi ricaricare l’auto di notte, perché l’energia allora è particolarmente economica.
+La batteria domestica però cercherà di coprire il fabbisogno di ricarica finché ha ancora energia.
+L’energia notturna economica viene usata solo quando la batteria domestica è vuota.
+
+Se il tuo impianto supporta il controllo attivo della batteria, puoi attivare l’opzione “Prevenire la scarica della batteria domestica in modalità rapida e durante la ricarica programmata” nella pagina **Batteria**.
+In questo modo la batteria domestica viene bloccata mentre il veicolo carica a piena potenza. Questo può avvenire con la modalità veloce, dalla ricarica intelligente dalla rete, dai piani di ricarica o dalla ricarica minima.
+
+Lo stato di blocco vale per la durata della ricarica a piena potenza.
+Durante questo periodo la batteria domestica non viene scaricata.
+
+### Carica dalla rete \{#gridcharge\}
+
+Scenario: hai una tariffa elettrica dinamica e vuoi caricare la batteria domestica di notte con energia economica.
+Ad es. perché il surplus prodotto durante il giorno non basta.
+
+<Screenshot
+  name="features/screenshots/battery-grid-charging"
+  caption="Sezione Carica da rete nella pagina Batteria"
+/>
+
+Come per la ricarica dei veicoli ottimizzata in base alla [CO₂](/it/features/co2) o al [prezzo](/it/features/dynamic-prices), puoi caricare anche la batteria domestica con energia economica.
+Se il tuo inverter supporta questa funzione, nella pagina **Batteria** compare la sezione **Carica da rete**.
+Qui puoi impostare un limite.
+Se il prezzo attuale dell’elettricità scende sotto questo limite, la batteria domestica viene caricata dalla rete e allo stesso tempo bloccata per impedirne la scarica.
+
+:::note[Normativa tedesca § 14a EnWG]
+Mentre è in corso una [riduzione di potenza dovuta a un limite esterno](/it/external-limit), la carica dalla rete viene messa automaticamente in pausa e la scarica della batteria viene bloccata (modalità “hold”).
+Di solito è comunque possibile caricare la batteria con il surplus solare.
+Al termine della riduzione di potenza, la carica dalla rete riprende automaticamente.
+:::
+
+:::caution[Gestione del carico]
+La carica della batteria domestica dalla rete non viene considerata dalla [gestione del carico](/it/features/loadmanagement).
+Se ad es. la batteria domestica preleva 9 kW dalla rete, questo consumo non rientra nei calcoli della gestione del carico.
+Questo non vale per i segnali di riduzione di potenza § 14a: in quel caso la carica dalla rete viene messa automaticamente in pausa, come descritto sopra.
+:::
+
+Facoltativamente puoi impostare un livello di carica massimo fino al quale la batteria viene caricata dalla rete.
+Quando la batteria raggiunge questo valore, la carica dalla rete si ferma automaticamente.
+L’opzione **Carica massima** (`maxsoc`) si trova nella configurazione del dispositivo del tuo sistema di batterie.
+
+In [Solare, batteria domestica, rete, contatori](/it/meters) puoi vedere dal tag **Controllo batteria** se il tuo impianto supporta il controllo della batteria e se `maxsoc` è disponibile.

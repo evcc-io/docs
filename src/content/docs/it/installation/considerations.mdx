@@ -1,0 +1,130 @@
+---
+title: "Considerazioni preliminari"
+description: "Se la ricarica solare è nuova per te, ecco perché evcc ha bisogno di un contatore di rete, su quale hardware gira bene e cosa guardare nella scelta del caricabatterie."
+sidebar:
+  hidden: true
+translatedFrom: "4a0ecdd6f848"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Hai buone competenze tecniche e sai già su quale hardware installare evcc e quale caricabatterie, impianto fotovoltaico ed eventuale batteria integrare?
+Allora salta questa pagina e passa direttamente all’installazione.
+
+Se la ricarica con l’energia solare è una novità per te, qui sotto trovi alcune informazioni su come iniziare con evcc.
+
+## Situazione di partenza
+
+evcc è la soluzione giusta per me per la ricarica con il surplus?
+Ho un impianto fotovoltaico e un’auto elettrica e voglio provarlo.
+Da dove comincio?
+
+Un impianto fotovoltaico è particolarmente conveniente quando consumi anche l’elettricità autoprodotta.
+Per farlo, l’elettricità deve essere consumata esattamente quando viene prodotta, cioè quando splende il sole.
+La soluzione più semplice: metti sempre l’auto in carica quando splende il sole e non si vede nemmeno una nuvola.
+Purtroppo però le nuvole ci sono, oppure l’elettricità dell’impianto fotovoltaico serve per la lavatrice.
+Bisogna quindi automatizzare il controllo della ricarica, ed è proprio quello che fa evcc.
+
+Per l’automazione bisogna conoscere il surplus di elettricità attuale, cioè quanta elettricità non consumi tu stesso e quindi immetti nella rete elettrica.
+Questa informazione arriva dal contatore elettrico.
+Può essere il contatore del gestore del punto di misura (ad es. il tuo fornitore di energia) oppure un contatore aggiuntivo installato insieme all’impianto fotovoltaico.
+Il secondo caso è quello tipico quando l’impianto fotovoltaico è dotato di una batteria domestica.
+
+Il contatore deve essere leggibile elettronicamente.
+Controlla in [Dispositivi > Solare, batteria domestica, rete, contatori](/it/meters) se trovi i tuoi dispositivi.
+Se non ci sono, puoi anche integrarli tu come [dispositivi definiti dall’utente](/it/user-defined-devices).
+
+Un altro requisito per automatizzare la ricarica con il surplus è un caricabatterie controllabile.
+I dispositivi supportati sono elencati in [Dispositivi > Caricabatterie](/it/chargers).
+Se non hai (ancora) un caricabatterie, per fare delle prove è consigliata una presa commutabile con misurazione dei consumi, ad es. una TP-Link Tapo P110, che costa meno di 20 euro.
+In seguito può servire per accendere e spegnere il caricabatterie di monopattini o e-bike.
+Per l’auto elettrica non è una soluzione definitiva perché, da un lato, la potenza di ricarica non può essere regolata, cioè adattata alla produzione attuale dell’impianto fotovoltaico e all’autoconsumo.
+Dall’altro lato non c’è comunicazione con l’auto elettrica, quindi la commutazione avviene sotto pieno carico e a lungo andare la presa commutabile non resiste.
+I caricabatterie invece comunicano con l’auto, così l’auto ha già interrotto la ricarica prima che il caricabatterie si spenga.
+
+## Hardware per l’installazione di evcc
+
+evcc è un software open source sviluppato da volontari.
+Quindi non c’è alcuna garanzia di funzionamento.
+In compenso non paghi alcun prezzo d’acquisto.
+Che un software open source possa funzionare in modo eccellente lo dimostra ad es. Linux, sviluppato secondo questo modello da molti anni.
+Questo però richiede una community attiva.
+La community, ad es., risponde alle [domande dei principianti](https://github.com/evcc-io/evcc/discussions/categories/erste-hilfe) o porta avanti lo sviluppo del software.
+Se non puoi contribuire in questo modo, puoi sostenere il progetto con una [sponsorizzazione](/it/sponsorship).
+Per alcuni caricabatterie commerciali la sponsorizzazione è necessaria.
+
+Se all’inizio vuoi solo provare evcc, non devi comprare un Raspberry Pi, ma puoi iniziare con un vecchio PC o portatile dismesso.
+Dovrebbero andare bene tutti i dispositivi degli ultimi 10 anni con una CPU a 64 bit compatibile Intel e una scheda di rete (o Wi-Fi).
+A lungo termine, il consumo di corrente più alto e l’ingombro maggiore sono un punto a sfavore di PC e portatili.
+Inoltre con i portatili possono esserci problemi dovuti alla modalità di risparmio energetico.
+Un’alternativa all’installazione su un Raspberry Pi sono i dispositivi già presenti nella rete domestica.
+Può trattarsi, ad es., di un archivio di rete (NAS) o di un sistema esistente come Home Assistant.
+In questo caso l’installazione è più impegnativa, perché evcc deve girare in una macchina virtuale o come container.
+
+Per garantire un’elevata stabilità consigliamo di collegare con un cavo di rete, dove possibile, sia evcc sia i dispositivi utilizzati (caricabatterie, impianto fotovoltaico, batteria ecc.).
+Contatori, impianti fotovoltaici, batterie domestiche e caricabatterie vengono raggiunti tramite il loro indirizzo IP.
+Durante la [configurazione](/it/installation/configuration) ti vengono proposti i dispositivi trovati nella tua rete, quindi di solito non devi cercare gli indirizzi.
+Se un dispositivo non viene trovato, il suo indirizzo IP di solito è indicato nell’interfaccia web del router DSL o via cavo (ad es. Fritz!Box).
+È utile assegnare questi indirizzi in modo fisso nel router, così non cambiano nel tempo.
+
+## Caricabatterie per veicoli elettrici
+
+I caricabatterie esistono in diverse varianti.
+Di seguito sono descritte le caratteristiche e le funzioni tipiche dei caricabatterie.
+Così dovrebbe essere un po’ più facile scegliere il caricabatterie giusto.
+
+### Potenza di ricarica
+
+Una prima decisione riguarda la potenza di ricarica massima del caricabatterie.
+I più diffusi sono soprattutto i caricabatterie da 11 kW e da 22 kW.
+La variante da 11 kW è probabilmente la più scelta.
+I motivi principali sono due: da un lato molti veicoli possono ricaricare al massimo a 11 kW in AC, dall’altro i caricabatterie da 11 kW possono essere messi in funzione con una semplice registrazione (comunicazione) presso il gestore di rete.
+I caricabatterie da 22 kW richiedono l’autorizzazione del gestore di rete.
+Questa può essere concessa solo a determinate condizioni.
+Il gestore di rete può ad es. richiedere che la ricarica possa essere interrotta tramite un segnale di controllo in caso di carenza di energia.
+Questo può far aumentare i costi di installazione.
+Se con un caricabatterie da 22 kW l’allacciamento della casa supera una potenza di 30 kW, il gestore di rete può addebitare un contributo per il potenziamento della rete per la potenza oltre i 30 kW.
+La potenza di ricarica massima o la corrente massima si possono impostare nel caricabatterie tramite selettori o DIP switch.
+L’installatore deve impostarle correttamente in base alla potenza massima autorizzata dal gestore di rete e all’impianto (interruttore automatico, protezione differenziale, sezione dei cavi, lunghezza dei cavi ecc.).
+Gli errori in questo ambito possono portare rapidamente a guasti o incendi.
+In caso di danno, l’assicurazione chiederà il verbale di installazione o la fattura dell’installatore autorizzato dal gestore di rete.
+
+### Interfaccia di comunicazione
+
+evcc ha bisogno di un modo per comunicare con il caricabatterie.
+Quasi tutti i caricabatterie moderni ne dispongono.
+In [Dispositivi > Caricabatterie](/it/chargers) trovi un elenco dei caricabatterie attualmente supportati.
+Le interfacce fisiche possono essere Ethernet, Wi-Fi, LTE o seriale tramite bus RS485 (ad es. interfaccia Modbus RTU).
+Spesso sono presenti più interfacce contemporaneamente.
+Per controllare la ricarica serve un protocollo adatto tra il caricabatterie ed evcc.
+Uno standard aperto ormai affermato in tutto il mondo è [OCPP (Open Charge Point Protocol)](https://en.wikipedia.org/wiki/OCPP).
+
+Oltre alla comunicazione tra caricabatterie ed evcc è rilevante la comunicazione del caricabatterie con il veicolo.
+Nel caso più semplice il caricabatterie può solo segnalare la corrente di ricarica tra 6 A e 32 A.
+A seconda che il caricabatterie sia collegato alla rete elettrica in monofase o in trifase, il veicolo ricarica quindi con almeno 1,38 kW o 4,14 kW.
+In [Funzionalità > Ricarica con surplus solare](/it/features/solar-charging) trovi maggiori informazioni.
+Per poter ricaricare sia con piccoli surplus solari sia con surplus più grandi è consigliata la commutazione automatica 1p/3p.
+I caricabatterie che supportano questa funzione sono indicati di conseguenza nell’[elenco](/it/chargers).
+Se il caricabatterie non supporta la commutazione automatica, nei mesi invernali si potrebbero eventualmente disattivare a mano le fasi 2 e 3 con un sezionatore installato a monte (ad es. Hager HAB304).
+
+Con la comunicazione minima descritta sopra tra caricabatterie e veicolo, il caricabatterie non può identificare il veicolo collegato né leggere il livello di carica attuale.
+Per ottenere queste informazioni, evcc passa dalle interfacce (API) del produttore del veicolo.
+Le informazioni messe a disposizione variano e possono comprendere ad es. la climatizzazione o la posizione del veicolo.
+A volte il produttore fa pagare l’uso di queste API.
+
+Alcuni caricabatterie implementano già il protocollo relativamente nuovo [ISO 15118](https://en.wikipedia.org/wiki/ISO_15118) (sono necessarie estensioni hardware e software), usato per _Plug & Charge_ e _Autocharge_ nelle stazioni di ricarica rapida pubbliche.
+In questo modo è possibile, ad es., determinare l’identità del veicolo collegato e il livello di carica e impostare la potenza di ricarica per ogni singola fase.
+Il presupposto è che anche il veicolo supporti correttamente la rispettiva funzione.
+Non c’è da aspettarsi che i veicoli più vecchi vengano ancora aggiornati con il supporto per ISO 15118.
+Lo stesso vale per i caricabatterie.
+Se l’hardware per la comunicazione secondo ISO 15118 non è installato, non c’è speranza.
+
+### Auto aziendali e uso commerciale
+
+Un contatore certificato è interessante soprattutto per chi guida un’auto aziendale e per i privati che vogliono documentare al fisco le spese di trasferta.
+Per questo alcuni produttori offrono il loro caricabatterie anche in una variante con contatore elettrico certificato.
+Così puoi documentare l’energia caricata in ogni sessione di ricarica.
+Il contatore è interessante anche al di là del fisco, perché permette di determinare con precisione le perdite di ricarica.
+I caricabatterie spesso lavorano in modo più efficiente alla potenza di ricarica massima.
+Con correnti di ricarica basse, invece, si verificano spesso perdite di ricarica maggiori.
+Mentre nella pura ricarica con il surplus questo ha un ruolo secondario, nella ricarica con energia di rete è un fattore di costo rilevante.

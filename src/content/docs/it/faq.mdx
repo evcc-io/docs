@@ -1,0 +1,437 @@
+---
+title: "Domande frequenti"
+description: "Qui trovi le risposte alle domande più frequenti su configurazione, ricerca degli errori, ricariche inattese, reimpostazione della password e previsione solare."
+toc_max_heading_level: 2
+sidebar:
+  order: 8
+translatedFrom: "f3967fa3eceb"
+---
+
+## Configurazione \{#configuration\}
+
+### Conviene configurare evcc tramite l’interfaccia web o con il file di configurazione?
+
+Ti consigliamo di usare l’**interfaccia web**.
+Dopo aver installato evcc, aprila nel browser e configura i tuoi dispositivi direttamente lì.
+Le impostazioni vengono salvate automaticamente nel database.
+
+Il **file di configurazione** (`evcc.yaml`) è il metodo tradizionale e continua a essere supportato.
+
+**Importante**: alcune funzioni più recenti sono disponibili solo tramite l’interfaccia web.
+I due metodi si possono anche usare in parallelo.
+
+Trovi maggiori informazioni in [Configurazione](/it/installation/configuration).
+
+### Ho una configurazione in evcc.yaml. Come passo all’interfaccia web? \{#ui-migration\}
+
+Puoi usare entrambi i metodi di configurazione in parallelo e migrare un passo alla volta.
+
+**Procedura:**
+
+1. Configura un nuovo dispositivo direttamente tramite l’interfaccia web in **Configurazione**.
+2. Rimuovi la voce corrispondente dal tuo `evcc.yaml`.
+3. Ripeti l’operazione per tutti i dispositivi finché il tuo `evcc.yaml` non è vuoto.
+
+**Unione dei dispositivi:**
+
+Punti di ricarica, contatori di rete, impianti fotovoltaici, batterie, veicoli e altri contatori vengono letti da entrambe le fonti e uniti.
+Nella pagina di configurazione i dispositivi da `evcc.yaml` sono visibili ma non modificabili.
+Puoi usare contemporaneamente i dispositivi da `evcc.yaml` e quelli dell’interfaccia.
+
+**La configurazione nell’interfaccia ha la precedenza:**
+
+Per le altre impostazioni (MQTT, notifiche, InfluxDB, tariffe, ...) i valori dell’interfaccia web hanno la precedenza su quelli di `evcc.yaml`.
+Ti consigliamo di usare una sola fonte per evitare confusione.
+
+**Nota:** in alcuni punti (limite esterno, token sponsor) la configurazione nell’interfaccia è bloccata se è già stata fatta tramite `evcc.yaml`.
+Elimina la voce da `evcc.yaml` per poterla modificare nell’interfaccia.
+
+**Conclusione:**
+
+Una migrazione completa non è obbligatoria.
+Puoi continuare a usare `evcc.yaml` per alcune configurazioni e aggiungere le nuove funzioni tramite l’interfaccia web.
+
+:::note[Non esiste una migrazione automatica.]
+Il comando `evcc migrate` disponibile in precedenza è stato rimosso a causa della sua elevata complessità.
+Esegui la migrazione manualmente.
+:::
+
+### Posso usare evcc senza un contatore di rete?
+
+Il contatore di rete è il cuore di evcc e, se possibile, andrebbe incluso.
+Tuttavia è anche possibile gestire la ricarica basandosi esclusivamente sulla potenza solare.
+
+Tieni presente però che non potrai ricaricare solo con il surplus solare, perché i calcoli necessari sono possibili solo quando è nota la potenza di rete.
+Con questa configurazione evcc ricarica il veicolo con la potenza che arriva in quel momento dalla produzione solare.
+
+Per lasciare un po’ di energia alla casa, puoi indicare il consumo tipico di un’abitazione media con il parametro di configurazione
+[`residualPower`](/it/reference/configuration/site#residualpower).
+
+**Esempio**:
+
+```yaml
+site:
+  residualPower: 250 # 250W house consumption
+```
+
+### Non ho pannelli solari, posso comunque usare evcc in modo utile?
+
+Probabilmente sì! evcc offre molti utilizzi oltre al semplice sfruttamento del fotovoltaico. **Tieni presente che tutti questi casi d’uso richiedono un contatore di rete.**
+
+Ecco qualche idea:
+
+- Ricaricare automaticamente un veicolo in base al prezzo attuale dell’energia con una tariffa dinamica (come Octopus Energy, Nachtstrom, Tibber, Awatter, ecc.), vedi [Tariffe dinamiche](/it/features/dynamic-prices)
+- Avviare e fermare il caricabatterie da remoto, particolarmente utile per i caricabatterie che non hanno altre interfacce di controllo remoto
+- Limitare la ricarica del veicolo a un certo livello di carica (in questo caso il veicolo deve essere configurato)
+
+### Posso provare evcc senza tutti i componenti (impianto fotovoltaico, caricabatterie, ...)?
+
+Certo! Abbiamo una serie di componenti _demo_ che possono aiutarti a colmare le lacune.
+
+[Contatore](https://docs.evcc.io/en/docs/meters#demo-meter)
+
+[Caricabatterie](https://docs.evcc.io/en/docs/chargers#demo-charger)
+
+### Posso usare evcc senza integrare l’inverter fotovoltaico?
+
+Sì! Se c’è un contatore di rete e un caricabatterie controllabile, puoi usare tutte le funzioni essenziali di evcc, compresa la ricarica con il surplus solare.
+Tieni presente che ti mancheranno alcune visualizzazioni e statistiche, tra cui il calcolo della quota di ricarica solare.
+
+Considera che, se installi un contatore aggiuntivo (ad es. uno Shelly EM) sul cavo di uscita del tuo inverter, ottieni tutte le funzioni che avresti
+se potessi comunicare direttamente con l’inverter.
+
+### Posso usare più caricabatterie?
+
+Sì! Puoi aggiungere più caricabatterie ed evcc li controlla contemporaneamente.
+
+Tuttavia, al momento la gestione del carico su più caricabatterie non è supportata.
+È in fase di sviluppo per una versione futura.
+
+### evcc può impedire che più batterie domestiche si scarichino a vicenda?
+
+Quando controlla i punti di ricarica e gli altri consumatori, evcc tiene conto del livello di carica delle batterie domestiche configurate.
+Se un sistema di batterie supporta il [controllo attivo della batteria](/it/features/battery#battery-control), evcc può richiedere determinate modalità, ad es. impedire la scarica o caricare la batteria.
+Tuttavia evcc non coordina direttamente la potenza di carica e scarica delle singole batterie.
+Per questo, in generale, evcc non può impedire che più batterie domestiche si scarichino a vicenda.
+Le possibilità di controllo disponibili dipendono dal sistema di batterie.
+
+### evcc controlla la carica e la scarica della mia batteria domestica?
+
+Nel funzionamento normale è il sistema di batterie stesso a decidere quando e con quale potenza caricare o scaricare.
+evcc tiene conto di valori come il livello di carica e la potenza quando controlla i punti di ricarica, ma non regola continuamente la potenza di carica della batteria domestica.
+Se un sistema supporta il [controllo attivo della batteria](/it/features/battery#battery-control), evcc può richiedere singole funzioni, ad es. impedire la scarica durante la ricarica di un veicolo o caricare la batteria dalla rete.
+I comandi disponibili dipendono dal sistema di batterie; uno stato come “controllabile” non significa necessariamente che evcc possa controllare completamente la batteria o impostarne la potenza a un valore qualsiasi.
+
+### Il mio caricabatterie non supporta la commutazione delle fasi. Posso comunque ricaricare in monofase?
+
+Con impianti fotovoltaici piccoli e/o in inverno ha senso usare una sola fase per sfruttare il surplus nel modo più efficiente possibile, senza cedere energia alla rete.
+
+Nel caso di caricabatterie trifase che non supportano la commutazione automatica, puoi scollegare le fasi 2 e 3 sull’alimentazione del tuo punto di ricarica con un contattore (ad es. Hager HAB304). Se ti serve la piena potenza, basta riattivare queste fasi.
+
+:::danger[Pericolo]
+Questa commutazione manuale va fatta solo quando il veicolo **NON** è collegato al caricabatterie.
+:::
+
+In inverno puoi anche usare semplicemente un cavo di ricarica monofase.
+
+Ricordati di impostare il caricabatterie in modalità monofase nell’interfaccia di evcc.
+In questo modo evcc sa quando c’è abbastanza surplus per ricaricare il veicolo.
+
+## Risoluzione dei problemi
+
+### Qualcosa non funziona. E adesso?
+
+Controlla prima il [forum della community](https://github.com/evcc-io/evcc/discussions) per vedere se il tuo problema è già stato discusso.
+Sviluppatori e utenti sono pronti ad aiutare a risolvere i problemi più comuni.
+
+Il modo più semplice per ricevere aiuto è **Altro → Segnala un problema** nell’interfaccia web.
+La funzione raccoglie configurazione e log e prepara una segnalazione precompilata su GitHub.
+
+[Segnala un problema](/it/report-a-problem) spiega dove va segnalato il tuo problema e cosa contiene una buona segnalazione.
+
+### Trovare errori di sintassi in evcc.yaml
+
+YAML è molto sensibile alla sintassi e gli errori non sempre saltano subito all’occhio.
+
+Validatori come [onlineyamltools.com](https://onlineyamltools.com/validate-yaml) possono essere molto utili e vale la pena usarli per trovare gli errori più semplici.
+
+### Come creo un file di log per l’analisi degli errori?
+
+Il modo più semplice è la pagina dei log in **Altro → Logs**.
+Lì puoi filtrare per livello e area e scaricare il log come file.
+Vedi [Log](/it/report-a-problem#logs) per sapere cosa deve mostrare il log.
+
+Per periodi più lunghi o se l’interfaccia web non è raggiungibile, usa i [log a lungo termine](/it/report-a-problem#system-logs) della tua installazione.
+
+### Altre considerazioni sul rilevamento dei dispositivi
+
+`evcc detect` è un comando speciale che cerca di trovare hardware compatibile nella tua rete.
+In particolare, a volte può aiutare a trovare dispositivi Modbus “nuovi” compatibili con SunSpec; si tratta però soprattutto di uno strumento diagnostico per sviluppatori e supporto, che non può fornire risultati dettagliati.
+
+## Errori comuni
+
+### Errore: Charger out of sync: expected disabled, got enabled<br/>Charger logic error: disabled but charging
+
+evcc si aspetta che i caricabatterie siano passati al nuovo stato prima del ciclo di controllo successivo (dopo l’`interval` configurato).
+
+Alcuni dispositivi a volte reagiscono ai comandi un po’ lentamente; in questo caso la mancata sincronizzazione dello stato viene segnalata con questi messaggi di errore.
+
+Se non riscontri altri problemi, puoi ignorarli senza rischi, oppure puoi provare ad aumentare l’[`interval`](/it/reference/configuration/interval).
+
+### connection refused
+
+Significa che il dispositivo è stato raggiunto all’indirizzo IP o all’hostname indicato, ma ha rifiutato la connessione.
+
+Le cause possibili sono diverse. Queste sono le più frequenti:
+
+- Verifica che la porta di destinazione sia impostata correttamente nel tuo `evcc.yaml`.
+- Verifica che il dispositivo di destinazione abbia l’accesso esterno abilitato (ad es. gli inverter SolarEdge escono di fabbrica con Modbus disattivato).
+- Il dispositivo potrebbe aver raggiunto il numero massimo di connessioni simultanee. Potrebbe essere necessario chiudere altre connessioni (ad es. da altri sistemi di domotica o da altre istanze di evcc) per collegare evcc. Conosciamo alcuni dispositivi che accettano una sola connessione alla volta.
+- Verifica che non ci sia un firewall tra te e il dispositivo di destinazione e, se c’è, che sia configurato in modo da lasciar passare il traffico.
+
+### i/o timeout
+
+Significa che il sistema di destinazione non ha risposto abbastanza in fretta alla richiesta di evcc.
+
+Di solito le cause sono:
+
+- Una connessione di rete lenta o di scarsa qualità (soprattutto con reti wireless o di tipo Homeplug)
+- Cablaggio o terminazione errati o di scarsa qualità (soprattutto con RS485)
+- Il dispositivo di destinazione potrebbe essere sovraccarico
+- Alcune funzioni che evcc richiede al dispositivo potrebbero non essere disponibili (a volte a causa di un firmware obsoleto o di una configurazione errata sul dispositivo)
+- Il timeout di evcc o l’`interval` di interrogazione sono impostati su valori troppo bassi
+
+### /tmp/evcc: operation not permitted<br/>bind: address already in use
+
+Questo errore si verifica se evcc è già in esecuzione (ad es. come servizio) e provi ad avviarlo di nuovo. **Deve essere in esecuzione una sola istanza di evcc alla volta.**
+
+Puoi usare un programma come `htop` per capire se un’altra istanza di evcc è in esecuzione in background.
+
+Se devi avviare evcc dal terminale, assicurati di fermare prima il servizio (ad es. con `systemctl stop evcc`).
+
+### L’interfaccia di evcc non è raggiungibile
+
+Controlla il log per trovare la causa dell’errore.
+In [Installazione](/it/installation) trovi, per ciascun metodo di installazione, come accedere al log.
+
+### Il plugin MQTT mostra l’avviso `outdated`
+
+Con il [plugin MQTT](/it/reference/plugins#mqtt) puoi stabilire con il parametro `timeout` per quanto tempo un valore ricevuto via MQTT resta valido.
+Se entro questo tempo non arriva un nuovo valore, evcc considera il valore `outdated`.
+È importante indicare un’unità, ad es. `timeout: 30s`.
+
+## Ricarica
+
+### Il veicolo inizia a caricare appena viene collegato, anche se non c’è surplus
+
+Alcuni caricabatterie iniziano a caricare appena l’auto viene collegata o quando viene presentata una tessera RFID. evcc non sempre può influire su questo comportamento, ma lo riconosce e interrompe la ricarica dopo poco tempo.
+
+### Produzione solare in inverno
+
+Nei mesi invernali la produzione solare è spesso inferiore al minimo configurato.
+Per portare nel veicolo quanta più energia possibile, puoi provare alcuni dei seguenti consigli e trucchi:
+
+#### Usare `residualpower`
+
+Nella configurazione, sotto il parametro [`site`](/it/reference/configuration/site), imposta [`residualPower`](/it/reference/configuration/site#residualpower) su un valore **negativo**. Questo valore determina quanta potenza può fornire la rete per integrare la produzione solare fino a coprire il minimo. È possibile modificarlo tramite l’API.
+
+**Esempio**:
+
+```yaml
+site:
+  residualPower: -1000 # 1000W grid cover in smart mode
+```
+
+Lo svantaggio di questa soluzione è che la potenza di rete viene usata anche quando il surplus è sufficiente.
+
+#### Con il cursore della quota solare
+
+Nelle impostazioni del punto di ricarica abbassa il cursore **Quota solare**, in modo che solo una parte della potenza di ricarica minima debba provenire dal solare.
+Per i dettagli vedi [Surplus insufficiente?](/it/features/solar-charging#not-enough-surplus).
+
+### PSA (Peugeot / Citroën / Vauxhall / Opel): il livello di carica si aggiorna solo quando uso l’app
+
+Purtroppo si tratta di una limitazione del servizio online del produttore: PSA fornisce valori non aggiornati finché non vengono rinnovati aprendo l’app mobile.
+
+Purtroppo,
+
+## Password
+
+### Ho dimenticato la password. Come posso reimpostarla? \{#password-reset\}
+
+La password è salvata in forma cifrata, quindi non può essere letta.
+Puoi impostare una nuova password dalla riga di comando.
+Assicurati di fermare evcc prima di cambiare la password.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password set --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+In alternativa puoi reimpostare la password.
+Al prossimo accesso all’interfaccia di evcc ti verrà chiesto di impostare una nuova password.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password reset --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+### Come posso fare il backup e il ripristino della mia configurazione?
+
+Nell’interfaccia web di evcc vai su **Configurazione** → **Backup e ripristino**.
+
+**Backup:**
+Scarica una copia del tuo database (evcc.db).
+Contiene tutti i dispositivi configurati, i servizi, i piani, le sessioni di ricarica, ecc.
+
+**Ripristina:**
+Ripristina un database scaricato in precedenza.
+Prima della sovrascrittura viene creato automaticamente un backup locale (`evcc.db.bak`).
+
+:::caution[Attenzione]
+Tutte le azioni sono protette da password.
+Il ripristino sovrascrive completamente i dati attuali.
+:::
+
+**Reimposta:**
+Puoi eliminare singole aree del tuo database:
+
+- **Sessioni di ricarica:** elimina lo storico delle sessioni di ricarica.
+- **Configurazione e impostazioni:** elimina tutti i dispositivi configurati, i servizi, i piani, le cache, ecc.
+
+:::caution[Attenzione]
+Dopo aver reimpostato la configurazione dovrai configurare di nuovo tutti i dispositivi.
+Il tuo `evcc.yaml` (se presente) resta invariato.
+:::
+
+In alternativa puoi eliminare singole cache dalla riga di comando:
+
+```bash
+evcc cache get
+
+# Clear all caches
+evcc cache clear
+```
+
+## Previsione solare
+
+In evcc puoi usare diverse [previsioni solari](/it/tariffs#pv-forecast) per vedere la produzione residua stimata per la giornata in corso e per i giorni successivi.
+Come funzione sperimentale abbiamo integrato anche la possibilità di adattare le previsioni alla tua produzione effettiva.
+
+### Adattamento della previsione
+
+Oltre alla previsione, evcc registra anche la potenza solare attuale e la accumula nel tempo.
+Lo stesso avviene per i dati di previsione.
+Confrontando i due valori nel tempo, evcc può adattare le previsioni ai tuoi valori di produzione effettivi.
+Puoi attivare e disattivare questo adattamento nella finestra di dialogo delle previsioni nell’interfaccia.
+
+### Reimpostare i dati di adattamento
+
+Se i valori di adattamento non sono corretti, puoi reimpostarli.
+
+Procedura:
+
+1. Ferma evcc
+2. Esegui i seguenti comandi dalla riga di comando
+   ```bash
+   # Reset adjustment history. Confirm with `y`.
+   evcc settings set solarAccForecast 0
+   evcc settings set solarAccYield "{}"
+   ```
+3. Avvia di nuovo evcc
+
+Ora evcc ricomincia ad accumulare le previsioni da zero.
+
+## Dati statistici \{#statistical-data\}
+
+### Telemetria e dati della community \{#telemetry\}
+
+Il [sito web di evcc](https://evcc.io/#live) (e la finestra di dialogo “Riepilogo energia caricata” nell’interfaccia di evcc) mostra dati di ricarica live aggregati dalle installazioni di evcc. Raccogliamo questi dati sul nostro server centrale _api.evcc.io_; la partecipazione è del tutto volontaria.
+
+#### Come posso partecipare?
+
+Basta attivare l’interruttore nella finestra di dialogo “Riepilogo energia caricata” nell’interfaccia di evcc.
+
+**Per contribuire ai dati della community serve attualmente un 💚 token sponsor**. Questo aiuta a mantenere alta la qualità dei dati e a tenere fuori dati scadenti o falsi.
+
+#### Quali dati vengono raccolti attualmente?
+
+Al momento raccogliamo i seguenti dati:
+
+- potenza di ricarica attuale
+- quota attuale della potenza di ricarica fornita dal solare
+- energia caricata totale
+- quota totale dell’energia fornita dal solare
+
+In futuro potremmo raccogliere altri dati, ma non si tratterà **mai** di dati personali o informazioni private (come la posizione). La tua privacy è davvero importante per noi!
+
+#### Cosa succede ai dati?
+
+Salviamo la quantità di energia aggregata per ogni istanza di evcc. **Non creiamo profili utente nel tempo** e non abbiamo alcun interesse a farlo in futuro.
+
+Il nostro obiettivo è invogliare più persone a usare evcc, capire meglio come gli utenti usano evcc e, soprattutto, mostrare il potenziale dell’energia solare rinnovabile usata con evcc.
+
+Chiunque può consultare i dati mostrati tramite la nostra [API](https://api.evcc.io/v1/total). Se hai un’idea fantastica per una visualizzazione creativa, costruisci qualcosa e faccelo sapere!
+
+Trovi maggiori informazioni su come usiamo i dati nella nostra [informativa sulla privacy](https://sponsor.evcc.io/privacy) (DE).
+
+### Calcolo del risparmio
+
+In basso a destra nell’interfaccia di evcc trovi la percentuale dell’energia usata per ricaricare i tuoi veicoli che proviene dal solare (ad es. _85% energia solare_).
+
+Se ci clicchi sopra, si apre una finestra di dialogo con maggiori dettagli, tra cui il risparmio totale calcolato rispetto alla rete.
+
+Per avere cifre precise, assicurati che il tuo `evcc.yaml` contenga la configurazione `tariffs` appropriata.
+
+**Esempio**:
+
+```yaml
+tariffs:
+  currency: EUR # (default EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [currency]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [currency]/kWh
+```
+
+Trovi maggiori dettagli, anche su come usare le tariffe dinamiche (come quelle di Octopus Energy), in [Configurazione → Tariffe](/it/tariffs).
+
+_Tieni presente che queste statistiche sono approssimative e non vanno considerate perfettamente precise._
+
+Per calcolare il risparmio, evcc usa la quantità totale di energia caricata e le fonti di energia usate durante la ricarica (rete, batteria domestica, solare).
+
+**Cos’è l’energia solare?**
+
+L’energia solare è l’energia proveniente direttamente dall’impianto fotovoltaico e l’energia fornita da un’eventuale batteria domestica.
+evcc presuppone che la batteria domestica serva principalmente ad accumulare il surplus solare autoprodotto.
+Se la batteria domestica si scarica anche per alimentare altri carichi o si carica dalla rete, questa ipotesi non è sempre corretta.
+Inoltre non vengono considerate le perdite della batteria dovute a conversione e raddrizzamento.
+
+**Calcolo del risparmio / prezzo effettivo**
+
+L’algoritmo distingue tra prelievo dalla rete ed energia solare autoprodotta (solare e batteria domestica).
+
+Il vantaggio economico della tua energia solare si calcola dalla differenza tra il prezzo di prelievo dalla rete (ad es. 30 ct/kWh) e la tariffa di immissione (ad es. 8 ct/kWh).
+In questo esempio ogni unità di energia prodotta costa 22 ct (30 ct − 8 ct) in meno rispetto al prezzo di prelievo dalla rete.
+Se hai ricaricato un veicolo con 2 kWh di energia tua, questo corrisponde a un risparmio effettivo di 44 ct.
+
+Se hai ricaricato al 100% con la tua energia solare, il _prezzo effettivo dell’energia_ mostrato corrisponde al costo della mancata immissione in rete, cioè alla tariffa di immissione (9 ct/kWh).
+Se ricarichi con il 50% di energia solare e il 50% di energia di rete, il _prezzo effettivo dell’energia_ si adatta di conseguenza (ad es. 19 ct/kWh).
+
+Se non ricevi alcuna remunerazione per l’energia immessa in rete, puoi impostare la tariffa di immissione a 0; l’energia solare viene quindi considerata gratuita.
+
+**Calcolo della quota solare**
+
+Se prelevi energia da più fonti contemporaneamente (ad es. 50% solare, 50% rete), la tua energia viene assegnata prima alla casa.
+Per casa si intendono tutti i consumatori non controllati da evcc.
+La quota restante viene poi suddivisa tra le sessioni di ricarica.
+Esempio: il tuo impianto fotovoltaico produce 3 kW. Questi 3 kW vengono consumati interamente dalla casa (ad es. dalla lavatrice).
+Contemporaneamente ricarichi l’auto con 3 kW (ad es. in modalità **Veloce**).
+In questo caso la casa viene calcolata con una quota solare del 100%, l’auto con lo 0%.
+
+Le tariffe dinamiche (Octopus Energy, Awattar, Tibber, ecc.) vengono considerate per determinare il prezzo effettivo dell’energia.

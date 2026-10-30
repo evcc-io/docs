@@ -1,0 +1,186 @@
+---
+title: "Gestione del carico"
+description: "La gestione del carico raggruppa i punti di ricarica in circuiti con corrente o potenza massima, così che più caricabatterie non sovraccarichino mai l’impianto elettrico."
+sidebar:
+  order: 12
+translatedFrom: "6421abf2b4a4"
+---
+
+:::caution[Sperimentale]
+La funzione di gestione del carico è ancora sperimentale. In combinazione con alcune altre funzioni potrebbe non comportarsi come previsto.
+:::
+
+La funzione di gestione e bilanciamento del carico serve a limitare la potenza usata dai caricabatterie, per evitare di sovraccaricare i circuiti e far scattare gli interruttori.
+Limitare la potenza può essere utile anche per evitare picchi di consumo indesiderati.
+Per farlo, un punto di ricarica può essere assegnato a un `circuit`.
+Un `circuit` può avere un valore di corrente massima (`maxCurrent`) e/o un valore di potenza massima (`maxPower`).
+Il sistema funziona in modo gerarchico, cioè un circuito può far parte di un circuito di livello superiore.
+
+:::note[Configurazione tramite UI]
+Questa pagina descrive la configurazione tramite il file `evcc.yaml`.
+La configurazione è possibile anche tramite la UI.
+
+I circuiti si definiscono in **Configurazione → Gestione del carico**.
+L’inserimento avviene in formato YAML e corrisponde al contenuto sotto `circuits:` negli esempi seguenti.
+Stiamo lavorando per sostituirlo con un inserimento tramite moduli.
+
+Ogni punto di ricarica può poi essere assegnato a un circuito (è necessario un riavvio) in **Configurazione → Ricarica e riscaldamento → [nome]**.
+:::
+
+## Configurazione
+
+La sezione `circuits` definisce i circuiti.
+Ogni punto di ricarica può poi essere assegnato a un circuito.
+
+### Esempio: circuito principale
+
+```yaml
+circuits:
+  - name: main # if there is only one circuit defined the name needs to be 'main'
+    title: "main circuit" # name for the UI (not implemented in UI yet)
+    maxCurrent: 63 # 63A (optional)
+    maxPower: 30000 # 30kW (optional)
+    meter: grid # optional
+
+loadpoints:
+  - title: Garage
+    circuit: main
+```
+
+Questa configurazione definisce solo un circuito principale.
+Il circuito ha una corrente massima di 63 A.
+Se altri consumatori, come un forno o una pompa di calore, usano in totale 50 A (misurati da un contatore), il caricabatterie potrà usare solo 13 A.
+Il circuito ha un limite di 30 kW.
+Poiché il contatore di rete è assegnato a questo circuito, la potenza dei punti di ricarica viene ridotta in modo che i limiti non vengano superati al punto di connessione alla rete.
+Senza il contatore di rete assegnato, i limiti si applicano direttamente alla somma di tutti i punti di ricarica.
+
+### Esempio: circuiti annidati
+
+```yaml
+circuits:
+  - name: main
+    title: "main circuit"
+    maxCurrent: 48
+  - name: garage
+    title: Garage
+    maxCurrent: 32
+    parent: main
+  - name: carport
+    title: Carport
+    maxCurrent: 32
+    parent: main
+
+loadpoints:
+  - title: Garage A
+    circuit: garage
+  - title: Garage B
+    circuit: garage
+  - title: Garage C
+    circuit: garage
+  - title: Carport A
+    circuit: carport
+  - title: Carport B
+    circuit: carport
+  - title: Heat Pump
+    circuit: main
+```
+
+Qui ci sono due circuiti, `garage` e `carport`, entrambi figli del circuito principale, cioè a valle di esso (`parent: main`).
+Il circuito `main` ha una corrente massima di 48 A.
+I circuiti `garage` e `carport` hanno ciascuno una corrente massima di 32 A.
+I punti di ricarica Garage A, Garage B e Garage C sono assegnati al circuito `garage` (`circuit: garage`).
+I punti di ricarica Carport A e Carport B sono assegnati al circuito `carport` (`circuit: carport`).
+I circuiti `garage`, `carport` e la pompa di calore sono collegati direttamente al circuito principale (`main`).
+La regolazione garantisce che i limiti dei rispettivi circuiti non vengano mai superati.
+
+**Importante:** deve esserci sempre esattamente un circuito principale (un circuito senza la proprietà `parent`).
+
+:::note[Limite esterno (§ 14a, § 9)]
+Quando è attivo un [limite esterno](/it/external-limit), questo pone un tetto alla potenza del circuito principale.
+Lo segnala l’avviso “Consumi limitati” nella scheda Gestione del carico.
+:::
+
+## Misurazione
+
+Per impostazione predefinita, il sistema di controllo calcola la potenza e la corrente attuali dalla somma dei rispettivi punti di ricarica.
+Configurando un `meter` su un `circuit`, si può tenere conto anche del carico reale.
+Questo è particolarmente utile se allo stesso fusibile sono collegati anche altri consumatori.
+
+```yaml
+site:
+  meters:
+    ext:
+      - carport_meter
+
+meters:
+  - name: carport_meter
+    type: template
+    template: shelly-3em
+
+circuits:
+  - name: carport
+    meter: carport_meter
+    maxCurrent: 32
+```
+
+Nota: se si usa un contatore che non è già impiegato per un altro scopo (ad es. come `grid`), deve essere collegato come contatore esterno in `site.meters.ext`.
+
+## Limiti
+
+Su ogni circuito si possono configurare sia una corrente massima per fase (`maxCurrent`) sia una potenza massima (`maxPower`).
+Se configurati, questi valori vengono monitorati indipendentemente l’uno dall’altro.
+
+### Limiti esterni
+
+Se necessario, si possono definire anche limiti esterni tramite `GetMaxCurrent` e `GetMaxPower`. In caso di errore valgono i limiti predefiniti.
+
+Esempio:
+
+```yaml
+circuits:
+  - name: main
+    title: "main circuit"
+    maxCurrent: 48
+    GetMaxCurrent:
+      source: mqtt
+      topic: ext/maxcurrent
+    maxPower: 33000
+    GetMaxPower:
+      source: mqtt
+      topic: ext/maxpower
+```
+
+:::note[Nota]
+Un limite esterno permette di attuare le richieste di controllo del gestore di rete.
+Per maggiori informazioni, vedi [Limite esterno](/it/external-limit).
+:::
+
+## Commutazione delle fasi
+
+Con i caricabatterie dotati di commutazione automatica delle fasi (1P/3P), la gestione del carico può sfruttare questa capacità per caricare entro i limiti configurati.
+Quando la potenza disponibile non basta per la ricarica trifase, evcc passa automaticamente alla ricarica monofase.
+
+Questo vale anche per la modalità **Veloce** e per i piani di ricarica.
+Ad es., se la gestione del carico limita la potenza disponibile a 3,5 kW, evcc passa alla ricarica monofase (possibile a partire da 1,4 kW) invece di mettere in pausa la ricarica.
+
+**Requisito:** il caricabatterie deve supportare la commutazione delle fasi.
+
+## Configurazione del caricabatterie
+
+Alcuni caricabatterie hanno funzioni di gestione del carico proprie.
+Si consiglia vivamente di disattivarle o di usare caricabatterie senza intelligenza integrata.
+evcc si aspetta che i dispositivi seguano direttamente i suoi comandi.
+Altre configurazioni possono causare comportamenti imprevisti e vanno testate a fondo in autonomia.
+
+## Restrizioni
+
+:::note
+In futuro l’uso commerciale della gestione del carico richiederà una licenza separata.
+L’uso privato con impianti più piccoli resterà gratuito.
+:::
+
+- I valori di corrente e i limiti dei singoli circuiti sono visualizzati nella pagina di configurazione della UI. È prevista la visualizzazione anche nella scheda del punto di ricarica.
+- Le impostazioni `priority` del punto di ricarica non vengono ancora considerate.
+- Le nuove sessioni ricevono solo il margine residuo del circuito.
+  Il ribilanciamento tra le sessioni attive non è ancora supportato.
+- La [carica dalla rete](/it/features/battery#gridcharge) della batteria domestica non viene considerata. Quando la batteria domestica si carica attivamente dalla rete, questo consumo non rientra nei calcoli della gestione del carico. Tuttavia, durante i segnali attivi di [riduzione di potenza secondo il § 14a](/it/external-limit), la carica dalla rete viene messa automaticamente in pausa.

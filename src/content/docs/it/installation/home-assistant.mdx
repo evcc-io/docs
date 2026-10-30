@@ -1,0 +1,198 @@
+---
+title: "Home Assistant"
+description: "Installa evcc come app di Home Assistant senza riga di comando e scopri dove si trova la configurazione, come funzionano gli aggiornamenti e quali opzioni avanzate hai."
+sidebar:
+  order: 5
+translatedFrom: "df86bba2a2d5"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import haConfigUi from "@assets/installation/ha_configuration_ui.webp";
+
+:::note
+L’app evcc per Home Assistant è un’integrazione della community e non è supportata ufficialmente dal team di evcc.
+
+Il motivo è che, in caso di errore, non è facile fornire i dati importanti per l’analisi (manca `evcc cli`).
+:::
+
+:::caution[Migrazione dei dati]
+Tieni presente che il 16 febbraio 2025, con la versione 0.200.1, abbiamo modificato i percorsi nell’app per renderli coerenti con le [linee guida](https://developers.home-assistant.io/blog/2023/11/06/public-addon-config/) di Home Assistant.
+
+Da allora nell’app vengono mappati i seguenti percorsi:
+
+- `/homeassistant/` -> punta a `/homeassistant/` o `/config/` in Home Assistant.
+- `/config/` -> punta a `/addon_configs/49686a9f_evcc/` in Home Assistant.
+
+Se aggiorni da una versione precedente, il tuo file di configurazione viene copiato automaticamente nella nuova directory.
+Copiamo il database solo se si trovava anch’esso in `/config/`. Se si trovava in `/data/`, resta lì.
+Ai vecchi file aggiungiamo l’estensione `.migrated`. Puoi poi eliminarli a mano.
+:::
+
+Questa guida descrive l’installazione di evcc come app di Home Assistant.
+A differenza dell’[installazione su Linux](/it/installation/linux) o dell’[installazione con Docker](/it/installation/docker), qui non ti servono conoscenze della riga di comando.
+
+## Prerequisiti
+
+Ti serve un’installazione di Home Assistant con lo store delle app attivo.
+A seconda del tipo di installazione, questa funzione potrebbe non essere disponibile.
+Per maggiori informazioni consulta la [documentazione di Home Assistant](https://www.home-assistant.io/installation/#advanced-installation-methods).
+
+## Installazione
+
+<Tabs groupId="release-type">
+  <TabItem label="Release" default>
+  La versione stabile attuale.
+
+1. Aggiungi il repository automaticamente: clicca sul pulsante seguente, poi su **Apri collegamento** e quindi su **Aggiungi**.
+   [![Apri la tua istanza di Home Assistant e mostra la finestra di dialogo per aggiungere un repository di app con l’URL del repository già compilato.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc-io%2Fhassio-addon)
+2. Oppure aggiungi il repository manualmente:
+   1. Clicca su **Impostazioni** → **App** → **Installa app**
+   2. Clicca sui **tre puntini** → **Repository**
+   3. Aggiungi l’URL del repository e clicca su **Aggiungi**
+      ```
+      https://github.com/evcc-io/hassio-addon
+      ```
+3. Ricarica la pagina web
+4. Cerca l’app **evcc** e cliccaci sopra
+5. Clicca sul pulsante **INSTALLA**
+
+  </TabItem>
+  <TabItem label="Nightly">
+  La versione di sviluppo attuale, aggiornata ogni giorno e potenzialmente instabile.
+  Puoi installarla accanto alla versione stabile, ma può essere in esecuzione una sola versione alla volta.
+  Se usi la versione nightly, i percorsi e i nomi dei container Docker indicati in questa guida cambiano, cioè al posto di `evcc` devi usare `evcc-nightly`.
+
+1. Aggiungi il repository automaticamente: clicca sul pulsante seguente, poi su **Apri collegamento** e quindi su **Aggiungi**.
+   [![Apri la tua istanza di Home Assistant e mostra la finestra di dialogo per aggiungere un repository di app con l’URL del repository già compilato.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc-io%2Fhassio-addon)
+2. Oppure aggiungi il repository manualmente:
+   1. Clicca su **Impostazioni** → **App** → **Installa app**
+   2. Clicca sui **tre puntini** → **Repository**
+   3. Aggiungi l’URL del repository e clicca su **Aggiungi**
+      ```
+      https://github.com/evcc-io/hassio-addon
+      ```
+3. Ricarica la pagina web
+4. Cerca l’app **evcc (nightly)** e cliccaci sopra
+5. Clicca sul pulsante **INSTALLA**
+
+  </TabItem>
+</Tabs>
+
+## Configurazione
+
+evcc si può configurare in due modi:
+
+### Interfaccia web (consigliata)
+
+Vai alla scheda **Informazioni** dell’app **evcc** e attiva **Mostra nella barra laterale**. L’interfaccia di evcc si trova all’indirizzo http://your-ha-instance-ip-address:7070.
+
+Vai alla scheda **Configurazione** e imposta la directory di lavoro, ad es.:
+
+<img
+  src={haConfigUi.src}
+  alt="Interfaccia di configurazione dell’app in Home Assistant"
+/>
+
+```sh
+- sqlite_file: /data/evcc.db
+```
+
+Lascia invariata la sezione **Rete**.
+
+Avvia l’app.
+Poi apri l’interfaccia di evcc dalla barra laterale:
+
+- Ti viene chiesto di impostare una password di amministratore
+- Puoi poi configurare i tuoi dispositivi direttamente dall’interfaccia web
+- Le impostazioni vengono salvate automaticamente nel database
+
+### File di configurazione (tradizionale)
+
+In alternativa puoi usare un file di configurazione `evcc.yaml`.
+
+Vai alla scheda **Configurazione** e aggiungi il file di configurazione alla tua directory di lavoro:
+
+```sh
+- config_file: /config/evcc.yaml
+- sqlite_file: /data/evcc.db
+```
+
+Crea un file di configurazione evcc `evcc.yaml` nella directory di configurazione principale dell’app (`/addon_configs/49686a9f_evcc`).
+Se questa directory non esiste, creala a mano.
+
+Per creare o modificare il file di configurazione hai diverse possibilità:
+
+- [Visual Studio Code](https://github.com/hassio-addons/addon-vscode): seleziona il menu hamburger in alto a sinistra, scegli “File”, “Open Folder...” e seleziona `/addon_configs/49686a9f_evcc`
+- [File Editor](https://github.com/home-assistant/addons/tree/master/configurator): assicurati di aver disattivato l’opzione “Enforce Basepath” nella configurazione dell’app, riavvia l’app e vai a `/addon_configs/49686a9f_evcc`
+- [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh): vai a `/addon_configs/49686a9f_evcc` e usa ad es. nano
+
+Per i dettagli sulla creazione del file di configurazione consulta [Configurazione](/it/installation/configuration).
+
+Se vuoi vedere il sistema in funzione in modalità demo, avvia semplicemente evcc con il parametro `--demo`.
+Per maggiori informazioni consulta il [riferimento CLI](/it/reference/cli/evcc).
+
+## Aggiornamenti
+
+L’aggiornamento all’ultima versione di evcc è integrato nel processo di aggiornamento di Home Assistant.
+
+## Suggerimenti avanzati
+
+Per eseguire le funzioni seguenti ti serve l’accesso SSH a Home Assistant. Puoi ottenerlo, ad es., con l’app SSH citata sopra.
+
+- Installa [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh)
+- Disattiva l’opzione “secure mode” nella configurazione dell’app
+- Riavvia l’app
+- Apri l’interfaccia utente dell’app
+
+### Come accedo al database di evcc?
+
+Mostra i file in `/data`:
+
+```sh
+docker exec addon_49686a9f_evcc ls -la /data
+```
+
+Copia `evcc.db` in `/addon_configs/49686a9f_evcc`:
+
+```sh
+docker cp addon_49686a9f_evcc:/data/evcc.db /addon_configs/49686a9f_evcc/
+```
+
+### Come posso usare la CLI di evcc?
+
+Apri una shell nel container Docker di evcc:
+
+```sh
+docker exec -it addon_49686a9f_evcc /bin/sh
+```
+
+Esegui i comandi della CLI di evcc (qui ad es. `checkconfig`):
+
+```sh
+evcc -c /config/evcc.yaml checkconfig
+```
+
+Quando hai finito, chiudi la shell nel container Docker di evcc:
+
+```sh
+exit
+```
+
+### Come posso usare il mio adattatore esterno / HAT nell’app evcc di Home Assistant (Home Assistant OS, Raspberry Pi)?
+
+Se il dispositivo con Home Assistant si trova vicino al contatore (solare, batteria domestica, rete ecc.), puoi anche leggere i dati direttamente via Modbus (ad es. USB).
+
+Per farlo devi abilitare i dispositivi esterni per Home Assistant, il che vale anche per l’app evcc.
+A questo scopo togli il commento alla riga `uart = 1` nel file `config.txt` sulla partizione di boot di Home Assistant OS.
+
+```ini title=/config.txt
+uart = 1
+```
+
+Dopo un riavvio, il tuo dispositivo dovrebbe essere disponibile per l’app evcc (probabilmente come `/dev/ttyS0` o `/dev/ttyUSB`).
+
+## Passo successivo: integrazione
+
+Quando il sistema è in funzione, puoi configurare l’integrazione tra evcc e Home Assistant.
+Trovi maggiori informazioni in [Integrazioni → Home Assistant](/it/smarthome/home-assistant).
+Puoi visualizzare i dati di evcc in Home Assistant o creare automazioni basate su evcc.

@@ -1,0 +1,188 @@
+---
+title: "macOS"
+description: "Installa evcc su macOS con Homebrew, avvialo come servizio launchd e mantienilo aggiornato, oppure installalo manualmente se vuoi provare una versione nightly."
+sidebar:
+  order: 8
+translatedFrom: "cd89edd53094"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Questa guida descrive l’installazione su macOS (10.12 e successivi) con il gestore di pacchetti [Homebrew](https://brew.sh).
+
+:::note
+Se vuoi installare evcc senza un gestore di pacchetti o provare una versione nightly, consulta la sezione [Installazione manuale](#manual).
+:::
+
+## Installazione
+
+<Steps>
+
+1. ### Installa
+
+   Apri una finestra del terminale e installa [Homebrew](https://brew.sh), se non l’hai già fatto.
+
+   ```sh
+   brew trust --tap evcc-io/tap
+   brew tap evcc-io/tap
+   brew update
+   brew install --cask evcc
+   ```
+
+2. ### Avvia \{#start\}
+
+   evcc viene distribuito come cask di Homebrew, che non può essere gestito con `brew services`.
+   Crea invece un agente launchd. Questo avvia evcc all’accesso e lo riavvia se si interrompe:
+
+   ```sh
+   mkdir -p "$(brew --prefix)/var/log"
+   cat > ~/Library/LaunchAgents/io.evcc.plist <<EOF
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+   <plist version="1.0">
+   <dict>
+     <key>Label</key>
+     <string>io.evcc</string>
+     <key>ProgramArguments</key>
+     <array>
+       <string>$(brew --prefix)/bin/evcc</string>
+     </array>
+     <key>WorkingDirectory</key>
+     <string>$(brew --prefix)</string>
+     <key>RunAtLoad</key>
+     <true/>
+     <key>KeepAlive</key>
+     <true/>
+     <key>StandardOutPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+     <key>StandardErrorPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+   </dict>
+   </plist>
+   EOF
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
+   ```
+
+3. ### Configura
+
+   Apri l’interfaccia web di evcc nel browser: [http://localhost:7070](http://localhost:7070).
+   Imposta una password di amministratore e configura i tuoi dispositivi direttamente dall’interfaccia web.
+
+</Steps>
+
+## Configurazione
+
+:::tip[Consigliato]
+Configura evcc direttamente nel browser.
+:::
+
+Dopo il primo avvio puoi configurare evcc all’indirizzo [http://localhost:7070](http://localhost:7070).
+Le impostazioni vengono salvate automaticamente nel database.
+
+In alternativa puoi usare un file di configurazione `evcc.yaml` in `/etc/evcc.yaml`.
+Trovi i dettagli in [Configurazione](/it/installation/configuration).
+
+## Aggiornamenti
+
+Per aggiornare evcc a una nuova versione, segui questi passaggi:
+
+- Apri una finestra del terminale
+- Aggiorna l’elenco dei pacchetti:
+
+  ```sh
+  brew update
+  ```
+
+- Aggiorna evcc:
+
+  ```sh
+  brew upgrade --cask evcc
+  ```
+
+- Riavvia evcc:
+
+  ```sh
+  launchctl kickstart -k gui/$(id -u)/io.evcc
+  ```
+
+:::caution[OCPP e l’Application Firewall]
+Ogni aggiornamento installa un nuovo binario, che l’Application Firewall di macOS considera una nuova applicazione.
+Se il firewall è attivo, le connessioni in entrata restano bloccate finché la nuova versione non viene approvata.
+I caricabatterie OCPP non riescono più a connettersi, mentre tutto il resto continua a funzionare.
+Su un Mac senza monitor la finestra di approvazione non si vede mai.
+Dopo ogni aggiornamento approva il binario dalla riga di comando:
+
+```sh
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$(brew --prefix)/bin/evcc"
+launchctl kickstart -k gui/$(id -u)/io.evcc
+```
+
+:::
+
+### Aggiornamento dalla formula Homebrew
+
+Fino alla versione 0.314.5 evcc veniva distribuito come formula Homebrew e avviato con `brew services`.
+Homebrew non aggiorna una formula installata a cask, quindi per `brew upgrade` la vecchia versione risulta sempre aggiornata.
+Basta rimuovere la formula una volta e installare il cask:
+
+```sh
+brew services stop evcc
+brew uninstall evcc
+brew update
+brew install --cask evcc
+```
+
+Poi crea l’agente launchd come descritto in [Avvia](#start).
+La configurazione e il database non vengono toccati.
+
+## Altri comandi
+
+- Controlla lo stato del server evcc:
+
+  ```sh
+  launchctl print gui/$(id -u)/io.evcc
+  ```
+
+- Arresta evcc e rimuovi l’agente launchd:
+
+  ```sh
+  launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
+  ```
+
+- Visualizza i log:
+
+  ```sh
+  tail -f "$(brew --prefix)/var/log/evcc.log"
+  ```
+
+## Installazione manuale \{#manual\}
+
+Qui trovi le istruzioni per installare evcc manualmente su macOS.
+
+### Installazione
+
+- Scarica il file adatto al tuo sistema:
+  - CPU ARM a 64 bit o Intel: [evcc_X.XX_macOS_all.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+- Estrai il file scaricato (ad es. con un doppio clic sul file)
+- Ora c’è una nuova cartella con il programma `evcc`
+- Apri un terminale e vai nella cartella che contiene il programma `evcc`
+- Avvia evcc con questo comando:
+  ```sh
+  ./evcc -v
+  ```
+- Dovresti vedere la versione attuale di evcc (ad es. `evcc version 0.xxx.y`).
+
+### Configurazione
+
+Dopo il primo avvio apri [http://localhost:7070](http://localhost:7070) nel browser e configura evcc tramite l’interfaccia web.
+
+In alternativa puoi creare un file di configurazione `evcc.yaml` (vedi [Configurazione](/it/installation/configuration)) e avviare evcc con questo file:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Aggiornamento e downgrade
+
+Segui i passaggi descritti sopra e sostituisci il file del programma evcc con la versione nuova o precedente.
+Non è necessario ripetere la configurazione.
