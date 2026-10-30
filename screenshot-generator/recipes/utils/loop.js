@@ -2,10 +2,11 @@ const { test } = require("@playwright/test");
 const sharp = require("sharp");
 
 const screenshotBase = "../src/assets";
+const LANGS = (process.env.LANGS || "en,de").split(",");
 
 export function loop(body) {
   ["light", "dark"].forEach((theme) => {
-    ["en", "de"].forEach((lang) => {
+    LANGS.forEach((lang) => {
       async function screenshot(page, name, element, padding = {}) {
         const paddingLeft = padding.left ?? padding.x ?? padding.all ?? 20;
         const paddingRight = padding.right ?? padding.x ?? padding.all ?? 20;

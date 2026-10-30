@@ -1,0 +1,60 @@
+evcc supports smart sockets and controllable switches.
+They work similarly to chargers but without power control.
+evcc only switches the socket on or off.
+If enough [surplus](/en/features/solar-charging) or [cheap energy](/en/features/dynamic-prices) is available, the socket is switched automatically.
+
+Set up your smart switches in the web interface under **Configuration → Charging & Heating**.
+
+## Modes \{#modes\}
+
+Depending on the application there are two modes.
+The `standbypower` parameter (standby power in watts) picks between them.
+In both modes `standbypower` states how much the device consumes, which is used to balance the rest of the house and compute the remaining PV surplus.
+The surplus needed to [enable activation in smart mode](/en/features/solar-charging) is defined by the minimum current in the charging point settings.
+
+### Charging mode (default) \{#charging-mode\}
+
+Suitable for controlling battery-powered devices (e-motorcycles, e-bikes, tool batteries …).
+The measured power at the switch is treated as charging power.
+If it falls below `standbypower` (default 15&nbsp;W), evcc treats the device as charged.
+Active whenever `standbypower` is not negative.
+Example: `standbypower: 50` ends the charge once the load drops below 50&nbsp;W.
+
+<details class="device-config-section">
+<summary>Configuration example for evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Static mode \{#static-mode\}
+
+Suitable for general consumers such as heat pumps, air conditioners or heaters.
+Activated by a negative `standbypower` value; the magnitude is the estimated power draw evcc uses for surplus calculation.
+Example: `standbypower: -5000` for a device drawing about 5&nbsp;kW.
+
+<details class="device-config-section">
+<summary>Configuration example for evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+Charging mode assumes the switch has a built-in energy meter.
+It's currently not possible to get this behaviour with an additional external [energy meter](/en/meters).
+:::

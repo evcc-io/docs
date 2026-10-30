@@ -1,0 +1,60 @@
+evcc unterstützt smarte Steckdosen und steuerbare Schalter.
+Diese Schalter funktionieren ähnlich wie Wallboxen, jedoch ohne Regelung der Ladeleistung.
+evcc steuert lediglich den Ein-/Aus-Zustand der Steckdose.
+Ist genügend [Überschuss](/de/features/solar-charging) oder [günstige Energie](/de/features/dynamic-prices) aus dem Netz verfügbar, wird automatisch geschaltet.
+
+Smarte Schalter richtest du in der Weboberfläche unter **Konfiguration → Laden & Heizen** ein.
+
+## Modus \{#modes\}
+
+Abhängig vom Anwendungsfall gibt es zwei Modi.
+Der Parameter `standbypower` (Standby-Leistung in Watt) wählt zwischen ihnen.
+In beiden Fällen gibt `standbypower` an, wie viel das Gerät verbraucht, damit der restliche Hausverbrauch und der verbleibende PV-Überschuss korrekt berechnet werden.
+Wie viel Überschuss zur [Aktivierung im Smart-Modus](/de/features/solar-charging) nötig ist, wird durch den Mindeststrom in den Ladepunkt-Einstellungen bestimmt.
+
+### Lademodus (Standard) \{#charging-mode\}
+
+Geeignet für die Ladesteuerung von akkubetriebenen Geräten (E-Motorrad, E-Bikes, Werkzeugakkus …).
+Die gemessene Leistung am Schalter wird als Ladeleistung gewertet.
+Fällt sie unter `standbypower` (Standard: 15&nbsp;W), betrachtet evcc das Gerät als geladen.
+Aktiv, sobald `standbypower` nicht negativ ist.
+Beispiel: `standbypower: 50` beendet das Laden, sobald die Last unter 50&nbsp;W fällt.
+
+<details class="device-config-section">
+<summary>Konfigurationsbeispiel für evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Statischer Modus \{#static-mode\}
+
+Für allgemeine Verbraucher wie Wärmepumpen, Klimaanlagen oder Heizlüfter geeignet.
+Wird durch einen negativen Wert für `standbypower` aktiviert; der Betrag gibt die geschätzte Leistungsaufnahme an, die evcc bei der Überschussberechnung berücksichtigt.
+Beispiel: `standbypower: -5000` für ein Gerät mit etwa 5&nbsp;kW Leistungsaufnahme.
+
+<details class="device-config-section">
+<summary>Konfigurationsbeispiel für evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+Der Lademodus setzt voraus, dass der Schalter einen eingebauten Energiezähler hat.
+Mit einem zusätzlichen [Energiezähler](/de/meters) am Ladepunkt ist dieses Verhalten aktuell nicht erreichbar.
+:::

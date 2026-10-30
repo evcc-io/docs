@@ -14,6 +14,10 @@ Paths starting with `../evcc/` refer to a local checkout of the main repository 
 /src/content.config.ts              # Content collections (docs + device templates)
 /src/content/docs/en                # English documentation (default locale)
 /src/content/docs/de                # German documentation
+/src/content/docs/{nl,fr,da,it,cs}  # Translated documentation (pipeline output, never edit by hand)
+/src/content/i18n/*.json            # UI strings for components, one dictionary per locale
+/src/locales.json                   # Locale list (single source of truth)
+/scripts/i18n                       # Translation pipeline: checks, status, terms, style sheets
 /src/content/docs/{lang}/blog       # Blog posts per locale
 /src/pages/[lang]/...               # Auto-generated device list & detail pages
 /src/components                     # Astro components (.astro)
@@ -47,6 +51,11 @@ The nightly/release toggle in the UI switches which collection is used at runtim
 
 - **English is the default locale** (`defaultLocale: "en"` in `astro.config.mjs`).
 - German content lives under `src/content/docs/de/`.
+- English and German are written by hand. The other locales (`nl`, `fr`, `da`, `it`, `cs`) are produced from English and stamped with `translatedFrom` in the frontmatter. Never edit them by hand: edit en (and de), then run `/translate <lang>`.
+- Device pages in the other locales show English template data with translated UI chrome.
+- Custom UI strings live in `src/content/i18n/<lang>.json` and are read via `Astro.locals.t("key")`, not via `lang === "de" ? … : …` ternaries in components.
+- Translated pages reference English assets relatively (e.g. `../../en/features/x.webp`) and never copy them.
+- Per-language style rules live in `scripts/i18n/style/<lang>.md`.
 - Pages missing in one locale fall back to the default locale (English) automatically; the URL still reflects the requested locale.
 - Sidebar group labels are translated via the `translations` field in the sidebar config in `astro.config.mjs`.
 - Header UI strings come from Starlight's built-in i18n; only locale-specific overrides go in our components (e.g. `src/components/SiteTitle.astro`, `LanguageSelect.astro`).

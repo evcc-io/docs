@@ -1,7 +1,7 @@
 # Screenshot Generator
 
 Uses [Playwright](https://playwright.dev) to generate screenshots for the documentation.
-All screenshots are generated in **light** and **dark mode** and in **English** and **German**.
+All screenshots are generated in **light** and **dark mode** and in **English** and **German** by default.
 They are written directly to `../src/assets/features/screenshots/` as `<name>-<lang>-<theme>-{1,2}x.webp`.
 The `Screenshot` component picks the matching variant based on the page locale.
 
@@ -25,6 +25,14 @@ Generate all screenshots:
 ```bash
 npm run start
 ```
+
+Generate screenshots for other languages by setting `LANGS` (default `en,de`):
+
+```bash
+LANGS=nl,fr npm start
+```
+
+The evcc binary must contain the UI translation for each locale, since recipes read UI labels from the running instance via `recipes/utils/i18n.js`.
 
 Generate selective screenshots via Playwright UI:
 

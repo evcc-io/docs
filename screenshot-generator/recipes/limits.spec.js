@@ -2,9 +2,9 @@ const { test, expect } = require("@playwright/test");
 import { loop } from "./utils/loop";
 import { CURSOR, ARROW, placeOverlay, removeOverlays } from "./utils/overlay";
 const { start, stop } = require("./utils/evcc");
+import { t } from "./utils/i18n";
 
 const BASE_PATH = "features/screenshots";
-const VEHICLES_MENU_LABEL = { en: "Vehicles", de: "Fahrzeuge" };
 const MODAL = "[data-testid=vehicle-settings-modal]";
 
 test.beforeEach(async () => {
@@ -19,7 +19,7 @@ loop((screenshot, { lang }) => {
     const moreTab = page.getByTestId("tab-more");
     await moreTab.click();
     await moreTab
-      .getByRole("button", { name: VEHICLES_MENU_LABEL[lang] })
+      .getByRole("button", { name: await t(lang, "main.vehicleSettings.menu") })
       .click();
     await expect(page.locator(MODAL)).toBeVisible();
   }

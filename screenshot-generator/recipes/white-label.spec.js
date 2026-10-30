@@ -112,7 +112,7 @@ loop((screenshot, { lang }) => {
     await page.goto(`/#/issue`);
     await page.locator("#issueDescription").waitFor();
 
-    const demo = {
+    const demos = {
       en: {
         title: "Charging stops at 80%",
         description:
@@ -123,7 +123,8 @@ loop((screenshot, { lang }) => {
         description:
           "Seit gestern stoppt die Ladung bei 80%, obwohl das Limit auf 100% eingestellt ist.",
       },
-    }[lang] ?? { title: "", description: "" };
+    };
+    const demo = demos[lang] ?? demos.en;
     await page.locator("#issueTitle").fill(demo.title);
     await page.locator("#issueDescription").fill(demo.description);
     await shortenVersion(page);

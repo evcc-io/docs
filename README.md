@@ -27,10 +27,11 @@ npm run dev
 ```
 
 This starts the Astro dev server with hot reload.
-Both locales are served from the same instance:
+All locales are served from the same instance:
 
 - English: <http://localhost:4321/en>
 - German: <http://localhost:4321/de>
+- Dutch, French, Danish, Italian, Czech: <http://localhost:4321/nl>, `/fr`, `/da`, `/it`, `/cs`
 
 ### Build
 
@@ -58,3 +59,6 @@ The CI pipeline checks formatting and will fail if files are not formatted.
 - German content: `src/content/docs/de/`
 
 If you only speak one language, mention this in your PR so maintainers can help with the translation.
+
+All other locales are translated automatically from English and stamped with `translatedFrom`.
+Don't edit them by hand: change the English (and German) source, then run `/translate <lang>`.
