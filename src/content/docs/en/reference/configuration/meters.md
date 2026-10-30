@@ -7,7 +7,7 @@ sidebar:
 
 _Meters_ (current measurement devices) is a list of devices in the house that can measure power and energy consumption, solar generation, or home battery usage. A `meter` defines a point of energy measurement and can be a physical device (e.g., a meter at the grid connection point), a solar inverter (AC or DC in the case of hybrid inverters), or a battery inverter.
 
-Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meters`](/en/reference/configuration/loadpoints#meter) in the charging point configuration, or assume that the charging power set is actually being used.
+Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meter`](/en/reference/configuration/loadpoints#meter) in the charging point configuration, or assume that the charging power set is actually being used.
 
 evcc uses a consistent sign convention for power and current values (`power`, `powers`, `currents`):
 
@@ -45,7 +45,7 @@ Below, the various parameters are explained.
 
 ### `name`
 
-A short designation of the meter. The value is used when referencing the device in the configuration of the [site](/en/reference/configuration/site) or the [charger](/en/reference/configuration/loadpoints#meter).
+A short designation of the meter. The value is used when referencing the device in the configuration of the [site](/en/reference/configuration/site) or the [charging point](/en/reference/configuration/loadpoints#meter).
 
 **For example**:
 
@@ -221,10 +221,6 @@ type: openwb
 usage: grid
 broker: 192.0.2.2
 ```
-
-:::note
-The `uri` and `password` parameters are only required for a `meter` device if multiple devices are configured.
-:::
 
 #### Required Parameters
 

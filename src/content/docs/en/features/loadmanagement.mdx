@@ -35,7 +35,7 @@ Each charging point can then be assigned to an electrical circuit.
 
 ```yaml
 circuits:
-  - name: main # if there is only one circuit defined the name needs to be 'main'
+  - name: main # unique name, other circuits reference it via parent
     title: "main circuit" # name for the UI (not implemented in UI yet)
     maxCurrent: 63 # 63A (optional)
     maxPower: 30000 # 30kW (optional)
@@ -44,13 +44,16 @@ circuits:
 loadpoints:
   - title: Garage
     circuit: main
+    # ...
+  - title: Carport
+    circuit: main
+    # ...
 ```
 
-This configuration only configures a main circuit.
-The circuit has a maximum current of 63A.
-If there are other consumers like an oven/heat pump (this requires a meter) using a total of 50A, the charger will only be allowed to use 13A.
-The circuit has a limit of 30kW.
-Since the grid meter is assigned to this circuit, the power of the charging points will be throttled so that the limits ​​are not exceeded at the grid connection.
+This configuration defines the main circuit `main` with a maximum power of 30 kW and a maximum current of 63 A per phase.
+The charging points _Garage_ and _Carport_ are assigned to this circuit.
+If other consumers such as an oven or heat pump (this requires a meter) draw a total of 50 A, the charging points are only allowed to use the remaining 13 A.
+Since the grid meter is assigned to this circuit, the power of the charging points will be throttled so that the limits are not exceeded at the grid connection.
 Without the grid meter assigned, the limits apply directly to the sum of all charging points.
 
 ### Example: Nested Circuits
@@ -85,8 +88,8 @@ loadpoints:
 ```
 
 Here we have two circuits, `garage` and `carport`, both of which are children/downstream of the main circuit (`parent: main`).
-The `main` circuit has a maximum current of 48A.
-The circuits `garage` and `carport` each have a maximum current of 32A.
+The `main` circuit has a maximum current of 48 A.
+The circuits `garage` and `carport` each have a maximum current of 32 A.
 The charging points Garage A, Garage B, and Garage C are assigned to the `garage` circuit (`circuit: garage`).
 The charging points Carport A and Carport B are assigned to the `carport` circuit (`circuit: carport`).
 The circuits `garage`, `carport`, and the heat pump are connected directly to the root circuit (`main`).

@@ -87,7 +87,7 @@ Where the value `renault` corresponds to the value of the `name` parameter in th
 
 ### `mode`
 
-evcc rememerbers the last used charging mode.
+evcc remembers the last used charging mode.
 With the `mode` parameter, you can specify the charging mode that should be used after the vehicle is disconnected.
 
 **Possible values**:
@@ -121,7 +121,7 @@ mode: smart
 
 ### `soc`
 
-Defins the default settings for handling the charge level of a connected vehicle.
+Defines the default settings for handling the charge level of a connected vehicle.
 
 **For example**:
 
@@ -136,6 +136,9 @@ soc:
 #### `poll`
 
 Defines how vehicle APIs are used to retrieve real-time information about the vehicle.
+
+If the charger has the `features` flag `integrateddevice` configured, the data is retrieved continuously.
+In this case no `poll` settings are needed, and any that are set are ignored.
 
 :::caution
 Changing the default settings is **NOT** recommended, as it could lead to the vehicle's battery draining or the vehicle manufacturer actively preventing charging control via evcc. **Use at your own risk**.
@@ -173,11 +176,11 @@ interval: 60m
 
 #### `estimate`
 
-Calculate (interpolate) the current charge level between vehicle data queries.
+Estimate the current charge level from the measured charging energy (extrapolation) between the vehicle queries set by `interval`.
 
 **Possible values**:
 
-- `true`: evcc interpolates the charge level values between vehicle data queries (recommended).
+- `true`: evcc extrapolates the charge level values between vehicle data queries (recommended).
 - `false`: evcc only uses the charge level values returned by the vehicle.
 
 **Default value:** `true`
@@ -185,7 +188,7 @@ Calculate (interpolate) the current charge level between vehicle data queries.
 **For example**:
 
 ```yaml
-estimate: false # No interpolation
+estimate: false # No extrapolation
 ```
 
 ---
@@ -311,7 +314,7 @@ Configure the vehicle twice: once with `phases: 1` and once with `phases: 3`. De
 
 If a known vehicle is connected, the lower value between `vehicle: phases` and `loadpoint: phases` is used for calculation. For unknown vehicles, only `loadpoint: phases` is considered.
 
-While the vehicle is charging and the charger or charging meter provide phase currents, the actual number of phases is detected, and (as long as the vehicle remains connected) this is used for further calculations. This only works for three-phase charging points.
+While the vehicle is charging and the charger or charging meter provide phase currents, the actual number of phases is detected, and (as long as the vehicle remains connected) this is used for further calculations of the actual switching thresholds. This only works for three-phase charging points.
 
 **Default value:** `3`
 

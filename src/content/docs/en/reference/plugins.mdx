@@ -176,7 +176,7 @@ script: |
   if hour >= 9 && hour < 17 {
     price = 100.0 // Tariff price during business hours
   }
-  price
+  price // returns 50.0 or 100.0 depending on the time of day
 ```
 
 **Example with String Processing**:
@@ -222,7 +222,7 @@ power:
     } else if soc < 20.0 {
       power = 1000.0 // low
     }
-    power
+    power // returns 5000.0 (standby=false, soc>=20)
   in:
     - name: soc
       type: float
@@ -334,7 +334,7 @@ auth: # basic authentication
   password: bar
 insecure: false # set to true to trust self-signed certificates
 jq: .data.tuples[0][1] # parse response json
-scale: 0.001 # factor applied to result, e.g. for kW to W conversion
+scale: 0.001 # factor applied to result, e.g. for W to kW conversion
 cache: 60s # response cache duration
 timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
 ```
@@ -589,7 +589,7 @@ mul:
 
 The basic arithmetic operations addition (add), multiplication (mul), division (div), sign inversion (sign), absolute value (abs), minimum value (min) and maximum value (max) are supported as operands.
 
-With `scale: -1` on one of the values, simple subtraction can be performed, with `scale: 0.001` division, e.g. for converting kWh to Wh.
+With `scale: -1` on one of the values, simple subtraction can be performed, with `scale: 0.001` division, e.g. for converting Wh to kWh.
 
 With `sign:` (every positive number becomes +1, every negative number becomes -1, 0 remains 0), signs can be transferred to other values (in conjunction with `mul`).
 E.g. to transfer the "direction" of power (export or import) to the measured currents for meters.
@@ -1177,7 +1177,7 @@ The watchdog plugin monitors write operations and automatically repeats them at 
 
 1. **Start**: If `initial` is configured, this value is written once at startup
 2. **Write**: When a value is written, the plugin checks whether it is in the `reset` list
-3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value every `timeout/2` seconds
+3. **Watchdog active**: If the value is **not** in `reset`, the watchdog starts and automatically rewrites the value at half the `timeout` interval
 4. **Watchdog stops**: If the value is in `reset`, no repetitions are performed
 
 **reset parameter**:
@@ -1224,7 +1224,7 @@ In this example, values are automatically repeated every 30 s, except when the v
 
 - Plugin starts
 - Write value `100` → Watchdog **runs**, value is repeated every 30 s
-- After 2 minutes: Value `100` has been written 4x (0s, 30s, 60s, 90s, 120s)
+- After 2 minutes: Value `100` has been written 5 times (at 0, 30, 60, 90 and 120 s)
 - Write value `200` → Watchdog **continues** running, now with new value `200` every 30 s
 - Write value `0` → Watchdog **stops** (since `0` is defined in `reset`)
 - No further repetitions until a new value != `0` is written
