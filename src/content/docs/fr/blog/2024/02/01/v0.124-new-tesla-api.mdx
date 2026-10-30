@@ -1,0 +1,133 @@
+---
+date: 2024-02-01
+title: "v0.124 - Nouvelle intégration Tesla"
+description: "Notes de version d’evcc 0.124 de février 2024 avec la nouvelle intégration de l’API officielle de Tesla via tesla.evcc.io et le contrôle actif de la batterie domestique."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "60082a9a90ff"
+---
+
+![Bannière présentant les nouvelles fonctionnalités](../../../../../en/blog/2024/02/01/v0.124-banner.webp)
+
+Les jours rallongent et la charge solaire redevient un plaisir.
+C’est le bon moment pour faire un petit point sur les dernières évolutions d’evcc.
+
+{/* excerpt */}
+
+## Nouvelle intégration Tesla
+
+En [octobre](https://www.notateslaapp.com/news/1653/tesla-creates-official-apis-for-third-party-services-to-start-charging-for-usage), Tesla a présenté une nouvelle [API officielle](https://developer.tesla.com/docs/fleet-api).
+Tesla a également annoncé que l’ancienne [API non officielle](https://www.teslaapi.io) serait arrêtée début 2024.
+
+### Qu’est-ce que cela change pour moi ?
+
+Pour utiliser la nouvelle API, vous devez apporter deux modifications au fichier `evcc.yaml` :
+
+1. **Nouveau nom de template :** comme l’ancienne API fonctionne encore aujourd’hui pour certains utilisateurs, nous avons décidé de proposer pour l’instant les deux implémentations en parallèle. Remplacez le nom de template `tesla` par `tesla-command` pour utiliser la nouvelle API.
+
+2. **Générer de nouveaux jetons :** avec la nouvelle API, il est désormais possible de générer les `accessToken` et `refreshToken` nécessaires directement dans le navigateur.
+   Pour cela, nous avons mis en place un petit site web à l’adresse [tesla.evcc.io](https://tesla.evcc.io).
+
+La configuration doit ensuite ressembler à ceci :
+
+```yaml
+vehicles:
+ - name: mytesla
+   type: template
+   template: tesla-command # change `tesla` to `tesla-command`
+   accessToken: ... # generetad by tesla.evcc.io
+   refreshToken:  ... # generetad by tesla.evcc.io
+   ...
+```
+
+Les jetons générés via [tesla.evcc.io](https://tesla.evcc.io) ne peuvent **être utilisés qu’avec les versions officielles d’evcc** (stable et nightly).
+La raison en est que les jetons de la nouvelle Developer API de Tesla sont toujours liés à une application tierce.
+
+Vous pouvez bien sûr toujours compiler evcc vous-même.
+Il vous faudra cependant votre propre compte Tesla Developer et générer les jetons vous-même.
+Vous trouverez plus de détails dans la [pull request](https://github.com/evcc-io/evcc/pull/10802) correspondante.
+
+### Confidentialité et sécurité
+
+Comme avec l’ancienne API, la récupération des données (niveau de charge, statut, …) et le contrôle (réveil) s’effectuent directement entre votre instance evcc locale et l’infrastructure de Tesla.
+Seule la génération des jetons passe, une fois, par notre site web.
+Les jetons ne sont pas enregistrés, ils sont seulement affichés dans votre navigateur.
+
+Pour un contrôle étendu du véhicule (démarrer et arrêter la charge directement au niveau du véhicule), une requête signée supplémentaire vers Tesla est nécessaire.
+Aujourd’hui, cela concerne les utilisateurs d’un Tesla Wall Connector.
+Comme nous ne pouvons ni ne devons intégrer la clé privée de notre application tierce dans le binaire d’evcc, nous proposerons probablement notre [propre service](https://github.com/evcc-io/evcc/pull/11893) pour cet usage, qui signera ces requêtes et les transmettra à Tesla.
+Mais nous y reviendrons dans une prochaine version.
+
+### Coûts
+
+Tesla propose actuellement la nouvelle API [gratuitement](https://developer.tesla.com/docs/fleet-api#membership-tiers).
+Tesla a toutefois déjà annoncé que l’utilisation de l’API deviendrait payante à l’avenir.
+Malheureusement, nous ne savons pas encore à quel point ce modèle sera favorable à l’open source.
+
+Il est tout à fait possible que nous ne puissions plus proposer gratuitement la génération des jetons à l’avenir.
+Nous pourrions la lier au modèle de parrainage existant d’evcc.
+Mais nous y reviendrons quand Tesla aura communiqué de nouvelles informations.
+
+## Contrôle actif de la batterie
+
+Une grande nouveauté de la version de Noël est le contrôle actif de la batterie.
+Cette fonction n’est plus marquée comme expérimentale.
+De plus, plusieurs onduleurs de batterie ont été ajoutés ces dernières semaines.
+Dans la documentation, vous pouvez désormais vérifier [si votre onduleur est pris en charge](/fr/meters#features).
+
+### Contrôle passif
+
+Le contrôle passif de la batterie existe dans evcc depuis un certain temps déjà.
+evcc régule alors la charge solaire de sorte que la batterie domestique ne se décharge pas involontairement.
+L’année dernière, nous avons introduit une [boîte de dialogue de configuration](/fr/blog/2023/10/05/feature-highlights-10-2023#battery-settings) dans laquelle vous pouvez définir la priorité entre la charge du véhicule et celle de la batterie domestique.
+Ce modèle fonctionne très bien pour la charge solaire.
+evcc connaît le niveau de charge actuel de la batterie domestique et ne régule que la puissance de charge du véhicule.
+Ce mécanisme ne fonctionne cependant pas pour la charge rapide.
+Il faut pour cela un contrôle actif de la batterie.
+
+### Empêcher la décharge pendant la charge rapide
+
+Par défaut, la batterie domestique essaie de couvrir toute la consommation d’énergie de la maison (points de charge compris).
+Selon le prix actuel de l’électricité ou la production solaire attendue, il peut toutefois être souhaitable de prélever l’énergie pour la **charge rapide du véhicule** directement sur le réseau et non dans la batterie domestique.
+Ainsi, l’énergie solaire accumulée reste dans la batterie domestique et peut servir, p. ex., à couvrir la consommation de la maison pendant la nuit.
+
+C’est notre premier cas d’usage du contrôle actif de la batterie.
+Si votre onduleur prend en charge cette fonction, une option correspondante apparaît dans la boîte de dialogue des paramètres de la batterie.
+
+![Contrôle de la batterie : empêcher la décharge de la batterie pendant la charge rapide](../../../../../en/blog/2024/02/01/batterycontrol-en.webp)
+
+Lorsque cette option est active, la batterie domestique est bloquée pendant la charge rapide.
+Pendant ce temps, elle n’est ni déchargée ni chargée.
+Ce blocage est également actif pendant la [charge planifiée](/fr/blog/2023/10/05/feature-highlights-10-2023#charging-planner-visualization) et la [charge réseau intelligente](/fr/blog/2023/10/05/feature-highlights-10-2023#smart-grid-charging).
+
+### Prochaine étape : charger la batterie avec de l’électricité bon marché du réseau
+
+La prochaine étape de développement du contrôle actif de la batterie est la possibilité de charger la batterie domestique avec de l’électricité bon marché du réseau.
+C’est particulièrement intéressant pour les utilisateurs de tarifs dynamiques pendant les journées peu ensoleillées.
+L’objectif est de remplir la batterie domestique avec de l’énergie du réseau pendant les périodes de prix bas, puis d’utiliser cette énergie dans la maison pendant les périodes de prix élevés.
+Nous avons déjà implémenté les intégrations matérielles nécessaires.
+Nous prévoyons donc que cette fonction sera disponible dans l’une des prochaines versions.
+
+## Mise à jour : migration vers la configuration dans le navigateur
+
+evcc est un système très flexible et puissant pour optimiser votre consommation d’énergie.
+Notre plus grand défi reste de concilier cette flexibilité avec une mise en service simple.
+Ces derniers mois, nous avons fait de grands progrès dans le domaine de la configuration.
+Notre objectif est de permettre une mise en service entièrement dans le navigateur, sans `evcc.yaml`.
+
+Si vous avez activé l’option « Show experimental UI features » dans la boîte de dialogue des paramètres, vous pouvez suivre l’avancement de nos développements sous « 🧪 Device Configuration ».
+Vous pouvez actuellement y ajouter et modifier des véhicules, des compteurs avant réseau, des installations photovoltaïques et des systèmes de batterie.
+Les chargeurs et les tarifs suivront dans la prochaine itération.
+Même si c’est encore un « travail en cours », nous attendons vos retours avec impatience.
+
+![Configuration des appareils](../../../../../en/blog/2024/02/01/config-ui.webp)
+
+## Petites améliorations et corrections de bugs
+
+Comme toujours, cette version contient aussi un certain nombre de petites améliorations et de corrections de bugs.
+Pour plus de détails, consultez les [notes de version](https://github.com/evcc-io/evcc/releases/tag/0.124.0).
+
+Bien à vous<br/>
+votre équipe principale d’evcc
