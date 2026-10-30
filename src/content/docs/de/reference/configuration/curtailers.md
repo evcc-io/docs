@@ -1,13 +1,14 @@
 ---
 title: "curtailers"
-description: "Einspeisebegrenzer in der evcc.yaml anlegen, die die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers drosseln, und wann du einen brauchst."
+description: "So legst du in der evcc.yaml Einspeisebegrenzer an, die die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers drosseln, und erfährst, wann du einen brauchst."
 sidebar:
   order: 6
+translatedFrom: "ca8194269ca0"
 ---
 
-_Curtailers_ (Einspeisebegrenzer) ist eine Liste von Geräten, die ausschließlich die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG).
+Der Abschnitt _curtailers_ enthält eine Liste von Einspeisebegrenzern, also Geräten, die ausschließlich die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG).
 Die meisten Wechselrichter werden über ihren Eintrag unter [`meters`](/de/reference/configuration/meters) abgeregelt und benötigen kein separates Gerät.
-Ein eigener Einspeisebegrenzer wird nur benötigt, wenn der Wechselrichter nicht über seine Zähler-Konfiguration abgeregelt werden kann, für den SMA Sunny Home Manager 2.0 oder für Anlagen mit mehreren Wechselrichtern, bei denen das Limit am führenden Wechselrichter gesetzt werden muss.
+Ein eigener Einspeisebegrenzer wird nur benötigt, wenn der Wechselrichter nicht über seine Zähler-Konfiguration abgeregelt werden kann, beim SMA Sunny Home Manager 2.0 oder bei Anlagen mit mehreren Wechselrichtern, bei denen das Limit am führenden Wechselrichter gesetzt werden muss.
 Hintergrund und die Liste der unterstützten Geräte findest du unter [Externe Begrenzung](/de/external-limit#curtailment-devices).
 
 Einspeisebegrenzer werden über [`site.curtailers`](/de/reference/configuration/site#curtailers) referenziert.

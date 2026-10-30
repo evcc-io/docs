@@ -1,0 +1,112 @@
+---
+title: "FreeBSD"
+description: "Installez evcc sous FreeBSD depuis le paquet officiel, activez-le comme service, maintenez-le à jour et placez au besoin nginx devant lui comme proxy inverse."
+sidebar:
+  order: 9
+translatedFrom: "2cdd994e3b84"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Ce guide décrit l’installation sous FreeBSD avec le [paquet officiel de la collection des ports FreeBSD](https://cgit.freebsd.org/ports/tree/www/evcc).
+
+## Installation
+
+<Steps>
+
+1. ### Installer
+
+   Ouvrez un terminal en tant que root et installez evcc :
+
+   ```sh
+   pkg install evcc
+   ```
+
+2. ### Démarrer
+
+   Activez le service au démarrage et lancez-le :
+
+   ```sh
+   sysrc evcc_enable="YES"
+   service evcc start
+   ```
+
+3. ### Configurer
+
+   Ouvrez l’interface web d’evcc dans votre navigateur : [http://localhost:7070](http://localhost:7070).
+   Définissez un mot de passe administrateur et configurez vos appareils directement dans l’interface web.
+
+</Steps>
+
+## Configuration
+
+:::tip[Recommandé]
+Configurez evcc directement dans votre navigateur.
+:::
+
+Après le premier démarrage, vous pouvez configurer votre instance evcc à l’adresse [http://localhost:7070](http://localhost:7070).
+Les paramètres sont enregistrés automatiquement dans la base de données.
+
+Vous pouvez aussi utiliser un fichier de configuration `evcc.yaml` à l’emplacement `/usr/local/etc/evcc.yaml`.
+Vous trouverez plus de détails sur la page [Configuration](/fr/installation/configuration).
+
+## Mises à jour
+
+Pour passer à une nouvelle version, procédez comme suit :
+
+- Consultez les [notes de version](https://github.com/evcc-io/evcc/releases) pour repérer les changements incompatibles (BC) qui concernent votre installation
+- Ouvrez un terminal en tant que root
+- Mettez à jour evcc :
+
+  ```sh
+  pkg upgrade evcc
+  ```
+
+- Redémarrez le service :
+
+  ```sh
+  service evcc restart
+  ```
+
+## Autres commandes utiles
+
+- Vérifiez l’état du serveur evcc :
+
+  ```sh
+  service evcc status
+  ```
+
+- Affichez les journaux :
+
+  ```sh
+  tail -f /var/log/evcc.log
+  ```
+
+## nginx comme proxy inverse
+
+Si nginx tourne déjà chez vous, ajoutez un nouvel hôte virtuel (virtual host) avec la configuration suivante :
+
+```nginx
+server {
+  ...
+  server_name evcc.<your-domain>
+  ...
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Host $http_host;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_redirect off;
+    proxy_read_timeout 240s;
+
+    proxy_http_version 1.1;
+
+    proxy_pass http://127.0.0.1:7070;
+  }
+}
+```
+
+L’interface web d’evcc sera alors accessible à l’adresse `http://evcc.<your-domain>/`.

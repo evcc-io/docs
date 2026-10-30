@@ -1,13 +1,15 @@
 import { getCollection } from "astro:content";
 import { marked } from "marked";
 import countries from "i18n-iso-countries";
-// @ts-ignore
-import countriesDe from "i18n-iso-countries/langs/de.json";
-// @ts-ignore
-import countriesEn from "i18n-iso-countries/langs/en.json";
+import { useTranslations } from "@astrojs/starlight/internal";
+import { LOCALES, templateLocale } from "@utils/locales";
 
-countries.registerLocale(countriesEn);
-countries.registerLocale(countriesDe);
+// Country names for every locale (tariff country chips).
+const countryLangs = import.meta.glob<any>(
+  "/node_modules/i18n-iso-countries/langs/*.json",
+  { eager: true, import: "default" },
+);
+Object.values(countryLangs).forEach((d) => countries.registerLocale(d));
 
 export const TARIFF_GROUPS: Record<
   string,
@@ -64,31 +66,12 @@ export const CODE_PREAMBLES: Record<string, string> = {
   curtailer: "curtailers:\n    - name: my_curtailer",
 };
 
-const TRANSLATIONS_DE: Record<string, string> = {
-  "tab.grid": "Netz",
-  "tab.pv": "PV",
-  "tab.battery": "Batterie",
-  "tab.charge": "Wallbox",
-  "tab.aux": "AUX",
-  global: "Global",
-};
-
-const TRANSLATIONS_EN: Record<string, string> = {
-  "tab.grid": "Grid",
-  "tab.pv": "PV",
-  "tab.battery": "Battery",
-  "tab.charge": "Wallbox",
-  "tab.aux": "AUX",
-  global: "Global",
-};
-
-export function translate(lang: "de" | "en", key: string): string {
+export function translate(lang: string, key: string): string {
   if (!key) return key;
-  const translations = lang === "de" ? TRANSLATIONS_DE : TRANSLATIONS_EN;
-  if (translations[key]) return translations[key];
-  const countryName = countries.getName(key, lang);
-  if (countryName) return countryName;
-  return key;
+  if (key === "global") return useTranslations(lang)("country.global");
+  // short alias names for translated locales ("Duitsland"), en/de keep the official names as before
+  const select = lang === "en" || lang === "de" ? "official" : "alias";
+  return countries.getName(key, lang, { select }) ?? key;
 }
 
 export function renderMarkdown(md: string | undefined | null): string {
@@ -303,7 +286,7 @@ export function featuresFor(
     | "messenger"
     | "curtailer",
   entry: DeviceEntry,
-  lang: "de" | "en",
+  lang: string,
 ): string[] {
   const countryList =
     type === "tariff"
@@ -345,10 +328,10 @@ export function collectionName(
     | "hems"
     | "messengers"
     | "curtailers",
-  lang: "de" | "en",
+  lang: string,
   channel: Channel,
 ): string {
-  return `${prefix}-${channel === "nightly" ? "nightly-" : ""}${lang}`;
+  return `${prefix}-${channel === "nightly" ? "nightly-" : ""}${templateLocale(lang)}`;
 }
 
 /**
@@ -448,7 +431,7 @@ export async function deviceDetailPaths(opts: {
   const { prefix, urlType, channel, filterType } = opts;
   const other: Channel = channel === "nightly" ? "release" : "nightly";
   const paths: any[] = [];
-  for (const lang of ["en", "de"] as const) {
+  for (const lang of LOCALES) {
     const coll = await getCollection(
       collectionName(prefix, lang, channel) as any,
     );
@@ -481,7 +464,7 @@ export async function deviceDetailPaths(opts: {
 }
 
 /** Usage-tab descriptors for a meter detail page. */
-export function buildMeterTabs(entry: DeviceEntry, lang: "de" | "en") {
+export function buildMeterTabs(entry: DeviceEntry, lang: string) {
   return ((entry.data.render as any[]) ?? []).map((render) => {
     const usage = render.usage ?? "meter";
     const preamble = CODE_PREAMBLES[usage] ?? CODE_PREAMBLES.meter;
@@ -531,9 +514,6 @@ export function plainText(md: string | undefined | null): string | undefined {
   );
 }
 
-const t = (lang: "de" | "en", de: string, en: string) =>
-  lang === "de" ? de : en;
-
 /** Escape a value for a markdown table cell: backslashes, pipes, newlines. */
 function cell(v: unknown): string {
   return String(v ?? "")
@@ -543,18 +523,21 @@ function cell(v: unknown): string {
 
 function localized(
   v: string | Record<string, string> | null | undefined,
-  lang: "de" | "en",
+  lang: string,
 ): string {
   if (v == null) return "";
-  return typeof v === "string" ? v : (v[lang] ?? v.en ?? v.de ?? "");
+  return typeof v === "string"
+    ? v
+    : (v[templateLocale(lang)] ?? v.en ?? v.de ?? "");
 }
 
 export function deviceMarkdown(
   entry: DeviceEntry,
-  lang: "de" | "en",
+  lang: string,
   type: string,
   kind: DeviceKind,
 ): string {
+  const t = useTranslations(lang);
   const url = `https://docs.evcc.io/${lang}/${type}/${entry.id}`;
   const features = featuresFor(kind, entry, lang).filter(
     (f) => f !== "sponsorfree",
@@ -570,47 +553,34 @@ export function deviceMarkdown(
   );
 
   const out: string[] = [`# ${deviceTitle(entry)}`, ""];
-  out.push(`${t(lang, "Quelle", "Source")}: ${url}`, "");
+  out.push(`${t("md.source")}: ${url}`, "");
   if (entry.data.description) out.push(entry.data.description.trim(), "");
   if (features.length) {
-    out.push(
-      `${t(lang, "Unterstützte Funktionen", "Supported features")}: ${features.join(", ")}`,
-      "",
-    );
+    out.push(`${t("feature.heading")}: ${features.join(", ")}`, "");
   }
   if (entry.data.requirements?.includes("sponsorship")) {
-    out.push(
-      t(
-        lang,
-        "Sponsortoken erforderlich: Dieses Gerät steht Unterstützern des Projekts zur Verfügung, siehe https://docs.evcc.io/de/sponsorship.",
-        "Sponsor token required: this device is available to sponsors of the project, see https://docs.evcc.io/en/sponsorship.",
-      ),
-      "",
-    );
+    out.push(t("md.sponsor"), "");
   }
   if (entry.data.caveats?.length) {
-    out.push(
-      `## ${t(lang, "Bekannte Einschränkungen", "Known limitations")}`,
-      "",
-    );
+    out.push(`## ${t("detail.caveats")}`, "");
     for (const c of entry.data.caveats) {
       out.push(`- ${c.description ?? ""}${c.link ? ` (${c.link})` : ""}`);
     }
     out.push("");
   }
   if (params.length) {
-    out.push(`## ${t(lang, "Parameter", "Parameters")}`, "");
+    out.push(`## ${t("detail.params")}`, "");
     out.push(
-      `| ${t(lang, "Name", "Name")} | ${t(lang, "Beschreibung", "Description")} | ${t(lang, "Standard / Beispiel", "Default / example")} | |`,
+      `| ${t("params.name")} | ${t("params.description")} | ${t("md.defaultExample")} | |`,
       "| --- | --- | --- | --- |",
     );
     for (const p of params) {
       const value = p.default ?? p.example ?? "";
       const choices = p.choice?.length ? ` (${p.choice.join(", ")})` : "";
       const flag = p.required
-        ? t(lang, "erforderlich", "required")
+        ? t("params.required")
         : p.advanced
-          ? t(lang, "erweitert", "advanced")
+          ? t("params.advanced")
           : "";
       const desc = `${localized(p.description, lang)}${localized(p.help, lang) ? ` ${localized(p.help, lang)}` : ""}${choices}`;
       out.push(
@@ -620,10 +590,7 @@ export function deviceMarkdown(
     out.push("");
   }
   if (codeBlocks.length) {
-    out.push(
-      `## ${t(lang, "Konfigurationsbeispiel für evcc.yaml", "Configuration example for evcc.yaml")}`,
-      "",
-    );
+    out.push(`## ${t("detail.config")}`, "");
     for (const code of codeBlocks) out.push("```yaml", code, "```", "");
   }
   return out.join("\n");

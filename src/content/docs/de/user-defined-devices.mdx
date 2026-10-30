@@ -1,19 +1,20 @@
 ---
 title: Benutzerdefinierte Geräte
-description: "Zeigt, wie du Wallbox, Zähler, Fahrzeug oder Heizung ohne fertige Vorlage einbindest, indem du Messwerte und Steuerung selbst per HTTP, MQTT oder Modbus definierst."
+description: "Zeigt, wie du Wallboxen, Zähler, Fahrzeuge oder Heizungen ohne eingebaute Vorlage einbindest und Messwerte und Steuerung selbst per HTTP, MQTT oder Modbus definierst."
 tableOfContents:
   maxHeadingLevel: 4
+translatedFrom: "3be6e303b568"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Hausbatterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes lässt sich in der Geräteliste der Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
+Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Hausbatterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes kannst du in der Geräteliste den Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
 
-So lassen sich auch Geräte einbinden, die nicht von einem eingebauten Template abgedeckt sind, z. B. die aktuelle Leistung über einen HTTP-Endpunkt lesen oder einen Zielstrom per Modbus schreiben.
+So lassen sich auch Geräte einbinden, für die es keine eingebaute Vorlage gibt, z. B. indem du die aktuelle Leistung über einen HTTP-Endpunkt liest oder einen Zielstrom per Modbus schreibst.
 
 ## Ein Gerät definieren
 
-In der Benutzeroberfläche steht bei jedem Gerätetyp der Eintrag **Benutzerdefiniertes Gerät** in der Template-Auswahl bereit.
+In der Oberfläche steht bei jedem Gerätetyp der Eintrag **Benutzerdefiniertes Gerät** in der Vorlagenauswahl bereit.
 Damit öffnet sich der Editor für die eigene Konfiguration.
 Standardmäßig wird ein Gerät mit `type: custom` angelegt. Der Typ lässt sich bei Bedarf mit einem anderen Wert überschreiben (z. B. `type: heatpump`).
 
@@ -23,7 +24,7 @@ power:
   topic: home/current/imsys/chn2/raw
 ```
 
-Alternativ lässt sich die vollständige Konfiguration direkt in die `evcc.yaml` schreiben, mit `name`, `type: custom` und den Attributen darunter:
+Alternativ kannst du die vollständige Konfiguration mit `name`, `type: custom` und den darunterliegenden Attributen direkt in die `evcc.yaml` schreiben:
 
 ```yaml
 meters:
@@ -34,22 +35,22 @@ meters:
       topic: home/current/imsys/chn2/raw
 ```
 
-Alle weiteren Beispiele auf dieser Seite verwenden die flache Attribut-Block-Form, wie sie in der UI eingegeben wird.
+Alle weiteren Beispiele auf dieser Seite verwenden die flache Attributblock-Form, wie du sie in der Oberfläche eingibst.
 
-Die Liste der verfügbaren Plugin-Quellen (`http`, `mqtt`, `modbus`, …) und Helper (`calc`, `map`, `watchdog`, …) steht in der [Plugins-Referenz](/de/reference/plugins).
+Die Liste der verfügbaren Plugin-Quellen (`http`, `mqtt`, `modbus`, …) und Hilfsfunktionen (`calc`, `map`, `watchdog`, …) steht in der [Plugin-Referenz](/de/reference/plugins).
 
 ## Attribute und Features
 
 Jedes benutzerdefinierte Gerät besteht aus drei Arten von Feldern:
 
-- **Lese-Attribute** — Plugins, die evcc regelmäßig abfragt, um einen Wert zu erhalten (z. B. `power`, `soc`, `status`).
-- **Schreib-Attribute** — Plugins, die evcc aufruft, um einen Wert zu setzen oder eine Aktion auszulösen (z. B. `enable`, `maxcurrent`, `wakeup`). Der zu schreibende Wert steht im Plugin zur Verfügung.
-- **Features** — `features`-Liste, die abweichendes Verhalten freischaltet. Verfügbare Flags hängen vom Gerätetyp ab.
+- **Leseattribute**: Plugins, die evcc regelmäßig abfragt, um einen Wert zu erhalten (z. B. `power`, `soc`, `status`).
+- **Schreibattribute**: Plugins, die evcc aufruft, um einen Wert zu setzen oder eine Aktion auszulösen (z. B. `enable`, `maxcurrent`, `wakeup`). Der zu schreibende Wert steht im Plugin zur Verfügung.
+- **Features**: `features`-Liste, die abweichendes Verhalten freischaltet. Verfügbare Flags hängen vom Gerätetyp ab.
 
 Allgemeine Form:
 
 ```yaml
-# Lese-Attribute
+# Leseattribute
 power:
   source: http
   uri: http://meter.local/power
@@ -57,7 +58,7 @@ soc:
   source: mqtt
   topic: battery/soc
 
-# Schreib-Attribute
+# Schreibattribute
 enable:
   source: http
   uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
@@ -72,12 +73,12 @@ features:
   - integrateddevice
 ```
 
-Welche Attribut-Namen und Feature-Flags verfügbar sind, hängt vom Gerätetyp ab und steht in den nachfolgenden Abschnitten.
+Welche Attributnamen und Feature-Flags verfügbar sind, hängt vom Gerätetyp ab und steht in den nachfolgenden Abschnitten.
 
 ## Zähler \{#meter\}
 
-Stromzähler werden in der Sektion [`meters`](/de/reference/configuration/meters) konfiguriert.
-Zähler unter `meters:` können an verschiedenen Stellen innerhalb der `site` Konfiguration referenziert werden:
+Stromzähler werden im Abschnitt [`meters`](/de/reference/configuration/meters) konfiguriert.
+Zähler unter `meters:` können in `site` referenziert werden:
 
 - `grid`: Netzzähler
 - `pv`: PV-Zähler
@@ -85,32 +86,32 @@ Zähler unter `meters:` können an verschiedenen Stellen innerhalb der `site` Ko
 - `charge`: Zähler für die Ladeleistung der Wallbox
 - `aux`: Verbrauchszähler für intelligente Verbraucher
 - `consumer`: Zähler für einen regulären Verbraucher, erfasst für die Verbrauchsstatistik
-- `ext`: Weiterer Zähler, der nicht für die Regelung verwendet oder angezeigt wird, nur geloggt und exportiert
+- `ext`: Weiterer Zähler, der weder für die Regelung genutzt noch angezeigt, sondern nur protokolliert und exportiert wird
 
 `power` ist das einzig erforderliche Attribut.
 Nicht alle Zählerrollen unterstützen alle Attribute:
 
 - `limitsoc` und `batterymode` werden ausschließlich für Batteriezähler genutzt (referenziert in `site.battery`).
 - `curtail` und `curtailed` werden gemeinsam für `pv`-Zähler verwendet, die eine Abregelung der Einspeisung unterstützen (§ 9 EEG).
-- `currents`, `voltages` und `powers` sind Phasen-Attribute, die mit genau drei Plugin-Konfigurationen (als YAML-Array) konfiguriert werden müssen und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
+- `currents`, `voltages` und `powers` sind Phasen-Attribute, die genau drei Plugin-Konfigurationen (als YAML-Array) erwarten und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
 
 Plugins müssen den richtigen Datentyp zurückliefern.
 Zur Konvertierung dienen die [Lese-Pipelines](/de/reference/plugins#reading).
 
-### Lese-Attribute
+### Leseattribute
 
-| Attribut       | Typ                   | Erfordert | Kontext       | Beschreibung                                                                |
-| -------------- | --------------------- | --------- | ------------- | --------------------------------------------------------------------------- |
-| `power`        | `float`               | ja        | alle          | Aktuelle Leistung in W                                                      |
-| `energy`       | `float`               | nein      | alle          | Zählerstand in kWh                                                          |
-| `returnenergy` | `float`               | nein      | alle          | Zählerstand in Gegenrichtung in kWh (siehe unten)                           |
-| `maxpower`     | `int`                 | nein      | `pv` (hybrid) | Maximale AC-Leistung in W                                                   |
-| `curtailed`    | `int`                 | nein      | `pv`          | Aktuelles Einspeiselimit in % (0 bis 100). Nur zusammen mit `curtail`.      |
-| `soc`          | `int`                 | nein      | `battery`     | Ladestand in %                                                              |
-| `capacity`     | `float`               | nein      | `battery`     | Kapazität in kWh                                                            |
-| `powers`       | `[float,float,float]` | nein      | alle          | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen. |
-| `currents`     | `[float,float,float]` | nein      | alle          | Phasenströme in A. Zur Erkennung aktiver Phasen.                            |
-| `voltages`     | `[float,float,float]` | nein      | alle          | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                      |
+| Attribut       | Typ                   | Erforderlich | Kontext       | Beschreibung                                                                |
+| -------------- | --------------------- | ------------ | ------------- | --------------------------------------------------------------------------- |
+| `power`        | `float`               | ja           | alle          | Aktuelle Leistung in W                                                      |
+| `energy`       | `float`               | nein         | alle          | Zählerstand in kWh                                                          |
+| `returnenergy` | `float`               | nein         | alle          | Zählerstand in Gegenrichtung in kWh (siehe unten)                           |
+| `maxpower`     | `int`                 | nein         | `pv` (hybrid) | Maximale AC-Leistung in W                                                   |
+| `curtailed`    | `int`                 | nein         | `pv`          | Aktuelles Einspeiselimit in % (0 bis 100). Nur zusammen mit `curtail`.      |
+| `soc`          | `int`                 | nein         | `battery`     | Ladestand in %                                                              |
+| `capacity`     | `float`               | nein         | `battery`     | Kapazität in kWh                                                            |
+| `powers`       | `[float,float,float]` | nein         | alle          | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen. |
+| `currents`     | `[float,float,float]` | nein         | alle          | Phasenströme in A. Zur Erkennung aktiver Phasen.                            |
+| `voltages`     | `[float,float,float]` | nein         | alle          | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                      |
 
 ### Vorzeichen und Richtungen \{#signs-and-directions\}
 
@@ -124,9 +125,8 @@ Was ein positiver `power`-Wert und die beiden Energierichtungen bedeuten, hängt
 | `charge`                 | Laden                     | Geladen    | Entladen (V2X)      |
 | `aux`, `ext`, `consumer` | Verbrauch                 | Verbraucht | Erzeugt (selten)    |
 
-`energy` und `returnenergy` sind steigende Zählerstände in kWh, idealerweise Gesamtwerte wie die Bezugs- und Einspeiseregister eines Stromzählers.
-Die Differenzen zwischen den Zählerständen werden automatisch berechnet.
-Das Plugin muss deshalb einen Zählerstand liefern und keine Verbrauchswerte pro Intervall.
+`energy` und `returnenergy` sind steigende Zählerstände in kWh, idealerweise Gesamtwerte wie die Bezugs- und Einspeiseregister eines Netzzählers.
+Da die Differenzen zwischen den Zählerständen automatisch berechnet werden, muss das Plugin einen Zählerstand liefern, keine Verbrauchswerte pro Intervall.
 Auch ein Zähler, der sich regelmäßig zurücksetzt (z. B. täglich), funktioniert, da der Rücksprung automatisch erkannt wird.
 Ein Zählerstand von `0` wird als nicht verfügbar behandelt.
 
@@ -134,13 +134,13 @@ Beide Attribute sind optional.
 Ohne sie wird die Energiehistorie aus dem zeitlichen Verlauf von `power` abgeleitet.
 Echte Zählerstände liefern genauere Langzeitstatistiken.
 
-### Schreib-Attribute \{#meter-write-attributes\}
+### Schreibattribute \{#meter-write-attributes\}
 
-| Attribut      | Typ   | Erfordert | Kontext   | Beschreibung                                                                                                                                                    |
-| ------------- | ----- | --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `limitsoc`    | `int` | nein      | `battery` | Setze Ladeziel für Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.           |
-| `curtail`     | `int` | nein      | `pv`      | Setze Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
-| `batterymode` | `int` | nein      | `battery` | Setze den Steuerungsmodus der Batterie direkt. Die Modi sind unten aufgeführt.                                                                                  |
+| Attribut      | Typ   | Erforderlich | Kontext   | Beschreibung                                                                                                                                                        |
+| ------------- | ----- | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | nein         | `battery` | Setzt das Ladeziel der Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.           |
+| `curtail`     | `int` | nein         | `pv`      | Setzt das Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
+| `batterymode` | `int` | nein         | `battery` | Setzt den Steuerungsmodus der Batterie direkt. Die Modi sind unten aufgeführt.                                                                                      |
 
 #### Batteriemodi \{#battery-modes\}
 
@@ -150,7 +150,7 @@ Echte Zählerstände liefern genauere Langzeitstatistiken.
 | `2`  | `hold`       | Entladen verhindern, Laden aus Überschuss bleibt erlaubt           |
 | `3`  | `charge`     | Aus dem Netz laden, kein Entladen                                  |
 | `4`  | `holdcharge` | Laden verhindern, Entladen für den Verbrauch bleibt erlaubt        |
-| `5`  | `discharge`  | Einspeisung ins Netz                                               |
+| `5`  | `discharge`  | Ins Netz entladen                                                  |
 
 Es werden nur die Batteriemodi genutzt, die das Gerät unterstützt.
 Ist `batterymode` ein [`switch`](/de/reference/plugins#switch), werden die unterstützten Modi aus dessen `case`-Werten übernommen.
@@ -159,7 +159,7 @@ Für alle anderen Plugins müssen die unterstützten Modi in `batterymodes` ange
 
 ### Beispiele
 
-Lese die aktuelle Netzleistung über einen HTTP-Endpunkt.
+Lies die aktuelle Netzleistung über einen HTTP-Endpunkt.
 
 ```yaml
 meters:
@@ -171,7 +171,7 @@ meters:
       jq: .data.tuples[0][1]
 ```
 
-Lese Leistung und Ladestand einer Hausbatterie und setze ihren Modus über HTTP.
+Lies Leistung und Ladestand einer Hausbatterie und setze ihren Modus über HTTP.
 Der `switch` deckt die Modi normal, hold und charge ab, evcc bietet also genau diese drei an.
 
 ```yaml
@@ -211,48 +211,48 @@ meters:
 ## Wallbox \{#charger\}
 
 Der Standardtyp `type: custom` deckt Wallboxen mit stufenloser Stromregelung ab.
-Für andere Geräte stehen spezialisierte Charger-Typen unter [Switchsocket](#charger-switchsocket) und [Wärmepumpen](#charger-heating) bereit.
+Für andere Geräte stehen spezialisierte Wallbox-Typen unter [schaltbare Steckdosen](#charger-switchsocket) und [Wärmepumpen](#charger-heating) bereit.
 
-### Lese-Attribute
+### Leseattribute
 
-| Attribut       | Typ                   | Erfordert | Beschreibung                                                                             |
-| -------------- | --------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `status`       | `string`              | ja        | Status (A..F)                                                                            |
-| `enabled`      | `bool`                | ja        | Ist Ladung freigegeben?                                                                  |
-| `power`        | `float`               | nein      | Ladeleistung in W                                                                        |
-| `energy`       | `float`               | nein      | Zählerstand in kWh                                                                       |
-| `returnenergy` | `float`               | nein      | Zählerstand in Gegenrichtung in kWh (Entladeenergie, V2X)                                |
-| `identify`     | `string`              | nein      | Aktuelle RFID-Kennung                                                                    |
-| `soc`          | `int`                 | nein      | Ladestand in %                                                                           |
-| `limitsoc`     | `int`                 | nein      | Ladelimit in %                                                                           |
-| `temp`         | `float`               | nein      | Aktuelle Temperatur in °C (Heizung, Alias für `soc`)                                     |
-| `limittemp`    | `int`                 | nein      | Temperaturlimit in °C (Heizung, Alias für `limitsoc`)                                    |
-| `finishtime`   | `string`              | nein      | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
-| `phases`       | `int`                 | nein      | Anzahl der physischen Phasen (1..3)                                                      |
-| `powers`       | `[float,float,float]` | nein      | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen.              |
-| `currents`     | `[float,float,float]` | nein      | Phasenströme in A. Zur Erkennung aktiver Phasen.                                         |
-| `voltages`     | `[float,float,float]` | nein      | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                                   |
+| Attribut       | Typ                   | Erforderlich | Beschreibung                                                                             |
+| -------------- | --------------------- | ------------ | ---------------------------------------------------------------------------------------- |
+| `status`       | `string`              | ja           | Status (A bis F)                                                                         |
+| `enabled`      | `bool`                | ja           | Ist das Laden freigegeben?                                                               |
+| `power`        | `float`               | nein         | Ladeleistung in W                                                                        |
+| `energy`       | `float`               | nein         | Zählerstand in kWh                                                                       |
+| `returnenergy` | `float`               | nein         | Zählerstand in Gegenrichtung in kWh (Entladeenergie, V2X)                                |
+| `identify`     | `string`              | nein         | Aktuelle RFID-Kennung                                                                    |
+| `soc`          | `int`                 | nein         | Ladestand in %                                                                           |
+| `limitsoc`     | `int`                 | nein         | Ladelimit in %                                                                           |
+| `temp`         | `float`               | nein         | Aktuelle Temperatur in °C (Heizung, Alias für `soc`)                                     |
+| `limittemp`    | `int`                 | nein         | Temperaturlimit in °C (Heizung, Alias für `limitsoc`)                                    |
+| `finishtime`   | `string`              | nein         | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
+| `phases`       | `int`                 | nein         | Anzahl der physischen Phasen (1 bis 3)                                                   |
+| `powers`       | `[float,float,float]` | nein         | Phasenleistungen in W. Zur Vorzeichenerkennung bei vorzeichenlosen Strömen.              |
+| `currents`     | `[float,float,float]` | nein         | Phasenströme in A. Zur Erkennung aktiver Phasen.                                         |
+| `voltages`     | `[float,float,float]` | nein         | Phasenspannungen in V. Zur Anschlusserkennung (1p/3p).                                   |
 
-### Schreib-Attribute
+### Schreibattribute
 
-| Attribut           | Typ     | Erfordert | Beschreibung                                          |
-| ------------------ | ------- | --------- | ----------------------------------------------------- |
-| `enable`           | `bool`  | ja        | Ladung freigeben / sperren                            |
-| `maxcurrent`       | `int`   | ja        | Setze maximalen Ladestrom in A                        |
-| `maxcurrentmillis` | `float` | nein      | Setze maximalen Ladestrom in A (mit Nachkommastellen) |
-| `phases1p3p`       | `int`   | nein      | Phasenumschaltung durchführen (erfordert `tos: true`) |
-| `wakeup`           | `bool`  | nein      | Wecke Fahrzeug auf                                    |
+| Attribut           | Typ     | Erforderlich | Beschreibung                                              |
+| ------------------ | ------- | ------------ | --------------------------------------------------------- |
+| `enable`           | `bool`  | ja           | Laden freigeben/sperren                                   |
+| `maxcurrent`       | `int`   | ja           | Setzt den maximalen Ladestrom in A                        |
+| `maxcurrentmillis` | `float` | nein         | Setzt den maximalen Ladestrom in A (mit Nachkommastellen) |
+| `phases1p3p`       | `int`   | nein         | Phasenumschaltung durchführen (erfordert `tos: true`)     |
+| `wakeup`           | `bool`  | nein         | Fahrzeug aufwecken                                        |
 
 ### Features \{#charger-features\}
 
-| Feature            | Beschreibung                                                                                                                                                                                                                                                                                                                                            |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `integrateddevice` | Gerät ohne angeschlossenes Fahrzeug und ohne Ladesitzungen (z. B. Wärmepumpe, Heizstab, fest installierter Verbraucher). Keine Fahrzeugauswahl.                                                                                                                                                                                                         |
-| `heating`          | Behandelt das Gerät als Heizung: Ladestand und Limits werden in °C statt in % dargestellt.                                                                                                                                                                                                                                                              |
-| `continuous`       | Gerät läuft im "deaktivierten" Zustand eigenständig in seinem Normalbetrieb weiter. Statt "Standby" wird "Normalbetrieb" angezeigt. Eine Empfehlung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Strom) wird als "Boost" gekennzeichnet. Die Modi heißen **Normal**, **Smart** und **Boost** statt **Aus**, **Smart** und **Schnell**. |
-| `switchdevice`     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Max-Strom und die Option **Dauerhaft laden** werden nicht angezeigt. Min-Strom und Phasen legen die PV-Einschaltleistung fest. Ohne `continuous` heißen die Modi **Aus**, **Smart** und **Ein**.                                                                         |
+| Feature            | Beschreibung                                                                                                                                                                                                                                                                                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Keine Fahrzeugauswahl. Gerät läuft ohne angeschlossenes Fahrzeug und ohne Ladevorgänge (z. B. Wärmepumpe, Heizstab, fest installierter Verbraucher).                                                                                                                                                                                                       |
+| `heating`          | Behandelt das Gerät als Heizung: Ladestand und Limits werden in °C statt in % dargestellt.                                                                                                                                                                                                                                                                 |
+| `continuous`       | Gerät läuft im Zustand „deaktiviert“ eigenständig in seinem Normalbetrieb weiter. Statt „Standby“ wird „Normalbetrieb“ angezeigt. Eine Anforderung zur Leistungserhöhung (z. B. bei PV-Überschuss oder günstigem Netzstrom) wird als „Boost“ gekennzeichnet. Die Modi heißen **Normal**, **Smart** und **Boost** statt **Aus**, **Smart** und **Schnell**. |
+| `switchdevice`     | Gerät kann nur ein- und ausgeschaltet werden (keine stufenlose Stromregelung). Max-Strom und die Option **Dauerhaft laden** werden nicht angezeigt. Min-Strom und Phasen legen die PV-Einschaltleistung fest. Ohne `continuous` heißen die Modi **Aus**, **Smart** und **Ein**.                                                                            |
 
-Häufige Feature-Kombinationen aus den vorkonfigurierten Templates:
+Häufige Feature-Kombinationen aus den eingebauten Vorlagen:
 
 **Heizstab**:
 
@@ -309,26 +309,26 @@ enable:
   payload: ON
 ```
 
-### Switchsocket \{#charger-switchsocket\}
+### Schaltbare Steckdosen \{#charger-switchsocket\}
 
 **`type: switchsocket`**
 
 Für schaltbare Steckdosen und vergleichbare Relais-Geräte, die nur ein-/ausgeschaltet werden können, ohne stufenlose Stromregelung.
-Der Ladestatus wird aus der aktuellen Leistung abgeleitet (oberhalb `standbypower` gilt als Laden).
-Vollständige Einrichtung unter [Schaltbare Steckdosen](/de/smartswitches).
+Der Ladestatus wird aus der aktuellen Leistung abgeleitet (eine Leistung oberhalb von `standbypower` gilt als Laden).
+Die vollständige Einrichtung ist unter [Schaltbare Steckdosen](/de/smartswitches) beschrieben.
 
-| Attribut       | Typ     | Erfordert | Beschreibung                                                                                            |
-| -------------- | ------- | --------- | ------------------------------------------------------------------------------------------------------- |
-| `enabled`      | `bool`  | ja        | Status der Steckdose (an/aus)                                                                           |
-| `power`        | `float` | ja        | Aktuelle Leistung in W                                                                                  |
-| `energy`       | `float` | nein      | Zählerstand in kWh                                                                                      |
-| `soc`          | `float` | nein      | Ladestand in %                                                                                          |
-| `enable`       | `bool`  | ja        | Steckdose ein-/ausschalten                                                                              |
-| `standbypower` | `float` | nein      | Schwellwert in W. Darüber: Laden, darunter: Standby. Negativ: statisch (keine Leistungsmessung möglich) |
+| Attribut       | Typ     | Erforderlich | Beschreibung                                                                                    |
+| -------------- | ------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| `enabled`      | `bool`  | ja           | Status der Steckdose (an/aus)                                                                   |
+| `power`        | `float` | ja           | Aktuelle Leistung in W                                                                          |
+| `energy`       | `float` | nein         | Zählerstand in kWh                                                                              |
+| `soc`          | `float` | nein         | Ladestand in %                                                                                  |
+| `enable`       | `bool`  | ja           | Steckdose ein-/ausschalten                                                                      |
+| `standbypower` | `float` | nein         | Schwellwert in W. Darüber: Laden, darunter: Standby. Negativ: statisch (keine Leistungsmessung) |
 
 ### Wärmepumpen \{#charger-heating\}
 
-Für Wärmepumpen und vergleichbare Heizgeräte gibt es eigene Charger-Typen mit jeweils eigenen Attributen.
+Für Wärmepumpen und vergleichbare Heizgeräte gibt es eigene Wallbox-Typen mit jeweils eigenen Attributen.
 Die vollständige Einrichtung ist unter [Wärmepumpen, Heizstäbe](/de/heating) beschrieben.
 
 <Tabs>
@@ -339,49 +339,49 @@ Die vollständige Einrichtung ist unter [Wärmepumpen, Heizstäbe](/de/heating) 
 Für wechselrichtergesteuerte Wärmepumpen, die einen kontinuierlichen Leistungs-Sollwert per Modbus, HTTP o. Ä. annehmen.
 Die Ziel-Heizleistung wird direkt über `setmaxpower` geschrieben.
 
-| Attribut      | Typ     | Erfordert | Beschreibung                          |
-| ------------- | ------- | --------- | ------------------------------------- |
-| `power`       | `float` | nein      | Aktuelle Leistung in W                |
-| `energy`      | `float` | nein      | Zählerstand in kWh                    |
-| `temp`        | `float` | nein      | Aktuelle Temperatur in °C             |
-| `limittemp`   | `int`   | nein      | Geräte-internes Temperaturlimit in °C |
-| `setmaxpower` | `int`   | ja        | Setze maximale Heizleistung in W      |
-| `getmaxpower` | `float` | nein      | Aktuelle maximale Heizleistung in W   |
+| Attribut      | Typ     | Erforderlich | Beschreibung                         |
+| ------------- | ------- | ------------ | ------------------------------------ |
+| `power`       | `float` | nein         | Aktuelle Leistung in W               |
+| `energy`      | `float` | nein         | Zählerstand in kWh                   |
+| `temp`        | `float` | nein         | Aktuelle Temperatur in °C            |
+| `limittemp`   | `int`   | nein         | Geräteinternes Temperaturlimit in °C |
+| `setmaxpower` | `int`   | ja           | Setzt die maximale Heizleistung in W |
+| `getmaxpower` | `float` | nein         | Aktuelle maximale Heizleistung in W  |
 
   </TabItem>
   <TabItem label="SG-Ready">
 
 **`type: sgready`**
 
-Für Wärmepumpen mit klassischer SG-Ready-Schnittstelle, gesteuert über einen einzelnen Modus-Wert.
+Für Wärmepumpen, die die standardisierte SG-Ready-Schnittstelle als einzelnen Modus-Wert bereitstellen.
 Drei Modi werden unterstützt: `1` reduziert, `2` normal, `3` boost.
 
-| Attribut      | Typ     | Erfordert | Beschreibung                                            |
-| ------------- | ------- | --------- | ------------------------------------------------------- |
-| `power`       | `float` | nein      | Aktuelle Leistung in W                                  |
-| `energy`      | `float` | nein      | Zählerstand in kWh                                      |
-| `temp`        | `float` | nein      | Aktuelle Temperatur in °C                               |
-| `limittemp`   | `int`   | nein      | Geräte-internes Temperaturlimit in °C                   |
-| `setmode`     | `int`   | ja        | Ändere SG-Ready-Modus (1: reduced, 2: normal, 3: boost) |
-| `getmode`     | `int`   | nein      | Aktueller SG-Ready-Modus (1, 2, 3)                      |
-| `setmaxpower` | `int`   | nein      | Setze maximale Heizleistung in W                        |
+| Attribut      | Typ     | Erforderlich | Beschreibung                                                  |
+| ------------- | ------- | ------------ | ------------------------------------------------------------- |
+| `power`       | `float` | nein         | Aktuelle Leistung in W                                        |
+| `energy`      | `float` | nein         | Zählerstand in kWh                                            |
+| `temp`        | `float` | nein         | Aktuelle Temperatur in °C                                     |
+| `limittemp`   | `int`   | nein         | Geräteinternes Temperaturlimit in °C                          |
+| `setmode`     | `int`   | ja           | Ändert den SG-Ready-Modus (1: reduziert, 2: normal, 3: boost) |
+| `getmode`     | `int`   | nein         | Aktueller SG-Ready-Modus (1, 2, 3)                            |
+| `setmaxpower` | `int`   | nein         | Setzt die maximale Heizleistung in W                          |
 
   </TabItem>
   <TabItem label="SG-Ready über Relais">
 
 **`type: sgready-relay`**
 
-Für Wärmepumpen, deren SG-Ready-Eingang als zwei potentialfreie Relais-Kontakte (boost + dim) ausgeführt ist.
-Jeder Kontakt wird über einen eigenen Sub-Charger geschaltet, referenziert per Typ statt per Plugin.
+Für Wärmepumpen, deren SG-Ready-Eingang als zwei potenzialfreie Relaiskontakte (boost + dim) ausgeführt ist.
+Jeder Kontakt wird über eine eigene untergeordnete Wallbox geschaltet, die per Typ statt per Plugin referenziert wird.
 
-| Attribut    | Typ             | Erfordert | Beschreibung                          |
-| ----------- | --------------- | --------- | ------------------------------------- |
-| `power`     | `float`         | nein      | Aktuelle Leistung in W                |
-| `energy`    | `float`         | nein      | Zählerstand in kWh                    |
-| `temp`      | `float`         | nein      | Aktuelle Temperatur in °C             |
-| `limittemp` | `int`           | nein      | Geräte-internes Temperaturlimit in °C |
-| `boost`     | `charger-typed` | ja        | Relais für den SG-Ready Boost-Kontakt |
-| `dim`       | `charger-typed` | nein      | Relais für den SG-Ready Dim-Kontakt   |
+| Attribut    | Typ             | Erforderlich | Beschreibung                          |
+| ----------- | --------------- | ------------ | ------------------------------------- |
+| `power`     | `float`         | nein         | Aktuelle Leistung in W                |
+| `energy`    | `float`         | nein         | Zählerstand in kWh                    |
+| `temp`      | `float`         | nein         | Aktuelle Temperatur in °C             |
+| `limittemp` | `int`           | nein         | Geräteinternes Temperaturlimit in °C  |
+| `boost`     | `charger-typed` | ja           | Relais für den SG-Ready-Boost-Kontakt |
+| `dim`       | `charger-typed` | nein         | Relais für den SG-Ready-Dim-Kontakt   |
 
   </TabItem>
 </Tabs>
@@ -390,46 +390,46 @@ Jeder Kontakt wird über einen eigenen Sub-Charger geschaltet, referenziert per 
 
 Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 
-### Lese-Attribute
+### Leseattribute
 
-| Attribut        | Typ      | Erfordert | Beschreibung                                                                             |
-| --------------- | -------- | --------- | ---------------------------------------------------------------------------------------- |
-| `soc`           | `int`    | ja        | Ladestand in %                                                                           |
-| `limitsoc`      | `int`    | nein      | Ladelimit in %                                                                           |
-| `status`        | `string` | nein      | Status (A..F)                                                                            |
-| `range`         | `int`    | nein      | Reichweite in km                                                                         |
-| `odometer`      | `int`    | nein      | Kilometerstand in km                                                                     |
-| `climater`      | `bool`   | nein      | Klimatisierung aktiv?                                                                    |
-| `getmaxcurrent` | `float`  | nein      | Maximaler Ladestrom in A                                                                 |
-| `finishtime`    | `string` | nein      | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
+| Attribut        | Typ      | Erforderlich | Beschreibung                                                                             |
+| --------------- | -------- | ------------ | ---------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | ja           | Ladestand in %                                                                           |
+| `limitsoc`      | `int`    | nein         | Ladelimit in %                                                                           |
+| `status`        | `string` | nein         | Status (A bis F)                                                                         |
+| `range`         | `int`    | nein         | Reichweite in km                                                                         |
+| `odometer`      | `int`    | nein         | Kilometerstand in km                                                                     |
+| `climater`      | `bool`   | nein         | Klimatisierung aktiv?                                                                    |
+| `getmaxcurrent` | `float`  | nein         | Maximaler Ladestrom in A                                                                 |
+| `finishtime`    | `string` | nein         | Geschätztes Ladeende (RFC3339, Go-Duration, Unix-Zeitstempel oder verbleibende Sekunden) |
 
-### Schreib-Attribute
+### Schreibattribute
 
-| Attribut       | Typ    | Erfordert | Beschreibung                   |
-| -------------- | ------ | --------- | ------------------------------ |
-| `wakeup`       | `bool` | nein      | Fahrzeug aufwecken             |
-| `chargeenable` | `bool` | nein      | Starte/stoppe den Ladevorgang  |
-| `maxcurrent`   | `int`  | nein      | Setze maximalen Ladestrom in A |
+| Attribut       | Typ    | Erforderlich | Beschreibung                       |
+| -------------- | ------ | ------------ | ---------------------------------- |
+| `wakeup`       | `bool` | nein         | Fahrzeug aufwecken                 |
+| `chargeenable` | `bool` | nein         | Startet/stoppt den Ladevorgang     |
+| `maxcurrent`   | `int`  | nein         | Setzt den maximalen Ladestrom in A |
 
 ### Konfiguration
 
-| Attribut   | Typ      | Erfordert | Beschreibung                   |
-| ---------- | -------- | --------- | ------------------------------ |
-| `title`    | `string` | nein      | Anzeigename des Fahrzeugs      |
-| `capacity` | `float`  | nein      | Batteriekapazität in kWh       |
-| `icon`     | `string` | nein      | Icon in der Benutzeroberfläche |
+| Attribut   | Typ      | Erforderlich | Beschreibung                   |
+| ---------- | -------- | ------------ | ------------------------------ |
+| `title`    | `string` | nein         | Anzeigename des Fahrzeugs      |
+| `capacity` | `float`  | nein         | Batteriekapazität in kWh       |
+| `icon`     | `string` | nein         | Icon in der Benutzeroberfläche |
 
 ### Features \{#vehicle-features\}
 
 | Feature         | Beschreibung                                                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `coarsecurrent` | Fahrzeug akzeptiert den Ladestrom nur in ganzen 1 A Schritten. Die Regelung wird auf grobe 1 A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
+| `coarsecurrent` | Fahrzeug akzeptiert den Ladestrom nur in ganzen 1-A-Schritten. Die Regelung wird auf grobe 1-A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
 | `streaming`     | Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). Ladestand-Updates außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.     |
 | `welcomecharge` | Fahrzeug erwartet beim Anschließen eine aktive Wallbox, um die Verbindung als funktionierend zu erkennen. Andernfalls meldet das Fahrzeug einen Fehler.       |
 
 ### Beispiele
 
-Lese die aktuelle Reichweite aus MQTT-Nachrichten.
+Lies die aktuelle Reichweite aus MQTT-Nachrichten.
 
 ```yaml
 title: Grüner Mazda # Anzeigename (optional)
@@ -441,7 +441,7 @@ range:
   topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
 ```
 
-Ein Auto per HTTP-Ping aufwecken, bevor weitere Abfragen folgen.
+Wecke das Fahrzeug per HTTP-Ping auf, bevor weitere Abfragen folgen.
 
 ```yaml
 wakeup:
@@ -462,33 +462,33 @@ onIdentify:
 ```
 
 Verfügbare Modi sind: `off`, `smart`, `now`.
-Die veralteten Werte `pv` und `minpv` werden weiterhin akzeptiert und aktivieren `smart` mit [Dauerhaft laden](/de/features/modes#always-charge) aus bzw. an.
+Die veralteten Werte `pv` und `minpv` werden weiterhin akzeptiert und aktivieren `smart` mit ausgeschaltetem bzw. eingeschaltetem [Dauerhaft laden](/de/features/modes#always-charge).
 
 ## Tarif und Vorhersage \{#tariff\}
 
 Ein benutzerdefinierter Tarif bindet eine eigene Wertquelle über den Plugin-Mechanismus an.
 Das Attribut `tariff` legt fest, was die Quelle liefert und in welcher Einheit.
 
-### Lese-Attribute
+### Leseattribute
 
-Die Attribute `price` und `forecast` schließen sich gegenseitig aus. Genau eines der beiden ist erforderlich.
+Genau eines der Attribute `price` oder `forecast` muss konfiguriert sein.
 
-| Attribut   | Typ      | Beschreibung                                                                                                 |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `price`    | `float`  | Aktueller Wert. Float-Wert des Plugins.                                                                      |
-| `forecast` | `string` | Vorhersage als JSON-String mit einer Liste von Zeiträumen und Werten (siehe Schema unten). Stündlich geholt. |
+| Attribut   | Typ      | Beschreibung                                                                                                         |
+| ---------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Aktueller Wert. Float-Wert des Plugins.                                                                              |
+| `forecast` | `string` | Vorhersage als JSON-String mit einer Liste von Zeiträumen und Werten (siehe Schema unten). Wird stündlich abgefragt. |
 
 ### Konfiguration
 
-| Attribut       | Typ        | Erfordert | Beschreibung                                                                                                                                                                                                   |
-| -------------- | ---------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tariff`       | `string`   | nein      | `price` (Standard), `co2`, `solar` oder `temperature`. Bestimmt die Einheit der zurückgegebenen Werte: Preis in konfigurierter Währung pro kWh, CO₂-Intensität in g/kWh, PV-Vorhersage in W, Temperatur in °C. |
-| `charges`      | `float`    | nein      | Fester Aufschlag pro kWh, der zu jedem Wert addiert wird. Standard `0`.                                                                                                                                        |
-| `chargesZones` | `list`     | nein      | Zeitabhängige Aufschläge (z. B. Netzentgelte), die `charges` für bestimmte Zeiträume überschreiben. Siehe [zeitabhängige Netzentgelte](/de/reference/configuration/tariffs#charges-zones).                     |
-| `tax`          | `float`    | nein      | Prozentualer Steuersatz auf das Ergebnis, z. B. `0.2` für 20%. Standard `0`.                                                                                                                                   |
-| `formula`      | `string`   | nein      | Go-Ausdruck für eine eigene Berechnung, mit `price`, `charges` und `tax` im Scope. Siehe [Beispiele](#formula-examples).                                                                                       |
-| `interval`     | `duration` | nein      | Abfrageintervall für `forecast`. Standard `1h`.                                                                                                                                                                |
-| `cache`        | `duration` | nein      | Cache-Dauer für `price`. Standard `15m`.                                                                                                                                                                       |
+| Attribut       | Typ        | Erforderlich | Beschreibung                                                                                                                                                                                                   |
+| -------------- | ---------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`       | `string`   | nein         | `price` (Standard), `co2`, `solar` oder `temperature`. Bestimmt die Einheit der zurückgegebenen Werte: Preis in konfigurierter Währung pro kWh, CO₂-Intensität in g/kWh, PV-Vorhersage in W, Temperatur in °C. |
+| `charges`      | `float`    | nein         | Fester Aufschlag pro kWh, der zu jedem Wert addiert wird. Standard `0`.                                                                                                                                        |
+| `chargesZones` | `list`     | nein         | Zeitabhängige Aufschläge (z. B. Netzentgelte), die `charges` für bestimmte Zeiträume überschreiben. Siehe [zeitabhängige Netzentgelte](/de/reference/configuration/tariffs#charges-zones).                     |
+| `tax`          | `float`    | nein         | Prozentualer Steuersatz auf das Ergebnis, z. B. `0.2` für 20%. Standard `0`.                                                                                                                                   |
+| `formula`      | `string`   | nein         | Go-Ausdruck für eine eigene Berechnung, in dem `price`, `charges` und `tax` als Variablen zur Verfügung stehen. Siehe [Beispiele](#formula-examples).                                                          |
+| `interval`     | `duration` | nein         | Abfrageintervall für `forecast`. Standard `1h`.                                                                                                                                                                |
+| `cache`        | `duration` | nein         | Cache-Dauer für `price`. Standard `15m`.                                                                                                                                                                       |
 
 ### Features \{#tariff-features\}
 
@@ -518,7 +518,7 @@ forecast:
 
 Das Plugin muss eine JSON-Struktur mit einer Liste von Zeiträumen und Preisen zurückgeben.
 Die Datumsfelder müssen in der Form `YYYY-MM-DDTHH:MM:SSZ` vorliegen, der Preis in der korrekten Währungseinheit (z. B. EUR).
-evcc arbeitet intern mit 15-Minuten-Intervallen; Plugins können auch stündliche Daten liefern, die automatisch in 15-Minuten-Intervalle umgerechnet werden.
+evcc arbeitet intern mit 15-Minuten-Intervallen, Plugins können aber auch stündliche Daten liefern, die automatisch umgerechnet werden.
 
 ```json
 [
@@ -547,9 +547,9 @@ evcc arbeitet intern mit 15-Minuten-Intervallen; Plugins können auch stündlich
 
 <a id="formula-examples"></a>
 
-Das `formula`-Feld akzeptiert einen Go-Ausdruck mit `price`, `charges`, `tax` und dem Slot-Zeitstempel `ts` im Scope.
+Das `formula`-Feld akzeptiert einen Go-Ausdruck, in dem `price`, `charges`, `tax` und der Zeitstempel `ts` des Zeitfensters als Variablen zur Verfügung stehen.
 Die [`math`-Bibliothek](https://pkg.go.dev/math) und [`time.Time`](https://pkg.go.dev/time#Time)-Methoden auf `ts` stehen zur Verfügung.
-Die Formel wird für den aktuellen Preis und jeden Vorhersage-Slot ausgeführt.
+Die Formel wird für den aktuellen Preis und jedes Zeitfenster der Vorhersage ausgeführt.
 
 **Preisobergrenze**:
 
@@ -561,7 +561,7 @@ formula: math.Min(0.5, (price + charges) * (1 + tax))
 
 Deckelt das Ergebnis bei 50 ct/kWh.
 
-**Keine Einspeisevergütung bei negativen Börsenpreisen** (deutsche PV-Anlagen, Inbetriebnahme ab 25. Februar 2025):
+**Keine Einspeisevergütung bei negativen Börsenpreisen** (deutsche PV-Anlagen, Inbetriebnahme nach dem 25. Februar 2025):
 
 ```yaml
 formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
@@ -571,10 +571,10 @@ Zahlt eine feste Einspeisevergütung von 7 ct/kWh, außer wenn der Börsenstromp
 
 ## Externe Begrenzung \{#external-limit\}
 
-Eine benutzerdefinierte Integration für die [Externe Begrenzung](/de/external-limit) bindet eine Steuerbox oder ein Energiemanagementsystem an, das nicht durch eine integrierte Integration abgedeckt ist.
+Eine benutzerdefinierte Integration für die [Externe Begrenzung](/de/external-limit) bindet eine Steuerbox oder ein Energiemanagementsystem an, das nicht durch eine eingebaute Integration abgedeckt ist.
 Wähle dazu in der Oberfläche unter **Konfiguration → Externe Begrenzung** die Option **Benutzerdefinierte Integration**.
 
-Einer von vier Typen beschreibt, wie das Begrenzungssignal empfangen wird: `relay` (einzelner Schaltkontakt), `fnn` (FNN-Steuerbox mit mehreren Schaltkontakten), `eebus` (EEBUS-Protokoll) oder `custom` (dynamische Limitwerte über Plugins).
+Wie das Begrenzungssignal empfangen wird, legst du mit einem von vier Typen fest: `relay` (einzelner Schaltkontakt), `fnn` (FNN-Steuerbox mit mehreren Schaltkontakten), `eebus` (EEBUS-Protokoll) oder `custom` (dynamische Limitwerte über Plugins).
 Jedes Signal wird über eine [Plugin](/de/reference/plugins)-Konfiguration ausgelesen (GPIO, MQTT, HTTP, Modbus).
 Siehe auch die [`hems`-Konfigurationsreferenz](/de/reference/configuration/hems).
 
@@ -592,7 +592,7 @@ Die Steuerbox aktiviert einen Kontakt, der von deiner evcc-Instanz ausgewertet w
 
 Das Leistungslimit wird dir vom Netzbetreiber mitgeteilt.
 Bei mehreren steuerbaren Verbrauchseinrichtungen (SteuVE) wird der Gleichzeitigkeitsfaktor berücksichtigt.
-Du kannst das Limit auch selbst berechnen mit der Formel: **Gesamtlimit = Anzahl SteuVE × 4,2 kW × Gleichzeitigkeitsfaktor**. Details zur Berechnung findest du [hier](https://www.inexogy.com/blog/14a-enwg/).
+Du kannst das Limit auch mit folgender Formel selbst berechnen: **Gesamtlimit = Anzahl SteuVE × 4,2 kW × Gleichzeitigkeitsfaktor**. Details zur Berechnung findest du [hier](https://www.inexogy.com/blog/14a-enwg/).
 
 <Tabs>
 <TabItem label="Raspberry Pi GPIO">
@@ -605,7 +605,7 @@ maxPower: 8400 # Beispiel für 2 SteuVE
 limit:
   source: gpio
   function: read
-  pin: 17 # GPIO Pin 17 auslesen
+  pin: 17 # GPIO-Pin 17 auslesen
   # Rückgabewert: false = nicht begrenzt, true = begrenzt
 ```
 
@@ -649,7 +649,7 @@ type: relay
 maxPower: 4200 # Beispiel für 1 SteuVE
 limit:
   source: modbus
-  uri: 192.168.179.200:4703 # Beispiel: am 2. S0-Zähler einer cFos Power Brain solar Wallbox
+  uri: 192.168.179.200:4703 # Beispiel: Relais am 2. S0-Zähler einer cFos Power Brain solar Wallbox
   id: 3 # Modbus Slave-ID
   timeout: 5s
   register:
@@ -670,7 +670,7 @@ Mindestens eines der Signale `w4` oder `w3` muss konfiguriert sein.
 
 | Attribut          | Typ        | Erforderlich | Beschreibung                                                                         |
 | ----------------- | ---------- | ------------ | ------------------------------------------------------------------------------------ |
-| `maxDimPower`     | `int` (W)  | ja¹          | Verbrauchslimit während das Dimmsignal (W4) aktiv ist.                               |
+| `maxDimPower`     | `int` (W)  | ja¹          | Verbrauchslimit, während das Dimmsignal (W4) aktiv ist.                              |
 | `maxCurtailPower` | `int` (W)  | ja²          | Installierte PV-Leistung, Basiswert für die Abregelungsstufen.                       |
 | `w4`              | Plugin     | nein         | Liest das Dimmsignal. Begrenzt den Verbrauch auf `maxDimPower`.                      |
 | `w3`              | Plugin     | nein         | Liest das Abregelungssignal. Begrenzt die Einspeisung auf 0% von `maxCurtailPower`.  |
@@ -705,7 +705,7 @@ s1:
 
 ### EEBUS \{#external-limit-eebus\}
 
-Die digitale Anbindung über das EEBUS-Protokoll.
+Hier erfolgt die Anbindung digital über das EEBUS-Protokoll.
 Die Steuerbox kommuniziert direkt mit deiner evcc-Instanz und übermittelt das Leistungslimit automatisch.
 Steuerbox und evcc müssen einmalig [gekoppelt](/de/external-limit#eebus-pairing) werden.
 
@@ -724,18 +724,18 @@ type: eebus
 ski: "1234-5678-90AB-CDEF" # SKI der Steuerbox
 ```
 
-### Custom \{#external-limit-custom\}
+### Benutzerdefiniert \{#external-limit-custom\}
 
-Die generische Integration für Steuerungssysteme, die dynamische Limitwerte statt Schaltkontakten liefern.
+Diese generische Integration ist für Steuerungssysteme gedacht, die dynamische Limitwerte statt Schaltkontakten liefern.
 Verbrauchslimit und Abregelung der Einspeisung werden über Plugins ausgelesen und arbeiten unabhängig voneinander.
 Mindestens eines der Attribute `maxConsumptionPower` oder `curtailedPercent` muss konfiguriert sein.
 
-| Attribut               | Typ        | Erforderlich | Beschreibung                                                                                                |
-| ---------------------- | ---------- | ------------ | ----------------------------------------------------------------------------------------------------------- |
-| `maxConsumptionPower`  | Plugin     | nein¹        | Liest das Gesamtleistungslimit in Watt. `0` = kein Limit.                                                   |
-| `curtailedPercent`     | Plugin     | nein¹        | Liest die erlaubte Einspeisung in Prozent von `productionNominalMax` (0 bis 100). `100` = keine Abregelung. |
-| `productionNominalMax` | `int` (W)  | nein²        | Installierte Generatorleistung (Wp).                                                                        |
-| `interval`             | `duration` | nein         | Abfrageintervall für die Plugins. Standard `10s`.                                                           |
+| Attribut               | Typ        | Erforderlich | Beschreibung                                                                                          |
+| ---------------------- | ---------- | ------------ | ----------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | Plugin     | nein¹        | Liest das Gesamtleistungslimit in W. `0` = kein Limit.                                                |
+| `curtailedPercent`     | Plugin     | nein¹        | Liest die erlaubte Einspeisung in % von `productionNominalMax` (0 bis 100). `100` = keine Abregelung. |
+| `productionNominalMax` | `int` (W)  | nein²        | Installierte Generatorleistung (Wp).                                                                  |
+| `interval`             | `duration` | nein         | Abfrageintervall für die Plugins. Standard `10s`.                                                     |
 
 ¹ mindestens eines von beiden ist erforderlich, ² erforderlich, wenn `curtailedPercent` konfiguriert ist.
 
@@ -821,13 +821,13 @@ Die Nachricht wird dem Plugin im Parameter `${send}` (bzw. als Template-Paramete
 
 Die möglichen Werte für `encoding` sind:
 
-| Encoding | Inhalt von `${send}`                                                                                                         |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `json`   | JSON-Objekt `{ "msg": msg, "title": title }`. Das Feld `title` wird nur hinzugefügt, wenn es für das Ereignis definiert ist. |
-| `csv`    | `title` und `msg` als kommaseparierte Liste                                                                                  |
-| `tsv`    | Wie `csv`, jedoch mit Tabulator als Trennzeichen                                                                             |
-| `title`  | Nur der Titel                                                                                                                |
-| (keins)  | Nur die Nachricht (`msg`)                                                                                                    |
+| Encoding        | Inhalt von `${send}`                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `json`          | JSON-Objekt `{ "msg": msg, "title": title }`. Das Feld `title` wird nur hinzugefügt, wenn es für das Ereignis definiert ist. |
+| `csv`           | `title` und `msg` als kommagetrennte Liste                                                                                   |
+| `tsv`           | Wie `csv`, jedoch mit Tabulator als Trennzeichen                                                                             |
+| `title`         | Nur der Titel                                                                                                                |
+| (nicht gesetzt) | Nur die Nachricht (`msg`)                                                                                                    |
 
 ### Beispiel
 

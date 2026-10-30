@@ -20,7 +20,7 @@ The list of hardware supported by evcc is growing steadily.
 
 We have added some wallbox integrations. Since evcc now also supports the very popular [Bender Controller](https://github.com/evcc-io/evcc/pull/3103) we were able to significantly expand the portfolie of supported devices.
 
-Here are the manufacturers that have been added since the beginning of the year: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity Vestel, Webasto. [(All charging stations)](/en/chargers)
+Here are the manufacturers that have been added since the beginning of the year: Alphatec, Ebee, Ensto, Garo, HardyBarth, Innogy, Juice, Mennekes, OpenWB Pro, Optec, PC Electric, SmartWB, TechniSat, Tapo Smarthome, Ubitricity, Vestel, Webasto. [(All charging stations)](/en/chargers)
 
 ### Vehicles 🚗 🛵
 
@@ -28,7 +28,7 @@ Audi (e-tron), Cupra, Jaguar, Landrover, Mercedes, Silence S01, Smart. [(All veh
 
 ### Inverters ☀️ 🔋
 
-SMA (Data Manager M Lite), Shelly (1PM, 3EM), Siemens (PAC 2200), OpenEMS, TQ. [(All meters)](/en/meters)
+SMA (Smart Energy Hybrid), Huawei (SUN2000), Solarwatt, Solax, Varta. [(All meters)](/en/meters)
 
 ### Grid meters 📟
 

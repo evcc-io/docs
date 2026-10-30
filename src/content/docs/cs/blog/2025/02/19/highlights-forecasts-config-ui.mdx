@@ -1,0 +1,135 @@
+---
+date: 2025-02-19
+title: "Novinky: předpovědi, konfigurace v rozhraní"
+description: "Přehled novinek z února 2025: evcc 0.200 přináší solární předpovědi, opakované plány nabíjení, podporu tepelných čerpadel SG Ready a konfiguraci v prohlížeči."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner s novinkami"
+  image: "../../../../../en/blog/2025/02/19/forecasts-banner.webp"
+translatedFrom: "34782fcb035b"
+---
+
+import Video from "@components/Video.astro";
+import forecastsVideo from "../../../../../en/blog/2025/02/19/forecasts.mp4";
+import forecastsPoster from "../../../../../en/blog/2025/02/19/forecasts.webp";
+import configUiVideo from "../../../../../en/blog/2025/02/19/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/02/19/config-ui.webp";
+export const SgreadySvg = "/img/sgready.svg?url";
+
+S [vydáním v0.200](https://github.com/evcc-io/evcc/releases) jsme udělali velký krok ke stabilitě a uživatelské přívětivosti.
+V tomto článku vám vysvětlíme, co stojí za tak velkým skokem v číslování verzí.
+Abychom udrželi napětí, necháme si to ale až na konec článku ;)
+
+Představíme také několik nových funkcí, které přibyly od [článku z listopadu](/cs/blog/2024/11/22/highlights-charts-stats).
+
+{/* excerpt */}
+
+## Předpovědi
+
+Nabíjení [optimalizované podle CO₂](/cs/features/co2) a [podle ceny](/cs/features/dynamic-prices) máme už nějakou dobu.
+Nyní jsme zapojili první dva poskytovatele předpovědí solární výroby: [Forecast.solar](https://forecast.solar) a [Solcast](https://solcast.com/free-rooftop-solar-forecasting).
+K tomu slouží nové pole `solar` v [konfiguraci tarifů](/cs/tariffs).
+
+Když je nastavený zdroj solární předpovědi, uvidíte v přehledu energie očekávanou solární výrobu na dnešek v kWh.
+Kliknutím na toto číslo nebo na novou položku nabídky **Předpověď** se dostanete do nového zobrazení, které vizualizuje očekávanou solární výrobu na příštích 48 hodin.
+Toto zobrazení ukazuje také předpovědi cen a CO₂.
+
+<Video src={forecastsVideo} poster={forecastsPoster} />
+
+~Zatím lze nastavit jen jednu solární předpověď (odpovídající jedné ploše střechy).
+V příštím vydání přidáme možnost předpovědi kombinovat.~<br/>
+To už je možné, viz [solární předpověď](/cs/tariffs#solar).
+
+Data solární předpovědi zatím plánování nabíjení neovlivňují, tvoří ale základ pro budoucí funkce a optimalizace.
+
+## Opakované plány nabíjení
+
+Když evcc zná stav nabití vozidla, zpřístupní se několik užitečných funkcí nabíjení.
+Možnost nabít vozidlo hned po zapojení na [minimální nabití](/cs/features/limits#minimum) tu je už nějakou dobu.
+Efektivní a čisté nabíjení vozidla pomocí [plánu nabíjení](/cs/features/plans) (čas odjezdu a cílový stav nabití) funguje také už léta.
+
+Téměř stejně staré je přání mít opakované plány nabíjení.
+Tedy možnost vytvořit plány podle dne v týdnu, o které se nemusíte neustále starat.
+Velké díky patří [@Maschga](https://github.com/Maschga), který se této velké funkce ujal.
+Výsledek se opravdu povedl.
+
+![Opakované plány nabíjení](../../../../../en/blog/2025/02/19/repeating-plans.webp)
+
+Plány lze v případě potřeby deaktivovat (např. během dovolené).
+Časová pásma, letní i zimní čas jsou zpracovány správně 🤯.
+Opakovaných plánů můžete mít více, a pokud jdou těsně po sobě, vybere se ten nejdůležitější a rozhodnutí plánovače se přehledně zobrazí.
+
+Více se dozvíte v části [Plány nabíjení](/cs/features/plans#repeating-plans).
+
+## Tepelná čerpadla a SG Ready
+
+Poptávka po podpoře tepelných čerpadel se v posledních měsících objevovala pravidelně.
+Doposud jsme se záměrně soustředili na elektromobily, aby evcc zůstalo zaměřené a zvládnutelné.
+Zapojení zdrojů tepla bylo možné pomocí [relé, chytrých zásuvek](/cs/smartswitches#heating) a rozhraní pluginů ([příklad](https://github.com/naltatis/aton-ctrl)) a uživatelé ho využívali.
+
+Od ledna nabízíme pro řízení tepelných čerpadel samostatný typ zařízení.
+Mnoho tepelných čerpadel podporuje standard SG Ready.
+Pomocí spínaného relé (např. Shelly) lze tepelnému čerpadlu dát pokyn, aby při přebytku nebo levné energii ze sítě zvýšilo provoz.
+
+<SgreadySvg
+  alt="Diagram řízení tepelného čerpadla přes relé SG Ready"
+  style={{ maxWidth: "700px" }}
+/>
+
+Některá tepelná čerpadla podporují i přímou komunikaci, např. po síti.
+Seznam těchto zařízení je zatím poměrně krátký.
+Pokud máte takové tepelné čerpadlo a víte, jak ho řídit, otevřete prosím [issue na GitHubu](https://github.com/evcc-io/evcc/issues).
+
+Více informací o [tepelných čerpadlech a elektrických ohřívačích](/cs/heating) najdete v dokumentaci.
+
+Zapojení zdrojů tepla do uživatelského rozhraní funguje, ale ještě není dokonalé.
+Témata jako časové metriky a lepší zobrazení tepelného čerpadla v hlavním přehledu máme na seznamu úkolů.
+
+## Konfigurace v rozhraní: nastavení v prohlížeči
+
+Při vývoji evcc nám vždy záleželo na tom, aby rozhraní bylo co nejjednodušší a nejpřehlednější.
+Pravidelně dostáváme zpětnou vazbu, že se v rozhraní rychle zorientují i ostatní členové domácnosti (často lidé, kteří se o techniku nezajímají).
+Taková vlastnost není samozřejmá, zvlášť u „klasických“ open source projektů, a jsme na ni docela hrdí.
+
+Velkou roli hraje důsledné sjednocení zařízení a datový model, na kterém evcc stojí.
+Jakmile je střídač, vozidlo nebo nabíječka nastavená, zvláštnosti jednotlivých zařízení už v rozhraní nehrají roli.
+
+Největší překážkou pro mnoho uživatelů je ale vůbec dosáhnout stavu „všechno je nastavené“.
+Doposud to vyžadovalo příkazový řádek a úpravy souboru YAML.
+
+Na tom, aby šlo prvotní nastavení provést v rozhraní, pracujeme už dlouho.
+V posledních letech a měsících jsme postupně přidávali jednotlivé funkce, jako je vytváření vozidel, měřičů, střídačů, tarifů a dalších.
+K dispozici jsou nyní také potřebné funkce, jako je zobrazení logů a ověřování uživatelů.
+
+Ve verzi 0.200 jsme přidali „poslední velký dílek skládačky“ k nastavení přes rozhraní.
+**Nyní lze v rozhraní vytvářet a upravovat nabíjecí body a nabíječky, tedy ústřední součásti evcc.**
+Tím jsme se znatelně přiblížili ke stabilnímu vydání 1.0.
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+Konfigurační rozhraní je zatím označené jako experimentální funkce 🧪.
+Některá pole ještě nejsou na správném místě, nemají správné popisy nebo nejsou důkladně otestovaná.
+Proto se velmi těšíme na vaši zpětnou vazbu, návrhy a hlášení chyb.
+
+Pokročilé funkce, jako je vytváření uživatelsky definovaných zařízení a lepší diagnostické nástroje, jsou ještě na programu.
+Více o stavu a postupu v tomto tématu najdete v [souhrnném issue](https://github.com/evcc-io/evcc/issues/6029).
+
+### Vyzkoušejte konfiguraci v rozhraní
+
+Pokud chcete vyzkoušet nastavení čistě přes rozhraní, můžete **spustit evcc s prázdným souborem `evcc.yaml`**.
+Zobrazí se uvítací obrazovka a odtud můžete pokračovat v konfiguraci přes rozhraní.
+K tomu je potřeba v rozhraní aktivovat experimentální funkce.
+
+## A mnohem víc…
+
+Jak je u článků s novinkami zvykem, jde jen o malý výběr ze všech témat, na kterých se pracuje.
+Od posledního článku v listopadu bylo vyvinuto, zrevidováno a úspěšně začleněno [přes 250 pull requestů](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged) 🤯.
+
+Úplný seznam témat najdete v [poznámkách k vydání](https://github.com/evcc-io/evcc/releases) na GitHubu.
+
+**S pozdravem**<br/>
+Tým evcc<br/>
+Michael, Andi a Uli

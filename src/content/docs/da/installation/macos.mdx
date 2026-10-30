@@ -1,0 +1,188 @@
+---
+title: "macOS"
+description: "Installer evcc på macOS med Homebrew, start det som launchd-tjeneste og hold det opdateret, eller installer det manuelt, hvis du vil prøve en nightly-version."
+sidebar:
+  order: 8
+translatedFrom: "de28eae0a2d4"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Denne vejledning beskriver installationen på macOS (10.12 og nyere) med pakkehåndteringen [Homebrew](https://brew.sh).
+
+:::note
+Hvis du vil installere evcc uden pakkehåndtering eller teste en nightly-version, kan du se afsnittet [Manuel installation](#manual).
+:::
+
+## Installation
+
+<Steps>
+
+1. ### Installer
+
+   Åbn et terminalvindue, og installer [Homebrew](https://brew.sh), hvis det ikke allerede er installeret.
+
+   ```sh
+   brew trust --tap evcc-io/tap
+   brew tap evcc-io/tap
+   brew update
+   brew install --cask evcc
+   ```
+
+2. ### Start \{#start\}
+
+   evcc leveres som en Homebrew-cask, der ikke kan styres med `brew services`.
+   Opret i stedet en launchd-agent. Den starter evcc ved login og genstarter det, hvis det stopper:
+
+   ```sh
+   mkdir -p "$(brew --prefix)/var/log"
+   cat > ~/Library/LaunchAgents/io.evcc.plist <<EOF
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+   <plist version="1.0">
+   <dict>
+     <key>Label</key>
+     <string>io.evcc</string>
+     <key>ProgramArguments</key>
+     <array>
+       <string>$(brew --prefix)/bin/evcc</string>
+     </array>
+     <key>WorkingDirectory</key>
+     <string>$(brew --prefix)</string>
+     <key>RunAtLoad</key>
+     <true/>
+     <key>KeepAlive</key>
+     <true/>
+     <key>StandardOutPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+     <key>StandardErrorPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+   </dict>
+   </plist>
+   EOF
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
+   ```
+
+3. ### Sæt op
+
+   Åbn evcc-grænsefladen i din browser: [http://localhost:7070](http://localhost:7070).
+   Angiv en administratoradgangskode, og konfigurer dine enheder direkte i webgrænsefladen.
+
+</Steps>
+
+## Konfiguration
+
+:::tip[Anbefalet]
+Konfigurer evcc direkte i din browser.
+:::
+
+Efter den første start kan du konfigurere evcc på [http://localhost:7070](http://localhost:7070).
+Indstillingerne gemmes automatisk i databasen.
+
+Alternativt kan du bruge en `evcc.yaml`-konfigurationsfil i `/etc/evcc.yaml`.
+Du finder detaljer under [Konfiguration](/da/installation/configuration).
+
+## Opgraderinger
+
+Følg disse trin for at opgradere til en ny version af evcc:
+
+- Åbn et terminalvindue
+- Opdater pakkelisterne:
+
+  ```sh
+  brew update
+  ```
+
+- Opgrader evcc:
+
+  ```sh
+  brew upgrade --cask evcc
+  ```
+
+- Genstart evcc:
+
+  ```sh
+  launchctl kickstart -k gui/$(id -u)/io.evcc
+  ```
+
+:::caution[OCPP og macOS-firewallen]
+Hver opgradering installerer en ny binærfil, der for macOS-firewallen er et nyt program.
+Hvis firewallen er slået til, blokeres indgående forbindelser, indtil den nye version er godkendt.
+OCPP-opladere kan så ikke længere oprette forbindelse, mens alt andet fortsat virker.
+På en Mac uden skærm vises godkendelsesdialogboksen aldrig.
+Godkend binærfilen fra kommandolinjen efter hver opgradering:
+
+```sh
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$(brew --prefix)/bin/evcc"
+launchctl kickstart -k gui/$(id -u)/io.evcc
+```
+
+:::
+
+### Opgradering fra Homebrew-formlen
+
+Til og med version 0.314.5 blev evcc leveret som Homebrew-formel og startet med `brew services`.
+Homebrew opgraderer ikke en installeret formel til en cask, så `brew upgrade` bliver ved med at melde den gamle version som opdateret.
+Fjern formlen, og installer casken (det skal kun gøres én gang):
+
+```sh
+brew services stop evcc
+brew uninstall evcc
+brew update
+brew install --cask evcc
+```
+
+Opret derefter launchd-agenten som beskrevet under [Start](#start).
+Din konfiguration og database påvirkes ikke.
+
+## Yderligere kommandoer
+
+- Tjek status for evcc-serveren:
+
+  ```sh
+  launchctl print gui/$(id -u)/io.evcc
+  ```
+
+- Stop evcc, og fjern launchd-agenten:
+
+  ```sh
+  launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
+  ```
+
+- Vis logfiler:
+
+  ```sh
+  tail -f "$(brew --prefix)/var/log/evcc.log"
+  ```
+
+## Manuel installation \{#manual\}
+
+Her finder du en vejledning i at installere evcc manuelt på macOS.
+
+### Installation
+
+- Download den passende fil til dit system:
+  - 64-bit ARM- eller Intel-CPU: [evcc_X.XX_macOS_all.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+- Pak den downloadede fil ud (f.eks. ved at dobbeltklikke på filen)
+- Der er nu en ny mappe med programmet `evcc`
+- Åbn en terminal, og gå til mappen med programmet `evcc`
+- Start evcc med følgende kommando:
+  ```sh
+  ./evcc -v
+  ```
+- Du bør nu se den aktuelle version af evcc (f.eks. `evcc version 0.xxx.y`).
+
+### Konfiguration
+
+Efter den første start åbner du [http://localhost:7070](http://localhost:7070) i din browser og konfigurerer evcc i webgrænsefladen.
+
+Alternativt kan du oprette en `evcc.yaml`-konfigurationsfil (se [Konfiguration](/da/installation/configuration)) og starte evcc med den:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Opdateringer/nedgraderinger
+
+Følg trinene ovenfor, og erstat evcc-programfilen med den nye eller den tidligere version.
+Konfigurationen behøver ikke at blive lavet igen.

@@ -1,0 +1,246 @@
+---
+date: 2025-07-30
+title: "Højdepunkter: konfigurationsflade, eksport og AI"
+description: "Højdepunkter for evcc 0.206 og 0.207 fra juli 2025 med en ikke-bagudkompatibel ændring i REST API'et, sen opladning, dynamisk eksport til elnettet og AI via MCP."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner med højdepunkter"
+  image: "../../../../../en/blog/2025/07/30/config-ui-mcp-feedin-banner.webp"
+translatedFrom: "5704e9a73f8e"
+---
+
+import Video from "@components/Video.astro";
+import configUiVideo from "../../../../../en/blog/2025/07/30/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/07/30/config-ui.webp";
+import mcpVideo from "../../../../../en/blog/2025/07/30/mcp-integration.mp4";
+import mcpPoster from "../../../../../en/blog/2025/07/30/mcp-integration.webp";
+
+Tid til en ny runde nyheder! Jeg har udvalgt en håndfuld spændende emner.
+
+{/* excerpt */}
+
+Før vi kommer til funktionerne, har vi en vigtig meddelelse til alle, der bruger REST API'et.
+
+## Ikke-bagudkompatibel ændring: REST API
+
+Med udgivelsen v0.207 ændres REST API'et.
+Endpoints forbliver de samme, men svarformatet bliver strømlinet.
+Konkret fjernes det yderste `result`-niveau.
+
+Her er et eksempel for endpointet `GET /api/state`:
+
+Nuværende JSON-svar:
+
+```json
+{
+  "result": {
+    "loadpoints": [...],
+    ...
+  }
+}
+```
+
+Fremtidigt JSON-svar:
+
+```json
+{
+  "loadpoints": [...],
+  ...
+}
+```
+
+Udviklerne af de populære evcc-integrationer er blevet informeret og har allerede foretaget de nødvendige tilpasninger.
+
+Hvis du har egne scripts eller automatiseringer, der tilgår REST API'et direkte, skal du selv tilpasse dem.
+Flere detaljer finder du i det tilhørende [GitHub-issue.](https://github.com/evcc-io/evcc/pull/22299)
+
+:::note[Bemærkninger til migreringen]
+For at gøre overgangen lettere har vi udgivet to versioner: **v0.206 og v0.207 har identiske funktioner**.
+Ændringerne i API'et er **med fra v0.207**.
+Hvis det nye svarformat giver problemer, kan du gå tilbage til v0.206.
+Så får du alle de nye funktioner, der beskrives her, og kan forberede dine scripts og integrationer på ændringen i dit eget tempo.
+:::
+
+## Planer: sen opladning
+
+Ladeplaner har fået en ny funktion: _Sen opladning_.
+Som standard optimerer planlægningsalgoritmen opladningen, så den sker i de billigste eller grønneste timer.
+Det kan dog også give mening at oplade køretøjet sent, dvs. så det passer med det indstillede måltidspunkt.
+
+Anvendelsesmuligheder er bl.a.:
+
+- **Forkonditionering**: Især om vinteren kan det være en fordel at varme køretøjets batteri op ved at oplade lige før afgang. Det sparer energi, fordi der skal bruges mindre aktiv klimastyring under kørslen.
+- **Klimastyring**: Hvis du har aktiveret klimastyring i bilen ved afgangstid, sørger denne indstilling for, at den nødvendige energi tages fra opladeren og ikke fra bilens batteri.
+- **Batteripleje**: Når du oplader til 100 % før lange ture, bør batteriet ikke stå fuldt opladet i længere tid.
+
+![Sen opladning](../../../../../en/blog/2025/07/30/plan-late.webp)
+
+Ud over afkrydsningsfeltet til at aktivere sen opladning kan du også indstille, hvor lang tid før måltidspunktet der skal oplades.
+Så kan du f.eks. stadig oplade størstedelen på prisoptimerede tidspunkter og først lade bilen helt op i den sidste time, som vist på skærmbilledet ovenfor.
+
+Flere detaljer finder du i [dokumentationen](/da/features/plans#late-charging).
+
+<a id="config-ui"></a>
+
+## Konfiguration i browseren
+
+Der sker store fremskridt med den første opsætning via browseren.
+I nogle uger har det været muligt at komme i gang uden `evcc.yaml`, men indtil nu startede det altid i [demotilstand](https://demo.evcc.io/).
+
+Nu starter opsætningen med en dialogboks, hvor du vælger:
+
+- Klassisk konfiguration med `evcc.yaml`
+- Browserbaseret konfiguration _🧪 eksperimentel_
+
+I den følgende video kan du se konfigurationen med flere køretøjer, målere, sol- og batterisystemer, opladere og varmepumper:
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+### Demotilstand
+
+Demotilstanden er stadig tilgængelig, hvis du vil afprøve brugerfladen uden konfiguration.
+Den startes med [CLI-flaget](https://docs.evcc.io/docs/reference/cli/evcc) `--demo`.
+
+I denne tilstand bruger solcelleanlæg, batteri og opladere simulerede data.
+Desuden er godkendelsessystemet slået fra, og derfor er alle beskyttede funktioner (konfiguration, log, ...) deaktiveret.
+
+### Brugerdefinerede enheder (plugins)
+
+Via konfigurationsfladen kunne man allerede oprette køretøjer, målere, sol- og batterisystemer, opladere, tariffer, styrbare stikkontakter og varmepumper.
+Det bygger på vores store bibliotek af enhedsskabeloner, som nu dækker over 550 produkter.
+
+En anden styrke er det [fleksible pluginsystem](/da/reference/plugins).
+Med det kan selv eksotiske enheder og integrationer tilsluttes via HTTP, Modbus, scripts, MQTT osv.
+Disse brugerdefinerede enheder (`type: custom`) skulle hidtil konfigureres via `evcc.yaml`.
+Nu kan det også gøres via brugerfladen, med syntaksfremhævning, validering og testfunktion.
+
+![Brugerdefinerede enheder (plugins)](../../../../../en/blog/2025/07/30/custom-devices.webp)
+
+### Opladning og opvarmning
+
+evcc har sin oprindelse i intelligent opladning af elbiler.
+I dag understøtter systemet også en voksende liste af varmepumper og varmelegemer.
+De grundlæggende optimeringsmål som effektiv brug af egen energi eller omkostningsoptimeret opladning fra elnettet er de samme på begge områder.
+Styringen, kravene til visningen og indstillingsmulighederne er dog forskellige i detaljerne.
+
+I konfigurationsfladen er afsnittet _Ladepunkter_ derfor omdøbt til _Opladning og opvarmning_.
+Opsætningsforløbet er også blevet omarbejdet, så det viser de indstillinger, der er relevante for den pågældende anvendelse.
+
+I [videoen ovenfor](#config-ui) (fra 2:10) kan du se de forskellige forløb for opladning og opvarmning.
+Her er et skærmbillede af den første opsætningsdialogboks:
+
+![Opladning og opvarmning](../../../../../en/blog/2025/07/30/charging-heating.webp)
+
+I de kommende udgivelser tager vi flere skridt for at gøre _opvarmning_ til en fuldgyldig del af evcc.
+Flere detaljer finder du i dette [GitHub-issue](https://github.com/evcc-io/evcc/issues/19753).
+
+### Sikkerhedskopiering og gendannelse
+
+Nu hvor flere og flere funktioner flytter ind i brugerfladen, opstår der nye spørgsmål:
+
+- Hvordan sikkerhedskopierer jeg min konfiguration?
+- Hvordan flytter jeg min installation til et nyt system?
+- Kan jeg nulstille konfigurationen og starte forfra?
+
+For at besvare disse spørgsmål har vi bygget en funktion til sikkerhedskopiering og gendannelse.
+Med den kan du gemme en sikkerhedskopi af evcc-databasen på din computer, gendanne en gemt tilstand eller slette konfigurationen og f.eks. beholde opladningshistorikken.
+
+![Sikkerhedskopiering og gendannelse](../../../../../en/blog/2025/07/30/backup-restore.webp)
+
+En stor tak til [@maschga](https://github.com/maschga) for hjælpen med implementeringen.
+
+### Mere på vej
+
+Listen over åbne opgaver for opsætning via browseren bliver kortere og kortere.
+Der er stadig nogle enheder, der ikke kan oprettes, og fejlfindingsoplysningerne til GitHub-issues skal forbedres.
+Og selvfølgelig er der altid plads til forbedringer i eksisterende funktioner.
+
+Men det tegner sig nu, at konfiguration via brugerfladen snart bliver den nye standard.
+Version 1.0.0 kommer nærmere.
+
+Bemærk: Konfiguration via `evcc.yaml` vil fortsat være mulig i fremtiden.
+
+## Dynamisk eksport til elnettet
+
+Med [dynamiske eltariffer](/da/features/dynamic-prices) kan du tilpasse opladning og opvarmning til den aktuelle prissituation.
+Den funktion findes nu også for eksport til elnettet.
+
+Hvis du har en tarif med [dynamiske eksportpriser](/da/features/dynamic-feedin) (f.eks. direkte salg af strøm på elmarkedet, dynamiske nettariffer, Nederlandene, Australien osv.), vises funktionen [prioritér eksport til elnettet](/da/features/dynamic-feedin#feed-in-priority) i indstillingsdialogboksen for ladepunktet.
+
+![Dynamisk eksport til elnettet](../../../../../en/blog/2025/07/30/smart-feedin.webp)
+
+Så kan du sætte opladning eller opvarmning på pause i perioder, hvor det er mere lukrativt at eksportere energien til elnettet.
+Du kan indstille en fast prisgrænse til det.
+Automatisering med eksterne scripts eller systemer via API'et er selvfølgelig også mulig.
+
+I de kommende udgivelser bygger vi flere funktioner omkring dynamisk eksport til elnettet.
+Vi eksperimenterer med at sætte eksporten på pause i perioder med negative priser og med at reducere produktionen.
+Mere om det [her](https://github.com/evcc-io/evcc/issues/21747).
+
+## AI-integration via MCP 🧪
+
+Med [Model Context Protocol](https://en.wikipedia.org/wiki/Model_Context_Protocol) (forkortet MCP) kan man give LLM'er som Claude, Gemini og ChatGPT struktureret adgang til eksterne systemer, f.eks. evcc.
+
+Når den eksperimentelle funktion [MCP](/da/integrations/mcp) er aktiveret, startes en eksperimentel MCP-server i evcc.
+Du kan tilføje det nye endpoint (f.eks. `http://evcc.local:7070/mcp`) i din LLM's konfiguration.
+
+Emnet MCP og de tilgængelige værktøjer er stadig meget nye og ændrer sig hele tiden.
+Vi ser dog et stort potentiale og spændende nye muligheder her, især inden for optimering og automatisering med lokale modeller.
+
+Den følgende video viser et eksempel på evcc sammen med Claude Code (Sonnet 4):
+
+<Video src={mcpVideo} poster={mcpPoster} />
+
+Forespørgsel: _”Brugeren vil køre til Hamborg i morgen kl. 8 med sin Tesla.”_
+
+LLM'en ...
+
+- ... finder det rigtige ladepunkt: ”white Model 3”
+- ... beregner afstanden: Bremen (titel) -> Hamborg (forespørgsel)
+- ... beregner det nødvendige opladningsniveau: 90 %
+- ... opretter en ladeplan: 90 % kl. 8 for Tesla Model 3
+- ... skifter opladningstilstanden fra **Fra** til **Sol**, da planer kun er aktive i tilstandene **Min+Sol** og **Sol**
+
+Til sidst henter den ladeplanen, som evcc har beregnet, og giver den videre til brugeren.
+
+Dette relativt enkle eksempel viser ret godt, hvor udviklingen kan bevæge sig hen.
+Vi er spændte på at se, hvordan MCP udvikler sig.
+Prøv det gerne selv, og del dine erfaringer i [GitHub Discussions](https://github.com/evcc-io/evcc/discussions).
+
+Flere detaljer om brugen af MCP med f.eks. Claude Code finder du i [dokumentationen](/da/integrations/mcp).
+
+## Produktion, batteri og ladepunkter kan foldes ud
+
+Hvis du har konfigureret flere sol- og batterisystemer eller ladepunkter, kan du nu folde dem ud i energiflowet og se flere detaljer.
+Enheder, der er oprettet via konfigurationsfladen, kan få et navn til det formål.
+
+:::note
+Af tekniske årsager kan målere for solcelleanlæg, batteri og andre enheder ikke navngives via `evcc.yaml`.
+:::
+
+## Understøttelse af nye enheder
+
+Siden februar har vi tilføjet flere nye producenter:
+
+- **Opladere:** Ampure, Autoaid, Charge Amps, Elecq, eledio, EN+, enercab, EntraTek, Free2Move, Free2move eSolutions, Huawei, Kathrein, Plugchoice, Volt Time, ZJ Beny
+- **Styrbare stikkontakter:** Home Assistant
+- **Varmepumper og varmelegemer:** alpha innotec, Bosch, Buderus, Bösch, CTA All-In-One, Daikin, Elco, IDM, Junkers, Kermi, Lambda, my-PV, Nibe, Novelan, Roth, Stiebel Eltron, Tecalor, Vaillant, Viessmann, Wolf, Zewotherm
+- **Målere:** Axitec, Bosch, IAMMETER, IOmeter, ORNO, Saia-Burgess Controls (SBC), Sigenergy, Wago
+- **Sol- og batterisystemer:** Axitec, batterX, Bosch, IAMMETER, Marstek, Sigenergy
+- **Køretøjer:** Toyota
+
+Selvfølgelig er der også rettet fejl og forbedret eksisterende implementeringer.
+
+## Meget mere ...
+
+Dette er kun et udpluk.
+Den fulde liste over nye funktioner finder du som altid i [GitHub Release Notes](https://github.com/evcc-io/evcc/releases).
+En stor tak til alle, der aktivt deltager i udviklingen af evcc.
+I er seje 🤘.
+
+**Venlig hilsen**<br />
+evcc-teamet<br />
+Michael, Andi & Uli

@@ -1,0 +1,118 @@
+---
+title: "chargers"
+description: "V evcc.yaml definujete nabíječky s povinnými parametry a můžete je označit jako integrovaná zařízení, topení nebo chytré spínače."
+sidebar:
+  order: 4
+translatedFrom: "8ce278855648"
+---
+
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+Aby mohlo evcc řídit nabíjení, musí umět komunikovat s nabíječkou.
+
+Nabíječka musí mít alespoň následující konfiguraci:
+
+```yaml
+chargers:
+  - name: charger1 # referenční název
+    type: ...
+    ...
+```
+
+Níže jsou vysvětleny možné parametry.
+
+---
+
+## Povinné parametry
+
+### `name`
+
+Krátké označení zde definované nabíječky. Hodnota se používá při odkazování na nabíječku v konfiguraci [nabíjecího bodu](/cs/reference/configuration/loadpoints#charger).
+
+**Příklad**:
+
+```yaml
+name: charger1
+```
+
+---
+
+### `type`
+
+Typ, přes který evcc s nabíječkou komunikuje. Známé nabíječky lze připojit pomocí typu `template`. Vhodný typ (šablonu) najdete v části [Zařízení – nabíječky](/cs/chargers).
+
+Pokud evcc vaši nabíječku nezná nebo potřebujete vlastní řešení, nastavte [nabíječku definovanou uživatelem](/cs/user-defined-devices#charger).
+
+**Příklad**:
+
+```yaml
+type: custom
+```
+
+---
+
+## Volitelné parametry
+
+### `integrateddevice`
+
+Tento parametr zajistí, že u nabíječek, které pracují bez „vozidla“ (např. tepelné čerpadlo, elektrokolo), se vozidlo nezobrazuje, a rozpoznávání vozidla tak odpadá.
+
+Spolu s tímto parametrem lze také přiřadit ikonu (viz [`vehicle.icon`](/cs/reference/configuration/vehicles#icon)), která se pak zobrazí u nabíječky.
+
+**Příklad**:
+
+```yaml
+features:
+  - integrateddevice
+icon: bike
+```
+
+---
+
+### `heating`
+
+Tento parametr zajistí, že se stav nabití u nabíječek ze skupiny _přepínatelné zásuvky_ (switchsockets) zobrazuje ve stupních místo v procentech.
+
+**Příklad**:
+
+```yaml
+features:
+  - heating
+```
+
+---
+
+### `continuous`
+
+Označuje zařízení, které i ve „vypnutém“ stavu dál běží ve svém běžném provozu.
+Uživatelské rozhraní pak místo **Vypnuto** zobrazuje **Normální**.
+Požadavek na zvýšení výkonu (např. při solárním přebytku nebo levné energii ze sítě) se označuje jako **Boost**.
+
+Tuto funkci nastavte, pokud vaše zařízení bez aktivního řízení dál běží ve svém běžném provozu.
+Typickým případem je tepelné čerpadlo; předkonfigurované typy tepelných čerpadel a odpovídající šablony tuto funkci již nastavují.
+
+**Příklad**:
+
+```yaml
+features:
+  - continuous
+```
+
+---
+
+### `switchdevice`
+
+Označuje zařízení, které lze pouze zapnout a vypnout a nepodporuje plynulé řízení proudu (např. tepelná čerpadla typu zapnuto/vypnuto, přepínatelné zásuvky).
+Uživatelské rozhraní pro tento nabíjecí bod skryje nastavení minimálního a maximálního proudu a volbu **Vždy nabíjet**.
+
+Odpovídající šablony a předkonfigurované typy tuto funkci již nastavují.
+U konfigurací definovaných uživatelem (`type: custom`) bez plynulého řízení proudu tuto funkci nastavte.
+
+**Příklad**:
+
+```yaml
+features:
+  - switchdevice
+```
+
+---

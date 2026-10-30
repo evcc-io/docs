@@ -34,7 +34,7 @@ All charging point IDs begin at `1`.
 - `evcc/loadpoints/<id>/title`: charging point title
 - `evcc/loadpoints/<id>/connected`: vehicle connected (true/false)
 - `evcc/loadpoints/<id>/charging`: currently charging (true/false)
-- `evcc/loadpoints/<id>/enabled`: charger enabled (true/false)
+- `evcc/loadpoints/<id>/enabled`: charging point enabled (true/false)
 - `evcc/loadpoints/<id>/mode`: charge mode (`off`, `smart`, `now`)
 - `evcc/loadpoints/<id>/alwaysCharge`: always charge option (`off`, `on`, `once`)
 - `evcc/loadpoints/<id>/chargePower`: current charge power (W)
@@ -82,7 +82,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/bufferSoc`: battery buffer charge level
 - `evcc/site/bufferStartSoc`: battery buffer start charge level
 - `evcc/site/residualPower`: grid residual power
-- `evcc/site/batteryGridChargeLimit`: smart charging cost limit
+- `evcc/site/batteryGridChargeLimit`: price limit for battery grid charging
 - `evcc/site/batteryDischargeControl`: enable/disable battery discharge control (true/false)
 - `evcc/site/batteryMode`: external battery mode (`normal`, `hold`, `charge`, `holdcharge`, `discharge`) — directly controls all controllable batteries, overrules other evcc modes, resets after 60 s
 - `evcc/site/smartCostLimit`: smart cost limit for all charging points
@@ -97,13 +97,13 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/loadpoints/<id>/limitEnergy`: limit energy in kWh — only applicable for offline vehicles
 - `evcc/loadpoints/<id>/planEnergy`: charging plan energy (JSON payload: `{"value": 50, "time": "2023-03-05T07:00:00Z"}`)
 - `evcc/loadpoints/<id>/phasesConfigured`: configured phases
-- `evcc/loadpoints/<id>/minCurrent`: minimum current value
-- `evcc/loadpoints/<id>/maxCurrent`: maximum current value
+- `evcc/loadpoints/<id>/minCurrent`: minimum charge current
+- `evcc/loadpoints/<id>/maxCurrent`: maximum charge current
 - `evcc/loadpoints/<id>/solarShare`: solar share of the minimum charging power (0 to 1)
-- `evcc/loadpoints/<id>/enableThreshold`: threshold value
-- `evcc/loadpoints/<id>/enableDelay`: delay value (s)
-- `evcc/loadpoints/<id>/disableThreshold`: threshold value
-- `evcc/loadpoints/<id>/disableDelay`: delay value (s)
+- `evcc/loadpoints/<id>/enableThreshold`: enable threshold
+- `evcc/loadpoints/<id>/enableDelay`: enable delay (s)
+- `evcc/loadpoints/<id>/disableThreshold`: disable threshold
+- `evcc/loadpoints/<id>/disableDelay`: disable delay (s)
 - `evcc/loadpoints/<id>/batteryboost`: battery boost enabled (1/0)
 - `evcc/loadpoints/<id>/batteryBoostLimit`: battery boost charge level limit
 - `evcc/loadpoints/<id>/priority`: priority value

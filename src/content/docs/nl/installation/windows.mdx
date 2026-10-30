@@ -1,0 +1,228 @@
+---
+title: "Windows"
+description: "Installeer evcc handmatig op Windows, start het via de opdrachtprompt of als achtergrondservice en voer later een update of downgrade uit."
+sidebar:
+  order: 10
+translatedFrom: "95912adc36d1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Hier vindt u instructies voor het handmatig installeren van evcc op Windows.
+
+:::caution
+Deze handmatige installatie vereist gevorderde pc-kennis, vooral bij het werken met de opdrachtprompt of PowerShell.
+
+evcc op Windows draaien is mogelijk.
+evcc wordt echter meestal in een Linux-omgeving gebruikt (bijv. Raspberry Pi).
+:::
+
+## Installatie
+
+<Steps>
+
+1. ### Installeren
+
+   Download het juiste bestand voor uw systeem en pak het uit (bijv. door erop te dubbelklikken):
+   - 64-bit Intel-CPU: [evcc_X.XX_windows_amd64.zip](https://github.com/evcc-io/evcc/releases/latest)
+
+   Open de opdrachtprompt en ga naar de uitgepakte map. Controleer de installatie:
+
+   ```sh
+   evcc -v
+   ```
+
+   U zou nu de huidige versie van evcc moeten zien (bijv. `evcc version 0.xxx.y`).
+
+2. ### Start
+
+   ```sh
+   ./evcc
+   ```
+
+3. ### Instellen
+
+   Open de evcc-interface in uw browser: [http://localhost:7070](http://localhost:7070).
+   Stel een beheerderswachtwoord in en configureer uw apparaten direct via de webinterface.
+
+</Steps>
+
+## Configuratiebestand (alternatief)
+
+Als alternatief voor de webinterface kunt u een configuratiebestand `evcc.yaml` gebruiken.
+Zie [Configuratie](/nl/installation/configuration) voor details.
+
+Start evcc met:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+## Updaten en downgraden
+
+Volg de stappen hierboven en vervang het evcc-programmabestand door de nieuwe of vorige versie.
+De configuratie hoeft niet opnieuw te worden ingesteld.
+
+## Achtergrondservice
+
+### Taakplanner
+
+:::note
+Deze documentatie gaat ervan uit dat evcc in `c:\evcc` staat.
+
+Deze instructies zijn gemaakt met Windows 10.
+:::
+
+- Open het startmenu en zoek naar “Taakplanner”, klik er met de rechtermuisknop op en kies “Als administrator uitvoeren”:
+
+![Windows 10 Taakplanner](../../en/installation/win10-srv/win10-srv-1.png)
+
+- Kies na het starten van de Taakplanner of u de nieuwe taak in een eigen map of in de algemene Bibliotheek Taakplanner wilt aanmaken.
+  In dit voorbeeld maken we een aparte map `evcc` aan.
+  Selecteer “Bibliotheek Taakplanner”, open met de rechtermuisknop het contextmenu en kies “Nieuwe map...”:
+
+![Bibliotheek Taakplanner](../../en/installation/win10-srv/win10-srv-2.png)
+
+- Selecteer nu de nieuwe map `evcc` en open opnieuw het contextmenu.
+  Kies “Taak maken”:
+
+![Venster Nieuwe taak](../../en/installation/win10-srv/win10-srv-3.png)
+
+- Geef de taak een naam (bijv. “evcc”) en een korte beschrijving.
+  Omdat de taak als systeemservice moet draaien, opent u via “Gebruiker of groep wijzigen” het venster om een gebruiker te selecteren en voert u `SYSTEM` in het invoerveld in.
+  Klik op “Namen controleren”, waarna het woord “SYSTEM” onderstreept moet zijn.
+  Klik op OK om het venster te sluiten:
+
+![Taakvenster](../../en/installation/win10-srv/win10-srv-4.png) ![Gebruikersselectie](../../en/installation/win10-srv/win10-srv-5.png)
+
+- Klik op het tabblad “Triggers” op “Nieuw...”.
+  Stel de trigger in op “Bij opstarten” en controleer of het selectievakje “Ingeschakeld” is aangevinkt:
+
+![Trigger](../../en/installation/win10-srv/win10-srv-6.png)
+
+- Klik op het tabblad “Acties” op “Nieuw...”.
+  Zorg dat “Een programma starten” is geselecteerd en zoek dan via “Bladeren” het programmabestand `evcc.exe`.
+  Het is aan te raden ook het pad in het veld “Beginnen in” in te vullen, zodat het configuratiebestand automatisch wordt gevonden:
+
+![Acties](../../en/installation/win10-srv/win10-srv-7.png)
+
+- Op het tabblad “Voorwaarden” kunnen de standaardinstellingen ongewijzigd blijven.
+
+  :::note
+  De SMA Home Manager kan soms problemen geven in combinatie met wifi. Probeer in dat geval de voorwaarde “Netwerk” in te schakelen en de juiste netwerkverbinding in de keuzelijst te kiezen.
+  :::
+
+![Voorwaarden](../../en/installation/win10-srv/win10-srv-8.png)
+
+- Selecteer op het tabblad “Instellingen” de optie “Taak zo snel mogelijk uitvoeren nadat een geplande start is gemist”.
+  Zorg er ook voor dat “Taak stoppen als deze langer wordt uitgevoerd dan:” **niet** is geselecteerd, anders wordt evcc na verloop van tijd onverwacht gestopt.
+
+![Instellingen](../../en/installation/win10-srv/win10-srv-9.png)
+
+De taak kan nu handmatig worden gestart of met een herstart worden getest.
+Ga ter controle in uw browser naar `http://localhost:7070`.
+
+### NSSM \{#nssm\}
+
+:::note
+Deze documentatie gaat ervan uit dat evcc in `c:\Tools\evcc` staat.
+
+Deze instructies zijn gemaakt met Windows 11.
+:::
+
+Als alternatief voor de Taakplanner kunt u evcc als Windows-service draaien.
+Een service draait zonder dat een gebruiker is ingelogd en biedt betere controle over het herstartgedrag en de foutafhandeling.
+
+Omdat evcc de Windows-serviceinterface niet zelf ondersteunt, kan [_nssm_](https://nssm.cc/download) (_Non-Sucking Service Manager_) als servicewrapper worden gebruikt.
+
+- Download _nssm_ van [nssm.cc](https://nssm.cc/download) en pak het ZIP-bestand uit naar `C:\Tools\nssm\`.
+- Open een opdrachtprompt (`cmd.exe`) en ga naar de map `win64`:
+
+  ```sh
+  cd /D C:\Tools\nssm\nssm-2.24\win64
+  ```
+
+- Installeer de service:
+
+  ```sh
+  nssm install evcc
+  ```
+
+- Loop de tabbladen van het venster door.
+  De volgende instellingen zijn aanbevelingen.
+  - **Application**:
+
+    ![Toepassing](../../en/installation/win11-nssm/win11-nssm_01_Application.webp)
+    - _Path_: pad naar `evcc.exe`.
+    - _Start directory_: werkmap voor evcc.
+    - _Arguments_: parameters voor evcc, bijv. `-c evcc.yaml`.
+      Optioneel: `--database evcc.db` om het databasepad expliciet in te stellen.
+      Zonder deze optie wordt de database opgeslagen in het gebruikersprofiel van het account dat evcc uitvoert.
+      Onder het account _System_ is dat `%SystemRoot%\system32\config\systemprofile\.evcc\evcc.db`, een andere locatie dan bij een interactieve start.
+      Met `--database` zorgt u ervoor dat altijd dezelfde database wordt gebruikt.
+      Dit is van belang bij het [opnieuw instellen van het wachtwoord](/nl/faq#password-reset).
+
+  - **Details**:
+
+    ![Details](../../en/installation/win11-nssm/win11-nssm_02_Details.webp)
+    - _Display Name_: naam van de service in Windows Services (bij voorkeur gelijk aan _Service Name_).
+    - _Startup type_: _Automatic_ voor automatisch starten bij het opstarten.
+
+  - **Log on**:
+
+    ![Aanmelden](../../en/installation/win11-nssm/win11-nssm_03_Log_on.webp)
+
+    Standaard: de service draait onder het account _System_.
+    Details: [nssm-documentatie](https://nssm.cc/usage).
+
+    :::important
+    Het hier gekozen account bepaalt waar evcc zijn database `evcc.db` opslaat (zie _Arguments_ hierboven).
+    :::
+
+  - **Dependencies**:
+
+    ![Afhankelijkheden](../../en/installation/win11-nssm/win11-nssm_04_Dependencies.webp)
+
+    Door `NlaSvc` als afhankelijkheid toe te voegen, zorgt u ervoor dat het netwerk gereed is voordat evcc start.
+
+  - **Process**:
+
+    ![Proces](../../en/installation/win11-nssm/win11-nssm_05_Process.webp)
+
+    Standaardinstellingen behouden.
+
+  - **Shutdown**:
+
+    ![Afsluiten](../../en/installation/win11-nssm/win11-nssm_06_Shutdown.webp)
+
+    Standaardinstellingen behouden.
+    nssm probeert eerst `Ctrl`+`C`, daarna `WM_CLOSE`/`WM_QUIT`, en beëindigt het proces geforceerd na een time-out.
+
+  - **Exit actions**:
+
+    ![Afsluitacties](../../en/installation/win11-nssm/win11-nssm_07_Exit_actions.webp)
+
+    Aanbeveling: _Restart application_ met een vertraging van 10 seconden, zodat evcc na een crash of een herstart via de webinterface automatisch opnieuw start.
+
+  - **I/O**:
+
+    ![I/O](../../en/installation/win11-nssm/win11-nssm_08_IO.webp)
+
+    Optioneel: leid `stdout` en `stderr` om naar logbestanden.
+    Houd het logniveau van evcc laag, zodat de bestanden niet te snel groeien.
+
+  - **File rotation**:
+
+    ![Bestandsrotatie](../../en/installation/win11-nssm/win11-nssm_09_File_rotation.webp)
+
+    Optioneel: schakel logrotatie in om de grootte van de logbestanden te beperken.
+
+  - **Environment**:
+
+    ![Omgeving](../../en/installation/win11-nssm/win11-nssm_10_Environment.webp)
+
+    Standaardinstellingen behouden.
+
+Klik op _Install Service_ om de service te installeren.
+De service kan daarna via de Windows-beheerconsole Services worden gestart en gestopt.
+Ga ter controle in uw browser naar `http://localhost:7070`.

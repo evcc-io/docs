@@ -1,0 +1,70 @@
+---
+translatedFrom: "de9f2699a051"
+---
+
+## Sådan fungerer det \{#how-it-works\}
+
+Ved normal drift lader evcc uden ekstern effektbegrænsning.
+Ladepunkterne kører med deres normale konfiguration og koordineres om nødvendigt af yderligere begrænsninger i [Belastningsstyring](/da/features/loadmanagement).
+
+Når netselskabet sender et signal om effektreduktion:
+
+1. **FNN-styreboks**: W4-kontakten lukkes, og evcc aktiverer den konfigurerede forbrugsgrænse
+2. **EEBUS**: Styreboksen overfører digitalt den beregnede samlede grænse
+3. **Relæ**: Kontakten lukkes, og evcc aktiverer den konfigurerede effektgrænse
+
+Grænsen begrænser hovedkredsløbet i [Belastningsstyring](/da/features/loadmanagement), og alle ladepunkter, der er tildelt kredsløb, reduceres tilsvarende.
+Hvis det samlede forbrug er for højt, kan opladninger også stoppes.
+Styringen gælder for alle tilstande (Smart, Hurtig).
+
+**Batteristyring under effektreduktion:**
+Hvis [aktiv batteristyring](/da/features/battery#battery-control) er konfigureret, og [opladning fra elnettet](/da/features/battery#gridcharge) af hjemmebatteriet er aktiv, sættes den automatisk på pause.
+Batteriet sættes i tilstanden _hold_, så det ikke længere aflades.
+Opladning af batteriet med soloverskud er normalt stadig mulig.
+Når effektreduktionen ophører, genoptages [opladning fra elnettet](/da/features/battery#gridcharge) automatisk.
+
+Når en styringsgrænse er aktiv, vises der et **banner med en styringsmeddelelse** på hovedsiden i evcc.
+Forbrugsgrænse og effektbegrænsning af eksporten vises hver for sig.
+
+## Logning \{#logging\}
+
+Alle anmodninger om begrænsning fra netselskabet dokumenteres automatisk.
+Logdataene kan downloades som CSV-fil under **Opsætning → Ekstern grænse**.
+
+Hver post indeholder:
+
+- Start- og sluttidspunkt for begrænsningen
+- Styringstype (forbrugsreduktion eller effektbegrænsning af eksporten)
+- Målt effekt i elnettet ved begrænsningens start
+- Indstillet effektgrænse
+
+Netselskabet kan på anmodning få denne dokumentation for at kontrollere, at styringsanmodningerne er overholdt.
+
+:::note[Ansvar (tysk regulering § 14a, § 9)]
+Den autoriserede elinstallatør skal efter installationen kontrollere, at den eksterne grænse virker som forventet.
+Anlægsejeren er ansvarlig for korrekt drift og skal opbevare loggen i mindst 2 år.
+:::
+
+## Styring af yderligere forbrugsenheder \{#additional-consumers\}
+
+Ud over ladepunkter kan også andre styrbare forbrugsenheder indgå i belastningsstyringen i henhold til den tyske § 14a EnWG.
+Det gælder f.eks. varmepumper eller hjemmebatterier, der er tilsluttet via EEBUS eller konfigureret som målere med en ekstra relæudgang.
+
+Styringen tager højde for det aktuelle effektforbrug for alle styrbare forbrugsenheder.
+Det omfatter automatisk alle ladepunkter og, som andre forbrugsenheder, alle målere med en tilsvarende koblingsudgang eller en EEBUS-grænseflade med LPC-use-case.
+
+Først dæmpes alle andre forbrugsenheder.
+Den resterende effekt fordeles derefter til de aktive ladepunkter.
+På grund af den generelle dæmpning af andre forbrugsenheder kan den tilgængelige ladeeffekt for aktive ladepunkter i undtagelsestilfælde endda være højere end ved normal drift.
+Hvis det ikke er nok at drosle ladepunkterne ned og dæmpe alle andre forbrugsenheder, afbrydes opladningen ved ladepunkterne.
+
+:::note[Tilgængelighed]
+I øjeblikket findes der kun én måler, der kan dæmpes (EEBUS-forbrugsenhed).
+Funktionen udbygges, og kompatible målere vil blive markeret i [enhedsdokumentationen](/da/meters).
+:::
+
+## Yderligere information \{#further-information\}
+
+- [Belastningsstyring](/da/features/loadmanagement): Grundlæggende om fordeling af belastningen
+- [Brugerdefineret integration](/da/user-defined-devices#external-limit): Tilslutning via relæ eller brugerdefinerede datakilder
+- [Plugins](/da/reference/plugins): Avancerede plugin-konfigurationer

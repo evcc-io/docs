@@ -1,0 +1,1256 @@
+---
+title: Plugins
+description: "Plugins lezen en schrijven afzonderlijke waarden via Modbus, HTTP, MQTT, scripts en meer, en vormen de bouwstenen van gebruikersgedefinieerde apparaten."
+tableOfContents:
+  maxHeadingLevel: 4
+translatedFrom: "ffe5935de8c0"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+
+Plugins lezen en schrijven afzonderlijke waarden op een apparaat, bijv. een enkele vermogensmeting, een doelstroom of een inschakelcommando.
+Ze vormen de basis van de meegeleverde apparaatsjablonen en worden direct gebruikt wanneer u een [gebruikersgedefinieerd apparaat](/nl/user-defined-devices) van `type: custom` opbouwt.
+
+Plugins kunnen voor de volgende categorieën worden gebruikt:
+
+- `meter`: [Zonne-energie, thuisbatterij, net, meters](/nl/meters)
+- `charger`: [Laders](/nl/chargers), [Slimme schakelaars](/nl/smartswitches), [Warmtepompen, elektrische verwarmingselementen](/nl/heating)
+- `vehicle`: [Voertuigen](/nl/vehicles)
+- `tariff`: [Tarieven, voorspellingen](/nl/tariffs)
+- `circuit`: [Load management](/nl/features/loadmanagement)
+
+Plugins worden ook door [meldingen](/nl/notifications) gebruikt om levenscyclusgebeurtenissen te versturen.
+
+### Lijst met plugins
+
+- [GPIO-plugin](#gpio) - Plugin voor directe toegang tot GPIO-pinnen (alleen Linux).
+- [Go-plugin](#go) - Plugin die waarden via een Go-script levert of ontvangt.
+- [HTTP-plugin](#http) - Plugin die via een HTTP-API met eindapparaten communiceert.
+- [JavaScript-plugin](#javascript) - Plugin die waarden via een JavaScript-script levert of ontvangt.
+- [Modbus-plugin](#modbus) - Plugin voor het uitlezen van een apparaat met Modbus-ondersteuning.
+- [MQTT-plugin](#mqtt) - Plugin voor indirecte communicatie met MQTT-compatibele apparaten via MQTT.
+- [Prometheus-plugin](#prometheus) - Plugin voor het uitlezen van metrics uit Prometheus met PromQL.
+- [Shell-plugin](#shell) - Plugin die een shellscript kan uitvoeren om gegevens op te halen of om gegevens te ontvangen die moeten worden geschreven.
+- [SMA/Speedwire-plugin](#speedwire) - Plugin speciaal voor SMA-apparaten die via het Speedwire-protocol kunnen communiceren.
+- [Websocket-plugin](#websocket) - Plugin voor het ontvangen van apparaatgegevens via een eigen webserver. Kan alleen voor het lezen van gegevens worden gebruikt.
+
+### Lijst met hulpplugins
+
+- [Calc-plugin](#calc) - Metaplugin voor het rekenkundig combineren van uitvoer van andere plugins.
+- [Combined-plugin](#combined) - Metaplugin speciaal voor `charger` om de booleaanse statuswaarden voor verbonden (_plugged_) en laden (_charging_) te combineren tot één laadstatus.
+- [Const-plugin](#const) - Speciale plugin die alleen een constante waarde teruggeeft.
+- [Error-plugin](#error) - Speciale plugin die een bekende foutwaarde teruggeeft.
+- [Convert-plugin](#convert) - Metaplugin voor conversie van gegevenstypen bij het schrijven (bijv. float naar int).
+- [Delta-plugin](#delta) - Metaplugin voor het omzetten van absolute waarden in delta- of incrementwaarden bij het schrijven.
+- [Ignore-plugin](#ignore) - Metaplugin voor het onderdrukken van specifieke foutmeldingen.
+- [IfElse-plugin](#ifelse) - Metaplugin voor voorwaardelijke schrijfbewerkingen met twee takken (if/else).
+- [Map-plugin](#map) - Metaplugin voor het vertalen van gehele getallen (bijv. apparaatspecifieke modi naar evcc-modi).
+- [Meter-plugin](#meter-plugin) - Plugin om een andere meter als gegevensbron te gebruiken.
+- [Sequence-plugin](#sequence) - Metaplugin voor het na elkaar uitvoeren van meerdere schrijfbewerkingen.
+- [Sleep-plugin](#sleep) - Hulpplugin voor het vertragen van acties (meestal samen met Sequence gebruikt).
+- [Switch-plugin](#switch) - Metaplugin voor voorwaardelijke schrijfbewerkingen op basis van invoerwaarden (zoals switch/case).
+- [Valid-plugin](#valid) - Metaplugin voor het leveren van pluginwaarden op basis van een booleaanse validatie.
+- [Watchdog-plugin](#watchdog) - Metaplugin voor het automatisch herhalen van schrijfbewerkingen met vaste intervallen.
+
+## Syntaxis
+
+Een plugin hoort bij een attribuut van een apparaat.
+De attribuutnaam (bijv. `power`, `enable`, `soc`) bepaalt de rol, `source` kiest het plugintype en de overige sleutels zijn pluginspecifieke parameters.
+
+```yaml
+<attribuut>:
+  source: <plugin>
+  <p-attr1>: ...
+  <p-attr2>: ...
+```
+
+Elke plugin wordt gebruikt in een **lees**- of een **schrijf**context. Sommige parameters zijn maar in een van beide zinvol.
+De volledige attribuutlijsten van meters, laders, voertuigen en tarieven vindt u bij [gebruikersgedefinieerde apparaten](/nl/user-defined-devices).
+
+### Lezen \{#reading\}
+
+Bij het lezen van gegevens met een plugin kunnen zogenaamde _pipelines_ worden gebruikt.
+Hiermee kunnen gegevens nauwkeurig uit de uitvoer van de plugin worden gehaald.
+Zo kunnen complexe datastructuren zoals JSON of XML worden verwerkt en kan de benodigde informatie eruit worden gefilterd.
+Mogelijke parameters voor het extraheren van gegevens zijn:
+
+- `regex`: Een reguliere expressie om waarden uit de ontvangen tekst te halen.
+- `jq`: Een [jq](https://jqlang.github.io/jq/)-expressie om waarden uit JSON-structuren te halen.
+  De volledige syntaxis en mogelijkheden staan in de jq-documentatie.
+- `quote`: Booleaanse waarde die de invoergegevens tussen aanhalingstekens zet voordat ze aan jq worden doorgegeven. Zo kan jq strings zonder aanhalingstekens verwerken (bijv. uit MQTT). Voor een MQTT-waarde als `Charging` kunt u `quote: true` en `jq: '. == "Charging"'` gebruiken.
+- `unpack`: Zet waarden om vanuit andere getalnotaties, bijv. `hex`.
+- `decode`: Decodeert binaire formaten zoals `uint32`, `float32` enz.
+
+#### Bekende foutwaarden \{#known-errors\}
+
+De plugins [HTTP](#http), [MQTT](#mqtt) en [Websocket](#websocket) kunnen speciale foutstrings teruggeven.
+evcc herkent deze en zet ze om in interne foutcodes in plaats van ze als gegevens te behandelen.
+Dat is bijv. handig voor gebruikersgedefinieerde voertuigintegraties waarbij de gegevensbron de toestand van het voertuig kent.
+
+- `ErrAsleep`: Het voertuig slaapt. evcc kan besluiten het voertuig te wekken en het opnieuw te proberen.
+- `ErrMustRetry`: De bewerking moet opnieuw worden geprobeerd (bijv. vanwege rate limiting).
+- `ErrNotAvailable`: De waarde is niet beschikbaar. evcc behandelt dit tot de volgende herstart als permanente fout.
+
+Als een plugin de string `ErrAsleep` als antwoord teruggeeft, genereert evcc de bijbehorende interne fout.
+De [Error-plugin](#error) gebruikt hetzelfde mechanisme om een vaste foutwaarde als constante terug te geven.
+
+### Schrijven \{#writing\}
+
+Bij het schrijven kunnen parameters in de configuratie door plaatshouders worden vervangen.
+De gegevens worden geleverd in de vorm `${var[:format]}`.
+Als er geen formaat is opgegeven, worden de gegevens in het Go-standaardformaat %v geleverd.
+De variabelen worden door de bijbehorende waarde vervangen voordat de plugin wordt uitgevoerd.
+Daarnaast kunnen alle functies van de Go-templatebibliotheek worden gebruikt voor complexere gegevenstransformaties.
+
+## Plugins
+
+### GPIO <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#gpio\}
+
+De `gpio`-plugin geeft directe toegang tot GPIO-pinnen (General Purpose Input/Output) op Linux-systemen.
+Hij is vooral geschikt voor de Raspberry Pi en vergelijkbare singleboardcomputers.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                                |
+| --------- | ------ | --------- | ------------------------------------------- |
+| function  | string | ja        | Modus: `read` (invoer) of `write` (uitvoer) |
+| pin       | int    | ja        | Pinnummer (BCM-nummering, bijv. GPIO 17)    |
+
+**Werking**:
+
+- **Lezen** (`function: read`): Leest de toestand van een GPIO-pin als booleaanse waarde (`true` = HIGH, `false` = LOW)
+- **Schrijven** (`function: write`): Zet een GPIO-pin op HIGH (`true`) of LOW (`false`)
+
+De pinnummering volgt het BCM-schema (Broadcom-nummers, niet de fysieke positie van de pin).
+Een pinoverzicht van de Raspberry Pi vindt u bijv. op [pinout.xyz](https://pinout.xyz/).
+
+**Leesvoorbeeld**:
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM-pinnummer
+```
+
+**Schrijfvoorbeeld**:
+
+```yaml
+source: gpio
+function: write
+pin: 27 # BCM-pinnummer
+```
+
+:::note
+Deze plugin werkt alleen op Linux-systemen met toegang tot `/dev/gpiomem`.
+:::
+
+### Go <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#go\}
+
+De `go`-plugin gebruikt de [Yaegi](https://github.com/traefik/yaegi)-interpreter om Go-code tijdens runtime uit te voeren.
+Hij is vooral nuttig voor typeveilige berekeningen en complexe logica voor gegevensverwerking.
+
+#### Beschikbare Go-standaardbibliotheken
+
+De volgende Go-packages zijn automatisch beschikbaar en hoeven niet te worden geïmporteerd:
+
+- `fmt` - Geformatteerde I/O
+- `math` - Wiskundige functies
+- `strings` - Stringbewerkingen
+- `time` - Tijd- en datumfuncties
+
+**Leesvoorbeeld**:
+
+```yaml
+source: go
+script: |
+  res := 500.0
+  res * 2 // geeft 1000.0 terug
+```
+
+**Voorbeeld met tijdfuncties**:
+
+```yaml
+source: go
+script: |
+  hour := time.Now().Hour()
+  price := 50.0 // Nachttarief
+  if hour >= 9 && hour < 17 {
+    price = 100.0 // Tariefprijs tijdens kantooruren
+  }
+  price // geeft 50.0 of 100.0 terug, afhankelijk van het tijdstip
+```
+
+**Voorbeeld met stringverwerking**:
+
+```yaml
+source: go
+script: |
+  text := "hallo wereld"
+  strings.ToUpper(text) // geeft "HALLO WERELD" terug
+```
+
+Als de `go`-plugin voor schrijven wordt gebruikt, wordt de te schrijven waarde als variabele aan het script doorgegeven:
+
+**Schrijfvoorbeeld**:
+
+```yaml
+maxcurrent:
+  source: go
+  script: |
+    fmt.Printf("Laadstroom instellen: %d A\n", maxcurrent)
+    // de variabele maxcurrent is automatisch beschikbaar
+```
+
+#### Invoer- en uitvoertransformaties \{#transformations\}
+
+De plugins `go` en `js` ondersteunen de parameters `in` en `out` om waarden uit andere bronnen als variabelen in het script te gebruiken of het resultaat van het script naar andere plugins door te sturen.
+
+##### Invoertransformaties (`in`)
+
+Met de parameter `in` kunt u waarden uit andere bronnen als variabelen in uw script gebruiken.
+Elk item vereist `name` (variabelenaam in het script), `type` (`bool`, `int`, `float`, `string`) en `config` (pluginconfiguratie).
+
+Dit voorbeeld toont voorwaardelijke logica die met eenvoudige Calc-bewerkingen niet mogelijk is:
+
+```yaml
+power:
+  source: go
+  script: |
+    // Vermogen op basis van SoC en stand-by
+    power := 5000.0 // normaal
+    if standby {
+      power = 0.0 // geen belasting in stand-by
+    } else if soc < 20.0 {
+      power = 1000.0 // laag
+    }
+    power // geeft 5000.0 terug (standby=false, soc>=20)
+  in:
+    - name: soc
+      type: float
+      config:
+        source: const
+        value: 85.0
+    - name: standby
+      type: bool
+      config:
+        source: const
+        value: false
+```
+
+##### Uitvoertransformaties (`out`)
+
+De parameter `out` stuurt het resultaat van het script door naar andere plugins.
+Dat is vooral nuttig in een schrijfcontext, bijv. wanneer het resultaat van het script verder via MQTT of HTTP moet worden verwerkt.
+Elk item vereist `name`, `type` en `config`, net als bij `in`.
+
+```yaml
+maxcurrent:
+  source: go
+  script: |
+    watts := maxcurrent * 230
+    watts
+  out:
+    - name: watts
+      type: float
+      config:
+        source: mqtt
+        topic: heater/target_power
+```
+
+### HTTP <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#http\}
+
+De `http`-plugin voert HTTP-verzoeken uit om gegevens te lezen of bij te werken.
+Daarnaast kan hij JSON-datastructuren via jq-query’s uitlezen of er eenvoudige transformaties op uitvoeren (bijv. voor REST-API’s).
+De volledige functionaliteit staat in de [officiële jq-documentatie](https://jqlang.github.io/jq/manual/).
+
+De authenticatiemethoden zijn `basic`, `bearer` en `digest`.
+De namen van de bijbehorende parameters vindt u [hier](https://github.com/evcc-io/evcc/blob/master/plugin/http_auth.go#L23).
+
+#### Authenticatie
+
+Voor HTTP-verzoeken zijn verschillende authenticatiemethoden beschikbaar:
+
+**Basic-authenticatie**:
+
+```yaml
+auth:
+  type: basic
+  user: <gebruikersnaam>
+  password: <wachtwoord>
+```
+
+**Bearer-token** (bijv. voor JWT):
+
+```yaml
+auth:
+  type: bearer
+  token: <token>
+```
+
+**Digest-authenticatie**:
+
+```yaml
+auth:
+  type: digest
+  user: <gebruikersnaam>
+  password: <wachtwoord>
+```
+
+**Aangepaste authenticatie**:
+
+Voor complexere authenticatiescenario’s kunnen eigen authenticatieplugins worden ontwikkeld.
+Deze worden via de parameter `source` gekoppeld:
+
+```yaml
+auth:
+  source: <pluginnaam>
+  user: <gebruikersnaam>
+  password: <wachtwoord>
+  # extra pluginspecifieke parameters
+```
+
+Zo kunnen apparaten met bijzondere authenticatie-eisen worden geïntegreerd zonder de code van de hele HTTP-plugin aan te passen.
+
+:::caution[Belangrijk]
+XML-documenten worden intern automatisch naar JSON omgezet, dat daarna net als een gewoon JSON-antwoord met jq kan worden gefilterd.
+Attributen krijgen het voorvoegsel `attr`.
+:::
+
+:::tip
+Voor het testen van jq-query’s zijn onlinetools als [jqplay.org](https://jqplay.org/) handig.
+Voor regex-tests is [regex101.com](https://regex101.com/) een goede optie.
+:::
+
+**Leesvoorbeeld**:
+
+```yaml
+source: http
+uri: https://volkszaehler/api/data/<uuid>.json?from=now
+method: GET # standaard HTTP-methode
+headers:
+  - content-type: application/json
+auth: # basic-authenticatie
+  type: basic
+  user: foo
+  password: bar
+insecure: false # op true zetten om zelfondertekende certificaten te vertrouwen
+jq: .data.tuples[0][1] # JSON-antwoord parsen
+scale: 0.001 # factor voor het resultaat, bijv. voor omrekening van W naar kW
+cache: 60s # cacheduur van het antwoord
+timeout: 10s # time-out in het Go-duurformaat, zie https://golang.org/pkg/time/#ParseDuration
+```
+
+```yaml
+source: http
+uri: http://charger/status
+jq: .total_power > 10 # Zet een JSON-integer om in een booleaanse waarde
+```
+
+**Schrijfvoorbeeld**:
+
+```yaml
+body: %v # alleen voor PUT- of POST-verzoeken
+```
+
+```yaml
+enable:
+  source: http
+  uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
+```
+
+**Dynamische URI’s**:
+
+`uri` en `body` zijn Go-templates die bij elk verzoek opnieuw worden geëvalueerd. Naast de [sprig-functies](https://masterminds.github.io/sprig/) zijn `addDate` en `timeRound` beschikbaar. Zo kan bijv. een voorspellings-API altijd voor een meeschuivend datumbereik worden bevraagd:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.example.org/forecast?from={{ now | date "2006-01-02" }}&to={{ addDate now 0 0 2 | date "2006-01-02" }}
+```
+
+### JavaScript <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#javascript\}
+
+evcc bevat een JavaScript-interpreter met de bibliotheek [Underscore.js](https://underscorejs.org), die direct via `_.` beschikbaar is, bijv. `_.random(0,5)`.
+De `js`-plugin kan via de parameter `script` JavaScript-code uitvoeren. Dat is zeer nuttig voor snelle prototypes:
+
+**Leesvoorbeeld**:
+
+```yaml
+source: js
+script: |
+  var res = 500;
+  2 * res; // geeft 1000 terug
+```
+
+Als de `js`-plugin voor schrijven wordt gebruikt, wordt de te schrijven waarde als variabele aan het script doorgegeven:
+
+**Schrijfvoorbeeld**:
+
+```yaml
+maxcurrent:
+  source: js
+  script: |
+    console.log(maxcurrent);
+```
+
+De `js`-plugin ondersteunt dezelfde [invoer- en uitvoertransformaties](#transformations) (`in`/`out`) als de `go`-plugin.
+
+### Modbus <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#modbus\}
+
+De `modbus`-plugin kan gegevens lezen van elk apparaat met Modbus-ondersteuning of elke SunSpec-compatibele omvormer.
+Veel energiemeters zijn al voorgeconfigureerd (zie [MBMD Supported Devices](https://github.com/volkszaehler/mbmd#supported-devices)).
+Het is ook mogelijk Modbus-registers te schrijven om ook andere laders te integreren.
+
+**Voorbeeld**:
+
+```yaml
+source: modbus
+id: 1
+uri: 192.168.1.10:502
+register:
+  address: 300
+  type: holding
+  decode: uint16
+```
+
+Zie de [Modbus-documentatie](/nl/reference/modbus) voor meer details.
+
+### MQTT <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#mqtt\}
+
+De `mqtt`-plugin maakt het lezen van waarden via MQTT-topics mogelijk.
+Dat is vooral nuttig voor energiemeters, bijv. wanneer die hun gegevens al via MQTT leveren.
+In de [MBMD-documentatie](https://github.com/volkszaehler/mbmd) staat een voorbeeld van hoe u Modbus-meetgegevens naar MQTT krijgt.
+
+**Parameters (lezen)**:
+
+| Parameter | Type     | Verplicht | Beschrijving                                                                  |
+| --------- | -------- | --------- | ----------------------------------------------------------------------------- |
+| topic     | string   | ja        | MQTT-topic waaruit wordt gelezen                                              |
+| timeout   | duration | nee       | Maximale leeftijd van ontvangen waarden                                       |
+| scale     | float    | nee       | Schaalfactor voor het resultaat (bijv. 0,001 voor omrekening van Wh naar kWh) |
+
+De plugin geeft een fout terug als er binnen de duur van `timeout` geen nieuwe waarde is ontvangen.
+Als `timeout` niet is ingesteld, worden waarden van elke leeftijd geaccepteerd zodra het eerste bericht is ontvangen.
+Stel bij voorkeur een time-out in, zodat evcc merkt wanneer de bron geen actuele gegevens meer levert.
+
+Voor het extraheren van gegevens zijn de pipelineparameters uit [Lezen](#reading) beschikbaar (`regex`, `jq`, `quote` enz.).
+
+**Leesvoorbeeld**:
+
+```yaml
+source: mqtt
+topic: mbmd/sdm1-1/Power
+timeout: 30s # geen waarden accepteren die ouder zijn dan timeout
+scale: 0.001 # factor voor het resultaat, bijv. voor omrekening van Wh naar kWh
+```
+
+**Parameters (schrijven)**:
+
+| Parameter | Type   | Verplicht | Beschrijving                                                                               |
+| --------- | ------ | --------- | ------------------------------------------------------------------------------------------ |
+| topic     | string | ja        | MQTT-topic waarnaar wordt geschreven                                                       |
+| payload   | string | nee       | Payload-template (indien niet ingesteld, wordt de waarde in het standaardformaat gebruikt) |
+
+Bij schrijftoegang worden de gegevens met het attribuut `payload` geleverd.
+Als deze parameter in de configuratie ontbreekt, wordt de waarde in het standaardformaat geschreven.
+
+**Schrijfvoorbeeld**:
+
+```yaml
+source: mqtt
+topic: mbmd/charger/maxcurrent
+payload: ${var:%d}
+```
+
+### Prometheus <Badge text="lezen" variant="tip" size="small" /> \{#prometheus\}
+
+De `prometheus`-plugin leest metrics uit een Prometheus-instantie met PromQL-query’s.
+Dat is handig wanneer monitoringgegevens al in Prometheus beschikbaar zijn en in evcc moeten worden gebruikt.
+
+**Parameters**:
+
+| Parameter | Type     | Verplicht | Beschrijving                    |
+| --------- | -------- | --------- | ------------------------------- |
+| uri       | string   | ja        | URL van de Prometheus-server    |
+| query     | string   | ja        | PromQL-query                    |
+| timeout   | duration | nee       | Time-out (standaard: 2 minuten) |
+
+**Ondersteunde queryresultaten**:
+
+- **Scalar**: Eén numerieke waarde
+- **Vector**: Een vector met precies één metric-item
+
+**Voorbeeld**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Voorbeeld met tijdsbereik**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+De query moet één numerieke waarde teruggeven.
+Bij vectorresultaten moet precies één metric zijn opgenomen.
+
+### Shellscript <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#shell\}
+
+De `script`-plugin voert externe scripts uit om gegevens te lezen of bij te werken. De plugin is handig om allerlei externe functionaliteit te integreren.
+
+**Leesvoorbeeld**:
+
+```yaml
+source: script
+cmd: /bin/bash -c "cat /dev/urandom"
+timeout: 5s
+```
+
+**Schrijfvoorbeeld**:
+
+```yaml
+source: script
+cmd: /home/user/my-script.sh ${enable:%b} # booleaanse enable als 0/1 formatteren
+timeout: 5s
+```
+
+### SMA/Speedwire <Badge text="lezen" variant="tip" size="small" /> \{#speedwire\}
+
+De `sma`-plugin biedt een interface naar SMA-apparaten die het Speedwire-protocol ondersteunen.
+
+**Leesvoorbeeld**:
+
+```yaml
+source: sma
+uri: 192.168.4.51 # alternatief voor serial
+serial: 123456 # alternatief voor uri
+value: ActivePowerPlus # ID van de te lezen waarde
+password: "0000" # optioneel (standaard: 0000)
+interface: eth0 # optioneel
+scale: 1 # optionele schaalfactor voor de waarde
+```
+
+Ondersteunde waarden voor `value` vindt u in de diagnose-uitvoer van het commando `evcc meter` (met geconfigureerde SMA-apparaten van het type `meter`).
+
+Alle mogelijke waarden staan als constanten [hier](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (gebruik de naam van de constante voor `value`).
+
+### Websocket <Badge text="lezen" variant="tip" size="small" /> \{#websocket\}
+
+De `websocket`-plugin biedt een WebSocket-listener.
+Daarnaast kan hij JSON-datastructuren via jq-achtige query’s uitlezen of parsen.
+Zo kunnen bijv. gegevens van de pushserver van Volkszähler worden ontvangen.
+
+Voor het extraheren van gegevens zijn de pipelineparameters uit [Lezen](#reading) beschikbaar (`regex`, `jq`, `quote` enz.).
+
+**Leesvoorbeeld**:
+
+```yaml
+source: http
+uri: ws://<volkszaehler host:port>/socket
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # JSON-bericht parsen
+scale: 0.001 # factor voor het resultaat, bijv. voor omrekening van Wh naar kWh
+timeout: 30s # fout als er binnen 30 seconden geen update binnenkomt
+```
+
+## Hulpplugins
+
+### Calc <Badge text="lezen" variant="tip" size="small" /> \{#calc\}
+
+Met de `calc`-plugin kunnen meerdere afzonderlijke waarden wiskundig worden verwerkt:
+
+**Leesvoorbeeld**:
+
+```yaml
+source: calc
+add:
+- source: ...
+  ...
+- source: ...
+  ...
+```
+
+```yaml
+source: calc
+mul:
+- source: calc
+  sign:
+    source: ... (vermogen)
+  ...
+- source: ... (stroom)
+  ...
+```
+
+De plugin ondersteunt de basisbewerkingen optellen (add), vermenigvuldigen (mul), delen (div), tekenbepaling (sign), absolute waarde (abs), minimumwaarde (min) en maximumwaarde (max).
+
+Met `scale: -1` op een van de waarden kan eenvoudig worden afgetrokken, met `scale: 0.001` gedeeld, bijv. voor de omrekening van Wh naar kWh.
+
+Met `sign:` wordt elk positief getal +1, elk negatief getal -1 en blijft 0 gelijk.
+In combinatie met `mul` kan zo het teken op andere waarden worden overgedragen.
+Zo kan bijv. bij meters de “richting” van het vermogen (teruglevering of netafname) op de gemeten stromen worden overgedragen.
+
+Met `abs:` wordt de absolute waarde van een getal berekend.
+
+Met `min:` en `max:` worden respectievelijk de minimumwaarde en de maximumwaarde berekend.
+
+De `calc`-plugin is bijv. handig voor:
+
+- Het optellen van vermogenswaarden van afzonderlijke strings van zonnepanelen (optellen)
+- Het berekenen van het schijnbare vermogen uit spanning en stroom (vermenigvuldigen)
+- Het combineren van afzonderlijke vermogenswaarden voor netafname en teruglevering tot één waarde met teken (aftrekken)
+- Het berekenen van vulniveaus in procenten (delen)
+- Het bepalen van de juiste richting van de stroom (sign)
+- Het wegwerken van bekende offsets (optellen met de `const`-plugin)
+
+:::tip
+Constante hulpwaarden (bijv. voor offsets) kunnen met de `const`-plugin als operanden worden gegenereerd.
+:::
+
+### Combined <Badge text="lezen" variant="tip" size="small" /> \{#combined\}
+
+De statusplugin `combined` combineert de booleaanse statuswaarden `Plugged` (verbonden) en `Charging` (laden) tot een evcc-compatibele laadstatus A t/m F.
+Hij wordt bijv. gebruikt bij een MQTT-integratie van OpenWB.
+
+**Leesvoorbeeld**:
+
+```yaml
+source: combined
+plugged:
+  source: mqtt
+  topic: openWB/lp/1/boolPlugStat
+charging:
+  source: mqtt
+  topic: openWB/lp/1/boolChargeStat
+```
+
+### Const <Badge text="lezen" variant="tip" size="small" /> \{#const\}
+
+De `const`-plugin geeft een constante waarde terug.
+Hij is bijv. geschikt om in combinatie met de `calc`-plugin vaste correctiewaarden (offset) op een variabele waarde toe te passen of om voor testdoeleinden meet- en statuswaarden te simuleren.
+
+**Leesvoorbeeld**:
+
+```yaml
+source: const
+value: -16247
+```
+
+### Error <Badge text="lezen" variant="tip" size="small" /> \{#error\}
+
+De `error`-plugin geeft altijd een [bekende foutwaarde](#known-errors) terug.
+Dat is handig om een niet-geïmplementeerd attribuut expliciet als niet beschikbaar te markeren.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                                                  |
+| --------- | ------ | --------- | ------------------------------------------------------------- |
+| error     | string | ja        | Foutwaarde (`ErrAsleep`, `ErrMustRetry` of `ErrNotAvailable`) |
+
+**Voorbeeld**:
+
+```yaml
+soc:
+  source: error
+  error: ErrNotAvailable
+```
+
+### Convert <Badge text="schrijven" variant="caution" size="small" /> \{#convert\}
+
+De `convert`-plugin zet gegevenstypen om bij het schrijven.
+Hij wordt gebruikt wanneer een plugin een ander gegevenstype verwacht dan evcc levert.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                              |
+| --------- | ------ | --------- | ----------------------------------------- |
+| convert   | string | ja        | Conversietype                             |
+| set       | config | ja        | Plugin voor het schrijven na de conversie |
+
+**Ondersteunde conversies**:
+
+| Conversie | Beschrijving                                |
+| --------- | ------------------------------------------- |
+| float2int | Float64 → Int64 (decimalen worden afgekapt) |
+| int2float | Int64 → Float64                             |
+| int2bytes | Int64 → bytearray (big-endian, 8 bytes)     |
+| bool2int  | Bool → Int64 (true=1, false=0)              |
+
+**Voorbeeld** (evcc levert float, apparaat verwacht int):
+
+```yaml
+limitsoc:
+  source: convert
+  convert: float2int
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 41009
+      type: writesingle
+      encoding: uint16
+```
+
+In dit voorbeeld zet evcc een float-waarde als `85.5` om in `85` voordat die naar het Modbus-register wordt geschreven.
+
+### Delta <Badge text="schrijven" variant="caution" size="small" /> \{#delta\}
+
+De `delta`-plugin zet absolute waarden om in delta- of incrementwaarden.
+Hij wordt gebruikt voor apparaten die geschreven waarden bij een interne som optellen in plaats van ze direct in te stellen.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                                                  |
+| --------- | ------ | --------- | ------------------------------------------------------------- |
+| get       | config | nee       | Plugin voor het lezen van het huidige totaal van het apparaat |
+| set       | config | ja        | Plugin voor het schrijven van de berekende delta              |
+
+**Werking**:
+
+1. De invoerwaarde wordt ontvangen (bijv. `1000`)
+2. Als `get` is geconfigureerd, wordt het huidige totaal van het apparaat gelezen
+3. De delta wordt berekend: `delta = new_value - current_total`
+4. De delta wordt via de `set`-plugin geschreven
+5. De interne toestand wordt bijgewerkt
+
+Zonder de parameter `get` houdt de plugin het totaal intern bij (begint bij 0).
+Bij een herstart van evcc gaat de synchronisatie met het apparaat verloren.
+Daarom wordt aanbevolen `get` te configureren als het apparaat een leesbaar totaalregister heeft.
+
+**Ondersteunde gegevenstypen**: `int64`, `float64`
+
+**Toepassing**:
+
+Sommige warmtepompen (bijv. Ochsner) hebben registers die deltawaarden verwachten in plaats van absolute waarden.
+Bij het schrijven van `500` telt het apparaat 500 W bij de interne waarde op in plaats van die op 500 W te zetten.
+Om van 1000 W naar 1500 W te gaan, moet u `+500` schrijven.
+Om te verlagen worden negatieve waarden geschreven (bijv. `-300`).
+
+**Schrijfvoorbeeld**:
+
+```yaml
+setmaxpower:
+  source: delta
+  get: # Huidig totaal van het apparaat lezen
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2012 # Intern somregister van het apparaat
+      type: input
+      decode: uint16
+  set: # Berekende delta schrijven
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2201 # Deltaregister
+      type: writeholding
+      decode: uint16
+```
+
+**Voorbeeld met watchdog**:
+
+De Delta-plugin wordt vaak gecombineerd met de [Watchdog-plugin](#watchdog) wanneer het apparaat regelmatige updates nodig heeft:
+
+```yaml
+setmaxpower:
+  source: watchdog
+  timeout: 60s # Elke 30 seconden opnieuw versturen
+  set:
+    source: delta # Absolute waarden omzetten in delta’s
+    get: # Huidig totaal lezen
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2012 # Totaalregister
+        type: input
+        decode: uint16
+    set: # Delta schrijven
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2201 # Deltaregister
+        type: writeholding
+        decode: uint16
+```
+
+### Ignore <Badge text="schrijven" variant="caution" size="small" /> \{#ignore\}
+
+De `ignore`-plugin onderdrukt specifieke foutmeldingen bij het schrijven.
+Hij wordt gebruikt wanneer een apparaat onschuldige fouten teruggeeft die kunnen worden genegeerd.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                               |
+| --------- | ------ | --------- | ------------------------------------------ |
+| error     | string | ja        | Begin van de fouttekst die wordt genegeerd |
+| set       | config | ja        | Plugin voor het schrijven                  |
+
+**Werking**:
+
+1. De geneste `set`-plugin wordt uitgevoerd
+2. Als er een fout optreedt, wordt gecontroleerd of de foutmelding met de string `error` begint
+3. Zo ja, dan wordt de fout genegeerd en wordt succes teruggegeven
+4. Zo nee, dan wordt de fout gewoon doorgegeven
+
+**Ondersteunde gegevenstypen**: `int64`, `float64`, `bool`, `[]byte`
+
+**Voorbeeld**:
+
+```yaml
+batterymode:
+  source: switch
+  switch:
+    - case: 1 # normaal
+      set:
+        source: const
+        value: 2
+        set:
+          source: ignore
+          error: "modbus: response data size '18' does not match count '4'"
+          set:
+            source: modbus
+            uri: 192.168.1.10:502
+            id: 1
+            register:
+              address: 0x1110
+              type: writemultiple
+              encoding: int16
+```
+
+In dit voorbeeld geeft het apparaat een onschuldige Modbus-fout terug die wordt genegeerd.
+
+### IfElse <Badge text="schrijven" variant="caution" size="small" /> \{#ifelse\}
+
+De `ifelse`-plugin voert voorwaardelijke schrijfbewerkingen met twee takken uit.
+Afhankelijk van de invoerwaarde wordt de `if`- of de `else`-plugin uitgevoerd.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                                                      |
+| --------- | ------ | --------- | ----------------------------------------------------------------- |
+| if        | config | ja        | Plugin die wordt uitgevoerd als aan de voorwaarde is voldaan      |
+| else      | config | ja        | Plugin die wordt uitgevoerd als niet aan de voorwaarde is voldaan |
+
+**Werking**:
+
+- Voor `bool`-waarden: `true` voert `if` uit, `false` voert `else` uit
+- Voor `int64`-waarden: `> 0` voert `if` uit, anders wordt `else` uitgevoerd
+
+**Ondersteunde gegevenstypen**: `int64`, `bool`
+
+**Voorbeeld** (verschillende endpoints voor in- en uitschakelen):
+
+```yaml
+enable:
+  source: ifelse
+  if:
+    source: http
+    uri: http://device.local/api/on
+    method: POST
+  else:
+    source: http
+    uri: http://device.local/api/off
+    method: POST
+```
+
+### Map <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#map\}
+
+De `map`-plugin vertaalt gehele getallen met een opzoektabel naar andere gehele getallen.
+Hij wordt vaak gebruikt om apparaatspecifieke waarden om te zetten in standaardwaarden van evcc en omgekeerd.
+
+**Parameters**:
+
+| Parameter | Type            | Verplicht | Beschrijving                                           |
+| --------- | --------------- | --------- | ------------------------------------------------------ |
+| values    | map[int64]int64 | ja        | Opzoektabel met toewijzing invoer → uitvoer            |
+| get       | config          | nee       | Plugin voor het lezen (alleen nodig bij lezen)         |
+| set       | config          | nee       | Plugin voor het schrijven (alleen nodig bij schrijven) |
+
+**Werking**:
+
+**Bij het lezen**:
+
+1. De `get`-plugin geeft een waarde terug (bijv. `0`)
+2. De waarde wordt opgezocht in de tabel `values`
+3. De toegewezen waarde wordt teruggegeven (bijv. `0` → `2`)
+
+**Bij het schrijven**:
+
+1. De invoerwaarde wordt ontvangen (bijv. `3`)
+2. De waarde wordt opgezocht in de tabel `values`
+3. De toegewezen waarde wordt aan de `set`-plugin doorgegeven (bijv. `3` → `6`)
+
+Als er geen passende waarde in de tabel staat, treedt er een fout op.
+
+**Ondersteunde gegevenstypen**: `int64` (alleen gehele getallen)
+
+**Leesvoorbeeld** (apparaatwaarde → evcc):
+
+```yaml
+getmode:
+  source: map
+  values:
+    0: 2 # Apparaat "Vrij" → evcc "normaal"
+    1: 1 # Apparaat "Geforceerd uit" → evcc "gereduceerd"
+    2: 3 # Apparaat "Aanbevolen aan" → evcc "boost"
+    3: 3 # Apparaat "Geforceerd aan" → evcc "boost"
+  get:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: holding
+      encoding: int16
+```
+
+**Schrijfvoorbeeld** (evcc → apparaatwaarde):
+
+```yaml
+setmode:
+  source: map
+  values:
+    1: 1 # evcc "gereduceerd" → apparaat "Geforceerd uit"
+    2: 0 # evcc "normaal" → apparaat "Vrij"
+    3: 3 # evcc "boost" → apparaat "Geforceerd aan"
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: writeholding
+      encoding: int16
+```
+
+### Meter <Badge text="lezen" variant="tip" size="small" /> \{#meter-plugin\}
+
+Met de `meter`-plugin kan een andere meter als gegevensbron worden gebruikt.
+Dat is handig wanneer u een bestaand apparaat voor meerdere metingen wilt gebruiken of wanneer u voor verschillende attributen verschillende methoden van een apparaat nodig hebt.
+
+De sectie `config` bevat de volledige sjabloonconfiguratie van de meter die als bron wordt gebruikt.
+De parameter `method` bepaalt welke waarde wordt gelezen: `power`, `energy`, `returnenergy` of `soc`.
+
+**Leesvoorbeeld**:
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    power:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: power
+      scale: -1
+    energy:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: energy
+    soc:
+      source: mqtt
+      topic: Haus/Batterie
+      jq: .soc
+      timeout: 60s
+```
+
+In dit voorbeeld wordt een Shelly 1PM als gegevensbron gebruikt voor het vermogen en de energie van een thuisbatterij, terwijl het laadniveau via MQTT wordt opgehaald.
+
+### Sequence <Badge text="schrijven" variant="caution" size="small" /> \{#sequence\}
+
+De `sequence`-plugin voert meerdere schrijfbewerkingen na elkaar uit.
+Alle geneste plugins krijgen dezelfde invoerwaarde en worden in de gedefinieerde volgorde uitgevoerd.
+Bij een fout stopt de uitvoering direct.
+
+**Parameters**:
+
+| Parameter | Type     | Verplicht | Beschrijving                          |
+| --------- | -------- | --------- | ------------------------------------- |
+| set       | [config] | ja        | Array van geneste pluginconfiguraties |
+
+**Werking**:
+
+1. De invoerwaarde wordt ontvangen
+2. Elke plugin in de lijst `set` wordt na elkaar met deze waarde aangeroepen
+3. Bij een fout wordt de reeks afgebroken en wordt de fout teruggegeven
+4. Een geslaagde uitvoering betekent dat alle plugins met succes zijn uitgevoerd
+
+**Ondersteunde gegevenstypen**: `int64`, `float64`, `bool`
+
+**Toepassingen**:
+
+- Meerdere HTTP-verzoeken na elkaar uitvoeren
+- Combineren met de `sleep`-plugin voor vertraagde acties
+- Meerdere Modbus-registers tegelijk schrijven
+- Waarden naar meerdere doelen doorgeven
+
+**Voorbeeld 1: Meerdere HTTP-verzoeken**
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/pin1
+      method: POST
+      body: '{"value": "on"}'
+    - source: http
+      uri: http://device.local/api/pin4
+      method: POST
+      body: '{"value": "off"}'
+```
+
+**Voorbeeld 2: Combinatie met switch**
+
+```yaml
+batterymode:
+  source: sequence
+  set:
+    - source: switch
+      switch:
+        - case: 1 # normaal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            body: "automatic"
+        - case: 3 # laden
+          set:
+            source: sequence
+            set:
+              - source: sleep
+                duration: 1s
+              - source: http
+                uri: http://battery.local/api/charge
+                body: "5000" # 5 kW
+    - source: mqtt
+      topic: home/battery/status
+      payload: "mode_${batterymode}"
+```
+
+**Verloop voor `batterymode: 1` (normaal)**:
+
+1. De buitenste `sequence` ontvangt de waarde `1`
+2. Eerste stap: `switch` controleert de waarde `1`
+   - Case `1` komt overeen → HTTP-verzoek naar `/api/mode` met body `automatic`
+3. Tweede stap: `mqtt` stuurt een bericht naar `home/battery/status` met payload `mode_1`
+4. Klaar
+
+**Verloop voor `batterymode: 3` (laden)**:
+
+1. De buitenste `sequence` ontvangt de waarde `3`
+2. Eerste stap: `switch` controleert de waarde `3`
+   - Case `3` komt overeen → de binnenste `sequence` wordt uitgevoerd:
+     - 1 seconde wachten (`sleep`)
+     - HTTP-verzoek naar `/api/charge` met body `5000`
+3. Tweede stap: `mqtt` stuurt een bericht naar `home/battery/status` met payload `mode_3`
+4. Klaar
+
+De waarde loopt door alle plugins, waarbij `switch` afhankelijk van de waarde verschillende acties uitvoert en `mqtt` aan het eind altijd een bericht stuurt.
+
+### Sleep <Badge text="schrijven" variant="caution" size="small" /> \{#sleep\}
+
+De `sleep`-plugin voegt een vertraging toe.
+Hij wordt meestal binnen een `sequence`-plugin gebruikt om wachttijden tussen acties in te voegen.
+
+**Parameters**:
+
+| Parameter | Type     | Verplicht | Beschrijving                                               |
+| --------- | -------- | --------- | ---------------------------------------------------------- |
+| duration  | duration | ja        | Wachttijd (bijv. `1s`, `500ms`, `0s` voor geen vertraging) |
+
+**Voorbeeld**:
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/prepare
+      method: POST
+    - source: sleep
+      duration: 500ms
+    - source: http
+      uri: http://device.local/api/activate
+      method: POST
+```
+
+### Switch <Badge text="schrijven" variant="caution" size="small" /> \{#switch\}
+
+De `switch`-plugin voert voorwaardelijke schrijfbewerkingen uit, vergelijkbaar met een switch/case-statement in programmeertalen.
+Afhankelijk van de invoerwaarde wordt de bijbehorende actie uitgevoerd.
+
+**Parameters**:
+
+| Parameter | Type   | Verplicht | Beschrijving                                          |
+| --------- | ------ | --------- | ----------------------------------------------------- |
+| switch    | [case] | ja        | Array van cases met configuratie voor `case` en `set` |
+| default   | config | nee       | Terugvalplugin als geen enkele case overeenkomt       |
+
+**Werking**:
+
+1. De invoerwaarde wordt vergeleken met de waarden van `case`
+2. Bij een overeenkomst wordt de bijbehorende `set`-plugin uitgevoerd
+3. Als geen enkele case overeenkomt en `default` is gedefinieerd, wordt die uitgevoerd
+4. Als geen enkele case overeenkomt en er geen `default` is gedefinieerd, treedt er een fout op
+
+**Ondersteunde gegevenstypen**: `int64` (alleen gehele getallen)
+
+**Voorbeeld**:
+
+```yaml
+setmode:
+  source: switch
+  switch:
+    - case: 1 # gereduceerd
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "eco"
+    - case: 2 # normaal
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "normal"
+    - case: 3 # boost
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "boost"
+```
+
+### Valid <Badge text="lezen" variant="tip" size="small" /> \{#valid\}
+
+Met de `valid`-plugin kunnen pluginwaarden worden geleverd op basis van een booleaanse validatie.
+Hij scheidt de geldigheid van een waarde van de eigenlijke inhoud.
+Als de validatie `false` teruggeeft, geldt de waarde als niet beschikbaar.
+
+Dat is vooral nuttig voor integraties zoals ioBroker die geldigheid en waarde afzonderlijk leveren.
+
+**Leesvoorbeeld**:
+
+```yaml
+source: valid
+valid:
+  source: mqtt
+  topic: iobroker/wallbox/power/valid
+value:
+  source: mqtt
+  topic: iobroker/wallbox/power/value
+```
+
+In dit voorbeeld wordt de waarde alleen gebruikt als het topic `valid` de waarde `true` teruggeeft.
+Geeft het `false` terug, dan wordt de waarde als niet beschikbaar gemarkeerd.
+
+### Watchdog <Badge text="schrijven" variant="caution" size="small" /> \{#watchdog\}
+
+De `watchdog`-plugin is een wrapperplugin die schrijfbewerkingen automatisch met vaste intervallen herhaalt.
+Sommige apparaten (bijv. thuisbatterijen, omvormers) verwachten dat stuurcommando’s regelmatig worden herhaald om actief te blijven.
+De Watchdog-plugin bewaakt schrijfbewerkingen en herhaalt ze automatisch na de helft van het geconfigureerde time-outinterval.
+
+**Parameters**:
+
+| Parameter | Type               | Verplicht | Beschrijving                                                                       |
+| --------- | ------------------ | --------- | ---------------------------------------------------------------------------------- |
+| timeout   | duration           | ja        | Tijdsinterval voor herhalingen (de waarde wordt elke timeout/2 opnieuw geschreven) |
+| reset     | string \| [string] | nee       | Waarde(n) waarbij de herhalingen stoppen                                           |
+| initial   | string             | nee       | Waarde die bij het opstarten eenmalig wordt geschreven                             |
+| defer     | bool               | nee       | Stelt updates uit in plaats van ze direct uit te voeren (standaard: false)         |
+| set       | config             | ja        | Geneste plugin voor de eigenlijke schrijfbewerking                                 |
+
+**Werking**:
+
+1. **Start**: Als `initial` is geconfigureerd, wordt deze waarde bij het opstarten eenmalig geschreven
+2. **Schrijven**: Bij het schrijven van een waarde controleert de plugin of die in de lijst `reset` staat
+3. **Watchdog actief**: Als de waarde **niet** in `reset` staat, start de watchdog en schrijft hij de waarde automatisch opnieuw met een interval van de helft van `timeout`
+4. **Watchdog stopt**: Als de waarde in `reset` staat, worden er geen herhalingen uitgevoerd
+
+**Parameter reset**:
+
+- Legt de waarden vast waarbij de watchdog wordt gestopt
+- Kan één waarde (`reset: 0`) of meerdere waarden (`reset: [0, 1]`) zijn
+- Wordt meestal gebruikt voor “veilige” of standaardtoestanden die niet steeds hoeven te worden herhaald
+
+**Parameter initial**:
+
+- Optionele waarde die eenmalig wordt geschreven wanneer de plugin start
+- Handig om een gedefinieerde begintoestand in te stellen
+- Wordt vóór alle andere schrijfbewerkingen uitgevoerd
+
+**Parameter defer**:
+
+- Zorgt ervoor dat wachttijden tussen updates worden gerespecteerd
+- De watchdog wordt tijdens de vertraging gestopt en na afloop met de nieuwe waarde opnieuw gestart
+- Handig wanneer apparaten een minimale wachttijd tussen moduswissels vereisen
+- De vertraging wordt berekend op basis van de tijd sinds de laatste update
+- Resetwaarden worden altijd direct geschreven (zonder vertraging)
+
+**Ondersteunde gegevenstypen**: `int64`, `float64`, `bool`
+
+**Schrijfvoorbeeld**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+In dit voorbeeld worden waarden automatisch elke 30 s herhaald, behalve wanneer de waarde `0` wordt geschreven.
+
+**Voorbeeldverloop** met `timeout: 60s`, `reset: 0`:
+
+- De plugin start
+- Waarde `100` schrijven → watchdog **loopt**, de waarde wordt elke 30 s herhaald
+- Na 2 minuten: waarde `100` is 5 keer geschreven (op 0, 30, 60, 90 en 120 s)
+- Waarde `200` schrijven → watchdog **blijft** lopen, nu met de nieuwe waarde `200` elke 30 s
+- Waarde `0` schrijven → watchdog **stopt** (omdat `0` in `reset` is gedefinieerd)
+- Geen verdere herhalingen totdat een nieuwe waarde anders dan `0` wordt geschreven
+
+**Voorbeeld met batterijsturing** (`batterymode` gebruikt de waarden 1=normal, 2=hold, 3=charge, 4=holdcharge, 5=discharge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Herhalingen stoppen bij normale werking
+  set:
+    source: switch
+    switch:
+      - case: 1 # normaal
+        set:
+          source: modbus
+          # ... Modbus-configuratie voor normale werking
+      - case: 2 # vasthouden
+        set:
+          source: modbus
+          # ... Modbus-configuratie voor de vasthoudmodus
+      - case: 3 # laden
+        set:
+          source: modbus
+          # ... Modbus-configuratie voor de laadmodus
+```

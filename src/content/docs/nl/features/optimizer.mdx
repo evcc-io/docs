@@ -1,0 +1,97 @@
+---
+title: "Optimizer 🧪"
+description: "De experimentele optimizer berekent met voorspellingen en uw verbruiksgeschiedenis kostenoptimale laad- en batterijbeslissingen, voorlopig alleen ter informatie."
+sidebar:
+  order: 13
+translatedFrom: "8465baa052f5"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+:::caution[Experimenteel]
+De optimizer bevindt zich in een vroeg ontwikkelingsstadium.
+De weergegeven gegevens zijn voorlopig alleen ter informatie.
+Stuuracties volgen in toekomstige versies.
+:::
+
+De optimizer analyseert voorspellingen, verbruiksgegevens en de huidige toestand van uw energiesysteem om kostenoptimale beslissingen te nemen.
+Hij vult de regelgebaseerde aansturing van evcc aan met voorspellende optimalisatie.
+
+## Waarom een optimizer?
+
+evcc werkt regelgebaseerd en deterministisch.
+Dat werkt prima voor veel opstellingen.
+Bijvoorbeeld een zonnepanelensysteem, een thuisbatterij en één voertuig.
+
+Bij complexere scenario’s loopt deze aanpak tegen zijn grenzen aan:
+
+- **Meerdere voertuigen:** welk voertuig moet eerst worden geladen?
+- **Thuisbatterij of voertuig:** waar moet de beschikbare energie naartoe?
+- **Dynamische tarieven:** loont het om vannacht uit het net te laden, of is er morgen genoeg zonne-energie?
+
+De optimizer kan deze vragen beantwoorden.
+Op dit moment stelt u waarden zoals prijslimieten of de voorrang van de thuisbatterij zelf in.
+In de toekomst kunt u deze beslissingen aan de optimizer overlaten.
+Die vindt dan automatisch de optimale waarden.
+We werken hier stap voor stap aan.
+
+## Wat doet de optimizer?
+
+De optimizer verzamelt verschillende gegevens:
+
+- **Voorspellingsgegevens:** [opbrengst van zonne-energie](/nl/tariffs#solar), [stroomprijzen](/nl/tariffs#price), [terugleververgoedingen](/nl/features/dynamic-feedin), [buitentemperatuur](/nl/tariffs#temperature) om de warmtevraag te voorspellen
+- **Historische gegevens:** het typische verbruiksprofiel van uw huishouden
+- **Huidige toestand:** laadniveau van de thuisbatterij, aangesloten voertuigen, warmtevraag
+
+Op basis van deze gegevens berekent een optimalisatiealgoritme het verwachte gedrag van uw energiesysteem.
+Het bepaalt kostenoptimale acties: efficiënte [laadplannen](/nl/features/plans), batterijaansturing (ontladen blokkeren, netladen).
+Ook voorspelt het wanneer de thuisbatterij vol of leeg zal zijn.
+
+Doel: **energiekosten minimaliseren.**
+
+## De optimizer gebruiken
+
+Inschakelen via de gebruikersinterface:
+
+1. **Configuratie → Experimenteel** → inschakelen
+2. **Configuratie → Optimizer 🧪** → inschakelen
+
+Voor de optimizer is een actieve [sponsoring](/nl/sponsorship) nodig.
+Bij nieuwe installaties kan het tot 24 uur duren voordat er genoeg gegevens zijn verzameld om de eerste resultaten te tonen.
+
+- **Hoofdweergave → Energiestroom (uitklappen):** toont wanneer de thuisbatterij naar verwachting vol of leeg is.
+- **Menu → Optimizer:** grafieken die tonen hoe uw thuisbatterij en laadpunten zich de komende uren zouden moeten gedragen en wat de verwachte energiekosten over de optimalisatiehorizon zijn (zie screenshot hieronder).
+
+<Screenshot
+  name="features/screenshots/optimizer-debug"
+  caption="Debugweergave van de optimizer met voorspellingen en optimalisatieresultaten."
+/>
+
+## Huidige stand & volgende stappen
+
+De optimizer dient op dit moment alleen ter informatie.
+Hij toont voorspellingen en mogelijke besparingen, maar stuurt nog niets actief aan.
+
+Volgende stappen:
+
+- Acties integreren: de thuisbatterij actief aansturen
+- De optimizer [laadplannen](/nl/features/plans) laten optimaliseren
+- Gebruikers in staat stellen bepaalde instellingen aan de optimizer over te dragen
+
+## Technische achtergrond \{#technical\}
+
+De optimizer is gebaseerd op Python en benut het sterke ecosysteem voor wiskundige optimalisatie en statistiek.
+Hij maakt geen deel uit van evcc zelf, maar is een zelfstandige dienst.
+
+Als de optimizer is ingeschakeld, wordt de clouddienst `optimizer.evcc.io` aangeroepen.
+De dienst is **stateless**.
+Gegevens worden alleen opgeslagen als u feedback geeft op de uitleg van een plan.
+Details over privacy vindt u in onze [privacyverklaring](https://evcc.io/en/datenschutz/).
+
+Net als evcc zelf is de optimizer open source: [github.com/evcc-io/optimizer](https://github.com/evcc-io/optimizer).
+U kunt de Docker-image [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer) ook lokaal installeren.
+Gebruik de omgevingsvariabele `OPTIMIZER_URI` om evcc naar uw eigen endpoint te laten verwijzen.
+
+Om de berekening snel te houden, voegt evcc de slots na 48 uur samen tot slots van een uur.
+Met uw eigen optimizer kunt u deze grens verschuiven met de omgevingsvariabele `OPTIMIZER_COARSEN_AFTER` in uren, bijv. `72`.
+De waarde `0` behoudt slots van 15 minuten voor de volledige voorspelling.

@@ -1,0 +1,178 @@
+---
+title: "Raspberry Pi & Co."
+description: "Kør evcc på en Raspberry Pi eller NanoPi med det færdige SD-kort-image, som også byder på wifi-opsætning og systemadministration via Cockpit i browseren."
+sidebar:
+  order: 3
+translatedFrom: "dd6112dce7f1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Med det færdige image er det enklest at installere evcc på en Raspberry Pi eller en lignende enkeltkortcomputer.
+Forudkonfigureret og klar til opsætning via webgrænsefladen!
+
+## Kom hurtigt i gang
+
+<Steps>
+
+1. ### Download filen
+
+   Download det nyeste evcc-image til din enhed:
+
+   | Enhed                                | Download                                                                                                                                                                                                                    |
+   | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | **Raspberry Pi** (3, 4, 5, Zero 2 W) | **[evcc_raspberry-pi.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip)** ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))         |
+   | NanoPi Zero2                         | [evcc_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.sha))             |
+   | NanoPi R3S                           | [evcc_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.sha))                   |
+   | NanoPi R76S                          | [evcc_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))                |
+   | NanoPi NEO3 Plus                     | [evcc_nanopi-neo3-plus.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.sha)) |
+   | NanoPi R28S                          | [evcc_nanopi-r28s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.sha))                |
+
+   Flere detaljer om de enkelte boards (wifi, lager, ydeevne) finder du i [listen over understøttede boards](https://github.com/evcc-io/images#supported-boards).
+
+2. ### Skriv til SD-kortet
+
+   Skriv nu det downloadede image til SD-kortet. Vi bruger **[Armbian Imager](https://imager.armbian.com/#downloads)** til det. Alternativt kan du bruge [Rufus](https://rufus.ie/) (Windows).
+   - Sæt SD-kortet i computeren
+   - Åbn Armbian Imager
+   - **Use Custom Image** → vælg den downloadede fil
+   - Vælg dit SD-kort
+   - Start skrivningen → vent, til den er færdig
+
+   :::tip[Alternativ]
+   I stedet for ”Download filen og skriv til SD-kortet” kan du også forberede SD-kortet med **[Raspberry Pi Imager](https://www.raspberrypi.com/software/)**.
+
+   evcc-imaget står i det officielle katalog. Vælg **Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc**.
+   :::
+
+3. ### Start Raspberry Pi
+   - Sæt SD-kortet i Raspberry Pi
+   - Tilslut netværkskablet (anbefales), alternativt kan du [sætte wifi op](#wifi)
+   - Tilslut strømforsyningen
+   - Vent, til den er startet
+
+4. ### evcc-webgrænseflade \{#evcc-web-ui\}
+
+   ![evcc-adgangskodeopsætning](../../../../assets/installation/evcc-password.webp)
+   - Åbn browseren
+   - Indtast **[https://evcc.local/](https://evcc.local/)**
+     - Certifikatadvarslen skal accepteres (det er normalt, og forbindelsen er krypteret)
+     - Alternativt via IP-adressen, f.eks. `https://192.168.1.123/` (find IP-adressen i routeren)
+   - Angiv en administratoradgangskode (ved første start)
+   - Opsæt enheder (oplader, solcelleanlæg, hjemmebatteri, køretøjer)
+     - Bemærk: Der skal oprettes mindst ét ladepunkt, for at evcc kan køre.
+
+   Flere detaljer om opsætningen finder du i [konfigurationsvejledningen](/da/installation/configuration).
+
+   ![evcc-velkomstskærm](../../../../assets/installation/evcc-welcome.webp)
+
+   **Færdig!** 🎉
+
+</Steps>
+
+Systemkonfiguration og opdateringer foregår via [Cockpit](#cockpit).
+Log ind der én gang for at ændre Linux-standardadgangskoden.
+
+## Opsætning af wifi \{#wifi\}
+
+Hvis der ikke er et netværkskabel til rådighed, opretter Raspberry Pi et wifi-hotspot til den første opsætning.
+
+- Søg efter wifi-netværket **”evcc-setup”** på din smartphone
+- Opret forbindelse (ingen adgangskode nødvendig)
+- Vælg dit hjemmenetværk på listen
+- Indtast adgangskoden til dit hjemmenetværk
+- Raspberry Pi lukker hotspottet og opretter forbindelse til dit hjemmenetværk
+- Fortsæt med [evcc-webgrænseflade](#evcc-web-ui)
+
+Wifi kan også konfigureres senere via [Cockpit](#cockpit).
+
+## Systemadministration via Cockpit \{#cockpit\}
+
+Cockpit er en grafisk brugerflade til systemadministration på Linux.
+Her kan du konfigurere dit system, installere opdateringer og ændre netværksindstillinger.
+
+- URL: [https://evcc.local:9090/](https://evcc.local:9090/)
+- Bruger: `admin`
+- Adgangskode: `admin` (standardadgangskode)
+
+Ved første login bliver du bedt om at ændre standardadgangskoden.
+Vælg en sikker adgangskode til systemadministrationen.
+Hvis du glemmer den, skal du skrive imaget til SD-kortet igen.
+Der er ingen funktion til ”glemt adgangskode”.
+
+![Cockpit-login](../../../../assets/installation/cockpit.webp)
+
+**Vigtige funktioner:**
+
+- **System:** Overblik over CPU, hukommelse og disk
+- **Logs:** Vis [systemlogs](/da/report-a-problem#system-logs)
+- **Networking:** Konfigurer netværk og wifi
+- **Navigator:** Fileditor til konfigurationsfiler
+- **Terminal:** Adgang til kommandolinjen
+- **Software Updates:** Opdater systemet
+
+:::caution
+**Cockpit-adgangskoden er kun til systemadministration (inkl. SSH).**
+
+Til evcc-webgrænsefladen angiver du en separat administratoradgangskode.
+:::
+
+## Anbefalet hardware
+
+evcc kører på forskellige enkeltkortcomputere og kræver kun få ressourcer.
+Selv 1 GB RAM er helt tilstrækkeligt.
+
+**Understøttede enheder:**
+
+- Raspberry Pi 4 og 5: rigeligt med ydeevne
+- Raspberry Pi 3 og Zero 2 W: tilstrækkeligt, hvis evcc er det eneste program
+- NanoPi Zero2, R3S og R76S: kompakte, billige, fås med metalkabinet og indbygget eMMC-lager
+
+**Lager:**
+Mindst 16 GB SD-kort eller eMMC.
+For en længere levetid anbefaler vi eMMC i stedet for SD-kort (f.eks. med NanoPi).
+SD-kort kan slides op af hyppige skriveoperationer.
+Se også [Armbians anbefalinger](https://docs.armbian.com/User-Guide_Getting-Started/#what-do-i-need).
+
+**Strømforsyning:**
+Brug den originale strømforsyning fra den pågældende producent.
+
+**Netværk:**
+Vi anbefaler stærkt en kablet forbindelse.
+Wifi er muligt, men ofte mindre stabilt.
+
+## Om evcc Linux-imaget
+
+evcc Linux-imaget er baseret på [Armbian](https://www.armbian.com/) og har nogle praktiske funktioner:
+
+### Tilgængelige tjenester
+
+| Tjeneste            | URL                                                       | Bemærkning                             |
+| ------------------- | --------------------------------------------------------- | -------------------------------------- |
+| evcc-webgrænseflade | `https://evcc.local/`                                     | selvsigneret certifikat **(standard)** |
+|                     | `http://evcc.local:7070/`                                 | ukrypteret                             |
+| OCPP-server         | `ws://evcc.local:8887/<station-id>`                       | ukrypteret **(standard)**              |
+|                     | `wss://evcc.local:8888/<station-id>`                      | selvsigneret certifikat                |
+| Cockpit             | `https://evcc.local:9090/` (standardadgangskode: `admin`) | selvsigneret certifikat                |
+| SSH                 | `ssh admin@evcc.local` (standardadgangskode: `admin`)     |                                        |
+
+Imaget tilbyder en krypteret variant af alle tjenester.
+Vi anbefaler at bruge krypterede forbindelser, også i lokale netværk.
+Nogle opladere understøtter ikke selvsignerede certifikater til OCPP.
+Brug ukrypteret WS som reserveløsning.
+
+### Opdateringer
+
+- Operativsystem: Sikkerhedsopdateringer installeres automatisk
+- evcc: Opdateringer kan udføres manuelt via [Cockpit](#cockpit)
+
+### SSH-adgang
+
+Du kan logge ind via SSH med brugeren `admin` (samme loginoplysninger som til [Cockpit](#cockpit)).
+
+Flere tekniske detaljer finder du i [GitHub-repositoryet](https://github.com/evcc-io/images).
+
+## Næste trin
+
+I afsnittet [Funktioner](/da/features/solar-charging) kan du lære om alle evcc's muligheder.
+Download også [iOS/Android-appen](/da/features/app).

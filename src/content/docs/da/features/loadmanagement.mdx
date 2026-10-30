@@ -1,0 +1,189 @@
+---
+title: "Belastningsstyring"
+description: "Belastningsstyring samler ladepunkter i kredsløb med en maksimal strøm eller effekt, så flere opladere aldrig overbelaster din elinstallation."
+sidebar:
+  order: 12
+translatedFrom: "56826048a083"
+---
+
+:::caution[Eksperimentel]
+Funktionen belastningsstyring er stadig eksperimentel. Den fungerer muligvis ikke som forventet sammen med visse andre funktioner.
+:::
+
+Funktionen belastningsstyring/lastbalancering kan bruges til at begrænse opladernes effekt, så kredsløbene ikke overbelastes og sikringerne ikke slår fra.
+Fordi effekten begrænses, kan funktionen også være nyttig, hvis du vil undgå utilsigtede høje forbrugsspidser.
+Til det formål kan et ladepunkt tildeles et kredsløb (`circuit`).
+Et kredsløb (`circuit`) kan have en maksimal strøm (`maxCurrent`) og/eller en maksimal effekt (`maxPower`).
+Systemet er hierarkisk opbygget, dvs. et kredsløb kan være en del af et overordnet kredsløb.
+
+:::note[Opsætning via brugerfladen]
+Denne side beskriver opsætningen via filen `evcc.yaml`.
+Opsætningen er også mulig via brugerfladen.
+
+Kredsløb kan defineres under **Opsætning → Belastningsstyring**.
+Indtastningen sker i YAML-format og svarer til indholdet under `circuits:` i de følgende eksempler.
+Vi arbejder på at erstatte dette med en formularbaseret løsning.
+
+Derefter kan hvert ladepunkt tildeles et kredsløb under **Opsætning → Ladere og varmelegemer → [navn]** (genstart påkrævet).
+:::
+
+## Opsætning
+
+Afsnittet `circuits` definerer kredsløbene.
+Hvert ladepunkt kan derefter tildeles et kredsløb.
+
+### Eksempel: hovedkredsløb
+
+```yaml
+circuits:
+  - name: main # entydigt navn, andre kredsløb henviser til det via parent
+    title: "hovedkredsløb" # navn til brugerfladen (endnu ikke implementeret i brugerfladen)
+    maxCurrent: 63 # 63A (valgfri)
+    maxPower: 30000 # 30kW (valgfri)
+    meter: grid # valgfri
+
+loadpoints:
+  - title: Garage
+    circuit: main
+    # ...
+  - title: Carport
+    circuit: main
+    # ...
+```
+
+Denne opsætning definerer hovedkredsløbet `main` med en maksimal effekt på 30 kW og en maksimal strøm på 63 A pr. fase.
+Ladepunkterne _Garage_ og _Carport_ er tildelt dette kredsløb.
+Hvis andre forbrugsenheder som en ovn eller en varmepumpe tilsammen bruger 50 A (det kræver en måler), må ladepunkterne kun bruge de resterende 13 A.
+Da elnetsmåleren er tildelt dette kredsløb, bliver ladepunkternes effekt neddroslet, så grænserne ikke overskrides ved tilslutningen til elnettet.
+Uden tildelt elnetsmåler gælder grænserne direkte for summen af alle ladepunkter.
+
+### Eksempel: indlejrede kredsløb
+
+```yaml
+circuits:
+  - name: main
+    title: "hovedkredsløb"
+    maxCurrent: 48
+  - name: garage
+    title: Garage
+    maxCurrent: 32
+    parent: main
+  - name: carport
+    title: Carport
+    maxCurrent: 32
+    parent: main
+
+loadpoints:
+  - title: Garage A
+    circuit: garage
+  - title: Garage B
+    circuit: garage
+  - title: Garage C
+    circuit: garage
+  - title: Carport A
+    circuit: carport
+  - title: Carport B
+    circuit: carport
+  - title: Varmepumpe
+    circuit: main
+```
+
+Her har vi to kredsløb, `garage` og `carport`, som begge ligger under hovedkredsløbet (`parent: main`).
+Kredsløbet `main` har en maksimal strøm på 48 A.
+Kredsløbene `garage` og `carport` har hver en maksimal strøm på 32 A.
+Ladepunkterne Garage A, Garage B og Garage C er tildelt kredsløbet `garage` (`circuit: garage`).
+Ladepunkterne Carport A og Carport B er tildelt kredsløbet `carport` (`circuit: carport`).
+Kredsløbene `garage` og `carport` samt varmepumpen er tilsluttet direkte til hovedkredsløbet (`main`).
+Reguleringen sikrer, at grænserne for de enkelte kredsløb ikke overskrides på noget tidspunkt.
+
+**Vigtigt:** Der skal altid være præcis ét hovedkredsløb (et kredsløb uden egenskaben `parent`).
+
+:::note[Ekstern grænse (§ 14a, § 9)]
+Når en [ekstern grænse](/da/external-limit) er aktiv, begrænser den hovedkredsløbets effekt.
+Det vises med meddelelsen ”Forbrug begrænset” på kortet Belastningsstyring.
+:::
+
+## Måling
+
+Som standard beregner styringen den aktuelle effekt og strøm ud fra summen af de pågældende ladepunkter.
+Hvis kredsløbet (`circuit`) får tildelt en måler (`meter`), tages den reelle belastning også i betragtning.
+Det er især nyttigt, hvis andre forbrugsenheder også sidder på samme sikring.
+
+```yaml
+site:
+  meters:
+    ext:
+      - carport_meter
+
+meters:
+  - name: carport_meter
+    type: template
+    template: shelly-3em
+
+circuits:
+  - name: carport
+    meter: carport_meter
+    maxCurrent: 32
+```
+
+Bemærk: Hvis måleren ikke allerede har en anden funktion (f.eks. `grid`), skal den tilføjes som ekstra måler under `site.meters.ext`.
+
+## Grænser
+
+På hvert kredsløb kan der konfigureres både en maksimal strøm pr. fase (`maxCurrent`) og en maksimal effekt (`maxPower`).
+Hvis værdierne er konfigureret, overvåges de uafhængigt af hinanden.
+
+### Eksterne grænser
+
+Ved behov kan der også defineres eksterne grænser med `GetMaxCurrent` og `GetMaxPower`. Hvis der opstår en fejl, gælder de foruddefinerede grænser.
+
+Eksempel:
+
+```yaml
+circuits:
+  - name: main
+    title: "hovedkredsløb"
+    maxCurrent: 48
+    GetMaxCurrent:
+      source: mqtt
+      topic: ext/maxcurrent
+    maxPower: 33000
+    GetMaxPower:
+      source: mqtt
+      topic: ext/maxpower
+```
+
+:::note[Bemærk]
+En ekstern grænse kan bruges til at efterkomme styringskrav fra netselskabet.
+Du kan læse mere under [Ekstern grænse](/da/external-limit).
+:::
+
+## Faseskift
+
+For opladere med automatisk faseskift (1P/3P) kan belastningsstyringen skifte faser, så opladningen holder sig inden for de konfigurerede grænser.
+Når den tilgængelige effekt ikke rækker til 3-faset opladning, skifter evcc automatisk til 1-faset opladning.
+
+Det gælder også i tilstanden **Hurtig** og ved opladning efter ladeplan.
+Hvis belastningsstyringen f.eks. begrænser den tilgængelige effekt til 3,5 kW, skifter evcc til 1-faset opladning (fra 1,4 kW) i stedet for at sætte opladningen på pause.
+
+**Forudsætning:** Opladeren skal understøtte faseskift.
+
+## Opsætning af opladeren
+
+Nogle opladere har deres egne funktioner til belastningsstyring.
+Det anbefales kraftigt at deaktivere dem eller bruge opladere uden indbygget intelligens.
+evcc forventer, at enhederne udfører kommandoerne fra evcc direkte.
+Andre opsætninger kan føre til uventet adfærd, og dem skal du selv teste grundigt.
+
+## Begrænsninger
+
+:::note
+Kommerciel brug af belastningsstyring vil senere kræve en separat licens.
+Privat brug i mindre installationer forbliver gratis.
+:::
+
+- Aktuelle værdier og grænser for de enkelte kredsløb vises på opsætningssiden i brugerfladen. Visning ved ladepunktet er planlagt.
+- Indstillinger for `priority` på ladepunktet tages endnu ikke i betragtning.
+- Nye opladningssessioner får kun den resterende kapacitet i kredsløbet.
+  Omfordeling mellem aktive opladningssessioner understøttes endnu ikke.
+- [Netladning](/da/features/battery#gridcharge) af hjemmebatteriet tages ikke i betragtning. Når hjemmebatteriet aktivt oplades fra elnettet, indgår dette forbrug ikke i belastningsstyringens beregninger. Mens et signal om [effektreduktion efter § 14a](/da/external-limit) er aktivt, sættes netladningen dog automatisk på pause.

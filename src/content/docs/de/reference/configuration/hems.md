@@ -1,24 +1,25 @@
 ---
 title: "hems"
-description: "Externe Begrenzung von Bezug und Einspeisung in der evcc.yaml einrichten, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBUS."
+description: "So richtest du in der evcc.yaml die externe Begrenzung von Verbrauch und Einspeisung ein, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBUS."
 sidebar:
   order: 8
+translatedFrom: "426c429c285d"
 ---
 
-Unter `hems` wird die externe Steuerung von Verbrauchsleistung und Einspeisung konfiguriert.
+Unter `hems` wird die externe Begrenzung von Verbrauchsleistung und Einspeisung konfiguriert.
 Dies wird z. B. für die Umsetzung von § 14a EnWG oder § 9 EEG benötigt.
 Details zu Hintergrund und Einrichtung findest du unter [Externe Begrenzung](/de/external-limit).
 
 :::note[Hinweis]
 Die Abregelung wirkt direkt auf die abregelbaren `pv`-Zähler und [Einspeisebegrenzer](/de/reference/configuration/curtailers), das Dimmen direkt auf die steuerbaren Verbraucher.
-Dafür sind keine Stromkreise erforderlich.
+Für beides sind keine Stromkreise erforderlich.
 Damit das Verbrauchslimit auf Ladepunkte wirkt, müssen Stromkreise im [Lastmanagement](/de/features/loadmanagement) eingerichtet sein.
-Ein aktives Limit begrenzt dann den obersten Stromkreis.
+Ein aktives Limit begrenzt dann den Hauptstromkreis.
 :::
 
 :::note[SMA Sunny Home Manager & SEMP-Protokoll]
 Die Integration mit dem SMA Sunny Home Manager (SHM) ist standardmäßig aktiv und muss nicht mehr unter `hems:` konfiguriert werden.
-Details und Konfigurationsmöglichkeiten findest du unter **Konfiguration > Sunny Home Manager**.
+Details und Konfigurationsmöglichkeiten findest du unter **Konfiguration → Sunny Home Manager**.
 :::
 
 ---
@@ -72,7 +73,7 @@ Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Beg
 Abfrageintervall für den Schaltkontakt.
 Standard: `10s`.
 
-Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [Benutzerdefinierte Integrationen](/de/user-defined-devices#external-limit).
+Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [benutzerdefinierte Integrationen](/de/user-defined-devices#external-limit).
 
 ---
 
@@ -126,17 +127,17 @@ Bei aktivem Signal wird der Verbrauch auf `maxDimPower` begrenzt.
 
 #### `w3`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "0%".
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals „0%“.
 Bei aktivem Signal wird die Einspeisung auf 0% von `maxCurtailPower` begrenzt.
 
 #### `s2`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "30%".
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals „30%“.
 Bei aktivem Signal wird die Einspeisung auf 30% von `maxCurtailPower` begrenzt.
 
 #### `s1`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals "60%".
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Abregelungssignals „60%“.
 Bei aktivem Signal wird die Einspeisung auf 60% von `maxCurtailPower` begrenzt.
 
 #### `interval`
@@ -164,7 +165,7 @@ hems:
 #### `ski`
 
 SKI (Subject Key Identifier) der Steuerbox.
-Wird für das Pairing benötigt.
+Wird für die Kopplung benötigt.
 
 #### Erweiterte Limits
 
@@ -185,4 +186,4 @@ Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Beg
 Abfrageintervall.
 Standard: `10s`.
 
-Details zur Einrichtung und zum Pairing findest du unter [Externe Begrenzung](/de/external-limit#eebus-pairing).
+Details zur Einrichtung und zur Kopplung findest du unter [Externe Begrenzung](/de/external-limit#eebus-pairing).

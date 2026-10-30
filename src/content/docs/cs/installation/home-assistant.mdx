@@ -1,0 +1,198 @@
+---
+title: "Home Assistant"
+description: "Nainstalujte evcc jako aplikaci Home Assistantu bez příkazové řádky, zjistěte, kde je uložena konfigurace a jak fungují aktualizace, a projděte si pokročilé tipy."
+sidebar:
+  order: 5
+translatedFrom: "df86bba2a2d5"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import haConfigUi from "@assets/installation/ha_configuration_ui.webp";
+
+:::note
+Aplikace evcc pro Home Assistant je komunitní integrace a správci evcc ji oficiálně nepodporují.
+
+Důvodem je, že v případě chyby nelze snadno získat důležitá data (chybí `evcc cli`).
+:::
+
+:::caution[Migrace dat]
+Upozorňujeme, že 16. února 2025 jsme ve verzi 0.200.1 změnili cesty v aplikaci tak, aby odpovídaly [pokynům](https://developers.home-assistant.io/blog/2023/11/06/public-addon-config/) Home Assistantu.
+
+Od této chvíle jsou v aplikaci namapovány následující cesty:
+
+- `/homeassistant/` -> odkazuje na `/homeassistant/` nebo `/config/` v Home Assistantu.
+- `/config/` -> odkazuje na `/addon_configs/49686a9f_evcc/` v Home Assistantu.
+
+Pokud aktualizujete ze starší verze, váš konfigurační soubor se automaticky zkopíruje do nového adresáře.
+Databázi zkopírujeme jen tehdy, pokud byla rovněž uložena v `/config/`. Pokud jste ji měli v `/data/`, zůstane tam.
+Ke starým souborům připojíme příponu `.migrated`. Ty pak můžete ručně smazat.
+:::
+
+Tento návod popisuje instalaci evcc jako aplikace Home Assistantu.
+Na rozdíl od [instalace na Linuxu](/cs/installation/linux) nebo [instalace pomocí Dockeru](/cs/installation/docker) zde nepotřebujete znalost příkazové řádky.
+
+## Předpoklady
+
+Potřebujete instalaci Home Assistantu se zapnutým obchodem s aplikacemi.
+V závislosti na typu instalace nemusí být tato funkce k dispozici.
+Více informací najdete v [dokumentaci Home Assistantu](https://www.home-assistant.io/installation/#advanced-installation-methods).
+
+## Instalace
+
+<Tabs groupId="release-type">
+  <TabItem label="Stabilní verze" default>
+  Aktuální stabilní verze.
+
+1. Automatické přidání repozitáře: klikněte na následující tlačítko, poté na **Otevřít odkaz** a pak na **Přidat**.
+   [![Otevře vaši instanci Home Assistantu a zobrazí dialogové okno pro přidání repozitáře aplikací s předvyplněnou adresou URL repozitáře.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc-io%2Fhassio-addon)
+2. Ruční přidání repozitáře:
+   1. Klikněte na **Nastavení** → **Aplikace** → **Instalovat aplikaci**
+   2. Klikněte na **tři tečky** → **Repozitáře**
+   3. Přidejte adresu URL repozitáře a klikněte na **Přidat**
+      ```
+      https://github.com/evcc-io/hassio-addon
+      ```
+3. Znovu načtěte webovou stránku
+4. Najděte aplikaci **evcc** a klikněte na ni
+5. Klikněte na tlačítko **Instalovat**
+
+  </TabItem>
+  <TabItem label="Nightly">
+  Aktuální vývojová verze. Aktualizuje se denně. Může být nestabilní.
+  Lze ji sice nainstalovat vedle stabilní verze, ale současně může běžet jen jedna z nich.
+  Pokud používáte verzi nightly, změní se cesty a názvy kontejnerů Dockeru uvedené v tomto návodu, tj. místo `evcc` musíte použít `evcc-nightly`.
+
+1. Automatické přidání repozitáře: klikněte na následující tlačítko, poté na **Otevřít odkaz** a pak na **Přidat**.
+   [![Otevře vaši instanci Home Assistantu a zobrazí dialogové okno pro přidání repozitáře aplikací s předvyplněnou adresou URL repozitáře.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc-io%2Fhassio-addon)
+2. Ruční přidání repozitáře:
+   1. Klikněte na **Nastavení** → **Aplikace** → **Instalovat aplikaci**
+   2. Klikněte na **tři tečky** → **Repozitáře**
+   3. Přidejte adresu URL repozitáře a klikněte na **Přidat**
+      ```
+      https://github.com/evcc-io/hassio-addon
+      ```
+3. Znovu načtěte webovou stránku
+4. Najděte aplikaci **evcc (nightly)** a klikněte na ni
+5. Klikněte na tlačítko **Instalovat**
+
+  </TabItem>
+</Tabs>
+
+## Konfigurace
+
+evcc lze konfigurovat dvěma způsoby:
+
+### Webové rozhraní (doporučeno)
+
+Přejděte v aplikaci **evcc** na kartu **Informace** a zapněte **Zobrazit v postranním panelu** (rozhraní evcc najdete na adrese http://your-ha-instance-ip-address:7070).
+
+Přejděte na kartu **Konfigurace** a zvolte svůj pracovní adresář, např. takto:
+
+<img
+  src={haConfigUi.src}
+  alt="Konfigurační rozhraní aplikace v Home Assistantu"
+/>
+
+```sh
+- sqlite_file: /data/evcc.db
+```
+
+Sekci Síť ponechte beze změny.
+
+Spusťte aplikaci.
+Poté otevřete rozhraní evcc přes postranní panel:
+
+- Budete vyzváni k nastavení hesla administrátora.
+- Poté můžete svá zařízení nakonfigurovat přímo ve webovém rozhraní.
+- Nastavení se automaticky ukládají do databáze.
+
+### Konfigurační soubor (tradiční)
+
+Případně můžete použít konfigurační soubor `evcc.yaml`.
+
+Přejděte na kartu **Konfigurace** a přidejte konfigurační soubor do svého pracovního adresáře:
+
+```sh
+- config_file: /config/evcc.yaml
+- sqlite_file: /data/evcc.db
+```
+
+Vytvořte konfigurační soubor evcc `evcc.yaml` v kořenovém konfiguračním adresáři aplikace (`/addon_configs/49686a9f_evcc`).
+Pokud tento adresář neexistuje, vytvořte ho ručně.
+
+Konfigurační soubor můžete vytvořit nebo upravit několika způsoby:
+
+- [Visual Studio Code](https://github.com/hassio-addons/addon-vscode): vlevo nahoře otevřete hamburger menu, zvolte „File“, „Open Folder...“ a vyberte `/addon_configs/49686a9f_evcc`
+- [File Editor](https://github.com/home-assistant/addons/tree/master/configurator): ujistěte se, že máte v konfiguraci aplikace vypnutou volbu „Enforce Basepath“, restartujte aplikaci a přejděte do `/addon_configs/49686a9f_evcc`
+- [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh): přejděte do `/addon_configs/49686a9f_evcc` a použijte např. nano
+
+Podrobnosti o vytvoření konfiguračního souboru najdete v části [Konfigurace](/cs/installation/configuration).
+
+Pokud si chcete systém vyzkoušet v ukázkovém režimu (demo), stačí spustit evcc s parametrem `--demo`.
+Více informací najdete v [referenci CLI](/cs/reference/cli/evcc).
+
+## Aktualizace
+
+evcc se aktualizuje na nejnovější verzi spolu s ostatními aktualizacemi v Home Assistantu.
+
+## Pokročilé tipy
+
+Pro následující funkce potřebujete přístup k Home Assistantu přes SSH. Získáte ho např. pomocí výše zmíněné aplikace SSH.
+
+- Nainstalujte [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh)
+- V konfiguraci aplikace vypněte „secure mode“
+- Restartujte aplikaci
+- Otevřete uživatelské rozhraní aplikace
+
+### Jak získám přístup k databázi evcc?
+
+Zobrazte soubory v `/data`:
+
+```sh
+docker exec addon_49686a9f_evcc ls -la /data
+```
+
+Zkopírujte `evcc.db` do `/addon_configs/49686a9f_evcc`:
+
+```sh
+docker cp addon_49686a9f_evcc:/data/evcc.db /addon_configs/49686a9f_evcc/
+```
+
+### Jak mohu použít CLI evcc?
+
+Otevřete shell v kontejneru Docker s evcc:
+
+```sh
+docker exec -it addon_49686a9f_evcc /bin/sh
+```
+
+Spusťte příkazy CLI evcc (zde jako příklad `checkconfig`):
+
+```sh
+evcc -c /config/evcc.yaml checkconfig
+```
+
+Až budete hotovi, zavřete shell v kontejneru Docker s evcc:
+
+```sh
+exit
+```
+
+### Jak mohu v aplikaci evcc pro Home Assistant použít externí adaptér / HAT (Home Assistant OS, Raspberry Pi)?
+
+Pokud je zařízení s Home Assistantem blízko měřiče (solár, domácí baterie, síť atd.), můžete data získávat také přímo přes Modbus (např. USB).
+
+K tomu musíte v Home Assistantu povolit externí zařízení, což se týká i aplikace evcc.
+Odkomentujte proto řádek `uart = 1` v souboru `config.txt` na bootovacím oddílu Home Assistant OS.
+
+```ini title=/config.txt
+uart = 1
+```
+
+Po restartu by mělo být vaše zařízení dostupné pro aplikaci evcc (pravděpodobně jako `/dev/ttyS0` nebo `/dev/ttyUSB`).
+
+## Další krok: integrace
+
+Jakmile váš systém běží, můžete nastavit integraci mezi evcc a Home Assistantem.
+Více informací najdete v části [Integrace → Home Assistant](/cs/smarthome/home-assistant).
+Data z evcc můžete zobrazit v Home Assistantu nebo vytvářet automatizace založené na evcc.

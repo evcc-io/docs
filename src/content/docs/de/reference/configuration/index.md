@@ -1,8 +1,9 @@
 ---
 title: "Konfiguration"
-description: "Überblick über die Konfiguration per evcc.yaml: wo die Datei liegt, wie sie aufgebaut ist und welche Abschnitte deine Anlage, Ladepunkte und Geräte beschreiben."
+description: "Hier erfährst du, wo die evcc.yaml liegt, wie sie aufgebaut ist und mit welchen Abschnitten du deinen Standort und deine Geräte festlegst."
 sidebar:
   order: 1
+translatedFrom: "7c938df548c1"
 ---
 
 evcc kann auf zwei Arten konfiguriert werden:
@@ -11,35 +12,37 @@ evcc kann auf zwei Arten konfiguriert werden:
 
 Die Konfiguration erfolgt über die Weboberfläche unter **Konfiguration**.
 Die Einstellungen werden automatisch in der Datenbank gespeichert.
-Weitere Informationen findest du unter [Einrichtung](/de/installation/configuration).
+Weitere Informationen findest du unter [Konfiguration](/de/installation/configuration).
 
 **2. Dateibasierte Konfiguration**
 
-Die Konfiguration über die `evcc.yaml` Datei wird weiterhin unterstützt.
+Die Konfiguration über die Datei `evcc.yaml` wird weiterhin unterstützt.
 Dieser Bereich dokumentiert die YAML-basierte Konfiguration.
 
 :::note[Parallele Nutzung]
 Beide Konfigurationsmethoden können parallel genutzt werden.
 Geräte (Ladepunkte, Zähler, PV-Anlagen, Hausbatterien, Fahrzeuge) werden aus beiden Quellen zusammengeführt.
 Bei anderen Einstellungen hat die UI-Konfiguration Vorrang.
-Details findest du in der [FAQ](/de/faq#ui-migration).
+Details findest du in den [FAQ](/de/faq#ui-migration).
 :::
 
 ## Dateibasierte Konfiguration (evcc.yaml)
 
-Die Konfigurationsdatei ist im YAML Format geschrieben und hat standardmäßig den Namen `evcc.yaml`.
-Sie liegt entweder im gleichen Verzeichnis wie das Programm oder bei Linux-Systemen unter `/etc/evcc.yaml`.
+Die Konfigurationsdatei ist im YAML-Format geschrieben und heißt standardmäßig `evcc.yaml`.
+Sie liegt entweder im gleichen Verzeichnis wie evcc selbst oder auf POSIX-Systemen (z. B. Linux) unter `/etc/evcc.yaml`.
 
 Abweichende Pfade können beim Start angegeben werden: `evcc -c /pfad/zur/evcc.yaml`
 
 ### Struktur
 
-Die Konfigurationsdatei besteht aus mehreren Bereichen.
-Um zwischen Bereichen zu referenzieren, haben Geräte einen `name` Parameter zur Identifikation.
+Die Konfigurationsdatei besteht aus mehreren Abschnitten.
+Damit sich die Abschnitte gegenseitig referenzieren können, hat jedes Gerät einen Parameter `name`.
 
-Eine Beispieldatei mit vielen Parametern findet man hier: https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml
+Eine Beispieldatei mit vielen Parametern findest du hier:
+https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml
 
-Hier ein Überblick über die Beziehungen der wichtigsten Bestandteile der Konfiguration:
+Hier ein Überblick über die Beziehungen zwischen den wichtigsten Bestandteilen der
+Konfiguration:
 
 ```mermaid
 graph TD;
@@ -70,85 +73,89 @@ graph TD;
     meterGrid -- meters.grid --> site
     meterPV -- meters.pvs --> site
     meterBattery -- meters.batterys --> site
-
 ```
 
 ### Wie funktioniert evcc? (Ein Blick ins Innere)
 
-Wichtig für die Funktionalität ist ein Netzanschlusszähler (`grid` Zähler). Dieser ermittelt die aktuelle Überschussleistung.
-Die Messung der Erzeugungsleistung hat in diesem Fall keinen funktionalen Einfluss.
-Ein Betrieb ist aber auch ohne Netzanschlusszähler möglich. Mehr dazu findest du [hier](/de/faq#einrichtung).
+Damit das System funktioniert, ist ein Netzzähler (`grid`-Zähler) wichtig.
+Er ermittelt die aktuelle Überschussleistung.
+Die Messung der Erzeugungsleistung hat in diesem Fall keinen Einfluss auf die Funktion.
+Ein Betrieb ohne Netzzähler ist ebenfalls möglich, siehe [FAQ](/de/faq#configuration).
 
-Die Überschussleistung wird mit der Mindestladeleistung verglichen. Ist diese erreicht, startet die Ladung.
+Die Überschussleistung wird mit der Mindestladeleistung verglichen.
+Reicht sie aus, startet der Ladevorgang.
 
-Die Mindestladeleistung ergibt sich aus den im Ladepunkt definierten Werten [`minCurrent`](/de/reference/configuration/loadpoints) und [`phases`](/de/reference/configuration/loadpoints).
+Die Mindestladeleistung ergibt sich aus den Werten `minCurrent`
+und `phases`, die pro `loadpoint` (eine Gruppe von Wallboxen am selben Ort) definiert werden.
+Weitere Informationen findest du unter [`loadpoints`](/de/reference/configuration/loadpoints).
 
 Beispiel: `phases: 1` und `minCurrent: 8`
 
-1 (phases) x 8A (minCurrent) x 230V (Netzspannung) = 1840W (Mindestladeleistung)
+1 (phases) × 8 A (minCurrent) × 230 V (Netzspannung) = 1840 W (Mindestladeleistung)
 
-#### Manipulationsmöglichkeiten
+#### Einflussmöglichkeiten
 
-Normalerweise entspricht die Überschussleistung der verfügbaren Ladeleistung. Die verfügbare Ladeleistung kann jedoch individuell durch mehrere Parameter verändert werden. Diese sind:
+Normalerweise entspricht die Überschussleistung der verfügbaren Ladeleistung.
+Die verfügbare Ladeleistung lässt sich jedoch über mehrere Parameter individuell anpassen.
+Diese sind:
 
-- Site: `residualpower`
-- Site: `prioritySoc`
-- Site: `bufferSoc`
-- Site: `aux`
-- Loadpoint: `enable: threshold`
-- Loadpoint: `disable: threshold`
+- Standort: `residualpower`
+- Standort: `prioritySoc`
+- Standort: `bufferSoc`
+- Standort: `aux`
+- Ladepunkt: `enable: threshold`
+- Ladepunkt: `disable: threshold`
 
-Die Einstellmöglichkeiten bitte der Beschreibung der jeweiligen Parameter entnehmen.
+Die Einstellmöglichkeiten findest du in der Beschreibung des jeweiligen Parameters.
 
-### Site
+- [Konfigurationsparameter des Standorts](/de/reference/configuration/site)
+- [Konfigurationsparameter des Ladepunkts](/de/reference/configuration/loadpoints)
 
-Eine _Site_ beschreibt den Standort mit den vorhandenen und benötigten Geräten der Hausinstallation und ist für das Regeln der verfügbaren Leistung zuständig.
+### Standort
 
-[Weiterlesen...](/de/reference/configuration/site)
+Ein [Standort](/de/reference/configuration/site) beschreibt den Ort mit den vorhandenen und benötigten Geräten
+der Hausinstallation und regelt die verfügbare Leistung.
 
-### Ladepunkte
+### Ladepunkt
 
-_Ladepunkte_ (`loadpoints`) beschreiben die Ladeinfrastruktur und kombinieren vorhandene _Charger_ (Wallboxen), _Vehicle_ (Fahrzeuge) und alles weitere was ein Ladepunkt benötigt.
+Ein [Ladepunkt](/de/reference/configuration/loadpoints) beschreibt die Ladeinfrastruktur und kombiniert
+vorhandene _Wallboxen_, _Fahrzeuge_ und alles Weitere, was ein Ladepunkt benötigt.
 
-[Weiterlesen...](/de/reference/configuration/loadpoints)
+### Wallboxen
 
-### Chargers
+Der Abschnitt [Wallboxen](/de/reference/configuration/chargers) enthält eine Liste von Wallboxen und ihren Eigenschaften, z. B.
+wie sie angesprochen werden.
 
-_Chargers_ (Wallboxen) beinhaltet eine Liste von Wallboxen und deren Eigenschaften, z. B. wie sie angesprochen werden.
+### Zähler
 
-[Weiterlesen...](/de/reference/configuration/chargers)
+Der Abschnitt [Zähler](/de/reference/configuration/meters) enthält eine Liste von Geräten, die verschiedene Leistungsflüsse messen.
+Dazu gehören:
 
-### Meters
+- Leistung aus Netzbezug und Einspeisung
+- PV-Erzeugungsleistung
+- Ladestrom des Elektroautos (falls die Wallbox diesen nicht direkt liefert)
+- Leistungsfluss der Hausbatterie(n)
 
-_Meters_ (Hausinstallation) ist eine Liste von Geräten welche verschiedene Stromflüsse messen. Dazu gehören:
+### Einspeisebegrenzer
 
-- Eingekaufter, Verkaufter Strom
-- PV erzeugte Ströme
-- Ladestrom des EV (falls die Wallbox dies nicht direkt unterstützt)
-- Ströme der Hausbatterie(n)
+[Einspeisebegrenzer](/de/reference/configuration/curtailers) sind Geräte, die ausschließlich die Einspeisung der PV-Anlage
+auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG), z. B. der SMA Sunny Home Manager 2.0 oder der führende
+Wechselrichter einer Anlage mit mehreren Wechselrichtern.
 
-[Weiterlesen...](/de/reference/configuration/meters)
+### Fahrzeuge
 
-### Curtailers
-
-_Curtailers_ (Einspeisebegrenzer) sind Geräte, die ausschließlich die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG), z. B. der SMA Sunny Home Manager 2.0 oder der führende Wechselrichter einer Anlage mit mehreren Wechselrichtern.
-
-[Weiterlesen...](/de/reference/configuration/curtailers)
-
-### Vehicles
-
-Um die Ladung auf einen bestimmten Ladestand in EVs zu begrenzen, können hier die vorhandenen Fahrzeuge und Online Zugangsdaten angegeben werden.
-
-[Weiterlesen...](/de/reference/configuration/vehicles)
+Um den Ladestand von Elektroautos auf einen bestimmten Wert zu begrenzen, kannst du hier
+die vorhandenen [Fahrzeuge](/de/reference/configuration/vehicles) und ihre Online-Zugangsdaten angeben.
 
 ### HEMS
 
-evcc kann die Ladepunkte und deren Ladeströme an ein anderes Home Energy Management System (HEMS) weitergeben, damit dieses die Informationen z.b. zur Steuerung der Hausbatterie nutzen kann.
+evcc kann Informationen zu den Ladepunkten und deren Ladeströmen an ein anderes
+[Home Energy Management System (HEMS)](/de/reference/configuration/hems) weitergeben, damit dieses die
+Informationen z. B. zur Steuerung der Hausbatterie nutzen kann.
 
-[Weiterlesen...](/de/reference/configuration/hems)
+### Benachrichtigungen
 
-### Messaging
+In diesem Abschnitt kannst du Ereignisse festlegen, über die du informiert werden möchtest.
+Für die Zustellung der Nachrichten werden viele verschiedene Systeme unterstützt.
 
-In diesem Bereich können Ereignisse definiert werden, bei welchen man informiert werden will. Zur Informationsübermittlung werden eine Reihe von unterschiedlichen Systemen unterstützt.
-
-[Weiterlesen...](/de/reference/configuration/messaging)
+[Weitere Informationen](/de/reference/configuration/messaging)

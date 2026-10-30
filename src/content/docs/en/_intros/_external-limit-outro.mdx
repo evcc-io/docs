@@ -1,0 +1,66 @@
+## How It Works \{#how-it-works\}
+
+In normal operation, evcc charges without external power limitation.
+The charging points operate with their normal configuration and are coordinated by additional [Load Management](/en/features/loadmanagement) restrictions if applicable.
+
+When the grid operator sends a reduction signal:
+
+1. **FNN control box**: The W4 contact is closed, evcc activates the configured consumption limit
+2. **EEBus**: The control box digitally transmits the calculated total limit
+3. **Relay**: The contact is closed, evcc activates the configured power limit
+
+The limit caps the top-level [Load Management](/en/features/loadmanagement) circuit; all charging points assigned to circuits are reduced accordingly.
+If total consumption is too high, charging processes can also be stopped.
+The control affects all modes (Smart, Fast).
+
+**Battery control during reduction:**
+If [active battery control](/en/features/battery#battery-control) is configured and [grid charging](/en/features/battery#gridcharge) of the home battery is active, this is automatically paused.
+The battery is set to "hold" mode so that it no longer discharges.
+Charging the battery from solar surplus is usually still possible.
+After the power reduction ends, [grid charging](/en/features/battery#gridcharge) automatically resumes.
+
+When a control limit is active, a **banner with control notice** is displayed on the main page in evcc.
+Consumption limit and feed-in curtailment are shown separately.
+
+## Logging \{#logging\}
+
+All limitation requests from the grid operator are automatically documented.
+The log data can be downloaded as a CSV file under **Configuration → External Limit**.
+
+Each entry contains:
+
+- Start and end time of the limitation
+- Type of control (consumption reduction or feed-in curtailment)
+- Measured grid power at the start of the limitation
+- Set power limit
+
+This documentation can be provided to the grid operator upon request to verify compliance with control requests.
+
+:::note[Responsibility (German regulations § 14a, § 9)]
+The qualified electrician must verify after installation that the external limit is working as expected.
+The system operator is responsible for proper operation and must keep the log for at least 2 years.
+:::
+
+## Controlling Additional Consumers \{#additional-consumers\}
+
+In addition to charging points, other controllable consumers can also be integrated into German § 14a load management.
+This applies e.g. to heat pumps or battery storage systems that are connected via EEBus or configured as meters with an additional relay output.
+
+The control takes into account the current power consumption of all controllable consumers.
+This automatically includes all charging points and all meters with corresponding switching outputs or EEBus interface with LPC use case as other consumers.
+
+First, all other consumers are dimmed.
+The remaining power is then distributed to the active charging points.
+Due to flat dimming of other consumers, the available charging power for active charging points can in exceptional cases even be higher than in normal state.
+If throttling the charging points including dimming all other consumers is not sufficient, charging processes at charging points are interrupted.
+
+:::note[Availability]
+Currently, only one dimmable meter (EEBus consumer) exists.
+This feature is being expanded and compatible meters will be marked in the [device documentation](/en/meters).
+:::
+
+## Further Information \{#further-information\}
+
+- [Load Management](/en/features/loadmanagement): Basics of load distribution
+- [User-defined integration](/en/user-defined-devices#external-limit): Connection via relay or custom data sources
+- [Plugins](/en/reference/plugins): Advanced plugin configurations

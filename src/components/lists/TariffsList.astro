@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
-import TariffsIntro from "@components/intros/TariffsIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
 import {
@@ -12,9 +11,10 @@ import {
   nightlyPageHead,
 } from "@utils/devices";
 import type { Channel } from "@utils/devices";
+import { intro } from "@utils/intros";
 
 interface Props {
-  lang: "de" | "en";
+  lang: string;
   channel: Channel;
 }
 const { lang, channel } = Astro.props;
@@ -24,11 +24,9 @@ const coll = await getCollection(collectionName("tariffs", lang, channel) as any
 const devices = sortDevices(coll as any);
 const basePath = `/${lang}${isNightly ? "/nightly" : ""}/tariffs`;
 
-const title = lang === "de" ? "Tarife & Vorhersagen" : "Tariffs & forecasts";
-const description =
-  lang === "de"
-    ? "Dynamische Stromtarife sowie Anbieter für CO₂-, PV- und Temperaturvorhersagen."
-    : "Dynamic electricity tariffs and CO₂, solar, and temperature forecast providers.";
+const title = Astro.locals.t("list.tariffs.title");
+const description = Astro.locals.t("list.tariffs.description");
+const Intro = intro(lang, "tariffs");
 
 function bucketFor(d: any): "price" | "co2" | "solar" | "temperature" {
   const group = d.data.product.group ?? "";
@@ -43,35 +41,15 @@ const buckets: Record<"price" | "co2" | "solar" | "temperature", any[]> = {
 };
 for (const d of devices) buckets[bucketFor(d)].push(d);
 
-const sectionLabels = lang === "de"
-  ? {
-      price: { id: "price", title: "Strompreise" },
-      co2: { id: "co2", title: "CO₂-Vorhersagen" },
-      solar: { id: "solar", title: "Solar-Vorhersagen" },
-      temperature: { id: "temperature", title: "Temperaturvorhersagen" },
-    }
-  : {
-      price: { id: "price", title: "Electricity prices" },
-      co2: { id: "co2", title: "CO₂ forecasts" },
-      solar: { id: "solar", title: "Solar forecasts" },
-      temperature: { id: "temperature", title: "Temperature forecasts" },
-    };
+const sectionTitle = (k: string) => Astro.locals.t(`list.tariffs.${k}` as any);
 
 const sectionOrder = ["price", "co2", "solar", "temperature"] as const;
 
 const headings = [
-  ...(lang === "de"
-    ? [
-        { depth: 2, slug: "kinds", text: "Tarifarten" },
-        { depth: 2, slug: "forecasts", text: "Vorhersagen" },
-      ]
-    : [
-        { depth: 2, slug: "kinds", text: "Tariff kinds" },
-        { depth: 2, slug: "forecasts", text: "Forecasts" },
-      ]),
+  ...Intro.getHeadings(),
   ...sectionOrder
     .filter((k) => buckets[k].length > 0)
-    .map((k) => ({ depth: 2, slug: sectionLabels[k].id, text: sectionLabels[k].title })),
+    .map((k) => ({ depth: 2, slug: k, text: sectionTitle(k) })),
 ];
 
 const frontmatter = {
@@ -84,12 +62,12 @@ const frontmatter = {
 
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="tariffs" />}
-  <TariffsIntro lang={lang} />
+  <Intro.Content />
   {
     sectionOrder.map((k) =>
       buckets[k].length > 0 ? (
         <>
-          <h2 id={sectionLabels[k].id}>{sectionLabels[k].title}</h2>
+          <h2 id={k}>{sectionTitle(k)}</h2>
           <DeviceCardList
             devices={buckets[k] as any}
             lang={lang}

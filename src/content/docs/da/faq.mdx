@@ -1,0 +1,442 @@
+---
+title: "Ofte stillede spørgsmål"
+description: "Her finder du svar på ofte stillede spørgsmål om opsætning af evcc, fejlfinding, uventet ladeadfærd, nulstilling af adgangskoden og solprognosen."
+toc_max_heading_level: 2
+sidebar:
+  order: 8
+translatedFrom: "dd31f239a292"
+---
+
+## Opsætning \{#configuration\}
+
+### Skal jeg sætte evcc op via brugerfladen eller med konfigurationsfilen?
+
+Vi anbefaler at bruge **brugerfladen**.
+Når du har installeret evcc, åbner du den i din browser og opsætter dine enheder direkte der.
+Indstillingerne gemmes automatisk i databasen.
+
+**Konfigurationsfilen** (`evcc.yaml`) er den traditionelle metode og understøttes fortsat.
+
+**Vigtigt**: Nogle nyere funktioner er kun tilgængelige via brugerfladen.
+De to metoder kan også bruges parallelt.
+
+Mere information finder du under [Opsætning](/da/installation/configuration).
+
+### Jeg har en evcc.yaml-konfiguration. Hvordan migrerer jeg til brugerfladen? \{#ui-migration\}
+
+Du kan bruge begge opsætningsmetoder parallelt og migrere trin for trin.
+
+**Fremgangsmåde:**
+
+1. Opsæt en ny enhed direkte via brugerfladen under **Opsætning**.
+2. Fjern den tilsvarende post fra din `evcc.yaml`.
+3. Gentag dette for alle enheder, indtil din `evcc.yaml` er tom.
+
+**Sammenlægning af enheder:**
+
+Ladepunkter, elnetsmålere, solcelleanlæg, batterier, køretøjer og andre målere lægges sammen fra begge kilder.
+På opsætningssiden er enheder fra `evcc.yaml` synlige, men kan ikke redigeres.
+Du kan bruge enheder fra både `evcc.yaml` og brugerfladen samtidig.
+
+**Opsætningen i brugerfladen har forrang:**
+
+For andre indstillinger (MQTT, notifikationer, InfluxDB, tariffer osv.) har værdier fra brugerfladen forrang for værdier fra `evcc.yaml`.
+Vi anbefaler kun at bruge én kilde for at undgå forvirring.
+
+**Bemærk:** Nogle steder (ekstern grænse, sponsortoken) er opsætningen i brugerfladen låst, hvis den allerede er sat op via `evcc.yaml`.
+Slet posten fra `evcc.yaml` for at kunne redigere i brugerfladen.
+
+**Konklusion:**
+
+En fuldstændig migrering er ikke påkrævet.
+Du kan fortsætte med at bruge `evcc.yaml` til bestemte opsætninger og tilføje nye funktioner via brugerfladen.
+
+:::note[Der findes ingen automatisk migrering.]
+Den tidligere tilgængelige kommando `evcc migrate` blev fjernet på grund af høj kompleksitet.
+Migrer venligst manuelt.
+:::
+
+### Kan jeg bruge evcc uden en elnetsmåler?
+
+Elnetsmåleren er kernen i evcc og bør så vidt muligt indgå.
+Det er dog også muligt at lade solstyret opladning køre udelukkende på grundlag af soleffekten.
+
+Bemærk dog, at du så ikke kan oplade udelukkende med overskud fra solenergi, fordi de nødvendige beregninger kun er mulige, når effekten fra elnettet er kendt.
+Med en sådan opsætning oplader evcc køretøjet med den aktuelle effekt fra solproduktionen.
+
+Du kan angive forbruget i et typisk mellemstort hus, for at forsøge at levne lidt energi til huset. Det gør du med
+konfigurationsparameteren [`residualPower`](/da/reference/configuration/site#residualpower).
+
+**Eksempel**:
+
+```yaml
+site:
+  residualPower: 250 # 250 W husforbrug
+```
+
+### Jeg har ingen solceller, kan jeg stadig få gavn af evcc?
+
+Muligvis! evcc kan bruges til meget andet end ren udnyttelse af solenergi. **Bemærk, at alle disse anvendelser kræver en elnetsmåler.**
+
+Her er nogle idéer:
+
+- Oplad automatisk et køretøj afhængigt af den aktuelle energipris med en dynamisk tarif (f.eks. Octopus Energy, Nachtstrom, Tibber, Awatter osv.), se [Dynamiske tariffer](/da/features/dynamic-prices)
+- Start/stop din oplader på afstand, især nyttigt ved opladere, der ikke har nogen anden fjernstyringsgrænseflade
+- Begræns opladningen af dit køretøj til et bestemt opladningsniveau, men bemærk, at køretøjet skal være sat op.
+
+### Kan jeg afprøve evcc uden alle komponenterne (solcelleanlæg, oplader osv.)?
+
+Selvfølgelig! Vi har et udvalg af ”demo”-komponenter, der kan udfylde hullerne.
+
+[Måler](https://docs.evcc.io/en/docs/meters#demo-meter)
+
+[Oplader](https://docs.evcc.io/en/docs/chargers#demo-charger)
+
+### Kan jeg bruge evcc uden at integrere solcelleinverteren?
+
+Ja! Hvis der er en elnetsmåler og en styrbar oplader, kan du bruge alle de grundlæggende funktioner i evcc, inklusive opladning med soloverskud.
+Bemærk, at du så mangler nogle visualiseringer og statistikker, herunder beregningen af solandelen ved opladning.
+
+Hvis du eftermonterer en måler (f.eks. en Shelly EM) på inverterens udgangskabel, får du præcis de samme funktioner, som du ville få,
+hvis du kunne kommunikere direkte med inverteren.
+
+### Kan jeg bruge flere opladere?
+
+Ja! Flere opladere kan tilføjes og styres af evcc på samme tid.
+
+Med [belastningsstyring](/da/features/loadmanagement) kan du samle dem i kredsløb med en maksimal strøm eller effekt, så de tilsammen aldrig overbelaster din elinstallation.
+
+### Kan evcc forhindre, at flere hjemmebatterier aflader hinanden?
+
+Når evcc styrer ladepunkter og andre forbrugsenheder, tager den højde for opladningsniveauet i de konfigurerede hjemmebatterier.
+Hvis et batterisystem understøtter [aktiv batteristyring](/da/features/battery#battery-control), kan evcc anmode om bestemte tilstande, f.eks. at forhindre afladning eller at oplade batteriet.
+evcc koordinerer dog ikke direkte lade- og afladeeffekten for de enkelte batterier.
+Derfor kan evcc generelt ikke forhindre, at flere hjemmebatterier aflader hinanden.
+De tilgængelige styringsmuligheder afhænger af batterisystemet.
+
+### Styrer evcc opladning og afladning af mit hjemmebatteri?
+
+Under normal drift bestemmer batterisystemet selv, hvornår og med hvilken effekt det oplader eller aflader.
+evcc tager højde for målinger som opladningsniveau og effekt, når den styrer ladepunkter, men regulerer ikke løbende hjemmebatteriets ladeeffekt.
+Hvis et system understøtter [aktiv batteristyring](/da/features/battery#battery-control), kan evcc anmode om enkelte funktioner, f.eks. at forhindre afladning, mens et køretøj oplades, eller at oplade batteriet fra elnettet.
+De tilgængelige kommandoer afhænger af batterisystemet; en status som ”styrbar” betyder ikke nødvendigvis, at evcc kan styre batteriet fuldt ud eller sætte dets effekt til et vilkårligt niveau.
+
+### Min oplader understøtter ikke faseskift. Kan jeg stadig oplade på én fase?
+
+Med små solcelleanlæg og/eller om vinteren giver det mening at bruge én fase for at udnytte overskud så effektivt som muligt uden at trække fra elnettet.
+
+Ved trefasede opladere, der ikke understøtter automatisk faseskift, kan du afbryde fase 2 og 3 i forsyningen til dit ladepunkt med en kontaktor (f.eks. Hager HAB304). Hvis der er brug for fuld effekt, slår du blot disse faser til igen.
+
+:::danger[Fare]
+Denne manuelle omskiftning må kun foretages, når køretøjet **IKKE** er tilsluttet opladeren.
+:::
+
+Du kan også bare bruge et enfaset ladekabel om vinteren.
+
+Husk at sætte opladerens indstilling i evcc-brugerfladen til enfaset tilstand.
+På den måde ved evcc, hvornår der er nok overskud til at oplade køretøjet.
+
+## Fejlfinding
+
+### Noget virker ikke. Hvad nu?
+
+Tjek først [fællesskabsforummet](https://github.com/evcc-io/evcc/discussions) for at se, om dit problem allerede er blevet diskuteret.
+Udviklere og brugere står klar til at hjælpe med at løse almindelige problemer.
+
+Den nemmeste måde at få hjælp på er **Mere → Indberet et problem** i brugerfladen.
+Funktionen samler din opsætning og dine logs og opretter et forberedt indlæg på GitHub.
+
+[Indberet et problem](/da/report-a-problem) forklarer, hvor dit problem hører hjemme, og hvad en god indberetning indeholder.
+
+### Sådan finder du syntaksfejl i evcc.yaml
+
+YAML er meget følsom over for syntaks, og fejl springer ikke altid i øjnene med det samme.
+
+Valideringsværktøjer som [onlineyamltools.com](https://onlineyamltools.com/validate-yaml) kan være meget nyttige og er værd at bruge til at finde simple fejl.
+
+### Hvordan opretter jeg en logfil til fejlanalyse?
+
+Den nemmeste måde er logsiden under **Mere → Log**.
+Der kan du filtrere efter niveau og område og downloade loggen som en fil.
+Se [Log](/da/report-a-problem#logs) for, hvad loggen skal vise.
+
+Ved længere perioder, eller hvis brugerfladen ikke kan nås, bruger du [langtidslogs](/da/report-a-problem#system-logs) fra din installation.
+
+### Mere om enhedsgenkendelse
+
+`evcc detect` er en særlig kommando, der forsøger at finde kompatibel hardware på dit netværk.
+Især kan den nogle gange hjælpe med en første vurdering af ”nye” SunSpec-kompatible Modbus-enheder og med at validere IP-opsætninger.
+Den er dog mere et udvikler- og supportværktøj til diagnoseformål og genkender kun et begrænset udvalg af enhedstyper.
+
+## Almindelige fejl
+
+### Fejl: Charger out of sync: expected disabled, got enabled<br/>Charger logic error: disabled but charging
+
+evcc forventer, at opladere er skiftet til deres nye tilstand inden næste kontrolcyklus (efter det konfigurerede `interval`).
+
+Nogle enheder reagerer af og til lidt langsomt på kommandoer. Så viser disse fejlmeddelelser, at tilstanden ikke er synkron.
+
+Hvis du ikke oplever andre problemer, kan de roligt ignoreres, eller du kan prøve at øge [`interval`](/da/reference/configuration/interval).
+
+### connection refused
+
+Det betyder, at enheden kunne kontaktes på den angivne IP-adresse eller det angivne værtsnavn, men at enheden nægtede at kommunikere med evcc.
+
+Der kan være flere årsager. Disse dukker jævnligt op:
+
+- Sørg for, at målporten er angivet korrekt i din `evcc.yaml`.
+- Har målenheden ekstern adgang aktiveret? (F.eks. leveres Solaredge-invertere med Modbus deaktiveret fra fabrikken.)
+- Enheden kan have nået det maksimale antal samtidige forbindelser. Andre forbindelser (f.eks. fra andre hjemmeautomatiseringssystemer eller fra andre evcc-installationer) skal muligvis stoppes, for at evcc kan oprette forbindelse. Vi kender til nogle enheder, der kun accepterer én forbindelse ad gangen.
+- Sørg for, at der ikke er en firewall mellem dig og målenheden, og hvis der er, at den er konfigureret, så den tillader trafikken.
+
+### i/o timeout
+
+Der kan godt være forbindelse til enheden, men målsystemet svarer ikke inden for den forventede tid.
+Enten når forespørgslen aldrig frem til målsystemet, svaret går tabt på vejen tilbage, eller svaret tager for lang tid.
+
+Typiske årsager er:
+
+- En langsom eller ustabil netværksforbindelse (især ved trådløse netværk eller netværk af Homeplug-typen)
+- Forkert eller dårlig kabelføring eller terminering (især ved RS485)
+- Målenheden kan være overbelastet eller defekt
+- Visse funktioner, som evcc anmoder om fra enheden, er muligvis ikke tilgængelige (nogle gange skyldes det forældet firmware eller forkert opsætning på målenheden)
+- evcc's timeout eller forespørgsels-`interval` er sat for kort
+
+### /tmp/evcc: operation not permitted<br/>bind: address already in use
+
+Denne fejl opstår, hvis evcc allerede kører (f.eks. som tjeneste), og du starter den igen fra kommandolinjen, muligvis med andre brugerrettigheder.
+**Der bør kun køre én evcc-installation ad gangen.**
+
+Du kan bruge et program som `htop` til at undersøge, om en anden evcc-installation kører i baggrunden.
+
+Hvis du har en grund til at bruge evcc i terminalen, skal du sørge for at stoppe tjenesten først (f.eks. med `systemctl stop evcc`).
+
+### evcc-brugerfladen er ikke tilgængelig
+
+Tjek loggen for at finde årsagen til fejlen.
+Hvordan du får adgang til loggen, er beskrevet under [Installation](/da/installation) for den installationsmetode, du bruger.
+
+### MQTT-pluginet viser advarslen `outdated`
+
+Når du bruger [MQTT-pluginet](/da/reference/plugins#mqtt), kan du med parameteren `timeout` styre, hvor længe en værdi modtaget via MQTT forbliver gyldig.
+Hvis der ikke kommer en ny værdi inden for dette tidsrum, betragter evcc værdien som `outdated`.
+Det er vigtigt at angive en tidsenhed her, f.eks. `timeout: 30s`.
+
+## Opladning
+
+### Køretøjet begynder at oplade, når det tilsluttes, selvom der ikke er noget overskud
+
+Nogle opladere begynder at oplade, så snart bilen tilsluttes, eller når et RFID-kort holdes op mod opladeren. Denne adfærd kan evcc ikke altid påvirke, men evcc genkender den og stopper opladningen efter kort tid.
+
+### Solproduktion om vinteren
+
+I vintermånederne ligger solproduktionen ofte under eller tæt på den [minimale ladeeffekt](/da/features/solar-charging#charging-start).
+For at få så meget energi som muligt ind i køretøjet kan du prøve nogle af følgende tips og tricks:
+
+#### Med `residualpower`
+
+I opsætningen under parameteren [`site`](/da/reference/configuration/site) sætter du [`residualPower`](/da/reference/configuration/site#residualpower) til en **negativ** værdi. Den bestemmer, hvor meget effekt elnettet må levere for at løfte din solproduktion nok til at dække minimummet. Værdien kan også ændres via API'et.
+
+**Eksempel**:
+
+```yaml
+site:
+  residualPower: -1000 # 1000 W fra elnettet i smart-tilstand
+```
+
+Ulempen ved denne løsning er, at der bruges effekt fra elnettet, selv når der er tilstrækkeligt overskud.
+
+#### Med skyderen for solandel
+
+I ladepunktets indstillinger sænker du skyderen **Solandel**, så kun en del af den minimale ladeeffekt skal komme fra solenergi.
+Se [Ikke nok overskud?](/da/features/solar-charging#not-enough-surplus) for detaljer.
+
+### PSA (Peugeot / Citroën / Vauxhall / Opel): Ladestatus opdateres kun, når jeg bruger appen
+
+Det er desværre en begrænsning i producentens onlinetjeneste. PSA leverer forældede værdier, indtil de fornyes ved at åbne mobilappen.
+Desværre kendes der endnu ingen grænseflade, der kan udløse denne opdatering programmatisk.
+
+## Adgangskode
+
+### Jeg har glemt min adgangskode. Hvordan nulstiller jeg den? \{#password-reset\}
+
+Adgangskoden gemmes krypteret, så den kan ikke læses.
+Du kan angive en ny adgangskode via kommandolinjen.
+Sørg for at stoppe evcc, før du ændrer adgangskoden.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password set --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+Alternativt kan du nulstille adgangskoden.
+Du bliver bedt om at angive en ny adgangskode, næste gang du åbner evcc-brugerfladen.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password reset --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+### Hvordan sikkerhedskopierer og gendanner jeg min opsætning?
+
+I evcc-brugerfladen går du til **Opsætning** → **Sikkerhedskopiering og gendannelse**.
+
+**Sikkerhedskopier:**
+Downloader en kopi af din database (evcc.db).
+Den indeholder alle konfigurerede enheder, tjenester, planer, opladningssessioner osv.
+
+**Gendan:**
+Gendanner en tidligere downloadet database.
+Der oprettes automatisk en lokal sikkerhedskopi (`evcc.db.bak`), før data overskrives.
+
+:::caution[Advarsel]
+Alle handlinger er beskyttet med adgangskode.
+En gendannelse overskriver dine nuværende data fuldstændigt.
+:::
+
+**Nulstil:**
+Du kan slette enkelte områder af din database:
+
+- **Opladningssessioner:** Sletter historikken over dine opladningssessioner.
+- **Konfiguration og indstillinger:** Sletter alle konfigurerede enheder, tjenester, planer, caches osv.
+
+:::caution[Advarsel]
+Når du har nulstillet opsætningen, skal du sætte alle enheder op igen.
+Din `evcc.yaml` (hvis den findes) forbliver uændret.
+:::
+
+Alternativt kan du slette enkelte caches via kommandolinjen:
+
+```bash
+evcc cache get
+
+# Ryd alle caches
+evcc cache clear
+```
+
+## Solprognose
+
+Du kan bruge forskellige [solprognoser](/da/tariffs#solar) i evcc til at se den forventede resterende produktion i dag og de kommende dage.
+Som eksperimentel funktion har vi også indbygget muligheden for at tilpasse prognoserne til din faktiske produktion.
+
+### Tilpasning af prognosen
+
+Ud over prognosen logger evcc også den aktuelle soleffekt og akkumulerer den over tid.
+Det samme sker for prognosedataene.
+Ved at sammenligne de to værdier over tid kan evcc tilpasse prognoserne til dine faktiske produktionsværdier.
+Du kan aktivere og deaktivere denne tilpasning i prognosedialogboksen i brugerfladen.
+
+### Nulstilling af tilpasningsdata
+
+Hvis tilpasningsværdierne ikke er korrekte, kan du nulstille dem.
+
+Fremgangsmåde:
+
+1. Stop evcc
+2. Kør følgende kommandoer på kommandolinjen
+   ```bash
+   # Nulstil tilpasningshistorikken. Bekræft med `y`.
+   evcc settings set solarAccForecast 0
+   evcc settings set solarAccYield "{}"
+   ```
+3. Start evcc igen
+
+Nu begynder evcc at akkumulere prognoserne fra nul.
+
+## Statistiske data \{#statistical-data\}
+
+### Telemetri og fællesskabsdata \{#telemetry\}
+
+[evcc-websitet](https://evcc.io/#live) (og dialogboksen **Oversigt over ladeenergi** i evcc-brugerfladen) viser aggregerede live-opladningsdata fra evcc-installationer. Vi indsamler disse data på vores centrale _api.evcc.io_-server. Deltagelse er helt frivillig.
+
+#### Hvordan deltager jeg?
+
+Slå blot kontakten til i dialogboksen **Oversigt over ladeenergi** i evcc-brugerfladen.
+
+**Du skal i øjeblikket have et 💚 sponsortoken for at bidrage med fællesskabsdata**. Det er med til at sikre, at datakvaliteten forbliver høj, og at dårlige/falske data holdes ude.
+
+#### Hvilke data indsamles i øjeblikket?
+
+Vi indsamler følgende:
+
+- aktuel ladeeffekt
+- aktuel andel af ladeeffekten, der leveres af solenergi
+- samlet opladet energi
+- samlet andel af energien, der leveres af solenergi
+
+Vi indsamler måske flere data i fremtiden, men det vil **aldrig** være personoplysninger eller private oplysninger (f.eks. placering). Dit privatliv er virkelig vigtigt for os!
+
+#### Hvad sker der med dataene?
+
+Vi gemmer energimængden aggregeret pr. evcc-installation. Vi **danner ikke brugerprofiler over tid** og har ingen interesse i at gøre det i fremtiden.
+
+Vores mål er at inspirere flere til at bruge evcc, lære mere om, hvordan brugerne bruger evcc, og frem for alt at visualisere potentialet i den vedvarende solenergi, der udnyttes med evcc.
+
+De viste data kan hentes af alle via vores [API](https://api.evcc.io/v1/total). Hvis du har en fed idé til en kreativ visualisering, så byg noget og fortæl os om det!
+
+Du kan finde flere oplysninger om, hvordan vi bruger data, i vores [privatlivspolitik](https://sponsor.evcc.io/privacy) (DE).
+
+### Beregning af besparelse \{#savings-calculation\}
+
+Nederst til højre i evcc-brugerfladen finder du den procentdel af energien til opladning af dine køretøjer, der kommer fra solenergi (f.eks. _85 % solenergi_).
+
+Hvis du klikker på den, får du en dialogboks med flere detaljer, herunder den samlede beregnede besparelse i forhold til elnettet.
+
+For at sikre, at disse tal er nøjagtige, skal din `evcc.yaml` indeholde en passende `tariffs`-konfiguration.
+
+**Eksempel**:
+
+```yaml
+tariffs:
+  currency: EUR # (standard EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [valuta]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [valuta]/kWh
+```
+
+Flere detaljer, herunder hvordan du bruger dynamiske tariffer (f.eks. fra Octopus Energy), finder du under [Tariffer](/da/tariffs).
+
+_Bemærk, at disse statistikker er grove skøn og ikke skal betragtes som helt nøjagtige._
+
+Ved beregningen af besparelsen bruger evcc den samlede mængde opladet energi og de energikilder, der blev brugt under opladningen (elnet, hjemmebatteri, sol).
+
+**Hvad er solenergi?**
+
+Solenergi er energi, der bruges direkte fra solcelleanlægget, og energi, der leveres af et eventuelt installeret hjemmebatteri.
+evcc antager, at hjemmebatteriet primært bruges til at lagre overskydende, egenproduceret solenergi.
+Hvis hjemmebatteriet også leverer tjenester til elnettet (f.eks. Sonnen) eller kalibrerer sig selv med strøm fra elnettet, er denne antagelse ikke altid korrekt.
+Batteritab ved vekselretning/ensretning tages heller ikke i betragtning.
+
+**Beregning af besparelse / effektiv pris**
+
+Algoritmen skelner mellem forsyning fra elnettet og egenproduceret solenergi (sol og hjemmebatteri).
+
+Omkostningsfordelen ved din solenergi beregnes ud fra forskellen mellem din importpris fra elnettet (f.eks. 30 ct/kWh) og din eksporttarif (f.eks. 8 ct/kWh).
+I dette eksempel er hver kWh egenproduceret energi 22 ct (30 ct minus 8 ct) billigere end importprisen fra elnettet.
+Hvis du oplader et køretøj med 2 kWh af din egen energi, svarer det til en effektiv besparelse på 44 ct.
+
+Hvis du oplader 100 % med din egen solenergi, er den viste _effektive energipris_ omkostningen ved ikke at eksportere til elnettet, dvs. eksporttariffen (f.eks. 8 ct/kWh).
+Hvis du oplader med 50 % solenergi og 50 % energi fra elnettet, tilpasses den _effektive energipris_ tilsvarende (f.eks. 19 ct/kWh).
+
+Hvis du ikke får betaling for strøm, du eksporterer til elnettet, kan du sætte eksporttariffen til 0. Solenergien behandles så som gratis.
+
+Vi er klar over, at denne besparelse ikke alene skyldes evcc.
+Hvis du sætter din bil i en _dum_ oplader på en solrig dag, vil en del af den opladede energi også være solenergi.
+evcc hjælper dig med at maksimere andelen af solenergi, du oplader med.
+
+**Beregning af solandelen**
+
+Hvis du trækker energi fra flere kilder på samme tid (f.eks. 50 % sol, 50 % elnet), fordeles din egen energi først til dit hus.
+Det omfatter alle forbrugsenheder, som ikke styres af evcc.
+Den resterende andel fordeles derefter på opladningssessionerne.
+Eksempel: Dit solcelleanlæg producerer 3 kW. Disse 3 kW forbruges fuldstændigt af huset (f.eks. vaskemaskine).
+Samtidig oplader du din bil med 3 kW (f.eks. i tilstanden **Hurtig**).
+I dette tilfælde regnes huset med 100 % solandel, bilen med 0 %.
+
+Dynamiske priser (Octopus Energy, awattar, Tibber osv.) tages i betragtning ved beregningen af den effektive energipris.

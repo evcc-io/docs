@@ -8,13 +8,15 @@ prev: false
 next: false
 ---
 
-Auf den letzten Metern des Jahres 2021 kommt doch nochmals eine Aktualisierung mit ein paar Fehlerkorrekturen. Das Jahr soll ja schließlich positiv enden ;)
+On the final stretch of 2021 there's one more update with a few bug fixes.
+After all, the year should end on a positive note ;)
 
 <!-- excerpt -->
 
-## Fehlerkorrekturen
+## Bug Fixes
 
-Gegenüber der Version 0.76 haben wir Korrekturen für die Verwendung einiger Geräte und der Handhabung von PV Timern in der UI eingepflegt. Schaut euch gerne über den Changelog Link unten eine detaillierte Auflistung an.
+Compared to version 0.76 we have added fixes for using some devices and for the handling of solar timers in the UI.
+Feel free to check out the detailed list via the changelog link below.
 
 ## Download & Installation
 
@@ -25,4 +27,4 @@ Gegenüber der Version 0.76 haben wir Korrekturen für die Verwendung einiger Ge
 
 ## Changelog
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.77)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.77)

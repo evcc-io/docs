@@ -1,0 +1,161 @@
+---
+date: 2023-10-05
+title: "Nejzajímavější novinky 10/2023"
+description: "Nejzajímavější novinky z října 2023 s vizualizací plánu nabíjení, minimálním nabitím v UI, chytrým nabíjením ze sítě a nastavením baterie."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "24a3a98a0947"
+---
+
+import Video from "@components/Video.astro";
+import batterysettingsVideo from "../../../../../en/blog/2023/10/05/batterysettings.mp4";
+import batterysettingsPoster from "../../../../../en/blog/2023/10/05/batterysettings.webp";
+import chargingplanVideo from "../../../../../en/blog/2023/10/05/chargingplan.mp4";
+import chargingplanPoster from "../../../../../en/blog/2023/10/05/chargingplan.webp";
+import chargingsessionsVideo from "../../../../../en/blog/2023/10/05/chargingsessions.mp4";
+import chargingsessionsPoster from "../../../../../en/blog/2023/10/05/chargingsessions.webp";
+import dynamicpricesVideo from "../../../../../en/blog/2023/10/05/dynamicprices.mp4";
+import dynamicpricesPoster from "../../../../../en/blog/2023/10/05/dynamicprices.webp";
+import minsocVideo from "../../../../../en/blog/2023/10/05/minsoc.mp4";
+import minsocPoster from "../../../../../en/blog/2023/10/05/minsoc.webp";
+import sessionvaluesVideo from "../../../../../en/blog/2023/10/05/sessionvalues.mp4";
+import sessionvaluesPoster from "../../../../../en/blog/2023/10/05/sessionvalues.webp";
+
+Od posledního příspěvku na blogu se toho hodně stalo. Přidali jsme mnoho nových funkcí a opravili některé chyby. V tomto článku představíme několik nových funkcí.
+
+## Vizualizace plánovače nabíjení \{#charging-planner-visualization\}
+
+Plánovač nabíjení je v evcc už nějakou dobu.
+Zadáte, kdy má mít vaše vozidlo požadovaný stav nabití, a evcc najde nejlepší časová okna.
+Už několik vydání není algoritmus černou skříňkou, protože výsledek plánování vizualizujeme.
+
+<Video src={chargingplanVideo} poster={chargingplanPoster} />
+
+{/* excerpt */}
+
+Jak algoritmus funguje?
+
+1. Přednost má přebytečná solární energie
+2. Období s levnou elektřinou ze sítě (pokud je k dispozici [dynamický tarif](/cs/features/dynamic-prices))
+3. Období s čistou elektřinou ze sítě (pokud je nakonfigurováno [rozhraní CO₂](/cs/features/co2))
+4. Časová okna krátce před odjezdem
+
+**Výhled:** V současnosti experimentujeme s předpověďmi výroby ze soláru od [Solcast](https://solcast.com/).
+Algoritmus tak může dělat ještě lepší rozhodnutí.
+Pokud je např. cílový čas nabíjení během dne, může mít smysl nenabíjet vozidlo úplně levnou noční elektřinou, ale nechat místo pro přebytečnou energii během dne.
+
+## Minimální nabití nastavitelné v UI
+
+Funkce minimálního nabití je v evcc už odnepaměti.
+Hodí se, když přijedete domů jen s několika procenty a chcete mít jistotu, že budete mít vždy dost dojezdu pro nečekanou událost.
+
+Dosud se dala nastavit jen v konfiguračním souboru nebo přes API.
+Nyní to můžete udělat i v UI pod **Plán** → **Příjezd** → **Min. nabití %**.
+
+Nastavení se ukládá pro každé vozidlo zvlášť a zůstane zachováno i po restartu nebo aktualizaci.
+
+<Video src={minsocVideo} poster={minsocPoster} />
+
+## Chytré nabíjení ze sítě \{#smart-grid-charging\}
+
+Pokud vlastní přebytek ze soláru nestačí, můžete využít i elektřinu ze sítě v době, kdy je obzvlášť levná nebo čistá.
+Když v diagramu toku energie kliknete na cenu elektřiny ze sítě nebo na emise CO₂, otevře se dialogové okno **Smart Grid Nabíjení**.
+
+V něm můžete nastavit práh pro cenu nebo emise CO₂.
+Pokud cena nebo emise klesnou pod tuto hodnotu, evcc dočasně přepne všechny nabíjecí body v režimu PV na rychlé nabíjení.
+
+<Video src={dynamicpricesVideo} poster={dynamicpricesPoster} />
+
+Předpokladem pro tuto funkci je, že máte nakonfigurovaný buď dynamický tarif, nebo rozhraní CO₂.
+
+Dalším drobným vylepšením je, že u většiny dynamických tarifů teď můžete ceny z API upravit pomocí **procentních nebo pevných příplatků** (`charges` / `tax`).
+Tibber a Octopus Energy (UK) už poskytují hodnoty včetně příplatků.
+U awattar, Nordpool Estonia a Energinet je teď můžete přidat.
+
+Mimochodem: pokud máte dynamický tarif, který zatím není podporován, ale nabízí API, otevřete prosím issue na GitHubu.
+
+## Nastavení baterie \{#battery-settings\}
+
+Obrovskou výhodou evcc oproti jiným řešením pro nabíjení z přebytků je integrace s domácí baterií.
+Konfigurační hodnotou [`prioritySoc`](/cs/features/battery) můžete určit, zda má přebytečná solární energie jít přednostně **do domácí baterie, nebo do vozidla**.
+
+Obecně se evcc v režimu PV snaží zabránit vybíjení domácí baterie do baterie vozidla, aby nedocházelo ke zbytečným ztrátám při přeměně.
+Hodnotou [`bufferSoc`](/cs/features/battery) však můžete vědomě **vyhradit část domácí baterie na podporu nabíjení**.
+
+Můžete také nastavit, aby se nabíjení spustilo automaticky, jakmile baterie dosáhne určitého stavu nabití ([`bufferStartSoc`](/cs/features/battery)).
+Automatické nabíjení se spustí, i když nesvítí slunce.
+
+<Video src={batterysettingsVideo} poster={batterysettingsPoster} />
+
+## Podíl soláru v %, cena a CO₂ pro každou nabíjecí relaci
+
+Něco máme i pro milovníky dat.
+Nově pro každou nabíjecí relaci zaznamenáváme podíl vlastní solární energie (v %), cenu (celkem a za kWh), dobu nabíjení a průměrné emise CO₂.
+Mezi těmito hodnotami můžete přepínat přímo u nabíjecí relace.
+
+<Video src={sessionvaluesVideo} poster={sessionvaluesPoster} />
+
+## Nový výpočet podílu soláru
+
+Pokud jste si všimli, že podíl soláru od jedné z posledních verzí mírně klesl, je to kvůli našemu novému výpočtu.
+Dosud evcc vždy rozděloval poměr energie ze sítě a vlastní energie rovnoměrně mezi spotřebu domu a nabíjecí relace.
+
+Nyní jsme přešli na nový model, ve kterém zelenou elektřinu dostává nejdřív spotřeba domu a zbývající mix připadá nabíjecím relacím.
+Děkujeme [@MarkusGH](https://github.com/MarkusGH) za implementaci.
+Další podrobnosti o modelu najdete [v dokumentaci](/cs/faq#savings-calculation).
+
+![Nový výpočet](../../../../../en/blog/2023/10/05/calculation.webp)
+
+## Přehled nabíjecích relací
+
+Nové hodnoty se samozřejmě dostaly i do přehledu nabíjecích relací.
+Podle konfigurace jsou zde nyní vidět i ceny a emise CO₂.
+Navíc jsme zobrazení kompletně přepracovali a zvolili **kompaktní tabulku po měsících**.
+Lze ji **filtrovat podle nabíjecího bodu a vozidla**.
+
+Pokud zde potřebujete ještě větší flexibilitu, můžete samozřejmě použít export do CSV nebo získat surová data přímo přes InfluxDB nebo MQTT.
+
+<Video src={chargingsessionsVideo} poster={chargingsessionsPoster} />
+
+## Prioritizace nabíjecích bodů a vozidel
+
+Pokud máte více nabíjecích bodů, můžete nastavením [`priority`](/cs/reference/configuration/loadpoints#priority) určit, kterému se má dát přednost.
+Prioritu můžete také nastavit podle rozpoznaného vozidla nebo ji řídit přes API.
+Konfigurace přes UI zatím není k dispozici.
+
+Funkce prioritizace se hodí i tehdy, když evcc používáte k řízení dalších spotřebičů, např. [topné tyče nebo tepelného čerpadla připojeného přes rozhraní pluginů](https://github.com/evcc-io/evcc/pull/9393).
+Můžete je tak řídit, aby běžely jen tehdy, když vozidlo nenabíjí nebo nabíjí jen málo.
+
+## Co dál?
+
+Náš [backlog](https://github.com/evcc-io/evcc/issues?q=is%3Aopen+is%3Aissue+label%3Abacklog) je dobře naplněný.
+Toto jsou další velká témata, do kterých se chceme pustit:
+
+**Konfigurační UI:** Všechny předpoklady jsou nyní splněny.
+V 🧪 experimentálním režimu už lze vytvářet vozidla a ani konfigurace sítě, soláru nebo baterie není daleko.
+Je tu ještě hodně práce, ale světlo na konci tunelu je vidět.
+
+**Lepší plánování:** Jak bylo zmíněno výše, pracujeme na začlenění kvalitních **předpovědí výroby ze soláru** do plánovacího algoritmu a UI.
+Máme také koncept pro podporu **více plánů nabíjení**.
+
+**Revize režimů:** evcc začínal jako aplikace pro nabíjení z přebytků ze soláru.
+Dnes už hraje velkou roli i souhra s domácí baterií.
+Na významu nabývá také téma **nabíjení šetrného k síti** na základě dynamických tarifů nebo emisí CO₂.
+Proto přepracujeme naše režimy nabíjení (v současnosti PV a Min+PV) a uděláme je flexibilnější.
+
+## Další nové funkce
+
+Toto byl přehled z ptačí perspektivy a z pohledu koncového uživatele.
+Pod kapotou se samozřejmě také hodně pracuje.
+
+- 🔌 Podpora dalších nabíječek od 22 nových výrobců
+- 🌞🔋📟 Podpora měřičů, fotovoltaických a bateriových systémů od 36 nových výrobců
+- 🇬🇧 Web a dokumentace v angličtině. Díky [duckfullstop](https://github.com/duckfullstop) a [carygravel](https://github.com/carygravel) 💚
+
+Pokud chcete ještě více podrobností, můžete si projít [poznámky k vydání](https://github.com/evcc-io/evcc/releases) posledních 49(!) vydání od začátku roku.
+
+**Děkujeme za vaši podporu evcc!**<br />
+core tým evcc<br />
+[@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) a [@naltatis](https://github.com/naltatis)

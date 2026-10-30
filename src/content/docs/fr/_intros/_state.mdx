@@ -1,0 +1,19 @@
+---
+translatedFrom: "467d4c7df8e1"
+---
+
+L’état de l’API est la structure de données sur laquelle repose l’interface.
+Il est accessible de trois manières.
+Sa structure n’est pas figée : les champs peuvent changer d’une version à l’autre.
+
+- [API REST](/integrations/rest-api) : `GET /api/state` renvoie l’état complet sous la forme d’un seul document JSON, encapsulé dans un objet `result`.
+  Le paramètre de requête `jq` filtre la réponse à l’aide d’une expression [jq](https://jqlang.org/).
+  - Exemple en direct : [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Filtré sur un seul champ : [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/fr/integrations/mqtt-api) : chaque champ est publié dans son propre topic.
+  Les champs du site apparaissent sous `evcc/site/<field>`, ceux des points de charge et chauffages sous `evcc/loadpoints/<n>/<field>`, avec des index commençant à 1.
+  Les objets et tableaux imbriqués sont aplatis en sous-topics, p. ex. `evcc/site/pv/1/power`.
+  Les valeurs sont publiées en texte brut, les horodatages en temps Unix (secondes) et les durées en secondes.
+- **WebSocket** : à la connexion, le client reçoit l’état complet sous la forme d’un seul objet JSON.
+  Les champs des points de charge et chauffages utilisent des clés séparées par des points, comme `loadpoints.0.chargePower`.
+  Ensuite, seules des mises à jour incrémentales sont envoyées : de petits objets JSON contenant les champs modifiés, que le client fusionne dans sa copie de l’état.

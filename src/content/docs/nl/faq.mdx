@@ -1,0 +1,442 @@
+---
+title: "Veelgestelde vragen"
+description: "Hier vindt u antwoorden op veelgestelde vragen over het configureren van evcc, foutopsporing, onverwacht laadgedrag, wachtwoordherstel en de zonnevoorspelling."
+toc_max_heading_level: 2
+sidebar:
+  order: 8
+translatedFrom: "dd31f239a292"
+---
+
+## Configuratie \{#configuration\}
+
+### Moet ik evcc configureren via de webinterface of met het configuratiebestand?
+
+We raden de **webinterface** aan.
+Open evcc na de installatie in uw browser en configureer uw apparaten daar direct.
+Instellingen worden automatisch in de database opgeslagen.
+
+Het **configuratiebestand** (`evcc.yaml`) is de traditionele methode en wordt nog steeds ondersteund.
+
+**Belangrijk**: sommige nieuwere functies zijn alleen via de webinterface beschikbaar.
+Beide methoden kunnen ook naast elkaar worden gebruikt.
+
+Meer informatie vindt u onder [Configuratie](/nl/installation/configuration).
+
+### Ik heb een evcc.yaml-configuratie. Hoe stap ik over naar de webinterface? \{#ui-migration\}
+
+U kunt beide configuratiemethoden naast elkaar gebruiken en stap voor stap overstappen.
+
+**Werkwijze:**
+
+1. Configureer een nieuw apparaat direct via de webinterface onder **Configuratie**.
+2. Verwijder het bijbehorende item uit uw `evcc.yaml`.
+3. Herhaal dit voor alle apparaten tot uw `evcc.yaml` leeg is.
+
+**Samenvoegen van apparaten:**
+
+Laadpunten, netmeters, zonnepanelensystemen, batterijen, voertuigen en andere meters worden uit beide bronnen samengevoegd.
+Op de configuratiepagina zijn apparaten uit `evcc.yaml` zichtbaar, maar niet bewerkbaar.
+U kunt apparaten uit `evcc.yaml` en uit de webinterface tegelijk gebruiken.
+
+**Configuratie via de webinterface heeft voorrang:**
+
+Voor andere instellingen (MQTT, meldingen, InfluxDB, tarieven enz.) hebben waarden uit de webinterface voorrang op waarden uit `evcc.yaml`.
+We raden aan om maar één bron te gebruiken om verwarring te voorkomen.
+
+**Let op:** op sommige plaatsen (externe limiet, sponsortoken) is de configuratie via de webinterface vergrendeld als deze al via `evcc.yaml` is ingesteld.
+Verwijder het item uit `evcc.yaml` om bewerken via de webinterface mogelijk te maken.
+
+**Conclusie:**
+
+Een volledige overstap is niet verplicht.
+U kunt `evcc.yaml` voor bepaalde configuraties blijven gebruiken en nieuwe functies via de webinterface toevoegen.
+
+:::note[Geen automatische migratie]
+Het eerder beschikbare commando `evcc migrate` is vanwege de hoge complexiteit verwijderd.
+U moet dus handmatig overstappen.
+:::
+
+### Kan ik evcc zonder netmeter gebruiken?
+
+De netmeter is de kern van evcc en hoort er indien mogelijk bij.
+U kunt echter ook op basis van zonne-energie laden, waarbij alleen het vermogen van de zonnepanelen wordt gebruikt.
+
+Houd er wel rekening mee dat u dan niet uitsluitend met het zonneoverschot kunt laden, omdat de daarvoor benodigde berekeningen alleen mogelijk zijn als het netvermogen bekend is.
+In deze configuratie laadt evcc het voertuig met het actuele vermogen dat de zonnepanelen opwekken.
+
+U kunt het verbruik van een gemiddeld huishouden opgeven, om te proberen wat energie voor uw huis over te laten. Dat doet u met de
+configuratieoptie [`residualPower`](/nl/reference/configuration/site#residualpower).
+
+**Voorbeeld**:
+
+```yaml
+site:
+  residualPower: 250 # 250 W huisverbruik
+```
+
+### Ik heb geen zonnepanelen. Kan ik evcc dan toch zinvol gebruiken?
+
+Mogelijk wel! evcc heeft genoeg toepassingen naast puur laden met zonne-energie. **Let op: al deze toepassingen vereisen een netmeter.**
+
+Een paar ideeën:
+
+- Een voertuig automatisch laden afhankelijk van de actuele energieprijs met een dynamisch tarief (zoals Octopus Energy, Nachtstrom, Tibber, aWATTar enz.), zie [Dynamische tarieven](/nl/features/dynamic-prices)
+- Uw lader op afstand starten en stoppen, vooral handig bij laders die geen andere interface voor bediening op afstand hebben
+- Het laden van uw voertuig beperken tot een bepaald laadniveau, waarvoor het voertuig wel geconfigureerd moet zijn
+
+### Kan ik evcc uitproberen zonder alle componenten (zonnepanelensysteem, lader enz.)?
+
+Zeker! We hebben een aantal _demo_-componenten waarmee u ontbrekende onderdelen kunt vervangen.
+
+[Meter](https://docs.evcc.io/en/docs/meters#demo-meter)
+
+[Lader](https://docs.evcc.io/en/docs/chargers#demo-charger)
+
+### Kan ik evcc gebruiken zonder de omvormer te koppelen?
+
+Ja! Met een netmeter en een stuurbare lader kunt u alle essentiële functies van evcc gebruiken, inclusief laden met zonneoverschot.
+Houd er rekening mee dat u dan enkele visualisaties en statistieken mist, waaronder de berekening van het aandeel zonne-energie bij het laden.
+
+Als u een achteraf geplaatste meter (zoals een Shelly EM) op de uitgangskabel van uw omvormer installeert, krijgt u wel precies dezelfde functionaliteit als wanneer
+evcc direct met de omvormer zou kunnen communiceren.
+
+### Kan ik meerdere laders gebruiken?
+
+Ja! U kunt meerdere laders toevoegen, en evcc stuurt ze tegelijk aan.
+
+Met [load management](/nl/features/loadmanagement) kunt u ze in circuits met een maximale stroom of een maximaal vermogen groeperen, zodat ze samen uw elektrische installatie nooit overbelasten.
+
+### Kan evcc voorkomen dat meerdere thuisbatterijen elkaar ontladen?
+
+Bij het aansturen van laadpunten en andere verbruikers houdt evcc rekening met het laadniveau van geconfigureerde thuisbatterijen.
+Als een batterijsysteem [actieve batterijaansturing](/nl/features/battery#battery-control) ondersteunt, kan evcc bepaalde modi aanvragen, zoals ontladen voorkomen of de batterij laden.
+evcc coördineert het laad- en ontlaadvermogen van afzonderlijke batterijen echter niet direct.
+Daarom kan evcc in het algemeen niet voorkomen dat meerdere thuisbatterijen elkaar ontladen.
+Welke stuurmogelijkheden er zijn, hangt af van het batterijsysteem.
+
+### Stuurt evcc het laden en ontladen van mijn thuisbatterij aan?
+
+Bij normale werking bepaalt het batterijsysteem zelf wanneer en met welk vermogen het laadt of ontlaadt.
+evcc houdt bij het aansturen van laadpunten rekening met meetwaarden zoals laadniveau en vermogen, maar regelt het laadvermogen van de thuisbatterij niet continu.
+Als een systeem [actieve batterijaansturing](/nl/features/battery#battery-control) ondersteunt, kan evcc afzonderlijke functies aanvragen, zoals het voorkomen van ontladen tijdens het laden van een voertuig of het laden van de batterij vanuit het net.
+Welke commando’s beschikbaar zijn, hangt af van het batterijsysteem. Een status als “Stuurbaar” betekent niet per se dat evcc de batterij volledig kan aansturen of het vermogen op een willekeurige waarde kan instellen.
+
+### Mijn lader ondersteunt geen fasewisseling. Kan ik toch eenfasig laden?
+
+Bij kleine zonnepanelensystemen en/of in de winter is het zinvol om op één fase te laden, zodat u een overschot zo goed mogelijk benut zonder stroom uit het net af te nemen.
+
+Bij driefasige laders die geen automatische fasewisseling ondersteunen, kunt u fasen 2 en 3 van de voeding van uw laadpunt afschakelen met een magneetschakelaar (bijv. Hager HAB304). Als het volledige vermogen nodig is, schakelt u deze fasen gewoon weer in.
+
+:::danger[Gevaar]
+Schakel de fasen alleen handmatig om als het voertuig **NIET** op de lader is aangesloten.
+:::
+
+U kunt in de winter ook gewoon een eenfasige laadkabel gebruiken.
+
+Vergeet niet om de lader in de webinterface op eenfasige modus in te stellen.
+Zo weet evcc wanneer er genoeg overschot is om het voertuig te laden.
+
+## Foutopsporing
+
+### Er werkt iets niet. Wat nu?
+
+Kijk eerst op het [communityforum](https://github.com/evcc-io/evcc/discussions) of uw probleem al is besproken.
+Ontwikkelaars en gebruikers staan klaar om bij veelvoorkomende problemen te helpen.
+
+De eenvoudigste manier om hulp te krijgen is **Meer → Een probleem melden** in de webinterface.
+Daarmee worden uw configuratie en logs verzameld en wordt een voorbereid bericht op GitHub aangemaakt.
+
+[Een probleem melden](/nl/report-a-problem) legt uit waar uw probleem thuishoort en wat een goede melding bevat.
+
+### Syntaxfouten in evcc.yaml vinden
+
+YAML is erg gevoelig voor syntax, en fouten vallen niet altijd meteen op.
+
+Linters zoals [onlineyamltools.com](https://onlineyamltools.com/validate-yaml) zijn erg handig en de moeite waard om eenvoudige fouten op te sporen.
+
+### Hoe maak ik een logbestand voor foutanalyse?
+
+De eenvoudigste manier is de logpagina onder **Meer → Logboeken**.
+Daar kunt u filteren op niveau en gebied en het log als bestand downloaden.
+Zie [Logs](/nl/report-a-problem#logs) voor wat het log moet laten zien.
+
+Hebt u logs over een langere periode nodig of is de webinterface niet bereikbaar, gebruik dan de [langetermijnlogs](/nl/report-a-problem#system-logs) van uw installatie.
+
+### Meer over apparaatdetectie
+
+`evcc detect` is een speciaal commando dat probeert compatibele hardware in uw netwerk te vinden.
+Het kan vooral helpen bij een eerste beoordeling van nieuwe SunSpec-compatibele Modbus-apparaten en bij het controleren van IP-configuraties.
+Het is echter eerder een diagnosehulpmiddel voor ontwikkelaars en supportmedewerkers en herkent maar een beperkt aantal apparaattypen.
+
+## Veelvoorkomende fouten
+
+### Fout: Charger out of sync: expected disabled, got enabled<br/>Charger logic error: disabled but charging
+
+evcc verwacht dat laders vóór de volgende controlecyclus (na het geconfigureerde `interval`) naar hun nieuwe status zijn overgeschakeld.
+
+Sommige apparaten reageren soms wat traag op commando’s. Als dat gebeurt, wordt die afwijkende status met deze foutmeldingen gemeld.
+
+Als u verder geen problemen ondervindt, kunt u deze meldingen gerust negeren, of u kunt proberen het [`interval`](/nl/reference/configuration/interval) te verhogen.
+
+### connection refused
+
+Dit betekent dat het apparaat op het opgegeven IP-adres of de opgegeven hostnaam bereikbaar was, maar de verbinding met evcc weigerde.
+
+Daar kunnen verschillende oorzaken voor zijn. Deze komen regelmatig voor:
+
+- Controleer of de doelpoort in uw `evcc.yaml` juist is ingesteld.
+- Is externe toegang op het doelapparaat ingeschakeld? (Bij omvormers van SolarEdge is Modbus bijv. standaard uitgeschakeld.)
+- Het apparaat heeft mogelijk het maximale aantal gelijktijdige verbindingen bereikt. Andere verbindingen (bijv. van andere domoticasystemen of van andere evcc-installaties) moeten mogelijk worden gestopt, zodat evcc verbinding kan maken. We kennen enkele apparaten die maar één verbinding tegelijk accepteren.
+- Zorg dat er geen firewall tussen evcc en het doelapparaat zit, of dat deze het verkeer doorlaat.
+
+### i/o timeout
+
+Er bestaat mogelijk een verbinding met het apparaat, maar het doelsysteem reageert niet binnen de verwachte tijd.
+Ofwel bereikt het verzoek het doelsysteem nooit, ofwel gaat het antwoord onderweg terug verloren, ofwel duurt het antwoord te lang.
+
+Meestal komt dit door:
+
+- Een trage netwerkverbinding of een verbinding van slechte kwaliteit (vooral bij draadloze netwerken of netwerken van het type Homeplug)
+- Onjuiste of slechte bekabeling of afsluitweerstand (vooral bij RS485)
+- Een overbelast of defect doelapparaat
+- Functies die evcc bij het apparaat opvraagt, maar die niet beschikbaar zijn (soms door verouderde firmware of een onjuiste configuratie van het doelapparaat)
+- Een te kort ingestelde timeout of een te kort query-`interval` van evcc
+
+### /tmp/evcc: operation not permitted<br/>bind: address already in use
+
+Deze fout treedt op als evcc al draait (bijv. als service) en u het opnieuw vanaf de opdrachtregel start, mogelijk met andere gebruikersrechten.
+**Er mag maar één evcc-installatie tegelijk draaien.**
+
+Met een programma zoals `htop` kunt u nagaan of er op de achtergrond nog een andere evcc-installatie draait.
+
+Als u evcc om wat voor reden dan ook in de terminal wilt starten, stop dan eerst de service (bijv. met `systemctl stop evcc`).
+
+### De webinterface is niet bereikbaar
+
+Controleer het log om de oorzaak van de fout te vinden.
+Hoe u het log opent, staat bij [Installatie](/nl/installation) onder uw installatiemethode.
+
+### De MQTT-plugin toont de waarschuwing `outdated`
+
+Bij gebruik van de [MQTT-plugin](/nl/reference/plugins#mqtt) bepaalt u met de parameter `timeout` hoe lang een via MQTT ontvangen waarde geldig blijft.
+Komt er binnen deze tijd geen nieuwe waarde binnen, dan beschouwt evcc de waarde als `outdated`.
+Het is belangrijk om hier een eenheid op te geven, bijv. `timeout: 30s`.
+
+## Laden
+
+### Het voertuig begint te laden bij het aansluiten, ook al is er geen overschot
+
+Sommige laders beginnen te laden zodra de auto wordt aangesloten of er een RFID-kaart voor de lezer wordt gehouden. Dit gedrag kan evcc niet altijd beïnvloeden, maar evcc herkent het wel en stopt het laden na korte tijd.
+
+### Zonne-energie in de winter
+
+In de wintermaanden ligt de productie van zonne-energie vaak onder of dicht bij het [minimale laadvermogen](/nl/features/solar-charging#charging-start).
+Om zoveel mogelijk energie in het voertuig te krijgen, kunt u de volgende tips en trucs proberen:
+
+#### Met `residualpower`
+
+Stel in de configuratie onder [`site`](/nl/reference/configuration/site) de optie [`residualPower`](/nl/reference/configuration/site#residualpower) in op een **negatieve** waarde. Deze bepaalt hoeveel vermogen het net mag leveren om de productie van uw zonnepanelen aan te vullen tot het minimale laadvermogen. Wijzigingen zijn via de API mogelijk.
+
+**Voorbeeld**:
+
+```yaml
+site:
+  residualPower: -1000 # 1.000 W uit het net in de modus Slim
+```
+
+Het nadeel van deze oplossing is dat er ook netstroom wordt gebruikt als er voldoende overschot beschikbaar is.
+
+#### Met de schuifregelaar voor het aandeel zonne-energie
+
+Zet in de instellingen van het laadpunt de schuifregelaar **Aandeel zonne-energie** lager, zodat maar een deel van het minimale laadvermogen uit zonne-energie hoeft te komen.
+Zie [Niet genoeg overschot?](/nl/features/solar-charging#not-enough-surplus) voor details.
+
+### PSA (Peugeot / Citroën / Vauxhall / Opel): laadniveau wordt alleen bijgewerkt als ik de app gebruik
+
+Dit is helaas een beperking van de onlinedienst van de fabrikant. PSA levert verouderde waarden totdat u de mobiele app opent.
+Er is nog geen interface bekend waarmee deze verversing programmatisch kan worden gestart.
+
+## Wachtwoord
+
+### Ik ben mijn wachtwoord vergeten. Hoe kan ik het herstellen? \{#password-reset\}
+
+Het wachtwoord wordt versleuteld opgeslagen en kan dus niet worden uitgelezen.
+U kunt via de opdrachtregel een nieuw wachtwoord instellen.
+Stop evcc voordat u het wachtwoord wijzigt.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password set --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+U kunt het wachtwoord ook resetten.
+De volgende keer dat u de webinterface opent, wordt u gevraagd een nieuw wachtwoord in te stellen.
+
+```bash
+service evcc stop
+sudo -u evcc evcc password reset --database /var/lib/evcc/evcc.db
+service evcc start
+```
+
+### Hoe maak ik een back-up van mijn configuratie en hoe zet ik die terug?
+
+Ga in de webinterface naar **Configuratie** → **Backup & Herstel**.
+
+**Backup:**
+Downloadt een kopie van uw database (evcc.db).
+Deze bevat alle geconfigureerde apparaten, diensten, plannen, laadsessies enz.
+
+**Herstel:**
+Zet een eerder gedownloade database terug.
+Voor het overschrijven wordt automatisch een lokale back-up (`evcc.db.bak`) aangemaakt.
+
+:::caution[Let op]
+Alle acties zijn met een wachtwoord beveiligd.
+Bij het terugzetten worden uw huidige gegevens volledig overschreven.
+:::
+
+**Reset:**
+U kunt afzonderlijke onderdelen van uw database verwijderen:
+
+- **Laadsessies:** verwijdert de geschiedenis van uw laadsessies.
+- **Configuratie & instellingen:** verwijdert alle geconfigureerde apparaten, diensten, plannen, caches enz.
+
+:::caution[Let op]
+Na het resetten van de configuratie moet u alle apparaten opnieuw configureren.
+Uw `evcc.yaml` (indien aanwezig) blijft ongewijzigd.
+:::
+
+U kunt ook afzonderlijke caches via de opdrachtregel verwijderen:
+
+```bash
+evcc cache get
+
+# Alle caches wissen
+evcc cache clear
+```
+
+## Voorspelling voor zonne-energie
+
+U kunt in evcc verschillende [voorspellingen voor zonne-energie](/nl/tariffs#solar) gebruiken om de verwachte resterende productie voor vandaag en de komende dagen te zien.
+Als experimentele functie hebben we ook de mogelijkheid ingebouwd om de voorspellingen aan te passen aan uw werkelijke productie.
+
+### Aanpassing van de voorspelling
+
+Naast de voorspelling registreert evcc ook het actuele vermogen van de zonnepanelen en telt dit in de loop van de tijd op.
+Dat gebeurt ook voor de voorspellingsgegevens.
+Door de twee waarden in de loop van de tijd te vergelijken, kan evcc de voorspellingen afstemmen op uw werkelijke productiewaarden.
+U kunt deze aanpassing in het voorspellingsvenster in de webinterface in- en uitschakelen.
+
+### De aanpassingsgegevens resetten
+
+Als de aanpassingswaarden niet kloppen, kunt u ze resetten.
+
+Werkwijze:
+
+1. Stop evcc
+2. Voer de volgende commando’s uit op de opdrachtregel
+   ```bash
+   # Aanpassingsgeschiedenis resetten. Bevestig met `y`.
+   evcc settings set solarAccForecast 0
+   evcc settings set solarAccYield "{}"
+   ```
+3. Start evcc opnieuw
+
+Nu begint evcc de voorspellingen weer vanaf nul op te tellen.
+
+## Statistische gegevens \{#statistical-data\}
+
+### Telemetrie en communitydata \{#telemetry\}
+
+De [evcc-website](https://evcc.io/#live) (en het venster “Oplaadenergie-overzicht” in de webinterface) toont geaggregeerde live laadgegevens van evcc-installaties. We verzamelen deze gegevens op onze centrale server _api.evcc.io_. Deelname is volledig vrijwillig.
+
+#### Hoe doe ik mee?
+
+Zet gewoon de schakelaar aan in het venster “Oplaadenergie-overzicht” in de webinterface.
+
+**Voor deelname aan de communitydata is momenteel een 💚 sponsortoken nodig**. Zo blijft de kwaliteit van de gegevens hoog en blijven onbruikbare of valse gegevens buiten de deur.
+
+#### Welke gegevens worden momenteel verzameld?
+
+We verzamelen momenteel het volgende:
+
+- actueel laadvermogen
+- actueel aandeel zonne-energie in het laadvermogen
+- totale geladen energie
+- totaal aandeel zonne-energie in de geladen energie
+
+Mogelijk verzamelen we in de toekomst meer gegevens, maar dat zullen **nooit** persoonsgegevens of privégegevens (zoals de locatie) zijn. Uw privacy is erg belangrijk voor ons!
+
+#### Wat gebeurt er met de gegevens?
+
+We slaan de geaggregeerde hoeveelheid energie per evcc-installatie op. We **bouwen geen langetermijnprofielen van gebruikers op** en zijn ook niet van plan dat in de toekomst te doen.
+
+We willen meer mensen enthousiast maken voor evcc, leren hoe evcc in de praktijk wordt ingezet en vooral het potentieel zichtbaar maken van hernieuwbare zonne-energie die via evcc wordt gebruikt.
+
+De getoonde gegevens kan iedereen opvragen via onze [API](https://api.evcc.io/v1/total). Hebt u een goed idee voor een creatieve visualisatie? Bouw dan iets en laat het ons weten!
+
+Meer informatie over hoe we gegevens gebruiken vindt u in ons [privacybeleid](https://sponsor.evcc.io/privacy) (DE).
+
+### Berekening van de besparing \{#savings-calculation\}
+
+Rechtsonder in de webinterface ziet u welk deel van de geladen energie van de zon komt (bijv. _85% zonne-energie_).
+
+Als u erop klikt, gaat een venster open met meer details, waaronder de totale berekende besparing ten opzichte van het net.
+
+Zorg ervoor dat uw `evcc.yaml` de juiste `tariffs`-configuratie bevat, zodat deze cijfers kloppen.
+
+**Voorbeeld**:
+
+```yaml
+tariffs:
+  currency: EUR # (standaard EUR)
+  grid:
+    type: fixed
+    price: 0.294 # [valuta]/kWh
+
+  feedin:
+    type: fixed
+    price: 0.08 # [valuta]/kWh
+```
+
+Meer details, ook over het gebruik van dynamische tarieven (zoals die van Octopus Energy), vindt u onder [Configuratie - Tarieven](/nl/tariffs).
+
+_Houd er rekening mee dat deze statistieken een ruwe schatting zijn en niet als volkomen nauwkeurig moeten worden beschouwd._
+
+Bij het berekenen van de besparing gebruikt evcc de totale hoeveelheid geladen energie en de energiebronnen die tijdens het laden zijn gebruikt (net, thuisbatterij, zonne-energie).
+
+**Wat is zonne-energie?**
+
+Zonne-energie is energie die direct van het zonnepanelensysteem komt, plus energie die door een eventuele thuisbatterij wordt geleverd.
+evcc gaat ervan uit dat de thuisbatterij vooral wordt gebruikt om overschot aan zelf opgewekte zonne-energie op te slaan.
+Als de thuisbatterij ook netdiensten levert (bijv. Sonnen) of zichzelf met netstroom kalibreert, klopt deze aanname niet altijd.
+Omzettingsverliezen van de batterij (omvormen / gelijkrichten) worden ook niet meegerekend.
+
+**Berekening van besparing / effectieve prijs**
+
+Het algoritme maakt onderscheid tussen netafname en zelf opgewekte zonne-energie (zonnepanelen en thuisbatterij).
+
+Het kostenvoordeel van uw zonne-energie wordt berekend uit het verschil tussen uw netafnameprijs (bijv. 30 ct/kWh) en uw terugleververgoeding (bijv. 8 ct/kWh).
+In dit voorbeeld is elke kWh zelf opgewekte energie 22 ct (30 ct min 8 ct) goedkoper dan de netafnameprijs.
+Als u een voertuig met 2 kWh eigen energie hebt geladen, komt dat overeen met een effectieve besparing van 44 ct.
+
+Als u 100% met uw eigen zonne-energie hebt geladen, is de getoonde _effectieve energieprijs_ de gemiste opbrengst van teruglevering aan het net, d.w.z. de terugleververgoeding (bijv. 8 ct/kWh).
+Als u met 50% zonne-energie en 50% netstroom laadt, past de _effectieve energieprijs_ zich daarop aan (bijv. 19 ct/kWh).
+
+Als u geen terugleververgoeding ontvangt voor stroom die u aan het net teruglevert, kunt u de terugleververgoeding op 0 zetten. De zonne-energie wordt dan als gratis behandeld.
+
+We weten dat deze besparing niet alleen aan evcc te danken is.
+Als u uw auto op een zonnige dag aan een _domme_ lader aansluit, is een deel van de geladen energie ook zonne-energie.
+evcc helpt u het aandeel zonne-energie bij het laden zo groot mogelijk te maken.
+
+**Berekening van het aandeel zonne-energie**
+
+Als u tegelijk energie uit meerdere bronnen haalt (bijv. 50% zonne-energie, 50% net), wordt uw eigen energie eerst aan uw huis toegewezen.
+Daarmee zijn alle verbruikers bedoeld die niet door evcc worden aangestuurd.
+Het resterende deel wordt vervolgens over de laadsessies verdeeld.
+Voorbeeld: uw zonnepanelensysteem wekt 3 kW op. Deze 3 kW worden volledig door het huis verbruikt (bijv. wasmachine).
+Tegelijk laadt u uw auto met 3 kW (bijv. in de modus **Snel**).
+In dit geval krijgt het huis een aandeel zonne-energie van 100% en de auto 0%.
+
+Dynamische tarieven (Octopus Energy, aWATTar, Tibber enz.) worden meegenomen bij het bepalen van de effectieve energieprijs.

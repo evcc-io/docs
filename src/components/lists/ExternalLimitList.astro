@@ -2,16 +2,14 @@
 import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
-import ExternalLimitIntro from "@components/intros/ExternalLimitIntro.astro";
-import ExternalLimitOutro from "@components/intros/ExternalLimitOutro.astro";
-import CurtailmentDevicesIntro from "@components/intros/CurtailmentDevicesIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
 import { sortDevices, collectionName, nightlyPageHead } from "@utils/devices";
 import type { Channel } from "@utils/devices";
+import { intro } from "@utils/intros";
 
 interface Props {
-  lang: "de" | "en";
+  lang: string;
   channel: Channel;
 }
 const { lang, channel } = Astro.props;
@@ -23,43 +21,21 @@ const curtailerColl = await getCollection(collectionName("curtailers", lang, cha
 const curtailers = sortDevices(curtailerColl as any);
 const basePath = `/${lang}${isNightly ? "/nightly" : ""}/external-limit`;
 
-const title =
-  lang === "de"
-    ? "Externe Begrenzung (§14a, §9)"
-    : "External Limit (§14a, §9)";
-const description =
-  lang === "de"
-    ? "Leistungsbegrenzung durch Netzbetreiber oder übergeordnete Energiemanagementsysteme."
-    : "Power limitation by grid operators or higher-level energy management systems.";
+const title = Astro.locals.t("list.external-limit.title");
+const description = Astro.locals.t("list.external-limit.description");
+const integrationsTitle = Astro.locals.t("list.integrations");
+const curtailmentTitle = Astro.locals.t("list.curtailment");
+const Intro = intro(lang, "external-limit");
+const CurtailmentIntro = intro(lang, "curtailment-devices");
+const Outro = intro(lang, "external-limit-outro");
 
-const headings =
-  lang === "de"
-    ? [
-        { depth: 2, slug: "background", text: "Hintergrund" },
-        { depth: 3, slug: "dimming", text: "Steuerbare Verbrauchseinrichtungen (§ 14a EnWG)" },
-        { depth: 3, slug: "curtailment", text: "Einspeisemanagement (§ 9 EEG)" },
-        { depth: 2, slug: "setup", text: "Einrichtung" },
-        { depth: 3, slug: "eebus-pairing", text: "Pairing bei EEBus-Integrationen" },
-        { depth: 2, slug: "integrations", text: "Integrationen" },
-        { depth: 2, slug: "curtailment-devices", text: "Einspeisebegrenzer" },
-        { depth: 2, slug: "how-it-works", text: "Funktionsweise" },
-        { depth: 2, slug: "logging", text: "Protokollierung" },
-        { depth: 2, slug: "additional-consumers", text: "Steuerung weiterer Verbraucher" },
-        { depth: 2, slug: "further-information", text: "Weiterführende Informationen" },
-      ]
-    : [
-        { depth: 2, slug: "background", text: "Background" },
-        { depth: 3, slug: "dimming", text: "Controllable Consumption Devices (§ 14a EnWG)" },
-        { depth: 3, slug: "curtailment", text: "Feed-in Management (§ 9 EEG)" },
-        { depth: 2, slug: "setup", text: "Setup" },
-        { depth: 3, slug: "eebus-pairing", text: "Pairing for EEBus Integrations" },
-        { depth: 2, slug: "integrations", text: "Integrations" },
-        { depth: 2, slug: "curtailment-devices", text: "Curtailment" },
-        { depth: 2, slug: "how-it-works", text: "How It Works" },
-        { depth: 2, slug: "logging", text: "Logging" },
-        { depth: 2, slug: "additional-consumers", text: "Controlling Additional Consumers" },
-        { depth: 2, slug: "further-information", text: "Further Information" },
-      ];
+const headings = [
+  ...Intro.getHeadings(),
+  { depth: 2, slug: "integrations", text: integrationsTitle },
+  { depth: 2, slug: "curtailment-devices", text: curtailmentTitle },
+  ...CurtailmentIntro.getHeadings(),
+  ...Outro.getHeadings(),
+];
 
 const frontmatter = {
   title,
@@ -71,20 +47,20 @@ const frontmatter = {
 
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {isNightly && <ChannelListNav lang={lang} channel={channel} category="external-limit" />}
-  <ExternalLimitIntro lang={lang} />
-  <h2 id="integrations">{lang === "de" ? "Integrationen" : "Integrations"}</h2>
+  <Intro.Content />
+  <h2 id="integrations">{integrationsTitle}</h2>
   <DeviceCardList
     devices={devices as any}
     lang={lang}
     basePath={basePath}
-    noBrandLabel={lang === "de" ? "Generische Integrationen" : "Generic integrations"}
+    noBrandLabel={Astro.locals.t("list.genericIntegrations")}
     unbrandedFirst
   />
   {channel === "release" && (
     <UserDefinedHint lang={lang} kind="hems" nightlyHref={`/${lang}/nightly/external-limit`} />
   )}
-  <h2 id="curtailment-devices">{lang === "de" ? "Einspeisebegrenzer" : "Curtailment"}</h2>
-  <CurtailmentDevicesIntro lang={lang} />
+  <h2 id="curtailment-devices">{curtailmentTitle}</h2>
+  <CurtailmentIntro.Content />
   <DeviceCardList devices={curtailers as any} lang={lang} basePath={basePath} />
   {channel === "release" && (
     <UserDefinedHint
@@ -93,5 +69,5 @@ const frontmatter = {
       nightlyHref={`/${lang}/nightly/external-limit#curtailment-devices`}
     />
   )}
-  <ExternalLimitOutro lang={lang} />
+  <Outro.Content />
 </StarlightPage>

@@ -3,18 +3,15 @@ title: "Referenz"
 description: "Dient als Einstieg in die technische Referenz und führt zur Konfigurationsdatei mit ihren Einstellungen sowie zu den Modbus-Verbindungen unterstützter Geräte."
 sidebar:
   order: 1
+translatedFrom: "da5496e357a4"
 ---
 
-In diesem Bereich sind die verschiedenen technischen Dokumentationen zu finden.
+Hier findest du die technische Dokumentation zu verschiedenen Aspekten von evcc.
 
 ### Konfiguration
 
-Hier werden die verschiedenen möglichen Einstellungen erklärt.
-
-[Weiterlesen...](/de/reference/configuration)
+[Eine Erklärung der Einstellungen und Konfigurationsdateien.](/de/reference/configuration)
 
 ### Modbus
 
-Hier befindet sich die Modbus Dokumentation, welche in verschiedenen Bereichen genutzt werden kann.
-
-[Weiterlesen...](/de/reference/modbus)
+[Anbindung von Geräten über Modbus, das viele unterstützte Geräte verwenden.](/de/reference/modbus)

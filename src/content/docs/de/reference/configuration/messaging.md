@@ -1,12 +1,13 @@
 ---
 title: "messaging"
-description: "Benachrichtigungen in der evcc.yaml einrichten: welche Ladeereignisse eine Nachricht auslösen, wie du Vorlagen schreibst und welche Dienste sie zustellen."
+description: "Lege in der evcc.yaml fest, bei welchen Ladeereignissen eine Nachricht verschickt wird, wie Titel und Text mit Platzhaltern aussehen und welche Dienste sie zustellen."
 sidebar:
   order: 13
+translatedFrom: "3cc3fbca407b"
 ---
 
-Der Abschnitt `messaging` konfiguriert [Benachrichtigungen](/de/notifications) über Ladevorgänge per Diensten wie Telegram, Pushover, ntfy oder E-Mail.
-Unter `events` wird definiert, für welche Ereignisse Nachrichten verschickt werden, unter `services`, wohin sie verschickt werden.
+Im Abschnitt `messaging` richtest du [Benachrichtigungen](/de/notifications) zu Ladevorgängen über Dienste wie Telegram, Pushover, ntfy oder E-Mail ein.
+Unter `events` legst du fest, bei welchen Ereignissen eine Nachricht verschickt wird, und unter `services`, über welche Dienste sie ankommt.
 
 **Beispiel**:
 
@@ -18,35 +19,35 @@ messaging:
 
 ## `events`
 
-`events` definiert den Nachrichteninhalt für verschiedene vordefinierte Ereignisse.
+Unter `events` legst du den Nachrichteninhalt für die vordefinierten Ereignisse fest.
 
 Die verfügbaren Ereignisse sind:
 
-- `start`: Laden hat begonnen
-- `stop`: Laden wurde beendet
+- `start`: Laden gestartet
+- `stop`: Laden beendet
 - `connect`: Fahrzeug angeschlossen
-- `disconnect`: Fahrzeug entfernt
-- `soc`: Fahrzeug Akku-Ladestandsänderung
+- `disconnect`: Fahrzeug getrennt
+- `soc`: Ladestand des Fahrzeugs geändert
 - `guest`: Unbekanntes Fahrzeug erkannt
-- `asleep`: Fahrzeug lädt nicht trotz Ladefreigabe
+- `asleep`: Fahrzeug lädt trotz Ladefreigabe nicht
 - `planoverrun`: Ladeplan verfehlt voraussichtlich sein Ziel
 
 **Beispiel**:
 
 ```yaml
-start: # charge start event
+start: # Ereignis Ladestart
   title: Laden gestartet
   msg: Laden im Modus "${mode}" gestartet
 ```
 
 ### `title`
 
-`title` definiert den Text für den Nachrichtentitel.
+`title` ist der Titel der Nachricht.
 
 ### `msg`
 
-`msg` definiert den Text für den Nachrichteninhalt.
-Titel und Nachricht unterstützen Platzhalter, entweder in der einfachen Form `${variablenName}` oder als Go-Template (`{{.variablenName}}`).
+`msg` ist der eigentliche Nachrichtentext.
+Titel und Nachricht unterstützen Platzhalter, entweder in der einfachen Form `${variableName}` oder als Go-Template (`{{.variableName}}`).
 Die verfügbaren Variablen sind unter [Nachrichtenformat](/de/notifications#message-format) aufgeführt.
 
 **Beispiel** (einfache Syntax):
@@ -61,16 +62,16 @@ messaging:
     stop:
       title: Laden beendet
       msg: >-
-        ${title}: ${vehicleTitle} geladen mit ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
-        Sonnenanteil: ${sessionSolarPercentage:%.0f}%
+        ${title}: ${vehicleTitle} hat ${chargedEnergy:%.1fk} kWh in ${chargeDuration} geladen.
+        PV-Anteil: ${sessionSolarPercentage:%.0f}%
     connect:
-      title: Fahrzeug verbunden
+      title: Fahrzeug angeschlossen
       msg: >-
-        ${vehicleTitle} verbunden an ${title} bei ${pvPower:%.1fk}kW PV
+        ${vehicleTitle} bei ${pvPower:%.1fk} kW PV-Leistung an ${title} angeschlossen
     disconnect:
       title: Fahrzeug getrennt
       msg: >-
-        ${vehicleTitle} getrennt von ${title} nach ${connectedDuration}
+        ${vehicleTitle} nach ${connectedDuration} von ${title} getrennt
 ```
 
 **Beispiel** (Go-Template-Syntax mit Berechnungen und Bedingungen):
@@ -84,30 +85,30 @@ messaging:
         {{.title}} lädt {{.vehicleTitle}} im Modus {{ toString .mode | upper }}.
         PV: {{round (divf .pvPower 1000) 1 }} kW
         Netz: {{round (divf .grid.Power 1000) 1 }} kW
-        {{if .battery}}Batterie: {{round (divf .battery.Power 1000) 1 }} kW ({{.battery.Soc }} %){{end}}
+        {{if .battery}}Hausbatterie: {{round (divf .battery.Power 1000) 1 }} kW ({{.battery.Soc }}%){{end}}
     stop:
       title: "{{.vehicleTitle}}: Laden beendet"
       msg: |
         {{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
-        Sonnenanteil: {{round .sessionSolarPercentage 0 }}%
+        PV-Anteil: {{round .sessionSolarPercentage 0 }}%
         {{- if .sessionPrice}}
         Kosten: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
         {{- end}}
     connect:
-      title: "{{.vehicleTitle}} verbunden"
+      title: "{{.vehicleTitle}} angeschlossen"
       msg: |
-        {{.vehicleTitle}} verbunden an {{.title}}.
+        {{.vehicleTitle}} an {{.title}} angeschlossen.
         Ladestand: {{.vehicleSoc }}% ({{.vehicleRange }} km)
         PV: {{round (divf .pvPower 1000) 1 }} kW
     disconnect:
       title: "{{.vehicleTitle}} getrennt"
       msg: |
-        {{.vehicleTitle}} getrennt von {{.title}} nach {{.connectedDuration}}.
+        {{.vehicleTitle}} nach {{.connectedDuration}} von {{.title}} getrennt.
 ```
 
 ## `services`
 
-`services` definiert eine Liste der zu verwendenden Nachrichtendienste.
+`services` enthält die Liste der Benachrichtigungsdienste, über die Nachrichten verschickt werden.
 
 **Beispiel**:
 
@@ -123,5 +124,5 @@ services:
 Die verfügbaren Dienste und ihre Parameter sind auf der Seite [Benachrichtigungen](/de/notifications#services) aufgeführt.
 Jede Dienstseite zeigt ein fertiges `evcc.yaml`-Beispiel.
 
-Zusätzlich ermöglicht `type: custom` die Nutzung beliebiger [Plugins](/de/reference/plugins) mit Schreibzugriff.
-Siehe [benutzerdefinierter Benachrichtigungsdienst](/de/user-defined-devices#notification-service).
+Mit `type: custom` kannst du außerdem beliebige [Plugins](/de/reference/plugins) mit Schreibzugriff verwenden.
+Details findest du im Abschnitt [benutzerdefinierter Benachrichtigungsdienst](/de/user-defined-devices#notification-service).

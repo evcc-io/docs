@@ -1,0 +1,64 @@
+---
+translatedFrom: "42d5067324d9"
+---
+
+evcc supporta prese commutabili e interruttori controllabili.
+Funzionano in modo simile ai caricabatterie, ma senza regolazione della potenza.
+evcc si limita ad accendere o spegnere la presa.
+Se è disponibile abbastanza [surplus](/it/features/solar-charging) o [energia economica](/it/features/dynamic-prices), evcc accende automaticamente la presa.
+
+Configura le tue prese commutabili nell’interfaccia web in **Configurazione → Ricarica e riscaldamento**.
+
+## Modalità \{#modes\}
+
+A seconda dell’applicazione ci sono due modalità.
+Il parametro `standbypower` (potenza in standby in watt) determina quale delle due viene usata.
+In entrambe le modalità `standbypower` indica quanto consuma il dispositivo, un valore che serve a calcolare il consumo del resto della casa e il surplus solare rimanente.
+Il surplus necessario per [l’attivazione in modalità intelligente](/it/features/solar-charging) è definito dalla corrente minima nelle impostazioni del punto di ricarica.
+
+### Modalità di ricarica (predefinita) \{#charging-mode\}
+
+Adatta a controllare dispositivi a batteria (moto elettriche, e-bike, batterie per utensili ecc.).
+La potenza misurata sull’interruttore viene trattata come potenza di ricarica.
+Se scende sotto `standbypower` (predefinito 15&nbsp;W), evcc considera il dispositivo carico.
+È attiva ogni volta che `standbypower` non è negativo.
+Esempio: `standbypower: 50` termina la ricarica appena il carico scende sotto 50&nbsp;W.
+
+<details class="device-config-section">
+<summary>Esempio di configurazione per evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Modalità statica \{#static-mode\}
+
+Adatta a consumatori generici come pompe di calore, condizionatori o stufe.
+Si attiva con un valore negativo di `standbypower`, il cui valore assoluto è la potenza assorbita stimata che evcc usa per il calcolo del surplus.
+Esempio: `standbypower: -5000` per un dispositivo che assorbe circa 5&nbsp;kW.
+
+<details class="device-config-section">
+<summary>Esempio di configurazione per evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+La modalità di ricarica presuppone che l’interruttore abbia un contatore di energia integrato.
+Al momento non è possibile ottenere questo comportamento con un [contatore di energia](/it/meters) esterno aggiuntivo.
+:::

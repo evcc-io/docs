@@ -1,0 +1,104 @@
+---
+title: "Sessioni di ricarica"
+description: "Spiega quali valori mostra evcc durante la ricarica, come funziona l’elenco delle sessioni con statistiche ed esportazione CSV e cosa mostra il dettaglio di una sessione."
+sidebar:
+  order: 7
+translatedFrom: "d1b4445f95e6"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Il compito principale di evcc è la ricarica intelligente dei veicoli in base a energia solare, batteria domestica e tariffe elettriche.
+Questo controllo avviene in automatico e in background.
+Per permetterti di vedere l’effetto di queste ottimizzazioni, durante la sessione di ricarica evcc registra alcuni valori misurati.
+
+## Sessione di ricarica in corso
+
+Nella vista principale vedi le informazioni sulla sessione di ricarica in corso.
+
+<Screenshot
+  name="features/screenshots/sessions-main-ui"
+  caption="Valori misurati durante la ricarica"
+/>
+
+1.  **Potenza:** mostra la potenza di ricarica attuale in kW.
+    Il fulmine verde indica che è in corso una ricarica.
+    Sotto la potenza, piccole barre verdi mostrano il numero di fasi attive e il loro carico.
+
+2.  **Caricato:** mostra la quantità di energia già caricata.
+    Se nel tuo caricabatterie è installato un contatore, i valori vengono presi da lì.
+    Per i caricabatterie senza contatore, evcc calcola la quantità di energia in base alla potenza di ricarica.
+
+3.  **Altri valori:** a seconda della tua installazione sono disponibili altri valori misurati.
+    Puoi selezionarli facendo clic sul nome.
+    In alternativa, un clic sul valore numerico passa alla visualizzazione successiva.
+
+            * **Rimanenti:** mostra il tempo rimanente fino al raggiungimento dell’obiettivo di ricarica.
+            Se il tuo veicolo lo supporta, il tempo rimanente viene ricavato dai dati del veicolo.
+            In alternativa, il tempo rimanente viene calcolato in base alla potenza di ricarica attuale e all’obiettivo di ricarica.
+
+            * **Ora di fine:** mostra l’ora in cui viene raggiunto l’obiettivo di ricarica in base al tempo rimanente.
+            Come per il tempo rimanente, se il veicolo lo supporta il valore viene ricavato dai suoi dati.
+
+            * **Durata:** mostra la durata effettiva della sessione di ricarica.
+            Se la sessione di ricarica è in pausa (ad es. a causa del surplus solare), il tempo si ferma.
+
+            * **Solare:** il valore percentuale indica quale quota dell’energia caricata proviene dall’impianto fotovoltaico.
+            L’energia della batteria domestica viene conteggiata come energia solare.
+
+            * **⌀ Prezzo:** mostra il prezzo medio per kWh.
+            Il calcolo si basa sul prezzo attuale dell’energia, sulla quota di autoconsumo e sull’eventuale mancato compenso per l’immissione in rete.
+            Disponibile solo se è configurata una [tariffa elettrica dinamica](/it/features/dynamic-prices).
+
+            * **Costo:** costo totale della sessione di ricarica in corso. Il calcolo si basa sul prezzo attuale dell’energia, sulla quota di autoconsumo e sull’eventuale mancato compenso per l’immissione in rete.
+            Disponibile solo se è configurata una [tariffa elettrica dinamica](/it/features/dynamic-prices).
+
+            * **⌀ CO₂:** mostra le emissioni medie di CO₂ per kWh.
+            Il calcolo si basa sulla quota di autoconsumo combinata con le emissioni di CO₂ del mix elettrico.
+            La tua energia solare (uso diretto dell’energia solare e batteria domestica) è considerata a zero emissioni di CO₂.
+            Disponibile solo se è configurata una [fonte di CO₂](/it/features/co2).
+
+## Elenco delle sessioni di ricarica
+
+In evcc una sessione di ricarica è il periodo tra il collegamento e lo scollegamento del cavo di ricarica.
+È del tutto possibile che in questo periodo la ricarica sia stata messa in pausa e ripresa più volte.
+Le sessioni di ricarica in cui non è stata usata energia non vengono registrate.
+
+Nel menu, alla voce **Sessioni di ricarica**, trovi un elenco di tutte le sessioni di ricarica precedenti, raggruppate per mese.
+I dati sono presentati in forma di tabella e si possono esportare come file CSV o Excel.
+Puoi filtrare per punto di ricarica e veicolo e vedere totali e valori medi.
+
+<Screenshot
+  name="features/screenshots/sessions-list"
+  caption="Elenco delle sessioni di ricarica mensili"
+/>
+
+Nota: sugli schermi più piccoli viene mostrata una vista più compatta con meno colonne.
+Facendo clic sulle intestazioni delle colonne puoi scegliere quali informazioni visualizzare.
+
+## Dettaglio della sessione di ricarica
+
+Un clic su una voce dell’elenco apre la vista dettagliata della sessione di ricarica.
+Lì vedi tutti i valori registrati, incluso il chilometraggio del tuo veicolo, se disponibile.
+
+Se un veicolo non è stato riconosciuto correttamente, in questa vista puoi anche correggere l’assegnazione del veicolo o eliminare la sessione di ricarica.
+
+<Screenshot
+  name="features/screenshots/sessions-detail"
+  caption="Vista dettagliata di una sessione di ricarica"
+/>
+
+## Prese commutabili e riscaldamento
+
+A differenza dei caricabatterie, con le prese commutabili (ad es. caricatore Schuko, e-bike, ...) o i dispositivi di riscaldamento (ad es. pompa di calore, resistenza elettrica, ...) non c’è modo di rilevare la sessione di ricarica.
+
+### Dispositivi di riscaldamento
+
+Per i dispositivi di riscaldamento (pompe di calore, resistenze elettriche ecc.) ogni giorno a mezzanotte viene avviata automaticamente una nuova sessione di ricarica.
+In questo modo i valori misurati vengono registrati separatamente per ogni giorno e l’elenco delle sessioni di ricarica resta ordinato.
+
+### Prese commutabili
+
+Per le prese commutabili vengono registrate sessioni di ricarica che coprono lunghi periodi di tempo.
+Se la tua istanza evcc viene riavviata, viene registrata una nuova sessione di ricarica.
+Puoi farlo anche manualmente, fermando e riavviando la ricarica al punto di ricarica (modalità **Off**).

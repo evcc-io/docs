@@ -1,43 +1,44 @@
 ---
 date: 2022-01-09
 title: "Version 0.80"
-description: "Release Notes zu evcc 0.80 vom Januar 2022 mit Verbesserungen an evcc configure, dem neuen Dialog für Sonnenenergieanteil und Ersparnis und neuen Docker-Tags."
+description: "Release Notes zu evcc 0.80 vom Januar 2022 mit Verbesserungen an evcc configure, einem neuen Dialog für PV-Anteil und Ersparnis sowie den Docker-Tags latest und nightly."
 authors: [derandereandi, naltatis]
 tags: [release]
 prev: false
 next: false
+translatedFrom: "9db66286559a"
 ---
 
-Auch dieses Jahr geht es weiter mit weiteren Aktualisierungen :) Zusätzlich zu den kleineren Updates mit 0.78 und 0.79, gibt es nun auch ein paar größere Änderungen mit der Version 0.80.
+Auch dieses Jahr geht es weiter mit Aktualisierungen :) Zusätzlich zu den kleineren Updates mit 0.78 und 0.79 bringt die Version 0.80 ein paar größere Änderungen.
 
 <!-- excerpt -->
 
-## `evcc configure` Verbesserungen
+## Verbesserungen an `evcc configure`
 
-Wenn man eine Konfiguration mit `evcc configure` erstellt, wird zuerst nach dem eigenen Know How gefragt. So können fortgeschrittene Anwender die Konfiguration in technischen Bereichen etwas genauer einstellen. Dieser Modus ist weiterhin auch über `evcc configure --advanced` direkt verfügbar. Einsteiger empfehlen wir diesen Modus jedoch nicht, da mehr Know-How erforderlich ist.
+Wenn du eine Konfiguration mit `evcc configure` erstellst, wirst du jetzt zuerst nach deinem Kenntnisstand gefragt. So können fortgeschrittene Anwender die Konfiguration in technischen Bereichen genauer einstellen. Dieser Modus ist weiterhin auch direkt über `evcc configure --advanced` verfügbar. Für Einsteiger empfehlen wir ihn jedoch nicht, da er mehr Know-how erfordert.
 
-Zustätzlich gibt es weitere Geräte Templates, Korrekturen an bisherigen Templates und weitere Einstellmöglichkeiten.
+Zusätzlich gibt es weitere Geräte-Templates, Korrekturen an bestehenden Templates und weitere Einstellmöglichkeiten.
 
-## Sonnenenergieanteil und Ersparnis
+## PV-Anteil und Ersparnis
 
-![Ersparnisdialog](./ersparnis.png)
+![Ersparnisdialog](../../../../../en/blog/2022/01/09/ersparnis.png)
 
-Das neue Ersparnisfeature zeigt dir an wie viel deines Ladestroms durch selbsproduzierte Sonnenenergie gedeckt werden konnte.
+Die neue Ersparnis-Funktion zeigt dir, wie viel deiner Ladeenergie durch selbst erzeugten Sonnenstrom gedeckt wurde.
 Der Prozentwert wird unten rechts in der Ecke angezeigt.
-Beim Klick darauf bekommst du weitere Details in einem Dialog angezeigt.
-Dort siehst du neben der Energiemenge auch deinen effektiven Energiepreis und die Gesamtersparnis gegenüber reinem Netzbezug.
-Hier findest du mehr Informationen zur [Berechnung und Preiskonfiguration](/de/faq#ersparnisberechnung).
+Klickst du darauf, bekommst du weitere Details in einem Dialog angezeigt.
+Dort siehst du neben der Energiemenge auch deinen effektiven Energiepreis und deine Gesamtersparnis gegenüber reinem Netzbezug.
+Mehr Informationen zur [Berechnung und Preiskonfiguration](/de/faq#savings-calculation) findest du in den FAQ.
 
-[Sponsoren](/de/sponsorship) finden in dem neuen Dialog unter dem Dankeschön-Konfetti-Button einen, _\*drumroll\*_, Link um unsere neuen evcc Sticker zu bekommen.
-Ihr seid die Besten. Danke für euren Support! 💚🥳
+[Sponsoren](/de/sponsorship) finden im neuen Dialog hinter dem Dankeschön-Konfetti-Button, _\*Trommelwirbel\*_, einen Link, um unsere neuen evcc-Sticker zu bekommen.
+Ihr seid die Besten. Danke für eure Unterstützung! 💚🥳
 
 ## Docker
 
-Wer Docker verwendet, kann nun über die Tags `latest` jeweils die aktuelle Version verwenden. Mit dem Tag `nightly` gibt es dann täglich neue Builds, die aber noch nicht so gut getestet sein können. Weitere Informationen zur Docker Installation sind hier zu finden: [Docker, Synology](/de/installation/docker)
+Wenn du Docker verwendest, bekommst du jetzt über das Tag `latest` immer die aktuelle Version. Das Tag `nightly` liefert täglich neue Builds, die aber möglicherweise noch nicht so gründlich getestet sind. Weitere Informationen zur Docker-Installation findest du hier: [Docker, Synology](/de/installation/docker)
 
 ## Fehlerkorrekturen
 
-Diese Version enthält natürlich wieder eine Reihe von Fehlerkorrekturen und vielen kleinen Verbesserungen. Schaut euch gerne über den Changelog Link unten eine detaillierte Auflistung an.
+Wie immer enthält diese Version eine Reihe von Fehlerkorrekturen und viele kleine Verbesserungen. Eine detaillierte Auflistung findest du über die Changelog-Links unten.
 
 ## Download & Installation
 

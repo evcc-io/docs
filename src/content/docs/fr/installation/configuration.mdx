@@ -1,0 +1,250 @@
+---
+title: "Configuration"
+description: "Après l’installation, configurez evcc de préférence dans l’interface web ou à défaut avec un fichier evcc.yaml, puis testez la configuration et corrigez les erreurs."
+sidebar:
+  order: 11
+translatedFrom: "6672cdb3ee1b"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Une fois evcc installé, vous pouvez configurer vos appareils et vos paramètres.
+La méthode recommandée est la configuration via l’interface web.
+Une configuration par fichier est également disponible pour les utilisateurs avancés.
+
+## Via l’interface web
+
+:::tip[Recommandé]
+L’interface web est le moyen le plus simple et le plus rapide de configurer evcc.
+:::
+
+### Premiers pas
+
+<Steps>
+
+1. **Démarrer evcc** : après l’[installation](/fr/installation), démarrez evcc selon les instructions pour votre système
+2. **Ouvrir le navigateur** : allez sur `http://<your-ip>:7070` (p. ex. `http://evcc.local:7070` ou `http://192.168.1.50:7070`)
+3. **Set administrator password** : au premier démarrage, vous êtes invité à définir un mot de passe
+4. **Configuration initiale** : suivez les instructions de la page d’accueil
+
+</Steps>
+
+### Ajouter des appareils
+
+Dans la zone de configuration, vous pouvez configurer les composants suivants :
+
+- **Bornes de recharge et chauffages** (recommandé) : chargeurs et pompes à chaleur
+- **Réseau électrique** (recommandé) : compteur avant réseau, tarifs d’électricité et appareils de bridage, importants pour une bonne gestion de l’énergie
+- **Solaire & batterie** (facultatif) : installations photovoltaïques et batteries domestiques
+- **Véhicules** (facultatif) : intégrations de véhicules qui fournissent la capacité de la batterie et le niveau de charge et permettent une charge plus intelligente
+
+Au moins un compteur ou un point de charge doit être configuré pour que le système fonctionne.
+
+evcc accède à la plupart des appareils par leur adresse IP ou leur nom d’hôte.
+Le champ **Adresse IP ou nom d’hôte** propose les appareils trouvés sur votre réseau avec leur adresse, leur nom d’hôte et leur fabricant.
+Les appareils qui correspondent au type d’appareil sélectionné sont listés sous **Correspondance**, tous les autres sous **Autre**.
+Les entrées déjà utilisées par un autre appareil portent la mention **déjà utilisé**.
+Si un seul appareil correspond, il est renseigné automatiquement.
+Vous pouvez toujours saisir une adresse vous-même.
+La recherche ne s’exécute qu’en local, pendant que vous configurez un appareil.
+Elle ne trouve que les appareils du même segment de réseau que votre instance evcc.
+Les appareils situés dans d’autres VLAN ou sous-réseaux ne sont pas trouvés.
+Dans un conteneur Docker, cela nécessite le [réseau hôte](/fr/installation/docker#network) (ou macvlan), car en mode bridge le conteneur ne voit pas le réseau local.
+
+### Intégrations
+
+Vous pouvez en outre intégrer différents services et protocoles :
+
+- **MQTT** : échange de données avec d’autres systèmes du réseau
+- **[Notifications](/fr/notifications)** : notifications push et alertes par e-mail
+- **InfluxDB** : export de données pour une analyse à long terme
+- **EEBUS** : communication avec d’autres appareils EEBUS
+- **Serveur OCPP** : connexion avec des chargeurs compatibles OCPP
+- **Circuits** : surveillance et pilotage des circuits
+- **Proxy Modbus** : accès multiple aux appareils Modbus
+- **Sunny Home Manager** : intégration via le protocole SEMP
+- **Limite externe** : limitation de puissance par les gestionnaires de réseau (§ 14a EnWG, § 9 EEG) ou par des systèmes de gestion de l’énergie de niveau supérieur
+
+### Sauvegarde et restauration \{#backup\}
+
+L’interface web propose des fonctions intégrées de sauvegarde des données :
+
+- **Sauvegarde** : télécharger la base de données pour la sauvegarder
+- **Restaurer** : restaurer les données à partir d’un fichier de sauvegarde
+- **Réinitialiser** : supprimer la configuration ou l’historique des charges
+
+## Via un fichier de configuration
+
+:::note[Méthode traditionnelle]
+Cette méthode utilise un fichier `evcc.yaml` et nécessite de connaître la ligne de commande et le format YAML. Certaines nouvelles fonctionnalités ne sont configurables que via l’interface web.
+:::
+
+### Partir de zéro
+
+Vous pouvez aussi créer le fichier `evcc.yaml` à la main.
+Vous trouverez ici un modèle minimal à utiliser comme point de départ.
+
+#### Création
+
+Copiez le contenu dans un nouveau fichier `evcc.yaml`.
+
+```yaml title="evcc.yaml"
+## minimal configuration example
+
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid
+    pv:
+      - my_pv
+    battery:
+      - my_battery
+
+# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    vehicle: my_car # default vehicle
+
+# meter definitions
+# name can be freely chosen and is used as reference when assigning meters to site and loadpoints
+# for documentation see https://docs.evcc.io/docs/meters
+meters:
+  # replace with your real grid meter
+  - name: my_grid
+    type: template
+    template: demo-meter
+    usage: grid
+    power: -1000 # 1 kW feed-in
+  # replace with your real solar system
+  - name: my_pv
+    type: template
+    template: demo-meter
+    usage: pv
+    power: 4000 # 4 kW production
+  # replace with your real battery
+  - name: my_battery
+    type: template
+    template: demo-battery
+    usage: battery
+    power: -1000 # 1 kW battery charging
+    soc: 50 # 50 % state of charge
+
+# replace with your real charger
+# see https://docs.evcc.io/docs/chargers
+chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: C # charging
+    power: 2000 # 2 kW charging power
+    enabled: true # optional
+
+# replace with your real vehicle (optional)
+# see https://docs.evcc.io/docs/vehicles
+vehicles:
+  - name: my_car
+    type: template
+    template: offline
+    title: blue e-Golf
+    capacity: 50 # in kWh
+
+# enter your real grid tariff and feed-in price
+# see https://docs.evcc.io/docs/tariffs
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.29 # EUR/kWh
+  feedin:
+    type: fixed
+    price: 0.10 # EUR/kWh
+```
+
+Vous pouvez démarrer evcc avec ce fichier.
+Suivez pour cela les instructions correspondant à votre système.
+
+#### Test
+
+Redémarrez evcc et ouvrez votre navigateur à l’adresse `http://<evcc-ip>:7070`.
+Vérifiez que les valeurs sont plausibles.
+Si vous obtenez un message d’erreur, vérifiez vos saisies.
+
+Il s’agit souvent d’erreurs d’indentation ou de frappe.
+Le fichier est écrit au [format YAML](https://wikipedia.org/wiki/YAML).
+Vous pouvez utiliser l’outil en ligne [YAML Lint](https://www.yamllint.com/) pour vérifier que votre fichier respecte le bon format.
+
+#### Personnalisation
+
+Le fichier ne contient que des appareils de démonstration (`demo-charger`, `demo-meter`, `demo-battery`, `offline`).
+Ceux-ci ont des valeurs fixes.
+Parcourez le fichier étape par étape et adaptez les valeurs à votre installation :
+
+- Remplacez les appareils de démonstration par vos propres [compteurs](/fr/meters), [chargeurs](/fr/chargers) et [véhicules](/fr/vehicles).
+- Si vous n’avez pas de batterie, vous pouvez supprimer entièrement cette section.
+- Si vous avez plusieurs installations photovoltaïques, vous pouvez dupliquer les sections correspondantes.
+- Si vous avez plusieurs chargeurs, copiez les sections du point de charge et du chargeur et adaptez les noms.
+
+Notez que les différentes entrées renvoient les unes aux autres.
+Dans l’entrée `site` (`meters`), les compteurs (`grid`, `pv`, `battery`) sont affectés à leurs rôles.
+C’est toujours le champ `name` qui sert à cela.
+Les noms doivent donc être uniques.
+
+Si possible, faites ces modifications étape par étape.
+Redémarrez evcc après chaque modification et vérifiez le résultat dans le navigateur.
+Vous remarquerez ainsi rapidement si vous avez fait une erreur.
+
+#### Pour aller plus loin
+
+Le fichier [evcc.dist.yaml](https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml) du projet principal contient la liste complète de toutes les options de configuration possibles.
+Vous trouverez des explications plus détaillées sur les options sous [Référence → evcc.yaml](/fr/reference/configuration).
+
+Pour voir une démo dynamique, vous pouvez aussi consulter le contenu du fichier [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml).
+Ce fichier contient des appareils de démonstration en JavaScript qui simulent un comportement simplifié.
+Il est également utilisé pour [demo.evcc.io](https://demo.evcc.io).
+
+Pour faire tourner votre propre installation en mode démo, démarrez simplement evcc avec le paramètre `--demo`.
+Consultez la [référence CLI](/fr/reference/cli/evcc) pour plus d’informations.
+
+## Test
+
+Vérifiez que la configuration fonctionne :
+
+```sh
+evcc -c evcc.yaml
+```
+
+Ouvrez un navigateur et saisissez l’URL : `http://<your-ip>:7070` (p. ex. `http://evcc.local:7070`).
+L’interface d’evcc devrait maintenant afficher vos propres appareils.
+
+Si tout fonctionne, vous pouvez déplacer votre `evcc.yaml` à l’emplacement requis par votre installation.
+
+## Dépannage
+
+En cas d’erreur, vous pouvez obtenir des informations supplémentaires avec les commandes suivantes.
+
+- Vérification de la syntaxe
+
+  ```sh
+  evcc -c evcc.yaml checkconfig
+  ```
+
+- Compteurs (réseau, solaire, batterie)
+
+  ```sh
+  evcc -c evcc.yaml -l debug meter
+  ```
+
+- Véhicules
+
+  ```sh
+  evcc -c evcc.yaml -l debug vehicle
+  ```
+
+- Chargeurs
+
+  ```sh
+  evcc -c evcc.yaml -l debug charger
+  ```
+
+Vérifiez que la sortie de chaque commande est plausible.

@@ -1,0 +1,19 @@
+---
+translatedFrom: "467d4c7df8e1"
+---
+
+Der API State ist die Datenstruktur hinter der UI.
+Er ist über drei Schnittstellen verfügbar.
+Es gibt keine Kompatibilitätsgarantie, Felder können sich zwischen Releases ändern.
+
+- [REST-API](/integrations/rest-api): `GET /api/state` liefert den kompletten Zustand als ein JSON-Dokument, eingebettet in ein `result`-Objekt.
+  Mit dem Query-Parameter `jq` lässt sich die Antwort per [jq](https://jqlang.org/)-Ausdruck filtern.
+  - Live-Beispiel: [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Gefiltert auf ein einzelnes Feld: [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/de/integrations/mqtt-api): jedes Feld wird als eigenes Topic veröffentlicht.
+  Felder des Standorts liegen unter `evcc/site/<feld>`, Ladepunkt-Felder unter `evcc/loadpoints/<n>/<feld>` mit Index ab 1.
+  Verschachtelte Objekte und Arrays werden auf Sub-Topics aufgeteilt, z. B. `evcc/site/pv/1/power`.
+  Werte werden als einfache Strings veröffentlicht, Zeitstempel als Unix-Zeit in Sekunden und Dauern ebenfalls in Sekunden.
+- **WebSocket**: beim Verbinden erhält der Client den kompletten Zustand als ein JSON-Objekt.
+  Ladepunkt-Felder verwenden Schlüssel mit Punktnotation wie `loadpoints.0.chargePower`.
+  Danach werden nur noch inkrementelle Updates gesendet: kleine JSON-Objekte mit den geänderten Feldern, die der Client in seine Kopie des Zustands übernimmt.

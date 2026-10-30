@@ -1,0 +1,189 @@
+---
+title: "Řízení zátěže"
+description: "Řízení zátěže seskupuje nabíjecí body do okruhů s maximálním proudem nebo výkonem, aby několik nabíječek nikdy nepřetížilo vaši elektroinstalaci."
+sidebar:
+  order: 12
+translatedFrom: "56826048a083"
+---
+
+:::caution[Experimentální]
+Funkce řízení zátěže je zatím experimentální. V kombinaci s některými dalšími funkcemi se nemusí chovat podle očekávání.
+:::
+
+Funkci řízení zátěže (vyrovnávání zátěže) lze použít k omezení výkonu nabíječek, aby se nepřetížily okruhy a nevypínaly jističe.
+Omezení výkonu se může hodit také tehdy, když se chcete vyhnout nechtěným vysokým odběrovým špičkám.
+Za tím účelem lze nabíjecí bod přiřadit k okruhu `circuit`.
+Okruh `circuit` může mít maximální proud (`maxCurrent`), maximální výkon (`maxPower`) nebo obojí.
+Systém funguje hierarchicky, tj. okruh může být součástí nadřazeného okruhu.
+
+:::note[Konfigurace přes uživatelské rozhraní]
+Tato stránka popisuje konfiguraci pomocí souboru `evcc.yaml`.
+Konfigurace je možná i přes uživatelské rozhraní.
+
+Okruhy lze definovat v nabídce **Konfigurace → Řízení zátěže**.
+Zadání probíhá ve formátu YAML a odpovídá obsahu pod `circuits:` v následujících příkladech.
+Tento způsob zadávání chceme později nahradit formulářem.
+
+Každý nabíjecí bod pak lze přiřadit k okruhu v nabídce **Konfigurace → Místo pro nabíjení a topení → [název]** (vyžaduje restart).
+:::
+
+## Konfigurace
+
+Okruhy se definují v sekci `circuits`.
+Každý nabíjecí bod pak lze přiřadit k okruhu.
+
+### Příklad: hlavní okruh
+
+```yaml
+circuits:
+  - name: main # jedinečný název, ostatní okruhy na něj odkazují přes parent
+    title: "hlavní okruh" # název pro uživatelské rozhraní (zatím v něm není implementováno)
+    maxCurrent: 63 # 63 A (volitelné)
+    maxPower: 30000 # 30 kW (volitelné)
+    meter: grid # volitelné
+
+loadpoints:
+  - title: Garage
+    circuit: main
+    # ...
+  - title: Carport
+    circuit: main
+    # ...
+```
+
+Tato konfigurace definuje hlavní okruh `main` s maximálním výkonem 30 kW a maximálním proudem 63 A na fázi.
+K tomuto okruhu jsou přiřazeny nabíjecí body _Garage_ a _Carport_.
+Pokud další spotřebiče, např. trouba nebo tepelné čerpadlo (k tomu je potřeba měřič), odebírají celkem 50 A, smí nabíjecí body využít jen zbývajících 13 A.
+Protože je k tomuto okruhu přiřazen měřič sítě, výkon nabíjecích bodů se omezí tak, aby se na síťové přípojce nepřekročily limity.
+Bez přiřazeného měřiče sítě platí limity přímo pro součet všech nabíjecích bodů.
+
+### Příklad: vnořené okruhy
+
+```yaml
+circuits:
+  - name: main
+    title: "hlavní okruh"
+    maxCurrent: 48
+  - name: garage
+    title: Garage
+    maxCurrent: 32
+    parent: main
+  - name: carport
+    title: Carport
+    maxCurrent: 32
+    parent: main
+
+loadpoints:
+  - title: Garage A
+    circuit: garage
+  - title: Garage B
+    circuit: garage
+  - title: Garage C
+    circuit: garage
+  - title: Carport A
+    circuit: carport
+  - title: Carport B
+    circuit: carport
+  - title: Tepelné čerpadlo
+    circuit: main
+```
+
+V tomto příkladu jsou dva okruhy, `garage` a `carport`, oba podřízené hlavnímu okruhu (`parent: main`).
+Okruh `main` má maximální proud 48 A.
+Každý z okruhů `garage` a `carport` má maximální proud 32 A.
+Nabíjecí body Garage A, Garage B a Garage C jsou přiřazeny k okruhu `garage` (`circuit: garage`).
+Nabíjecí body Carport A a Carport B jsou přiřazeny k okruhu `carport` (`circuit: carport`).
+Okruhy `garage`, `carport` a tepelné čerpadlo jsou připojeny přímo k hlavnímu okruhu (`main`).
+Regulace zajistí, že se limity jednotlivých okruhů nikdy nepřekročí.
+
+**Důležité:** Vždy musí existovat právě jeden hlavní okruh (okruh bez vlastnosti `parent`).
+
+:::note[Externí limit (§ 14a, § 9)]
+Když je aktivní [externí limit](/cs/external-limit), omezuje výkon hlavního okruhu.
+Na kartě Řízení zátěže se pak zobrazí upozornění „Spotřeba snížena“.
+:::
+
+## Měření
+
+Ve výchozím nastavení počítá regulace aktuální výkon a proud ze součtu příslušných nabíjecích bodů.
+Přiřazením měřiče `meter` k okruhu `circuit` lze zohlednit i skutečné zatížení.
+To se hodí zejména tehdy, když jsou k jističi připojeny i další spotřebiče.
+
+```yaml
+site:
+  meters:
+    ext:
+      - carport_meter
+
+meters:
+  - name: carport_meter
+    type: template
+    template: shelly-3em
+
+circuits:
+  - name: carport
+    meter: carport_meter
+    maxCurrent: 32
+```
+
+Poznámka: Pokud se použije měřič, který zatím neslouží k jinému účelu (např. `grid`), musí být uveden jako externí měřič v `site.meters.ext`.
+
+## Limity
+
+U každého okruhu lze nastavit maximální proud na fázi (`maxCurrent`) i maximální výkon (`maxPower`).
+Pokud jsou tyto hodnoty nastaveny, sledují se nezávisle na sobě.
+
+### Externí limity
+
+Podle potřeby lze externí limity definovat také pomocí `GetMaxCurrent` a `GetMaxPower`. Pokud se hodnoty nepodaří načíst, platí pevně nastavené limity.
+
+Příklad:
+
+```yaml
+circuits:
+  - name: main
+    title: "hlavní okruh"
+    maxCurrent: 48
+    GetMaxCurrent:
+      source: mqtt
+      topic: ext/maxcurrent
+    maxPower: 33000
+    GetMaxPower:
+      source: mqtt
+      topic: ext/maxpower
+```
+
+:::note[Poznámka]
+Externí limit lze použít k realizaci řídicích požadavků provozovatele distribuční soustavy.
+Další informace najdete v části [Externí limit](/cs/external-limit).
+:::
+
+## Přepínání fází
+
+U nabíječek s automatickým přepínáním fází (1P/3P) může řízení zátěže využít přepínání k nabíjení v rámci nastavených limitů.
+Pokud dostupný výkon pro třífázové nabíjení nestačí, evcc automaticky přepne na jednofázové nabíjení.
+
+To platí i v režimu **Rychlé** a při nabíjení podle plánu.
+Pokud například řízení zátěže omezí dostupný výkon na 3,5 kW, evcc přepne na jednofázové nabíjení (od 1,4 kW), místo aby nabíjení pozastavilo.
+
+**Předpoklad:** Nabíječka musí podporovat přepínání fází.
+
+## Konfigurace nabíječky
+
+Některé nabíječky mají vlastní funkce řízení zátěže.
+Důrazně doporučujeme tyto funkce vypnout nebo použít nabíječky bez vestavěné inteligence.
+evcc očekává, že zařízení budou jeho příkazy přímo plnit.
+Jiné konfigurace mohou vést k neočekávanému chování a je nutné je samostatně důkladně otestovat.
+
+## Omezení
+
+:::note
+Pro komerční využití řízení zátěže bude později potřeba samostatná licence.
+Soukromé použití u menších instalací zůstane zdarma.
+:::
+
+- Aktuální hodnoty a limity jednotlivých okruhů se zobrazují na konfigurační stránce v uživatelském rozhraní. Zobrazení u nabíjecího bodu je plánováno.
+- Nastavení `priority` u nabíjecího bodu se zatím nezohledňuje.
+- Nové nabíjecí relace dostanou jen zbývající volnou kapacitu okruhu.
+  Přerozdělení mezi aktivními nabíjecími relacemi zatím není podporováno.
+- [Nabíjení ze sítě](/cs/features/battery#gridcharge) u domácí baterie se nezohledňuje. Když se domácí baterie aktivně nabíjí ze sítě, tato spotřeba se do výpočtů řízení zátěže nezahrnuje. Když je však aktivní signál ke [snížení výkonu podle § 14a](/cs/external-limit), nabíjení ze sítě se automaticky pozastaví.

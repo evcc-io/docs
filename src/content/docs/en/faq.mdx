@@ -6,7 +6,7 @@ sidebar:
   order: 8
 ---
 
-## Configuration
+## Configuration \{#configuration\}
 
 ### Should I configure evcc via the web interface or with the configuration file?
 
@@ -63,7 +63,7 @@ However, it is also possible to operate solar-guided charging exclusively on the
 But please note that you won't be able to charge using solar excess energy only, as the calculations required for this are only possible when grid power is known.
 When configured like this, evcc will charge the vehicle using the current power coming from solar generation.
 
-A typical, medium-sized house's consumption can be specified to attempt to leave some energy for your house - you can do us this using the
+A typical, medium-sized house's consumption can be specified to attempt to leave some energy for your house - you can do this using the
 [`residualPower`](/en/reference/configuration/site#residualpower) config flag.
 
 **Example**:
@@ -103,13 +103,12 @@ if you could talk directly to the inverter.
 
 Yes! Multiple chargers can be added and controlled by evcc at the same time.
 
-However, Load Management across multiple chargers is not supported right now.
-This is currently in development for a later release.
+With [load management](/en/features/loadmanagement) you can group them into circuits with a maximum current or power, so that they never overload your electrical installation together.
 
 ### Can evcc prevent multiple home batteries from discharging each other?
 
 When controlling charging points and other consumers, evcc takes the charge level of configured home batteries into account.
-If a battery system supports [active battery control](/en/features/battery#active-battery-control), evcc can request certain modes, such as preventing discharge or charging the battery.
+If a battery system supports [active battery control](/en/features/battery#battery-control), evcc can request certain modes, such as preventing discharge or charging the battery.
 However, evcc does not directly coordinate the charging and discharging power of individual batteries.
 Therefore, evcc cannot generally prevent multiple home batteries from discharging each other.
 Available control options depend on the battery system.
@@ -118,12 +117,12 @@ Available control options depend on the battery system.
 
 In normal operation, the battery system itself decides when and at what power it charges or discharges.
 evcc takes readings such as charge level and power into account when controlling charging points, but it does not continuously regulate the home battery's charging power.
-If a system supports [active battery control](/en/features/battery#active-battery-control), evcc can request individual functions, such as preventing discharge while charging a vehicle or charging the battery from the grid.
+If a system supports [active battery control](/en/features/battery#battery-control), evcc can request individual functions, such as preventing discharge while charging a vehicle or charging the battery from the grid.
 The available commands depend on the battery system; a status such as "controllable" does not necessarily mean evcc can fully control the battery or set its power to an arbitrary level.
 
 ### My charger doesn't support phase switching. Can I still charge single-phase?
 
-With small solar systems and/or during the winter, it makes sense to use a single phase to make use of any surplus power as efficiently as possible without incurring network losses.
+With small solar systems and/or during the winter, it makes sense to use a single phase to make use of any surplus power as efficiently as possible without drawing power from the grid.
 
 In the case of three-phase chargers that don't support automatic mode switching, you can disconnect phases 2 & 3 on the incoming supply to your charging point using some kind of contactor (e.g Hager HAB304). If full performance is needed, simply switch these phases back on again.
 
@@ -134,7 +133,7 @@ This manual switching should only be done when the vehicle is **NOT** connected 
 You can also just use a single-phase charging cable in the winter.
 
 Remember to set the charger setting in the evcc UI to single-phase mode.
-This ways evcc knows when there's enough surpuls to charge the vehicle.
+This way evcc knows when there's enough surplus to charge the vehicle.
 
 ## Debugging
 
@@ -165,7 +164,8 @@ For longer periods or if the web interface isn't reachable, use the [long-term l
 ### More thoughts on device detection
 
 `evcc detect` is a special command that attempts to find compatible hardware on your network.
-In particular, it can sometimes help find "new" Sunspec-compatible modbus devices - however, it is more of a developer / support tool for diagnostic purposes, and can't provide detailed results.
+In particular, it can sometimes help with a first assessment of "new" SunSpec-compatible Modbus devices and with validating IP configurations.
+However, it is more of a developer and support tool for diagnostic purposes and only recognises a limited range of device types.
 
 ## Common Errors
 
@@ -190,19 +190,21 @@ There's a number of possible reasons for this. These ones regularly come up:
 
 ### i/o timeout
 
-This means the target system didn't respond quickly enough to our request.
+A connection to the device may exist, but the target system doesn't respond within the expected time.
+Either the request never reaches the target system, the response gets lost on the way back, or the response takes too long.
 
 Typically this is due to:
 
 - A slow or poor quality network connection (especially when using wireless or Homeplug-style networks)
 - Incorrect or poor quality cabling or termination (especially with RS485)
-- The target device may be overloaded
+- The target device may be overloaded or has failed
 - Certain functions requested by evcc from the device may be unavailable (sometimes this is due to outdated firmware or improperly set configuration on the target)
 - evcc's timeout or query `interval` is set too short
 
 ### /tmp/evcc: operation not permitted<br/>bind: address already in use
 
-This error happens if evcc is already running (for example, as a service) and you attempt to launch it again. **Only one instance of evcc should be running at a time.**
+This error happens if evcc is already running (e.g. as a service) and you start it again from the command line, possibly with different user permissions.
+**Only one instance of evcc should be running at a time.**
 
 You can use a program such as `htop` to help you diagnose whether another instance of evcc is running in the background.
 
@@ -227,14 +229,14 @@ Some chargers start charging as soon as the car is plugged in, or when an RFID c
 
 ### Solar Production in Winter
 
-In the winter months, solar production is often regularly below the configured minimum.
+In the winter months, solar production is often below or close to the [minimum charging power](/en/features/solar-charging#charging-start).
 In order to get as much energy into the Vehicle as possible, you can try some of the following tips and tricks:
 
 #### Using `residualpower`
 
 In the configuration under the [`site`](/en/reference/configuration/site) flag, set [`residualPower`](/en/reference/configuration/site#residualpower) to a **negative** value. This determines how much power the grid can supply to nudge your solar production up enough to cover the minimum. Changes are possible via the API.
 
-**Exmaple**:
+**Example**:
 
 ```yaml
 site:
@@ -251,8 +253,7 @@ See [Not enough surplus?](/en/features/solar-charging#not-enough-surplus) for de
 ### PSA (Peugeot / Citroën / Vauxhall / Opel): Charging status is only updated when I use the app
 
 This is unfortunately a restriction of the manufacturer's online service - PSA delivers outdated values until they are renewed by opening the mobile app.
-
-Sadly,
+Unfortunately, no interface is known yet that could trigger this refresh programmatically.
 
 ## Password
 
@@ -316,7 +317,7 @@ evcc cache clear
 
 ## Solar Forecast
 
-You can use various [solar forecasts](/en/tariffs#pv-forecast) in evcc to see the estimated remaining production for the current day and the upcoming days.
+You can use various [solar forecasts](/en/tariffs#solar) in evcc to see the estimated remaining production for the current day and the upcoming days.
 As an experimental feature, we have also built in the possibility to adapt the forecasts to your actual production.
 
 ### Forecast Adjustment
@@ -343,7 +344,7 @@ Procedure:
 
 Now evcc will start accumulating the forecasts from zero.
 
-## Statistical Data
+## Statistical Data \{#statistical-data\}
 
 ### Telemetry & Community Data \{#telemetry\}
 
@@ -376,7 +377,7 @@ The data shown can be called up by anyone using our [API](https://api.evcc.io/v1
 
 You can find more information on how we use data at our [Privacy Policy](https://sponsor.evcc.io/privacy) (DE).
 
-### Savings Calculation
+### Savings Calculation \{#savings-calculation\}
 
 In the bottom right of the evcc interface, you'll find the percentage of energy used to charge your vehicle(s) that has come from Solar power (for example, _85% solar energy_).
 
@@ -408,21 +409,25 @@ When calculating savings, evcc uses the total amount of charged energy, and the 
 
 Solar Energy is energy used directly from the Solar installation, and energy provided by any installed home battery.
 evcc assumes that the home battery is primarily used to store excess, self-produced solar power.
-If the home battery also discharges to satisfy other loads, or charges from grid supply, this assumption isn't always correct.
+If the home battery also provides grid services (e.g. Sonnen) or calibrates itself with grid power, this assumption isn't always correct.
 Battery losses from inversion / rectification are also not taken into account.
 
 **Calculation of savings / effective price**
 
 The algorithm distinguishes between grid supply and self-generated solar energy (solar and home battery).
 
-The cost advantage of your solar energy is calculated from the difference between your grid import price (e.g 30ct/kWh) and your grid export tariff (e.g 8ct/kWh).
-In this example, each unit of produced energy is 22ct (30ct - 8ct) cheaper than the grid import price.
-If you charged a vehicle with 2 kWh of your own energy, this would then correspond to an effective saving of 44ct.
+The cost advantage of your solar energy is calculated from the difference between your grid import price (e.g. 30 ct/kWh) and your grid export tariff (e.g. 8 ct/kWh).
+In this example, each kWh of self-produced energy is 22 ct (30 ct minus 8 ct) cheaper than the grid import price.
+If you charged a vehicle with 2 kWh of your own energy, this would then correspond to an effective saving of 44 ct.
 
-If you charged 100% with your own solar energy, the displayed _effective energy price_ would be the cost of not exporting to the grid, i.e the grid export tariff (9ct/kWh).
-If you charge with 50% solar energy and 50% grid power, the _effective energy price_ adapts accordingly (e.g 19ct/kWh).
+If you charged 100% with your own solar energy, the displayed _effective energy price_ would be the cost of not exporting to the grid, i.e. the grid export tariff (e.g. 8 ct/kWh).
+If you charge with 50% solar energy and 50% grid power, the _effective energy price_ adapts accordingly (e.g. 19 ct/kWh).
 
 If you don't receive a grid export tariff for exporting power to the grid, you can set the grid export price to 0 - the solar energy is then treated as being free of charge.
+
+We're aware that these savings aren't down to evcc alone.
+If you plug your car into a _dumb_ charger on a sunny day, part of the charged energy will be solar as well.
+evcc helps you maximise the share of solar energy you charge.
 
 **Calculation of the solar energy share**
 
@@ -433,4 +438,4 @@ Example: Your solar system generates 3 kW. These 3 kW are completely consumed by
 In parallel, you charge your car with 3 kW (e.g. mode = fast).
 In this case, the house is calculated with 100% solar share, the car with 0%.
 
-Flexible pricing (Octopus Energy, Awattar, Tibber, etc) is taken into account when determining the effective energy price.
+Flexible pricing (Octopus Energy, awattar, Tibber, etc) is taken into account when determining the effective energy price.

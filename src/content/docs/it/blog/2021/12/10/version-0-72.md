@@ -1,0 +1,47 @@
+---
+date: 2021-12-10
+title: "Versione 0.72"
+description: "Note di rilascio di evcc 0.72 di dicembre 2021 con guide di installazione semplificate e la nuova procedura guidata interattiva evcc configure."
+authors: [derandereandi]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "fe9b6c445f25"
+---
+
+Nelle ultime settimane sono successe molte cose e oggi vogliamo raccontare un po’ più nel dettaglio tutte le novità da scoprire nella versione 0.72.
+
+![Esempio di evcc configure](../../../../../en/blog/2021/12/10/configure.gif)
+
+<!-- excerpt -->
+
+## Installazione più semplice
+
+Finora iniziare a usare **evcc** richiedeva alcune conoscenze tecniche del proprio sistema operativo. Per Linux (Debian, Ubuntu, Raspberry Pi OS) e macOS ora c’è un’installazione decisamente semplificata. Ora **evcc** si può installare tramite i gestori di pacchetti `apt` su Linux e [`homebrew`](https://brew.sh) su macOS.
+
+Abbiamo rivisto ancora una volta le guide di installazione, rendendo la procedura ancora più semplice. Dai un’occhiata alla [documentazione relativa](/it/installation).
+
+## Configurazione più semplice
+
+Anche la configurazione di **evcc** finora era ancora molto tecnica. Bisognava conoscere le regole di formattazione di [YAML](https://yaml.org), che definisce la sintassi della configurazione, e descrivere e adattare i propri dispositivi nel file di configurazione. Per qualcuno questi sono ostacoli piuttosto alti. Ma il progetto è ancora giovane e il team è piccolo, soprattutto se si considera che per gli sviluppatori è “solo” un hobby.
+
+Per ridurre un po’ questi ostacoli, con questa nuova versione 0.72 di **evcc** introduciamo una nuova funzionalità: la configurazione guidata con `evcc configure`.
+
+Con questo comando puoi creare in modo interattivo un file di configurazione funzionante per la tua installazione! Sicuramente qua e là ci sono ancora alcuni problemi ed errori, ma speriamo che sia un buon primo passo nella giusta direzione.
+
+## Download e installazione
+
+- [Debian, Ubuntu, Raspberry Pi](/it/installation/linux)
+- [macOS Homebrew](/it/installation/macos)
+- [Docker](/it/installation/docker)
+- [Windows](/it/installation/windows)
+
+## Changelog
+
+### Versione 0.72
+
+- [Elenco dettagliato delle modifiche](https://github.com/evcc-io/evcc/releases/tag/0.72)
+
+### Versione 0.71
+
+- [Elenco dettagliato delle modifiche](https://github.com/evcc-io/evcc/releases/tag/0.71)

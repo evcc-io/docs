@@ -8,25 +8,25 @@ prev: false
 next: false
 ---
 
-Es hat sich in den letzten Wochen viel getan, und darüber möchten wir heute etwas ausführlicher berichten was es alles in Version 0.72 an Neuem zu entdecken gibt.
+A lot has happened over the last few weeks, and today we'd like to tell you in a bit more detail what's new to discover in version 0.72.
 
 ![evcc configure example](./configure.gif)
 
 <!-- excerpt -->
 
-## Einfachere Installation
+## Easier Installation
 
-Der Zugang zu **evcc** erforderte bisher doch einige technische Kenntnisse im Umgang mit dem jeweiligen Betriebssystem. Für Linux (Debian, Ubuntu, Raspberry Pi OS) und macOS gibt es nun eine deutlich vereinfachte Installation. So unterstützt **evcc** nun die Installation über die Paketmanager `apt` unter Linux und [`homebrew`](https://brew.sh) unter macOS.
+Until now, getting started with **evcc** required some technical knowledge of your operating system. Linux (Debian, Ubuntu, Raspberry Pi OS) and macOS now have a much simpler installation. **evcc** can now be installed with the package managers `apt` on Linux and [`homebrew`](https://brew.sh) on macOS.
 
-Hierfür haben wir die Installationsanleitungen nochmals überarbeitet und damit die Installation weiter vereinfacht. Schaut doch mal in der [dazugehörigen Dokumentation](/en/installation) vorbei.
+We've reworked the installation guides once more to make the installation even simpler. Have a look at the [related documentation](/en/installation).
 
-## Einfachere Konfiguration
+## Easier Configuration
 
-Auch die Einrichtung von **evcc** war bisher noch sehr technisch geprägt. Seien es die Formatierungsvorgaben von [YAML](https://yaml.org), welches die Synthax der Konfigurations vorgibt, oder die Ausgestaltung und Anpassung der Konfiguration der eigenen Geräte in der Konfigurationsdatei. Für den ein oder anderen sind das doch recht hohe Hürden. Aber das Projektk ist noch jung und das Team überschaubar, vor allem wenn man bedenkt dass dies für die Entwickler "nur" ein Hobby ist.
+Setting up **evcc** has also been very technical so far. Whether it's the formatting rules of [YAML](https://yaml.org), which defines the syntax of the configuration, or the work of describing and adjusting your own devices in the configuration file, these are fairly high hurdles for some. But the project is still young and the team is small, especially considering that this is "just" a hobby for the developers.
 
-Um diese Hürden etwas zu minimieren, führen wir mit dieser neuen Version 0.72 von **evcc** eine neue Funktionalität ein: Die geführte Konfiguration mit `evcc configure`.
+To lower these hurdles a little, this new version 0.72 of **evcc** introduces a new feature: guided configuration with `evcc configure`.
 
-Mit diesem Kommando lässt sich interaktiv eine funktionierende Konfigurationsdatei für die eigene Installation erstellen! Es gibt sicher hier und da noch einige Probleme und Fehler, aber wir hoffen es ist ein guter erster Schritt in die richtige Richtung.
+This command lets you interactively create a working configuration file for your own installation! There will certainly be some problems and bugs here and there, but we hope it's a good first step in the right direction.
 
 ## Download & Installation
 
@@ -39,8 +39,8 @@ Mit diesem Kommando lässt sich interaktiv eine funktionierende Konfigurationsda
 
 ### Version 0.72
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.72)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.72)
 
 ### Version 0.71
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.71)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.71)

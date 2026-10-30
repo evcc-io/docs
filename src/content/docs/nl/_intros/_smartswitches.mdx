@@ -1,0 +1,65 @@
+---
+translatedFrom: "42d5067324d9"
+---
+
+evcc ondersteunt schakelbare stopcontacten en relais.
+Ze werken vergelijkbaar met laders, maar zonder vermogensregeling.
+evcc schakelt het stopcontact alleen aan of uit.
+Is er genoeg [overschot](/nl/features/solar-charging) of [goedkope energie](/nl/features/dynamic-prices) beschikbaar, dan wordt het stopcontact automatisch ingeschakeld.
+
+Richt uw schakelbare stopcontacten in via de webinterface onder **Configuratie → Laadpunten & verwarmers**.
+
+## Modi \{#modes\}
+
+Afhankelijk van de toepassing zijn er twee modi.
+De parameter `standbypower` (stand-byvermogen in watt) bepaalt welke van de twee wordt gebruikt.
+In beide modi geeft `standbypower` aan hoeveel het apparaat verbruikt.
+Daarmee scheidt evcc dit verbruik van de rest van het huis en berekent het het resterende zonneoverschot.
+Hoeveel overschot nodig is om [in de modus **Slim** in te schakelen](/nl/features/solar-charging), hangt af van de minimale stroom in de instellingen van het laadpunt.
+
+### Laadmodus (standaard) \{#charging-mode\}
+
+Geschikt voor het aansturen van apparaten met een accu (elektrische motorfietsen, e-bikes, gereedschapsaccu’s …).
+Het door de schakelaar gemeten vermogen geldt als laadvermogen.
+Daalt het onder `standbypower` (standaard 15&nbsp;W), dan beschouwt evcc het apparaat als geladen.
+Deze modus is actief zolang `standbypower` niet negatief is.
+Voorbeeld: `standbypower: 50` beëindigt het laden zodra de belasting onder 50&nbsp;W zakt.
+
+<details class="device-config-section">
+<summary>Configuratievoorbeeld voor evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Statische modus \{#static-mode\}
+
+Geschikt voor algemene verbruikers zoals warmtepompen, airco’s of elektrische kachels.
+Deze modus wordt geactiveerd door een negatieve waarde voor `standbypower`, waarbij de absolute waarde het geschatte opgenomen vermogen is dat evcc voor de overschotberekening gebruikt.
+Voorbeeld: `standbypower: -5000` voor een apparaat dat ongeveer 5&nbsp;kW opneemt.
+
+<details class="device-config-section">
+<summary>Configuratievoorbeeld voor evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+De laadmodus gaat ervan uit dat de schakelaar een ingebouwde energiemeter heeft.
+Met een extra externe [energiemeter](/nl/meters) is dit gedrag momenteel niet mogelijk.
+:::
