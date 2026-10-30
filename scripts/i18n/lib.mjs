@@ -1,7 +1,7 @@
 // Shared helpers for the scripts in scripts/i18n/.
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
@@ -20,14 +20,27 @@ export const EVCC = [
   join(REPO, "../../../evcc"),
 ].find((p) => p && existsSync(join(p, "i18n/glossary")));
 
-export const LANG_NAMES = {
-  en: "English",
-  de: "German",
-  nl: "Dutch",
-  fr: "French",
-  da: "Danish",
-  it: "Italian",
-  cs: "Czech",
+const displayNames = new Intl.DisplayNames("en", { type: "language" });
+export const langName = (lang) => displayNames.of(lang);
+
+// informal forms of address per locale (the style sheets ask for the formal one)
+export const REGISTER = {
+  nl: ["je", "jij", "jou", "jouw"],
+  fr: ["tu", "ton", "ta", "tes", "toi"],
+  // "ty" is left out: it is also the plural demonstrative ("ty soubory")
+  cs: [
+    "tvůj",
+    "tvoje",
+    "tvá",
+    "tvé",
+    "tvého",
+    "tvému",
+    "tvým",
+    "tvými",
+    "tebe",
+    "tobě",
+    "tebou",
+  ],
 };
 
 export const readJson = (p) =>
@@ -45,17 +58,10 @@ export function blobHash(buf) {
 // all .md/.mdx files below <DOCS>/<lang>, relative, sorted, without reference/cli
 export function listPages(lang, root = DOCS) {
   const base = join(root, lang);
-  const out = [];
-  const walk = (dir) => {
-    if (!existsSync(dir)) return;
-    for (const name of readdirSync(dir)) {
-      const p = join(dir, name);
-      if (statSync(p).isDirectory()) walk(p);
-      else if (/\.mdx?$/.test(name)) out.push(relative(base, p));
-    }
-  };
-  walk(base);
-  return out.filter((f) => !f.startsWith("reference/cli/")).sort();
+  if (!existsSync(base)) return [];
+  return readdirSync(base, { recursive: true })
+    .filter((f) => /\.mdx?$/.test(f) && !f.startsWith("reference/cli/"))
+    .sort();
 }
 
 export function splitFrontmatter(text) {

@@ -7,6 +7,7 @@ import { join } from "node:path";
 import {
   DOCS,
   EVCC,
+  REGISTER,
   evccI18n,
   flatten,
   glossary,
@@ -37,9 +38,6 @@ const native = Object.values(flatten(evccI18n(lang) ?? {}))
 const EXTRA = {
   nl: ["OCPP-verbinding", "MQTT-broker", "EEBUS-apparaat"],
   da: ["OCPP-forbindelse", "MQTT-broker"],
-  cs: [],
-  fr: [],
-  it: [],
 };
 const compounds = [
   ...Object.values(gL).filter((t) => /^[A-Z₀-₉0-9]+-\p{Ll}/u.test(t)),
@@ -52,24 +50,6 @@ const PATTERNS = [
     `"${c.replace("-", " ")}" instead of ${c}`,
   ]),
 ];
-const REGISTER = {
-  nl: ["je", "jij", "jou", "jouw"],
-  fr: ["tu", "ton", "ta", "tes", "toi"],
-  // "ty" is left out: it is also the plural demonstrative ("ty soubory")
-  cs: [
-    "tvůj",
-    "tvoje",
-    "tvá",
-    "tvé",
-    "tvého",
-    "tvému",
-    "tvým",
-    "tvými",
-    "tebe",
-    "tobě",
-    "tebou",
-  ],
-};
 if (REGISTER[lang]) PATTERNS.push([wordRe(REGISTER[lang]), "informal address"]);
 
 // prose of all target pages: title, description, body without code, tags, link targets
@@ -122,14 +102,11 @@ const patternHits = PATTERNS.map(([re, msg]) => ({
 console.log(
   `glossary-check ${lang}: ${pages.length} pages, ${leaks.length} English-term leaks, ${patternHits.reduce((a, p) => a + p.hits.length, 0)} pattern hits`,
 );
+const list = (h) =>
+  `\n  ${h.slice(0, 10).join("\n  ")}${h.length > 10 ? `\n  … ${h.length - 10} more` : ""}`;
 for (const l of leaks)
-  console.log(
-    `\nleak "${l.en}" (${l.key}, use "${l[lang]}"):\n  ${l.hits.slice(0, 10).join("\n  ")}${l.hits.length > 10 ? `\n  … ${l.hits.length - 10} more` : ""}`,
-  );
-for (const p of patternHits)
-  console.log(
-    `\n${p.msg}:\n  ${p.hits.slice(0, 10).join("\n  ")}${p.hits.length > 10 ? `\n  … ${p.hits.length - 10} more` : ""}`,
-  );
+  console.log(`\nleak "${l.en}" (${l.key}, use "${l[lang]}"):${list(l.hits)}`);
+for (const p of patternHits) console.log(`\n${p.msg}:${list(p.hits)}`);
 console.log(`\nagreed term occurrences (key, term, count):`);
 for (const [k, t, n] of counts)
   console.log(`  ${k.padEnd(24)} ${t.padEnd(30)} ${n}`);

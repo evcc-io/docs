@@ -1,22 +1,15 @@
 import { useTranslations } from "@astrojs/starlight/internal";
+import en from "../content/i18n/en.json";
 
 // Feature labels, short labels and descriptions live in the UI dictionary
-// (src/content/i18n) as feature.<key>.label / .short / .description.
+// (src/content/i18n) as feature.<key>.label / .short / .description;
+// the order of the keys there is the display order.
 export const FEATURE_KEYS = [
-  "1p3p",
-  "mA",
-  "meter",
-  "rfid",
-  "battery-control",
-  "iso151182",
-  "iso15118-2",
-  "dim",
-  "curtail",
-  "sponsorship",
-  "sponsorfree",
-  "skiptest",
-  "ocpp",
-  "eebus",
+  ...new Set(
+    Object.keys(en)
+      .filter((k) => k.startsWith("feature.") && k !== "feature.heading")
+      .map((k) => k.split(".")[1]),
+  ),
 ];
 
 function lookup(feature: string, field: string, lang: string | undefined) {

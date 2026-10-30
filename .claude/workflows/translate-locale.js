@@ -35,14 +35,9 @@ const {
 } = args;
 const MODEL = "claude-opus-5-5";
 const SEV = ["critical", "major", "minor", "nit"];
-const KINDS = {
-  core: ["chrome", "docs"],
-  blog: ["blog"],
-  site: ["site"],
-  "blog+site": ["blog", "site"],
-  "core+blog": ["chrome", "docs", "blog"],
-  all: ["chrome", "docs", "blog", "site"],
-}[phase];
+const KINDS = (phase === "all" ? "core+blog+site" : phase)
+  .split("+")
+  .flatMap((p) => (p === "core" ? ["chrome", "docs"] : [p]));
 
 const FINDING = {
   type: "object",
@@ -132,7 +127,6 @@ const FIX = {
       },
     },
     checkPage: { enum: ["pass", "fail", "n/a"] },
-    prettier: { enum: ["pass", "fail", "n/a"] },
     verdict: { enum: ["done", "retranslate"] },
     unresolved: { type: "array", items: { type: "string" } },
   },

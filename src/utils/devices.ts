@@ -4,16 +4,12 @@ import countries from "i18n-iso-countries";
 import { useTranslations } from "@astrojs/starlight/internal";
 import { LOCALES, templateLocale } from "@utils/locales";
 
-// Country names for every site locale (tariff country chips).
+// Country names for every locale (tariff country chips).
 const countryLangs = import.meta.glob<any>(
   "/node_modules/i18n-iso-countries/langs/*.json",
   { eager: true, import: "default" },
 );
-for (const lang of LOCALES) {
-  const data =
-    countryLangs[`/node_modules/i18n-iso-countries/langs/${lang}.json`];
-  if (data) countries.registerLocale(data);
-}
+Object.values(countryLangs).forEach((d) => countries.registerLocale(d));
 
 export const TARIFF_GROUPS: Record<
   string,

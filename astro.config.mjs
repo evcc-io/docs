@@ -202,14 +202,10 @@ export default defineConfig({
           exclude: ({ file, link }) =>
             (file.includes("/_intros/") && link.startsWith("#")) ||
             [
-              `/${LANG_GLOB}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}`,
-              `/${LANG_GLOB}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}/**`,
-              `/${LANG_GLOB}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}#*`,
-              `/${LANG_GLOB}/reference/state`,
-              `/${LANG_GLOB}/reference/state#*`,
+              `/${LANG_GLOB}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}{,/**,#*}`,
+              `/${LANG_GLOB}/reference/state{,#*}`,
               // starlight-openapi and starlight-blog routes are not visible to the validator
-              "/integrations/rest-api",
-              "/integrations/rest-api/**",
+              "/integrations/rest-api{,/**}",
               `/${LANG_GLOB}/blog`,
             ].some((glob) => matchesGlob(link.split("?")[0], glob)),
         }),

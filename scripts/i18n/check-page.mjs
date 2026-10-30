@@ -4,15 +4,17 @@
 // --stamp writes translatedFrom (git blob hash of the en source) into the target on success.
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, relative, resolve } from "node:path";
+import { dirname, join, parse, relative, resolve } from "node:path";
 import {
   DOCS,
+  REGISTER,
   REPO,
   blobHash,
   flatten,
   inlineCode,
   maskCode,
   splitFrontmatter,
+  wordRe,
 } from "./lib.mjs";
 
 // props and frontmatter keys whose values get translated
@@ -45,13 +47,7 @@ const TYPO = {
       "looks like English prose",
     ],
   ],
-  nl: [
-    [/\d\s%/, "no space before % (50%)"],
-    [
-      /(?<!\p{L})(?:je|jij|jou|jouw)(?!\p{L})/iu,
-      "informal je/jij/jou, use u/uw",
-    ],
-  ],
+  nl: [[/\d\s%/, "no space before % (50%)"]],
   it: [[/\d\s%/, "no space before % (50%)"]],
   da: [[/\d%/, "space before % (50 %)"]],
   cs: [
@@ -66,12 +62,13 @@ const TYPO = {
       /[\p{L}\d)»*][:;?!](?:\s|$)/u,
       "missing non-breaking space before : ; ? !",
     ],
-    [
-      /(?<!\p{L})(?:tu|ton|ta|tes|toi)(?!\p{L})/iu,
-      "informal tu/ton/ta, use vous",
-    ],
   ],
 };
+for (const [lang, list] of Object.entries(REGISTER))
+  TYPO[lang].push([
+    wordRe(list, "iu"),
+    "informal address, see the style sheet",
+  ]);
 
 const sha = (s) => createHash("sha1").update(s).digest("hex").slice(0, 10);
 const lineAt = (text, idx) => text.slice(0, idx).split("\n").length;
@@ -119,22 +116,20 @@ const kind = (v) =>
 function canon(abs, lang) {
   const base = join(DOCS, lang) + "/";
   if (lang === "en" || !abs.startsWith(base)) return abs;
-  let b = basename(abs);
-  const i = b.lastIndexOf(".");
-  const [stem, ext] = i < 0 ? [b, ""] : [b.slice(0, i), b.slice(i)];
-  if (stem.endsWith(`-${lang}`)) b = `${stem.slice(0, -lang.length)}en${ext}`;
-  return join(DOCS, "en", dirname(relative(base, abs)), b);
+  const { base: b, name, ext } = parse(abs);
+  const en = name.endsWith(`-${lang}`)
+    ? `${name.slice(0, -lang.length)}en${ext}`
+    : b;
+  return join(DOCS, "en", dirname(relative(base, abs)), en);
 }
 // where the locale folder holds its own version of an English asset
 function localised(enAbs, lang) {
   const base = join(DOCS, "en") + "/";
   if (lang === "en" || !enAbs.startsWith(base)) return null;
   const rel = relative(base, enAbs);
-  const b = basename(rel);
-  const i = b.lastIndexOf(".");
-  const [stem, ext] = i < 0 ? [b, ""] : [b.slice(0, i), b.slice(i)];
+  const { base: b, name, ext } = parse(rel);
   const names = [b];
-  if (stem.endsWith("-en")) names.push(`${stem.slice(0, -2)}${lang}${ext}`);
+  if (name.endsWith("-en")) names.push(`${name.slice(0, -2)}${lang}${ext}`);
   return (
     names.map((n) => join(DOCS, lang, dirname(rel), n)).find(existsSync) ?? null
   );
@@ -288,7 +283,7 @@ const prose = (masked) =>
     .replace(/\]\([^)]*\)/g, "]")
     .replace(/<!--[\s\S]*?-->|\{[^}\n]*\}/g, (s) => s.replace(/[^\n]/g, " "));
 
-async function compileMdx(text, warnings) {
+async function compileMdx(text) {
   try {
     const [{ compile }, { default: gfm }] = await Promise.all([
       import("@mdx-js/mdx"),
@@ -297,10 +292,6 @@ async function compileMdx(text, warnings) {
     await compile(text, { remarkPlugins: [gfm] });
     return null;
   } catch (e) {
-    if (e.code === "ERR_MODULE_NOT_FOUND") {
-      warnings.push("@mdx-js/mdx not resolvable, MDX compile skipped");
-      return null;
-    }
     const p = e.place?.start ?? e.place ?? {};
     return `MDX does not compile at L${e.line ?? p.line ?? "?"}: ${e.reason ?? e.message}`;
   }
@@ -373,7 +364,7 @@ export async function checkPage(lang, rel, { stamp = false } = {}) {
   // MDX compile (frontmatter blanked so line numbers stay)
   if (rel.endsWith(".mdx")) {
     const blank = "\n".repeat(tg.offset) + tg.body;
-    const err = await compileMdx(blank, warnings);
+    const err = await compileMdx(blank);
     if (err) errors.push(err);
   }
 
