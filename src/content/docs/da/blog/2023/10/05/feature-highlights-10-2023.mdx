@@ -1,0 +1,161 @@
+---
+date: 2023-10-05
+title: "Højdepunkter 10/2023"
+description: "Højdepunkter fra oktober 2023, der viser visualiseringen af ladeplanen, minimumsopladning i brugerfladen, smart opladning fra elnettet og batteriindstillinger."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "b24e05c428f3"
+---
+
+import Video from "@components/Video.astro";
+import batterysettingsVideo from "../../../../../en/blog/2023/10/05/batterysettings.mp4";
+import batterysettingsPoster from "../../../../../en/blog/2023/10/05/batterysettings.webp";
+import chargingplanVideo from "../../../../../en/blog/2023/10/05/chargingplan.mp4";
+import chargingplanPoster from "../../../../../en/blog/2023/10/05/chargingplan.webp";
+import chargingsessionsVideo from "../../../../../en/blog/2023/10/05/chargingsessions.mp4";
+import chargingsessionsPoster from "../../../../../en/blog/2023/10/05/chargingsessions.webp";
+import dynamicpricesVideo from "../../../../../en/blog/2023/10/05/dynamicprices.mp4";
+import dynamicpricesPoster from "../../../../../en/blog/2023/10/05/dynamicprices.webp";
+import minsocVideo from "../../../../../en/blog/2023/10/05/minsoc.mp4";
+import minsocPoster from "../../../../../en/blog/2023/10/05/minsoc.webp";
+import sessionvaluesVideo from "../../../../../en/blog/2023/10/05/sessionvalues.mp4";
+import sessionvaluesPoster from "../../../../../en/blog/2023/10/05/sessionvalues.webp";
+
+Siden sidste blogindlæg er der sket meget. Vi har tilføjet mange nye funktioner og rettet nogle fejl. I denne artikel fremhæver vi nogle af de nye funktioner.
+
+## Visualisering af ladeplanen \{#charging-planner-visualization\}
+
+Ladeplanlæggeren har været en del af evcc i et stykke tid.
+Du angiver, hvornår dit køretøj skal have et ønsket opladningsniveau, og evcc finder de bedste tidsvinduer.
+I de seneste udgivelser er algoritmen ikke længere en sort boks, fordi vi visualiserer resultatet af planlægningen.
+
+<Video src={chargingplanVideo} poster={chargingplanPoster} />
+
+{/* excerpt */}
+
+Hvordan fungerer algoritmen?
+
+5. Overskydende solenergi prioriteres
+6. Tidspunkter med billig strøm fra elnettet (hvis der findes en [dynamisk tarif](/da/features/dynamic-prices))
+7. Tidspunkter med grøn strøm fra elnettet (hvis en [CO₂-integration](/da/features/co2) er konfigureret)
+8. Tidsvinduer kort før afgang
+
+**Udblik:** Vi eksperimenterer i øjeblikket med solprognosedata fra [Solcast](https://solcast.com/).
+Det gør det muligt for algoritmen at træffe endnu bedre beslutninger.
+Hvis opladningsmålet f.eks. ligger om dagen, kan det give mening ikke at oplade køretøjet helt med billig nattestrøm, men at give plads til overskydende energi i løbet af dagen.
+
+## Minimumsopladning kan indstilles i brugerfladen
+
+Funktionen til minimumsopladning har eksisteret i evcc i evigheder.
+Den er nyttig, hvis du kommer hjem med kun få procent og vil være sikker på, at du altid har nok rækkevidde til en uventet situation.
+
+Indtil nu kunne den kun indstilles via konfigurationsfilen eller via API'et.
+Nu kan du også gøre det i brugerfladen under **Plan** → **Ankomst** → **Min. opladning %**.
+
+Indstillingerne gemmes pr. køretøj og bevares også efter en genstart eller opdatering.
+
+<Video src={minsocVideo} poster={minsocPoster} />
+
+## Smart opladning fra elnettet \{#smart-grid-charging\}
+
+Når dit eget soloverskud ikke rækker, kan du også bruge strøm fra elnettet, når den er særlig billig eller grøn.
+Hvis du klikker på elprisen eller CO₂-emissionen i energiflowdiagrammet, åbnes dialogboksen **Smart opladning fra elnettet**.
+
+Der kan du indstille en grænseværdi for prisen eller CO₂-emissionen.
+Hvis denne værdi overskrides, skifter evcc midlertidigt alle ladepunkter i Sol-tilstand til hurtig opladning.
+
+<Video src={dynamicpricesVideo} poster={dynamicpricesPoster} />
+
+Forudsætningen for funktionen er, at du har konfigureret enten en dynamisk tarif eller en CO₂-integration.
+
+En anden lille forbedring er, at du nu med de fleste dynamiske tariffer kan korrigere prisværdierne fra API'et med **procentvise eller faste tillæg** (`charges` / `tax`).
+Tibber og Octopus Energy (UK) leverer allerede værdier inklusive tillæg.
+Med awattar, Nordpool Estonia og Energinet kan du nu tilføje dem.
+
+Forresten: Hvis du har en dynamisk tarif, der endnu ikke er understøttet, men som tilbyder et API, så opret gerne et GitHub-issue.
+
+## Batteriindstillinger \{#battery-settings\}
+
+En stor fordel, som evcc har frem for andre løsninger til overskudsopladning, er integrationen med hjemmebatteriet.
+Med konfigurationsværdien [`prioritySoc`](/da/features/battery) kan du styre, om overskydende solenergi først skal **oplade hjemmebatteriet eller køretøjet**.
+
+Generelt forsøger evcc i Sol-tilstand at undgå, at hjemmebatteriet aflades for at oplade køretøjet, for at undgå unødvendige konverteringstab.
+Med værdien [`bufferSoc`](/da/features/battery) kan du dog bevidst **afsætte en del af hjemmebatteriet til at støtte opladningen**.
+
+Du kan også indstille opladningen til at starte automatisk, så snart batteriet har nået et bestemt opladningsniveau ([`bufferStartSoc`](/da/features/battery)).
+Den automatiske opladning starter også, selvom solen ikke skinner.
+
+<Video src={batterysettingsVideo} poster={batterysettingsPoster} />
+
+## Sol %, pris og CO₂ pr. opladningssession
+
+Vi har også noget til dem, der holder af dataanalyse.
+Vi registrerer nu andelen af egen solenergi (i %), prisen (samlet og pr. kWh), opladningstiden og den gennemsnitlige CO₂-emission pr. opladningssession.
+Du kan skifte mellem disse værdier direkte ved opladningssessionen.
+
+<Video src={sessionvaluesVideo} poster={sessionvaluesPoster} />
+
+## Ny beregning af solandelen
+
+Hvis du har bemærket, at andelen af solenergi er faldet en smule siden en af de seneste versioner, skyldes det vores nye beregning.
+Indtil nu har evcc altid brugt samme forhold mellem strøm fra elnettet og egen energi for både husets forbrug og opladningssessionerne.
+
+Vi er nu gået over til en ny model, hvor husets forbrug først får den grønne strøm, og den resterende blanding går til opladningssessionerne.
+Tak til [@MarkusGH](https://github.com/MarkusGH) for implementeringen.
+Flere detaljer om modellen finder du [i dokumentationen](/da/faq#savings-calculation).
+
+![Ny beregning](../../../../../en/blog/2023/10/05/calculation.webp)
+
+## Oversigt over opladningssessioner
+
+De nye værdier er naturligvis også kommet med i oversigten over opladningssessioner.
+Afhængigt af konfigurationen kan du nu også se priser og CO₂-emissioner her.
+Derudover har vi redesignet visningen fuldstændigt og valgt en **kompakt tabelvisning pr. måned**.
+Den kan **filtreres efter ladepunkt og køretøj**.
+
+Hvis du har brug for endnu mere fleksibilitet her, kan du naturligvis også bruge CSV-eksporten eller hente rådataene direkte via InfluxDB eller MQTT.
+
+<Video src={chargingsessionsVideo} poster={chargingsessionsPoster} />
+
+## Prioritering af ladepunkter og køretøjer
+
+Hvis du har flere ladepunkter, kan du med indstillingen [`priority`](/da/reference/configuration/loadpoints#priority) angive, hvilket der skal foretrækkes.
+Du kan også gøre prioriteringen afhængig af det registrerede køretøj eller styre den via API'et.
+Der er i øjeblikket ingen konfiguration via brugerfladen.
+
+Prioriteringsfunktionen er også nyttig, hvis du bruger evcc til at styre andre forbrugsenheder, f.eks. [en elpatron eller varmepumpe, der er tilsluttet via plugin-grænsefladen](https://github.com/evcc-io/evcc/pull/9393).
+På den måde kan du styre dem, så de kun kører, når bilen ikke lader (nok).
+
+## Hvad kommer der nu?
+
+Vores [backlog](https://github.com/evcc-io/evcc/issues?q=is%3Aopen+is%3Aissue+label%3Abacklog) er godt fyldt.
+Det er de næste store emner, vi vil tage fat på:
+
+**Konfiguration i brugerfladen:** Alle forudsætninger er nu på plads.
+I øjeblikket kan køretøjer allerede oprettes i 🧪 eksperimentel tilstand, og springet til konfiguration af elnet, solcelleanlæg eller batteri er ikke langt væk.
+Der er stadig meget at gøre her, men lyset for enden af tunnelen er synligt.
+
+**Bedre planlægning:** Som nævnt ovenfor arbejder vi på at integrere gode **solprognoser** i planlægningsalgoritmen og brugerfladen.
+Vi har også et koncept for understøttelse af **flere ladeplaner**.
+
+**Nyt design af tilstande:** evcc startede som en applikation til opladning med soloverskud.
+Efterhånden spiller samspillet med hjemmebatteriet også en stor rolle.
+Emnet **elnetvenlig opladning** baseret på dynamiske tariffer eller CO₂-emissioner vinder også frem.
+Derfor vil vi revidere vores opladningstilstande (i øjeblikket Sol og Min+Sol) og skabe mere fleksibilitet her.
+
+## Flere nye funktioner
+
+Dette var et overordnet overblik set fra brugerens side.
+Der foregår naturligvis også meget arbejde under motorhjelmen.
+
+- 🔌 Understøttelse af flere opladere fra 22 nye producenter
+- 🌞🔋📟 Understøttelse af målere, solcelleanlæg og batterisystemer fra 36 nye producenter
+- 🇬🇧 Hjemmeside og dokumentation på engelsk. Tak til [duckfullstop](https://github.com/duckfullstop) & [carygravel](https://github.com/carygravel) 💚
+
+Hvis du vil have endnu flere detaljer, er du velkommen til at gennemgå [udgivelsesnoterne](https://github.com/evcc-io/evcc/releases) for de seneste 49(!) udgivelser siden årets begyndelse.
+
+**Tak for din støtte til evcc!**<br />
+evcc-kerneteamet<br />
+[@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) og [@naltatis](https://github.com/naltatis)

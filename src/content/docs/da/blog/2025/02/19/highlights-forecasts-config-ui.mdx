@@ -1,0 +1,135 @@
+---
+date: 2025-02-19
+title: "Højdepunkter: prognoser, konfigurationsflade"
+description: "Udgivelseshøjdepunkter for evcc 0.200 fra februar 2025 med solprognoser, gentagne ladeplaner, SG Ready-varmepumper og konfiguration i browseren."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner med højdepunkter"
+  image: "../../../../../en/blog/2025/02/19/forecasts-banner.webp"
+translatedFrom: "d6dd91291a14"
+---
+
+import Video from "@components/Video.astro";
+import forecastsVideo from "../../../../../en/blog/2025/02/19/forecasts.mp4";
+import forecastsPoster from "../../../../../en/blog/2025/02/19/forecasts.webp";
+import configUiVideo from "../../../../../en/blog/2025/02/19/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/02/19/config-ui.webp";
+export const SgreadySvg = "/img/sgready.svg?url";
+
+Med [udgivelsen af v0.200](https://github.com/evcc-io/evcc/releases) har vi taget et stort skridt mod stabilitet og brugervenlighed.
+I dette blogindlæg giver vi lidt baggrund for versionsspringet.
+For den dramatiske effekts skyld gemmer vi det til slutningen af artiklen ;)
+
+Vi præsenterer også nogle nye funktioner, der er kommet til siden [blogindlægget i november](/da/blog/2024/11/22/highlights-charts-stats).
+
+{/* excerpt */}
+
+## Prognoser
+
+[CO₂-optimeret](/da/features/co2) og [prisoptimeret](/da/features/dynamic-prices) opladning har vi haft et stykke tid.
+Med [Forecast.solar](https://forecast.solar) og [Solcast](https://solcast.com/free-rooftop-solar-forecasting) har vi nu integreret de to første udbydere af solprognoser.
+Til det formål findes der et nyt `solar`-felt i [tarifkonfigurationen](/da/tariffs).
+
+Når en kilde til solprognoser er konfigureret, ser du den forventede solproduktion for i dag i kWh i energioversigten.
+Et klik på tallet eller på det nye menupunkt **Prognose** fører dig til en ny visning, der viser den forventede solproduktion for de næste 48 timer.
+Visningen viser også pris- og CO₂-prognoser.
+
+<Video src={forecastsVideo} poster={forecastsPoster} />
+
+~I øjeblikket kan der kun konfigureres én solprognose (svarende til én tagflade).
+Med den næste udgivelse tilføjer vi muligheden for at kombinere prognoser.~<br/>
+Det er nu muligt (se [Solprognose](/da/tariffs#pv-forecast)).
+
+Data fra solprognosen påvirker endnu ikke ladeplanlægningen, men danner grundlaget for fremtidige funktioner og optimeringer.
+
+## Gentagne ladeplaner
+
+Når evcc kender køretøjets opladningsniveau, bliver flere nyttige ladefunktioner tilgængelige.
+Muligheden for at sikre et [minimumsopladning](/da/features/limits#minimum) lige efter tilslutning har eksisteret et stykke tid.
+At oplade køretøjet effektivt og grønt med en [ladeplan](/da/features/plans) (afgangstidspunkt og målopladningsniveau) er også en funktion, der har været der længe.
+
+Næsten lige så gammelt er ønsket om gentagne ladeplaner.
+Altså muligheden for at oprette ugedagsafhængige planer, der ikke kræver konstant opmærksomhed.
+En stor tak går til [@Maschga](https://github.com/Maschga), der tog fat på denne store funktion.
+Resultatet er blevet rigtig flot.
+
+![Gentagne ladeplaner](../../../../../en/blog/2025/02/19/repeating-plans.webp)
+
+Planer kan deaktiveres efter behov (f.eks. i ferien).
+Tidszoner, sommertid og normaltid håndteres korrekt 🤯.
+Flere gentagne planer er mulige, og ved planer, der ligger tæt på hinanden, vælges den mest relevante plan, og det vises tydeligt, hvilken plan planlæggeren har valgt.
+
+Læs mere om det under [Ladeplaner](/da/features/plans#repeating-plans).
+
+## Varmepumper og SG Ready
+
+Efterspørgslen efter understøttelse af varmepumper er dukket op regelmæssigt de seneste måneder.
+Indtil nu har vi bevidst koncentreret os om elbiler for at holde evcc fokuseret og overskueligt.
+Integration af varmelegemer var mulig via metoder som [relæer, styrbare stikkontakter](/da/smartswitches#heating) og plugin-grænsefladen ([eksempel](https://github.com/naltatis/aton-ctrl)), og det blev også brugt.
+
+Siden januar tilbyder vi en egentlig model til styring af varmepumper.
+Mange varmepumper understøtter SG Ready-modellen.
+Med et styrbart relæ (f.eks. Shelly) kan varmepumpen instrueres i at øge driften ved overskud eller billig strøm fra elnettet.
+
+<SgreadySvg
+  alt="Diagram, der viser styring af en varmepumpe via et SG Ready-relæ"
+  style={{ maxWidth: "700px" }}
+/>
+
+Nogle varmepumper understøtter også direkte kommunikation, f.eks. via netværket.
+Listen over disse enheder er stadig relativt kort.
+Hvis du har sådan en varmepumpe og ved, hvordan den styres, så opret gerne et [GitHub-issue](https://github.com/evcc-io/evcc/issues).
+
+Du finder flere oplysninger om [varmepumper og elvarmere](/da/heating) i dokumentationen.
+
+Integrationen af varmelegemer i brugerfladen fungerer, men er endnu ikke perfekt.
+Emner som tidsbaserede nøgletal og en bedre visning af varmepumpen i hovedoversigten står på vores to-do-liste.
+
+## Konfigurationsflade: opsætning i browseren
+
+Under udviklingen af evcc har det altid været vigtigt for os at holde brugerfladen så enkel og overskuelig som muligt.
+Vi får jævnligt feedback om, at andre i husstanden (ofte ikke-nørder) hurtigt finder rundt i brugerfladen.
+Det er en egenskab, der ikke altid er en selvfølge, især i ”klassiske” open source-projekter, og noget, vi er ret stolte af.
+
+En vigtig faktor er den konsekvente standardisering og den underliggende datamodel.
+Når en inverter, et køretøj eller en oplader først er konfigureret, er enhedernes særheder ikke længere relevante i brugerfladen.
+
+Det største problem for mange brugere er dog faktisk at nå frem til tilstanden ”alt er sat op”.
+Indtil nu krævede det, at man brugte kommandolinjen og redigerede en YAML-fil.
+
+Vi har længe arbejdet på at gøre den første opsætning mulig via brugerfladen.
+I de seneste år og måneder har vi gradvist tilføjet enkelte funktioner som oprettelse af køretøjer, målere, invertere, tariffer og meget mere.
+Nødvendige funktioner som en logvisning og et loginsystem er nu også med.
+
+Med v0.200 har vi tilføjet ”den sidste store brik” til opsætning via brugerfladen.
+**Nu kan ladepunkter og opladere, de centrale komponenter i evcc, oprettes og ændres via brugerfladen.**
+Det bringer os mærkbart tættere på en stabil 1.0-udgivelse.
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+Konfigurationsfladen er stadig markeret som en eksperimentel funktion 🧪.
+Ikke alle felter er på det rigtige sted, har de korrekte beskrivelser og er grundigt testet.
+Vi ser derfor meget frem til din feedback, dine forslag og fejlrapporter.
+
+Avancerede funktioner som oprettelse af brugerdefinerede enheder og bedre diagnoseværktøjer står stadig på dagsordenen.
+Du kan læse mere om status og fremskridt på dette område i [epic-issuet](https://github.com/evcc-io/evcc/issues/6029).
+
+### Prøv konfigurationsfladen
+
+Hvis du vil prøve at sætte alt op udelukkende via brugerfladen, kan du **starte evcc med en tom `evcc.yaml`**.
+Du får så en velkomstskærm og kan fortsætte din konfiguration via brugerfladen derfra.
+Eksperimentelle funktioner skal være aktiveret i brugerfladen til dette.
+
+## Og meget mere ...
+
+Som sædvanlig i vores højdepunktsindlæg er dette kun et lille udvalg af alle de emner, der arbejdes på.
+Siden sidste indlæg i november er [over 250 pull requests](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged) 🤯 blevet udviklet, gennemgået og flettet ind med succes.
+
+Du finder den komplette liste over emner i [udgivelsesnoterne](https://github.com/evcc-io/evcc/releases) på GitHub.
+
+**Venlig hilsen**<br/>
+evcc-teamet<br/>
+Michael, Andi & Uli
