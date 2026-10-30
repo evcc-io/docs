@@ -18,6 +18,24 @@ const LANGS = Object.keys(locales);
 // a one-item brace like {en} is not expanded, so a single locale stays plain
 const LANG_GLOB = LANGS.length > 1 ? `{${LANGS.join(",")}}` : LANGS[0];
 
+const DEVICE_ROUTES = [
+  "chargers",
+  "meters",
+  "vehicles",
+  "smartswitches",
+  "heating",
+  "tariffs",
+  "external-limit",
+  "notifications",
+];
+// device templates exist in en and de only
+const LANGS_WITHOUT_TEMPLATES = LANGS.filter((l) => l !== "en" && l !== "de");
+// noindex pages, see DeviceDetailLayout
+const NOINDEX_GLOBS = [
+  `/${LANG_GLOB}/nightly{,/**}`,
+  `/{${LANGS_WITHOUT_TEMPLATES}}/{${DEVICE_ROUTES}}/*`,
+];
+
 // UI dictionaries (src/content/i18n/<lang>.json) also feed the site title and
 // sidebar labels, so new locales only add their own JSON file.
 const dicts = Object.fromEntries(
@@ -207,7 +225,7 @@ export default defineConfig({
           exclude: ({ file, link }) =>
             (file.includes("/_intros/") && link.startsWith("#")) ||
             [
-              `/${LANG_GLOB}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications,nightly}{,/**,#*}`,
+              `/${LANG_GLOB}/{${DEVICE_ROUTES},nightly}{,/**,#*}`,
               `/${LANG_GLOB}/reference/state{,#*}`,
               // starlight-openapi and starlight-blog routes are not visible to the validator
               "/integrations/rest-api{,/**}",
@@ -361,8 +379,10 @@ export default defineConfig({
     // Registering our own copy makes Starlight skip its bundled one.
     mdx({ optimize: true }),
     sitemap({
-      // Nightly device pages are noindex and must stay out of the sitemap.
-      filter: (page) => !/\/nightly(\/|$)/.test(page),
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(/\/$/, "");
+        return !NOINDEX_GLOBS.some((glob) => matchesGlob(path, glob));
+      },
     }),
   ],
 });
