@@ -1,0 +1,287 @@
+---
+title: "Docker"
+description: "Kør evcc som Docker-container på en NAS eller Linux-server med Docker Compose, og se, hvorfor host-netværk anbefales, og hvilke porte bridge-netværk kræver."
+sidebar:
+  order: 4
+translatedFrom: "2cf8f5cf68e7"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+evcc kan installeres som Docker-image.
+Der findes images til AMD64, armv6 og arm64.
+Typiske anvendelser er NAS-systemer som Synology, QNAP, Unraid og TrueNAS.
+
+:::caution
+Denne vejledning forudsætter grundlæggende erfaring med Docker.
+
+Hvis du ikke har arbejdet med Docker før og leder efter en enkel løsning, anbefaler vi i stedet en dedikeret enhed, f.eks. en Raspberry Pi med det [færdige image](/da/installation/linux-image).
+
+Hvis dine enheder ikke kan nås via netværket (f.eks. RS485-adaptere), bør du vælge en direkte installation uden Docker, f.eks. under [Linux](/da/installation/linux).
+Der findes tekniske løsninger til at gøre dette med Docker.
+De bliver dog ikke beskrevet her.
+:::
+
+## Netværkstilstand \{#network\}
+
+Før du opretter containeren, skal du beslutte, hvordan den forbindes til dit netværk.
+Vi anbefaler **host-netværk**.
+Containeren deler så værtens netværk og opfører sig som et direkte installeret program.
+Det har flere fordele:
+
+- Når du tilføjer en enhed, foreslår feltet **IP-adresse eller værtsnavn** de enheder, der findes i dit netværk.
+- Funktioner baseret på mDNS virker, f.eks. EEBUS, SMA Sunny Home Manager og automatisk registrering via evcc-appen.
+- Enheder, der kommunikerer via UDP, f.eks. KEBA-opladere og SMA-enheder, kan nås uden yderligere opsætning.
+- Der er ingen portliste at vedligeholde. Indgående forbindelser, f.eks. fra OCPP-opladere, virker med det samme.
+
+Med **bridge-netværk** kører containeren i et separat Docker-netværk.
+Det er fint, hvis du ikke har brug for funktionerne ovenfor eller foretrækker at isolere containeren.
+Du skal så selv eksponere hver nødvendig [port](#ports).
+Enheder i dit netværk bliver ikke foreslået, så du indtaster deres adresser manuelt.
+
+Host-netværk kræver en Linux-vært, hvilket omfatter de almindelige NAS-systemer.
+Med Docker Desktop på macOS og Windows kører containeren i en virtuel maskine uden direkte adgang til dit netværk.
+Brug i så fald installationen til [macOS](/da/installation/macos) eller [Windows](/da/installation/windows) i stedet.
+
+:::tip[Monter mappen, ikke databasefilen]
+Monter altid **mappen** `/root/.evcc`, aldrig en enkelt `evcc.db`-fil. evcc gemmer SQLite-databasen sammen med dens hjælpefiler (`evcc.db-wal` og `evcc.db-shm`) i denne mappe, og de skal alle bevares sammen.
+
+Et [navngivet volume](https://docs.docker.com/engine/storage/volumes/) (`docker volume create evcc`, og monter derefter `evcc:/root/.evcc`) er det mest robuste valg: det holder filerne samlet og ligger på værtens eget filsystem, som giver den fillåsning, SQLite har brug for. Undgå at placere databasen på et netværksdrev (NFS/SMB). Med Docker Desktop til macOS/Windows bør du heller ikke bruge et bind mount, da det kan ødelægge SQLites låsning.
+:::
+
+## Installation
+
+Containeren kan sættes op via Docker Compose, Docker CLI eller dit systems Docker-brugerflade.
+Alle tre bruger samme image og samme volumes.
+
+Der findes to image-tags: `evcc/evcc:latest` (anbefalet) og `evcc/evcc:nightly` (udviklingsversion).
+
+### Volumes \{#volumes\}
+
+| Sti på værten          | Sti i containeren | Beskrivelse                               | Påkrævet |
+| ---------------------- | ----------------- | ----------------------------------------- | -------- |
+| `/home/user/.evcc`     | `/root/.evcc`     | Mappe til databasen                       | ja       |
+| `/home/user/evcc.yaml` | `/etc/evcc.yaml`  | Konfigurationsfil (kun hvis du bruger en) | nej      |
+
+Databasen indeholder dine opladningssessioner og alt, hvad du har sat op i webgrænsefladen.
+Opret mappen på dit værtssystem før første start.
+Denne vejledning bruger `/home/user/.evcc` som eksempel.
+
+Volumet til `evcc.yaml` er kun nødvendigt, hvis du konfigurerer din evcc-installation via en [konfigurationsfil](/da/installation/configuration) i stedet for webgrænsefladen.
+Fjern linjen fra eksemplerne nedenfor, hvis du ikke bruger en.
+
+### Docker Compose \{#compose\}
+
+[Docker Compose](https://docs.docker.com/compose) er den anbefalede metode, fordi alle parametre gemmes i én fil.
+Opret en fil med navnet `compose.yml` med en af følgende konfigurationer:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Host-netværk (anbefalet)">
+
+```yaml
+services:
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    network_mode: host
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+  </TabItem>
+  <TabItem label="Bridge-netværk">
+
+```yaml
+services:
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    ports:
+      - 7070:7070/tcp
+      - 8887:8887/tcp
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+Dette eksempel eksponerer kun webgrænsefladen og OCPP-serveren.
+Tilføj flere [porte](#ports) efter behov.
+
+  </TabItem>
+</Tabs>
+
+Start containeren med:
+
+```sh
+sudo docker compose up -d
+```
+
+Om du har brug for `sudo`, afhænger af dit system.
+
+### Docker CLI \{#cli\}
+
+Alternativt kan du oprette og starte containeren med en enkelt kommando:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Host-netværk (anbefalet)">
+
+```sh
+sudo docker run -d --name evcc \
+  --network host \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+  </TabItem>
+  <TabItem label="Bridge-netværk">
+
+```sh
+sudo docker run -d --name evcc \
+  -p 7070:7070 \
+  -p 8887:8887 \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+Dette eksempel eksponerer kun webgrænsefladen og OCPP-serveren.
+Tilføj flere [porte](#ports) efter behov.
+
+  </TabItem>
+</Tabs>
+
+### Docker-brugerflade \{#ui\}
+
+Hvis dit system har en Docker-brugerflade (f.eks. Synology, QNAP, Portainer, Unraid), kan du oprette containeren der.
+Angiv image og [volumes](#volumes) fra ovenfor, og sæt netværkstilstanden til `host`.
+Hvis du i stedet vælger bridge-netværk, skal du tilføje de [porte](#ports), du har brug for.
+
+De præcise feltnavne varierer fra system til system.
+Begreberne netværkstilstand, porte og volumes finder du dog i dem alle.
+
+## Porte \{#ports\}
+
+Det er kun nødvendigt at eksponere porte med bridge-netværk.
+Med host-netværk er disse porte tilgængelige direkte på værten.
+
+| Port på værten | Port i containeren | Beskrivelse            | Påkrævet |
+| -------------- | ------------------ | ---------------------- | -------- |
+| 7070           | 7070/tcp           | Webgrænseflade, API    | ja       |
+| 8887           | 8887/tcp           | OCPP-server            | nej      |
+| 9522           | 9522/udp           | SMA Sunny Home Manager | nej      |
+| 7090           | 7090/udp           | KEBA-opladere          | nej      |
+| 28376          | 28376/udp          | EVSE Master-opladere   | nej      |
+| 5353           | 5353/udp           | mDNS                   | nej      |
+| 4712           | 4712/tcp           | EEBUS                  | nej      |
+| 8899           | 8899/udp           | Modbus UDP             | nej      |
+
+## Test \{#test\}
+
+Når containeren er startet, kan du åbne webgrænsefladen på `http://<host>:7070`.
+`<host>` er IP-adressen eller værtsnavnet på den computer, der kører containeren.
+
+Ved første brug bliver du bedt om at angive en administratoradgangskode.
+Derefter kan du sætte dine enheder op som beskrevet under [Konfiguration](/da/installation/configuration).
+
+Hvis du ikke kan oprette forbindelse, så tjek [containerens log](/da/report-a-problem#system-logs).
+Du kan finde mere hjælp i [GitHub Discussions](https://github.com/evcc-io/evcc/discussions).
+
+## Opdateringer \{#update\}
+
+<Tabs>
+  <TabItem label="Docker Compose">
+
+Gå til mappen med filen `compose.yml`, og hent det nyeste image:
+
+```sh
+sudo docker compose pull
+```
+
+Hvis der er et nyt image, genopretter følgende kommando containeren.
+Ellers fortsætter den eksisterende med at køre.
+
+```sh
+sudo docker compose up -d
+```
+
+  </TabItem>
+  <TabItem label="Docker CLI">
+
+Hent det nyeste image, og stop og fjern derefter den eksisterende container:
+
+```sh
+sudo docker pull evcc/evcc:latest
+sudo docker stop evcc
+sudo docker rm evcc
+```
+
+Start containeren igen med samme `docker run`-kommando som ved [installationen](#cli).
+
+  </TabItem>
+  <TabItem label="Docker-brugerflade">
+
+Hvordan du opdaterer, afhænger af din Docker-brugerflade.
+Se dokumentationen til dit system.
+
+  </TabItem>
+</Tabs>
+
+:::note
+Hvis dine opladningssessioner ikke længere vises efter en opdatering, er mappen `/root/.evcc` ikke monteret korrekt.
+:::
+
+## Vejledninger fra fællesskabet
+
+Her finder du vejledninger, som brugere har lavet til bestemte systemer.
+Vi kan ikke garantere, at de er korrekte eller opdaterede.
+
+:::tip[Bidrag er velkomne]
+Opdateringer eller vejledninger til flere systemer er altid velkomne.
+Det kan være en PDF, et personligt blogindlæg eller en YouTube-video.
+Opret gerne en pull request i [dokumentationens repository](https://github.com/evcc-io/docs/pulls).
+:::
+
+### Synology NAS
+
+Du kan installere evcc via Docker på Synology NAS-systemer med den grafiske brugerflade, uden at bruge kommandolinjen.
+Denne vejledning bruger det anbefalede [host-netværk](#network):
+[Anleitung: Synology Docker (PDF / DE)](https://github.com/evcc-io/docs/files/10365841/Anleitung.EVCC.Synology.Docker.Elli.Charger.Connect-Pro.pdf)
+
+En vejledning til bridge-netværk finder du her:
+[Anleitung: Synology Docker 2 (PDF / DE)](https://github.com/evcc-io/docs/files/10365845/EVCC_Synology_Docker-2.pdf) af [at4hawo1](https://github.com/at4hawo1)
+
+### QNAP NAS
+
+Installationen af evcc på QNAP-systemer via Container Station minder meget om Synology-vejledningen ovenfor.
+QNAP-specifikke instruktioner finder du her:
+[Anleitung: QNAP (PDF / DE)](https://github.com/evcc-io/docs/files/11241693/EVCC_auf_QNAP_Container_Station.pdf)
+
+## Statiske enhedsforslag \{#discovery\}
+
+Dette er en avanceret mulighed for kontrollerede Docker-miljøer, hvor bridge-netværk er bevidst valgt, og enhederne ligger fast.
+Miljøvariablen `EVCC_DISCOVERY_HOSTS` angiver en statisk liste over enheder.
+Listen bruges så til forslagene i feltet **IP-adresse eller værtsnavn** i stedet for at søge i netværket.
+
+Værdien er en JSON-liste.
+Hver post skal have en `ip`.
+`hostname` og `mac` er valgfrie.
+De bruges til at vise producenten og til at vise enheder, der passer til den valgte enhedstype, under **Matcher**.
+
+```yaml
+services:
+  evcc:
+    environment:
+      EVCC_DISCOVERY_HOSTS: >-
+        [
+          {"ip": "192.168.1.10", "hostname": "sma3009876543", "mac": "00:15:BB:12:34:56"},
+          {"ip": "192.168.1.20", "hostname": "go-echarger_123456"}
+        ]
+```
+
+En tom liste `[]` slår forslagene fra.

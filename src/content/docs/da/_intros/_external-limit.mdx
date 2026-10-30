@@ -1,0 +1,59 @@
+---
+translatedFrom: "9bc910cfb8ce"
+---
+
+Netselskaber og overordnede energistyringssystemer kan begrænse din installations forbrug og eksport til elnettet udefra.
+Følgende scenarier understøttes:
+
+- **§ 14a EnWG** (tysk regulering): Midlertidig effektreduktion og dæmpning af forbrugsenheder fra netselskabets side
+- **§ 9 EEG** (tysk regulering): Effektbegrænsning af solcelleanlæg ved overbelastning af elnettet
+- **EMS-integration**: Anvendelse af grænser fra andre energistyringssystemer
+
+## Baggrund \{#background\}
+
+### Styrbare forbrugsenheder (§ 14a EnWG) \{#dimming\}
+
+§ 14a i den tyske energilov (EnWG) regulerer netvenlig styring af styrbare forbrugsenheder (SteuVE).
+Netselskaber kan midlertidigt reducere effekten for store forbrugsenheder som opladere, varmepumper eller hjemmebatterier, hvis elnettet overbelastes.
+
+Vigtige punkter:
+
+- Gælder forbrugsenheder fra 4,2 kW effekt
+- Styring via Smart Meter Gateway og styreboks
+
+### Eksportstyring (§ 9 EEG) \{#curtailment\}
+
+Ifølge § 9 i den tyske lov om vedvarende energi (EEG) kan netselskaber begrænse eksporten fra vedvarende energianlæg, hvis elnettet er ved at blive overbelastet.
+Det berører primært større solcelleanlæg, men kan også blive relevant for private boliger.
+
+Når evcc modtager et signal om effektbegrænsning, fordeles begrænsningsniveauet som en procentsats til alle invertere, der kan begrænses, og anvendes direkte på enheden.
+FNN-styrebokse signalerer trinvise grænser (60 %, 30 %, 0 %), som anvendes uændret.
+Grænser i watt (f.eks. via EEBUS) omregnes til en procentsats ud fra den installerede generatoreffekt.
+Invertere uden trinløs regulering slukkes helt, så længe grænsen er aktiv.
+Den aktive grænse vises i brugerfladen, og den fulde produktion genoptages, så snart signalet ophører.
+
+:::caution[Eksperimentel]
+Effektbegrænsning understøttes kun for udvalgte invertere.
+Understøttede enheder er markeret med ”Kan begrænses” i [enhedsoversigten](/da/meters).
+Enheder, der kun tilbyder begrænsning af eksporten, er opført under [Effektbegrænsning](#curtailment-devices).
+:::
+
+## Opsætning \{#setup\}
+
+Konfigurationen foretages under **Opsætning → Ekstern grænse**.
+Vælg en af integrationerne nedenfor, og indtast dens parametre.
+Alternativt kan du oprette en [brugerdefineret integration](/da/user-defined-devices#external-limit), f.eks. til en tilslutning via en enkelt kontakt (relæ).
+
+For at anvende forbrugsgrænsen på dine ladepunkter skal du opsætte kredsløb i [Belastningsstyring](/da/features/loadmanagement).
+En aktiv grænse begrænser derefter hovedkredsløbet, hvilket vises med bemærkningen ”Forbrug begrænset” på kortet Belastningsstyring.
+Aktive grænser vises på kortet **Ekstern grænse** og på hovedsiden.
+
+### Parring ved EEBUS-integrationer \{#eebus-pairing\}
+
+Ved integrationer, der bruger EEBUS-protokollen, kommunikerer styreboksen direkte med evcc og overfører automatisk effektgrænsen.
+Styreboks og evcc skal parres én gang:
+
+1. **I styreboksen**: Tilføj evcc som HEMS.
+   evcc's SKI og IP-adresse vises under **Opsætning → EEBUS**.
+2. **I evcc**: Indtast styreboksens SKI i integrationen.
+   Du finder den i styreboksens dokumentation eller i dens webgrænseflade.

@@ -1,0 +1,1255 @@
+---
+title: Plugins
+description: "Plugins læser og skriver enkelte værdier via Modbus, HTTP, MQTT, scripts m.m. og udgør byggestenene i brugerdefinerede enheder."
+tableOfContents:
+  maxHeadingLevel: 4
+translatedFrom: "548618bdc920"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+
+Plugins læser og skriver enkelte værdier på en enhed, f.eks. en enkelt effektmåling, en ønsket strømstyrke eller en aktiveringskommando.
+De ligger til grund for de medfølgende enhedsskabeloner, og du henviser direkte til dem, når du opbygger en [brugerdefineret enhed](/da/user-defined-devices) af `type: custom`.
+
+Plugins kan bruges til følgende kategorier:
+
+- `meter`: [Sol, hjemmebatteri, elnet, målere](/da/meters)
+- `charger`: [Opladere](/da/chargers), [Styrbare stikkontakter](/da/smartswitches), [Varmepumper, elvarmere](/da/heating)
+- `vehicle`: [Køretøjer](/da/vehicles)
+- `tariff`: [Tariffer, prognoser](/da/tariffs)
+- `circuit`: [Belastningsstyring](/da/features/loadmanagement)
+
+Plugins bruges også af [notifikationer](/da/notifications) til at sende livscyklushændelser.
+
+### Liste over plugins
+
+- [GPIO-plugin](#gpio) - Plugin til direkte adgang til GPIO-pins (kun Linux).
+- [Go-plugin](#go) - Plugin, der leverer eller modtager værdier via et Go-script.
+- [HTTP-plugin](#http) - Plugin, der kommunikerer med slutenheder via et HTTP-API.
+- [JavaScript-plugin](#javascript) - Plugin, der leverer eller modtager værdier via et JavaScript-script.
+- [Modbus-plugin](#modbus) - Plugin til læsning fra en Modbus-kompatibel enhed.
+- [MQTT-plugin](#mqtt) - Plugin til indirekte kommunikation med MQTT-kompatible enheder via MQTT.
+- [Prometheus-plugin](#prometheus) - Plugin til læsning af metrikker fra Prometheus med PromQL.
+- [Shell-plugin](#shell) - Plugin, der kan køre et shell-script for at udtrække data eller modtage data til skrivning.
+- [SMA/Speedwire-plugin](#speedwire) - Plugin specifikt til SMA-enheder, der kan kommunikere via Speedwire-protokollen.
+- [Websocket-plugin](#websocket) - Plugin, der modtager enhedsdata via en indbygget webserver. Kan kun bruges til at læse data.
+
+### Liste over hjælpere
+
+- [Calc-plugin](#calc) - Metaplugin til aritmetisk sammenkædning af output fra andre plugins.
+- [Combined-plugin](#combined) - Metaplugin specifikt til `charger`, der samler de boolske statusværdier for tilsluttet (_plugged_) og lader op (_charging_) til én samlet opladningsstatus.
+- [Const-plugin](#const) - Specielt plugin, der blot returnerer en konstant værdi.
+- [Error-plugin](#error) - Specielt plugin, der returnerer en kendt fejlværdi.
+- [Convert-plugin](#convert) - Metaplugin til konvertering af datatyper ved skrivning (f.eks. float til int).
+- [Delta-plugin](#delta) - Metaplugin til konvertering af absolutte værdier til delta-/tilvækstværdier ved skrivning.
+- [Ignore-plugin](#ignore) - Metaplugin til at undertrykke bestemte fejlmeddelelser.
+- [IfElse-plugin](#ifelse) - Metaplugin til betingede skriveoperationer med to grene (if/else).
+- [Map-plugin](#map) - Metaplugin til oversættelse af heltalsværdier (f.eks. enhedsspecifikke tilstande til evcc-tilstande).
+- [Meter-plugin](#meter-plugin) - Plugin til at bruge en anden måler som datakilde.
+- [Sequence-plugin](#sequence) - Metaplugin til sekventiel udførelse af flere skriveoperationer.
+- [Sleep-plugin](#sleep) - Hjælpeplugin til forsinkelse af handlinger (bruges typisk sammen med Sequence).
+- [Switch-plugin](#switch) - Metaplugin til betingede skriveoperationer baseret på inputværdier (som switch/case).
+- [Valid-plugin](#valid) - Metaplugin til at levere plugin-værdier baseret på en boolsk validering.
+- [Watchdog-plugin](#watchdog) - Metaplugin til automatisk gentagelse af skriveoperationer med faste intervaller.
+
+## Syntaks
+
+Et plugin knyttes til en attribut på en enhed.
+Attributnavnet (f.eks. `power`, `enable`, `soc`) bestemmer rollen, `source` vælger plugin-typen, og de øvrige nøgler er plugin-specifikke parametre.
+
+```yaml
+<attribute>:
+  source: <plugin>
+  <p-attr1>: ...
+  <p-attr2>: ...
+```
+
+Hvert plugin bruges enten i en **læsende** eller en **skrivende** kontekst. Nogle parametre giver kun mening i den ene af dem.
+De fulde attributlister for målere, opladere, køretøjer og tariffer finder du under [brugerdefinerede enheder](/da/user-defined-devices).
+
+### Læsning \{#reading\}
+
+Når der læses data med et plugin, kan såkaldte _pipelines_ bruges.
+De gør det muligt at udtrække præcis de data, der skal bruges, fra pluginets output.
+Dermed kan komplekse datastrukturer som JSON eller XML behandles, og de nødvendige oplysninger kan filtreres ud.
+Mulige parametre til dataudtræk er:
+
+- `regex`: Et regulært udtryk til at udtrække værdier fra den modtagne tekst.
+- `jq`: Et [jq](https://jqlang.github.io/jq/)-udtryk til at udtrække værdier fra JSON-strukturer.
+  Den fulde syntaks og alle muligheder findes i jq-dokumentationen.
+- `quote`: Boolsk værdi, der sætter inputdataene i anførselstegn, før de sendes videre til jq. Det gør det muligt for jq at behandle strenge uden anførselstegn (f.eks. fra MQTT). For en MQTT-værdi som `Charging` kan du bruge `quote: true` og `jq: '. == "Charging"'`.
+- `unpack`: Konverterer værdier fra andre talrepræsentationer, f.eks. `hex`.
+- `decode`: Afkoder binære formater som `uint32`, `float32` osv.
+
+#### Kendte fejlværdier \{#known-errors\}
+
+[HTTP](#http)-, [MQTT](#mqtt)- og [Websocket](#websocket)-plugins kan returnere særlige fejlstrenge.
+evcc genkender dem og omsætter dem til interne fejlkoder i stedet for at behandle dem som data.
+Det er f.eks. nyttigt til brugerdefinerede køretøjsintegrationer, hvor datakilden kender køretøjets tilstand.
+
+- `ErrAsleep`: Køretøjet sover. evcc kan vælge at vække køretøjet og prøve igen.
+- `ErrMustRetry`: Operationen skal prøves igen (f.eks. på grund af en begrænsning af antallet af forespørgsler).
+- `ErrNotAvailable`: Værdien er ikke tilgængelig. evcc behandler det som en permanent fejl indtil næste genstart.
+
+Hvis et plugin returnerer strengen `ErrAsleep` som svar, genererer evcc den tilsvarende interne fejl.
+[Error-pluginet](#error) bruger samme mekanisme til at returnere en fast fejlværdi som konstant.
+
+### Skrivning \{#writing\}
+
+Ved skrivning kan parametre i konfigurationen erstattes af pladsholdere.
+Dataene leveres i formen `${var[:format]}`.
+Hvis format ikke er angivet, leveres dataene i Go-standardformatet %v.
+Variablerne erstattes med den tilsvarende værdi, før pluginet udføres.
+Derudover kan alle funktioner i Go Template Library bruges til mere komplekse datatransformationer.
+
+## Plugins
+
+### GPIO <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#gpio\}
+
+`gpio`-pluginet giver direkte adgang til GPIO-pins (General Purpose Input/Output) på Linux-systemer.
+Det er særligt velegnet til Raspberry Pi og lignende enkeltkortcomputere.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                     |
+| --------- | ------ | -------- | ----------------------------------------------- |
+| function  | string | ja       | Tilstand: `read` (input) eller `write` (output) |
+| pin       | int    | ja       | Pinnummer (BCM-nummerering, f.eks. GPIO 17)     |
+
+**Sådan fungerer det**:
+
+- **Læsning** (`function: read`): Læser tilstanden af en GPIO-pin som en boolsk værdi (`true` = HIGH, `false` = LOW)
+- **Skrivning** (`function: write`): Sætter en GPIO-pin til HIGH (`true`) eller LOW (`false`)
+
+Pinnummereringen følger BCM-skemaet (Broadcom-numre, ikke den fysiske pinposition).
+Et pinout-diagram til Raspberry Pi finder du f.eks. på [pinout.xyz](https://pinout.xyz/).
+
+**Eksempel på læsning**:
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM pin number
+```
+
+**Eksempel på skrivning**:
+
+```yaml
+source: gpio
+function: write
+pin: 27 # BCM pin number
+```
+
+:::note
+Dette plugin virker kun på Linux-systemer med adgang til `/dev/gpiomem`.
+:::
+
+### Go <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#go\}
+
+`go`-pluginet bruger [Yaegi](https://github.com/traefik/yaegi)-fortolkeren til at udføre Go-kode under kørslen.
+Det er særligt nyttigt til typesikre beregninger og kompleks logik til databehandling.
+
+#### Tilgængelige Go-standardbiblioteker
+
+Følgende Go-pakker er automatisk tilgængelige og behøver ikke at blive importeret:
+
+- `fmt` - Formateret I/O
+- `math` - Matematiske funktioner
+- `strings` - Strengbehandling
+- `time` - Tids- og datofunktioner
+
+**Eksempel på læsning**:
+
+```yaml
+source: go
+script: |
+  res := 500.0
+  res * 2 // returns 1000.0
+```
+
+**Eksempel med tidsfunktioner**:
+
+```yaml
+source: go
+script: |
+  hour := time.Now().Hour()
+  price := 50.0 // Night tariff
+  if hour >= 9 && hour < 17 {
+    price = 100.0 // Tariff price during business hours
+  }
+  price
+```
+
+**Eksempel med strengbehandling**:
+
+```yaml
+source: go
+script: |
+  text := "hello world"
+  strings.ToUpper(text) // returns "HELLO WORLD"
+```
+
+Når `go`-pluginet bruges til skrivning, overføres den værdi, der skal skrives, til scriptet som en variabel:
+
+**Eksempel på skrivning**:
+
+```yaml
+maxcurrent:
+  source: go
+  script: |
+    fmt.Printf("Setting charge current: %d A\n", maxcurrent)
+    // maxcurrent variable is automatically available
+```
+
+#### Input- og outputtransformationer \{#transformations\}
+
+`go`- og `js`-plugins understøtter parametrene `in` og `out`, så værdier fra andre kilder kan bruges som variabler i scriptet, eller scriptresultatet kan sendes videre til andre plugins.
+
+##### Inputtransformationer (`in`)
+
+Med parameteren `in` kan du bruge værdier fra andre kilder som variabler i dit script.
+Hver post kræver `name` (variabelnavn i scriptet), `type` (`bool`, `int`, `float`, `string`) og `config` (plugin-konfiguration).
+
+Dette eksempel viser betinget logik, som ikke kan opnås med simple Calc-operationer:
+
+```yaml
+power:
+  source: go
+  script: |
+    // Power based on SoC and standby
+    power := 5000.0 // normal
+    if standby {
+      power = 0.0 // no load in standby
+    } else if soc < 20.0 {
+      power = 1000.0 // low
+    }
+    power
+  in:
+    - name: soc
+      type: float
+      config:
+        source: const
+        value: 85.0
+    - name: standby
+      type: bool
+      config:
+        source: const
+        value: false
+```
+
+##### Outputtransformationer (`out`)
+
+Parameteren `out` sender scriptresultatet videre til andre plugins.
+Det er særligt nyttigt i en skrivende kontekst, f.eks. når scriptresultatet skal behandles videre via MQTT eller HTTP.
+Hver post kræver `name`, `type` og `config`, analogt med `in`.
+
+```yaml
+maxcurrent:
+  source: go
+  script: |
+    watts := maxcurrent * 230
+    watts
+  out:
+    - name: watts
+      type: float
+      config:
+        source: mqtt
+        topic: heater/target_power
+```
+
+### HTTP <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#http\}
+
+`http`-pluginet udfører HTTP-kald for at læse eller opdatere data.
+Det kan også læse JSON-datastrukturer eller foretage simple transformationer af dem via jq-forespørgsler (f.eks. til REST-API'er).
+Den fulde funktionalitet finder du i den [officielle jq-dokumentation](https://jqlang.github.io/jq/manual/).
+
+Autentificeringsmetoderne er `basic`, `bearer` og `digest`.
+Navnene på de pågældende parametre findes [her](https://github.com/evcc-io/evcc/blob/master/plugin/http_auth.go#L23).
+
+#### Autentificering
+
+Der findes forskellige autentificeringsmetoder til HTTP-forespørgsler:
+
+**Basic-autentificering**:
+
+```yaml
+auth:
+  type: basic
+  user: <username>
+  password: <password>
+```
+
+**Bearer-token** (f.eks. til JWT):
+
+```yaml
+auth:
+  type: bearer
+  token: <token>
+```
+
+**Digest-autentificering**:
+
+```yaml
+auth:
+  type: digest
+  user: <username>
+  password: <password>
+```
+
+**Brugerdefineret autentificering**:
+
+Til mere komplekse autentificeringsscenarier kan der udvikles brugerdefinerede autentificeringsplugins.
+De integreres via parameteren `source`:
+
+```yaml
+auth:
+  source: <plugin-name>
+  user: <username>
+  password: <password>
+  # additional plugin-specific parameters
+```
+
+Det gør det muligt at integrere enheder med særlige krav til autentificering uden at ændre selve HTTP-pluginets kode.
+
+:::caution[Vigtigt]
+XML-dokumenter konverteres automatisk internt til JSON-format, som derefter kan filtreres med jq ligesom et oprindeligt JSON-svar.
+Attributter får præfikset `attr`.
+:::
+
+:::tip
+Til at teste jq-forespørgsler er onlineværktøjer som [jqplay.org](https://jqplay.org/) nyttige.
+Til regex-tests er [regex101.com](https://regex101.com/) en god mulighed.
+:::
+
+**Eksempel på læsning**:
+
+```yaml
+source: http
+uri: https://volkszaehler/api/data/<uuid>.json?from=now
+method: GET # default HTTP method
+headers:
+  - content-type: application/json
+auth: # basic authentication
+  type: basic
+  user: foo
+  password: bar
+insecure: false # set to true to trust self-signed certificates
+jq: .data.tuples[0][1] # parse response json
+scale: 0.001 # factor applied to result, e.g. for kW to W conversion
+cache: 60s # response cache duration
+timeout: 10s # timeout in golang duration format, see https://golang.org/pkg/time/#ParseDuration
+```
+
+```yaml
+source: http
+uri: http://charger/status
+jq: .total_power > 10 # Converts a json integer to a boolean value
+```
+
+**Eksempel på skrivning**:
+
+```yaml
+body: %v # only applicable for PUT or POST requests
+```
+
+```yaml
+enable:
+  source: http
+  uri: "http://charger/relay/0?turn={{if .enable}}on{{else}}off{{end}}"
+```
+
+**Dynamiske URI'er**:
+
+`uri` og `body` er Go-skabeloner, der evalueres ved hver forespørgsel. Ud over [sprig-funktionerne](https://masterminds.github.io/sprig/) er `addDate` og `timeRound` tilgængelige. Dermed kan f.eks. et prognose-API altid forespørges for et glidende datointerval:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.example.org/forecast?from={{ now | date "2006-01-02" }}&to={{ addDate now 0 0 2 | date "2006-01-02" }}
+```
+
+### JavaScript <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#javascript\}
+
+evcc indeholder en JavaScript-fortolker med biblioteket [Underscore.js](https://underscorejs.org), som er direkte tilgængeligt via `_.`, f.eks. `_.random(0,5)`.
+`js`-pluginet kan udføre JavaScript-kode via parameteren `script`. Det er meget nyttigt til hurtig prototyping:
+
+**Eksempel på læsning**:
+
+```yaml
+source: js
+script: |
+  var res = 500;
+  2 * res; // returns 1000
+```
+
+Når `js`-pluginet bruges til skrivning, overføres den værdi, der skal skrives, til scriptet som en variabel:
+
+**Eksempel på skrivning**:
+
+```yaml
+maxcurrent:
+  source: js
+  script: |
+    console.log(maxcurrent);
+```
+
+`js`-pluginet understøtter de samme [input- og outputtransformationer](#transformations) (`in`/`out`) som `go`-pluginet.
+
+### Modbus <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#modbus\}
+
+`modbus`-pluginet kan læse data fra enhver Modbus-kompatibel enhed eller SunSpec-kompatibel inverter.
+Mange elmålere er allerede forudkonfigurerede (se [understøttede enheder i MBMD](https://github.com/volkszaehler/mbmd#supported-devices)).
+Det er også muligt at skrive Modbus-registre for at integrere yderligere opladere.
+
+**Eksempel**:
+
+```yaml
+source: modbus
+id: 1
+uri: 192.168.1.10:502
+register:
+  address: 300
+  type: holding
+  decode: uint16
+```
+
+Se [Modbus-dokumentationen](/da/reference/modbus) for flere detaljer.
+
+### MQTT <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#mqtt\}
+
+`mqtt`-pluginet gør det muligt at læse værdier via MQTT-topics.
+Det er særligt nyttigt til elmålere, f.eks. når de allerede leverer deres data via MQTT.
+Se [MBMD-dokumentationen](https://github.com/volkszaehler/mbmd) for et eksempel på, hvordan Modbus-måledata kommer ind i MQTT.
+
+**Parametre (læsning)**:
+
+| Parameter | Type     | Påkrævet | Beskrivelse                                                                 |
+| --------- | -------- | -------- | --------------------------------------------------------------------------- |
+| topic     | string   | ja       | MQTT-topic, der læses fra                                                   |
+| timeout   | duration | nej      | Maksimal alder for modtagne værdier                                         |
+| scale     | float    | nej      | Skaleringsfaktor for resultatet (f.eks. 0,001 til omregning fra Wh til kWh) |
+
+Pluginet returnerer en fejl, hvis der ikke er modtaget en ny værdi inden for `timeout`-perioden.
+Hvis `timeout` ikke er sat, accepteres værdier af enhver alder, så snart den første besked er modtaget.
+Det anbefales at sætte en timeout for at opdage, når kilden ikke længere leverer aktuelle data.
+
+Til dataudtræk er pipeline-parametrene beskrevet under [Læsning](#reading) tilgængelige (`regex`, `jq`, `quote` osv.).
+
+**Eksempel på læsning**:
+
+```yaml
+source: mqtt
+topic: mbmd/sdm1-1/Power
+timeout: 30s # don't accept values older than timeout
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+```
+
+**Parametre (skrivning)**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                                              |
+| --------- | ------ | -------- | ------------------------------------------------------------------------ |
+| topic     | string | ja       | MQTT-topic, der skrives til                                              |
+| payload   | string | nej      | Payload-skabelon (bruger værdien i standardformat, hvis den ikke er sat) |
+
+Ved skriveadgang leveres dataene med attributten `payload`.
+Hvis denne parameter mangler i konfigurationen, skrives værdien i standardformatet.
+
+**Eksempel på skrivning**:
+
+```yaml
+source: mqtt
+topic: mbmd/charger/maxcurrent
+payload: ${var:%d}
+```
+
+### Prometheus <Badge text="læsning" variant="tip" size="small" /> \{#prometheus\}
+
+`prometheus`-pluginet læser metrikker fra en Prometheus-instans med PromQL-forespørgsler.
+Det er nyttigt, når overvågningsdata allerede er tilgængelige i Prometheus og skal bruges i evcc.
+
+**Parametre**:
+
+| Parameter | Type     | Påkrævet | Beskrivelse                    |
+| --------- | -------- | -------- | ------------------------------ |
+| uri       | string   | ja       | URL til Prometheus-serveren    |
+| query     | string   | ja       | PromQL-forespørgsel            |
+| timeout   | duration | nej      | Timeout (standard: 2 minutter) |
+
+**Understøttede forespørgselsresultater**:
+
+- **Skalar**: En enkelt numerisk værdi
+- **Vektor**: En vektor med præcis én metrikpost
+
+**Eksempel**:
+
+```yaml
+power:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "sum(household_power_watts)"
+  timeout: 30s
+```
+
+**Eksempel med tidsinterval**:
+
+```yaml
+energy:
+  source: prometheus
+  uri: http://prometheus.local:9090
+  query: "increase(energy_total_kwh[1h])"
+```
+
+Forespørgslen skal returnere en enkelt numerisk værdi.
+Ved vektorresultater skal der indgå præcis én metrik.
+
+### Shell-script <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#shell\}
+
+`script`-pluginet kører eksterne scripts for at læse eller opdatere data. Pluginet er nyttigt til at integrere enhver form for ekstern funktionalitet.
+
+**Eksempel på læsning**:
+
+```yaml
+source: script
+cmd: /bin/bash -c "cat /dev/urandom"
+timeout: 5s
+```
+
+**Eksempel på skrivning**:
+
+```yaml
+source: script
+cmd: /home/user/my-script.sh ${enable:%b} # format boolean enable as 0/1
+timeout: 5s
+```
+
+### SMA/Speedwire <Badge text="læsning" variant="tip" size="small" /> \{#speedwire\}
+
+`sma`-pluginet giver en grænseflade til SMA-enheder, der understøtter Speedwire-protokollen.
+
+**Eksempel på læsning**:
+
+```yaml
+source: sma
+uri: 192.168.4.51 # alternative to serial
+serial: 123456 # alternative to uri
+value: ActivePowerPlus # ID of value to read
+password: "0000" # optional (default: 0000)
+interface: eth0 # optional
+scale: 1 # optional scale factor for value
+```
+
+Understøttede værdier for `value` finder du i diagnoseoutputtet fra kommandoen `evcc meter` (med konfigurerede `meter`-enheder fra SMA).
+
+Alle mulige værdier findes som konstanter [her](https://gitlab.com/bboehmke/sunny/-/blob/master/values.go#L24) (brug konstantens navn til `value`).
+
+### Websocket <Badge text="læsning" variant="tip" size="small" /> \{#websocket\}
+
+`websocket`-pluginet stiller en WebSocket-listener til rådighed.
+Det kan også læse eller fortolke JSON-datastrukturer via jq-lignende forespørgsler.
+Det kan f.eks. bruges til at modtage data fra Volkszählers push-server.
+
+Til dataudtræk er pipeline-parametrene beskrevet under [Læsning](#reading) tilgængelige (`regex`, `jq`, `quote` osv.).
+
+**Eksempel på læsning**:
+
+```yaml
+source: http
+uri: ws://<volkszaehler host:port>/socket
+jq: .data | select(.uuid=="<uuid>") .tuples[0][1] # parse message json
+scale: 0.001 # factor applied to result, e.g. for Wh to kWh conversion
+timeout: 30s # error if no update received in 30 seconds
+```
+
+## Hjælpere
+
+### Calc <Badge text="læsning" variant="tip" size="small" /> \{#calc\}
+
+`calc`-pluginet gør det muligt at behandle flere enkeltværdier matematisk:
+
+**Eksempel på læsning**:
+
+```yaml
+source: calc
+add:
+- source: ...
+  ...
+- source: ...
+  ...
+```
+
+```yaml
+source: calc
+mul:
+- source: calc
+  sign:
+    source: ... (power)
+  ...
+- source: ... (current)
+  ...
+```
+
+De grundlæggende regnearter addition (add), multiplikation (mul), division (div), fortegnsvending (sign), absolut værdi (abs), minimumsværdi (min) og maksimumsværdi (max) understøttes som operander.
+
+Med `scale: -1` på en af værdierne kan der udføres en simpel subtraktion, med `scale: 0.001` en division, f.eks. til omregning af kWh til Wh.
+
+Med `sign:` (alle positive tal bliver til +1, alle negative tal til -1, 0 forbliver 0) kan fortegn overføres til andre værdier (sammen med `mul`).
+F.eks. for at overføre effektens ”retning” (eksport eller import) til de målte strømme for målere.
+
+Med `abs:` beregnes den absolutte værdi af et tal.
+
+Med `min:` og `max:` beregnes henholdsvis minimumsværdien og maksimumsværdien.
+
+`calc`-pluginet er f.eks. nyttigt til:
+
+- Summering af effektværdier fra de enkelte solcellestrenge (addition)
+- Beregning af tilsyneladende effekt ud fra spænding og strøm (multiplikation)
+- Sammenlægning af separate effektværdier for import og eksport til én værdi med fortegn (subtraktion)
+- Beregning af fyldningsgrader i procent (division)
+- Bestemmelse af strømmens korrekte retning (sign)
+- Eliminering af kendte offsets (addition med `const`-pluginet)
+
+:::tip
+Konstante hjælpeværdier (f.eks. til offsets) kan genereres som operander med `const`-pluginet.
+:::
+
+### Combined <Badge text="læsning" variant="tip" size="small" /> \{#combined\}
+
+Statuspluginet `combined` bruges til at omsætte blandede boolske statusværdier for `Plugged` (tilsluttet) / `Charging` (lader op) til en evcc-kompatibel opladningsstatus A..F.
+Det bruges f.eks. sammen med en OpenWB-MQTT-integration.
+
+**Eksempel på læsning**:
+
+```yaml
+source: combined
+plugged:
+  source: mqtt
+  topic: openWB/lp/1/boolPlugStat
+charging:
+  source: mqtt
+  topic: openWB/lp/1/boolChargeStat
+```
+
+### Const <Badge text="læsning" variant="tip" size="small" /> \{#const\}
+
+`const`-pluginet returnerer en konstant værdi.
+Det er f.eks. velegnet til at anvende faste korrektionsværdier (offset) på en variabel værdi sammen med `calc`-pluginet eller til at simulere måle- og statusværdier til testformål.
+
+**Eksempel på læsning**:
+
+```yaml
+source: const
+value: -16247
+```
+
+### Error <Badge text="læsning" variant="tip" size="small" /> \{#error\}
+
+`error`-pluginet returnerer altid en [kendt fejlværdi](#known-errors).
+Det er nyttigt til eksplicit at markere en ikke-implementeret attribut som ikke tilgængelig.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                                     |
+| --------- | ------ | -------- | --------------------------------------------------------------- |
+| error     | string | ja       | Fejlværdi (`ErrAsleep`, `ErrMustRetry` eller `ErrNotAvailable`) |
+
+**Eksempel**:
+
+```yaml
+soc:
+  source: error
+  error: ErrNotAvailable
+```
+
+### Convert <Badge text="skrivning" variant="caution" size="small" /> \{#convert\}
+
+`convert`-pluginet konverterer datatyper ved skrivning.
+Det bruges, når et plugin forventer en anden datatype, end evcc leverer.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                             |
+| --------- | ------ | -------- | --------------------------------------- |
+| convert   | string | ja       | Konverteringstype                       |
+| set       | config | ja       | Plugin til skrivning efter konvertering |
+
+**Understøttede konverteringer**:
+
+| Konvertering | Beskrivelse                             |
+| ------------ | --------------------------------------- |
+| float2int    | Float64 → Int64 (decimaler afkortes)    |
+| int2float    | Int64 → Float64                         |
+| int2bytes    | Int64 → Byte-array (Big Endian, 8 byte) |
+| bool2int     | Bool → Int64 (true=1, false=0)          |
+
+**Eksempel** (evcc leverer float, enheden forventer int):
+
+```yaml
+limitsoc:
+  source: convert
+  convert: float2int
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 41009
+      type: writesingle
+      encoding: uint16
+```
+
+I dette eksempel konverterer evcc en float-værdi som `85.5` til `85`, før den skrives til Modbus-registeret.
+
+### Delta <Badge text="skrivning" variant="caution" size="small" /> \{#delta\}
+
+`delta`-pluginet konverterer absolutte værdier til delta-/tilvækstværdier.
+Det bruges til enheder, der lægger skrevne værdier til en intern sum i stedet for at sætte dem direkte.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                        |
+| --------- | ------ | -------- | -------------------------------------------------- |
+| get       | config | nej      | Plugin til læsning af den aktuelle sum fra enheden |
+| set       | config | ja       | Plugin til skrivning af den beregnede delta        |
+
+**Sådan fungerer det**:
+
+1. Inputværdien modtages (f.eks. `1000`)
+2. Hvis `get` er konfigureret, læses den aktuelle sum fra enheden
+3. Deltaen beregnes: `delta = new_value - current_total`
+4. Deltaen skrives via `set`-pluginet
+5. Den interne tilstand opdateres
+
+Uden parameteren `get` holder pluginet styr på summen internt (starter ved 0).
+Når evcc genstarter, går synkroniseringen med enheden tabt.
+Derfor anbefales det at konfigurere `get`, hvis enheden har et læsbart register med summen.
+
+**Understøttede datatyper**: `int64`, `float64`
+
+**Anvendelse**:
+
+Nogle varmepumper (f.eks. Ochsner) har registre, der forventer deltaværdier i stedet for absolutte værdier.
+Når der skrives `500`, lægger enheden 500 W til den interne værdi i stedet for at sætte den til 500 W.
+For at øge fra 1.000 W til 1.500 W skrives `+500`.
+For at sænke skrives negative værdier (f.eks. `-300`).
+
+**Eksempel på skrivning**:
+
+```yaml
+setmaxpower:
+  source: delta
+  get: # Read current total from device
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2012 # Device's internal sum register
+      type: input
+      decode: uint16
+  set: # Write calculated delta
+    source: modbus
+    uri: 192.168.1.50:502
+    id: 50
+    register:
+      address: 2201 # Delta register
+      type: writeholding
+      decode: uint16
+```
+
+**Eksempel med Watchdog**:
+
+Delta-pluginet kombineres ofte med [watchdog-pluginet](#watchdog), når enheden kræver periodiske opdateringer:
+
+```yaml
+setmaxpower:
+  source: watchdog
+  timeout: 60s # Resend every 30 seconds
+  set:
+    source: delta # Convert absolute values to deltas
+    get: # Read current total
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2012 # Total register
+        type: input
+        decode: uint16
+    set: # Write delta
+      source: modbus
+      uri: 192.168.1.50:502
+      id: 50
+      register:
+        address: 2201 # Delta register
+        type: writeholding
+        decode: uint16
+```
+
+### Ignore <Badge text="skrivning" variant="caution" size="small" /> \{#ignore\}
+
+`ignore`-pluginet undertrykker bestemte fejlmeddelelser ved skrivning.
+Det bruges, når en enhed returnerer harmløse fejl, der kan ignoreres.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                   |
+| --------- | ------ | -------- | --------------------------------------------- |
+| error     | string | ja       | Præfiks for den fejltekst, der skal ignoreres |
+| set       | config | ja       | Plugin til skrivning                          |
+
+**Sådan fungerer det**:
+
+1. Det indlejrede `set`-plugin udføres
+2. Hvis der opstår en fejl, kontrolleres det, om fejlmeddelelsen starter med strengen fra `error`
+3. Hvis ja, ignoreres fejlen, og der returneres succes
+4. Hvis nej, sendes fejlen videre som normalt
+
+**Understøttede datatyper**: `int64`, `float64`, `bool`, `[]byte`
+
+**Eksempel**:
+
+```yaml
+batterymode:
+  source: switch
+  switch:
+    - case: 1 # normal
+      set:
+        source: const
+        value: 2
+        set:
+          source: ignore
+          error: "modbus: response data size '18' does not match count '4'"
+          set:
+            source: modbus
+            uri: 192.168.1.10:502
+            id: 1
+            register:
+              address: 0x1110
+              type: writemultiple
+              encoding: int16
+```
+
+I dette eksempel returnerer enheden en harmløs Modbus-fejl, som ignoreres.
+
+### IfElse <Badge text="skrivning" variant="caution" size="small" /> \{#ifelse\}
+
+`ifelse`-pluginet udfører betingede skriveoperationer med to grene.
+Afhængigt af inputværdien udføres enten `if`- eller `else`-pluginet.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                          |
+| --------- | ------ | -------- | ---------------------------------------------------- |
+| if        | config | ja       | Plugin, der udføres, når betingelsen er opfyldt      |
+| else      | config | ja       | Plugin, der udføres, når betingelsen ikke er opfyldt |
+
+**Sådan fungerer det**:
+
+- For `bool`-værdier: `true` kører `if`, `false` kører `else`
+- For `int64`-værdier: `> 0` kører `if`, ellers køres `else`
+
+**Understøttede datatyper**: `int64`, `bool`
+
+**Eksempel** (forskellige endpoints til aktivering og deaktivering):
+
+```yaml
+enable:
+  source: ifelse
+  if:
+    source: http
+    uri: http://device.local/api/on
+    method: POST
+  else:
+    source: http
+    uri: http://device.local/api/off
+    method: POST
+```
+
+### Map <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#map\}
+
+`map`-pluginet oversætter heltalsværdier til andre heltalsværdier ved hjælp af en opslagstabel.
+Det bruges ofte til at konvertere enhedsspecifikke værdier til evcc-standardværdier og omvendt.
+
+**Parametre**:
+
+| Parameter | Type            | Påkrævet | Beskrivelse                                         |
+| --------- | --------------- | -------- | --------------------------------------------------- |
+| values    | map[int64]int64 | ja       | Opslagstabel med tilknytning input → output         |
+| get       | config          | nej      | Plugin til læsning (kun nødvendigt ved læsning)     |
+| set       | config          | nej      | Plugin til skrivning (kun nødvendigt ved skrivning) |
+
+**Sådan fungerer det**:
+
+**Ved læsning**:
+
+1. `get`-pluginet returnerer en værdi (f.eks. `0`)
+2. Værdien slås op i tabellen `values`
+3. Den tilknyttede værdi returneres (f.eks. `0` → `2`)
+
+**Ved skrivning**:
+
+1. Inputværdien modtages (f.eks. `3`)
+2. Værdien slås op i tabellen `values`
+3. Den tilknyttede værdi sendes til `set`-pluginet (f.eks. `3` → `6`)
+
+Hvis der ikke findes en passende værdi i tabellen, opstår der en fejl.
+
+**Understøttede datatyper**: `int64` (kun heltalsværdier)
+
+**Eksempel på læsning** (enhedsværdi → evcc):
+
+```yaml
+getmode:
+  source: map
+  values:
+    0: 2 # Device "Free" → evcc "normal"
+    1: 1 # Device "Forced off" → evcc "reduced"
+    2: 3 # Device "Recommended on" → evcc "boost"
+    3: 3 # Device "Forced on" → evcc "boost"
+  get:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: holding
+      encoding: int16
+```
+
+**Eksempel på skrivning** (evcc → enhedsværdi):
+
+```yaml
+setmode:
+  source: map
+  values:
+    1: 1 # evcc "reduced" → Device "Forced off"
+    2: 0 # evcc "normal" → Device "Free"
+    3: 3 # evcc "boost" → Device "Forced on"
+  set:
+    source: modbus
+    uri: 192.168.1.10:502
+    id: 1
+    register:
+      address: 55
+      type: writeholding
+      encoding: int16
+```
+
+### Meter <Badge text="læsning" variant="tip" size="small" /> \{#meter-plugin\}
+
+`meter`-pluginet gør det muligt at bruge en anden måler som datakilde.
+Det er nyttigt, når du vil bruge en eksisterende enhed til flere målinger, eller når du har brug for forskellige metoder fra en enhed til forskellige attributter.
+
+Sektionen `config` indeholder den komplette skabelonkonfiguration for den måler, der skal indlejres.
+Parameteren `method` vælger, hvilken værdi der læses: `power`, `energy`, `returnenergy` eller `soc`.
+
+**Eksempel på læsning**:
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    power:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: power
+      scale: -1
+    energy:
+      source: meter
+      config:
+        type: template
+        template: shelly-1pm
+        host: 192.168.178.21
+        channel: 0
+      method: energy
+    soc:
+      source: mqtt
+      topic: Haus/Batterie
+      jq: .soc
+      timeout: 60s
+```
+
+I dette eksempel bruges en Shelly 1PM som datakilde for effekt og energi i et hjemmebatteri, mens opladningsniveauet hentes via MQTT.
+
+### Sequence <Badge text="skrivning" variant="caution" size="small" /> \{#sequence\}
+
+`sequence`-pluginet udfører flere skriveoperationer efter hinanden.
+Alle indlejrede plugins modtager den samme inputværdi og udføres i den angivne rækkefølge.
+Udførelsen stopper straks ved en fejl.
+
+**Parametre**:
+
+| Parameter | Type     | Påkrævet | Beskrivelse                                 |
+| --------- | -------- | -------- | ------------------------------------------- |
+| set       | [config] | ja       | Array med indlejrede plugin-konfigurationer |
+
+**Sådan fungerer det**:
+
+1. Inputværdien modtages
+2. Hvert plugin i listen `set` kaldes efter hinanden med denne værdi
+3. Ved en fejl afbrydes sekvensen, og fejlen returneres
+4. Vellykket udførelse betyder, at alle plugins blev udført uden fejl
+
+**Understøttede datatyper**: `int64`, `float64`, `bool`
+
+**Anvendelser**:
+
+- Udføre flere HTTP-kald efter hinanden
+- Kombinere med `sleep`-pluginet for tidsforsinkede handlinger
+- Skrive flere Modbus-registre samtidig
+- Sende værdier videre til flere mål
+
+**Eksempel 1: Flere HTTP-kald**
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/pin1
+      method: POST
+      body: '{"value": "on"}'
+    - source: http
+      uri: http://device.local/api/pin4
+      method: POST
+      body: '{"value": "off"}'
+```
+
+**Eksempel 2: Kombination med switch**
+
+```yaml
+batterymode:
+  source: sequence
+  set:
+    - source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            body: "automatic"
+        - case: 3 # charge
+          set:
+            source: sequence
+            set:
+              - source: sleep
+                duration: 1s
+              - source: http
+                uri: http://battery.local/api/charge
+                body: "5000" # 5 kW
+    - source: mqtt
+      topic: home/battery/status
+      payload: "mode_${batterymode}"
+```
+
+**Forløb for `batterymode: 1` (normal)**:
+
+1. Den ydre `sequence` modtager værdien `1`
+2. Første trin: `switch` kontrollerer værdien `1`
+   - Case `1` matcher → HTTP-kald til `/api/mode` med body `automatic`
+3. Andet trin: `mqtt` sender en besked til `home/battery/status` med payload `mode_1`
+4. Færdig
+
+**Forløb for `batterymode: 3` (charge)**:
+
+1. Den ydre `sequence` modtager værdien `3`
+2. Første trin: `switch` kontrollerer værdien `3`
+   - Case `3` matcher → den indre `sequence` udføres:
+     - Vent 1 sekund (`sleep`)
+     - HTTP-kald til `/api/charge` med body `5000`
+3. Andet trin: `mqtt` sender en besked til `home/battery/status` med payload `mode_3`
+4. Færdig
+
+Værdien løber gennem alle plugins, hvor `switch` udfører forskellige handlinger afhængigt af værdien, og `mqtt` altid giver besked til sidst.
+
+### Sleep <Badge text="skrivning" variant="caution" size="small" /> \{#sleep\}
+
+`sleep`-pluginet tilføjer en forsinkelse.
+Det bruges typisk i et `sequence`-plugin til at skabe tidsintervaller mellem handlinger.
+
+**Parametre**:
+
+| Parameter | Type     | Påkrævet | Beskrivelse                                                 |
+| --------- | -------- | -------- | ----------------------------------------------------------- |
+| duration  | duration | ja       | Ventetid (f.eks. `1s`, `500ms`, `0s` for ingen forsinkelse) |
+
+**Eksempel**:
+
+```yaml
+setmode:
+  source: sequence
+  set:
+    - source: http
+      uri: http://device.local/api/prepare
+      method: POST
+    - source: sleep
+      duration: 500ms
+    - source: http
+      uri: http://device.local/api/activate
+      method: POST
+```
+
+### Switch <Badge text="skrivning" variant="caution" size="small" /> \{#switch\}
+
+`switch`-pluginet udfører betingede skriveoperationer, ligesom en switch/case-sætning i programmeringssprog.
+Afhængigt af inputværdien udføres den tilsvarende handling.
+
+**Parametre**:
+
+| Parameter | Type   | Påkrævet | Beskrivelse                                       |
+| --------- | ------ | -------- | ------------------------------------------------- |
+| switch    | [case] | ja       | Array af cases med `case`- og `set`-konfiguration |
+| default   | config | nej      | Fallback-plugin, hvis ingen case matcher          |
+
+**Sådan fungerer det**:
+
+1. Inputværdien sammenlignes med `case`-værdierne
+2. Ved et match udføres det tilsvarende `set`-plugin
+3. Hvis ingen case matcher, og `default` er defineret, udføres den
+4. Hvis ingen case matcher, og `default` ikke er defineret, opstår der en fejl
+
+**Understøttede datatyper**: `int64` (kun heltalsværdier)
+
+**Eksempel**:
+
+```yaml
+setmode:
+  source: switch
+  switch:
+    - case: 1 # reduced
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "eco"
+    - case: 2 # normal
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "normal"
+    - case: 3 # boost
+      set:
+        source: http
+        uri: http://device.local/api/mode
+        body: "boost"
+```
+
+### Valid <Badge text="læsning" variant="tip" size="small" /> \{#valid\}
+
+`valid`-pluginet gør det muligt at levere plugin-værdier baseret på en boolsk validering.
+Det adskiller en værdis gyldighed fra dens faktiske indhold.
+Hvis valideringen returnerer `false`, betragtes værdien som utilgængelig.
+
+Det er særligt nyttigt til integrationer som ioBroker, der leverer gyldighed og værdi hver for sig.
+
+**Eksempel på læsning**:
+
+```yaml
+source: valid
+valid:
+  source: mqtt
+  topic: iobroker/wallbox/power/valid
+value:
+  source: mqtt
+  topic: iobroker/wallbox/power/value
+```
+
+I dette eksempel bruges værdien kun, når `valid`-topic'et returnerer `true`.
+Hvis det returnerer `false`, markeres værdien som utilgængelig.
+
+### Watchdog <Badge text="skrivning" variant="caution" size="small" /> \{#watchdog\}
+
+`watchdog`-pluginet er et wrapperplugin, der automatisk gentager skriveoperationer med faste intervaller.
+Nogle enheder (f.eks. hjemmebatterier, invertere) forventer, at styrekommandoer gentages regelmæssigt for at forblive aktive.
+Watchdog-pluginet overvåger skriveoperationer og gentager dem automatisk med halvdelen af det konfigurerede timeout-interval.
+
+**Parametre**:
+
+| Parameter | Type               | Påkrævet | Beskrivelse                                                                      |
+| --------- | ------------------ | -------- | -------------------------------------------------------------------------------- |
+| timeout   | duration           | ja       | Tidsinterval for gentagelser (værdien skrives igen hver timeout/2)               |
+| reset     | string \| [string] | nej      | Værdi(er), der stopper gentagelserne                                             |
+| initial   | string             | nej      | Værdi, der skrives én gang ved opstart                                           |
+| defer     | bool               | nej      | Udskyder opdateringer i stedet for at udføre dem med det samme (standard: false) |
+| set       | config             | ja       | Indlejret plugin til selve skriveoperationen                                     |
+
+**Sådan fungerer det**:
+
+1. **Start**: Hvis `initial` er konfigureret, skrives denne værdi én gang ved opstart
+2. **Skrivning**: Når en værdi skrives, kontrollerer pluginet, om den står i listen `reset`
+3. **Watchdog aktiv**: Hvis værdien **ikke** står i `reset`, starter watchdoggen og skriver automatisk værdien igen hvert `timeout/2` sekund
+4. **Watchdog stopper**: Hvis værdien står i `reset`, udføres der ingen gentagelser
+
+**Parameteren reset**:
+
+- Definerer værdier, der stopper watchdoggen
+- Kan være en enkelt værdi (`reset: 0`) eller flere værdier (`reset: [0, 1]`)
+- Bruges typisk til ”sikre” tilstande eller ”standard”-tilstande, der ikke kræver løbende gentagelse
+
+**Parameteren initial**:
+
+- Valgfri værdi, der skrives én gang, når pluginet starter
+- Nyttig til at sætte en defineret starttilstand
+- Udføres før alle andre skriveoperationer
+
+**Parameteren defer**:
+
+- Sikrer, at timeouts mellem opdateringer overholdes
+- Watchdoggen stoppes under forsinkelsen og genstartes med den nye værdi, når den udløber
+- Nyttig, når enheder kræver en minimal ventetid mellem tilstandsskift
+- Forsinkelsen beregnes ud fra tiden siden sidste opdatering
+- Reset-værdier skrives altid med det samme (uden forsinkelse)
+
+**Understøttede datatyper**: `int64`, `float64`, `bool`
+
+**Eksempel på skrivning**:
+
+```yaml
+source: watchdog
+timeout: 60s
+reset: 0
+set:
+  source: modbus
+  uri: 192.168.1.10:502
+  id: 1
+  register:
+    address: 100
+    type: writemultiple
+    encoding: uint16
+```
+
+I dette eksempel gentages værdierne automatisk hvert 30. sekund, undtagen når værdien `0` skrives.
+
+**Eksempel på forløb** med `timeout: 60s`, `reset: 0`:
+
+- Pluginet starter
+- Skriv værdien `100` → watchdoggen **kører**, værdien gentages hvert 30. sekund
+- Efter 2 minutter: Værdien `100` er skrevet 4 gange (0 s, 30 s, 60 s, 90 s, 120 s)
+- Skriv værdien `200` → watchdoggen **kører videre**, nu med den nye værdi `200` hvert 30. sekund
+- Skriv værdien `0` → watchdoggen **stopper** (da `0` er defineret i `reset`)
+- Ingen yderligere gentagelser, før en ny værdi != `0` skrives
+
+**Eksempel med batteristyring** (`batterymode` bruger værdierne 1=normal, 2=hold, 3=charge, 4=holdcharge, 5=discharge):
+
+```yaml
+batterymode:
+  source: watchdog
+  timeout: 60s
+  reset: 1 # Stop repetitions in normal operation
+  set:
+    source: switch
+    switch:
+      - case: 1 # normal
+        set:
+          source: modbus
+          # ... Modbus configuration for normal operation
+      - case: 2 # hold
+        set:
+          source: modbus
+          # ... Modbus configuration for hold mode
+      - case: 3 # charge
+        set:
+          source: modbus
+          # ... Modbus configuration for charge mode
+```

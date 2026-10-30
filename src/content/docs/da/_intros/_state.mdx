@@ -1,0 +1,19 @@
+---
+translatedFrom: "467d4c7df8e1"
+---
+
+API State er datastrukturen bag brugergrænsefladen.
+Den er tilgængelig via tre snitflader.
+Der gives ingen garanti for kompatibilitet, og felter kan ændre sig mellem udgivelser.
+
+- [REST API](/integrations/rest-api): `GET /api/state` returnerer hele tilstanden som ét JSON-dokument, pakket ind i et `result`-objekt.
+  Query-parameteren `jq` filtrerer svaret med et [jq](https://jqlang.org/)-udtryk.
+  - Live-eksempel: [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Filtreret til et enkelt felt: [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/da/integrations/mqtt-api): Hvert felt publiceres som sit eget topic.
+  Felter på anlægsniveau findes under `evcc/site/<field>`, felter for ladepunkter under `evcc/loadpoints/<n>/<field>` med indeks, der starter ved 1.
+  Indlejrede objekter og arrays opdeles i undertopics, f.eks. `evcc/site/pv/1/power`.
+  Værdier publiceres som almindelige strenge, tidsstempler som Unix-sekunder og varigheder i sekunder.
+- **Websocket**: Når klienten opretter forbindelse, modtager den hele tilstanden som ét JSON-objekt.
+  Felter for ladepunkter bruger nøgler med punktummer, f.eks. `loadpoints.0.chargePower`.
+  Derefter sendes kun inkrementelle opdateringer: små JSON-objekter med de ændrede felter, som klienten fletter ind i sin kopi af tilstanden.

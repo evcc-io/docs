@@ -1,0 +1,851 @@
+---
+title: Brugerdefinerede enheder
+description: "Du kan integrere en oplader, en måler, et køretøj eller en varmeenhed uden indbygget skabelon ved selv at definere aflæsning og styring via HTTP, MQTT eller Modbus."
+tableOfContents:
+  maxHeadingLevel: 4
+translatedFrom: "3be6e303b568"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Når du opretter en oplader, en varmeenhed, en elnetsmåler, et hjemmebatteri, et solcelleanlæg, en anden forbrugsenhed, et køretøj, en tarif, en enhed til effektbegrænsning eller en notifikationstjeneste, kan du vælge **Brugerdefineret enhed** i listen over enhedstyper og beskrive din egen logik med [pluginsystemet](/da/reference/plugins).
+
+På den måde kan du integrere enheder, som ingen indbygget skabelon dækker, f.eks. aflæse den aktuelle effekt fra et HTTP-endpoint eller skrive en ønsket strømstyrke via Modbus.
+
+## Sådan definerer du en enhed
+
+I brugerfladen har hver enhedstype en **Brugerdefineret enhed**-post i skabelonvalget.
+Når du vælger den, åbnes editoren til din egen konfiguration.
+Som standard oprettes en enhed med `type: custom`. Typen kan om nødvendigt overskrives med en anden værdi (f.eks. `type: heatpump`).
+
+```yaml
+power:
+  source: mqtt
+  topic: home/current/imsys/chn2/raw
+```
+
+Alternativt kan du skrive hele konfigurationen direkte i `evcc.yaml` med `name`, `type: custom` og attributblokken nedenunder:
+
+```yaml
+meters:
+  - name: imsys
+    type: custom
+    power:
+      source: mqtt
+      topic: home/current/imsys/chn2/raw
+```
+
+Alle andre eksempler på denne side bruger den flade attributblok, som du indtaster i brugerfladen.
+
+Listen over tilgængelige pluginkilder (`http`, `mqtt`, `modbus`, …) og hjælpefunktioner (`calc`, `map`, `watchdog`, …) finder du i [pluginreferencen](/da/reference/plugins).
+
+## Attributter og features
+
+Hver brugerdefineret enhed beskrives af tre slags felter:
+
+- **Læseattributter**: plugins, som evcc forespørger for at få en værdi (f.eks. `power`, `soc`, `status`).
+- **Skriveattributter**: plugins, som evcc kalder for at sætte en værdi eller udløse en handling (f.eks. `enable`, `maxcurrent`, `wakeup`). Den værdi, der skal skrives, er tilgængelig i pluginet.
+- **Features**: `features` er en liste over flag, der aktiverer en adfærd, som afviger fra standarden. De tilgængelige flag afhænger af enhedstypen.
+
+Generel opbygning:
+
+```yaml
+# read attributes
+power:
+  source: http
+  uri: http://meter.local/power
+soc:
+  source: mqtt
+  topic: battery/soc
+
+# write attributes
+enable:
+  source: http
+  uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
+maxcurrent:
+  source: mqtt
+  topic: charger/maxcurrent
+  payload: ${maxcurrent:%d}
+
+# features
+features:
+  - heating
+  - integrateddevice
+```
+
+De tilgængelige attributnavne og feature-flag afhænger af enhedstypen og er beskrevet i afsnittene nedenfor.
+
+## Måler \{#meter\}
+
+Effektmålere konfigureres i afsnittet [`meters`](/da/reference/configuration/meters).
+Målere, der er defineret under `meters:`, kan bruges fra `site`:
+
+- `grid`: elnetsmåler
+- `pv`: solmåler
+- `battery`: måler for hjemmebatteriet
+- `charge`: måler for opladerens ladeeffekt
+- `aux`: forbrugsmåler for intelligente forbrugsenheder
+- `consumer`: måler for en almindelig forbrugsenhed, registreres i forbrugsstatistikken
+- `ext`: ekstra måler, der ikke bruges til regulering eller vises i brugerfladen, men kun logges og eksporteres
+
+`power` er den eneste påkrævede attribut.
+Ikke alle målerroller understøtter alle attributter:
+
+- `limitsoc` og `batterymode` bruges udelukkende til batterimålere (refereret fra `site.battery`).
+- `curtail` og `curtailed` bruges sammen til `pv`-målere, der understøtter effektbegrænsning (§ 9 EEG).
+- `currents`, `voltages` og `powers` er faseattributter, der hver skal konfigureres med præcis tre pluginposter (som YAML-array) og gælder for elnetsmålere (`grid`) og opladere (`charge`).
+
+Hvert plugin skal returnere den korrekte datatype.
+Til konvertering bruges [læse-pipelines](/da/reference/plugins#reading).
+
+### Læseattributter
+
+| Attribut       | Type                  | Påkrævet | Kontekst      | Beskrivelse                                                                       |
+| -------------- | --------------------- | -------- | ------------- | --------------------------------------------------------------------------------- |
+| `power`        | `float`               | ja       | alle          | Aktuel effekt i W                                                                 |
+| `energy`       | `float`               | nej      | alle          | Målerstand i kWh                                                                  |
+| `returnenergy` | `float`               | nej      | alle          | Målerstand i modsat retning i kWh (se nedenfor)                                   |
+| `maxpower`     | `int`                 | nej      | `pv` (hybrid) | Maksimal AC-effekt i W                                                            |
+| `curtailed`    | `int`                 | nej      | `pv`          | Aktuel grænse for eksport til elnettet i % (0 til 100). Kun sammen med `curtail`. |
+| `soc`          | `int`                 | nej      | `battery`     | Opladningsniveau i %                                                              |
+| `capacity`     | `float`               | nej      | `battery`     | Kapacitet i kWh                                                                   |
+| `powers`       | `[float,float,float]` | nej      | alle          | Faseeffekter i W. Til fortegnsgenkendelse ved strømme uden fortegn.               |
+| `currents`     | `[float,float,float]` | nej      | alle          | Fasestrømme i A. Til genkendelse af aktive faser.                                 |
+| `voltages`     | `[float,float,float]` | nej      | alle          | Fasespændinger i V. Til genkendelse af tilslutningen (1p/3p).                     |
+
+### Fortegn og retninger \{#signs-and-directions\}
+
+Hvad en positiv `power`-værdi og de to energiretninger betyder, afhænger af målerens rolle:
+
+| Rolle                    | `power` positiv                | `energy`   | `returnenergy`                     |
+| ------------------------ | ------------------------------ | ---------- | ---------------------------------- |
+| `grid`                   | Import fra elnettet            | Importeret | Eksporteret (eksport til elnettet) |
+| `pv`                     | Produktion                     | Produceret | Forbrugt (sjældent)                |
+| `battery`                | Afladning (negativ: opladning) | Afladet    | Opladet                            |
+| `charge`                 | Opladning                      | Opladet    | Afladet (V2X)                      |
+| `aux`, `ext`, `consumer` | Forbrug                        | Forbrugt   | Produceret (sjældent)              |
+
+`energy` og `returnenergy` er stigende målerstande i kWh, helst samlede værdier over hele levetiden som import- og eksportregistrene i en elnetsmåler.
+Forskellene mellem aflæsningerne beregnes automatisk, så pluginet skal returnere en målerstand og ikke forbrugsværdier pr. interval.
+En tæller, der nulstilles med jævne mellemrum (f.eks. dagligt), fungerer også, da nulstillingen registreres automatisk.
+En værdi på `0` behandles som ikke tilgængelig.
+
+Begge attributter er valgfrie.
+Uden dem udledes energihistorikken af `power` over tid.
+Rigtige målerstande giver mere præcise langtidsstatistikker.
+
+### Skriveattributter \{#meter-write-attributes\}
+
+| Attribut      | Type  | Påkrævet | Kontekst  | Beskrivelse                                                                                                                                                                              |
+| ------------- | ----- | -------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limitsoc`    | `int` | nej      | `battery` | Sæt batteriets opladningsmål i %. Opladningsmålet beregnes ud fra de konfigurerede `MinSoc` og `MaxSoc` samt det aktuelle opladningsniveau (attribut `soc`).                             |
+| `curtail`     | `int` | nej      | `pv`      | Sæt grænsen for eksport til elnettet i % af den nominelle produktionseffekt (0 til 100, `100` = ingen grænse). Kun sammen med `curtailed`. Se [Enhed til effektbegrænsning](#curtailer). |
+| `batterymode` | `int` | nej      | `battery` | Sæt batteriets styringstilstand direkte. Tilstandene er angivet nedenfor.                                                                                                                |
+
+#### Batteritilstande \{#battery-modes\}
+
+| Værdi | Tilstand     | Adfærd                                                      |
+| ----- | ------------ | ----------------------------------------------------------- |
+| `1`   | `normal`     | Normal drift: opladning fra overskud, afladning til forbrug |
+| `2`   | `hold`       | Ingen afladning, opladning fra overskud er stadig tilladt   |
+| `3`   | `charge`     | Opladning fra elnettet, ingen afladning                     |
+| `4`   | `holdcharge` | Ingen opladning, afladning til forbrug er stadig tilladt    |
+| `5`   | `discharge`  | Afladning til elnettet                                      |
+
+Kun de batteritilstande, som enheden understøtter, bliver brugt.
+Hvis `batterymode` er en [`switch`](/da/reference/plugins#switch), hentes de understøttede tilstande fra dens `case`-værdier.
+Det fungerer også, når switchen er pakket ind i en [`watchdog`](/da/reference/plugins#watchdog).
+Alle andre plugins kræver `batterymodes` med en liste over de understøttede tilstande, f.eks. `batterymodes: ["normal", "hold", "charge"]`.
+
+### Eksempler
+
+Aflæs den aktuelle effekt ved elnettet fra et HTTP-endpoint.
+
+```yaml
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://zaehler.network.local:8080/api/data.json?from=now
+      jq: .data.tuples[0][1]
+```
+
+Aflæs effekt og opladningsniveau for et hjemmebatteri, og sæt dets tilstand via HTTP.
+`switch` dækker tilstandene normal, hold og charge, så evcc tilbyder præcis disse tre.
+
+```yaml
+meters:
+  - name: battery
+    type: custom
+    capacity: 10 # kWh
+    power:
+      source: http
+      uri: http://battery.local/api/power
+    soc:
+      source: http
+      uri: http://battery.local/api/soc
+    batterymode:
+      source: switch
+      switch:
+        - case: 1 # normal
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "auto"}'
+        - case: 2 # hold
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "hold"}'
+        - case: 3 # charge
+          set:
+            source: http
+            uri: http://battery.local/api/mode
+            method: POST
+            body: '{"mode": "charge"}'
+```
+
+## Oplader \{#charger\}
+
+Standardtypen `type: custom` dækker opladere med kontinuerlig strømstyring.
+Til andre enheder findes specialiserede opladertyper, som er beskrevet under [Styrbar stikkontakt](#charger-switchsocket) og [Varmepumper](#charger-heating).
+
+### Læseattributter
+
+| Attribut       | Type                  | Påkrævet | Beskrivelse                                                                                                |
+| -------------- | --------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `status`       | `string`              | ja       | Status (A..F)                                                                                              |
+| `enabled`      | `bool`                | ja       | Er opladning aktiveret?                                                                                    |
+| `power`        | `float`               | nej      | Ladeeffekt i W                                                                                             |
+| `energy`       | `float`               | nej      | Målerstand i kWh                                                                                           |
+| `returnenergy` | `float`               | nej      | Målerstand i modsat retning i kWh (afladet energi, V2X)                                                    |
+| `identify`     | `string`              | nej      | Aktuel RFID-identifikator                                                                                  |
+| `soc`          | `int`                 | nej      | Opladningsniveau i %                                                                                       |
+| `limitsoc`     | `int`                 | nej      | Ladegrænse i %                                                                                             |
+| `temp`         | `float`               | nej      | Aktuel temperatur i °C (opvarmning, alias for `soc`)                                                       |
+| `limittemp`    | `int`                 | nej      | Temperaturgrænse i °C (opvarmning, alias for `limitsoc`)                                                   |
+| `finishtime`   | `string`              | nej      | Forventet sluttidspunkt for opladningen (RFC3339, Go-varighed, Unix-tidsstempel eller resterende sekunder) |
+| `phases`       | `int`                 | nej      | Antal fysiske faser (1..3)                                                                                 |
+| `powers`       | `[float,float,float]` | nej      | Faseeffekter i W. Til fortegnsgenkendelse ved strømme uden fortegn.                                        |
+| `currents`     | `[float,float,float]` | nej      | Fasestrømme i A. Til genkendelse af aktive faser.                                                          |
+| `voltages`     | `[float,float,float]` | nej      | Fasespændinger i V. Til genkendelse af tilslutningen (1p/3p).                                              |
+
+### Skriveattributter
+
+| Attribut           | Type    | Påkrævet | Beskrivelse                                |
+| ------------------ | ------- | -------- | ------------------------------------------ |
+| `enable`           | `bool`  | ja       | Aktivér/deaktivér opladning                |
+| `maxcurrent`       | `int`   | ja       | Sæt maksimal ladestrøm i A                 |
+| `maxcurrentmillis` | `float` | nej      | Sæt maksimal ladestrøm i A (med decimaler) |
+| `phases1p3p`       | `int`   | nej      | Udfør faseskift (kræver `tos: true`)       |
+| `wakeup`           | `bool`  | nej      | Væk køretøjet                              |
+
+### Features \{#charger-features\}
+
+| Feature            | Beskrivelse                                                                                                                                                                                                                                                                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Intet valg af køretøj. Enheden kører uden tilsluttet køretøj og uden opladningssessioner (f.eks. varmepumpe, varmelegeme, fast installeret forbrugsenhed).                                                                                                                                                                                    |
+| `heating`          | Behandl enheden som opvarmning: Opladningsniveau og grænser vises i °C i stedet for %.                                                                                                                                                                                                                                                        |
+| `continuous`       | Enheden fortsætter i sin egen normale drift, når den er ”deaktiveret”. Brugerfladen viser ”Normal drift” i stedet for ”Standby”. En anmodning om mere effekt (f.eks. ved soloverskud eller billig strøm fra elnettet) vises som ”Boost”. Tilstandene hedder **Normal**, **Smart** og **Boost** i stedet for **Fra**, **Smart** og **Hurtig**. |
+| `switchdevice`     | Enheden kan kun tændes og slukkes (ingen kontinuerlig strømstyring). Maksimal strøm og indstillingen **Oplad altid** vises ikke. Minimal strøm og faser bestemmer, ved hvilken effekt opladning med sol starter. Uden `continuous` hedder tilstandene **Fra**, **Smart** og **Aktiveret**.                                                    |
+
+Almindelige kombinationer af features i de indbyggede skabeloner:
+
+**Elektrisk varmelegeme**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+```
+
+**Stikkontakt**:
+
+```yaml
+features:
+  - switchdevice
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
+```
+
+**Varmepumpe**:
+
+```yaml
+features:
+  - integrateddevice
+  - heating
+  - continuous
+  - switchdevice # optional, when no current control is available (SG Ready)
+```
+
+### Eksempler
+
+Forespørg en opladers opladningsstatus via Modbus.
+
+```yaml
+features:
+  - integrateddevice
+enabled:
+  source: modbus
+  id: 4711
+  uri: modbus.local:502
+  rtu: false
+  register:
+    address: 100
+    type: holding
+    decode: uint16
+```
+
+Tænd og sluk en Tasmota-stikkontakt via en MQTT-besked.
+
+```yaml
+enable:
+  source: mqtt
+  broker: mosquitto.local:883
+  topic: cmd/unu-switch/Power
+  payload: ON
+```
+
+### Styrbar stikkontakt \{#charger-switchsocket\}
+
+**`type: switchsocket`**
+
+Til styrbare stikkontakter og lignende relæenheder, som kun kan tændes og slukkes uden kontinuerlig strømstyring.
+Opladningsstatus udledes af den aktuelle effekt (over `standbypower` betyder opladning).
+Den fulde opsætning er beskrevet under [Styrbare stikkontakter](/da/smartswitches).
+
+| Attribut       | Type    | Påkrævet | Beskrivelse                                                                                |
+| -------------- | ------- | -------- | ------------------------------------------------------------------------------------------ |
+| `enabled`      | `bool`  | ja       | Aflæs stikkontaktens tilstand (tændt/slukket)                                              |
+| `power`        | `float` | ja       | Aktuel effekt i W                                                                          |
+| `energy`       | `float` | nej      | Målerstand i kWh                                                                           |
+| `soc`          | `float` | nej      | Opladningsniveau i %                                                                       |
+| `enable`       | `bool`  | ja       | Tænd/sluk stikkontakten                                                                    |
+| `standbypower` | `float` | nej      | Effektgrænse i W. Over den: opladning, under den: standby. Negativ: statisk (ingen måling) |
+
+### Varmepumper \{#charger-heating\}
+
+Varmepumper og lignende varmelegemer bruger egne opladertyper, hver med sine egne attributter.
+Den fulde opsætning er beskrevet under [Varmepumper og varmelegemer](/da/heating).
+
+<Tabs>
+  <TabItem label="Varmepumpe">
+
+**`type: heatpump`**
+
+Til inverterstyrede varmepumper, der modtager en kontinuerlig effektværdi via Modbus, HTTP eller lignende.
+Den ønskede varmeeffekt skrives direkte via `setmaxpower`.
+
+| Attribut      | Type    | Påkrævet | Beskrivelse                            |
+| ------------- | ------- | -------- | -------------------------------------- |
+| `power`       | `float` | nej      | Aktuel effekt i W                      |
+| `energy`      | `float` | nej      | Målerstand i kWh                       |
+| `temp`        | `float` | nej      | Aktuel temperatur i °C                 |
+| `limittemp`   | `int`   | nej      | Enhedens interne temperaturgrænse i °C |
+| `setmaxpower` | `int`   | ja       | Sæt maksimal varmeeffekt i W           |
+| `getmaxpower` | `float` | nej      | Aktuel maksimal varmeeffekt i W        |
+
+  </TabItem>
+  <TabItem label="SG-Ready">
+
+**`type: sgready`**
+
+Til varmepumper, der stiller standard-SG-Ready-grænsefladen til rådighed som en enkelt tilstandsværdi.
+Tre tilstande understøttes: `1` reduceret, `2` normal, `3` boost.
+
+| Attribut      | Type    | Påkrævet | Beskrivelse                                                 |
+| ------------- | ------- | -------- | ----------------------------------------------------------- |
+| `power`       | `float` | nej      | Aktuel effekt i W                                           |
+| `energy`      | `float` | nej      | Målerstand i kWh                                            |
+| `temp`        | `float` | nej      | Aktuel temperatur i °C                                      |
+| `limittemp`   | `int`   | nej      | Enhedens interne temperaturgrænse i °C                      |
+| `setmode`     | `int`   | ja       | Skift SG-Ready-tilstand (1: reduceret, 2: normal, 3: boost) |
+| `getmode`     | `int`   | nej      | Aktuel SG-Ready-tilstand (1, 2, 3)                          |
+| `setmaxpower` | `int`   | nej      | Sæt maksimal varmeeffekt i W                                |
+
+  </TabItem>
+  <TabItem label="SG-Ready via relæer">
+
+**`type: sgready-relay`**
+
+Til varmepumper, hvis SG-Ready-indgang er tilsluttet som to potentialfrie relækontakter (boost + dæmpning).
+Hver kontakt styres af en separat underoplader, som angives med sin type og ikke via plugins.
+
+| Attribut    | Type            | Påkrævet | Beskrivelse                            |
+| ----------- | --------------- | -------- | -------------------------------------- |
+| `power`     | `float`         | nej      | Aktuel effekt i W                      |
+| `energy`    | `float`         | nej      | Målerstand i kWh                       |
+| `temp`      | `float`         | nej      | Aktuel temperatur i °C                 |
+| `limittemp` | `int`           | nej      | Enhedens interne temperaturgrænse i °C |
+| `boost`     | `charger-typed` | ja       | Relæ til SG-Ready-boostkontakten       |
+| `dim`       | `charger-typed` | nej      | Relæ til SG-Ready-dæmpningskontakten   |
+
+  </TabItem>
+</Tabs>
+
+## Køretøj \{#vehicle\}
+
+Køretøjsparametre kan også aflæses via plugins.
+
+### Læseattributter
+
+| Attribut        | Type     | Påkrævet | Beskrivelse                                                                                                |
+| --------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `soc`           | `int`    | ja       | Opladningsniveau i %                                                                                       |
+| `limitsoc`      | `int`    | nej      | Ladegrænse i %                                                                                             |
+| `status`        | `string` | nej      | Status (A..F)                                                                                              |
+| `range`         | `int`    | nej      | Rækkevidde i km                                                                                            |
+| `odometer`      | `int`    | nej      | Kilometerstand i km                                                                                        |
+| `climater`      | `bool`   | nej      | Klimaanlæg aktivt?                                                                                         |
+| `getmaxcurrent` | `float`  | nej      | Maksimal ladestrøm i A                                                                                     |
+| `finishtime`    | `string` | nej      | Forventet sluttidspunkt for opladningen (RFC3339, Go-varighed, Unix-tidsstempel eller resterende sekunder) |
+
+### Skriveattributter
+
+| Attribut       | Type   | Påkrævet | Beskrivelse                |
+| -------------- | ------ | -------- | -------------------------- |
+| `wakeup`       | `bool` | nej      | Væk køretøjet              |
+| `chargeenable` | `bool` | nej      | Start/stop opladningen     |
+| `maxcurrent`   | `int`  | nej      | Sæt maksimal ladestrøm i A |
+
+### Konfiguration
+
+| Attribut   | Type     | Påkrævet | Beskrivelse                    |
+| ---------- | -------- | -------- | ------------------------------ |
+| `title`    | `string` | nej      | Køretøjets visningsnavn        |
+| `capacity` | `float`  | nej      | Batterikapacitet i kWh         |
+| `icon`     | `string` | nej      | Ikon, der vises i brugerfladen |
+
+### Features \{#vehicle-features\}
+
+| Feature         | Beskrivelse                                                                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coarsecurrent` | Køretøjet accepterer kun ladestrøm i hele trin på 1 A. Reguleringen begrænses til grove trin på 1 A, selv om opladeren kunne regulere finere.                           |
+| `streaming`     | Køretøjet sender selv data i stedet for at blive forespurgt (f.eks. BMW Cardata). Opdateringer af opladningsniveauet uden for aktiv opladning betragtes som pålidelige. |
+| `welcomecharge` | Køretøjet forventer, at opladeren er aktiv ved tilslutning, for at registrere forbindelsen som fungerende. Ellers melder det en fejl.                                   |
+
+### Eksempler
+
+Aflæs den aktuelle rækkevidde fra MQTT-beskeder.
+
+```yaml
+title: Green Mazda # display name (optional)
+capacity: 50 # battery capacity in kWh (optional)
+features:
+  - coarsecurrent
+range:
+  source: mqtt
+  topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
+```
+
+Væk en bil med et HTTP-ping, før der sendes yderligere forespørgsler.
+
+```yaml
+wakeup:
+  source: http
+  uri: http://teslalogger.local:5000/command/08154711/wake_up
+```
+
+<a id="onidentify"></a>
+
+`onIdentify` sætter automatisk ladetilstanden, når køretøjet genkendes.
+
+```yaml
+soc:
+  source: mqtt
+  topic: car/soc
+onIdentify:
+  mode: smart
+```
+
+Tilgængelige tilstande: `off`, `smart`, `now`.
+De forældede værdier `pv` og `minpv` accepteres stadig og aktiverer `smart` med [Oplad altid](/da/features/modes#always-charge) slået henholdsvis fra og til.
+
+## Tarif og prognose \{#tariff\}
+
+En brugerdefineret tarif forbinder evcc med din egen værdikilde via pluginsystemet.
+Attributten `tariff` angiver, hvad kilden repræsenterer, og hvilken måleenhed værdierne har.
+
+### Læseattributter
+
+Enten `price` eller `forecast` skal være konfigureret, ikke begge.
+
+| Attribut   | Type     | Beskrivelse                                                                                               |
+| ---------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Aktuel værdi. Float, som pluginet returnerer.                                                             |
+| `forecast` | `string` | Prognose som JSON-streng med en liste over tidsperioder og værdier (se skema nedenfor). Hentes hver time. |
+
+### Konfiguration
+
+| Attribut       | Type       | Påkrævet | Beskrivelse                                                                                                                                                                                                  |
+| -------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tariff`       | `string`   | nej      | `price` (standard), `co2`, `solar` eller `temperature`. Bestemmer måleenheden for de returnerede værdier: pris i den konfigurerede valuta pr. kWh, CO₂-intensitet i g/kWh, solprognose i W, temperatur i °C. |
+| `charges`      | `float`    | nej      | Fast tillæg pr. kWh, der lægges til hver værdi. Standard `0`.                                                                                                                                                |
+| `chargesZones` | `list`     | nej      | Tidsafhængige tillæg (f.eks. nettariffer), der erstatter `charges` i bestemte perioder. Se [tidsafhængige nettariffer](/da/reference/configuration/tariffs#charges-zones).                                   |
+| `tax`          | `float`    | nej      | Procentvis afgift, der lægges på resultatet, f.eks. `0.2` for 20 %. Standard `0`.                                                                                                                            |
+| `formula`      | `string`   | nej      | Go-udtryk til din egen beregning med `price`, `charges` og `tax` tilgængelige. Se [eksempler](#formula-examples).                                                                                            |
+| `interval`     | `duration` | nej      | Hentningsinterval for `forecast`. Standard `1h`.                                                                                                                                                             |
+| `cache`        | `duration` | nej      | Cachevarighed for `price`. Standard `15m`.                                                                                                                                                                   |
+
+### Features \{#tariff-features\}
+
+| Feature     | Beskrivelse                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| `average`   | Udjævner finmaskede prisintervaller (f.eks. 15-minutters værdier) til gennemsnit pr. time.              |
+| `cacheable` | Gemmer hentede værdier. Bruges som reserve efter en genstart eller et udbydernedbrud (op til 24 timer). |
+
+### Eksempler
+
+**Aktuel pris via HTTP**:
+
+```yaml
+price:
+  source: http
+  uri: https://example.com/api/price
+```
+
+**Prognose via HTTP**:
+
+```yaml
+forecast:
+  source: http
+  uri: https://api.allinpower.nl/troodon/api/p/spot_market/prices/?product_type=ELK
+  jq: '[.timestamps, .prices] | transpose | map({ "start": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | strftime("%Y-%m-%dT%H:%M:%SZ")), "end": (.[0] | strptime("%Y-%m-%dT%H:%M:%S.%f%z") | mktime + 3600 | strftime("%Y-%m-%dT%H:%M:%SZ")), "value": .[1] }) | tostring'
+```
+
+Pluginet skal returnere en JSON-struktur med en liste over tidsperioder og priser.
+Datofelter skal have formatet `YYYY-MM-DDTHH:MM:SSZ`, og prisen skal være i den korrekte valutaenhed (f.eks. EUR).
+evcc arbejder internt med 15-minutters intervaller. Plugins må gerne returnere timedata, som så konverteres automatisk.
+
+```json
+[
+  {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-01-01T00:15:00Z",
+    "value": 25.0
+  },
+  {
+    "start": "2025-01-01T00:15:00Z",
+    "end": "2025-01-01T00:30:00Z",
+    "value": 26.5
+  },
+  {
+    "start": "2025-01-01T00:30:00Z",
+    "end": "2025-01-01T00:45:00Z",
+    "value": 24.8
+  },
+  {
+    "start": "2025-01-01T00:45:00Z",
+    "end": "2025-01-01T01:00:00Z",
+    "value": 27.2
+  }
+]
+```
+
+<a id="formula-examples"></a>
+
+Feltet `formula` accepterer et Go-udtryk, hvor `price`, `charges`, `tax` og intervallets tidsstempel `ts` er tilgængelige.
+[`math`-biblioteket](https://pkg.go.dev/math) og [`time.Time`](https://pkg.go.dev/time#Time)-metoderne på `ts` kan bruges.
+Formlen udføres for den aktuelle pris og for hvert prognoseinterval.
+
+**Prisloft**:
+
+```yaml
+charges: 0.22
+tax: 0.19
+formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Begrænser resultatet til højst 50 ct/kWh.
+
+**Ingen eksporttarif ved negative day-ahead-priser** (tyske solcelleanlæg, der er idriftsat efter 25. februar 2025):
+
+```yaml
+formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
+```
+
+Udbetaler en fast eksporttarif på 7 ct/kWh, undtagen når day-ahead-markedsprisen er negativ.
+
+## Ekstern grænse \{#external-limit\}
+
+En brugerdefineret integration til funktionen [Ekstern grænse](/da/external-limit) forbinder en styreboks eller et energistyringssystem, som ingen indbygget integration dækker.
+I brugerfladen vælger du **Brugerdefineret integration** under **Opsætning → Ekstern grænse**.
+
+Der er fire typer, som angiver, hvordan grænsesignalet modtages: `relay` (en enkelt koblingskontakt), `fnn` (FNN-styreboks med flere koblingskontakter), `eebus` (EEBUS-protokol) eller `custom` (dynamiske grænseværdier via plugins).
+Hvert signal aflæses via en [plugin](/da/reference/plugins)-konfiguration (GPIO, MQTT, HTTP, Modbus).
+Se også [konfigurationsreferencen for `hems`](/da/reference/configuration/hems).
+
+### Relæ
+
+Tilslutning via en enkelt koblingskontakt er den enkleste løsning.
+Styreboksen aktiverer en kontakt, som din evcc-installation evaluerer.
+
+| Attribut      | Type       | Påkrævet | Beskrivelse                                                                                            |
+| ------------- | ---------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `maxPower`    | `int` (W)  | ja       | Samlet effektgrænse, der gælder, mens signalet er aktivt.                                              |
+| `limit`       | plugin     | ja       | Plugin-konfiguration til aflæsning af koblingskontakten. `true`/`1` = begrænset, `false`/`0` = normal. |
+| `passthrough` | plugin     | nej      | Videresender begrænsningssignalet til et eksternt system.                                              |
+| `interval`    | `duration` | nej      | Aflæsningsinterval for koblingskontakten. Standard `10s`.                                              |
+
+Effektgrænsen får du oplyst af netselskabet.
+Ved flere styrbare forbrugsenheder (SteuVE) tages samtidighedsfaktoren i betragtning.
+Du kan også selv beregne grænsen med formlen: **Samlet grænse = antal SteuVE × 4,2 kW × samtidighedsfaktor**. Detaljer om beregningen finder du [her](https://www.inexogy.com/blog/14a-enwg/).
+
+<Tabs>
+<TabItem label="Raspberry Pi GPIO">
+
+Hvis du bruger en Raspberry Pi, kan GPIO-pinnen aflæses direkte:
+
+```yaml
+type: relay
+maxPower: 8400 # Example for 2 SteuVE
+limit:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
+```
+
+Flere detaljer om GPIO-pluginet finder du i [plugindokumentationen](/da/reference/plugins#gpio).
+
+</TabItem>
+<TabItem label="MQTT">
+
+Hvis styreboksen eller gatewayen sender MQTT-beskeder:
+
+```yaml
+type: relay
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+limit:
+  source: mqtt
+  topic: hems/limit/status
+  # Expected values: 0/false = normal, 1/true = limited
+```
+
+</TabItem>
+<TabItem label="HTTP API">
+
+Til styrebokse med REST API:
+
+```yaml
+type: relay
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+limit:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .limited # JSON path to boolean value
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Hvis styreboksen eller en gateway stiller effektgrænsen til rådighed via Modbus:
+
+```yaml
+type: relay
+maxPower: 4200 # Example for 1 SteuVE
+limit:
+  source: modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
+  timeout: 5s
+  register:
+    type: holding
+    decode: uint16
+    address: 8056
+  # Return value: 0 = not limited, 1 = limited
+```
+
+</TabItem>
+</Tabs>
+
+### FNN-styreboks \{#external-limit-fnn\}
+
+Styrebokse efter FNN-standarden signalerer dæmpning og effektbegrænsning via separate koblingskontakter.
+Dæmpning af forbruget (W4) og effektbegrænsning (W3, S2, S1) fungerer uafhængigt af hinanden.
+Mindst ét af signalerne `w4` og `w3` skal være konfigureret.
+
+| Attribut          | Type       | Påkrævet | Beskrivelse                                                                                           |
+| ----------------- | ---------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `maxDimPower`     | `int` (W)  | ja¹      | Forbrugsgrænse, mens dæmpningssignalet (W4) er aktivt.                                                |
+| `maxCurtailPower` | `int` (W)  | ja²      | Installeret soleffekt, grundværdi for trinene i effektbegrænsningen.                                  |
+| `w4`              | plugin     | nej      | Aflæser dæmpningssignalet. Begrænser forbruget til `maxDimPower`.                                     |
+| `w3`              | plugin     | nej      | Aflæser signalet til effektbegrænsning. Begrænser eksport til elnettet til 0 % af `maxCurtailPower`.  |
+| `s2`              | plugin     | nej      | Aflæser signalet til effektbegrænsning. Begrænser eksport til elnettet til 30 % af `maxCurtailPower`. |
+| `s1`              | plugin     | nej      | Aflæser signalet til effektbegrænsning. Begrænser eksport til elnettet til 60 % af `maxCurtailPower`. |
+| `interval`        | `duration` | nej      | Aflæsningsinterval for koblingskontakterne. Standard `10s`.                                           |
+
+¹ påkrævet, når `w4` er konfigureret, ² påkrævet, når `w3` er konfigureret.
+
+```yaml
+type: fnn
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+w4:
+  source: gpio
+  function: read
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
+w3:
+  source: gpio
+  function: read
+  pin: 27
+s2:
+  source: gpio
+  function: read
+  pin: 22
+s1:
+  source: gpio
+  function: read
+  pin: 23
+```
+
+### EEBUS \{#external-limit-eebus\}
+
+Den digitale tilslutning sker via EEBUS-protokollen.
+Styreboksen kommunikerer direkte med din evcc-installation og overfører automatisk effektgrænsen.
+Styreboks og evcc skal [parres](/da/external-limit#eebus-pairing) én gang.
+
+| Attribut                              | Type       | Påkrævet | Beskrivelse                                               |
+| ------------------------------------- | ---------- | -------- | --------------------------------------------------------- |
+| `ski`                                 | `string`   | ja       | Styreboksens SKI (Subject Key Identifier).                |
+| `contractualConsumptionNominalMax`    | `int` (W)  | nej      | Kontraktmæssig maksimal forbrugseffekt.                   |
+| `failsafeConsumptionActivePowerLimit` | `int` (W)  | nej      | Failsafe-grænse for forbrugseffekten.                     |
+| `productionNominalMax`                | `int` (W)  | nej      | Installeret generatoreffekt (Wp).                         |
+| `failsafeProductionActivePowerLimit`  | `int` (W)  | nej      | Failsafe-grænse for effekten ved eksport til elnettet.    |
+| `failsafeDurationMinimum`             | `duration` | nej      | Minimal failsafe-varighed, f.eks. `2h`.                   |
+| `passthrough`                         | plugin     | nej      | Videresender begrænsningssignalet til et eksternt system. |
+
+```yaml
+type: eebus
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
+```
+
+### Brugerdefineret \{#external-limit-custom\}
+
+Den generiske integration er beregnet til styresystemer, der leverer dynamiske grænseværdier i stedet for koblingskontakter.
+Forbrugsgrænse og effektbegrænsning aflæses via plugins og fungerer uafhængigt af hinanden.
+Mindst én af `maxConsumptionPower` og `curtailedPercent` skal være konfigureret.
+
+| Attribut               | Type       | Påkrævet | Beskrivelse                                                                                                           |
+| ---------------------- | ---------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | nej¹     | Aflæser den samlede effektgrænse i W. `0` = ingen grænse.                                                             |
+| `curtailedPercent`     | plugin     | nej¹     | Aflæser den tilladte eksport til elnettet i procent af `productionNominalMax` (0 til 100). `100` = ingen begrænsning. |
+| `productionNominalMax` | `int` (W)  | nej²     | Installeret generatoreffekt (Wp).                                                                                     |
+| `interval`             | `duration` | nej      | Aflæsningsinterval for plugins. Standard `10s`.                                                                       |
+
+¹ mindst én af de to er påkrævet, ² påkrævet, når `curtailedPercent` er konfigureret.
+
+```yaml
+type: custom
+maxConsumptionPower:
+  source: http
+  uri: http://steuerbox.local/api/limit
+  jq: .maxPower # Power limit in watts, 0 = no limit
+curtailedPercent:
+  source: mqtt
+  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
+productionNominalMax: 10000 # Installed generator power (Wp)
+```
+
+## Enhed til effektbegrænsning \{#curtailer\}
+
+En brugerdefineret enhed til effektbegrænsning begrænser solcelleanlæggets eksport til elnettet efter anmodning fra netselskabet (§ 9 EEG), når inverteren ikke kan begrænses via sin [måler](#meter)-konfiguration.
+I brugerfladen vælger du **Brugerdefineret enhed** under **Opsætning → Elnet → Tilføj enhed til effektbegrænsning**.
+Se også [konfigurationsreferencen for `curtailers`](/da/reference/configuration/curtailers) og [Ekstern grænse](/da/external-limit#curtailment-devices).
+
+Enheden modtager den tilladte eksport til elnettet som en procentdel af den installerede generatoreffekt og skal anvende den på inverteren.
+`100` betyder ingen grænse.
+
+### Attributter
+
+| Attribut    | Type   | Påkrævet | Beskrivelse                                                                                                                                                      |
+| ----------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `curtail`   | plugin | ja       | Sætter grænsen for eksport til elnettet i % af den nominelle produktionseffekt (0 til 100). Skal understøtte skriveadgang.                                       |
+| `curtailed` | plugin | ja       | Aflæser den aktuelle grænse for eksport til elnettet i %. Hvis enheden ikke kan melde den, bruges pluginet [`error`](/da/reference/plugins#error) (se eksempel). |
+
+### Eksempler
+
+<Tabs>
+<TabItem label="HTTP">
+
+```yaml
+curtail:
+  source: http
+  uri: http://inverter.local/api/limit?percent={{ .curtail }}
+  method: POST
+curtailed:
+  source: http
+  uri: http://inverter.local/api/limit
+  jq: .percent
+```
+
+</TabItem>
+<TabItem label="Modbus">
+
+Inverteren kan ikke melde sin grænse, så `curtailed` returnerer `ErrNotAvailable`, og grænsen skrives, hver gang den ændres.
+
+```yaml
+curtail:
+  source: modbus
+  uri: 192.168.0.10:502
+  id: 1
+  register:
+    type: writesingle
+    address: 40016
+    encoding: uint16
+curtailed:
+  source: error
+  error: ErrNotAvailable
+```
+
+</TabItem>
+</Tabs>
+
+## Notifikationstjeneste \{#notification-service\}
+
+En brugerdefineret notifikationstjeneste sender [notifikationer](/da/notifications) via et vilkårligt [plugin](/da/reference/plugins) med skriveadgang, f.eks. et shell-script, en HTTP-forespørgsel eller en MQTT-besked.
+I brugerfladen vælger du **Bruger-defineret tjeneste** under **Opsætning → Beskeder → Tjenester**.
+
+Beskeden stilles til rådighed for pluginet i parameteren `${send}` (eller som skabelonparameter `{{.send}}`).
+
+### Konfiguration
+
+| Attribut   | Type     | Påkrævet | Beskrivelse                                                        |
+| ---------- | -------- | -------- | ------------------------------------------------------------------ |
+| `send`     | plugin   | ja       | Plugin, der kaldes for hver besked. Skal understøtte skriveadgang. |
+| `encoding` | `string` | nej      | Format for værdien i `${send}`. Se nedenfor.                       |
+
+De mulige værdier for `encoding` er:
+
+| Kodning | Indhold af `${send}`                                                                                            |
+| ------- | --------------------------------------------------------------------------------------------------------------- |
+| `json`  | JSON-objekt `{ "msg": msg, "title": title }`. Feltet `title` tilføjes kun, hvis det er defineret for hændelsen. |
+| `csv`   | `title` og `msg` som kommasepareret liste                                                                       |
+| `tsv`   | Som `csv`, men tabulatorsepareret                                                                               |
+| `title` | Kun titlen                                                                                                      |
+| (ingen) | Kun beskeden (`msg`)                                                                                            |
+
+### Eksempel
+
+```yaml
+messaging:
+  events:
+    connect:
+      title: "${vehicleTitle} connected"
+      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+  services:
+    - type: custom
+      encoding: json
+      send:
+        # plugin type
+        source: script
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
+        cmd: /usr/local/bin/evcc_message "{{.send}}"
+```
+
+I dette eksempel kaldes et shell-script (`cmd`) med argumentet `{"title": "...", "msg": "..."}`.

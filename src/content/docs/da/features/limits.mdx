@@ -1,0 +1,125 @@
+---
+title: "Minimumsopladning og grænser"
+description: "Med minimumsopladningen oplades dit køretøj straks efter tilslutning til et bestemt niveau, og med ladegrænsen oplades det aldrig over f.eks. 80 %."
+sidebar:
+  order: 4
+translatedFrom: "c321f49dadd9"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+De fleste køretøjsbatterier har det ikke godt med at stå med et meget højt eller lavt opladningsniveau i længere tid.
+Derfor giver det mening at holde batteriets opladningsniveau inden for et bestemt område.
+Minimumsopladningen og ladegrænsen hjælper med det.
+
+## Minimumsopladning \{#minimum\}
+
+Med minimumsopladningen kan du for hvert køretøj angive en værdi, som køretøjet skal oplades til så hurtigt som muligt efter tilslutning.
+Det sikrer, at køretøjet ikke står med et lavt opladningsniveau længere end nødvendigt.
+Samtidig har du altid en vis rækkevidde til rådighed til spontane ture.
+
+Et eksempel: Du kommer hjem med et opladningsniveau på 5 %.
+Hvis du har angivet en minimumsopladning på 20 %, oplades køretøjet straks til 20 %.
+Om nødvendigt også med energi fra dit hjemmebatteri eller fra elnettet.
+Derefter oplades køretøjet som normalt med [soloverskud](/da/features/solar-charging).
+
+### Indstilling
+
+Du finder indstillingen **Minimum opladning** i dialogboksen **Køretøjsindstillinger**, som du åbner via **Mere → Køretøjer** i navigationslinjen.
+
+<Screenshot
+  name="features/screenshots/minsoc-setting"
+  caption="Skærmbillede af indstillingen for minimumsopladning i dialogboksen med køretøjsindstillinger"
+/>
+
+Forudsætningen er, at der ved ladepunktet er valgt et køretøj med kendt opladningsniveau (online-API).
+Indstillingen er ikke tilgængelig for gæstekøretøjer eller konfigurerede køretøjer uden online-API (offline-køretøj).
+
+<Screenshot
+  name="features/screenshots/minsoc-loadpoint"
+  caption="Skærmbillede af et ladepunkt med aktiv minimumsopladning"
+/>
+
+En aktiv minimumsopladning vises i brugergrænsefladen med et rødt område i statuslinjen.
+
+:::note[Bemærk]
+Hvis evcc ikke kan bestemme dit køretøjs opladningsniveau ved tilslutning, antager systemet, at dit køretøj er tomt.
+Det betyder, at evcc oplader batteriet med den energimængde, der efter beregningen svarer til minimumsopladningen (f.eks. 0–20 %).
+Grundlaget er den batterikapacitet, der er angivet for [køretøjet](/da/features/vehicle).
+Hvis det sker regelmæssigt, f.eks. fordi modtagelsen ved ladepunktet er dårlig, bør du deaktivere minimumsopladningen.
+:::
+
+### Varmelegemer
+
+For ladepunkter med et varmelegeme kan du i stedet angive en minimumstemperatur.
+Hvis den målte temperatur er under denne værdi, bruges strøm fra batteriet og elnettet også i tilstanden Smart for at holde denne temperatur.
+
+Du finder indstillingen **Min. temperatur** i dialogboksen med ladepunktets indstillinger under **Opvarmning**.
+
+## Ladegrænse
+
+Ladegrænsen fastlægger den øvre grænse for opladningen.
+Den sikrer f.eks., at køretøjet kun oplades til 80 %.
+Afhængigt af køretøjet findes der to varianter: baseret på energi og baseret på opladningsniveau.
+
+### Energimængde (kWh)
+
+For gæstekøretøjer eller konfigurationer uden online-API (offline-køretøj) kan du angive ladegrænsen i kWh.
+Hvis du f.eks. vælger en grænse på 30 kWh, stopper opladningen, så snart denne mængde er nået i den aktuelle opladning.
+
+<Screenshot
+  name="features/screenshots/limitenergy-loadpoint"
+  caption="Skærmbillede af et ladepunkt med en energigrænse på 15 kWh"
+/>
+
+Som standard kan du vælge en værdi i trin på 5 kWh op til 100 kWh.
+Hvis du har angivet dit køretøjs batterikapacitet i [køretøjsparametrene](/da/reference/configuration/vehicles#capacity), tilpasses trinene tilsvarende.
+Du ser også, hvor mange procent af batteriet den valgte energimængde svarer til.
+
+Den indstillede energigrænse gælder kun for den aktuelle opladning og fjernes igen, når køretøjet frakobles.
+
+### Opladningsniveau (%)
+
+Hvis evcc kender dit opladningsniveau (online-API), kan du angive ladegrænsen i procent.
+Hvis du f.eks. vælger en grænse på 80 %, stopper opladningen, så snart dette opladningsniveau er nået.
+
+Den indstillede grænse vises i statuslinjen med en grøn skyder.
+Du kan også bruge den til at justere grænsen direkte i trin på 5 %.
+
+<Screenshot
+  name="features/screenshots/limitsoc-loadpoint"
+  caption="Skærmbillede af et ladepunkt med en ladegrænse på 90 %"
+/>
+
+Den indstillede ladegrænse gælder kun for den aktuelle opladning og nulstilles til 100 %, når køretøjet frakobles.
+Du kan dog angive en **Standardgrænse** pr. køretøj i dialogboksen **Køretøjsindstillinger** (**Mere → Køretøjer**).
+Den værdi, der er angivet her, bruges som ladegrænse, når køretøjet tilsluttes.
+
+<Screenshot
+  name="features/screenshots/limitsoc-setting"
+  caption="Skærmbillede af indstillingen for standardgrænsen i dialogboksen med køretøjsindstillinger"
+/>
+
+Eksempel: Du har angivet en standardgrænse på 80 %.
+Til en tur hæver du ladegrænsen til 90 % med skyderen.
+Disse 90 % gælder kun for den aktuelle opladning.
+Næste gang du tilslutter køretøjet, er din ladegrænse igen 80 %.
+
+### Køretøjsspecifik grænse
+
+I mange køretøjer kan du indstille en ladegrænse direkte i køretøjet.
+Hvis det er muligt, viser vi dig køretøjets grænse i statuslinjen som information.
+Den vises som en lille markering.
+Du kan få vist den konkrete værdi i et værktøjstip.
+
+Køretøjets grænse ændres ikke af evcc.
+I praksis er det vigtigt at vide, at grænsen i køretøjet er en fast grænse, som evcc ikke kan overskride.
+Nogle brugere sætter derfor køretøjets grænse til 100 % og bruger evcc til at begrænse opladningen.
+Andre foretrækker at bruge køretøjets grænse direkte.
+Hvad der giver mest mening for dig, afhænger af din brug og dit køretøj (f.eks. kvaliteten af køretøjets app).
+
+### Samspil med ladeplaner
+
+Med [ladeplaner](/da/features/plans) kan du angive, senest hvornår en bestemt energimængde eller et bestemt opladningsniveau skal være nået.
+Ladeplaner har højere prioritet end ladegrænsen.
+Hvis f.eks. en ladeplan for ”i morgen kl. 8 til 100 %” er aktiv, tilsidesætter den midlertidigt en grænse på f.eks. 80 %, der er indstillet ved ladepunktet.

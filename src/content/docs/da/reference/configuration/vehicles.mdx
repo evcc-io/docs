@@ -1,0 +1,209 @@
+---
+title: "vehicles"
+description: "Sådan definerer du køretøjer i evcc.yaml med batterikapacitet, faser og cachetid, får dem genkendt automatisk via RFID- eller køretøjs-id'er og vælger ikonet."
+sidebar:
+  order: 7
+translatedFrom: "28f7a3dffd71"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+Et køretøj repræsenterer en bestemt elbil med dens batteri. Når et køretøj er konfigureret og tildelt et [ladepunkt](/da/reference/configuration/loadpoints#vehicle), kan brugerfladen vise opladningsstatus, opladningsniveau, resterende ladetid og andre data, der automatisk hentes fra køretøjet og behandles.
+
+Det er også muligt at begrænse opladningen til et bestemt opladningsniveau (kun i brugerfladen). Da de fleste opladere ikke kender dette niveau (det overføres kun ved helt bestemte kombinationer af oplader og køretøj), kan evcc med denne konfiguration kommunikere direkte med køretøjet via køretøjsproducentens onlinegrænseflade (API).
+
+`vehicles`-konfigurationen er en liste over forskellige køretøjer.
+
+**Eksempel**:
+
+```yaml
+vehicles:
+  - name: Zoe
+    type: ...
+    ...
+```
+
+Konfigurationer til kendte køretøjer finder du under [Enheder - Køretøjer](/da/vehicles).
+
+Nedenfor forklares de forskellige parametre.
+
+---
+
+## Påkrævede parametre
+
+### `name`
+
+En kort betegnelse for det konfigurerede køretøj. Værdien bruges, når der henvises til køretøjet i konfigurationen af [ladepunktet](/da/reference/configuration/loadpoints#vehicle).
+
+**Eksempel**:
+
+```yaml
+name: zoe
+```
+
+---
+
+### `title`
+
+En beskrivelse af køretøjet, som vises i brugerfladen.
+
+**Eksempel**:
+
+```yaml
+title: Zoe
+```
+
+---
+
+### `type`
+
+Dette er den evcc-grænsefladetype, der muliggør kommunikationen med køretøjet. Kendte køretøjer kan integreres med typen `template`. Den passende (template-)type til kendte køretøjer og vejledning i manuel konfiguration med `custom` finder du under [Enheder - Køretøjer](/da/vehicles).
+
+---
+
+## Valgfrie parametre
+
+### `capacity`
+
+Den brugbare kapacitet af køretøjets batteri i kilowatttimer (kWh).
+
+Bruges til at beregne energibehovet ved planlægning af opladningen.
+
+**Eksempel**:
+
+```yaml
+capacity: 50 # kWh
+```
+
+---
+
+### `phases`
+
+Det _maksimale_ antal faser, som dette køretøj kan bruge (eventuelt inklusive ladekablet). Den interne standardværdi er 3. Mulige værdier er 1, 2 eller 3.
+
+Nogle køretøjer, især plug-in-hybrider, bruger ikke de maksimalt mulige 3 faser til opladning. `evcc` kan godt bestemme de faktisk brugte faser ved starten af en opladning, hvis der er installeret en lademåler, men denne information er ikke tilgængelig, før opladningen starter. Ved at konfigurere parameteren `phases` på køretøjet kan `evcc` starte opladningen med en lavere tilgængelig effekt i Smart-tilstand.
+
+**Eksempel**:
+
+```yaml
+phases: 2
+```
+
+---
+
+### `cache`
+
+Hvor længe data gemmes i cachen, og dermed hvor længe nye forespørgsler til køretøjets datagrænseflade (API) undertrykkes.
+
+:::note
+Værdien skal angives med tilhørende tidsenhed (se eksempel). `m` står for minutter.
+:::
+
+:::caution
+Det anbefales **IKKE** at ændre standardindstillingerne, da det kan føre til, at køretøjsproducenten aktivt forhindrer ladestyring via evcc. **PÅ EGEN RISIKO.**
+:::
+
+For at hente aktuelle statusdata fra køretøjet (f.eks. traktionsbatteriets opladningsniveau) forespørges producentens grænseflade regelmæssigt online. For ikke at overbelaste køretøjsproducentens servere med konstante forespørgsler (hvilket kan føre til, at kontoen spærres), er der implementeret en cache, der opfanger disse forespørgsler og svarer med de senest hentede data op til den maksimale alder, der er angivet her. Da de fleste køretøjer kun opdaterer dataene med lange mellemrum under en igangværende opladning (10 til 30 minutter er almindeligt), giver hyppigere forespørgsler ingen merværdi.
+
+**Standardværdi:** `15m`
+
+**Eksempel**:
+
+```yaml
+cache: 5m
+```
+
+---
+
+### `identifiers`
+
+En liste med et eller flere id'er til at identificere køretøjet. Hvis køretøjet skal identificeres ved forskellige opladere, kan der være brug for flere id'er. Identifikationen kan ske via følgende mekanismer:
+
+#### RFID
+
+Hvis opladeren har en RFID-grænseflade, kan et RFID-kort tildeles et køretøj til identifikation. I så fald kræves `RFID Token ID`.
+
+**Eksempel**:
+
+```yaml
+identifiers:
+  - 12345ABC # RFID token ID
+```
+
+Bemærk: Hvis id'et kan blive fortolket som et tal, skal det sættes i anførselstegn.
+
+**Eksempel**:
+
+```yaml
+identifiers:
+  - "012345"
+  - "12345e2"
+  - "0x1234"
+```
+
+#### Køretøjs-id
+
+Hvis opladeren understøtter det, modtager den et køretøjs-id fra køretøjet. Det kan enten være MAC-adressen på den indbyggede lader eller et id fra et fast installeret Plug & Charge-certifikat (et andet certifikat end ved DC-opladning!).
+
+**Eksempel**:
+
+```yaml
+identifiers:
+  - 01:23:45:67:89:0A # MAC address
+```
+
+Nogle køretøjer genererer en ny MAC-adresse hver dag. I så fald kan der bruges jokertegn, hvis de eksisterende køretøjer adskiller sig i den uforanderlige del af MAC-adressen.
+
+```yaml
+identifiers:
+  - 01:23:45:*
+```
+
+---
+
+### `features: ["coarsecurrent"]`
+
+Angiver, at et køretøj ikke kan reguleres med trinløs strømbegrænsning.
+
+Denne indstilling bør bruges ved følgende kombination:
+
+- Køretøjet kan kun regulere i trin på hele ampere
+- Opladeren kan håndtere mere finmaskede angivelser af ladestrøm (f.eks. 1 mA)
+
+I denne kombination kan det ske, at reguleringens ændringer af strømmen på få mA giver et uventet spring i fasestrømmen på 1 A. Reguleringen kan så begynde at svinge. Denne funktion begrænser også reguleringen til grove trin på 1 A.
+
+Den kan IKKE bruges sammen med en køretøjstemplate. For at bruge den skal køretøjet konfigureres med en indbygget type.
+
+**Eksempel**:
+
+```yaml
+features: ["coarsecurrent"]
+```
+
+---
+
+### `icon`
+
+Køretøjer kan vises med forskellige ikoner i brugerfladen. De tilgængelige muligheder er:
+
+- car
+- bike
+- scooter
+- moped
+- motorcycle
+- van
+- bus
+- tractor
+- generic
+- heater
+- cooler
+- waterheater
+
+**Eksempel**:
+
+```yaml
+icon: heater
+```
+
+---

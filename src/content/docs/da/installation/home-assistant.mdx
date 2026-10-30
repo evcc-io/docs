@@ -1,0 +1,198 @@
+---
+title: "Home Assistant"
+description: "Installer evcc som Home Assistant-app helt uden kommandolinje, og se, hvor konfigurationen ligger, hvordan opdateringer fungerer, og få et par avancerede tips."
+sidebar:
+  order: 5
+translatedFrom: "df86bba2a2d5"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import haConfigUi from "@assets/installation/ha_configuration_ui.webp";
+
+:::note
+evcc-appen til Home Assistant er en integration fra fællesskabet og understøttes ikke officielt af evcc-udviklerne.
+
+Årsagen er, at vigtige data ikke uden videre kan stilles til rådighed i tilfælde af fejl (manglende `evcc cli`).
+:::
+
+:::caution[Datamigrering]
+Bemærk, at vi med version 0.200.1 (16. februar 2025) har ændret stierne i appen, så de følger Home Assistants [retningslinjer](https://developers.home-assistant.io/blog/2023/11/06/public-addon-config/).
+
+Appen mapper nu følgende stier:
+
+- `/homeassistant/` peger på `/homeassistant/` eller `/config/` i Home Assistant.
+- `/config/` peger på `/addon_configs/49686a9f_evcc/` i Home Assistant.
+
+Hvis du opdaterer fra en ældre version, bliver din konfigurationsfil automatisk kopieret til den nye mappe.
+Vi kopierer kun databasen, hvis den også lå i `/config/`. Hvis du havde den i `/data/`, bliver den liggende der.
+Vi tilføjer `.migrated` til de gamle filer. Dem kan du derefter slette manuelt.
+:::
+
+Denne vejledning beskriver installationen af evcc som Home Assistant-app.
+I modsætning til [Linux-installationen](/da/installation/linux) eller [Docker-installationen](/da/installation/docker) behøver du ikke kendskab til kommandolinjen her.
+
+## Forudsætninger
+
+Du skal have en Home Assistant-installation med app-butikken aktiveret.
+Afhængigt af din installationstype er denne funktion muligvis ikke tilgængelig.
+Se [Home Assistants dokumentation](https://www.home-assistant.io/installation/#advanced-installation-methods) for mere information.
+
+## Installation
+
+<Tabs groupId="release-type">
+  <TabItem label="Release" default>
+  Den aktuelle stabile version.
+
+1. Tilføj repository'et automatisk: Klik på knappen nedenfor, derefter på **Åbn link** og til sidst på **Tilføj**.
+   [![Åbn din Home Assistant-installation, og vis dialogboksen til at tilføje et app-repository med en bestemt repository-URL udfyldt på forhånd.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc-io%2Fhassio-addon)
+2. Tilføj repository'et manuelt:
+   1. Klik på **Indstillinger** → **Apps** → **Installer app**
+   2. Klik på de **tre prikker** → **Repositories**
+   3. Tilføj repository-URL'en, og klik på **Tilføj**
+      ```
+      https://github.com/evcc-io/hassio-addon
+      ```
+3. Genindlæs websiden
+4. Find appen **evcc**, og klik på den
+5. Klik på knappen **Installer**
+
+  </TabItem>
+  <TabItem label="Nightly">
+  Den aktuelle udviklingsversion, som opdateres dagligt og kan være ustabil.
+  Den kan godt installeres ved siden af release-versionen, men kun én version kan køre ad gangen.
+  Hvis du bruger nightly-versionen, ændres stierne og Docker-containernavnene i denne vejledning: Brug `evcc-nightly` i stedet for `evcc`.
+
+1. Tilføj repository'et automatisk: Klik på knappen nedenfor, derefter på **Åbn link** og til sidst på **Tilføj**.
+   [![Åbn din Home Assistant-installation, og vis dialogboksen til at tilføje et app-repository med en bestemt repository-URL udfyldt på forhånd.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fevcc-io%2Fhassio-addon)
+2. Tilføj repository'et manuelt:
+   1. Klik på **Indstillinger** → **Apps** → **Installer app**
+   2. Klik på de **tre prikker** → **Repositories**
+   3. Tilføj repository-URL'en, og klik på **Tilføj**
+      ```
+      https://github.com/evcc-io/hassio-addon
+      ```
+3. Genindlæs websiden
+4. Find appen **evcc (nightly)**, og klik på den
+5. Klik på knappen **Installer**
+
+  </TabItem>
+</Tabs>
+
+## Konfiguration
+
+evcc kan konfigureres på to måder:
+
+### Webgrænseflade (anbefalet)
+
+Gå til fanen **Information** i appen **evcc**, og aktiver **Vis i sidepanel**. Webgrænsefladen findes derefter på http://your-ha-instance-ip-address:7070.
+
+Gå til fanen **Konfiguration**, og vælg din arbejdsmappe, f.eks.:
+
+<img
+  src={haConfigUi.src}
+  alt="Konfigurationsbrugerfladen for Home Assistant-appen"
+/>
+
+```sh
+- sqlite_file: /data/evcc.db
+```
+
+Lad afsnittet Netværk være uændret.
+
+Start appen.
+Åbn derefter webgrænsefladen via sidepanelet:
+
+- Du bliver bedt om at angive en administratoradgangskode
+- Derefter kan du konfigurere dine enheder direkte via webgrænsefladen
+- Indstillingerne gemmes automatisk i databasen
+
+### Konfigurationsfil (traditionel)
+
+Alternativt kan du bruge en `evcc.yaml`-konfigurationsfil.
+
+Gå til fanen **Konfiguration**, og tilføj konfigurationsfilen til din arbejdsmappe:
+
+```sh
+- config_file: /config/evcc.yaml
+- sqlite_file: /data/evcc.db
+```
+
+Opret konfigurationsfilen `evcc.yaml` i appens konfigurationsmappe (`/addon_configs/49686a9f_evcc`).
+Hvis mappen ikke findes, skal du oprette den manuelt.
+
+Du har flere muligheder for at oprette eller redigere konfigurationsfilen:
+
+- [Visual Studio Code](https://github.com/hassio-addons/addon-vscode): Åbn hamburgermenuen øverst til venstre, vælg **File** → **Open Folder…**, og vælg `/addon_configs/49686a9f_evcc`
+- [File Editor](https://github.com/home-assistant/addons/tree/master/configurator): Sørg for, at du har deaktiveret indstillingen **Enforce Basepath** i appens konfiguration, genstart appen, og gå til `/addon_configs/49686a9f_evcc`
+- [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh): Gå til `/addon_configs/49686a9f_evcc`, og brug f.eks. nano
+
+Se [Konfiguration](/da/installation/configuration) for detaljer om, hvordan du opretter konfigurationsfilen.
+
+Hvis du vil se systemet køre i demotilstand, skal du bare starte evcc med parameteren `--demo`.
+Se [CLI-referencen](/da/reference/cli/evcc) for mere information.
+
+## Opdateringer
+
+Opdateringen til den nyeste version af evcc er integreret i Home Assistants opdateringsproces.
+
+## Avancerede tips
+
+For at bruge følgende funktioner skal du have SSH-adgang til Home Assistant. Det kan du f.eks. få med den ovennævnte SSH-app.
+
+- Installer [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh)
+- Deaktiver **secure mode** i appens konfiguration
+- Genstart appen
+- Åbn appens brugerflade
+
+### Hvordan får jeg adgang til evcc-databasen?
+
+Vis filerne i `/data`:
+
+```sh
+docker exec addon_49686a9f_evcc ls -la /data
+```
+
+Kopier `evcc.db` til `/addon_configs/49686a9f_evcc`:
+
+```sh
+docker cp addon_49686a9f_evcc:/data/evcc.db /addon_configs/49686a9f_evcc/
+```
+
+### Hvordan bruger jeg evcc-CLI'en?
+
+Åbn en shell i evcc-Docker-containeren:
+
+```sh
+docker exec -it addon_49686a9f_evcc /bin/sh
+```
+
+Kør evcc-CLI-kommandoer (her f.eks. `checkconfig`):
+
+```sh
+evcc -c /config/evcc.yaml checkconfig
+```
+
+Luk shellen i evcc-Docker-containeren, når du er færdig:
+
+```sh
+exit
+```
+
+### Hvordan bruger jeg min eksterne adapter / HAT i evcc-appen til Home Assistant (Home Assistant OS, Raspberry Pi)?
+
+Hvis din Home Assistant-enhed står tæt på din måler (sol, hjemmebatteri, elnet osv.), kan du også hente data direkte via Modbus (f.eks. USB).
+
+Det kræver, at du aktiverer eksterne enheder for Home Assistant, hvilket også omfatter evcc-appen.
+Det gør du ved at fjerne kommentaren fra linjen `uart = 1` i filen `config.txt` på Home Assistant OS' boot-partition.
+
+```ini title=/config.txt
+uart = 1
+```
+
+Efter en genstart bør din enhed være tilgængelig for evcc-appen (sandsynligvis som `/dev/ttyS0` eller `/dev/ttyUSB`).
+
+## Næste trin: integration
+
+Når dit system kører, kan du sætte integrationen mellem evcc og Home Assistant op.
+Under [Integrationer → Home Assistant](/da/smarthome/home-assistant) finder du mere information.
+Du kan visualisere evcc-data i Home Assistant eller oprette automatiseringer baseret på evcc.

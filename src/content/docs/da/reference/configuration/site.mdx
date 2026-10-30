@@ -1,0 +1,252 @@
+---
+title: "site"
+description: "Beskriv din hjemmeinstallation i evcc.yaml ved at tildele elnets-, sol-, hjemmebatteri- og andre målere, og finjustér overskudsreguleringen med residualPower."
+sidebar:
+  order: 2
+translatedFrom: "fe6894529e96"
+---
+
+import prioritySoc from "../../../en/reference/configuration/img/prioritysoc.webp";
+import bufferSoc from "../../../en/reference/configuration/img/buffersoc.webp";
+import bufferStartSoc from "../../../en/reference/configuration/img/bufferstartsoc.webp";
+
+Sektionen beskriver din hjemmeinstallation med de relevante enheder og står for at regulere den tilgængelige effekt.
+
+For at regulere opladning med soloverskud kræves en aflæselig måler direkte efter tilslutningspunktet til elnettet. Derudover kan der også angives enheder til solenergi og hjemmebatteri(er). Effekten fra flere enheder lægges automatisk sammen, og for hjemmebatterier beregnes det gennemsnitlige opladningsniveau.
+
+**Eksempel**:
+
+```yaml
+site:
+  title: Home # display name for UI
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv:
+      - mypv1 # first pv meter reference
+      - mypv9 # second pv meter reference
+    battery:
+      - mybat5 # battery meter reference
+    aux:
+      - myaux1 # self-regulating consumer
+    consumer:
+      - myconsumer1 # regular consumer, recorded for consumption statistics
+    ext:
+      - myext1 # for data logging, load management, etc.
+  curtailers:
+    - my_curtailer # curtailment device reference
+  residualPower: 100
+```
+
+---
+
+## Påkrævede parametre
+
+### `title`
+
+Beskrivelsen af ladepunktet vises også i brugerfladen.
+
+**Eksempel**:
+
+```yaml
+title: Home
+```
+
+---
+
+### `meters`
+
+Angiver, hvilke konfigurerede målere (måleenheder for effekt) der bruges til hvilken type målepunkt. Dermed kobles enhedsdefinitionen logisk sammen med dens anvendelse. En måler er i første omgang neutral og får sin opgave ud fra sin placering i hjemmeinstallationen.
+
+:::note
+Der skal konfigureres mindst ét `grid`- eller `pv`-element.
+
+Uden mindst én af dem virker evcc ikke.
+:::
+
+**Eksempel**:
+
+```yaml
+site:
+  meters:
+    grid: mygridmeter # grid meter reference
+    pv: mypv1 # pv meter reference
+    battery: mybat2 # battery meter reference
+    aux: myaux1
+```
+
+---
+
+## Valgfrie parametre
+
+### `meters.grid`
+
+Definerer den [`meter`](/da/reference/configuration/meters) (måleenhed for effekt), der leverer målingerne fra tilslutningspunktet til elnettet.
+
+**Mulige værdier**: Værdien af en `name`-parameter i [`meters`](#meters)-konfigurationen.
+
+**Eksempel**:
+
+```yaml
+grid: mygridmeter # grid meter reference
+```
+
+---
+
+### `meters.pv`
+
+Definerer de [`meter`](/da/reference/configuration/meters) (måleenheder for effekt), som evcc henter målinger af solproduktionen fra.
+Der kan angives flere enheder. Effektdata lægges automatisk sammen.
+
+**Mulige værdier**: En enkelt værdi eller en liste med værdier fra en name-parameter i [`meters`](#meters)-konfigurationen. Listeformen kan også bruges, når der kun er én værdi.
+
+**Eksempel**:
+
+```yaml
+pv: myonlypv # single pv meter reference
+```
+
+eller
+
+```yaml
+pv: # (pvs = deprecated)
+  - myoldpv # first pv meter reference
+  - mynewestpv # second pv meter reference
+```
+
+---
+
+### `meters.battery`
+
+Definerer de [`meter`](/da/reference/configuration/meters) (måleenheder for effekt), der leverer måledata fra batteriet/batterierne.
+Der kan angives flere enheder. Effektdata lægges automatisk sammen, og der beregnes et gennemsnit af batteriernes opladningsniveau.
+
+**Mulige værdier**: En enkelt værdi eller en liste med værdier fra en `name`-parameter i [`meters`](#meters)-konfigurationen. Listeformen kan også bruges, når der kun er én værdi.
+
+**Eksempel**:
+
+```yaml
+battery: myonlybat # single battery meter reference
+```
+
+eller
+
+```yaml
+battery: # (batteries = deprecated)
+  - mysmallbat # first battery meter reference
+  - myhugebat # second battery meter reference
+```
+
+### `meters.aux`
+
+Målere for eksterne enheder, der selv styrer efter overskud, men ikke styres direkte af evcc, f.eks. en selvregulerende elpatron. Deres effekt tælles med i det overskud, der er til rådighed for opladning af køretøjet, ud fra den antagelse, at enheden sænker sit forbrug, når evcc tildeler effekten til opladning. Flere målere lægges sammen.
+
+**Mulige værdier**: En enkelt værdi eller en liste med værdier fra en `name`-parameter i [`meters`](#meters)-konfigurationen. Listeformen kan også bruges, når der kun er én værdi.
+
+**Eksempel**:
+
+```yaml
+aux: myaux # single aux meter reference
+```
+
+eller
+
+```yaml
+aux:
+  - myaux1 # first aux meter reference
+  - myaux2 # second aux meter reference
+```
+
+### `meters.consumer`
+
+Målere for almindelige forbrugsenheder som en vaskemaskine eller opvaskemaskine, som kun registreres til forbrugsstatistikken. I modsætning til `aux` indgår denne effekt ikke i det overskud, der er til rådighed for opladning af køretøjet.
+
+**Mulige værdier**: En enkelt værdi eller en liste med værdier fra en `name`-parameter i [`meters`](#meters)-konfigurationen. Listeformen kan også bruges, når der kun er én værdi.
+
+**Eksempel**:
+
+```yaml
+consumer: myconsumer # single consumer meter reference
+```
+
+eller
+
+```yaml
+consumer:
+  - myconsumer1 # first consumer meter reference
+  - myconsumer2 # second consumer meter reference
+```
+
+### `meters.ext`
+
+Målere, der hverken bruges til regulering eller vises i brugerfladen, f.eks. undertavler eller alternative elnets- eller solmålere. Deres data bliver kun logget og eksporteret og indgår hverken i overskuddet eller i forbrugsstatistikken.
+
+**Mulige værdier**: En enkelt værdi eller en liste med værdier fra en `name`-parameter i [`meters`](#meters)-konfigurationen. Listeformen kan også bruges, når der kun er én værdi.
+
+**Eksempel**:
+
+```yaml
+ext: myext # single ext meter reference
+```
+
+eller
+
+```yaml
+ext:
+  - myext1 # first ext meter reference
+  - myext2 # second ext meter reference
+```
+
+### `curtailers`
+
+Enheder til effektbegrænsning fra [`curtailers`](/da/reference/configuration/curtailers)-konfigurationen, der begrænser eksporten til elnettet efter anmodning fra netselskabet (§ 9 EEG).
+De anvendes sammen med de `pv`-målere, der kan begrænses, når [`hems`](/da/reference/configuration/hems)-integrationen signalerer en grænse.
+
+**Mulige værdier**: En liste med værdier af en `name`-parameter i [`curtailers`](/da/reference/configuration/curtailers)-konfigurationen.
+
+**Eksempel**:
+
+```yaml
+curtailers:
+  - my_curtailer # curtailment device reference
+```
+
+### `residualPower`
+
+Angiver overskudsreguleringens målværdi ved tilslutningen til elnettet (elnetsmåler). Standardværdien er 0 W.
+Positive værdier forskyder målværdien i retning af eksport til elnettet, mens negative værdier forskyder den i retning af import fra elnettet.
+I sidste ende fastlægger værdien reguleringssløjfens _hviletilstand_, som regulatoren skal justere efter.
+
+Især i kombination med andre uafhængige overskudsreguleringer som et hjemmebatteri skal denne værdi tilpasses for at opnå en veldefineret systemadfærd med klare prioriteter.
+
+Hvis en vis andel import fra elnettet skal være tilladt i tilstanden Smart, kan du angive en negativ værdi svarende til den maksimale andel import fra elnettet.
+
+#### Med `grid` `meter`
+
+- Positiv værdi: tilbageværende eksport til elnettet
+- Negativ værdi: tilbageværende import fra elnettet
+
+#### Kun med `pv` `meter`
+
+- Positiv værdi: typisk husstandsforbrug, som bruges til at estimere soloverskuddet.
+- Negativ værdi: den angivne effekt lægges til soleffekten og øger den tilgængelige ladeeffekt (OBS: import fra elnettet).
+
+:::note
+Når der er et hjemmebatteri, anbefales det kraftigt at angive en lille værdi her, f.eks. mellem 100 og 300 W, så batteriet kan oplades i henhold til de konfigurerede prioriteter (se `prioritySoc`). Ellers ser hjemmebatteriets uafhængige regulering ikke noget brugbart overskud. Det forhindrer også kortvarig import fra elnettet, selv uden batteri, ved hurtige ændringer i produktion og belastning.
+:::
+
+**Eksempel ”Hjemmebatteri”**:
+
+```yaml
+residualPower: 100
+```
+
+**Eksempel ”Andel fra elnettet”**:
+
+Opladningen skal i tilstanden Smart starte med mindst 6 A (enfaset), også med kun 50 % soloverskud (resten fra elnettet).
+Minimal ladeeffekt: 1 fase × 6 A × 230 V = 1.380 W, 50 % heraf: 690 W
+
+Se også [alternativet med enable/disable, der tillader en andel sol og import fra elnettet](/da/features/solar-charging).
+
+```yaml
+residualPower: -690
+```
