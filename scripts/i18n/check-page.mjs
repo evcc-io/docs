@@ -4,7 +4,7 @@
 // --stamp writes translatedFrom (git blob hash of the en source) into the target on success.
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import {
   DOCS,
   REPO,
@@ -76,8 +76,95 @@ const TYPO = {
 const sha = (s) => createHash("sha1").update(s).digest("hex").slice(0, 10);
 const lineAt = (text, idx) => text.slice(0, idx).split("\n").length;
 
+// Code blocks: comments, string values, placeholders and (for yaml) values may be
+// localised; the comparable part is the rest. Plain text blocks compare by line count.
+const CODE_TEXT = new Set(["", "txt", "text", "plaintext", "md", "markdown"]);
+function codeSkeleton(info, lines) {
+  if (CODE_TEXT.has(info.split(/\s/)[0].toLowerCase()))
+    return `${lines.length} lines`;
+  // yaml block scalars (key: | or key: >) are free text: blank their lines
+  let block = -1;
+  const scalar = lines.map((l) => {
+    const indent = l.match(/^\s*/)[0].length;
+    if (block >= 0 && (indent > block || !l.trim())) return "";
+    block = /^\s*(?:- )?[\w.-]+:\s*[|>][-+]?\s*$/.test(l) ? indent : -1;
+    return l;
+  });
+  return scalar
+    .map((l) => l.replace(/(^|\s)(#|\/\/).*$/, "$1"))
+    .map(
+      (l) =>
+        l.match(/^(\s*(?:- )?(?:"[\w.-]+"|[\w.-]+)):(\s|$)/)?.[1] + ":" || l,
+    )
+    .map((l) =>
+      l
+        .replace(/"[^"]*"|'[^']*'|`[^`]*`/g, '""')
+        .replace(/<[^>]*>/g, "<>")
+        .replace(/\$\{[^}]*\}/g, "${}"),
+    )
+    .join("\n")
+    .trimEnd();
+}
+// inline code that may be localised: example values with spaces or placeholders, plain words
+const loose = (c) => /\s|<[^>]*>|\$\{/.test(c) || /^\p{Ll}+$/u.test(c);
+const kind = (v) =>
+  v.startsWith("~`")
+    ? "loose"
+    : /^(https?:|mailto:)/i.test(v)
+      ? "ext"
+      : "strict";
+
+// A localised asset in the locale folder (same name, or -en replaced by -<lang>)
+// stands in for the English asset.
+function canon(abs, lang) {
+  const base = join(DOCS, lang) + "/";
+  if (lang === "en" || !abs.startsWith(base)) return abs;
+  let b = basename(abs);
+  const i = b.lastIndexOf(".");
+  const [stem, ext] = i < 0 ? [b, ""] : [b.slice(0, i), b.slice(i)];
+  if (stem.endsWith(`-${lang}`)) b = `${stem.slice(0, -lang.length)}en${ext}`;
+  return join(DOCS, "en", dirname(relative(base, abs)), b);
+}
+// where the locale folder holds its own version of an English asset
+function localised(enAbs, lang) {
+  const base = join(DOCS, "en") + "/";
+  if (lang === "en" || !enAbs.startsWith(base)) return null;
+  const rel = relative(base, enAbs);
+  const b = basename(rel);
+  const i = b.lastIndexOf(".");
+  const [stem, ext] = i < 0 ? [b, ""] : [b.slice(0, i), b.slice(i)];
+  const names = [b];
+  if (stem.endsWith("-en")) names.push(`${stem.slice(0, -2)}${lang}${ext}`);
+  return (
+    names.map((n) => join(DOCS, lang, dirname(rel), n)).find(existsSync) ?? null
+  );
+}
+
+// localised external links must exist; set I18N_OFFLINE=1 to skip the request
+const linkStatus = new Map();
+async function verifyUrl(url) {
+  if (process.env.I18N_OFFLINE) return "skipped";
+  if (!linkStatus.has(url)) {
+    let status;
+    try {
+      const opts = {
+        redirect: "follow",
+        signal: AbortSignal.timeout(8000),
+        headers: { "user-agent": "Mozilla/5.0 (evcc-docs i18n check)" },
+      };
+      let r = await fetch(url, { ...opts, method: "HEAD" });
+      if (r.status >= 400) r = await fetch(url, { ...opts, method: "GET" });
+      status = r.status;
+    } catch (e) {
+      status = e.name === "TimeoutError" ? "timeout" : "unreachable";
+    }
+    linkStatus.set(url, status);
+  }
+  return linkStatus.get(url);
+}
+
 // Build the comparable skeleton of a page body.
-function skeleton(body, offset, file, lang, errors) {
+function skeleton(body, offset, file, lang, errors, warnings) {
   const { masked, fences } = maskCode(body);
   const lines = masked.split("\n");
   const orig = body.split("\n");
@@ -91,7 +178,12 @@ function skeleton(body, offset, file, lang, errors) {
       const abs = resolve(dirname(file), t.replace(/[?#].*$/, ""));
       if (lang !== "en" && !existsSync(abs))
         errors.push(`L${line}: relative asset ${t} does not resolve`);
-      return `asset:${relative(docsParent, abs)}`;
+      const own = localised(abs, lang);
+      if (own)
+        warnings.push(
+          `L${line}: ${lang} has its own version of ${t}, reference ${relative(dirname(file), own)}`,
+        );
+      return `asset:${relative(docsParent, canon(abs, lang))}`;
     }
     // locale prefix -> placeholder, without building a regex from the argument
     const p = `/${lang}`;
@@ -109,7 +201,7 @@ function skeleton(body, offset, file, lang, errors) {
     const i = f.line - 1;
     add(
       lineStart[i],
-      `code ${f.info} ${sha(f.content.join("\n").trimEnd())}`,
+      `code ${f.info} ${sha(codeSkeleton(f.info, f.content))}`,
       ln(i),
     );
     if (f.unclosed) errors.push(`L${ln(i)}: code fence not closed`);
@@ -157,7 +249,9 @@ function skeleton(body, offset, file, lang, errors) {
     for (const m of l.matchAll(LINK_RE)) sec.push(target(m[1], ln(i)));
     const ref = l.match(/^\s*\[[^\]]+\]:\s*(\S+)/);
     if (ref) sec.push(target(ref[1], ln(i)));
-    if (l) for (const c of inlineCode(orig[i])) sec.push("`" + c + "`");
+    if (l)
+      for (const c of inlineCode(orig[i]))
+        sec.push((loose(c) ? "~`" : "`") + c + "`");
   }
   if (table) add(table.pos, `table ${table.rows}x${table.cols}`, table.line);
 
@@ -251,11 +345,12 @@ export async function checkPage(lang, rel, { stamp = false } = {}) {
       const r = (base, v) =>
         /^\.{1,2}\//.test(v) ? resolve(dirname(base), v) : v;
       const want = r(enFile, ef[k]);
-      if (r(file, String(tf[k])) !== want)
+      const got = r(file, String(tf[k]));
+      if (canon(got, lang) !== want)
         errors.push(
-          `frontmatter: ${k} must resolve to ${relative(dirname(file), want)}`,
+          `frontmatter: ${k} must resolve to ${relative(dirname(file), want)} or a localised copy of it`,
         );
-      else if (!existsSync(want))
+      else if (!existsSync(got))
         errors.push(`frontmatter: ${k} does not resolve`);
     } else if (TRANSLATABLE.has(last)) {
       if (last === "title" && tf[k] === ef[k])
@@ -283,8 +378,8 @@ export async function checkPage(lang, rel, { stamp = false } = {}) {
   }
 
   // skeleton
-  const a = skeleton(en.body, en.offset, enFile, "en", []);
-  const b = skeleton(tg.body, tg.offset, file, lang, errors);
+  const a = skeleton(en.body, en.offset, enFile, "en", [], []);
+  const b = skeleton(tg.body, tg.offset, file, lang, errors, warnings);
   const mism = [];
   const n = Math.max(a.tokens.length, b.tokens.length);
   for (let i = 0; i < n && mism.length < 3; i++) {
@@ -301,7 +396,9 @@ export async function checkPage(lang, rel, { stamp = false } = {}) {
     );
   errors.push(...mism);
 
-  // links, assets, inline code: same multiset per section
+  // per section: internal links, assets and config-like inline code must match exactly;
+  // localisable inline code must match in number; external links must match in number
+  // and a localised one must exist
   if (a.sections.length === b.sections.length) {
     let reported = 0;
     for (let s = 0; s < a.sections.length && reported < 3; s++) {
@@ -313,14 +410,54 @@ export async function checkPage(lang, rel, { stamp = false } = {}) {
         else left.splice(j, 1);
       }
       if (!missing.length && !left.length) continue;
-      reported++;
+      const at = `section at ${lang} L${b.sectionLines[s]}`;
       const fmt = (l) =>
-        l.map((v) => v.replace("/{lang}", "/" + lang)).join(", ");
-      errors.push(
-        `section at ${lang} L${b.sectionLines[s]}:` +
-          (missing.length ? ` missing ${fmt(missing)};` : "") +
-          (left.length ? ` unexpected ${fmt(left)}` : ""),
-      );
+        l
+          .map((v) => v.replace("/{lang}", "/" + lang).replace(/^~/, ""))
+          .join(", ");
+      const pick = (l, k) => l.filter((v) => kind(v) === k);
+      const strictMissing = pick(missing, "strict");
+      const strictLeft = pick(left, "strict");
+      if (strictMissing.length || strictLeft.length) {
+        reported++;
+        errors.push(
+          `${at}:` +
+            (strictMissing.length ? ` missing ${fmt(strictMissing)};` : "") +
+            (strictLeft.length ? ` unexpected ${fmt(strictLeft)}` : ""),
+        );
+      }
+      for (const k of ["loose", "ext"]) {
+        const m = pick(missing, k);
+        const l = pick(left, k);
+        if (!m.length && !l.length) continue;
+        if (m.length !== l.length) {
+          reported++;
+          errors.push(
+            `${at}: ${k === "ext" ? "external links" : "inline code"} differ in number:` +
+              (m.length ? ` missing ${fmt(m)};` : "") +
+              (l.length ? ` unexpected ${fmt(l)}` : ""),
+          );
+          continue;
+        }
+        if (k === "loose") {
+          warnings.push(
+            `${at}: localised inline code ${fmt(l)} (en: ${fmt(m)})`,
+          );
+          continue;
+        }
+        for (const url of l) {
+          const status = await verifyUrl(url);
+          if (status === 404 || status === 410 || status === "unreachable") {
+            reported++;
+            errors.push(
+              `${at}: localised link ${url} does not exist (${status}), use a language-neutral or the English link`,
+            );
+          } else
+            warnings.push(
+              `${at}: localised link ${url} (en: ${fmt(m)})${typeof status === "number" && status < 400 ? "" : `, not verified (${status})`}`,
+            );
+        }
+      }
     }
   }
 

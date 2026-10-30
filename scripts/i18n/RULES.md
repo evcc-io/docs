@@ -6,8 +6,7 @@ When the style sheet and these rules disagree, these rules win for structure and
 
 ## Source and Target
 
-- The English page `src/content/docs/en/<path>` is the only source.
-  The German pages are not a source.
+- The English page `src/content/docs/en/<path>` is the only source; every other locale, German included, is a translation of it.
 - The translation goes to the same relative path under `src/content/docs/<lang>/`, with the English file name (also for `_*.mdx` partials).
 - Write one file at a time and never print file contents in your answer.
 - After writing a file, run `node scripts/i18n/check-page.mjs <lang> <path> --stamp` and fix the page until it exits with 0.
@@ -20,8 +19,8 @@ When the style sheet and these rules disagree, these rules win for structure and
   Do not add or remove keys; the only key the checker adds is `translatedFrom`.
 - The `title` of partials (files starting with `_`).
 - Every `import` line, including order and names.
-- Every fenced code block, including its language tag and comments inside it.
-- Every inline code span (`` `residualPower` ``, `` `evcc.yaml` ``, `` `evcc migrate` ``).
+- The structure of every fenced code block: language tag and meta, number of lines, keys, commands, flags and every value that is not an example (see "Translate" for what may change inside code).
+- Inline code that names a config key, command, flag, file, path, URL, topic or version (`` `residualPower` ``, `` `evcc.yaml` ``, `` `evcc migrate` ``).
 - Component tags and their props, except the translatable props listed below.
 - JSX expressions in braces (`{…}`), e.g. `src={mcpVideo}`.
 - `{/* excerpt */}` in blog posts, at the same position relative to the surrounding paragraphs.
@@ -39,12 +38,16 @@ When the style sheet and these rules disagree, these rules win for structure and
   This also applies to pages that exist only in English and fall back automatically, e.g. `/<lang>/reference/cli/evcc`, `/<lang>/chargers`, `/<lang>/blog`.
 - Keep the anchor part (`#residualpower`) unchanged.
 - The REST API stays unprefixed: `/integrations/rest-api`.
-- External links stay unchanged, also links to `docs.evcc.io/en/…` in quoted material and to German sources.
+- External links point to the target-language version of the page when one exists (Wikipedia articles, manufacturer manuals, app stores, evcc.io), otherwise to a language-neutral page, otherwise to the English link.
+  Only use a localised URL you have verified: `check-page.mjs` requests every external link that differs from the English one and fails on 404, so never guess a URL.
+  Links to `docs.evcc.io/en/…` in quoted material stay.
 - Never use relative links to pages.
 
 ## Images, Videos and Other Assets
 
-Translated pages reference the English assets, they never copy them.
+Translated pages reference the English assets and never create copies.
+The one exception is a localised version that already exists in the locale folder (same file name as the English asset, or `-en` replaced by `-<lang>`, e.g. the German diagrams and screenshots): reference that file relatively (`./x-de.svg`) instead of the English one.
+`check-page.mjs` warns when such a file exists and the page does not use it.
 
 - A relative asset reference `./x` in `en/<dir>/<file>` becomes a path that climbs out of the locale directory and back into `en/<dir>/`: one `../` per directory level of the page plus one for the locale folder.
 - Examples:
@@ -54,7 +57,7 @@ Translated pages reference the English assets, they never copy them.
 - References that already climb out of the docs tree (`../../../../assets/…`) stay as they are, because the locale folder has the same depth.
 - The rule covers `![]()`, frontmatter `image`, MDX imports, `src="…"` and `poster="…"`.
 - `<Screenshot name="…">` keeps its `name`; the component picks the localised screenshot itself.
-- `check-page.mjs` verifies that every asset resolves to the same file as in English.
+- `check-page.mjs` verifies that every asset resolves to the English file or to its localised version in the locale folder.
 
 ## Translate
 
@@ -65,6 +68,9 @@ Translated pages reference the English assets, they never copy them.
   Blog descriptions keep the kind and date at the start ("Release notes from February 2024 …").
 - Props: `caption`, `alt`, `altLarge`, `altSmall`, `label` (TabItem, unless the label is a file, product or protocol name such as `compose.yml` or `evcc.yaml`), `title` and `description` (NavCard, Card), `text` (Badge), `subline`.
 - Children of `CtaButton`, `Card` and similar components.
+- Comments and example values inside code blocks and inline code: comments, `title` and `name` values, message texts, sample device names, placeholders such as `<your-ip>` or `${variable}`.
+  Keys, commands, flags, hosts, paths, URLs, numbers and real identifiers stay.
+  The checker compares the code structure, so a translated comment passes and a changed key fails.
 - Admonition titles in brackets: `:::note[Title]`.
 - Link texts and image alt texts.
 
@@ -100,6 +106,6 @@ Translated pages reference the English assets, they never copy them.
 
 - Add, drop, soften, sharpen or explain content.
 - Add translator notes, comments or "(translated)" markers.
-- Edit files outside your batch, anything under `src/content/docs/en/` or `src/content/docs/de/`, components, configs or scripts.
+- Edit files outside your batch, anything under `src/content/docs/en/`, components, configs or scripts.
 - Run `npm run format`, `npm run build` or a dev server in batch stages.
 - Commit, stage, create branches or open pull requests.

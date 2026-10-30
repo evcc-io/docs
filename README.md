@@ -53,12 +53,7 @@ The CI pipeline checks formatting and will fail if files are not formatted.
 
 ### Content changes
 
-**Important:** when making content changes, always update both English and German versions together to prevent translations from getting out of sync.
-
-- English content: `src/content/docs/en/`
-- German content: `src/content/docs/de/`
-
-If you only speak one language, mention this in your PR so maintainers can help with the translation.
-
+English (`src/content/docs/en/`) is the only hand-written locale.
 All other locales are translated automatically from English and stamped with `translatedFrom`.
-Don't edit them by hand: change the English (and German) source, then run `/translate <lang>`.
+Don't edit them by hand: change the English source, then run `/translate <lang>` (rules in `scripts/i18n/RULES.md`).
+If writing English is hard for you, open the PR anyway and say so; maintainers help with the wording.
