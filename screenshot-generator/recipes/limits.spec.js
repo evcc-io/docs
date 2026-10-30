@@ -20,7 +20,7 @@ loop((screenshot, { lang }) => {
     await moreTab.click();
     await moreTab
       .getByRole("button", {
-        name: await t(lang, "main.vehicleSettings.menu"),
+        name: (await t(lang, "main.vehicleSettings.menu")) ?? "Vehicles", // older binaries lack the key
         exact: true,
       })
       .click();
