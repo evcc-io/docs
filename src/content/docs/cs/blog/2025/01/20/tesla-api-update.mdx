@@ -1,0 +1,161 @@
+---
+date: 2025-01-20
+title: "v0.133: je nutný Tesla Developer Account"
+description: "Poznámky k vydání evcc 0.133 z ledna 2025: Tesla Fleet API se stává placeným, proto potřebujete vlastní Tesla Developer Account a tesla.evcc.io končí."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+cover:
+  alt: "Aktualizace Tesla API"
+  image: "../../../../../en/blog/2025/01/20/tesla-api-update-wide.webp"
+translatedFrom: "04d6b7983faa"
+---
+
+Od verze evcc v0.133 je nutný [Tesla Developer Account](https://developer.tesla.com/).
+Používání zůstává zdarma, vyžaduje ale jeden krok nastavení navíc.
+
+{/* excerpt */}
+
+:::note[Aktualizace]
+Tento příspěvek byl upraven.
+
+**[8. února 2025](https://github.com/evcc-io/docs/pull/723/files):** Podrobnější návod pro Tesla Fleet API a konfiguraci myteslamate.com.<br/>
+**[27. března 2025](https://github.com/evcc-io/docs/pull/775/files):** Aktualizace na nový postup nastavení na myteslamate.com.
+
+:::
+
+## Placené Tesla Fleet API od února
+
+Loni jsme do evcc integrovali [Tesla Fleet API](/cs/blog/2024/02/01/v0124-new-tesla-api).
+Tesla byla prvním výrobcem, který poskytl oficiální a především otevřené API pro komunikaci se svými vozidly.
+
+Tesla už dříve oznámila, že toto API nezůstane zdarma.
+Ceny jsou nyní známé a platí od 1. února 2025.
+Účtuje se podle využití, přičemž náklady se liší podle typu požadavku.
+
+Na [tesla.evcc.io](https://tesla.evcc.io) jsme provozovali službu, ve které si uživatelé evcc mohli vygenerovat přístupové tokeny pro používání API.
+Komunikaci s API přes tyto tokeny by nám Tesla od února 2025 účtovala.
+Náklady na uživatele závisí na počtu vozidel, způsobu nabíjení a konkrétním nastavení intervalu aktualizace.
+U většiny uživatelů by tyto náklady převýšily náš sponzorský model „2 $ měsíčně“ a nebyly by pro nás udržitelné, ani kdybychom pro integraci Tesly vyžadovali sponzorství.
+
+## Bezplatný kredit API pro soukromé uživatele
+
+Tesla nabízí soukromým uživatelům měsíční kredit API ve výši 10 $, který by měl většině uživatelů evcc stačit.
+
+[![Kredit API od Tesly](../../../../../en/blog/2025/01/20/tesla-credit-en.png)](https://developer.tesla.com/)
+
+Ve verzi 0.133 jsme komunikaci s Tesla API upravili tak, abyste mohli používat vlastní Tesla Developer Account.
+Staré tokeny vygenerované na [tesla.evcc.io](https://tesla.evcc.io) už nebudou fungovat.
+Zvažovali jsme, že rozšíříme náš stávající postup generování tokenů, abyste mohli používat vlastní Tesla Developer Account.
+Naštěstí už tuto funkci implementoval [myteslamate.com](https://app.myteslamate.com).
+Tam si se svým Developer Accountem můžete vygenerovat **Access a Refresh tokeny**.
+Rozhodli jsme se proto znovu nevynalézat kolo.
+
+## Co dělat?
+
+<a id="vehicle"></a>
+
+### Pro řidiče Tesly
+
+Pro nastavení v evcc potřebujete tři údaje:
+
+- **Client ID:** z [Tesla Developer Portalu](https://developer.tesla.com/)
+- **Access Token:** pomocí skriptu z [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/)
+- **Refresh Token:** pomocí skriptu z [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/)
+
+Tyto údaje vygenerujete podle návodu na [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/).
+
+Protože budete pracovat souběžně na myteslamate.com a developer.tesla.com, doporučujeme mít obě stránky otevřené zároveň ve dvou oknech prohlížeče.
+Na konci postupu je potřeba stáhnout skript a spustit ho na počítači v terminálu/konzoli.
+
+Během přihlášení se zobrazí dialogové okno s oprávněními.
+Pro provoz s běžnou nabíječkou (ne Tesla Wall Connector) potřebuje evcc tato **oprávnění Tesla API**:
+
+- Informace o profilu _(region, seznam vozidel)_
+- Informace o vozidle _(stav nabití, stav vozidla atd.)_
+- Poloha vozidla _(pro rozpoznání vozidla, zatím neimplementováno)_
+- Příkazy pro vozidlo _(pro probuzení)_
+
+Po úspěšném dokončení postupu zadejte údaje do konfigurace evcc:
+
+Příklad:
+
+```yaml {5-7}
+vehicles:
+  - type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-... # from developer.tesla.com
+    accessToken: ey1234567890... # from myteslamate.com
+    refreshToken: EU_1234567890... # from myteslamate.com
+```
+
+Spotřebovaný kredit API můžete sledovat v [přehledu Tesla Developer Portalu](https://developer.tesla.com/dashboard/).
+
+:::note
+Projekt evcc není s myteslamate.com nijak propojen.
+
+Jsme v kontaktu s [jlestel](https://github.com/jlestel), vývojářem myteslamate.com.
+Bezplatné používání služby uživateli evcc výslovně povolil.
+Před použitím služby si prosím přečtěte [podmínky služby](https://www.myteslamate.com/terms-of-service) a [zásady ochrany osobních údajů](https://www.myteslamate.com/privacy-policy).
+:::
+
+### Pro uživatele Tesla Wall Connectoru
+
+Pokud používáte Tesla Wall Connector, jsou potřeba další kroky, protože příkazy k nabíjení vyžadují podepsanou komunikaci a musí procházet veřejně dostupným serverem.
+myteslamate.com takovou proxy poskytuje.
+Účtuje se podle využití přímo přes myteslamate.com.
+Tyto příkazy nečerpají váš kredit Tesla API.
+
+Předpokládáme, že jste už prošli [výše popsanými kroky](#vehicle).
+Znovu se přihlaste na myteslamate.com a podle návodu nastavte placenou proxy pro příkazy.
+Zkopírujte **Proxy-Token** ze sekce **Use MyTeslamate API**.
+Vložte tento token do konfigurace evcc:
+
+```yaml {8}
+vehicles:
+  - type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-... # from developer.tesla.com
+    accessToken: ey1234567890... # from myteslamate.com
+    refreshToken: EU_1234567890... # from myteslamate.com
+    proxyToken: aaaaa-bbbbb-... # from myteslamate.com
+```
+
+S tímto nastavením posílá evcc příkazy k nabíjení na proxy myteslamate.com, která je podepíše vaší aplikací Tesla a předá je dál do oficiálního Tesla API.
+
+:::caution[Proxy token má velmi široká oprávnění.]
+Doporučujeme omezit oprávnění na myteslamate.com na nezbytné funkce.
+Pro evcc jsou potřeba pouze funkce **Charge Start**, **Charge Stop** a **Set Charging Amps**.
+:::
+
+## tesla.evcc.io bude ukončeno
+
+tesla.evcc.io bude v únoru ukončeno.
+Všechny tokeny, které jím byly vygenerovány, přestanou platit.
+Pro další používání Tesla API je nutná aktualizace evcc na verzi 0.133.
+
+## Další alternativy
+
+Komunikace s Tesla API v evcc není vázaná na myteslamate.com.
+Tokeny si můžete vygenerovat sami s odpovídající infrastrukturou (je nutná veřejná callback URL) a zadat je do výše uvedené konfigurace evcc.
+
+Možné jsou také alternativní integrace přes služby jako [TeslaLogger](https://docs.evcc.io/docs/vehicles#teslalogger), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [TeslaBleHttpProxy](https://docs.evcc.io/docs/vehicles#tesla-ble), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [Tessie](https://docs.evcc.io/docs/vehicles#tessie) nebo [Tronity](https://docs.evcc.io/docs/vehicles#tronity).
+
+Majitelé Tesla Wall Connectoru mohou jako lokální „Command Proxy“ dál používat také [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy).
+
+## Závěr
+
+Probrali jsme několik alternativ pro integraci Tesly.
+Na stole byly i speciální služby a cenové úrovně pro uživatele Tesly.
+Věříme, že naše současné řešení je z pohledu uživatele nejlepší.
+Většině soukromých uživatelů nevznikají žádné další náklady.
+Integrace Tesly dál nevyžaduje sponzorství.
+Komunikace s API nevyžaduje služby třetích stran.
+evcc mohou používat i uživatelé s většími flotilami, kteří po vyčerpání měsíčního bezplatného kreditu platí poplatky za API přímo Tesle.
+
+**S pozdravem**<br/>
+Tým evcc<br/>
+Michael, Andi a Uli

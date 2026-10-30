@@ -1,0 +1,310 @@
+---
+date: 2026-07-18
+title: "Novinky: vzdálený přístup, widgety pro iOS, optimalizátor a další"
+description: "Přehled novinek ve verzích evcc 0.301 až 0.311 z července 2026, jež přinášejí novou navigaci, widgety pro iOS, více serverů v aplikaci, vzdálený přístup a optimalizátor."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner s novinkami"
+  image: "../../../../../en/blog/2026/07/18/highlights-remote-access-widgets-optimizer.webp"
+translatedFrom: "1bfc946d912d"
+---
+
+import Video from "@components/Video.astro";
+import changeServerVideo from "../../../../../en/blog/2026/07/18/change-server.mp4";
+import changeServerPoster from "../../../../../en/blog/2026/07/18/change-server.webp";
+import widgetsVideo from "../../../../../en/blog/2026/07/18/widgets.mp4";
+import widgetsPoster from "../../../../../en/blog/2026/07/18/widgets.webp";
+import remoteAccessVideo from "../../../../../en/blog/2026/07/18/remote-access.mp4";
+import remoteAccessPoster from "../../../../../en/blog/2026/07/18/remote-access.webp";
+import batteryBoostVideo from "../../../../../en/blog/2026/07/18/battery-boost.mp4";
+import batteryBoostPoster from "../../../../../en/blog/2026/07/18/battery-boost.webp";
+
+Od [posledního přehledu novinek](/cs/blog/2026/01/01/highlights-browser-config-ready) uplynulo půl roku.
+Ve vydáních [0.301 až 0.311](https://github.com/evcc-io/evcc/releases) se od té doby hodně změnilo: nová navigace, widgety v aplikaci pro iOS, vzdálený přístup, časové statistiky a mnoho dalšího.
+V tomto příspěvku vybíráme několik našich oblíbených novinek a krátce nastíníme naše další plány.
+
+{/* excerpt */}
+
+## Přepracované rozhraní
+
+Rozhraní dostalo novou navigaci v dolní části obrazovky.
+Sekce **Nabíjení**, **Domácí baterie**, **Předpověď**, **Relace** a **Více** vás teď rychleji dovedou ke všem funkcím.
+Baterie a předpověď dostaly vlastní stránky, místo aby se jako dřív schovávaly v dialogových oknech v hamburger menu.
+Stránka baterie zobrazuje aktuální hodnoty spolu s předpovídaným vývojem stavu nabití (experimentální, o optimalizátoru více později).
+Navigace vám také nenápadně dá vědět, když je k dispozici nová verze evcc.
+Často požadované tlačítko pro aktualizaci přímo vedle seznamu změn tam zatím není.
+Máme ho ale v plánu.
+
+![Dolní navigace](../../../../../en/blog/2026/07/18/bottom-navigation.webp)
+
+Mezitím se zaplnily další mezery v konfiguraci v prohlížeči: [tarify](/cs/tariffs), [oznámení](/cs/notifications), EEBus a [externí limity](/cs/external-limit) teď můžete nastavit pomocí formulářů místo úprav YAML.
+Pouze řízení zátěže se zatím stále musí konfigurovat velkým blokem YAML.
+
+## Aplikace: widgety a více serverů
+
+[Aplikace evcc](/cs/features/app) v posledních měsících získala několik nových funkcí.
+
+**Widgety pro iOS:** Stav nabíjecího bodu, předpověď soláru, cena odběru ze sítě, cena exportu do sítě a předpověď CO₂ jsou teď dostupné jako widgety přímo na ploše.
+Jedním klepnutím se dostanete na odpovídající místo v aplikaci.
+
+<Video
+  src={widgetsVideo}
+  poster={widgetsPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Widgety pro iOS"
+/>
+
+**Více serverů:** V aplikaci teď můžete spravovat více instancí evcc, např. pro váš domov, vaše rodiče nebo vaši chatu.
+Přepínat mezi nimi můžete přes **Více → Změna serveru**.
+
+<Video
+  src={changeServerVideo}
+  poster={changeServerPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Přepínání mezi servery v aplikaci"
+/>
+
+**Nastavení pomocí QR kódu:** Novou instanci nastavíte naskenováním QR kódu přímo z webového rozhraní.
+Adresu serveru a přihlašovací údaje už nemusíte zadávat ručně.
+To se hodí zejména tehdy, když připravujete instalaci pro někoho jiného.
+Více o možnostech najdete v [referenci aplikace](/cs/reference/app).
+
+Zvláštní poděkování patří [Maschga](https://github.com/Maschga) za neustálé vylepšování aplikace.
+
+## Vzdálený přístup
+
+Mnozí z vás chtějí mít svůj systém pod dohledem i mimo domov.
+Naše doporučení bylo dosud nastavit si k tomu VPN.
+Často jsme ale slýchali přání jednoduššího řešení.
+
+Toto téma nás zaměstnává už dlouho.
+V posledních letech jsme postavili mnoho prototypů a zase je zahodili.
+Naše požadavky: vysoká bezpečnost, žádné ukládání dat na našich serverech, transparentnost, snadné použití a vysoká míra lokální kontroly.
+
+S novým, experimentálním [vzdáleným přístupem](/cs/features/remote-access) teď máme řešení, které tomu odpovídá.
+Vaše instance dostane vlastní doménu na `evcc.cloud`.
+Spojení vede tunelem, který vaše instance sama otevírá směrem ven.
+Není potřeba žádné přesměrování portů v routeru.
+Na tomto řešení je pěkné, že je technicky velmi jednoduché.
+Jeho jádrem je knihovna [hashicorp/yamux](https://github.com/hashicorp/yamux), díky které můžeme příchozí provoz z internetu bezpečně směrovat ke správné lokální instanci evcc, se šifrováním přenosu pomocí TLS.
+Samotné ověření probíhá na vaší lokální instanci: přihlašovací údaje se ukládají a ověřují výhradně tam a v cloudu neexistují žádné uživatelské účty.
+Služba je dostupná pro sponzory a zapnete ji dvěma kliknutími v **Konfigurace → Vzdálený přístup**.
+
+<Video
+  src={remoteAccessVideo}
+  poster={remoteAccessPoster}
+  autoplay
+  aspect="4 / 3"
+  title="Zapnutí vzdáleného přístupu a připojení aplikace"
+/>
+
+## Omezení odběru a omezení výkonu
+
+Zásadně jsme přepracovali [externí řízení](/cs/external-limit) ze strany provozovatele distribuční soustavy, což je téma relevantní hlavně pro Německo.
+Signály řídicího boxu FNN lze číst přes EEBus nebo přes spínací kontakty.
+
+**Omezení odběru:** Omezování řiditelných spotřebičů podle § 14a EnWG je podporováno už nějakou dobu.
+Teď je to ještě lepší: aktivní limity se rozdělují poměrně mezi všechna řiditelná zařízení a zobrazují se v rozhraní.
+
+**Omezení výkonu:** Novinkou je snižování výrobního výkonu podle § 9 EEG.
+Střídače od Huawei, Enphase, Sungrow a obecná zařízení SunSpec už lze omezovat.
+Přehled zařízení, která lze omezovat, najdete v [seznamu zařízení](/cs/meters?f=curtail).
+Na širší podpoře zařízení zde pracujeme.
+Pokud nějaké další zařízení dobře znáte, budeme rádi za váš příspěvek.
+
+{/* TODO: image dimming/curtailment */}
+
+<a id="heating"></a>
+
+## Tepelná čerpadla a vytápění
+
+Stále více z vás využívá přebytek ze soláru nejen pro auto, ale také pro tepelné čerpadlo nebo elektrické topení.
+I zde se toho hodně stalo.
+
+Teploty se teď zobrazují jako rozsah s vlastním barevným přechodem od modré po červenou, takže je jasně odlišíte od nabíjecích bodů.
+Teplotní rozsah si můžete nastavit sami.
+
+![Stavy nabíjení a vytápění](../../../../../en/blog/2026/07/18/heating-states.webp)
+
+S volbou **kontinuální** přibyl pro tepelná čerpadla nový způsob řízení: místo tvrdého zapínání a vypínání běží zařízení samo dál, což lépe odpovídá povaze této kategorie zařízení.
+Přes EEBus podporujeme flexibilitu kompresoru (OHPCF), díky které mohou tepelná čerpadla cíleně běžet z přebytku.
+
+K tomu přibyla řada [nových zařízení](/cs/heating#supported), od skupiny značek Vaillant po Glen Dimplex a Xtherma.
+Ještě nás čekají některé otevřené body, jako lepší pojmenování režimů, upravený režim plánování a průběžné zaznamenávání dat v čase (viz níže), a k tomu další nápady, např. předpovědi potřeby tepla v optimalizátoru.
+
+**Vyžaduje sponzorství:** Když jsme zavedli kategorii vytápění, oznámili jsme, že tato zařízení budou podobně jako mnoho nabíječek vyžadovat sponzorství.
+Upozornění je od té doby uvedeno nahoře v [seznamu zařízení](/cs/heating).
+V některém z nadcházejících vydání to začneme v softwaru vynucovat.
+
+![Karta tepelného čerpadla](../../../../../en/blog/2026/07/18/heatpump.webp)
+
+## Rychlé dobití
+
+Někdy je potřeba auto rychle nabít, i když slunce nesvítí.
+S funkcí **Rychlé dobití** můžete podle potřeby vybíjet domácí baterii do vozidla.
+Stačí jedno kliknutí u nabíjecího bodu a nabíjení pokračuje, dokud se nedosáhne nastavitelného limitu baterie.
+Rychlé dobití funguje v režimu **Solár**.
+
+<Video
+  src={batteryBoostVideo}
+  poster={batteryBoostPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Rychlé dobití v aplikaci"
+/>
+
+Mimochodem, rychlé dobití je první funkce, která se dočkala vlastní samolepky.
+Na [komunitním setkání](/cs/blog/2026/04/20/community-treffen-rueckblick) v dubnu jsme rozdali několik návrhů samolepek a sbírali nápady.
+Samolepka s třpytivým potiskem v barvě pixydust green je teď součástí standardní sady v dopisech pro nové sponzory.
+
+![Samolepky rychlého dobití](../../../../../en/blog/2026/07/18/battery-boost-stickers.webp)
+
+## Přeposílání OCPP
+
+Typický případ: jezdíte služebním autem a zaměstnavatel vám proplácí náklady na nabíjení přes zúčtovací platformu.
+Vaše nabíječka k tomu používá OCPP, ale umí se připojit jen k jednomu systému.
+Dosud jste museli volit mezi nabíjením ze soláru s evcc a vyúčtováním přes platformu.
+
+Nové [přeposílání OCPP](/cs/integrations/ocpp-forwarding) to řeší.
+Vaše instance evcc řídí nabíječku a zároveň přeposílá zprávy OCPP do externího backendu.
+Pokud chcete, blokuje příkazy zvenčí a ponechává si výhradní kontrolu nad nabíjením.
+Díky [webalexeu](https://github.com/webalexeu) za prosazení tohoto tématu a za implementaci.
+
+{/* TODO: diagram OCPP forwarding */}
+
+## Podpora nových zařízení
+
+Od začátku roku přibylo **přes 50 nových výrobců**.
+Knihovna zařízení teď obsahuje více než **320 výrobců** a přes **800 produktů**.
+
+**Nabíječky:** ChargeLine, ChargeX, Enovates, ETEK, EVSE Master (Besen, Telestar, Morec), Hager, Lektrico, Nexblue, RAEDIAN, Shell Recharge, Stegen, Voltie
+
+**Tepelná čerpadla a topná tělesa:** Askoma, E.G.O., Glen Dimplex, M-Tec, OVUM, Xtherma a také skupina značek Vaillant (Saunier Duval, Bulex, Glow-worm, DemirDöküm)
+
+**Měřiče, solár a bateriové systémy:** ADA, Afore, Atmoce, Azimut Energy, Danfoss, Eltako, Everhome, Finder, Homey, IBC Solar, IndeVolt, INTILION, IoTaWatt, Sessy, Smartstuff, Solinteg, stromleser.one, Tepto
+
+**Tarify:** BKW, CKW, Energy-Charts, EPEX Predictor, EWS Schönau, Fingrid, OMIE, Pstryk, pvnode
+
+**Vozidla:** Alpine, Genesis, Lexus
+
+Samozřejmě přibyla také řada oprav chyb a vylepšení stávajících implementací.
+Podrobnosti najdete v [poznámkách k vydání](https://github.com/evcc-io/evcc/releases).
+
+<a id="vw"></a>
+
+## Koncern VW: pryč a částečně zpět
+
+Čas od času integrace také zase zmizí.
+Situace s koncernem VW připomíná jízdu na horské dráze.
+Několik značek koncernu vypadlo, protože koncern [zablokoval](https://www.heise.de/news/Frust-bei-E-Auto-Fahrern-Schnittstelle-fuer-Drittanbieter-weg-VW-arbeitet-dran-11320034.html) přístup k neoficiálně používanému API své aplikace třetím stranám, jako je evcc, Home Assistant a další.
+Oklikou přes nové rozhraní podle EU Data Act jsme je znovu zpřístupnili, částečně a s omezeními.
+Místo živého API poskytuje portál transparentnosti každých 15 minut archiv ZIP s daty vozidla, který vaše instance stáhne a dekóduje.
+Koncern oznámil udržitelné řešení pro projekty chytré domácnosti a open source.
+Jsme v kontaktu, ale na další krok výrobce už několik týdnů čekáme.
+
+<a id="history"></a>
+
+## Historie: časové statistiky
+
+Pustili jsme se do dlouho požadované funkce: energetická data se teď strukturovaně zaznamenávají v 15minutovém rozlišení, nezávisle na nabíjecích relacích.
+Nová, experimentální stránka **Historie** zobrazuje průběh sítě, výroby, baterie, nabíjení a vytápění, spotřeby domácnosti a dalších měřičů v čase.
+Kromě vizuálního zobrazení lze data exportovat jako CSV nebo XLSX.
+
+Novinkou je také koncept _spotřebičů_: umožňuje zaznamenanou spotřebu domácnosti dále rozdělit, např. na pračku, myčku nebo toustovač.
+Na rozdíl od nabíjecích bodů a zařízení pro vytápění se spotřebiče pouze zaznamenávají, ale neřídí.
+
+Pro lepší kvalitu dat jsme přidali podporu měření energie s obousměrnými měřiči.
+Ty zaznamenávají oba směry: u sítě odběr a export, u baterie nabíjení a vybíjení.
+
+Téma ještě není hotové.
+Aktuálně se soustředíme na to, aby byla data správná pro všechny podporované třídy zařízení.
+Vizualizace jsou proto zatím záměrně jednoduché časové řady.
+Nápadů už je ale spousta: v tomto [vlákně s nápady](https://github.com/evcc-io/evcc/discussions/31060) můžete sdílet snímky obrazovky statistik a vizualizací, které považujete za povedené a užitečné a které byste v budoucnu rádi viděli v evcc.
+
+Tím pokládáme základ pro statistiky i mimo nabíjení elektromobilů.
+Na otázky jako „Kolik solární energie loni spotřebovalo tepelné čerpadlo?“ chceme v budoucnu odpovídat přímo.
+
+![Stránka Historie](../../../../../en/blog/2026/07/18/history.webp)
+
+<a id="optimizer"></a>
+
+## Optimalizátor
+
+Dosud evcc řídí podle aktuální energetické situace ve vaší domácnosti.
+Plány nabíjení sice hledí dopředu na ceny a předpovědi, ale vždy se zaměřují na jediný nabíjecí bod.
+[Optimalizátor](/cs/features/optimizer) posuzuje situaci jako celek: na základě předpovědí spotřeby a výroby i průběhu cen elektřiny vypočítá optimální chování celého systému na následující dva dny.
+Nově byly začleněny předpovědi počasí, díky kterým bude v budoucnu možné odhadnout a zohlednit potřebu tepla.
+Přispěl jimi [daniel309](https://github.com/daniel309), moc děkujeme!
+
+Novinkou je také volitelná strategie: vy rozhodujete, na co má plán kromě nákladové efektivity optimalizovat, např. nejdřív naplnit baterii nebo snížit odběrové špičky ze sítě.
+Doporučení optimalizátoru se zobrazují tam, kde jsou důležitá: u nabíjecího bodu a na stránce baterie, včetně předpovídané křivky stavu nabití.
+Optimalizátor zatím neřídí žádná zařízení.
+Dalším krokem je převést vypočítané plány na akce: konkrétně řídit chování baterie a nabíjecích bodů.
+
+![Plán nabíjení optimalizátoru](../../../../../en/blog/2026/07/18/optimizer.webp)
+
+## Sponzorství přes Creem
+
+Sponzorovat teď můžete i bez účtu na GitHubu.
+Na [sponsor.evcc.io](https://sponsor.evcc.io) můžete sponzorství uzavřít přímo.
+Platby zpracovává poskytovatel [Creem](https://www.creem.io), mladá evropská firma z Estonska.
+Momentálně můžete platit přes Apple Pay, Google Pay a kreditní kartou, další platební metody jsou v plánu.
+Novinkou jsou také [balíčky tokenů s množstevní slevou](https://sponsor.evcc.io/business) pro elektrikáře a instalační firmy, které nasazují evcc v zákaznických projektech.
+Všechny podrobnosti najdete v [dokumentaci ke sponzorství](/cs/sponsorship).
+
+## Nová dokumentace
+
+Také [docs.evcc.io](https://docs.evcc.io) jsme přestavěli.
+Přešli jsme z Docusaurus na [Astro Starlight](https://starlight.astro.build).
+Nový základ je odlehčenější, modernější a nabízí více volnosti pro rozšíření.
+Stránky se načítají rychleji a fungují bez JavaScriptu na straně klienta.
+Vyhledávání teď běží lokálně ve vašem prohlížeči místo přes externí službu Algolia.
+Novým výchozím jazykem je angličtina.
+Každé zařízení má vlastní stránku s detaily, na kterou lze přímo odkazovat, s tabulkou parametrů.
+Stránka se generuje ze šablon a nabízí přepínač mezi verzí release a nightly.
+Funkce úprav vás zavede přímo ke zdrojové šabloně.
+Reference REST API se sestavuje ze specifikace OpenAPI a pro LLM je k dispozici [llms.txt](https://docs.evcc.io/llms.txt).
+
+## Agentní vývoj
+
+Nástroje pro agentní vývoj se v posledních měsících výrazně zlepšily a změnily způsob, jakým v projektu pracujeme, ne bez třenic, ale převážně pozitivně.
+Na GitHubu agent předtřiďuje nové issues, pull requesty dostávají automatickou první revizi a správci mohou komentářem spustit analýzy, opravy a testovací buildy.
+Zkušebně také necháváme AI věcně odpovídat na issues: pochopit problém, hledat řešení a ve vhodných případech rovnou navrhnout pull request.
+Výsledek: lepší issues, lepší pull requesty a velký nárůst příspěvků.
+Zásady pro příspěvky generované pomocí AI jsme popsali v [CONTRIBUTING.md](https://github.com/evcc-io/evcc/blob/master/CONTRIBUTING.md).
+
+Jedno je ale jasné: soustředění a kvalita pro nás zůstávají nejvyšší prioritou.
+Generovat nové funkce je teď snadné.
+O to důležitější je dobrá komunikace v issues a diskusích.
+Pochopení případů použití a konkrétních potřeb za nimi zůstává zásadní, i když zkratka v podobě „rychle vygenerovaného dalšího nastavení“ je často velmi lákavá.
+
+## Výhled
+
+Na čem budeme pracovat dál?
+Některé plány jsme už zmínili výše: další [vylepšení pro tepelná čerpadla](#heating), více [statistik](#history) na základě nového zaznamenávání dat a [optimalizátor](#optimizer) na cestě od doporučení k aktivnímu řízení.
+K tomu přibývají dvě větší témata.
+
+**Mini nabíjecí body:** Běžné spotřebiče a zařízení pro vytápění mají dostat vlastní karty s odpovídajícími funkcemi.
+Díky časovým datům a přepracované správě zařízení jsou teď splněny předpoklady.
+Podrobnosti najdete v [diskusi na GitHubu](https://github.com/evcc-io/evcc/discussions/7235).
+
+**Obousměrné nabíjení:** V komunitě (včetně hlavního týmu) už jsou první vozidla a nabíječky, které umí energii dodávat zpět.
+Pracujeme na tom, aby je bylo možné používat v evcc.
+Momentálně jednáme s výrobci o detailech implementace ve standardu, certifikátech a dalších technických výzvách.
+Pokud máte doma kompatibilní kombinaci nabíječky a vozidla (nebo pracujete u výrobce), klidně se ozvěte: přes [GitHub issue](https://github.com/evcc-io/evcc/issues), na [Slacku](https://evcc.io/slack) nebo na [info@evcc.io](mailto:info@evcc.io).
+
+---
+
+💚 Výše jsme jmenovali několik přispěvatelů a ti zastupují mnoho dalších.
+Velké díky všem, kdo projekt posouvají dopředu: kódem, nápady, testováním, diskusemi i finanční podporou, bez které by projekt v této podobě nebyl možný.
+
+Přejeme vám slunečné léto se spoustou plných baterií.
+
+**S pozdravem**<br />
+Tým evcc<br />
+Michael, Andi & Uli

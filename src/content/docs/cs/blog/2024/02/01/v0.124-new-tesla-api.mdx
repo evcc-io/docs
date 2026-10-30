@@ -1,0 +1,133 @@
+---
+date: 2024-02-01
+title: "v0.124 - Nová integrace Tesly"
+description: "Poznámky k vydání evcc 0.124 z února 2024 s novou integrací oficiálního API Tesly přes tesla.evcc.io a aktivním řízením domácí baterie."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "60082a9a90ff"
+---
+
+![Banner s přehledem nových funkcí](../../../../../en/blog/2024/02/01/v0.124-banner.webp)
+
+Dny se prodlužují a nabíjení ze soláru zase začíná být zábava.
+Dobrá příležitost pro krátké shrnutí novinek v evcc.
+
+{/* excerpt */}
+
+## Nová integrace Tesly
+
+V [říjnu](https://www.notateslaapp.com/news/1653/tesla-creates-official-apis-for-third-party-services-to-start-charging-for-usage) Tesla představila nové [oficiální API](https://developer.tesla.com/docs/fleet-api).
+Zároveň oznámila, že staré [neoficiální API](https://www.teslaapi.io) bude na začátku roku 2024 vypnuto.
+
+### Co to pro mě znamená?
+
+Abyste mohli používat nové API, musíte v `evcc.yaml` provést dvě úpravy:
+
+1. **Nový název šablony:** Protože staré API u některých uživatelů dodnes funguje, rozhodli jsme se prozatím nabízet obě implementace souběžně. Pro použití nového API změňte název šablony z `tesla` na `tesla-command`.
+
+2. **Vygenerujte nové tokeny:** S novým API je nyní možné vygenerovat potřebné `accessToken` a `refreshToken` přímo v prohlížeči.
+   K tomu jsme připravili malou webovou stránku [tesla.evcc.io](https://tesla.evcc.io).
+
+Konfigurace by pak měla vypadat takto:
+
+```yaml
+vehicles:
+ - name: mytesla
+   type: template
+   template: tesla-command # change `tesla` to `tesla-command`
+   accessToken: ... # generetad by tesla.evcc.io
+   refreshToken:  ... # generetad by tesla.evcc.io
+   ...
+```
+
+Tokeny vygenerované přes [tesla.evcc.io](https://tesla.evcc.io) lze použít **pouze s oficiálními buildy evcc** (stable a nightly).
+Důvodem je, že tokeny z nového Developer API Tesly jsou vždy vázány na aplikaci třetí strany.
+
+evcc si samozřejmě můžete i nadále sestavit sami.
+Budete ale potřebovat vlastní vývojářský účet u Tesly (Tesla Developer Account) a tokeny si budete muset vygenerovat sami.
+Další podrobnosti najdete v příslušném [pull requestu](https://github.com/evcc-io/evcc/pull/10802).
+
+### Soukromí a zabezpečení
+
+Stejně jako u starého API probíhá komunikace pro načítání dat (stav nabití, stav vozidla atd.) a řízení (probuzení) přímo mezi vaší lokální instancí evcc a infrastrukturou Tesly.
+Přes náš web proběhne jen jednorázové vygenerování tokenů.
+Tokeny se neukládají, pouze se vám zobrazí v prohlížeči.
+
+Pro rozšířené řízení vozidla (spuštění a zastavení nabíjení přímo ve vozidle) je potřeba další podepsaný požadavek na Teslu.
+V současnosti se to týká uživatelů Tesla Wall Connectoru.
+Protože do binárky evcc nemůžeme a nesmíme vložit náš soukromý klíč aplikace třetí strany, poskytneme pro tento účel pravděpodobně [vlastní službu](https://github.com/evcc-io/evcc/pull/11893), která tyto požadavky podepíše a přepošle Tesle.
+Více ale v některém z dalších vydání.
+
+### Náklady
+
+Tesla v současnosti nabízí nové API [zdarma](https://developer.tesla.com/docs/fleet-api#membership-tiers).
+Už ale oznámila, že za používání API bude v budoucnu účtovat poplatky.
+Bohužel zatím nevíme, jak vstřícný bude nový cenový model k open source projektům.
+
+Je docela možné, že generování tokenů v budoucnu nebudeme moci nabízet zdarma.
+Možná ho propojíme se stávajícím modelem sponzorství evcc.
+Více ale, až budou od Tesly nové informace.
+
+## Aktivní řízení baterie
+
+Velkou novinkou, která přišla s vánočním vydáním, je aktivní řízení baterie.
+Tato funkce už není označena jako experimentální.
+Navíc v posledních týdnech přibyly další podporované bateriové střídače.
+V dokumentaci teď uvidíte, [zda je váš střídač podporován](/cs/meters#features).
+
+### Pasivní řízení
+
+Pasivní řízení baterie je v evcc k dispozici už nějakou dobu.
+evcc přitom reguluje nabíjení ze soláru tak, aby se domácí baterie nechtěně nevybíjela.
+Loni jsme představili [konfigurační dialogové okno](/cs/blog/2023/10/05/feature-highlights-10-2023#battery-settings), ve kterém můžete nastavit prioritu mezi nabíjením vozidla a domácí baterie.
+Tento model funguje pro nabíjení ze soláru velmi dobře.
+evcc zná aktuální stav nabití domácí baterie a reguluje pouze nabíjecí výkon vozidla.
+Pro rychlé nabíjení však tento mechanismus nefunguje.
+K tomu je potřeba aktivní řízení baterie.
+
+### Zabránění vybíjení při rychlém nabíjení
+
+Ve výchozím stavu se domácí baterie snaží pokrýt celou spotřebu energie domu (včetně nabíječek).
+V závislosti na aktuální ceně elektřiny nebo očekávané výrobě ze soláru však může být žádoucí brát energii pro **rychlé nabíjení vozidla** přímo ze sítě, a ne z domácí baterie.
+Nasbíraná solární energie tak zůstane v domácí baterii a dá se využít např. pro spotřebu domu v noci.
+
+Toto je náš první případ použití aktivního řízení baterie.
+Pokud váš střídač tuto funkci podporuje, objeví se v dialogovém okně nastavení baterie odpovídající volba.
+
+![Řízení baterie: zabránit vybíjení baterie při rychlém nabíjení](../../../../../en/blog/2024/02/01/batterycontrol-en.webp)
+
+Když je tato volba aktivní, domácí baterie se během rychlého nabíjení přepne do režimu blokování.
+Během této doby se ani nevybíjí, ani nenabíjí.
+Toto blokování je aktivní i během [plánovaného nabíjení](/cs/blog/2023/10/05/feature-highlights-10-2023#charging-planner-visualization) a [chytrého nabíjení ze sítě](/cs/blog/2023/10/05/feature-highlights-10-2023#smart-grid-charging).
+
+### Další krok: nabíjení baterie levnou elektřinou ze sítě
+
+Další fází vývoje aktivního řízení baterie je možnost nabíjet domácí baterii levnou elektřinou ze sítě.
+To je zajímavé hlavně pro uživatele dynamických tarifů v zimě, kdy je málo slunce.
+Cílem je naplnit domácí baterii energií ze sítě v obdobích nízkých cen a tuto energii pak spotřebovat v domě v obdobích vysokých cen.
+Potřebné integrace hardwaru už máme implementované.
+Proto očekáváme, že tato funkce bude k dispozici v některém z příštích vydání.
+
+## Aktualizace: přechod na konfiguraci v prohlížeči
+
+evcc je velmi flexibilní a výkonný systém pro optimalizaci vlastní energie.
+Naší největší výzvou stále zůstává spojit tuto flexibilitu se snadným nastavením.
+V posledních měsících jsme v oblasti konfigurace udělali velký pokrok.
+Naším cílem je umožnit uvedení do provozu čistě v prohlížeči, bez `evcc.yaml`.
+
+Pokud máte v dialogovém okně nastavení zapnutou volbu „Zobrazit experimentální funkce UI“, uvidíte náš aktuální stav vývoje pod položkou „🧪 Konfigurace zařízení“.
+V současnosti tam můžete přidávat a upravovat vozidla, měřiče sítě, fotovoltaické elektrárny a bateriové systémy.
+Nabíječky a tarify budou následovat v další iteraci.
+I když jde stále o rozpracovanou verzi, těšíme se na vaši zpětnou vazbu.
+
+![Konfigurace zařízení](../../../../../en/blog/2024/02/01/config-ui.webp)
+
+## Drobná vylepšení a opravy chyb
+
+Jako vždy obsahuje i toto vydání řadu menších vylepšení a oprav chyb.
+Další podrobnosti najdete v [poznámkách k vydání](https://github.com/evcc-io/evcc/releases/tag/0.124.0).
+
+Vše nejlepší<br/>
+váš core tým evcc
