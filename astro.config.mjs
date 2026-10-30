@@ -358,7 +358,14 @@ export default defineConfig({
     mdx({ optimize: true }),
     sitemap({
       // Nightly device pages are noindex and must stay out of the sitemap.
-      filter: (page) => !/\/nightly(\/|$)/.test(page),
+      // So are device detail pages outside en/de, which show English template
+      // data (see DeviceDetailLayout).
+      filter: (page) =>
+        !/\/nightly(\/|$)/.test(page) &&
+        !matchesGlob(
+          new URL(page).pathname.replace(/\/$/, ""),
+          `/{${LANGS.filter((l) => l !== "en" && l !== "de")}}/{chargers,meters,vehicles,smartswitches,heating,tariffs,external-limit,notifications}/*`,
+        ),
     }),
   ],
 });

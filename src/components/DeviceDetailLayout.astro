@@ -14,6 +14,7 @@ import {
 } from "@utils/devices";
 import type { Channel } from "@utils/devices";
 import { deviceIconSvg } from "@utils/deviceIcon";
+import { templateLocale } from "@utils/locales";
 
 interface Props {
   entry: any;
@@ -84,13 +85,31 @@ const markdownAlternate = [
   },
 ];
 
+// Templates exist in en and de only, so the other locales show English template
+// data. Keep those near-duplicates out of search and point at the English page.
+const englishCanonical =
+  templateLocale(lang) !== lang
+    ? [
+        { tag: "meta" as const, attrs: { name: "robots", content: "noindex" } },
+        {
+          tag: "link" as const,
+          attrs: {
+            rel: "canonical",
+            href: new URL(`/en/${type}/${entry.id}`, Astro.site).href,
+          },
+        },
+      ]
+    : [];
+
 const frontmatter = {
   title,
   description: plainText(entry.data.description),
   template: "doc",
   editUrl,
   tableOfContents: false,
-  head: isNightly ? nightlyPageHead : markdownAlternate,
+  head: isNightly
+    ? nightlyPageHead
+    : [...markdownAlternate, ...englishCanonical],
   ...(isNightly ? { pagefind: false } : {}),
 };
 ---
