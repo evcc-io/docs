@@ -1,0 +1,308 @@
+---
+date: 2026-07-18
+title: "Highlights: toegang op afstand, iOS-widgets, optimizer en meer"
+description: "Release-highlights van evcc 0.301 tot 0.311 uit juli 2026 met een nieuwe navigatie, iOS-widgets en meerdere servers in de app, toegang op afstand en de optimizer."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Highlights-banner"
+  image: "../../../../../en/blog/2026/07/18/highlights-remote-access-widgets-optimizer.webp"
+translatedFrom: "1bfc946d912d"
+---
+
+import Video from "@components/Video.astro";
+import changeServerVideo from "../../../../../en/blog/2026/07/18/change-server.mp4";
+import changeServerPoster from "../../../../../en/blog/2026/07/18/change-server.webp";
+import widgetsVideo from "../../../../../en/blog/2026/07/18/widgets.mp4";
+import widgetsPoster from "../../../../../en/blog/2026/07/18/widgets.webp";
+import remoteAccessVideo from "../../../../../en/blog/2026/07/18/remote-access.mp4";
+import remoteAccessPoster from "../../../../../en/blog/2026/07/18/remote-access.webp";
+import batteryBoostVideo from "../../../../../en/blog/2026/07/18/battery-boost.mp4";
+import batteryBoostPoster from "../../../../../en/blog/2026/07/18/battery-boost.webp";
+
+Er is een half jaar verstreken sinds de [vorige highlights-post](/nl/blog/2026/01/01/highlights-browser-config-ready).
+Sindsdien is er met de releases [0.301 tot 0.311](https://github.com/evcc-io/evcc/releases) veel gebeurd: een nieuwe navigatie, widgets in de iOS-app, toegang op afstand, tijdgebaseerde statistieken en nog veel meer.
+In deze blogpost lichten we een paar van onze highlights uit en geven we een korte vooruitblik op onze verdere plannen.
+
+{/* excerpt */}
+
+## Vernieuwde interface
+
+De interface heeft een nieuwe navigatie onderaan het scherm gekregen.
+Via de onderdelen **Laden**, **Thuisbatterij**, **Voorspelling**, **Sessies** en **Meer** komt u nu sneller bij alle functies.
+Batterij en voorspelling hebben een eigen pagina gekregen in plaats van zich zoals voorheen in vensters in het hamburgermenu te verstoppen.
+De batterijpagina toont de actuele waarden samen met het voorspelde verloop van het laadniveau (experimenteel, later meer over de optimizer).
+De navigatie geeft ook een subtiele hint wanneer er een nieuwe evcc-versie beschikbaar is.
+De vaak gevraagde updateknop direct naast de changelog is er nog niet.
+Maar hij staat op onze lijst.
+
+![Navigatie onderaan](../../../../../en/blog/2026/07/18/bottom-navigation.webp)
+
+Gaandeweg zijn er meer gaten in de configuratie via de browser gedicht: [tarieven](/nl/tariffs), [meldingen](/nl/notifications), EEBUS en [externe limieten](/nl/external-limit) kunnen nu via formulieren worden ingesteld in plaats van door YAML te bewerken.
+Alleen load balancing moet momenteel nog via een groot YAML-blok worden geconfigureerd.
+
+## App: widgets en meerdere servers
+
+De [evcc-app](/nl/features/app) heeft de afgelopen maanden een aantal nieuwe functies gekregen.
+
+**iOS-widgets:** Laadpuntstatus, voorspelling van zonne-energie, netafnameprijs, terugleverprijs en CO₂-voorspelling zijn nu als widgets direct op uw beginscherm beschikbaar.
+Eén tik brengt u via een deeplink naar de bijbehorende plek in de app.
+
+<Video
+  src={widgetsVideo}
+  poster={widgetsPoster}
+  autoplay
+  aspect="1 / 1"
+  title="iOS-widgets"
+/>
+
+**Meerdere servers:** U kunt nu meerdere evcc-installaties in de app beheren, bijv. voor uw eigen huis, dat van uw ouders of uw vakantiehuis.
+Wisselen gaat via **Meer → Andere server**.
+
+<Video
+  src={changeServerVideo}
+  poster={changeServerPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Wisselen tussen servers in de app"
+/>
+
+**Instellen via QR-code:** Een nieuwe installatie stelt u in door een QR-code direct vanuit de webinterface te scannen.
+U hoeft het serveradres en de inloggegevens niet langer met de hand in te voeren.
+Dat is vooral handig als u een installatie voor iemand anders voorbereidt.
+Meer over de mogelijkheden staat in de [app-referentie](/nl/reference/app).
+
+Speciale dank aan [Maschga](https://github.com/Maschga) voor het voortdurend verbeteren van de app.
+
+## Toegang op afstand
+
+Velen van u willen hun installatie ook in de gaten houden als ze niet thuis zijn.
+Ons advies was tot nu toe om daarvoor een VPN in te richten.
+Intussen hoorden we vaak de vraag om een eenvoudigere oplossing.
+
+Dit onderwerp houdt ons al lang bezig.
+In de afgelopen jaren hebben we veel prototypes gebouwd en weer weggegooid.
+Onze eisen: hoge veiligheid, geen gegevensopslag op onze servers, transparantie, eenvoudig gebruik en veel lokale controle.
+
+Met de nieuwe, experimentele [toegang op afstand](/nl/features/remote-access) hebben we nu een oplossing die past.
+Uw evcc-installatie krijgt een eigen domein op `evcc.cloud`.
+De verbinding loopt via een tunnel die uw installatie zelf naar buiten opent.
+Port forwarding in uw router is niet nodig.
+Het mooie aan deze oplossing is dat ze technisch heel eenvoudig is.
+De kern is de bibliotheek [hashicorp/yamux](https://github.com/hashicorp/yamux), waarmee we inkomend internetverkeer veilig naar de juiste lokale evcc-installatie leiden, met transportversleuteling via TLS.
+De eigenlijke authenticatie gebeurt op uw lokale installatie: inloggegevens worden uitsluitend daar opgeslagen en gecontroleerd, en er zijn geen gebruikersaccounts in de cloud.
+De dienst is beschikbaar voor sponsors en kan met twee klikken worden ingeschakeld onder **Configuratie → Toegang op afstand**.
+
+<Video
+  src={remoteAccessVideo}
+  poster={remoteAccessPoster}
+  autoplay
+  aspect="4 / 3"
+  title="Toegang op afstand inschakelen en de app verbinden"
+/>
+
+## Dimmen en opwekbegrenzing
+
+We hebben de [externe aansturing](/nl/external-limit) door de netbeheerder grondig herzien, een onderwerp dat vooral in Duitsland speelt.
+De signalen van een FNN-stuurkast kunnen via EEBUS of via schakelcontacten worden uitgelezen.
+
+**Dimmen:** Het begrenzen van stuurbare verbruikers volgens § 14a EnWG wordt al een tijdje ondersteund.
+Dat is nu beter geworden: actieve limieten worden proportioneel over alle stuurbare apparaten verdeeld en in de UI getoond.
+
+**Opwekbegrenzing:** Nieuw is het verlagen van het productievermogen volgens § 9 EEG.
+Omvormers van Huawei, Enphase, Sungrow en generieke SunSpec-apparaten kunnen al worden begrensd.
+Een overzicht van de begrensbare apparaten vindt u in de [apparatenlijst](/nl/meters?f=curtail).
+We werken eraan om meer apparaten te ondersteunen.
+Als u een ander apparaat goed kent, zijn we blij met uw bijdrage.
+
+{/* TODO: image dimming/curtailment */}
+
+<a id="heating"></a>
+
+## Warmtepompen en verwarming
+
+Steeds meer van u gebruiken hun zonneoverschot niet alleen voor de auto, maar ook voor een warmtepomp of elektrische verwarming.
+Ook hier is veel gebeurd.
+
+Temperaturen worden nu weergegeven als bereik met een eigen kleurverloop van blauw naar rood, zodat ze duidelijk te onderscheiden zijn van laadpunten.
+Het temperatuurbereik kunt u zelf instellen.
+
+![Laad- en verwarmingstoestanden](../../../../../en/blog/2026/07/18/heating-states.webp)
+
+Met **continu** is er een nieuwe conceptuele modus voor warmtepompen: in plaats van hard aan en uit te schakelen, blijft het apparaat zelfstandig draaien, wat beter past bij de aard van deze apparaatcategorie.
+Via EEBUS ondersteunen we compressorflexibiliteit (OHPCF), waarmee warmtepompen gericht op overschot kunnen draaien.
+
+Daarnaast zijn er veel [nieuwe apparaten](/nl/heating#supported) bijgekomen, van de merkenfamilie van Vaillant tot Glen Dimplex en Xtherma.
+We hebben nog een paar openstaande punten, zoals betere namen voor de modi, een aangepaste planmodus en tijdgebaseerde gegevensregistratie (zie hieronder), plus verdere ideeën zoals voorspellingen van de warmtevraag in de optimizer.
+
+**Sponsoring vereist:** Toen we de verwarmingscategorie introduceerden, kondigden we aan dat deze apparaten, net als veel laders, een sponsoring zullen vereisen.
+Die opmerking staat sindsdien bovenaan de [apparatenlijst](/nl/heating).
+In een van de komende releases gaan we dit in de software afdwingen.
+
+![Warmtepompkaart](../../../../../en/blog/2026/07/18/heatpump.webp)
+
+## Batterijboost
+
+Soms moet de auto snel vol, ook als de zon niet meewerkt.
+Met batterijboost (**Batterij Boost**) kunt u de thuisbatterij op verzoek in het voertuig ontladen.
+Eén klik op het laadpunt is genoeg, het laden gaat door tot een instelbare batterijlimiet is bereikt.
+Boost werkt in de modus **PV**.
+
+<Video
+  src={batteryBoostVideo}
+  poster={batteryBoostPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Batterijboost in de app"
+/>
+
+Batterijboost is overigens de eerste functie die een eigen sticker heeft gekregen.
+Op de [communitymeetup](/nl/blog/2026/04/20/community-treffen-rueckblick) in april hebben we een paar stickerontwerpen uitgedeeld en ideeën verzameld.
+De sticker, met een glitterprint in pixydust-groen, gaat voortaan standaard mee in de brief aan nieuwe sponsors.
+
+![Batterijboost-stickers](../../../../../en/blog/2026/07/18/battery-boost-stickers.webp)
+
+## OCPP-doorsturing
+
+Een typisch geval: u rijdt in een auto van de zaak en uw werkgever vergoedt de laadkosten via een afrekenplatform.
+Uw lader spreekt daarvoor OCPP, maar kan slechts met één systeem verbinden.
+Tot nu toe moest u kiezen: zonne-optimalisatie met evcc of afrekenen via het platform.
+
+De nieuwe [OCPP-doorsturing](/nl/integrations/ocpp-forwarding) lost dit op.
+Uw evcc-installatie stuurt de lader aan en stuurt tegelijk de OCPP-berichten door naar de externe backend.
+Desgewenst blokkeert ze commando’s van buitenaf en houdt ze als enige de controle over het laden.
+Dank aan [webalexeu](https://github.com/webalexeu) voor het aanjagen van dit onderwerp en het bouwen van de implementatie.
+
+{/* TODO: diagram OCPP forwarding */}
+
+## Ondersteuning voor nieuwe apparaten
+
+**Meer dan 50 nieuwe fabrikanten** zijn sinds het begin van het jaar toegevoegd.
+De apparatenbibliotheek omvat nu meer dan **320 fabrikanten** en ruim **800 producten**.
+
+**Laders:** ChargeLine, ChargeX, Enovates, ETEK, EVSE Master (Besen, Telestar, Morec), Hager, Lektrico, Nexblue, RAEDIAN, Shell Recharge, Stegen, Voltie
+
+**Warmtepompen en verwarmingselementen:** Askoma, E.G.O., Glen Dimplex, M-Tec, OVUM, Xtherma, plus de merkenfamilie van Vaillant (Saunier Duval, Bulex, Glow-worm, DemirDöküm)
+
+**Meters, zonnepanelen- en batterijsystemen:** ADA, Afore, Atmoce, Azimut Energy, Danfoss, Eltako, Everhome, Finder, Homey, IBC Solar, IndeVolt, INTILION, IoTaWatt, Sessy, Smartstuff, Solinteg, stromleser.one, Tepto
+
+**Tarieven:** BKW, CKW, Energy-Charts, EPEX Predictor, EWS Schönau, Fingrid, OMIE, Pstryk, pvnode
+
+**Voertuigen:** Alpine, Genesis, Lexus
+
+Natuurlijk zijn er ook veel bugfixes en verbeteringen aan bestaande implementaties geweest.
+Details staan in de [release notes](https://github.com/evcc-io/evcc/releases).
+
+<a id="vw"></a>
+
+## VW-concern: weg en deels terug
+
+Af en toe verdwijnen er ook weer integraties.
+De situatie bij het VW-concern is een beetje een achtbaanrit.
+Verschillende merken van het concern vielen weg, omdat het concern derden zoals evcc, Home Assistant en anderen [buitensloot](https://www.heise.de/news/Frust-bei-E-Auto-Fahrern-Schnittstelle-fuer-Drittanbieter-weg-VW-arbeitet-dran-11320034.html) van de onofficieel gebruikte API van zijn app.
+Via de omweg van de nieuwe interface op basis van de EU Data Act hebben we ze weer beschikbaar gemaakt, deels en met beperkingen.
+In plaats van een live-API levert het transparantieportaal elke 15 minuten een ZIP-archief met de voertuiggegevens, dat uw evcc-installatie downloadt en decodeert.
+Het concern heeft een duurzame oplossing voor smarthomeprojecten en open source aangekondigd.
+We hebben contact, maar wachten inmiddels al enkele weken op de volgende stap van de fabrikant.
+
+<a id="history"></a>
+
+## Geschiedenis: tijdgebaseerde statistieken
+
+We zijn begonnen aan een lang gevraagde functie: energiegegevens worden nu gestructureerd vastgelegd in een resolutie van 15 minuten, los van laadsessies.
+De nieuwe, experimentele pagina **Geschiedenis** toont net, productie, batterij, laden en verwarmen, huishoudelijk verbruik en extra meters in de tijd.
+Naast de visuele weergave kunnen de gegevens als CSV of XLSX worden geëxporteerd.
+
+Nieuw is ook het concept _verbruikers_: daarmee kunt u het vastgelegde huishoudelijke verbruik verder uitsplitsen, bijv. naar wasmachine, vaatwasser of broodrooster.
+Anders dan laadpunten en verwarmingstoestellen worden verbruikers alleen geregistreerd en niet aangestuurd.
+
+Voor een betere gegevenskwaliteit hebben we ondersteuning toegevoegd voor energiemeting met bidirectionele meters.
+Zo worden beide richtingen vastgelegd: netafname en teruglevering voor het net, geladen en ontladen voor de batterij.
+
+Het onderwerp is nog niet af.
+Onze huidige focus ligt op de juistheid van de gegevens voor alle ondersteunde apparaatklassen.
+De visualisaties zijn daarom nog bewust eenvoudige tijdreeksen.
+Maar er zijn al volop ideeën: in deze [ideeëndiscussie](https://github.com/evcc-io/evcc/discussions/31060) kunt u screenshots plaatsen van statistieken en visualisaties die u geslaagd en nuttig vindt en die u in de toekomst graag in evcc zou zien.
+
+Daarmee leggen we de basis voor statistieken die verder gaan dan het laden van elektrische auto’s.
+Vragen als “Hoeveel zonnestroom heeft de warmtepomp vorig jaar gebruikt?” willen we in de toekomst direct beantwoorden.
+
+![Geschiedenispagina](../../../../../en/blog/2026/07/18/history.webp)
+
+<a id="optimizer"></a>
+
+## Optimizer
+
+Tot nu toe stuurt evcc op basis van de actuele energiesituatie in uw huis.
+Laadplannen kijken weliswaar vooruit naar prijzen en voorspellingen, maar altijd gericht op één laadpunt.
+De [optimizer](/nl/features/optimizer) kijkt naar het grote geheel: hij berekent het optimale gedrag van het hele systeem voor de komende twee dagen, op basis van voorspellingen van verbruik en productie en het verloop van de stroomprijs.
+Net toegevoegd zijn weersvoorspellingen, waarmee de warmtevraag in de toekomst kan worden ingeschat en meegenomen.
+Ze zijn bijgedragen door [daniel309](https://github.com/daniel309), hartelijk dank!
+
+Nieuw is ook een selecteerbare strategie: u bepaalt waarop het plan naast kostenefficiëntie moet optimaliseren, bijv. eerst de batterij vullen of netpieken verminderen.
+De aanbevelingen van de optimizer worden getoond waar ze ertoe doen: bij het laadpunt en op de batterijpagina, inclusief de voorspelde curve van het laadniveau.
+De optimizer stuurt nog geen apparaten aan.
+De volgende stap is het omzetten van de berekende plannen in acties: concreet het gedrag van batterij en laadpunten aansturen.
+
+![Laadplan van de optimizer](../../../../../en/blog/2026/07/18/optimizer.webp)
+
+## Sponsoren via Creem
+
+Sponsoren kan nu zonder GitHub-account.
+Op [sponsor.evcc.io](https://sponsor.evcc.io) kunt u uw sponsoring direct afronden, afgehandeld via de betaalprovider [Creem](https://www.creem.io), een jong Europees bedrijf uit Estland.
+Op dit moment kunt u betalen met Apple Pay, Google Pay en creditcard, en er zijn meer betaalmethoden gepland.
+Nieuw zijn ook [tokenbundels met volumekorting](https://sponsor.evcc.io/business) voor elektriciens en installateurs die evcc in hun klantprojecten gebruiken.
+Alle details vindt u in de [documentatie over sponsoring](/nl/sponsorship).
+
+## Nieuwe documentatie
+
+Ook [docs.evcc.io](https://docs.evcc.io) is opnieuw opgebouwd.
+We zijn overgestapt van Docusaurus naar [Astro Starlight](https://starlight.astro.build).
+De nieuwe basis is lichter, moderner en biedt meer vrijheid voor uitbreidingen.
+Pagina’s laden sneller en werken zonder JavaScript aan de clientkant.
+Zoeken gebeurt nu lokaal in uw browser in plaats van via de externe dienst Algolia.
+Engels is de nieuwe standaardtaal.
+Elk apparaat heeft een eigen, direct linkbare detailpagina met een parametertabel, gegenereerd uit de templates en met een schakelaar tussen de release- en nightly-stand.
+De bewerkfunctie brengt u direct naar de brontemplate.
+De REST-API-referentie wordt opgebouwd uit de OpenAPI-specificatie, en er is een [llms.txt](https://docs.evcc.io/llms.txt) voor LLM’s.
+
+## Agentic development
+
+Tools voor agentic development zijn de afgelopen maanden flink beter geworden en hebben onze manier van werken in het project veranderd, niet zonder wrijving, maar overwegend positief.
+Op GitHub sorteert een agent nieuwe issues voor, krijgen pull requests een automatische eerste review, en kunnen maintainers via een reactie analyses, fixes en testbuilds starten.
+Bij wijze van proef laten we AI issues ook inhoudelijk beantwoorden: het probleem begrijpen, naar oplossingen zoeken en in geschikte gevallen zelfs direct een pull request voorstellen.
+Het resultaat: betere issues, betere pull requests en een flinke impuls voor bijdragen.
+Richtlijnen voor door AI gegenereerde bijdragen hebben we vastgelegd in [CONTRIBUTING.md](https://github.com/evcc-io/evcc/blob/master/CONTRIBUTING.md).
+
+Eén ding is wel duidelijk: focus en kwaliteit blijven onze hoogste prioriteit.
+Nieuwe functies genereren is makkelijk geworden.
+Goede communicatie in issues en discussies is daarom des te belangrijker.
+Use cases en de concrete behoeften erachter begrijpen blijft essentieel, ook al is de kortere weg van de “snel gegenereerde extra instelling” vaak erg verleidelijk.
+
+## Vooruitblik
+
+Waar werken we hierna aan?
+Sommige plannen kwamen hierboven al aan bod: verdere [verbeteringen voor warmtepompen](#heating), meer [statistieken](#history) op basis van de nieuwe gegevensregistratie en de [optimizer](#optimizer) op weg van aanbeveling naar actieve aansturing.
+Daar komen twee grotere onderwerpen bij.
+
+**Mini-laadpunten:** Gewone verbruikers en verwarmingstoestellen moeten een eigen kaart met passende functies krijgen.
+Met de tijdgebaseerde gegevens en het vernieuwde apparaatbeheer zijn de voorwaarden daarvoor nu aanwezig.
+Details in de [GitHub-discussie](https://github.com/evcc-io/evcc/discussions/7235).
+
+**Bidirectioneel laden:** De eerste voertuigen en laders die kunnen terugleveren zijn in de community aanwezig (ook bij het kernteam).
+We werken eraan ze in evcc bruikbaar te maken.
+We zijn momenteel in gesprek met fabrikanten over implementatiedetails in de standaard, certificaten en andere technische uitdagingen.
+Hebt u thuis een compatibele combinatie van lader en voertuig (of werkt u bij een fabrikant), neem dan gerust contact op: via een [GitHub-issue](https://github.com/evcc-io/evcc/issues), op [Slack](https://evcc.io/slack) of via [info@evcc.io](mailto:info@evcc.io).
+
+---
+
+💚 We hebben hierboven een paar bijdragers genoemd, en zij staan voor nog veel meer.
+Hartelijk dank aan iedereen die het project vooruithelpt: met code, ideeën, testen, discussies en financiële steun, zonder welke het project in deze vorm niet mogelijk zou zijn.
+
+We wensen u een zonnige zomer met veel volle batterijen.
+
+**Met vriendelijke groet**<br />
+Het evcc-team<br />
+Michael, Andi & Uli

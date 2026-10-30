@@ -1,0 +1,135 @@
+---
+date: 2025-02-19
+title: "Highlights: voorspellingen, configuratie-UI"
+description: "Release-highlights van evcc 0.200 uit februari 2025 met voorspellingen van zonne-energie, terugkerende laadplannen, SG Ready-warmtepompen en configuratie via de browser."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Highlights-banner"
+  image: "../../../../../en/blog/2025/02/19/forecasts-banner.webp"
+translatedFrom: "d6dd91291a14"
+---
+
+import Video from "@components/Video.astro";
+import forecastsVideo from "../../../../../en/blog/2025/02/19/forecasts.mp4";
+import forecastsPoster from "../../../../../en/blog/2025/02/19/forecasts.webp";
+import configUiVideo from "../../../../../en/blog/2025/02/19/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/02/19/config-ui.webp";
+export const SgreadySvg = "/img/sgready.svg?url";
+
+Met de [release van v0.200](https://github.com/evcc-io/evcc/releases) hebben we een grote stap gezet richting stabiliteit en gebruiksvriendelijkheid.
+In deze blogpost geven we wat achtergrond bij de versiesprong.
+Voor het dramatische effect bewaren we die voor het einde van het artikel ;)
+
+We stellen ook een aantal nieuwe functies voor die sinds de [blogpost in november](/nl/blog/2024/11/22/highlights-charts-stats) zijn toegevoegd.
+
+{/* excerpt */}
+
+## Voorspellingen
+
+[CO₂-geoptimaliseerd](/nl/features/co2) en [prijsgeoptimaliseerd](/nl/features/dynamic-prices) laden hebben we al een tijdje.
+Nu hebben we met [Forecast.solar](https://forecast.solar) en [Solcast](https://solcast.com/free-rooftop-solar-forecasting) de eerste twee aanbieders voor de voorspelling van zonne-energie geïntegreerd.
+Daarvoor is er een nieuw veld `solar` in de [tariefconfiguratie](/nl/tariffs).
+
+Als er een bron voor de voorspelling van zonne-energie is ingesteld, ziet u in het energieoverzicht de verwachte productie van zonne-energie voor vandaag in kWh.
+Een klik op dit getal of op het nieuwe menu-item **Voorspelling** brengt u naar een nieuwe weergave die de verwachte productie van zonne-energie voor de komende 48 uur toont.
+Deze weergave toont ook prijs- en CO₂-voorspellingen.
+
+<Video src={forecastsVideo} poster={forecastsPoster} />
+
+~Op dit moment kan er maar één voorspelling van zonne-energie (voor één dakvlak) worden ingesteld.
+Met de volgende release voegen we de mogelijkheid toe om voorspellingen te combineren.~<br/>
+Dat kan inmiddels, zie [voorspelling van zonne-energie](/nl/tariffs#pv-forecast).
+
+De voorspelling van zonne-energie heeft nog geen invloed op de laadplanning, maar vormt de basis voor toekomstige functies en optimalisaties.
+
+## Terugkerende laadplannen
+
+Als evcc het laadniveau van het voertuig kent, komen er verschillende nuttige laadfuncties beschikbaar.
+De mogelijkheid om direct na het aansluiten tot een [minimale lading](/nl/features/limits#minimum) te laden, bestaat al een tijdje.
+Het voertuig efficiënt en schoon laden met een [laadplan](/nl/features/plans) (vertrektijd en doellaadniveau) is ook al lang mogelijk.
+
+Bijna net zo oud is de vraag naar terugkerende laadplannen.
+Dat wil zeggen: plannen per weekdag aanmaken waar u niet steeds naar hoeft te kijken.
+Veel dank aan [@Maschga](https://github.com/Maschga), die deze omvangrijke functie heeft opgepakt.
+Het resultaat is echt mooi geworden.
+
+![Terugkerende laadplannen](../../../../../en/blog/2025/02/19/repeating-plans.webp)
+
+Plannen kunnen indien nodig worden gedeactiveerd (bijv. tijdens de vakantie).
+Tijdzones, zomertijd en wintertijd worden correct verwerkt 🤯.
+Meerdere terugkerende plannen zijn mogelijk, en bij plannen die dicht op elkaar liggen wordt het meest relevante plan gekozen, waarbij de beslissing van de planner transparant wordt weergegeven.
+
+Meer hierover leest u onder [Laadplannen](/nl/features/plans#repeating-plans).
+
+## Warmtepompen & SG Ready
+
+De vraag naar ondersteuning voor warmtepompen kwam de afgelopen maanden regelmatig terug.
+Tot nu toe hebben we ons bewust op elektrische voertuigen gericht om evcc gefocust en overzichtelijk te houden.
+Verwarmingstoestellen konden al worden geïntegreerd via [relais, slimme stekkers](/nl/smartswitches#heating) en de plug-ininterface ([voorbeeld](https://github.com/naltatis/aton-ctrl)), en dat werd ook gedaan.
+
+Sinds januari bieden we een expliciet model voor het aansturen van warmtepompen.
+Veel warmtepompen ondersteunen het SG Ready-model.
+Via een schakelbaar relais (bijv. Shelly) kan de warmtepomp de opdracht krijgen om bij overschot of goedkope netstroom meer te draaien.
+
+<SgreadySvg
+  alt="Diagram van de aansturing van een warmtepomp via een SG Ready-relais"
+  style={{ maxWidth: "700px" }}
+/>
+
+Sommige warmtepompen ondersteunen ook directe communicatie, bijv. via het netwerk.
+De lijst met deze apparaten is nog vrij kort.
+Als u zo’n warmtepomp hebt en weet hoe u die aanstuurt, open dan een [GitHub-issue](https://github.com/evcc-io/evcc/issues).
+
+Meer informatie over [warmtepompen & elektrische verwarming](/nl/heating) vindt u in de documentatie.
+
+De integratie van verwarmingstoestellen in de UI werkt, maar is nog niet perfect.
+Onderwerpen zoals tijdgebaseerde statistieken en een betere weergave van de warmtepomp in het hoofdoverzicht staan op onze takenlijst.
+
+## Configuratie-UI: instellen via de browser
+
+Bij de ontwikkeling van evcc vonden we het altijd belangrijk om de interface zo eenvoudig en overzichtelijk mogelijk te houden.
+We krijgen regelmatig de feedback dat andere gezinsleden (vaak geen nerds) snel hun weg vinden in de interface.
+Dat is een eigenschap die niet vanzelfsprekend is, zeker niet bij “klassieke” open-sourceprojecten, en we zijn er best trots op.
+
+Een belangrijke factor is de sterke uniformering en het onderliggende datamodel.
+Zodra een omvormer, voertuig of lader is ingesteld, doen de eigenaardigheden van de apparaten er in de UI niet meer toe.
+
+Het grootste pijnpunt voor veel gebruikers is echter om deze toestand van “alles is ingesteld” te bereiken.
+Tot nu toe moest u daarvoor de opdrachtregel gebruiken en een YAML-bestand bewerken.
+
+We werken er al lang aan om de eerste installatie via de UI mogelijk te maken.
+De afgelopen jaren en maanden hebben we stap voor stap afzonderlijke functies toegevoegd, zoals het aanmaken van voertuigen, meters, omvormers, tarieven en meer.
+Noodzakelijke functies zoals een logweergave en een authenticatiesysteem zijn er inmiddels ook.
+
+Met v0.200 hebben we het “laatste grote stuk” richting instellen via de UI toegevoegd.
+**Nu kunnen ook laadpunten en laders, de centrale onderdelen van evcc, via de UI worden aangemaakt en gewijzigd.**
+Daarmee komen we een merkbaar stuk dichter bij een stabiele 1.0-release.
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+De configuratie-UI is nog gemarkeerd als experimentele functie 🧪.
+Nog niet alle velden staan op de juiste plek, hebben de juiste omschrijving en zijn grondig getest.
+We kijken daarom erg uit naar uw feedback, suggesties en bugmeldingen.
+
+Geavanceerde functies, zoals het aanmaken van zelfgedefinieerde apparaten en betere diagnosetools, staan nog op de agenda.
+Meer over de status en voortgang van dit onderwerp vindt u in het [epic-issue](https://github.com/evcc-io/evcc/issues/6029).
+
+### Configuratie-UI uitproberen
+
+Als u de configuratie puur via de UI wilt uitproberen, kunt u **evcc starten met een lege `evcc.yaml`**.
+U krijgt dan een welkomstscherm en kunt van daaruit verder configureren via de UI.
+Daarvoor moeten de experimentele functies in de UI zijn geactiveerd.
+
+## En nog veel meer…
+
+Zoals gebruikelijk in de highlights-blogposts is dit maar een kleine selectie van alle onderwerpen waaraan wordt gewerkt.
+Sinds de vorige post in november zijn er [meer dan 250 pull requests](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged) 🤯 ontwikkeld, gereviewd en succesvol gemerged.
+
+De volledige lijst met onderwerpen vindt u in de [release notes](https://github.com/evcc-io/evcc/releases) op GitHub.
+
+**Met vriendelijke groet**<br/>
+Het evcc-team<br/>
+Michael, Andi & Uli

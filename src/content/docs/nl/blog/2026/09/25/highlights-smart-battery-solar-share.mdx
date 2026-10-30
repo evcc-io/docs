@@ -1,0 +1,167 @@
+---
+date: 2026-09-25
+title: "Highlights: modus Slim, batterijpagina, aandeel zonne-energie"
+description: "Release-highlights van evcc 0.315 en 0.316 uit september 2026 met de nieuwe modus Slim, de vernieuwde batterijpagina en de schuifregelaar voor het aandeel zonne-energie."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Highlights-banner"
+  image: "../../../../../en/blog/2026/09/25/highlights-smart-battery-solar-share.webp"
+translatedFrom: "da2b70ffef25"
+---
+
+Sinds de [vorige highlights-post](/nl/blog/2026/08/19/highlights-release-process-optimizer-customize) zijn er twee featurereleases verschenen: [0.315](https://github.com/evcc-io/evcc/releases/tag/0.315.0) en [0.316](https://github.com/evcc-io/evcc/releases/tag/0.316.0).
+Deze post behandelt ze allebei.
+De grote onderwerpen: de laadmodi hebben een nieuwe structuur gekregen met **Slim** en **Altijd laden**, de thuisbatterijpagina is vernieuwd, de nieuwe schuifregelaar **Aandeel zonne-energie** vervangt de verwarrende wattdrempels en de optimizer komt steeds dichter bij het zelf aansturen.
+
+{/* excerpt */}
+
+:::note[Update]
+**26 september 2026:** De [modus Slim](#modes) wordt nu uitgebreider uitgelegd, en de nieuwe [pagina over de modi](/nl/features/modes) behandelt alle modi.
+Het [gedeelte over de optimizer](#optimizer) vermeldt nu dat de optimizer een sponsortoken vereist.
+:::
+
+## Nieuwe modi: Slim en Altijd laden \{#modes\}
+
+De modi **PV** en **Min+PV** stammen uit de tijd dat evcc puur om laden met zonneoverschot draaide.
+In de loop der tijd hebben we functies toegevoegd die weinig met zonne-energie te maken hebben: dynamische tarieven, laadplannen, warmtepompen en schakelbare apparaten.
+Veel mensen gebruiken evcc inmiddels helemaal zonder zonnepanelensysteem, en de namen zorgden voor verwarring bij nieuwe gebruikers.
+
+Met [0.316](https://github.com/evcc-io/evcc/pull/32490) zijn de modi genoemd naar wat ze doen, niet naar hoe het vermogen wordt opgewekt.
+**PV** wordt **Slim**.
+
+**Uit** en **Snel** zijn eenvoudige schakelaars: het apparaat blijft uit, of het draait op vol vermogen zoals een lader zonder evcc.
+Alles wat evcc zelf beslist, gebeurt in de modus **Slim**:
+
+- [Laden met zonneoverschot](/nl/features/solar-charging)
+- Goedkoop of ecologisch laden van het net met een [dynamisch tarief](/nl/features/dynamic-prices) of een [CO₂-voorspelling](/nl/features/co2)
+- Prioriteiten tussen [thuisbatterij](/nl/features/battery), laadpunten en verwarmers
+- [Laadplannen](/nl/features/plans)
+
+**Slim** is ook de modus waarin de komende optimizer zal werken.
+
+De modus **Min+PV** is verwijderd.
+Die modus gedroeg zich als **PV** maar leverde altijd minstens het minimale vermogen, een belangrijke functie voor voertuigen die slecht tegen het steeds starten en stoppen van het laden kunnen, of voor installaties met weinig zonneoverschot.
+Maar dit concept is alleen zinvol voor het laden van voertuigen, niet voor schakelaars, verwarmers of warmtepompen.
+Daarom is het geen eigen modus meer, maar de optie **Altijd laden** in het dropdownmenu van de knop **Slim** bij laadpunten met een voertuig.
+U kunt de optie permanent inschakelen of, met de knop **1x**, alleen voor de huidige laadsessie.
+In de voertuiginstellingen kunt u per voertuig een standaardwaarde instellen.
+
+![Optie Altijd laden in het dropdownmenu van de knop van de modus Slim](../../../../../en/blog/2026/09/25/always-charge.webp)
+
+De namen van de modi passen zich aan het apparaat aan: een lader toont **Uit / Slim / Snel**, een schakelbaar apparaat **Uit / Slim / Aan**, een warmtepomp **Normaal / Slim / Boost**.
+De nieuwe [pagina over de modi](/nl/features/modes) legt alle modi en [Altijd laden](/nl/features/modes#always-charge) uitgebreid uit.
+
+Dit is een incompatibele wijziging voor integraties.
+De API, MQTT en de websocket melden nu `smart` in plaats van `pv`, en `minpv` wordt bij het uitlezen niet meer gemeld.
+Het schrijven van de oude waarden werkt nog steeds: `pv` instellen schakelt naar **Slim**, `minpv` instellen schakelt naar **Slim** met **Altijd laden** ingeschakeld, zodat bestaande automatiseringen hun gedrag behouden.
+Vergelijkt uw integratie met `pv` of `minpv`, dan is het tijd om die bij te werken.
+De belangrijkste integraties zijn vóór de release bijgewerkt.
+Dank aan alle maintainers die hun projecten hebben bijgewerkt 🙌
+
+## Thuisbatterijpagina \{#battery\}
+
+De pagina **Batterij** was vroeger een pure instellingenpagina.
+Nu geeft ze eerst een overzicht: een statuskaart met laadniveau, opgeslagen energie en actueel vermogen.
+Bij meerdere batterijen krijgt u een uitsplitsing: één kaart per batterij plus een gecombineerde kaart, en de grafiek daaronder toont het laadniveau van elke batterij over de afgelopen dagen.
+Is de [optimizer](#optimizer) ingeschakeld, dan toont de pagina ook de voorstellen van de optimizer: wat hij op dit moment met de batterij zou doen, bijv. vasthouden of van het net laden, en hoe het laadniveau zich verder zou ontwikkelen.
+Daarover verderop meer.
+De gebruiksinstellingen (prioriteit, laadbuffer en automatische start) zijn er nog steeds, maar nu als begrijpelijkere zinnen in plaats van een formulier.
+
+![Batterijpagina met statuskaarten, verloop van het laadniveau en gebruiksinstellingen](../../../../../en/blog/2026/09/25/battery-page.webp)
+
+Had u experimentele functies ingeschakeld, dan kent u deze pagina al.
+Met [0.316](https://github.com/evcc-io/evcc/pull/33434) is ze voor iedereen de standaard.
+
+**Batterijaansturingsmodi:** De batterijaansturing is nu fijnmaziger.
+Elke batterij meldt welke modi ze ondersteunt: normale werking, ontladen voorkomen, van het net laden, laden voorkomen en naar het net ontladen.
+evcc biedt alleen aan wat een apparaat werkelijk kan.
+Wat elke modus doet, staat in de [modustabel](/nl/user-defined-devices#battery-modes) in de documentatie, en externe systemen kunnen een modus instellen via de [REST API](/integrations/rest-api/operations/setexternalbatterymode).
+De ondersteuning voor actieve batterijaansturing is in deze cyclus gegroeid: Huawei SUN2000, Kostal Plenticore, Sungrow, Zendure Solarflow, Anker Solarbank, Atmoce, EcoFlow Stream, Marstek en Home Assistant-batterijen hebben extra modi gekregen.
+De [apparatenlijst](/nl/meters?f=battery-control) toont welke batterijsystemen actieve aansturing ondersteunen, en de [thuisbatterijpagina](/nl/features/battery) legt uit wat u ermee kunt doen.
+
+## Aandeel zonne-energie \{#solar-share\}
+
+Dit is een heel oud featureverzoek.
+Standaard start het laden in de modus **Slim** pas zodra het overschot het volledige minimale laadvermogen van het voertuig dekt.
+Is uw zonnepanelensysteem klein of staat de zon in de winter laag, dan komt dat moment misschien nooit.
+Tot nu toe kon u de drempel verlagen met wattdrempels in de laadpuntconfiguratie (herstart vereist).
+Die drempels verwarren nieuwe gebruikers al jaren, en eerlijk gezegd ook nogal wat ervaren gebruikers 😅.
+
+De nieuwe schuifregelaar [**Aandeel zonne-energie**](https://github.com/evcc-io/evcc/pull/32104) in de laadpuntinstellingen is eenvoudiger: u stelt in hoeveel van het minimale laadvermogen uit zonne-energie moet komen.
+100% betekent dat het laden wacht op volledig overschot.
+50% betekent dat de helft van het net mag komen.
+0% betekent dat het laden start zodra er überhaupt overschot is.
+Geen herstart, geen wattwaarden, gewoon een schuifregelaar.
+De oude drempels werken nog steeds voor geavanceerde configuraties.
+Zolang ze zijn ingesteld, is de schuifregelaar uitgeschakeld en wordt uitgelegd waarom.
+
+![Schuifregelaar Aandeel zonne-energie in de laadpuntinstellingen, ingesteld op 50%](../../../../../en/blog/2026/09/25/solar-share.webp)
+
+De [pagina over laden met zonneoverschot](/nl/features/solar-charging#not-enough-surplus) bevat de details.
+
+## Voortgang van de optimizer \{#optimizer\}
+
+De [optimizer](/nl/features/optimizer) berekent een plan voor uw hele huis over de komende dagen: batterij, laadpunten en verwarming, op basis van voorspellingen en prijzen.
+Hij is nog experimenteel en nog adviserend, d.w.z. hij toont wat hij zou doen, maar handelt nog niet.
+In de laatste twee releases is er veel gebeurd:
+
+- De horizon beslaat nu [48 uur plus de rest van de dag](https://github.com/evcc-io/evcc/pull/32893), en de grafiek markeert daggrenzen met de weekdag.
+- Het verbruik van het huishouden wordt [opgesplitst in afzonderlijke profielen](https://github.com/evcc-io/evcc/pull/33749): basislast, verwarming en laadpunten zonder bekende voertuigcapaciteit worden apart getoond.
+- De voorspelling van het huishoudverbruik is beter geworden, bijv. voor [verwarmers](https://github.com/evcc-io/evcc/pull/28232) en voor huizen waar een paar middagen met hoog verbruik vroeger [de basislast vertekenden](https://github.com/evcc-io/evcc/pull/33700).
+- De optimizerpagina toont nu [een melding zolang er nog geen plan is, heeft een menu-item zodra de optimizer is ingeschakeld, en een feedbacklink](https://github.com/evcc-io/evcc/pull/33750) om onaannemelijke plannen te melden.
+- Plannen worden [direct opnieuw berekend](https://github.com/evcc-io/evcc/pull/33467) wanneer een laadplan aan de voertuigkant verandert, en het laaddoel van het plan [komt in het juiste tijdslot terecht](https://github.com/evcc-io/evcc/pull/33832).
+- Laden van en ontladen naar het net worden alleen gepland voor batterijen die [de modus werkelijk ondersteunen](https://github.com/evcc-io/evcc/pull/33860).
+
+Hebt u de optimizer nog niet geprobeerd, schakel dan de experimentele functies in onder **Configuratie → Experimenteel**, zet de optimizer aan en controleer of het plan voor uw huis aannemelijk is.
+De optimizer vereist een [sponsortoken](/nl/sponsorship).
+De berekening draait op een clouddienst die wij hosten en die geen gegevens opslaat.
+U kunt de dienst ook zelf draaien, zie [technische achtergrond](/nl/features/optimizer#technical).
+We zijn blij met alle feedback.
+
+De volgende grote stap is de **automatische modus**: de optimizer doet dan niet langer alleen voorstellen, maar beslist wanneer de batterij laadt of vasthoudt en wanneer laadpunten in de modus **Slim** starten en stoppen.
+De [pull request](https://github.com/evcc-io/evcc/pull/32881) is in voorbereiding, en we hebben al veel feedback ontvangen.
+Bent u avontuurlijk ingesteld, pak dan een van de testbuilds uit de reacties op de pull request, probeer hem en laat ons weten hoe het gaat.
+Er is nog werk te doen, maar we kijken ernaar uit om het in de nightly te krijgen.
+
+## Kleinere verbeteringen
+
+- **Toegang op afstand:** [Niet langer experimenteel](/nl/features/remote-access). De kaart is nu ook zonder experimentele functies zichtbaar onder **Configuratie**, en een resetoptie verwijdert de configuratie en de inloggegevens. We hebben toegang op afstand geïntroduceerd in de [highlights van juli](/nl/blog/2026/07/18/highlights-remote-access-widgets-optimizer).
+- **Opwekbegrenzingsapparaten:** Wanneer de netbeheerder om minder teruglevering vraagt (§ 9 EEG), geeft evcc normaal gesproken elke omvormer rechtstreeks de opdracht zijn vermogen te verlagen. In sommige installaties moet die opdracht in plaats daarvan naar een centrale eenheid gaan, bijv. de SMA Sunny Home Manager 2.0 of SolarEdge export control. Deze hebben nu hun eigen [apparaatklasse](https://github.com/evcc-io/evcc/pull/32416), die naast de netmeter wordt geconfigureerd, in plaats van zich als meter voor te doen. Zie de [pagina over de externe limiet](/nl/external-limit#curtailment-devices).
+- **Datumnotatie:** De datumnotatie volgde vroeger de gekozen taal, wat regionale verschillen niet dekt, bijv. Engels in Europa. U kunt nu in de [instellingen van de gebruikersinterface](https://github.com/evcc-io/evcc/pull/29321) kiezen voor dag eerst, maand eerst of ISO-volgorde. Dank aan [webalexeu](https://github.com/webalexeu).
+- **Fase-indicator:** De weergave van de fasen bij het laadpunt is veranderd. Vroeger was er één balk per actieve fase en werden inactieve fasen gewoon verborgen. Nu toont een driefasige lader [altijd drie segmenten](https://github.com/evcc-io/evcc/pull/33173), waarvan de actieve gemarkeerd zijn, zodat u in één oogopslag ziet of hij op één of drie fasen laadt.
+- **Polestar:** De via reverse engineering gebouwde integratie is vervangen door de [officiële Polestar Data Portal API](https://github.com/evcc-io/evcc/pull/33814). Dank aan [loebse](https://github.com/loebse).
+- **Nissan:** Het inloggen gebeurt nu via [MyNISSAN OneID](https://github.com/evcc-io/evcc/pull/33316), nadat Nissan de oude NissanConnect-inloggegevens heeft uitgefaseerd. Dank aan [alex-irrgang](https://github.com/alex-irrgang).
+- **Škoda:** De nieuwe officiële MyŠkoda API wordt ondersteund, zie de [aparte blogpost](/nl/blog/2026/08/27/skoda-vehicle-api).
+- **Home Assistant:** De evcc-app [detecteert de Home Assistant-instantie en het token automatisch](https://github.com/evcc-io/evcc/pull/33000), zodat Home Assistant-apparaten zonder handmatige configuratie als gevonden apparaten verschijnen, dank aan [wlcrs](https://github.com/wlcrs). Home Assistant-batterijen hebben [de modi holdcharge en discharge](https://github.com/evcc-io/evcc/pull/33841) gekregen, dank aan [igotsoul](https://github.com/igotsoul). Twee incompatibele wijzigingen: de stroomregeling in milliampère bij de [Home Assistant-lader](https://github.com/evcc-io/evcc/pull/33858) is nu optioneel, en de [batterijpreset minsoc/maxsoc](https://github.com/evcc-io/evcc/pull/33707) is verdwenen.
+
+## Nieuwe apparaatondersteuning
+
+**Laders:** Steca, schakelbare stopcontacten van Sonoff, plus meterfunctie voor Spelsberg en verbeteringen voor go-e, OpenEVSE, NRGkick, Keba, Voltie en Zaptec
+
+**Meters, zonne-energie- en batterijsystemen:** CHINT ECH10K, Solplanet hybrid, SENEC.Connect cloud-API, Afore hybrid via RS485, Deye-micro-omvormers via Solarman en HTTP-logger, Zendure SolarFlow 800 Pro, my-PV HEA THOR 3.5 en 9.0, Solax X1/X3-HAC-stroombegrenzer, teruggeleverde energie voor Youless, openWB Pro en Sungrow
+
+**Voertuigen:** Polestar via de officiële Data Portal API, nieuwe officiële MyŠkoda API, Nissan OneID-login, LiveWire S2-motorfietsen, geladen energie voor Tesla BLE
+
+**Warmtepompen en verwarming:** Weishaupt (Modbus TCP), 1SINQ OneKey (SG Ready via MQTT), vermogen en temperatuur voor Viessmann dankzij [ickeundso](https://github.com/ickeundso)
+
+**Tarieven:** EPEX-spotprijzen voor België, spotovaelektrina.cz voor Tsjechië, extra regio’s, valuta en API-sleutel voor Energy Price Forecast
+
+**Opwekbegrenzing (§ 9 EEG):** SMA Sunny Home Manager 2.0, SolarEdge, Sungrow
+
+Natuurlijk zijn er ook veel bugfixes en verbeteringen aan bestaande integraties geweest.
+Details vindt u in de release notes van [0.315](https://github.com/evcc-io/evcc/releases/tag/0.315.0) en [0.316](https://github.com/evcc-io/evcc/releases/tag/0.316.0).
+
+---
+
+💚 Hartelijk dank aan iedereen die het project vooruithelpt: met code, ideeën, tests, discussies en financiële steun, waarzonder het project in deze vorm niet mogelijk zou zijn.
+
+De dagen worden korter.
+Gebruik de zon verstandig. 😉
+Veel laadplezier!
+
+**Met vriendelijke groet**<br />
+Het evcc-team<br />
+Michael, Andi & Uli

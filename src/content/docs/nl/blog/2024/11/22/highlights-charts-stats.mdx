@@ -1,0 +1,145 @@
+---
+date: 2024-11-22
+title: "Highlights: grafieken & statistieken"
+description: "Highlights van november 2024 met grafieken voor uw laadsessies, de experimentele batterijboost, flexibele tarieven en hybride omvormers."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Highlights-banner"
+  image: "../../../../../en/blog/2024/11/22/charts-stats-banner.webp"
+translatedFrom: "58511509e70c"
+---
+
+De dagen worden korter.
+Een goede reden voor een kleine update over wat er sinds het [laatste artikel in augustus](/nl/blog/2024/08/17/highlights-14a-enwg-ocpp-loadmanagement-elli) is gebeurd.
+
+{/* excerpt */}
+
+## Visualisatie van laadsessies
+
+Het overzicht van de [laadsessies](/nl/features/sessions) is al een tijdje beschikbaar.
+Naast de basisgegevens zoals energieverbruik, laadtijden, voertuig en kilometerstand verzamelen we al enige tijd informatie over het aandeel zelf opgewekte zonne-energie, werkelijke prijzen en CO₂-uitstoot.
+
+Tot nu toe waren deze gegevens alleen beschikbaar als tabel of als CSV-export voor eigen analyse.
+Nu hebben we mooie visualisaties toegevoegd van uw geladen energie, het aandeel zonne-energie, de kosten en de CO₂-uitstoot.
+
+![Visualisatie van het aandeel zonne-energie](../../../../../en/blog/2024/11/22/ipad-stats-solar.webp)
+
+Als u meerdere laadpunten of voertuigen hebt, kunt u de gegevens groeperen en vergelijken.
+In de [documentatie](/nl/features/co2) leest u hoe u de benodigde [CO₂-gegevensbronnen](/nl/features/co2) en [dynamische prijzen](/nl/features/dynamic-prices) instelt.
+
+![Visualisatie van de kosten](../../../../../en/blog/2024/11/22/ipad-stats-per-vehicle.webp)
+
+## Batterijboost
+
+De eerste versie van de vaak gevraagde [batterijboost](/nl/features/battery#battery-boost) is als experimentele functie 🧪 in de release terechtgekomen.
+Deze functie vult het klassieke laden met zonneoverschot aan.
+Als ze is ingeschakeld, wordt naast de beschikbare zonne-energie ook de opgeslagen energie van de thuisbatterij gebruikt om het voertuig te laden.
+Het systeem bepaalt automatisch het maximale laadvermogen dat de thuisbatterij kan leveren.
+
+![Batterijboost](../../../../../en/blog/2024/11/22/ipad-battery-boost.webp)
+
+De boost kan per laadpunt worden ingeschakeld en wordt automatisch uitgeschakeld zodra het voertuig wordt losgekoppeld.
+
+Dat kan vooral op zonnige dagen handig zijn.
+Wilt u ’s middags met uw auto van huis vertrekken, dan kunt u de boost voor uw vertrek inschakelen, zodat de energie van de volle thuisbatterij naar het voertuig gaat.
+Uw voertuig vertrekt met een hoger laadniveau en uw thuisbatterij heeft weer ruimte om de energie van de middagzon op te slaan, die u anders aan het net zou hebben teruggeleverd.
+
+Extra instellingen zoals laadlimieten en een prominentere plek in de UI (als Boost-knop) staan op de planning voor een volgende release.
+
+## Flexibele tarieven
+
+De lijst met [verschillende tarieven](/nl/tariffs) groeit gestaag.
+Vooral in de komende jaren zal het onderwerp dynamische tarieven aan belang winnen.
+
+Digitale aanbieders zoals Tibber, Awattar, Octopus of Ostrom bieden API’s voor de actuele prijs en prijsvoorspellingen voor de volgende dag.
+Deze prijzen bevatten vaak al netkosten en andere kosten.
+
+Voor dynamische tarieven waarvoor de aanbieder geen API heeft, is het mogelijk de stroomprijs zelf te bepalen op basis van de day-aheadprijs op de stroombeurs.
+
+Een goede gegevensbron voor de spotprijs is de [Energy Charts](https://api.energy-charts.info)-interface van Fraunhofer ISE.
+Deze kunt u zonder voorafgaande registratie gebruiken.
+
+Hier is een voorbeeldconfiguratie voor de Duitse prijszone:
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # fixed surcharge per kWh (e.g. 20ct grid fee, 2ct provider fees)
+    tax: 0.19 # percentage surcharge (e.g. 19% VAT)
+```
+
+De formule `(price + charges) * (1 + tax)` wordt gebruikt om de uiteindelijke consumentenprijs per kWh te berekenen.
+Deze formule lag tot nu toe vast in de code.
+
+Voor complexere tarieven, bijv. met een bovengrens voor de kosten, kunt u deze formule nu ook zelf aanpassen.
+Hier is een voorbeeld voor een dynamisch tarief met een bovengrens van 50 ct/kWh:
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # fester Aufschlag pro kWh (bspw. 20ct Netzentgelt, 2ct Gebühren)
+    tax: 0.19 # prozentualer Aufschlag (bspw. 19% MwSt.)
+    formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+Naast de spotprijs (`price`) en de waarden voor `charges` en `tax` hebt u ook de mogelijkheden van de [math](https://pkg.go.dev/math)-bibliotheek van Go tot uw beschikking.
+
+## Hybride omvormers met beperkt AC-vermogen
+
+Sommige hybride omvormers bieden een hoger DC-vermogen dan AC-vermogen.
+Ze kunnen bijv. 10 kW zonnevermogen verwerken, maar leveren slechts 8 kW AC-vermogen aan het huisnet.
+De resterende 2 kW wordt aan de DC-kant in de batterij opgeslagen.
+Dat zorgde altijd al voor problemen bij de overschotregeling, omdat evcc met het volledige zonnevermogen rekent.
+De globale configuratieoptie `maxGridSupplyWhileBatteryCharging` (ja, een onhandige naam) was een poging om deze onbedoelde bijwerkingen tegen te gaan.
+
+We hebben deze optie vervangen door een stabielere oplossing.
+Alle betreffende [omvormertemplates](/nl/meters) (bijv. Fronius, Growatt, SMA en Sungrow) hebben nu de geavanceerde optie `maxAcPower`.
+Daarmee kunt u per omvormer het maximale AC-vermogen vastleggen (bijv. `maxAcPower: 8000` voor 8 kW).
+De overschotregeling houdt nu dienovereenkomstig rekening met deze waarde.
+
+## Sponsor cocharge: maak uw privéwallbox openbaar
+
+We verwelkomen de startup [cocharge](https://cocharge.de/evcc) uit Bremen graag als nieuwe sponsor.
+
+[![cocharge-logo](../../../../../en/blog/2024/11/22/cocharge.webp)](https://cocharge.de/evcc)
+
+Met cocharge kunnen particulieren hun wallbox openbaar maken.
+Uw wallbox verschijnt dan in de apps van de grote laadpasaanbieders, optioneel met instelbare openingstijden.
+Voor de eigenaar van de elektrische auto werkt laden en afrekenen bij uw wallbox net als bij elk ander openbaar laadstation.
+cocharge regelt de technische details, de aanvragen voor THG-quota, de roamingafspraken en de bureaucratie.
+**Uw extra inkomsten uit laadsessies van derden worden maandelijks uitbetaald.**
+
+Voorwaarde voor het gebruik van cocharge is een **geijkte lader (eichrechtskonform)** die **OCPP ondersteunt**.
+Het laadpunt moet bovendien **openbaar toegankelijk** zijn.
+Er zijn geen eenmalige of terugkerende kosten.
+cocharge rekent alleen een commissie van 15% per laadsessie.
+
+Als u een [bedrijfsauto](https://cocharge.de/dienstwagen-laden) en een laadpas van uw werkgever hebt, kan deze oplossing voor u bijzonder interessant zijn.
+Dankzij de automatische afrekening blijft u niet alleen de administratieve rompslomp bespaard.
+U kunt ook extra geld verdienen als u met uw eigen zonnestroom of met een dynamisch tarief op gunstige momenten laadt.
+
+cocharge en evcc samen gebruiken?
+De meeste geijkte laders hebben naast OCPP ook een lokale interface zoals Modbus.
+U kunt uw wallbox dan openbaar maken en tegelijk het laadvermogen lokaal met evcc optimaliseren.
+
+Klinkt dit interessant en wilt u een van de eerste gebruikers zijn, kijk dan op [cocharge.de/evcc](https://cocharge.de/evcc).
+
+## Veel kleine verbeteringen
+
+Zoals gebruikelijk waren er ook veel kleine verbeteringen, bugfixes en ondersteuning voor nieuwe wallboxen, omvormers en andere apparaten.
+Meer details vindt u in de [releasenotes](https://github.com/evcc-io/evcc/releases).
+
+💚 Hartelijk dank aan iedereen die het project steunt door actief mee te doen en financieel te sponsoren.
+
+**Veel laadplezier!**<br/>
+Het evcc-team<br/>
+Michael, Andi & Uli
