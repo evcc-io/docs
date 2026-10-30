@@ -90,6 +90,10 @@ export default defineConfig({
         ThemeSelect: "./src/components/ThemeSelect.astro",
         EditLink: "./src/components/EditLink.astro",
         MarkdownContent: "./src/components/MarkdownContent.astro",
+        MobileTableOfContents: "./src/components/MobileTableOfContents.astro",
+        MobileMenuToggle: "./src/components/MobileMenuToggle.astro",
+        Header: "./src/components/Header.astro",
+        MobileMenuFooter: "./src/components/MobileMenuFooter.astro",
       },
       logo: {
         light: "./src/assets/logo-light.svg",
@@ -105,13 +109,6 @@ export default defineConfig({
       ],
       defaultLocale: "en",
       locales,
-      social: [
-        {
-          icon: "github",
-          label: "GitHub",
-          href: "https://github.com/evcc-io/evcc",
-        },
-      ],
       editLink: {
         baseUrl: "https://github.com/evcc-io/docs/edit/main/",
       },

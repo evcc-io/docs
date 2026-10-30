@@ -1,0 +1,142 @@
+---
+// Breadcrumb row below the header, built from the sidebar; rendered by Header.astro on every
+// page in place of Starlight's mobile "On this page" bar. Shown only while the sidebar is
+// hidden (below 50rem); the menu button (MobileMenuToggle.astro) sits at the start of the row.
+const { sidebar, entry, locale = "" } = Astro.locals.starlightRoute;
+const path = Astro.url.pathname.replace(/\/$/, "");
+
+type Crumb = { label: string; href?: string };
+type Hit = { href: string; label: string; trail: Crumb[] };
+
+// a group links to its first page (usually the section overview)
+function firstHref(entries: typeof sidebar): string | undefined {
+  for (const e of entries) {
+    const href = e.type === "group" ? firstHref(e.entries) : e.href;
+    if (href) return href;
+  }
+}
+
+// the longest sidebar link that is this page or one of its ancestors, with the groups above it
+function find(entries: typeof sidebar, trail: Crumb[], best: Hit | null): Hit | null {
+  for (const e of entries) {
+    if (e.type === "group") {
+      best = find(e.entries, [...trail, { label: e.label, href: firstHref(e.entries) }], best);
+      continue;
+    }
+    const href = e.href.replace(/\/$/, "");
+    const isRoot = href.split("/").length <= 2; // "/en": only counts for the home page itself
+    const matches = path === href || (!isRoot && path.startsWith(`${href}/`));
+    if (matches && (!best || href.length > best.href.length)) best = { href, label: e.label, trail };
+  }
+  return best;
+}
+
+// first crumb is the section, as in the header navigation: Blog or Docs
+const blogHref = locale ? `/${locale}/blog` : "/blog";
+const isBlog = path === blogHref || path.startsWith(`${blogHref}/`);
+const section: Crumb = isBlog
+  ? { label: "Blog", href: blogHref }
+  : { label: Astro.locals.t("site.docsLabel"), href: locale ? `/${locale}` : "/" };
+
+const hit = isBlog ? null : find(sidebar, [], null);
+const crumbs: Crumb[] = [
+  section,
+  ...(hit ? [...hit.trail, ...(hit.href === path ? [] : [{ label: hit.label, href: hit.href }])] : []),
+  ...(path === section.href ? [] : [{ label: entry.data.title }]),
+];
+const last = crumbs.length - 1;
+---
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <ol>
+    {crumbs.map((c, i) => (
+      <li aria-current={i === last ? "page" : undefined}>
+        {c.href && i < last ? <a href={c.href}>{c.label}</a> : c.label}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style is:global>
+  /* the breadcrumb row exists on every page below 50rem (also pages without a table of
+     contents, where Starlight reserves no space); the sidebar is visible from 50rem */
+  @media (max-width: 50rem) {
+    html:root:not([data-has-toc]) {
+      --sl-mobile-toc-height: 3rem;
+    }
+  }
+  @media (min-width: 50rem) {
+    :root {
+      --sl-mobile-toc-height: 0rem;
+    }
+  }
+  /* the open menu starts below the breadcrumb row, so the close button stays visible */
+  @media (max-width: 50rem) {
+    .sidebar-pane {
+      inset-block-start: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height));
+    }
+  }
+</style>
+
+<style>
+  /* same box as Starlight's mobile table of contents, see MobileTableOfContents.astro */
+  .breadcrumbs {
+    position: fixed;
+    z-index: var(--sl-z-index-toc);
+    top: calc(var(--sl-nav-height) - 1px);
+    inset-inline: 0;
+    height: var(--sl-mobile-toc-height);
+    display: flex;
+    align-items: center;
+    /* no right padding: the trail scrolls to the screen edge, the inset lives inside the scroller */
+    padding-inline: calc(1rem + var(--sl-menu-button-size) + 0.75rem) 0;
+    border-bottom: 1px solid var(--sl-color-hairline-shade);
+    background-color: var(--sl-color-bg-nav);
+    font-size: var(--sl-text-sm);
+  }
+  @media (min-width: 50rem) {
+    .breadcrumbs {
+      display: none;
+    }
+  }
+  ol {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+    white-space: nowrap;
+    /* long trails scroll sideways instead of wrapping or truncating */
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  ol::-webkit-scrollbar {
+    display: none;
+  }
+  ol::after {
+    content: "";
+    flex: 0 0 1rem;
+  }
+  li {
+    flex-shrink: 0;
+    color: var(--sl-color-gray-3);
+  }
+  li + li::before {
+    content: "›";
+    margin-inline-end: 0.4rem;
+    color: var(--sl-color-gray-4);
+  }
+  li[aria-current="page"] {
+    color: var(--sl-color-white);
+    font-weight: 600;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--sl-color-white);
+  }
+</style>
