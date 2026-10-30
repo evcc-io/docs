@@ -86,7 +86,8 @@ function skeleton(body, offset, file, lang, errors) {
 
   // link or asset target -> comparable value
   const target = (t, line) => {
-    if (/^\.{1,2}\//.test(t)) {
+    // relative asset: ./x, ../x or a bare path like win10-srv/x.png (no scheme, no leading / or #)
+    if (/^\.{1,2}\//.test(t) || !/^(\/|#|@|[a-z][a-z0-9+.-]*:)/i.test(t)) {
       const abs = resolve(dirname(file), t.replace(/[?#].*$/, ""));
       if (lang !== "en" && !existsSync(abs))
         errors.push(`L${line}: relative asset ${t} does not resolve`);
@@ -185,6 +186,7 @@ function skeleton(body, offset, file, lang, errors) {
 // prose only: no tags, link targets, html comments or jsx expressions
 const prose = (masked) =>
   masked
+    .replace(/^(import .*|\s*:::.*)$/gm, "")
     .replace(TAG_RE, (s) => s.replace(/[^\n]/g, " "))
     .replace(/\]\([^)]*\)/g, "]")
     .replace(/<!--[\s\S]*?-->|\{[^}\n]*\}/g, (s) => s.replace(/[^\n]/g, " "));
