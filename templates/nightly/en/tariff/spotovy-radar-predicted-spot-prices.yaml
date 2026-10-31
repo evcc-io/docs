@@ -1,0 +1,90 @@
+template: spotovyradar
+product:
+  identifier: spotovy-radar-predicted-spot-prices
+  brand: Spotový Radar
+  description: Predicted spot prices
+  group: Dynamic electricity price
+countries: ["CZ"]
+requirements: ["skiptest"]
+description: |
+  Czech OTE day-ahead prices in 15-minute intervals plus a 72-hour forecast. Optionally the final price including distribution and VAT from your tariff settings at spotovyradar.cz. Requires an API key from [spotovyradar.cz](https://spotovyradar.cz/ucet/api) (Smart Home plan).
+render:
+  - default: |
+      type: template
+      template: spotovyradar
+      apikey: sr_live_abcdefgh_… # API Key, Create a key at [spotovyradar.cz/ucet/api](https://spotovyradar.cz/ucet/api).
+      price: spot # Price, spot = spot price in CZK/kWh excluding VAT and charges (add them with charges and tax). final = final price according to the tariff saved at spotovyradar.cz (supplier fee, distribution peak/off-peak, other charges, VAT). Do not combine final with charges or tax. [spot, final] (optional)
+    advanced: |
+      type: template
+      template: spotovyradar
+      apikey: sr_live_abcdefgh_… # API Key, Create a key at [spotovyradar.cz/ucet/api](https://spotovyradar.cz/ucet/api).
+      price: spot # Price, spot = spot price in CZK/kWh excluding VAT and charges (add them with charges and tax). final = final price according to the tariff saved at spotovyradar.cz (supplier fee, distribution peak/off-peak, other charges, VAT). Do not combine final with charges or tax. [spot, final] (optional)
+      charges: # Charge, Additional fixed charge per kWh (optional)
+      chargesZones: # Charges zones, Time-based grid fees that override the default charge. (optional)
+      tax: # Tax, Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Formula, Individual formula for calculating the price (optional)
+      average: # Average by hour, optional
+params:
+  - name: apikey
+    example: sr_live_abcdefgh_…
+    default:
+    choice: []
+    unit:
+    description: API Key
+    help: Create a key at [spotovyradar.cz/ucet/api](https://spotovyradar.cz/ucet/api).
+    advanced: false
+    optional: false
+  - name: price
+    example:
+    default: spot
+    choice: ['spot', 'final']
+    unit:
+    description: Price
+    help: spot = spot price in CZK/kWh excluding VAT and charges (add them with charges and tax). final = final price according to the tariff saved at spotovyradar.cz (supplier fee, distribution peak/off-peak, other charges, VAT). Do not combine final with charges or tax.
+    advanced: false
+    optional: true
+  - name: charges
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charge
+    help: Additional fixed charge per kWh
+    advanced: true
+    optional: true
+  - name: chargesZones
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charges zones
+    help: Time-based grid fees that override the default charge.
+    advanced: true
+    optional: true
+  - name: tax
+    example:
+    default:
+    choice: []
+    unit:
+    description: Tax
+    help: Additional percentage charge (e.g. 0.2 for 20%)
+    advanced: true
+    optional: true
+  - name: formula
+    example: math.Max((price + charges) * (1 + tax), 0.0)
+    default:
+    choice: []
+    unit:
+    description: Formula
+    help: Individual formula for calculating the price
+    advanced: true
+    optional: true
+  - name: average
+    example:
+    default:
+    choice: []
+    unit:
+    description: Average by hour
+    help:
+    advanced: true
+    optional: true
