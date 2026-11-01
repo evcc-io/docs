@@ -25,7 +25,7 @@ Manage Easee local OCPP configuration
 
 ## See also
 
-- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc](/en/reference/cli/evcc) - evcc - smart charging
 - [evcc easee-ocpp disable](/en/reference/cli/evcc_easee-ocpp_disable) - Disable local OCPP on Easee charger
 - [evcc easee-ocpp enable](/en/reference/cli/evcc_easee-ocpp_enable) - Enable local OCPP on Easee charger
 - [evcc easee-ocpp status](/en/reference/cli/evcc_easee-ocpp_status) - Show Easee local OCPP configuration

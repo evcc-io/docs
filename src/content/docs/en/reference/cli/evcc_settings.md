@@ -17,6 +17,6 @@ Manage configuration settings
 
 ## See also
 
-- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc](/en/reference/cli/evcc) - evcc - smart charging
 - [evcc settings get](/en/reference/cli/evcc_settings_get) - Get configuration settings
 - [evcc settings set](/en/reference/cli/evcc_settings_set) - Set configuration setting
