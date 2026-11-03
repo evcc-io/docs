@@ -1,10 +1,10 @@
 ---
 title: "Domande frequenti"
-description: "Risponde alle domande più frequenti su configurazione di evcc, ricerca degli errori, ricariche inattese, reimpostazione della password e previsione solare."
+description: "Risponde alle domande più frequenti su configurazione di evcc, ricerca degli errori, ricariche inattese, reimpostazione della password e valori errati nello storico."
 toc_max_heading_level: 2
 sidebar:
   order: 8
-translatedFrom: "bfbbd3111876"
+translatedFrom: "cc1b07a98508"
 ---
 
 ## Configurazione \{#configuration\}
@@ -318,66 +318,34 @@ evcc cache clear
 
 ### Come elimino valori errati dallo storico? \{#delete-history\}
 
-Se un fornitore di previsioni o tariffe fornisce valori non plausibili, ad es. prezzi o valori di potenza sbagliati di diversi ordini di grandezza, questi finiscono nello storico registrato e falsano i grafici.
-Puoi eliminare l’intervallo di tempo interessato tramite l’API REST.
+Un errore di configurazione, ad es. un registro o un fattore di scala sbagliato sul contatore di rete, può registrare valori non plausibili come una potenza di diversi megawatt.
+Questi valori falsano i grafici dell’energia e i totali storici, anche dopo che hai corretto la configurazione.
+Non si possono eliminare nell’interfaccia, ma puoi rimuoverli per un intervallo di tempo tramite l’API REST.
 Per eliminare serve una chiave API, che crei in **Configurazione → Generali → Sicurezza**.
-Fai prima un backup: i valori eliminati non si possono ripristinare e in seguito l’intervallo di tempo resta vuoto nei grafici.
+Fai prima un backup: i valori eliminati non si possono ripristinare e in seguito l’intervallo di tempo resta vuoto.
 
-I valori di energia si selezionano per intervallo di tempo e, facoltativamente, si restringono con `group`, `name` o `title`.
-La query dello storico accetta gli stessi parametri, quindi puoi verificare prima cosa verrà eliminato.
-
-```bash
-# anteprima dei valori salvati
-curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-
-# eliminali
-curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-```
-
-I valori delle tariffe vengono eliminati per l’intero intervallo di tempo oppure, con `usage`, solo per un singolo tipo di valore (`grid`, `feedin`, `co2` o `temperature`).
+I valori si selezionano per intervallo di tempo (`from` incluso, `to` escluso, RFC 3339) e si restringono con `group` (ad es. `grid`, `pv`, `battery`) o con il `name` di un singolo dispositivo.
+I dispositivi configurati nell’interfaccia si chiamano `db:` seguito dal loro id, ad es. `db:22`.
+Trovi il nome dietro l’icona informazioni in alto a destra nella finestra di dialogo di configurazione del dispositivo.
+La query dello storico accetta gli stessi filtri, quindi puoi verificare prima cosa verrà eliminato.
 
 ```bash
-# anteprima dei valori delle tariffe salvati
-curl "http://evcc.local:7070/api/history/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z"
+# quali valori sono salvati per la rete in quest’ora?
+curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 
-# elimina solo i valori di CO₂ in questo intervallo
+# elimina i valori di un singolo dispositivo
 curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&usage=co2"
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&name=db:22"
+
+# elimina i valori di un intero gruppo
+curl -X DELETE -H "Authorization: Bearer evcc_..." \
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 ```
 
-`from` è incluso e `to` escluso, entrambi in formato RFC 3339.
 La risposta indica il numero di voci eliminate.
+
+Lo stesso vale per i valori delle tariffe registrati, ad es. quando un fornitore di prezzi ha fornito prezzi sbagliati: anteprima con `/api/history/tariffs`, eliminazione con `/api/db/metrics/tariffs`, facoltativamente limitata a un solo `usage` (`grid`, `feedin`, `co2` o `temperature`).
 Tutti i parametri sono elencati nel [riferimento dell’API REST](/integrations/rest-api).
-
-## Previsione solare
-
-In evcc puoi usare diverse [previsioni solari](/it/tariffs#solar) per vedere la produzione residua stimata per la giornata in corso e per i giorni successivi.
-Come funzione sperimentale abbiamo integrato anche la possibilità di adattare le previsioni alla tua produzione effettiva.
-
-### Adattamento della previsione
-
-Oltre alla previsione, evcc registra anche la potenza solare attuale e la accumula nel tempo.
-Lo stesso avviene per i dati di previsione.
-Confrontando i due valori nel tempo, evcc può adattare le previsioni ai tuoi valori di produzione effettivi.
-Puoi attivare e disattivare questo adattamento nella finestra di dialogo delle previsioni nell’interfaccia.
-
-### Reimpostare i dati di adattamento
-
-Se i valori di adattamento non sono corretti, puoi reimpostarli.
-
-Procedura:
-
-1. Ferma evcc
-2. Esegui i seguenti comandi dalla riga di comando
-   ```bash
-   # Reimposta lo storico di adattamento. Conferma con `y`.
-   evcc settings set solarAccForecast 0
-   evcc settings set solarAccYield "{}"
-   ```
-3. Avvia di nuovo evcc
-
-Ora evcc ricomincia ad accumulare le previsioni da zero.
 
 ## Dati statistici \{#statistical-data\}
 

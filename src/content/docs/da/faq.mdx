@@ -1,10 +1,10 @@
 ---
 title: "Ofte stillede spørgsmål"
-description: "Her finder du svar på ofte stillede spørgsmål om opsætning af evcc, fejlfinding, uventet ladeadfærd, nulstilling af adgangskoden og solprognosen."
+description: "Her finder du svar på ofte stillede spørgsmål om opsætning af evcc, fejlfinding, uventet ladeadfærd, nulstilling af adgangskoden og forkerte værdier i historikken."
 toc_max_heading_level: 2
 sidebar:
   order: 8
-translatedFrom: "bfbbd3111876"
+translatedFrom: "cc1b07a98508"
 ---
 
 ## Opsætning \{#configuration\}
@@ -318,66 +318,34 @@ evcc cache clear
 
 ### Hvordan sletter jeg forkerte værdier fra historikken? \{#delete-history\}
 
-Hvis en prognose- eller tarifudbyder leverer usandsynlige værdier, f.eks. priser eller effektværdier, der ligger flere størrelsesordener forkert, havner de i den registrerede historik og forvrænger diagrammerne.
-Du kan slette det berørte tidsrum via REST API'et.
+En fejl i opsætningen, f.eks. et forkert register eller en forkert skaleringsfaktor på din elnetsmåler, kan registrere usandsynlige værdier som en effekt på flere megawatt.
+Disse værdier forvrænger energidiagrammerne og de historiske summer, også efter at du har rettet opsætningen.
+De kan ikke slettes i brugerfladen, men du kan fjerne dem for et tidsrum via REST API'et.
 Sletning kræver en API-nøgle, som du opretter under **Opsætning → Generelle → Sikkerhed**.
-Lav en sikkerhedskopi først: slettede værdier kan ikke gendannes, og tidsrummet vises bagefter som et hul.
+Lav en sikkerhedskopi først: slettede værdier kan ikke gendannes, og tidsrummet forbliver tomt bagefter.
 
-Energiværdier vælges efter tidsrum og kan eventuelt indsnævres med `group`, `name` eller `title`.
-Historikforespørgslen accepterer de samme parametre, så du på forhånd kan tjekke, hvad der bliver slettet.
-
-```bash
-# vis de gemte værdier
-curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-
-# slet dem
-curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-```
-
-Tarifværdier slettes for hele tidsrummet eller, med `usage`, kun for en enkelt værditype (`grid`, `feedin`, `co2` eller `temperature`).
+Værdier vælges efter tidsrum (`from` inklusiv, `to` eksklusiv, RFC 3339) og indsnævres med `group` (f.eks. `grid`, `pv`, `battery`) eller med `name` for en enkelt enhed.
+Enheder, der er konfigureret i brugerfladen, hedder `db:` efterfulgt af deres id, f.eks. `db:22`.
+Du finder navnet bag info-ikonet i øverste højre hjørne af enhedens konfigurationsdialog.
+Historikforespørgslen accepterer de samme filtre, så du på forhånd kan tjekke, hvad der bliver slettet.
 
 ```bash
-# vis de gemte tarifværdier
-curl "http://evcc.local:7070/api/history/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z"
+# hvilke værdier er gemt for elnettet i denne time?
+curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 
-# slet kun CO₂-værdierne i dette tidsrum
+# slet værdierne for en enkelt enhed
 curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&usage=co2"
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&name=db:22"
+
+# slet værdierne for en hel gruppe
+curl -X DELETE -H "Authorization: Bearer evcc_..." \
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 ```
 
-`from` er inklusiv og `to` eksklusiv, begge i RFC 3339-format.
 Svaret angiver antallet af slettede poster.
+
+Det samme virker for registrerede tarifværdier, f.eks. når en prisudbyder har leveret forkerte priser: forhåndsvis med `/api/history/tariffs`, slet med `/api/db/metrics/tariffs`, eventuelt begrænset til én `usage` (`grid`, `feedin`, `co2` eller `temperature`).
 Alle parametre er anført i [REST API-referencen](/integrations/rest-api).
-
-## Solprognose
-
-Du kan bruge forskellige [solprognoser](/da/tariffs#solar) i evcc til at se den forventede resterende produktion i dag og de kommende dage.
-Som eksperimentel funktion har vi også indbygget muligheden for at tilpasse prognoserne til din faktiske produktion.
-
-### Tilpasning af prognosen
-
-Ud over prognosen logger evcc også den aktuelle soleffekt og akkumulerer den over tid.
-Det samme sker for prognosedataene.
-Ved at sammenligne de to værdier over tid kan evcc tilpasse prognoserne til dine faktiske produktionsværdier.
-Du kan aktivere og deaktivere denne tilpasning i prognosedialogboksen i brugerfladen.
-
-### Nulstilling af tilpasningsdata
-
-Hvis tilpasningsværdierne ikke er korrekte, kan du nulstille dem.
-
-Fremgangsmåde:
-
-1. Stop evcc
-2. Kør følgende kommandoer på kommandolinjen
-   ```bash
-   # Nulstil tilpasningshistorikken. Bekræft med `y`.
-   evcc settings set solarAccForecast 0
-   evcc settings set solarAccYield "{}"
-   ```
-3. Start evcc igen
-
-Nu begynder evcc at akkumulere prognoserne fra nul.
 
 ## Statistiske data \{#statistical-data\}
 

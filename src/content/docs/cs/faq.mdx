@@ -1,10 +1,10 @@
 ---
 title: "Často kladené otázky"
-description: "Najdete zde odpovědi na časté otázky ke konfiguraci evcc, hledání chyb, neočekávanému chování při nabíjení, resetu hesla a solární předpovědi."
+description: "Najdete zde odpovědi na časté otázky ke konfiguraci evcc, hledání chyb, neočekávanému chování při nabíjení, resetu hesla a chybným hodnotám v historii."
 toc_max_heading_level: 2
 sidebar:
   order: 8
-translatedFrom: "bfbbd3111876"
+translatedFrom: "cc1b07a98508"
 ---
 
 ## Konfigurace \{#configuration\}
@@ -318,66 +318,34 @@ evcc cache clear
 
 ### Jak smažu chybné hodnoty z historie? \{#delete-history\}
 
-Pokud poskytovatel předpovědi nebo tarifu dodává nevěrohodné hodnoty, např. ceny nebo hodnoty výkonu, které se liší o několik řádů, dostanou se do zaznamenané historie a zkreslí grafy.
-Dotčený časový rozsah můžete smazat přes REST API.
+Chyba v konfiguraci, např. špatný registr nebo faktor měřítka u měřiče sítě, může vést k zaznamenání nevěrohodných hodnot, jako je výkon několika megawattů.
+Tyto hodnoty zkreslují grafy energie a historické součty, i poté, co jste konfiguraci opravili.
+Ve webovém rozhraní je smazat nelze, ale přes REST API je můžete odstranit pro určitý časový rozsah.
 Mazání vyžaduje klíč API, který vytvoříte v **Konfigurace → Obecné → Zabezpečení**.
-Nejprve si vytvořte zálohu: smazané hodnoty nelze obnovit a časový rozsah se pak zobrazí jako mezera.
+Nejprve si vytvořte zálohu: smazané hodnoty nelze obnovit a časový rozsah pak zůstane prázdný.
 
-Hodnoty energie se vybírají podle časového rozsahu a volitelně se zužují pomocí `group`, `name` nebo `title`.
-Dotaz na historii přijímá stejné parametry, takže si můžete předem ověřit, co bude smazáno.
-
-```bash
-# náhled uložených hodnot
-curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-
-# smazání hodnot
-curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-```
-
-Hodnoty tarifů se mažou pro celý časový rozsah, nebo pomocí `usage` jen pro jeden typ hodnot (`grid`, `feedin`, `co2` nebo `temperature`).
+Hodnoty se vybírají podle časového rozsahu (`from` včetně, `to` vyjma, RFC 3339) a zužují se pomocí `group` (např. `grid`, `pv`, `battery`) nebo pomocí `name` jednotlivého zařízení.
+Zařízení nakonfigurovaná ve webovém rozhraní mají název `db:` následovaný jejich ID, např. `db:22`.
+Název najdete pod ikonou informací v pravém horním rohu dialogového okna konfigurace zařízení.
+Dotaz na historii přijímá stejné filtry, takže si můžete předem ověřit, co bude smazáno.
 
 ```bash
-# náhled uložených hodnot tarifů
-curl "http://evcc.local:7070/api/history/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z"
+# jaké hodnoty jsou pro síť uloženy v této hodině?
+curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 
-# smazání pouze hodnot CO₂ v tomto rozsahu
+# smazání hodnot jednoho zařízení
 curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&usage=co2"
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&name=db:22"
+
+# smazání hodnot celé skupiny
+curl -X DELETE -H "Authorization: Bearer evcc_..." \
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 ```
 
-Hodnota `from` do rozsahu patří, hodnota `to` už ne, obě ve formátu RFC 3339.
 Odpověď uvádí počet smazaných záznamů.
+
+Totéž funguje pro zaznamenané hodnoty tarifů, např. když poskytovatel cen dodal chybné ceny: náhled pomocí `/api/history/tariffs`, smazání pomocí `/api/db/metrics/tariffs`, volitelně omezené na jedno `usage` (`grid`, `feedin`, `co2` nebo `temperature`).
 Všechny parametry jsou uvedeny v [referenci REST API](/integrations/rest-api).
-
-## Solární předpověď
-
-V evcc můžete použít různé [solární předpovědi](/cs/tariffs#solar) a zobrazit si odhadovanou zbývající výrobu pro aktuální a následující dny.
-Jako experimentální funkci jsme navíc zabudovali možnost přizpůsobit předpovědi vaší skutečné výrobě.
-
-### Přizpůsobení předpovědi
-
-Kromě předpovědi evcc zaznamenává také aktuální solární výkon a v průběhu času ho sčítá.
-Totéž se děje s daty předpovědi.
-Porovnáním obou hodnot v průběhu času může evcc předpovědi přizpůsobit vašim skutečným hodnotám výroby.
-Toto přizpůsobení můžete zapnout a vypnout v dialogovém okně předpovědi ve webovém rozhraní.
-
-### Reset dat přizpůsobení
-
-Pokud hodnoty přizpůsobení nejsou správné, můžete je resetovat.
-
-Postup:
-
-1. Zastavte evcc
-2. V příkazovém řádku spusťte následující příkazy
-   ```bash
-   # Reset historie přizpůsobení. Potvrďte pomocí `y`.
-   evcc settings set solarAccForecast 0
-   evcc settings set solarAccYield "{}"
-   ```
-3. Znovu spusťte evcc
-
-Nyní začne evcc sčítat předpovědi od nuly.
 
 ## Statistická data \{#statistical-data\}
 

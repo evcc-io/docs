@@ -1,10 +1,10 @@
 ---
 title: "Veelgestelde vragen"
-description: "Hier vindt u antwoorden op veelgestelde vragen over de configuratie van evcc, foutopsporing, onverwacht laadgedrag, wachtwoordherstel en de verwachting van zonne-energie."
+description: "Hier vindt u antwoorden op veelgestelde vragen over de configuratie van evcc, foutopsporing, onverwacht laadgedrag, wachtwoordherstel en foute waarden in de geschiedenis."
 toc_max_heading_level: 2
 sidebar:
   order: 8
-translatedFrom: "bfbbd3111876"
+translatedFrom: "cc1b07a98508"
 ---
 
 ## Configuratie \{#configuration\}
@@ -318,66 +318,34 @@ evcc cache clear
 
 ### Hoe verwijder ik onjuiste waarden uit de geschiedenis? \{#delete-history\}
 
-Als een aanbieder van verwachtingen of tarieven onrealistische waarden levert, bijv. prijzen of vermogenswaarden die er ordes van grootte naast zitten, komen die in de opgeslagen geschiedenis terecht en vertekenen ze de grafieken.
-U kunt het betreffende tijdsbereik via de REST API verwijderen.
+Een configuratiefout, bijv. een verkeerd register of een verkeerde schaalfactor bij uw netmeter, kan onrealistische waarden opslaan, zoals een vermogen van meerdere megawatt.
+Deze waarden vertekenen de energiegrafieken en de historische totalen, ook nadat u de configuratie hebt gecorrigeerd.
+Ze kunnen niet in de webinterface worden verwijderd, maar u kunt ze voor een tijdsbereik via de REST API verwijderen.
 Voor het verwijderen is een API-sleutel nodig, die u aanmaakt onder **Configuratie → Algemeen → Beveiliging**.
-Maak eerst een back-up: verwijderde waarden kunnen niet worden teruggezet en het tijdsbereik verschijnt daarna als een gat.
+Maak eerst een back-up: verwijderde waarden kunnen niet worden teruggezet en het tijdsbereik blijft daarna leeg.
 
-Energiewaarden worden geselecteerd op tijdsbereik en optioneel verder beperkt met `group`, `name` of `title`.
-De geschiedenisquery accepteert dezelfde parameters, zodat u vooraf kunt controleren wat er wordt verwijderd.
-
-```bash
-# opgeslagen waarden bekijken
-curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-
-# waarden verwijderen
-curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
-```
-
-Tariefwaarden worden voor het hele tijdsbereik verwijderd of, met `usage`, alleen voor één soort waarde (`grid`, `feedin`, `co2` of `temperature`).
+Waarden worden geselecteerd op tijdsbereik (`from` inclusief, `to` exclusief, RFC 3339) en beperkt met `group` (bijv. `grid`, `pv`, `battery`) of met de `name` van één apparaat.
+Apparaten die in de webinterface zijn geconfigureerd, heten `db:` gevolgd door hun id, bijv. `db:22`.
+U vindt de naam achter het info-pictogram rechtsboven in het configuratievenster van het apparaat.
+De geschiedenisquery accepteert dezelfde filters, zodat u vooraf kunt controleren wat er wordt verwijderd.
 
 ```bash
-# opgeslagen tariefwaarden bekijken
-curl "http://evcc.local:7070/api/history/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z"
+# welke waarden zijn in dit uur voor het net opgeslagen?
+curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 
-# alleen de CO₂-waarden in dit bereik verwijderen
+# de waarden van één apparaat verwijderen
 curl -X DELETE -H "Authorization: Bearer evcc_..." \
-  "http://evcc.local:7070/api/db/metrics/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&usage=co2"
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&name=db:22"
+
+# de waarden van een hele groep verwijderen
+curl -X DELETE -H "Authorization: Bearer evcc_..." \
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T12:00:00Z&to=2026-07-01T13:00:00Z&group=grid"
 ```
 
-`from` is inclusief en `to` exclusief, beide in RFC 3339-formaat.
 Het antwoord vermeldt het aantal verwijderde items.
+
+Hetzelfde werkt voor opgeslagen tariefwaarden, bijv. als een prijsaanbieder verkeerde prijzen heeft geleverd: bekijk ze met `/api/history/tariffs` en verwijder ze met `/api/db/metrics/tariffs`, optioneel beperkt tot één `usage` (`grid`, `feedin`, `co2` of `temperature`).
 Alle parameters staan in de [REST-API-referentie](/integrations/rest-api).
-
-## Verwachting van zonne-energie
-
-U kunt in evcc verschillende [verwachtingen van zonne-energie](/nl/tariffs#solar) gebruiken om de verwachte resterende productie voor vandaag en de komende dagen te zien.
-Als experimentele functie hebben we ook de mogelijkheid ingebouwd om de verwachtingen aan te passen aan uw werkelijke productie.
-
-### Aanpassing van de verwachting
-
-Naast de verwachting registreert evcc ook het actuele vermogen van de zonnepanelen en telt dit in de loop van de tijd op.
-Dat gebeurt ook voor de verwachtingsgegevens.
-Door de twee waarden in de loop van de tijd te vergelijken, kan evcc de verwachtingen afstemmen op uw werkelijke productiewaarden.
-U kunt deze aanpassing in het verwachtingsvenster in de webinterface in- en uitschakelen.
-
-### De aanpassingsgegevens resetten
-
-Als de aanpassingsgegevens niet kloppen, kunt u ze resetten.
-
-Werkwijze:
-
-1. Stop evcc
-2. Voer de volgende commando’s uit op de opdrachtregel
-   ```bash
-   # Aanpassingsgeschiedenis resetten. Bevestig met `y`.
-   evcc settings set solarAccForecast 0
-   evcc settings set solarAccYield "{}"
-   ```
-3. Start evcc opnieuw
-
-Nu begint evcc de verwachtingen weer vanaf nul op te tellen.
 
 ## Statistische gegevens \{#statistical-data\}
 
