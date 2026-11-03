@@ -1,9 +1,9 @@
 ---
 title: "hems"
-description: "So richtest du in der evcc.yaml die externe Begrenzung von Verbrauch und Einspeisung ein, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBUS."
+description: "So richtest du in der evcc.yaml die externe Begrenzung von Verbrauch und Einspeisung nach § 14a EnWG oder § 9 EEG per Relais, FNN-Steuerbox oder EEBUS ein."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 Unter `hems` wird die externe Begrenzung von Verbrauchsleistung und Einspeisung konfiguriert.
@@ -28,19 +28,20 @@ Details und Konfigurationsmöglichkeiten findest du unter **Konfiguration → Su
 
 ### `type`
 
-Definiert den Typ der externen Steuerung.
+Legt fest, wie die externe Begrenzung angebunden ist.
 
 **Mögliche Werte**:
 
-- `relay`: Anbindung über Schaltkontakt
+- `relay`: Anbindung über einen Schaltkontakt
 - `fnn`: Anbindung über FNN-Steuerbox mit mehreren Schaltkontakten
 - `eebus`: Anbindung über das EEBUS-Protokoll
+- `custom`: Limits werden aus Plugins gelesen, siehe [Benutzerdefinierte Geräte](/de/user-defined-devices#external-limit-custom)
 
 ---
 
 ## `type: relay`
 
-Anbindung über einen Schaltkontakt (z. B. Steuerbox).
+Anbindung über einen Schaltkontakt, z. B. an einer Steuerbox.
 Der Kontakt signalisiert, ob eine Leistungsbegrenzung aktiv ist.
 
 ```yaml
@@ -73,7 +74,7 @@ Optionale [Plugin](/de/reference/plugins)-Konfiguration zum Durchreichen des Beg
 Abfrageintervall für den Schaltkontakt.
 Standard: `10s`.
 
-Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [benutzerdefinierte Integrationen](/de/user-defined-devices#external-limit).
+Weitere Beispiele für verschiedene Anbindungen (GPIO, MQTT, HTTP) findest du unter [Benutzerdefinierte Geräte](/de/user-defined-devices#external-limit).
 
 ---
 
@@ -85,7 +86,7 @@ Dimmen des Verbrauchs (W4) und Abregelung der Einspeisung (W3, S2, S1) werden ü
 ```yaml
 hems:
   type: fnn
-  maxDimPower: 4200 # Verbrauchslimit während Dimmung (in Watt)
+  maxDimPower: 4200 # Verbrauchslimit beim Dimmen (in Watt)
   maxCurtailPower: 10000 # Installierte PV-Leistung, Basis für Abregelungsstufen (in Watt)
   w4:
     source: gpio
@@ -108,11 +109,11 @@ hems:
 
 ### Parameter
 
-Mindestens eines der Signale `w4` oder `w3` muss konfiguriert sein.
+Mindestens eines der Signale `w4` und `w3` muss konfiguriert sein.
 
 #### `maxDimPower`
 
-Verbrauchslimit in Watt, das gesetzt wird, solange das Dimm-Signal (W4) aktiv ist.
+Verbrauchslimit in Watt, das gesetzt wird, solange das Dimmsignal (W4) aktiv ist.
 Erforderlich, wenn `w4` konfiguriert ist.
 
 #### `maxCurtailPower`
@@ -122,7 +123,7 @@ Basiswert für die Abregelungsstufen (W3, S2, S1).
 
 #### `w4`
 
-[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Dimm-Signals.
+[Plugin](/de/reference/plugins)-Konfiguration zum Auslesen des Dimmsignals.
 Bei aktivem Signal wird der Verbrauch auf `maxDimPower` begrenzt.
 
 #### `w3`
@@ -175,7 +176,7 @@ Folgende optionale Parameter können für die EEBUS-Kommunikation gesetzt werden
 - `failsafeConsumptionActivePowerLimit`: Failsafe-Limit für Verbrauchsleistung (in Watt)
 - `productionNominalMax`: Installierte Generatorleistung (Wp, in Watt)
 - `failsafeProductionActivePowerLimit`: Failsafe-Limit für Einspeiseleistung (in Watt)
-- `failsafeDurationMinimum`: Minimale Failsafe-Dauer (z. B. `2h`)
+- `failsafeDurationMinimum`: Mindestdauer im Failsafe-Modus (z. B. `2h`)
 
 #### `passthrough`
 

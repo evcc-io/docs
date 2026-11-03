@@ -3,7 +3,7 @@ title: "hems"
 description: "Configura in evcc.yaml i limiti esterni per consumo e immissione in rete, ad es. per § 14a EnWG o § 9 EEG, tramite relè, centralina di controllo FNN o EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 La sezione `hems` configura il controllo esterno della potenza di consumo e di immissione in rete.
@@ -14,7 +14,7 @@ Per il contesto e i dettagli sulla configurazione, vedi [Limite esterno](/it/ext
 La limitazione della produzione agisce direttamente sui contatori `pv` limitabili e sui [dispositivi limitatori](/it/reference/configuration/curtailers), mentre la riduzione di potenza agisce direttamente sui consumatori controllabili.
 In nessuno dei due casi serve una configurazione dei circuiti.
 Per applicare il limite di consumo ai punti di ricarica, i circuiti devono essere configurati nella [gestione del carico](/it/features/loadmanagement).
-Un limite attivo si applica quindi al circuito principale.
+In questo caso, un limite attivo limita il circuito principale.
 :::
 
 :::note[SMA Sunny Home Manager e protocollo SEMP]
@@ -35,18 +35,19 @@ Definisce il tipo di controllo esterno.
 - `relay`: collegamento tramite contatto di commutazione
 - `fnn`: collegamento tramite centralina di controllo FNN con più contatti di commutazione
 - `eebus`: collegamento tramite il protocollo EEBUS
+- `custom`: limiti letti dai plugin, vedi [dispositivi definiti dall’utente](/it/user-defined-devices#external-limit-custom)
 
 ---
 
 ## `type: relay`
 
-Collegamento tramite un contatto di commutazione (ad es. centralina di controllo).
+Collegamento tramite un contatto di commutazione (ad es. di una centralina di controllo).
 Il contatto segnala se è attiva una limitazione di potenza.
 
 ```yaml
 hems:
   type: relay
-  maxPower: 8400 # Total power limit when signal is active (in watts)
+  maxPower: 8400 # Limite di potenza totale con segnale attivo (in watt)
   limit:
     source: gpio
     function: read
@@ -73,25 +74,25 @@ Configurazione facoltativa del [plugin](/it/reference/plugins) per inoltrare il 
 Intervallo di interrogazione del contatto di commutazione.
 Predefinito: `10s`.
 
-Per altri esempi di collegamento (GPIO, MQTT, HTTP), vedi [integrazioni definite dall’utente](/it/user-defined-devices#external-limit).
+Per altri esempi di collegamento (GPIO, MQTT, HTTP), vedi [dispositivi definiti dall’utente](/it/user-defined-devices#external-limit).
 
 ---
 
 ## `type: fnn`
 
 Collegamento tramite una centralina di controllo FNN con contatti di commutazione separati.
-La riduzione di potenza del consumo (W4) e la limitazione della produzione (W3, S2, S1) vengono segnalate tramite contatti singoli.
+La riduzione di potenza del consumo (W4) e la limitazione della produzione (W3, S2, S1) vengono segnalate tramite contatti distinti.
 
 ```yaml
 hems:
   type: fnn
-  maxDimPower: 4200 # Consumption limit while dimmed (in watts)
-  maxCurtailPower: 10000 # Installed PV power, base for curtailment steps (in watts)
+  maxDimPower: 4200 # Limite di consumo durante la riduzione di potenza (in watt)
+  maxCurtailPower: 10000 # Potenza solare installata, base per i livelli di limitazione (in watt)
   w4:
     source: gpio
     function: read
-    pin: 17 # Read GPIO pin 17
-    # Return value: false = normal, true = active
+    pin: 17 # Legge il pin GPIO 17
+    # Valore di ritorno: false = normale, true = attivo
   w3:
     source: gpio
     function: read
@@ -118,7 +119,7 @@ Obbligatorio se `w4` è configurato.
 #### `maxCurtailPower`
 
 Potenza solare installata in watt.
-Valore di base per i livelli di limitazione (W3, S2, S1).
+Valore di riferimento per i livelli di limitazione (W3, S2, S1).
 
 #### `w4`
 
@@ -157,7 +158,7 @@ La centralina di controllo trasmette automaticamente il limite di potenza.
 ```yaml
 hems:
   type: eebus
-  ski: "1234-5678-90AB-CDEF" # SKI of the control box
+  ski: "1234-5678-90AB-CDEF" # SKI della centralina di controllo
 ```
 
 ### Parametri
@@ -172,10 +173,10 @@ Necessario per l’accoppiamento.
 Per la comunicazione EEBUS si possono impostare i seguenti parametri facoltativi:
 
 - `contractualConsumptionNominalMax`: potenza di consumo massima contrattuale (in watt)
-- `failsafeConsumptionActivePowerLimit`: limite failsafe per la potenza di consumo (in watt)
+- `failsafeConsumptionActivePowerLimit`: limite di sicurezza (failsafe) per la potenza di consumo (in watt)
 - `productionNominalMax`: potenza installata del generatore (Wp, in watt)
-- `failsafeProductionActivePowerLimit`: limite failsafe per la potenza di immissione in rete (in watt)
-- `failsafeDurationMinimum`: durata minima del failsafe (ad es. `2h`)
+- `failsafeProductionActivePowerLimit`: limite di sicurezza (failsafe) per la potenza di immissione in rete (in watt)
+- `failsafeDurationMinimum`: durata minima della modalità di sicurezza (ad es. `2h`)
 
 #### `passthrough`
 
