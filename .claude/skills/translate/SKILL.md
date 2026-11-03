@@ -52,6 +52,7 @@ Workflow tool, name `translate-locale`, args:
 { "phase": "<phase>", "commit": <bool>, "scratch": "<session scratchpad>", "locales": [ ...locale objects ] }
 ```
 
+Launch the Workflow with `scriptPath` set to this checkout's `.claude/workflows/translate-locale.js` when the current directory is a worktree on another branch, otherwise the worktree's (possibly older) copy of the script runs.
 Keep the agent count per run under 1,000 (≈170 per locale for `all`); split into `core` and `blog+site` runs for five locales.
 On abort or edit: resume with the run id and the same args.
 
