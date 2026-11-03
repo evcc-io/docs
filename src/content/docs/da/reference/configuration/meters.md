@@ -1,14 +1,14 @@
 ---
 title: "meters"
-description: "Sådan definerer du målere i evcc.yaml til elnet, sol, hjemmebatteri og forbrugsenheder, med fortegnskonventionen og de målertyper, der findes."
+description: "Sådan definerer du målere i evcc.yaml til elnet, sol, hjemmebatteri og forbrugsenheder, hvilken fortegnskonvention der gælder, og hvilke målertyper der findes."
 sidebar:
   order: 5
-translatedFrom: "731e5e09d04f"
+translatedFrom: "469542e8d8c5"
 ---
 
-_Målere_ (elmålere) er en liste over enheder i huset, der kan måle effekt- og energiforbrug, solproduktion eller brugen af hjemmebatteriet. En `meter` definerer et målepunkt for energi og kan være en fysisk enhed (f.eks. en måler ved tilslutningspunktet til elnettet), en solcelleinverter (AC eller DC ved hybridinvertere) eller en batteriinverter.
+Under _målere_ (elmålere) angiver du de enheder i huset, der kan måle effekt- og energiforbrug, solproduktion eller brugen af hjemmebatteriet. En `meter` definerer et målepunkt for energi og kan være en fysisk enhed (f.eks. en måler ved tilslutningspunktet til elnettet), en solcelleinverter (AC eller DC ved hybridinvertere) eller en batteriinverter.
 
-Opladere kan have en indbygget måler, eller der kan tilsluttes en ekstern. Hvis en oplader har en indbygget måler, behøver der ikke at blive oprettet en post til den under `meters`. Hvis opladeren ikke har en sådan måler, bruger evcc den måler, der er konfigureret her og tildelt opladeren under [`meter`](/da/reference/configuration/loadpoints#meter) i konfigurationen af ladepunktet, eller går ud fra, at den indstillede ladeeffekt faktisk bliver brugt.
+Opladere kan have en indbygget måler, eller der kan tilsluttes en ekstern. Hvis en oplader har en indbygget måler, behøver du ikke oprette en post til den under `meters`. Hvis opladeren ikke har en sådan måler, bruger evcc den måler, der er konfigureret her og tildelt opladeren under [`meter`](/da/reference/configuration/loadpoints#meter) i konfigurationen af ladepunktet, eller går ud fra, at den indstillede ladeeffekt faktisk bliver brugt.
 
 evcc bruger en ensartet fortegnskonvention for effekt- og strømværdier (`power`, `powers`, `currents`):
 
@@ -58,7 +58,7 @@ name: charger1
 
 ### `type`
 
-Dette er den evcc-specifikke målertype, der muliggør kommunikationen med enheden. Den passende type til kendte enheder finder du under [Enheder - Hjemmeinstallation](/da/meters).
+Det er den evcc-specifikke målertype, der bruges til at kommunikere med enheden. Den passende type til kendte enheder finder du under [Enheder - Hjemmeinstallation](/da/meters).
 
 **Eksempel**:
 
@@ -72,7 +72,7 @@ De forskellige mulige typer og deres yderligere parametre er dokumenteret nedenf
 
 :::note[Bemærk]
 Målerens ekstra felter `title` og `icon` understøttes af tekniske årsager ikke i filen `evcc.yaml`.
-Titler og ikoner (afhængigt af anvendelsen) kan kun defineres for målere, der er oprettet via brugerfladen.
+Titler og ikoner (afhængigt af anvendelsen) kan kun defineres for målere, der er oprettet via opsætningen i brugerfladen.
 :::
 
 ## Understøttede typer
@@ -201,7 +201,7 @@ uri: https://192.0.2.2/
 
 ##### `password`
 
-Her skal registreringsnummeret for LG ESS HOME-inverteren indtastes.
+Her skal registreringsnummeret for LG ESS Home-inverteren indtastes.
 
 **Eksempel**:
 
@@ -213,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Til brug af målinger fra en OpenWB-oplader.
+Bruger målinger fra en OpenWB-oplader.
 
 **Eksempel**:
 
@@ -251,7 +251,7 @@ broker: 192.0.2.2:1883
 
 ### `sma`
 
-Til brug af SMA Home Manager 2.0, SMA Energy Meter eller en SMA-inverter. Enhederne skal understøtte Speedwire-protokollen.
+Understøtter SMA Home Manager 2.0, SMA Energy Meter eller en SMA-inverter. Enhederne skal understøtte Speedwire-protokollen.
 
 **Eksempel**:
 
@@ -306,7 +306,7 @@ interface: eth0
 
 ### `tesla`
 
-_`tesla`_: Til brug af målinger fra en Tesla Powerwall.
+_`tesla`_: bruger målinger fra en Tesla Powerwall.
 
 **Eksempel**:
 
@@ -466,7 +466,19 @@ Plugin-definition, der leverer batteriets opladningsniveau i procent (%).
 
 #### `capacity`
 
-Angivelse af batteriets kapacitet. Kun relevant, når der er flere batterier. Bruges til at bestemme det samlede opladningsniveau.
+Batteriets kapacitet i kWh.
+Kapaciteten bruges til at bestemme det samlede opladningsniveau for flere batterier, og [optimizeren](/da/features/optimizer) bruger den til at planlægge batteriopladningen.
+I stedet for en fast værdi kan et vilkårligt [float-plugin](/da/reference/plugins) læse kapaciteten fra enheden.
+Pluginet læses én gang efter start, og værdien bevares derefter.
+Indtil den første vellykkede læsning er kapaciteten ukendt.
+
+**Eksempel**:
+
+```yaml
+  capacity: # Læses fra enheden i stedet for en fast værdi
+    source: modbus
+    ...
+```
 
 ---
 

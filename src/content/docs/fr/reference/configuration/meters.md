@@ -3,12 +3,12 @@ title: "meters"
 description: "Définissez dans evcc.yaml les compteurs du réseau, du solaire, de la batterie domestique et des consommateurs, avec la convention de signe et les types disponibles."
 sidebar:
   order: 5
-translatedFrom: "731e5e09d04f"
+translatedFrom: "469542e8d8c5"
 ---
 
 Les _meters_ (compteurs) sont une liste d’appareils de la maison capables de mesurer la puissance et la consommation d’énergie, la production solaire ou l’utilisation de la batterie domestique. Un `meter` définit un point de mesure de l’énergie et peut être un appareil physique (p. ex. un compteur au point de raccordement au réseau), un onduleur solaire (AC ou DC dans le cas des onduleurs hybrides) ou un onduleur de batterie.
 
-Les chargeurs peuvent disposer d’un compteur intégré, ou un compteur externe peut y être raccordé. Si un chargeur dispose d’un compteur intégré, il n’est pas nécessaire de créer une entrée pour lui dans `meters`. Si le chargeur ne dispose pas d’un tel compteur, evcc utilise le compteur configuré ici et attribué au chargeur sous [`meter`](/fr/reference/configuration/loadpoints#meter) dans la configuration du point de charge, ou suppose que la puissance de charge réglée est effectivement utilisée.
+Les chargeurs peuvent disposer d’un compteur intégré, ou un compteur externe peut y être raccordé. Si un chargeur dispose d’un compteur intégré, il n’est pas nécessaire de créer une entrée pour lui dans `meters`. Si le chargeur ne dispose pas d’un tel compteur, evcc utilise le compteur configuré ici et attribué au chargeur sous [`meter`](/fr/reference/configuration/loadpoints#meter) dans la configuration du point de charge, ou considère que la puissance de charge réglée est effectivement utilisée.
 
 evcc applique une convention de signe cohérente pour les valeurs de puissance et de courant (`power`, `powers`, `currents`) :
 
@@ -379,25 +379,25 @@ Implémentation générique dans laquelle chaque valeur est fournie par des [plu
     ...
   capacity: # Capacité de la batterie, facultative (kWh)
   currents: # Courant (A) par phase
-    - source: # Type de plugin phase 1
+    - source: # Type de plugin pour la phase 1
       ...
-    - source: # Type de plugin phase 2
+    - source: # Type de plugin pour la phase 2
       ...
-    - source: # Type de plugin phase 3
+    - source: # Type de plugin pour la phase 3
       ...
   powers: # Puissance (W) par phase
-    - source: # Type de plugin phase 1
+    - source: # Type de plugin pour la phase 1
       ...
-    - source: # Type de plugin phase 2
+    - source: # Type de plugin pour la phase 2
       ...
-    - source: # Type de plugin phase 3
+    - source: # Type de plugin pour la phase 3
       ...
   voltages: # Tension (V) par phase
-    - source: # Type de plugin phase 1
+    - source: # Type de plugin pour la phase 1
       ...
-    - source: # Type de plugin phase 2
+    - source: # Type de plugin pour la phase 2
       ...
-    - source: # Type de plugin phase 3
+    - source: # Type de plugin pour la phase 3
       ...
   ...
 ```
@@ -466,7 +466,19 @@ Définition de plugin qui renvoie le niveau de charge de la batterie en pourcent
 
 #### `capacity`
 
-Indique la capacité de la batterie. Elle n’est utile qu’en présence de plusieurs batteries et sert à calculer le niveau de charge global.
+Capacité de la batterie en kWh.
+Elle sert à déterminer le niveau de charge global de plusieurs batteries et permet à l’[optimiseur](/fr/features/optimizer) de planifier la charge de la batterie.
+Au lieu d’une valeur fixe, n’importe quel [plugin de type float](/fr/reference/plugins) peut lire la capacité depuis l’appareil.
+Le plugin est lu une fois après le démarrage, puis la valeur est conservée.
+Tant que la première lecture n’a pas réussi, la capacité est considérée comme inconnue.
+
+**Exemple** :
+
+```yaml
+  capacity: # lue depuis l’appareil au lieu d’une valeur fixe
+    source: modbus
+    ...
+```
 
 ---
 
@@ -478,11 +490,11 @@ Une liste de définitions de plugin qui renvoient le courant en ampères (A) par
 
 ```yaml
   currents: # Courant (A) par phase
-    - source: # Type de plugin phase 1
+    - source: # Type de plugin pour la phase 1
       ...
-    - source: # Type de plugin phase 2
+    - source: # Type de plugin pour la phase 2
       ...
-    - source: # Type de plugin phase 3
+    - source: # Type de plugin pour la phase 3
       ...
   ...
 ```
@@ -497,11 +509,11 @@ Une liste de définitions de plugin qui renvoient la puissance en watts (W) par 
 
 ```yaml
   powers: # Puissance (W) par phase
-    - source: # Type de plugin phase 1
+    - source: # Type de plugin pour la phase 1
       ...
-    - source: # Type de plugin phase 2
+    - source: # Type de plugin pour la phase 2
       ...
-    - source: # Type de plugin phase 3
+    - source: # Type de plugin pour la phase 3
       ...
   ...
 ```
@@ -516,11 +528,11 @@ Une liste de définitions de plugin qui renvoient la tension en volts (V) par ph
 
 ```yaml
   voltages: # Tension (V) par phase
-    - source: # Type de plugin phase 1
+    - source: # Type de plugin pour la phase 1
       ...
-    - source: # Type de plugin phase 2
+    - source: # Type de plugin pour la phase 2
       ...
-    - source: # Type de plugin phase 3
+    - source: # Type de plugin pour la phase 3
       ...
   ...
 ```
