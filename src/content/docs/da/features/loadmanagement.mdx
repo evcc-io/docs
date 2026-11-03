@@ -3,14 +3,14 @@ title: "Belastningsstyring"
 description: "Belastningsstyring samler ladepunkter i kredsløb med en maksimal strøm eller effekt, så flere opladere aldrig overbelaster din elinstallation."
 sidebar:
   order: 12
-translatedFrom: "56826048a083"
+translatedFrom: "47d88e6085e3"
 ---
 
 :::caution[Eksperimentel]
 Funktionen belastningsstyring er stadig eksperimentel. Den fungerer muligvis ikke som forventet sammen med visse andre funktioner.
 :::
 
-Funktionen belastningsstyring/lastbalancering kan bruges til at begrænse opladernes effekt, så kredsløbene ikke overbelastes og sikringerne ikke slår fra.
+Med belastningsstyring (også kaldet lastbalancering) kan du begrænse opladernes effekt, så kredsløbene ikke overbelastes og sikringerne ikke slår fra.
 Fordi effekten begrænses, kan funktionen også være nyttig, hvis du vil undgå utilsigtede høje forbrugsspidser.
 Til det formål kan et ladepunkt tildeles et kredsløb (`circuit`).
 Et kredsløb (`circuit`) kan have en maksimal strøm (`maxCurrent`) og/eller en maksimal effekt (`maxPower`).
@@ -37,9 +37,9 @@ Hvert ladepunkt kan derefter tildeles et kredsløb.
 ```yaml
 circuits:
   - name: main # entydigt navn, andre kredsløb henviser til det via parent
-    title: "hovedkredsløb" # navn til brugerfladen (endnu ikke implementeret i brugerfladen)
-    maxCurrent: 63 # 63A (valgfri)
-    maxPower: 30000 # 30kW (valgfri)
+    title: "hovedkredsløb" # navn i brugerfladen (endnu ikke implementeret)
+    maxCurrent: 63 # 63 A (valgfri)
+    maxPower: 30000 # 30 kW (valgfri)
     meter: grid # valgfri
 
 loadpoints:
@@ -53,8 +53,8 @@ loadpoints:
 
 Denne opsætning definerer hovedkredsløbet `main` med en maksimal effekt på 30 kW og en maksimal strøm på 63 A pr. fase.
 Ladepunkterne _Garage_ og _Carport_ er tildelt dette kredsløb.
-Hvis andre forbrugsenheder som en ovn eller en varmepumpe tilsammen bruger 50 A (det kræver en måler), må ladepunkterne kun bruge de resterende 13 A.
-Da elnetsmåleren er tildelt dette kredsløb, bliver ladepunkternes effekt neddroslet, så grænserne ikke overskrides ved tilslutningen til elnettet.
+Hvis andre forbrugsenheder som en ovn eller en varmepumpe (det kræver en måler) tilsammen bruger 50 A, må ladepunkterne kun bruge de resterende 13 A.
+Da elnetsmåleren er tildelt dette kredsløb, bliver ladepunkternes effekt droslet ned, så grænserne ikke overskrides ved nettilslutningen.
 Uden tildelt elnetsmåler gælder grænserne direkte for summen af alle ladepunkter.
 
 ### Eksempel: indlejrede kredsløb
@@ -130,12 +130,15 @@ Bemærk: Hvis måleren ikke allerede har en anden funktion (f.eks. `grid`), skal
 
 ## Grænser
 
-På hvert kredsløb kan der konfigureres både en maksimal strøm pr. fase (`maxCurrent`) og en maksimal effekt (`maxPower`).
+For hvert kredsløb kan du sætte både en maksimal strøm pr. fase (`maxCurrent`) og en maksimal effekt (`maxPower`).
 Hvis værdierne er konfigureret, overvåges de uafhængigt af hinanden.
+Værdien `0` betyder ingen grænse, ligesom når indstillingen udelades.
 
 ### Eksterne grænser
 
 Ved behov kan der også defineres eksterne grænser med `GetMaxCurrent` og `GetMaxPower`. Hvis der opstår en fejl, gælder de foruddefinerede grænser.
+Også her betyder `0` ingen grænse og blokerer ikke kredsløbet.
+For at stoppe al opladning på et kredsløb skal der i stedet returneres en meget lille værdi som f.eks. `1`.
 
 Eksempel:
 
@@ -163,8 +166,8 @@ Du kan læse mere under [Ekstern grænse](/da/external-limit).
 For opladere med automatisk faseskift (1P/3P) kan belastningsstyringen skifte faser, så opladningen holder sig inden for de konfigurerede grænser.
 Når den tilgængelige effekt ikke rækker til 3-faset opladning, skifter evcc automatisk til 1-faset opladning.
 
-Det gælder også i tilstanden **Hurtig** og ved opladning efter ladeplan.
-Hvis belastningsstyringen f.eks. begrænser den tilgængelige effekt til 3,5 kW, skifter evcc til 1-faset opladning (fra 1,4 kW) i stedet for at sætte opladningen på pause.
+Det gælder også ved hurtig opladning og ved opladning med en ladeplan.
+Hvis belastningsstyringen f.eks. begrænser den tilgængelige effekt til 3,5 kW, skifter evcc til 1-faset opladning, som er mulig fra 1,4 kW, i stedet for at sætte opladningen på pause.
 
 **Forudsætning:** Opladeren skal understøtte faseskift.
 

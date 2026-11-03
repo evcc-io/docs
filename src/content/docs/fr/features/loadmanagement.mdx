@@ -1,17 +1,17 @@
 ---
 title: "Gestion de la charge"
-description: "La gestion de la charge regroupe les points de charge en circuits limités en courant ou en puissance, pour ne jamais surcharger votre installation électrique."
+description: "La gestion de la charge regroupe les points de charge en circuits limités en courant ou en puissance pour que plusieurs chargeurs ne surchargent jamais l’installation."
 sidebar:
   order: 12
-translatedFrom: "56826048a083"
+translatedFrom: "47d88e6085e3"
 ---
 
 :::caution[Expérimental]
-La fonction de gestion de la charge est encore expérimentale. Elle peut ne pas se comporter comme prévu en combinaison avec certaines autres fonctions.
+La fonction de gestion de la charge est encore expérimentale. Combinée à certaines autres fonctions, elle peut ne pas se comporter comme prévu.
 :::
 
-La fonction de gestion de la charge (équilibrage de charge) permet de limiter la puissance utilisée par les chargeurs afin d’éviter de surcharger les circuits et de faire déclencher les disjoncteurs.
-Limiter la puissance peut aussi être utile si vous voulez éviter des pics de consommation élevés imprévus.
+La fonction de gestion de la charge (équilibrage de charge) permet de limiter la puissance utilisée par les chargeurs afin d’éviter la surcharge des circuits et le déclenchement des disjoncteurs.
+Limiter la puissance peut aussi être utile si vous voulez éviter des pics de consommation imprévus.
 Pour cela, un point de charge peut être affecté à un `circuit`.
 Un `circuit` peut avoir un courant maximal (`maxCurrent`), une puissance maximale (`maxPower`) ou les deux.
 Le système fonctionne de manière hiérarchique, c.-à-d. qu’un circuit peut faire partie d’un circuit de niveau supérieur.
@@ -54,8 +54,8 @@ loadpoints:
 Cette configuration définit le circuit principal `main` avec une puissance maximale de 30 kW et un courant maximal de 63 A par phase.
 Les points de charge _Garage_ et _Carport_ sont affectés à ce circuit.
 Si d’autres consommateurs, p. ex. un four ou une pompe à chaleur, tirent 50 A au total (ce qui suppose un compteur), les points de charge ne peuvent utiliser que les 13 A restants.
-Comme le compteur avant réseau est affecté à ce circuit, la puissance des points de charge est réduite pour que les limites ne soient pas dépassées au point de raccordement.
-Sans compteur avant réseau affecté, les limites s’appliquent directement à la somme de tous les points de charge.
+Comme le compteur général est affecté à ce circuit, la puissance des points de charge est réduite pour que les limites ne soient pas dépassées au point de raccordement.
+Si aucun compteur général n’est affecté, les limites s’appliquent directement au total de tous les points de charge.
 
 ### Exemple : circuits imbriqués
 
@@ -105,9 +105,9 @@ Cela est signalé par l’indication « Consommation limitée » sur la carte 
 
 ## Mesure
 
-Par défaut, la régulation calcule la puissance et le courant actuels à partir de la somme des points de charge concernés.
+Par défaut, la régulation calcule la puissance et le courant actuels en additionnant les valeurs des points de charge concernés.
 Si un `meter` est configuré sur un `circuit`, la régulation peut aussi tenir compte de la consommation réelle du circuit.
-C’est particulièrement utile lorsque d’autres consommateurs sont branchés derrière le même fusible.
+C’est particulièrement utile lorsque d’autres consommateurs sont branchés en aval du même fusible.
 
 ```yaml
 site:
@@ -126,16 +126,19 @@ circuits:
     maxCurrent: 32
 ```
 
-Remarque : si le compteur du circuit n’a pas déjà un autre rôle (p. ex. `grid`), il doit être déclaré comme compteur externe sous `site.meters.ext`.
+Remarque : si le compteur du circuit n’a pas déjà une autre utilisation (p. ex. `grid`), il doit être déclaré comme compteur externe sous `site.meters.ext`.
 
 ## Limites
 
 Chaque circuit peut recevoir un courant maximal par phase (`maxCurrent`) et une puissance maximale (`maxPower`).
 Ces valeurs, si elles sont configurées, sont surveillées indépendamment l’une de l’autre.
+Une valeur de `0` signifie qu’il n’y a aucune limite, comme si le paramètre était omis.
 
 ### Limites externes
 
 Si nécessaire, des limites externes peuvent aussi être définies avec `GetMaxCurrent` et `GetMaxPower`. En cas d’erreur, les limites prédéfinies s’appliquent.
+Ici aussi, `0` signifie qu’il n’y a aucune limite et ne bloque pas le circuit.
+Pour arrêter toute charge sur un circuit, la source doit plutôt renvoyer une très petite valeur, p. ex. `1`.
 
 Exemple :
 
@@ -160,7 +163,7 @@ Pour plus d’informations, consultez [Limite externe](/fr/external-limit).
 
 ## Commutation de phases
 
-Pour les chargeurs avec commutation automatique de phases (1P/3P), la gestion de la charge peut utiliser cette capacité pour charger dans les limites configurées.
+Pour les chargeurs avec commutation automatique de phases (1P/3P), la gestion de la charge peut utiliser cette fonction pour charger dans les limites configurées.
 Lorsque la puissance disponible ne suffit pas pour une charge triphasée, evcc passe automatiquement en charge monophasée.
 
 Cela vaut aussi pour la charge rapide et la charge planifiée.
@@ -175,7 +178,7 @@ Il est fortement recommandé de les désactiver ou d’utiliser des chargeurs sa
 evcc attend des appareils qu’ils suivent directement ses commandes.
 D’autres configurations peuvent entraîner un comportement inattendu et doivent être testées soigneusement par vos soins.
 
-## Limitations
+## Restrictions
 
 :::note
 Une licence distincte sera nécessaire ultérieurement pour l’utilisation commerciale de la gestion de la charge.
@@ -184,6 +187,6 @@ L’utilisation privée pour les petites installations restera gratuite.
 
 - Les valeurs actuelles et les limites des différents circuits sont affichées sur la page de configuration de l’interface. Un affichage au niveau du point de charge est prévu.
 - Les réglages `priority` du point de charge ne sont pas encore pris en compte.
-- Les nouvelles sessions ne reçoivent que la marge restante du circuit.
+- Les nouvelles sessions de charge ne reçoivent que la marge restante du circuit.
   Le rééquilibrage entre les sessions actives n’est pas encore pris en charge.
-- La [recharge de la batterie domestique depuis le réseau](/fr/features/battery#gridcharge) n’est pas prise en compte. Lorsque la batterie domestique se charge activement depuis le réseau, cette consommation n’est pas incluse dans les calculs de la gestion de la charge. Toutefois, lorsqu’un signal de [réduction de puissance § 14a](/fr/external-limit) est actif, la charge depuis le réseau est automatiquement mise en pause.
+- La [charge de la batterie domestique depuis le réseau](/fr/features/battery#gridcharge) n’est pas prise en compte. Lorsque la batterie domestique se charge activement depuis le réseau, cette consommation n’est pas incluse dans les calculs de la gestion de la charge. Toutefois, lorsqu’un signal de [réduction de puissance § 14a](/fr/external-limit) est actif, la charge depuis le réseau est automatiquement mise en pause.

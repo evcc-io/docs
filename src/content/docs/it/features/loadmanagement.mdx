@@ -3,7 +3,7 @@ title: "Gestione del carico"
 description: "La gestione del carico raggruppa i punti di ricarica in circuiti con corrente o potenza massima, così che più caricabatterie non sovraccarichino mai l’impianto elettrico."
 sidebar:
   order: 12
-translatedFrom: "56826048a083"
+translatedFrom: "47d88e6085e3"
 ---
 
 :::caution[Sperimentale]
@@ -11,20 +11,20 @@ La funzione di gestione del carico è ancora sperimentale. In combinazione con a
 :::
 
 La funzione di gestione e bilanciamento del carico serve a limitare la potenza usata dai caricabatterie, per evitare di sovraccaricare i circuiti e far scattare gli interruttori.
-Limitare la potenza può essere utile anche per evitare picchi di consumo indesiderati.
+Limitare la potenza può essere utile anche per evitare picchi di consumo elevati involontari.
 Per farlo, un punto di ricarica può essere assegnato a un circuito (`circuit`).
 Un circuito (`circuit`) può avere una corrente massima (`maxCurrent`) e/o una potenza massima (`maxPower`).
 Il sistema funziona in modo gerarchico, cioè un circuito può far parte di un circuito di livello superiore.
 
-:::note[Configurazione tramite UI]
+:::note[Configurazione tramite interfaccia]
 Questa pagina descrive la configurazione tramite il file `evcc.yaml`.
-La configurazione è possibile anche tramite la UI.
+La configurazione è possibile anche tramite l’interfaccia.
 
 I circuiti si definiscono in **Configurazione → Gestione del carico**.
 L’inserimento avviene in formato YAML e corrisponde al contenuto sotto `circuits:` negli esempi seguenti.
-Stiamo lavorando per sostituirlo con campi di inserimento nell’interfaccia.
+Stiamo lavorando per sostituirlo con un modulo di inserimento.
 
-Ogni punto di ricarica può poi essere assegnato a un circuito (è necessario un riavvio) in **Configurazione → Ricarica e riscaldamento → [nome]**.
+In **Configurazione → Ricarica e riscaldamento → [nome]** puoi poi assegnare ogni punto di ricarica a un circuito (serve un riavvio).
 :::
 
 ## Configurazione
@@ -37,7 +37,7 @@ Ogni punto di ricarica può poi essere assegnato a un circuito.
 ```yaml
 circuits:
   - name: main # nome univoco, gli altri circuiti vi fanno riferimento tramite parent
-    title: "circuito principale" # nome per la UI (non ancora implementato nella UI)
+    title: "circuito principale" # nome per l’interfaccia (non ancora implementato nell’interfaccia)
     maxCurrent: 63 # 63 A (opzionale)
     maxPower: 30000 # 30 kW (opzionale)
     meter: grid # opzionale
@@ -53,9 +53,9 @@ loadpoints:
 
 Questa configurazione definisce il circuito principale `main` con una potenza massima di 30 kW e una corrente massima di 63 A per fase.
 I punti di ricarica _Garage_ e _Carport_ sono assegnati a questo circuito.
-Se altri consumatori, come un forno o una pompa di calore (serve un contatore), assorbono in totale 50 A, i punti di ricarica possono usare solo i 13 A rimanenti.
+Se altri consumatori misurati da un contatore, come un forno o una pompa di calore, assorbono in totale 50 A, i punti di ricarica possono usare solo i 13 A rimanenti.
 Poiché il contatore di rete è assegnato a questo circuito, la potenza dei punti di ricarica viene ridotta in modo che i limiti non vengano superati al punto di connessione alla rete.
-Senza il contatore di rete assegnato, i limiti si applicano direttamente alla somma di tutti i punti di ricarica.
+Se non assegni il contatore di rete, i limiti si applicano direttamente alla somma di tutti i punti di ricarica.
 
 ### Esempio: circuiti annidati
 
@@ -88,7 +88,7 @@ loadpoints:
     circuit: main
 ```
 
-Qui ci sono due circuiti, `garage` e `carport`, entrambi figli del circuito principale, cioè a valle di esso (`parent: main`).
+Qui ci sono due circuiti, `garage` e `carport`, entrambi figli del circuito principale, ovvero a valle di esso (`parent: main`).
 Il circuito `main` ha una corrente massima di 48 A.
 I circuiti `garage` e `carport` hanno ciascuno una corrente massima di 32 A.
 I punti di ricarica Garage A, Garage B e Garage C sono assegnati al circuito `garage` (`circuit: garage`).
@@ -100,7 +100,7 @@ La regolazione garantisce che i limiti dei rispettivi circuiti non vengano mai s
 
 :::note[Limite esterno (§ 14a, § 9)]
 Quando è attivo un [limite esterno](/it/external-limit), questo pone un tetto alla potenza del circuito principale.
-Lo segnala l’avviso **Consumi limitati** nella scheda **Gestione del carico**.
+Lo segnala l’avviso “Consumi limitati” nella scheda Gestione del carico.
 :::
 
 ## Misurazione
@@ -132,10 +132,13 @@ Nota: se si usa un contatore che non è già impiegato per un altro scopo (ad es
 
 Su ogni circuito si possono configurare sia una corrente massima per fase (`maxCurrent`) sia una potenza massima (`maxPower`).
 Se configurati, questi valori vengono monitorati indipendentemente l’uno dall’altro.
+Un valore pari a `0` significa nessun limite, esattamente come omettere l’impostazione.
 
 ### Limiti esterni
 
 Se necessario, si possono definire anche limiti esterni tramite `GetMaxCurrent` e `GetMaxPower`. In caso di errore valgono i limiti predefiniti.
+Anche qui `0` significa nessun limite e non blocca il circuito.
+Per interrompere tutte le ricariche su un circuito, il plugin deve invece restituire un valore molto piccolo, ad es. `1`.
 
 Esempio:
 
@@ -173,7 +176,7 @@ Ad es., se la gestione del carico limita la potenza disponibile a 3,5 kW, evcc p
 Alcuni caricabatterie hanno funzioni di gestione del carico proprie.
 Si consiglia vivamente di disattivarle o di usare caricabatterie senza logica di controllo propria.
 evcc si aspetta che i dispositivi seguano direttamente i suoi comandi.
-Altre configurazioni possono causare comportamenti imprevisti e vanno testate a fondo in autonomia.
+Altre configurazioni possono causare comportamenti imprevisti e devi testarle a fondo tu stesso.
 
 ## Limitazioni
 
@@ -182,7 +185,7 @@ In futuro l’uso commerciale della gestione del carico richiederà una licenza 
 L’uso privato con impianti più piccoli resterà gratuito.
 :::
 
-- I valori di corrente e i limiti dei singoli circuiti sono visualizzati nella pagina di configurazione della UI. È prevista la visualizzazione anche nella scheda del punto di ricarica.
+- I valori di corrente e i limiti dei singoli circuiti sono visualizzati nella pagina di configurazione dell’interfaccia. È prevista la visualizzazione presso il punto di ricarica.
 - Le impostazioni `priority` del punto di ricarica non vengono ancora considerate.
 - Le nuove sessioni ricevono solo il margine residuo del circuito.
   Il ribilanciamento tra le sessioni attive non è ancora supportato.

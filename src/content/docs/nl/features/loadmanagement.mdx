@@ -1,16 +1,16 @@
 ---
 title: "Load management"
-description: "Load management verdeelt laadpunten over circuits met een maximale stroom of een maximaal vermogen, zodat meerdere laders uw elektrische installatie nooit overbelasten."
+description: "Load management deelt laadpunten in circuits in met een maximale stroom of een maximaal vermogen, zodat meerdere laders uw elektrische installatie nooit overbelasten."
 sidebar:
   order: 12
-translatedFrom: "56826048a083"
+translatedFrom: "47d88e6085e3"
 ---
 
 :::caution[Experimenteel]
 De functie load management is nog experimenteel. In combinatie met sommige andere functies werkt ze mogelijk niet zoals verwacht.
 :::
 
-Met load management (in de UI: **Load Balancing**) kan het vermogen van laders worden begrensd, zodat de circuits niet overbelast raken en zekeringen niet doorslaan.
+Met de functie load management/load balancing kan het vermogen van laders worden begrensd, zodat de circuits niet overbelast raken en zekeringen niet doorslaan.
 Het begrenzen van het vermogen kan ook nuttig zijn als u onbedoeld hoge verbruikspieken wilt vermijden.
 Hiervoor kan een laadpunt aan een `circuit` worden toegewezen.
 Een `circuit` kan een maximale stroom (`maxCurrent`) en/of een maximaal vermogen (`maxPower`) hebben.
@@ -126,16 +126,19 @@ circuits:
     maxCurrent: 32
 ```
 
-Let op: als een meter wordt gebruikt die nog geen andere rol heeft (bijv. `grid`), moet deze onder `site.meters.ext` als externe meter worden gekoppeld.
+Let op: als een meter wordt gebruikt die nog niet voor een ander doel (bijv. `grid`) wordt gebruikt, moet deze onder `site.meters.ext` als externe meter worden gekoppeld.
 
 ## Limieten
 
 Op elk circuit kunnen zowel een maximale stroom per fase (`maxCurrent`) als een maximaal vermogen (`maxPower`) worden ingesteld.
 Deze waarden worden, indien ingesteld, onafhankelijk van elkaar bewaakt.
+Een waarde van `0` betekent geen limiet, net als wanneer de instelling wordt weggelaten.
 
 ### Externe limieten
 
 Indien nodig kunnen ook externe limieten worden gedefinieerd met `GetMaxCurrent` en `GetMaxPower`. Bij een fout gelden de vooraf ingestelde limieten.
+Ook hier betekent `0` geen limiet: het circuit wordt dan niet geblokkeerd.
+Om het laden op een circuit volledig te stoppen, moet in plaats daarvan een zeer kleine waarde zoals `1` worden teruggegeven.
 
 Voorbeeld:
 
@@ -163,7 +166,7 @@ Meer informatie vindt u onder [Externe limiet](/nl/external-limit).
 Bij laders met automatische faseomschakeling (1P/3P) kan load management deze omschakeling gebruiken om binnen de ingestelde limieten te laden.
 Als het beschikbare vermogen niet voldoende is om driefasig te laden, schakelt evcc automatisch over naar eenfasig laden.
 
-Dit geldt ook in de modus **Snel** en bij laden volgens een laadplan.
+Dit geldt ook voor snelladen en voor laden volgens een laadplan.
 Als load management het beschikbare vermogen bijv. op 3,5 kW begrenst, schakelt evcc over naar eenfasig laden (vanaf 1,4 kW) in plaats van het laden te pauzeren.
 
 **Vereiste:** de lader moet faseomschakeling ondersteunen.
@@ -171,14 +174,14 @@ Als load management het beschikbare vermogen bijv. op 3,5 kW begrenst, schakelt 
 ## Configuratie van de lader
 
 Sommige laders hebben hun eigen functies voor load management.
-We raden sterk aan deze uit te schakelen of laders zonder ingebouwde intelligentie te gebruiken.
+Het wordt sterk aangeraden deze uit te schakelen of laders zonder ingebouwde intelligentie te gebruiken.
 evcc verwacht dat apparaten zijn commando’s direct opvolgen.
-Andere configuraties kunnen tot onverwacht gedrag leiden en moeten zelf grondig worden getest.
+Andere configuraties kunnen tot onverwacht gedrag leiden, dus u moet ze zelf grondig testen.
 
 ## Beperkingen
 
 :::note
-Voor commercieel gebruik van load management is later een aparte licentie nodig.
+Voor commercieel gebruik van load management is in de toekomst een aparte licentie nodig.
 Privégebruik bij kleinere installaties blijft kosteloos.
 :::
 
