@@ -3,7 +3,7 @@ title: "hems"
 description: "So richtest du in der evcc.yaml die externe Begrenzung von Verbrauch und Einspeisung ein, z. B. für § 14a EnWG oder § 9 EEG, per Relais, FNN-Steuerbox oder EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 Unter `hems` wird die externe Begrenzung von Verbrauchsleistung und Einspeisung konfiguriert.
@@ -35,6 +35,7 @@ Definiert den Typ der externen Steuerung.
 - `relay`: Anbindung über Schaltkontakt
 - `fnn`: Anbindung über FNN-Steuerbox mit mehreren Schaltkontakten
 - `eebus`: Anbindung über das EEBUS-Protokoll
+- `custom`: Begrenzungen werden aus Plugins gelesen, siehe [benutzerdefinierte Geräte](/de/user-defined-devices#external-limit-custom)
 
 ---
 

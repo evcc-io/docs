@@ -3,7 +3,7 @@ title: "hems"
 description: "Beschrijft hoe u in evcc.yaml externe limieten voor verbruik en teruglevering instelt, bijv. voor § 14a EnWG of § 9 EEG, via relais, FNN-stuurbox of EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 De sectie `hems` configureert de externe aansturing van het verbruiks- en terugleveringsvermogen.
@@ -35,6 +35,7 @@ Definieert het type externe aansturing.
 - `relay`: Aansluiting via schakelcontact
 - `fnn`: Aansluiting via FNN-stuurbox met meerdere schakelcontacten
 - `eebus`: Aansluiting via het EEBUS-protocol
+- `custom`: Limieten uitgelezen via plugins, zie [gebruikersgedefinieerde apparaten](/nl/user-defined-devices#external-limit-custom)
 
 ---
 

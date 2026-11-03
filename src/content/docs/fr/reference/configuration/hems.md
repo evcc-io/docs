@@ -3,7 +3,7 @@ title: "hems"
 description: "Configurez dans evcc.yaml les limites externes de consommation et d’export vers le réseau, p. ex. pour le § 14a EnWG ou le § 9 EEG, via relais, boîtier FNN ou EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 La section `hems` configure la commande externe de la puissance de consommation et d’export vers le réseau.
@@ -35,6 +35,7 @@ Définit le type de commande externe.
 - `relay` : raccordement via un contact de commutation
 - `fnn` : raccordement via un boîtier de commande FNN à plusieurs contacts de commutation
 - `eebus` : raccordement via le protocole EEBUS
+- `custom` : limites lues depuis des plugins, voir [appareils personnalisés](/fr/user-defined-devices#external-limit-custom)
 
 ---
 
