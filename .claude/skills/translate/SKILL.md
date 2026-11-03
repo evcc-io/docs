@@ -5,10 +5,15 @@ description: Translate docs, blog and website into a locale, or bring an existin
 
 # Translate a locale
 
-Usage: `/translate <lang|all> [--phase core|blog|site|blog+site|all] [--commit] [--worktree]`
+Usage: `/translate <lang|all> [--diff] [--phase core|blog|site|blog+site|all] [--commit] [--worktree]`
 
 The pipeline translates from English only (`src/content/docs/en`), reviews every batch with independent agents and verifies with `scripts/i18n/*`.
 Translated locales are never edited by hand; rerun this skill after English changes.
+
+Two modes:
+
+- **full** (default): every outdated or missing page is translated as a whole, reviewed by two or three agents, then per locale a glossary sweep, screenshots and a gate with build. For new locales, new pages and reworked pages.
+- **diff** (`--diff`): only the English change since each page's `translatedFrom` stamp is translated (`node scripts/i18n/endiff.mjs <lang> <path>` shows it), one reviewer checks the changed lines, every other line stays byte-identical (`node scripts/i18n/structure.mjs <lang> <path>` enforces the paragraph and line structure), no sweep, no screenshots, one gate with one build for all locales. For maintenance after editing a few sentences; roughly a quarter of the full run time. Pass `"mode": "diff"` in the workflow args (step 5).
 
 ## 1. Preconditions
 
