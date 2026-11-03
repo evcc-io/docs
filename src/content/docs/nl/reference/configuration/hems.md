@@ -1,6 +1,6 @@
 ---
 title: "hems"
-description: "Zo stelt u in evcc.yaml externe limieten voor verbruik en teruglevering in, bijv. voor § 14a EnWG of § 9 EEG, via een schakelcontact, een FNN-stuurbox of EEBUS."
+description: "Beschrijft hoe u in evcc.yaml externe limieten voor verbruik en teruglevering instelt, bijv. voor § 14a EnWG of § 9 EEG, via relais, FNN-stuurbox of EEBUS."
 sidebar:
   order: 8
 translatedFrom: "3c6cc27abcd0"
@@ -8,10 +8,10 @@ translatedFrom: "3c6cc27abcd0"
 
 De sectie `hems` configureert de externe aansturing van het verbruiks- en terugleveringsvermogen.
 Dit wordt bijv. gebruikt om aan de Duitse regelingen § 14a EnWG of § 9 EEG te voldoen.
-Achtergrond en details over de installatie vindt u op de pagina [Externe limiet](/nl/external-limit).
+Achtergrond en details over de installatie vindt u onder [Externe limiet](/nl/external-limit).
 
 :::note[Opmerking]
-Opwekbegrenzing grijpt rechtstreeks in op de begrensbare `pv`-meters en de [opwekbegrenzingsapparaten](/nl/reference/configuration/curtailers), het dimmen rechtstreeks op de aanstuurbare verbruikers.
+Opwekbegrenzing werkt direct op de begrensbare `pv`-meters en de [opwekbegrenzingsapparaten](/nl/reference/configuration/curtailers) en dimmen werkt direct op de aanstuurbare verbruikers.
 Voor geen van beide is een circuitconfiguratie nodig.
 Om de verbruikslimiet op laadpunten toe te passen, moeten circuits zijn ingesteld in [Load Balancing](/nl/features/loadmanagement).
 Een actieve limiet begrenst dan het hoofdcircuit.
@@ -35,7 +35,7 @@ Definieert het type externe aansturing.
 - `relay`: Aansluiting via schakelcontact
 - `fnn`: Aansluiting via FNN-stuurbox met meerdere schakelcontacten
 - `eebus`: Aansluiting via het EEBUS-protocol
-- `custom`: Limieten uit plugins, zie [gebruikersgedefinieerde apparaten](/nl/user-defined-devices#external-limit-custom)
+- `custom`: Limieten uitgelezen via plugins, zie [gebruikersgedefinieerde apparaten](/nl/user-defined-devices#external-limit-custom)
 
 ---
 
@@ -47,7 +47,7 @@ Het contact geeft aan of een vermogensbegrenzing actief is.
 ```yaml
 hems:
   type: relay
-  maxPower: 8400 # Totale vermogenslimiet wanneer het signaal actief is (in watt)
+  maxPower: 8400 # Total power limit when signal is active (in watts)
   limit:
     source: gpio
     function: read
@@ -74,25 +74,25 @@ Optionele [plugin](/nl/reference/plugins)-configuratie om het begrenzingssignaal
 Uitleesinterval voor het schakelcontact.
 Standaard: `10s`.
 
-Meer voorbeelden van verschillende aansluitingen (GPIO, MQTT, HTTP) vindt u op de pagina [gebruikersgedefinieerde apparaten](/nl/user-defined-devices#external-limit).
+Meer voorbeelden voor verschillende aansluitingen (GPIO, MQTT, HTTP) vindt u onder [gebruikergedefinieerde integraties](/nl/user-defined-devices#external-limit).
 
 ---
 
 ## `type: fnn`
 
 Aansluiting via een FNN-stuurbox met afzonderlijke schakelcontacten.
-Het dimmen van het verbruik (W4) en de begrenzing van de teruglevering (W3, S2, S1) worden via afzonderlijke contacten gesignaleerd.
+Het dimmen van het verbruik (W4) en de opwekbegrenzing van de teruglevering (W3, S2, S1) worden via afzonderlijke contacten gesignaleerd.
 
 ```yaml
 hems:
   type: fnn
-  maxDimPower: 4200 # Verbruikslimiet tijdens het dimmen (in watt)
-  maxCurtailPower: 10000 # Geïnstalleerd vermogen van de zonnepanelen, basis voor de begrenzingsstappen (in watt)
+  maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+  maxCurtailPower: 10000 # Installed PV power, base for curtailment steps (in watts)
   w4:
     source: gpio
     function: read
-    pin: 17 # GPIO-pin 17 uitlezen
-    # Retourwaarde: false = normaal, true = actief
+    pin: 17 # Read GPIO pin 17
+    # Return value: false = normal, true = active
   w3:
     source: gpio
     function: read
@@ -128,17 +128,17 @@ Wanneer het actief is, wordt het verbruik begrensd tot `maxDimPower`.
 
 #### `w3`
 
-[Plugin](/nl/reference/plugins)-configuratie voor het uitlezen van het begrenzingssignaal _0%_.
+[Plugin](/nl/reference/plugins)-configuratie voor het uitlezen van het begrenzingssignaal “0%”.
 Wanneer het actief is, wordt de teruglevering begrensd tot 0% van `maxCurtailPower`.
 
 #### `s2`
 
-[Plugin](/nl/reference/plugins)-configuratie voor het uitlezen van het begrenzingssignaal _30%_.
+[Plugin](/nl/reference/plugins)-configuratie voor het uitlezen van het begrenzingssignaal “30%”.
 Wanneer het actief is, wordt de teruglevering begrensd tot 30% van `maxCurtailPower`.
 
 #### `s1`
 
-[Plugin](/nl/reference/plugins)-configuratie voor het uitlezen van het begrenzingssignaal _60%_.
+[Plugin](/nl/reference/plugins)-configuratie voor het uitlezen van het begrenzingssignaal “60%”.
 Wanneer het actief is, wordt de teruglevering begrensd tot 60% van `maxCurtailPower`.
 
 #### `interval`
@@ -146,7 +146,7 @@ Wanneer het actief is, wordt de teruglevering begrensd tot 60% van `maxCurtailPo
 Uitleesinterval voor de schakelcontacten.
 Standaard: `10s`.
 
-Details over de installatie vindt u op de pagina [Externe limiet](/nl/external-limit).
+Details over de installatie vindt u onder [Externe limiet](/nl/external-limit).
 
 ---
 
@@ -158,7 +158,7 @@ De stuurbox geeft de vermogenslimiet automatisch door.
 ```yaml
 hems:
   type: eebus
-  ski: "1234-5678-90AB-CDEF" # SKI van de stuurbox
+  ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ```
 
 ### Parameters
@@ -187,4 +187,4 @@ Optionele [plugin](/nl/reference/plugins)-configuratie om het begrenzingssignaal
 Uitleesinterval.
 Standaard: `10s`.
 
-Details over de installatie en het koppelen vindt u op de pagina [Externe limiet](/nl/external-limit#eebus-pairing).
+Details over de installatie en het koppelen vindt u onder [Externe limiet](/nl/external-limit#eebus-pairing).

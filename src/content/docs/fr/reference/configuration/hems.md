@@ -6,12 +6,12 @@ sidebar:
 translatedFrom: "3c6cc27abcd0"
 ---
 
-La section `hems` configure la commande externe de la puissance consommée et de l’export vers le réseau.
+La section `hems` configure la commande externe de la puissance de consommation et d’export vers le réseau.
 Elle sert p. ex. à mettre en œuvre les réglementations allemandes du § 14a EnWG ou du § 9 EEG.
 Pour le contexte et les détails de mise en place, consultez [Limite externe](/fr/external-limit).
 
 :::note[Remarque]
-Le bridage agit directement sur les compteurs `pv` bridables et les [appareils de bridage](/fr/reference/configuration/curtailers), tandis que la réduction de puissance agit directement sur les appareils pilotables.
+Le bridage agit directement sur les compteurs `pv` bridables et les [appareils de bridage](/fr/reference/configuration/curtailers), tandis que la réduction de puissance agit directement sur les consommateurs pilotables.
 Ni l’un ni l’autre ne nécessite de configuration de circuit.
 Pour appliquer la limite de consommation aux points de charge, des circuits doivent être configurés dans la [gestion de la charge](/fr/features/loadmanagement).
 Une limite active plafonne alors le circuit racine.
@@ -42,12 +42,12 @@ Définit le type de commande externe.
 ## `type: relay`
 
 Raccordement via un contact de commutation (p. ex. boîtier de commande).
-Le contact signale si une réduction de puissance est active.
+Le contact signale si une limitation de puissance est active.
 
 ```yaml
 hems:
   type: relay
-  maxPower: 8400 # Limite de puissance totale lorsque le signal est actif (en watts)
+  maxPower: 8400 # Total power limit when signal is active (in watts)
   limit:
     source: gpio
     function: read
@@ -81,18 +81,18 @@ Pour d’autres exemples de raccordement (GPIO, MQTT, HTTP), consultez les [int�
 ## `type: fnn`
 
 Raccordement via un boîtier de commande FNN à contacts de commutation séparés.
-La réduction de puissance (W4) et le bridage de l’export vers le réseau (W3, S2, S1) sont signalés par des contacts distincts.
+La réduction de la consommation (W4) et le bridage de l’export vers le réseau (W3, S2, S1) sont signalés par des contacts distincts.
 
 ```yaml
 hems:
   type: fnn
-  maxDimPower: 4200 # Limite de consommation pendant la réduction de puissance (en watts)
-  maxCurtailPower: 10000 # Puissance solaire installée, base des paliers de bridage (en watts)
+  maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+  maxCurtailPower: 10000 # Installed PV power, base for curtailment steps (in watts)
   w4:
     source: gpio
     function: read
-    pin: 17 # Lire la broche GPIO 17
-    # Valeur de retour : false = normal, true = actif
+    pin: 17 # Read GPIO pin 17
+    # Return value: false = normal, true = active
   w3:
     source: gpio
     function: read
@@ -119,7 +119,7 @@ Obligatoire lorsque `w4` est configuré.
 #### `maxCurtailPower`
 
 Puissance solaire installée en watts.
-Elle sert de base au calcul des paliers de bridage (W3, S2, S1).
+Valeur de base des paliers de bridage (W3, S2, S1).
 
 #### `w4`
 
@@ -158,7 +158,7 @@ Le boîtier de commande transmet automatiquement la limite de puissance.
 ```yaml
 hems:
   type: eebus
-  ski: "1234-5678-90AB-CDEF" # SKI du boîtier de commande
+  ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ```
 
 ### Paramètres
@@ -173,9 +173,9 @@ Nécessaire pour l’appairage.
 Les paramètres facultatifs suivants peuvent être définis pour la communication EEBUS :
 
 - `contractualConsumptionNominalMax` : puissance de consommation maximale contractuelle (en watts)
-- `failsafeConsumptionActivePowerLimit` : limite de consommation appliquée en mode de sécurité (en watts)
-- `productionNominalMax` : puissance crête installée du générateur (en watts)
-- `failsafeProductionActivePowerLimit` : limite d’export vers le réseau appliquée en mode de sécurité (en watts)
+- `failsafeConsumptionActivePowerLimit` : limite de sécurité de la puissance de consommation (en watts)
+- `productionNominalMax` : puissance installée du générateur (Wc, en watts)
+- `failsafeProductionActivePowerLimit` : limite de sécurité de la puissance d’export vers le réseau (en watts)
 - `failsafeDurationMinimum` : durée minimale du mode de sécurité (p. ex. `2h`)
 
 #### `passthrough`

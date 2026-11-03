@@ -6,19 +6,19 @@ sidebar:
 translatedFrom: "3c6cc27abcd0"
 ---
 
-Sektionen `hems` konfigurerer ekstern styring af forbrugseffekten og eksporten til elnettet.
+Sektionen `hems` konfigurerer ekstern styring af effekten til forbrug og eksport til elnettet.
 Den bruges f.eks. til at opfylde de tyske regler i § 14a EnWG eller § 9 EEG.
 Baggrund og detaljer om opsætningen finder du under [Ekstern grænse](/da/external-limit).
 
 :::note[Bemærk]
-Effektbegrænsning virker direkte på de `pv`-målere, som kan begrænses, og på [enheder til effektbegrænsning](/da/reference/configuration/curtailers), mens dæmpning virker direkte på de styrbare forbrugsenheder.
-Ingen af delene kræver, at der er konfigureret kredsløb.
-For at anvende forbrugsgrænsen på ladepunkter, skal der være oprettet kredsløb under [Belastningsstyring](/da/features/loadmanagement).
+Effektbegrænsning virker direkte på de begrænsbare `pv`-målere og [enheder til effektbegrænsning](/da/reference/configuration/curtailers), dæmpning virker direkte på de styrbare forbrugsenheder.
+Ingen af delene kræver en konfiguration af kredsløb.
+For at anvende forbrugsgrænsen på ladepunkter skal der være oprettet kredsløb under [Belastningsstyring](/da/features/loadmanagement).
 En aktiv grænse begrænser så hovedkredsløbet.
 :::
 
 :::note[SMA Sunny Home Manager og SEMP-protokol]
-Integrationen med SMA Sunny Home Manager (SHM) er aktiv som standard og behøver ikke længere at blive konfigureret under `hems:`.
+Integrationen af SMA Sunny Home Manager (SHM) er aktiv som standard og behøver ikke længere at blive konfigureret under `hems:`.
 Detaljer og konfigurationsmuligheder finder du under **Opsætning → Sunny Home Manager**.
 :::
 
@@ -32,22 +32,22 @@ Angiver typen af ekstern styring.
 
 **Mulige værdier**:
 
-- `relay`: Tilslutning via koblingskontakt
-- `fnn`: Tilslutning via FNN-styreboks med flere koblingskontakter
+- `relay`: Tilslutning via relæ
+- `fnn`: Tilslutning via FNN-styreboks med flere relæer
 - `eebus`: Tilslutning via EEBUS-protokollen
-- `custom`: Grænser aflæst fra plugins, se [brugerdefinerede enheder](/da/user-defined-devices#external-limit-custom)
+- `custom`: Grænser læst fra plugins, se [brugerdefinerede enheder](/da/user-defined-devices#external-limit-custom)
 
 ---
 
 ## `type: relay`
 
-Tilslutning via en koblingskontakt (f.eks. styreboks).
+Tilslutning via et relæ (f.eks. styreboks).
 Kontakten signalerer, om en effektbegrænsning er aktiv.
 
 ```yaml
 hems:
   type: relay
-  maxPower: 8400 # Samlet effektgrænse, når signalet er aktivt (i watt)
+  maxPower: 8400 # Total power limit when signal is active (in watts)
   limit:
     source: gpio
     function: read
@@ -62,7 +62,7 @@ Samlet effektgrænse i watt, der anvendes, når signalet er aktivt.
 
 #### `limit`
 
-[Plugin](/da/reference/plugins)-konfiguration til aflæsning af koblingskontakten.
+[Plugin](/da/reference/plugins)-konfiguration til aflæsning af relæet.
 Forventet returværdi: `true`/`1` = begrænset, `false`/`0` = normal.
 
 #### `passthrough`
@@ -71,28 +71,28 @@ Valgfri [plugin](/da/reference/plugins)-konfiguration til at videregive begræns
 
 #### `interval`
 
-Aflæsningsinterval for koblingskontakten.
+Aflæsningsinterval for relæet.
 Standard: `10s`.
 
-Flere eksempler på forskellige tilslutninger (GPIO, MQTT, HTTP) finder du under [brugerdefinerede enheder](/da/user-defined-devices#external-limit).
+Flere eksempler på forskellige tilslutninger (GPIO, MQTT, HTTP) finder du under [brugerdefinerede integrationer](/da/user-defined-devices#external-limit).
 
 ---
 
 ## `type: fnn`
 
-Tilslutning via en FNN-styreboks med separate koblingskontakter.
-Dæmpning af forbruget (W4) og effektbegrænsning af eksport til elnettet (W3, S2, S1) signaleres via hver sin kontakt.
+Tilslutning via en FNN-styreboks med separate relæer.
+Dæmpning af forbruget (W4) og effektbegrænsning af eksport til elnettet (W3, S2, S1) signaleres via hver sit relæ.
 
 ```yaml
 hems:
   type: fnn
-  maxDimPower: 4200 # Forbrugsgrænse under dæmpning (i watt)
-  maxCurtailPower: 10000 # Installeret soleffekt, grundlag for begrænsningstrinene (i watt)
+  maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+  maxCurtailPower: 10000 # Installed PV power, base for curtailment steps (in watts)
   w4:
     source: gpio
     function: read
-    pin: 17 # Aflæs GPIO-pin 17
-    # Returværdi: false = normal, true = aktiv
+    pin: 17 # Read GPIO pin 17
+    # Return value: false = normal, true = active
   w3:
     source: gpio
     function: read
@@ -109,7 +109,7 @@ hems:
 
 ### Parametre
 
-Mindst ét af signalerne `w4` og `w3` skal være konfigureret.
+Mindst ét af signalerne `w4` eller `w3` skal være konfigureret.
 
 #### `maxDimPower`
 
@@ -119,7 +119,7 @@ Påkrævet, når `w4` er konfigureret.
 #### `maxCurtailPower`
 
 Installeret soleffekt i watt.
-Grundlag for begrænsningstrinene (W3, S2, S1).
+Grundværdi for trinene i effektbegrænsningen (W3, S2, S1).
 
 #### `w4`
 
@@ -143,7 +143,7 @@ Når det er aktivt, begrænses eksporten til elnettet til 60 % af `maxCurtailPow
 
 #### `interval`
 
-Aflæsningsinterval for koblingskontakterne.
+Aflæsningsinterval for relæerne.
 Standard: `10s`.
 
 Detaljer om opsætningen finder du under [Ekstern grænse](/da/external-limit).
@@ -158,7 +158,7 @@ Styreboksen overfører effektgrænsen automatisk.
 ```yaml
 hems:
   type: eebus
-  ski: "1234-5678-90AB-CDEF" # Styreboksens SKI
+  ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ```
 
 ### Parametre
@@ -170,13 +170,13 @@ Påkrævet til parring.
 
 #### Avancerede grænser
 
-Følgende valgfrie parametre kan indstilles for EEBUS-kommunikationen:
+Følgende valgfrie parametre kan indstilles til EEBUS-kommunikationen:
 
 - `contractualConsumptionNominalMax`: Kontraktlig maksimal forbrugseffekt (i watt)
 - `failsafeConsumptionActivePowerLimit`: Failsafe-grænse for forbrugseffekten (i watt)
 - `productionNominalMax`: Installeret generatoreffekt (Wp, i watt)
 - `failsafeProductionActivePowerLimit`: Failsafe-grænse for eksporteffekten til elnettet (i watt)
-- `failsafeDurationMinimum`: Mindste failsafe-varighed (f.eks. `2h`)
+- `failsafeDurationMinimum`: Minimal failsafe-varighed (f.eks. `2h`)
 
 #### `passthrough`
 
