@@ -315,6 +315,40 @@ evcc cache get
 evcc cache clear
 ```
 
+### How do I delete wrong values from the history? \{#delete-history\}
+
+If a forecast or tariff provider delivers implausible values, e.g. prices or power values that are off by orders of magnitude, they end up in the recorded history and distort the charts.
+You can delete the affected time range via the REST API.
+Deleting requires an API key, which you create under **Configuration → General → Security**.
+Make a backup first: deleted values can't be restored, the time range shows up as a gap afterwards.
+
+Energy values are selected by time range and optionally narrowed down by `group`, `name` or `title`.
+The history query accepts the same parameters, so you can check beforehand what will be deleted.
+
+```bash
+# preview the stored values
+curl "http://evcc.local:7070/api/history/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
+
+# delete them
+curl -X DELETE -H "Authorization: Bearer evcc_..." \
+  "http://evcc.local:7070/api/db/metrics/energy?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&group=forecast"
+```
+
+Tariff values are deleted for the whole time range or, with `usage`, only for a single value type (`grid`, `feedin`, `co2` or `temperature`).
+
+```bash
+# preview the stored tariff values
+curl "http://evcc.local:7070/api/history/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z"
+
+# delete only the CO₂ values in that range
+curl -X DELETE -H "Authorization: Bearer evcc_..." \
+  "http://evcc.local:7070/api/db/metrics/tariffs?from=2026-07-01T00:00:00Z&to=2026-07-02T00:00:00Z&usage=co2"
+```
+
+`from` is inclusive and `to` exclusive, both in RFC 3339 format.
+The response reports the number of deleted entries.
+All parameters are listed in the [REST API reference](/integrations/rest-api).
+
 ## Solar Forecast
 
 You can use various [solar forecasts](/en/tariffs#solar) in evcc to see the estimated remaining production for the current day and the upcoming days.
