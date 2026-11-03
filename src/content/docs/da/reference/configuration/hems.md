@@ -3,7 +3,7 @@ title: "hems"
 description: "Sådan konfigurerer du eksterne grænser for forbrug og eksport til elnettet i evcc.yaml, f.eks. for § 14a EnWG eller § 9 EEG, via relæ, FNN-styreboks eller EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 Sektionen `hems` konfigurerer ekstern styring af effekten til forbrug og eksport til elnettet.
@@ -35,6 +35,7 @@ Angiver typen af ekstern styring.
 - `relay`: Tilslutning via relæ
 - `fnn`: Tilslutning via FNN-styreboks med flere relæer
 - `eebus`: Tilslutning via EEBUS-protokollen
+- `custom`: Grænser læst fra plugins, se [brugerdefinerede enheder](/da/user-defined-devices#external-limit-custom)
 
 ---
 

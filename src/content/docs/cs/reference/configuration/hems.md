@@ -3,7 +3,7 @@ title: "hems"
 description: "Popisuje, jak v evcc.yaml nastavit externí limity pro spotřebu a export do sítě, např. pro § 14a EnWG nebo § 9 EEG, přes relé, řídicí jednotku FNN nebo EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 Sekce `hems` konfiguruje externí řízení výkonu spotřeby a exportu do sítě.
@@ -35,6 +35,7 @@ Určuje typ externího řízení.
 - `relay`: Připojení přes spínací kontakt
 - `fnn`: Připojení přes řídicí jednotku FNN s několika spínacími kontakty
 - `eebus`: Připojení přes protokol EEBUS
+- `custom`: Limity načítané z pluginů, viz [zařízení definovaná uživatelem](/cs/user-defined-devices#external-limit-custom)
 
 ---
 

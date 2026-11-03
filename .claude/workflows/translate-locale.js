@@ -24,15 +24,21 @@ export const meta = {
 };
 
 // args: { phase: 'core'|'blog'|'site'|'blog+site'|'all', commit: boolean, scratch: '/abs/dir',
+//         mode: 'full'|'diff', screenshots: boolean, sweep: boolean,
 //         locales: [{ lang, name, docs, site, batches: [{ id, tier, kind, files, words }] }] }
+// mode 'diff' (maintenance after small English edits): each page gets only the English change since its
+// translatedFrom stamp translated, one reviewer on the changed lines, no sweep, no screenshots, one gate.
 const {
   locales,
   phase = "all",
   commit = false,
   scratch,
   enStat = "",
-  screenshots = true,
+  mode = "full",
+  screenshots = mode === "full",
+  sweep: sweepOn = mode === "full",
 } = args;
+const DIFF = mode === "diff";
 const MODEL = "claude-opus-5-5";
 const SEV = ["critical", "major", "minor", "nit"];
 const KINDS = (phase === "all" ? "core+blog+site" : phase)
@@ -189,7 +195,7 @@ const SHOTS = {
 // ---------- prompt templates ----------
 const P = {};
 
-P.docsCommon = `Locale: {{LANG}} ({{LANG_NAME}}). Docs worktree: {{WT}} (git branch i18n/{{LANG}}). Work only inside this worktree; run every command from its root.
+P.docsCommon = `Locale: {{LANG}} ({{LANG_NAME}}). Docs worktree: {{WT}} (whatever branch it is on). Work only inside this worktree; run every command from its root.
 Binding references (read them first, in this order): {{RULES}} (what to keep, what to translate, what never to do), {{STYLE}} (form of address, typography, numbers), {{TERMS}} (glossary per concept and the exact UI strings).
 Never touch anything under src/content/docs/en or under any locale other than {{LANG}}, never edit files outside your batch, never run npm run build or npm run format, never commit, stage or create branches. Return only JSON per the schema (StructuredOutput); never print file contents.`;
 
@@ -210,6 +216,24 @@ For each file:
 UI strings: a bold UI element or an "A → B" path uses the exact UI translation from the terms file. If it is missing there, run: node scripts/i18n/terms.mjs {{LANG}} "<English string>". If it is not a UI string at all, translate naturally and list it under uiTermsMissing.
 When the glossary and the UI string disagree, the UI string wins inside bold UI references and the glossary wins in running prose. Record real doubts in glossaryDoubts; do not stall on them.`;
 
+P.translateDiff = `You update the {{LANG_NAME}} translation of evcc documentation after a change to the English source. You translate only what changed.
+{{DOCS_COMMON}}
+
+Batch {{BATCH_ID}} ({{KIND}}), paths relative to src/content/docs/en/:
+{{FILES}}
+
+For each file:
+- Run: node scripts/i18n/endiff.mjs {{LANG}} <path>
+  It prints the unified diff from the English version the current translation was made from to the current English. If it exits with 2 (no usable stamp), translate the whole page as a full translation would and say so in notes.
+- Open src/content/docs/{{LANG}}/<path> and apply exactly the changes the diff shows, at the corresponding positions: translate added lines and insert them, adjust the lines whose English changed, delete the lines whose English was deleted, update title or description only if they changed. Every other line stays byte-identical, even where you would phrase it differently.
+- The changed lines follow the same rules as a full translation (RULES.md, style sheet, terms file): one sentence per line mirroring the English line structure, glossary terms, exact UI strings from the terms file, locale prefix on internal links, code structure identical with localised comments and example values.
+- Then run: node scripts/i18n/check-page.mjs {{LANG}} <path> --stamp (fix until it exits 0), node scripts/i18n/structure.mjs {{LANG}} <path> (must exit 0), and npx prettier --write on the file.
+- Finally check with git diff -- src/content/docs/{{LANG}}/<path> that only the stamp and the changed region differ; revert anything else with a minimal edit.
+UI strings: a bold UI element or an "A → B" path uses the exact UI translation from the terms file. If it is missing there, run: node scripts/i18n/terms.mjs {{LANG}} "<English string>". If it is not a UI string at all, translate naturally and list it under uiTermsMissing. Record real doubts in glossaryDoubts; do not stall on them.`;
+
+P.diffNote = `Scope: this is an incremental update, the rest of the page was reviewed before. Run node scripts/i18n/endiff.mjs {{LANG}} <path> for the English change and git diff -- src/content/docs/{{LANG}}/<path> for the translated change. Review only the changed and added lines (and title or description if they changed) against their English counterparts. Also report, as type "addition", any translated line that changed although its English did not.
+`;
+
 P.translateChrome = `You translate the UI chrome strings of the evcc documentation site from English into {{LANG_NAME}}.
 {{DOCS_COMMON}}
 
@@ -228,7 +252,7 @@ P.reviewA = `You are an independent reviewer of a {{LANG_NAME}} translation of e
 Batch {{BATCH_ID}} ({{KIND}}). For each path below compare the source src/content/docs/en/<path> with the target src/content/docs/{{LANG}}/<path> (for the chrome batch: src/content/i18n/en.json vs src/content/i18n/{{LANG}}.json, key by key):
 {{FILES}}
 
-Method: both files have one sentence per line, so walk them line by line. For every sentence check: nothing missing, nothing added, same meaning and the same conditions and negations, numbers and units identical in value and formatted per the style sheet, the glossary term used for each concept (inflection is fine), bold UI strings equal to the terms file, correct form of address, anchors and internal links unchanged except the locale prefix, external links and assets localised only as RULES.md allows, evcc lowercase. Check title and description (90 to 170 characters, one natural sentence, same content as the English). Ignore whitespace and prettier formatting. Do not report style preferences as errors.
+{{DIFF_NOTE}}Method: both files have one sentence per line, so walk them line by line. For every sentence check: nothing missing, nothing added, same meaning and the same conditions and negations, numbers and units identical in value and formatted per the style sheet, the glossary term used for each concept (inflection is fine), bold UI strings equal to the terms file, correct form of address, anchors and internal links unchanged except the locale prefix, external links and assets localised only as RULES.md allows, evcc lowercase. Check title and description (90 to 170 characters, one natural sentence, same content as the English). Ignore whitespace and prettier formatting. Do not report style preferences as errors.
 Severity: critical = wrong or missing instruction, changed meaning, wrong number; major = wrong glossary or UI term, wrong register, broken markup or link; minor = correct but clumsy, typography; nit = taste.
 {{ADVERSARIAL}}
 Verdict: pass (no critical, at most two major), fix (otherwise), retranslate (a file is unusable: missing sections, wrong language, machine-like throughout).
@@ -282,6 +306,19 @@ Execute every item in order and record a verdict with a one-line detail for each
 9. If COMMIT is true and items 1 to 5 pass: git add src/content/docs/{{LANG}} src/content/i18n/{{LANG}}.json src/assets scripts/i18n/terms && git commit -q -m "{{MESSAGE}}" (no trailer, no footer, no co-author line). Then git status --porcelain must be empty and you report the short commit sha. If a gate failed, do not commit; report what failed.
 10. Write the report to {{SCRATCH}}/i18n-report-{{LANG}}-{{PHASE}}.md: branch, commit sha, pages in scope, a per-batch table (findings by severity, applied, rejected, retranslated, unresolved), sweep summary, each gate verdict, unresolved items. Return its path.`;
 
+P.gateDiff = `You run the quality gate for an incremental translation update of the evcc documentation (only the English change since each page's translatedFrom stamp was translated).
+Docs worktree: {{WT}}. Locales: {{LANGS}}. Pages, relative to src/content/docs/en/:
+{{FILES}}
+Run every command from the worktree root. You may run npm run build and npm run format:check. Never edit translations, never commit, never restore or check out files. Return only JSON per the schema (StructuredOutput). Summary of the batches (JSON): {{SUMMARY}}
+
+Execute every item in order and record a verdict with a one-line detail for each:
+1. For every locale: node scripts/i18n/status.mjs <lang> --json --check → none of the listed pages may be missing or outdated and there must be no check failures.
+2. For every locale and page: node scripts/i18n/structure.mjs <lang> <path> exits 0.
+3. git status --porcelain: only src/content/docs/<lang>/<page> for the listed locales and pages should be modified; list every other modified or untracked path (do not touch it).
+4. npm run build exits 0 (the links validator runs inside it), once for all locales.
+5. npm run format:check exits 0.
+6. Write the report to {{SCRATCH}}/i18n-report-diff.md (per locale: pages, findings by severity, applied, rejected, unresolved; each gate verdict) and return its path. committed is "".`;
+
 P.shots = `You generate the {{LANG_NAME}} UI screenshots for the evcc documentation.
 Docs worktree: {{WT}}. Work only in {{WT}}/screenshot-generator and never edit any file there or elsewhere. Return only JSON per the schema.
 The generator runs Playwright against a local evcc on port 7099 (the evcc binary and node_modules are present in the worktree). Run the recipes one spec file at a time so each command finishes within ten minutes:
@@ -329,6 +366,7 @@ const vars = (L, b, extra = {}) => {
     COMMIT: String(commit),
     EN_STAT: enStat,
     ADVERSARIAL: "",
+    DIFF_NOTE: "",
     ...extra,
   };
   base.DOCS_COMMON = fill(P.docsCommon, base);
@@ -392,7 +430,12 @@ if (KINDS.includes("docs") && screenshots)
 
 async function runBatch(L, b, attempt = 1) {
   const lbl = `${L.lang} ${b.id}`;
-  const tpl = b.kind === "chrome" ? P.translateChrome : P.translateDocs;
+  const tpl =
+    b.kind === "chrome"
+      ? P.translateChrome
+      : DIFF
+        ? P.translateDiff
+        : P.translateDocs;
   const t = await call(tpl, vars(L, b), {
     label: `${lbl} translate${attempt > 1 ? " #2" : ""}`,
     phase: "Translate",
@@ -405,21 +448,27 @@ async function runBatch(L, b, attempt = 1) {
   }
   const reviewers = [
     () =>
-      call(P.reviewA, vars(L, b), {
-        label: `${lbl} review A`,
-        phase: "Translate",
-        schema: REVIEW,
-        effort: "high",
-      }),
-    () =>
+      call(
+        P.reviewA,
+        vars(L, b, DIFF ? { DIFF_NOTE: fill(P.diffNote, vars(L, b)) } : {}),
+        {
+          label: `${lbl} review A`,
+          phase: "Translate",
+          schema: REVIEW,
+          effort: "high",
+        },
+      ),
+  ];
+  if (!DIFF)
+    reviewers.push(() =>
       call(P.reviewB, vars(L, b), {
         label: `${lbl} review B`,
         phase: "Translate",
         schema: REVIEW,
         effort: "high",
       }),
-  ];
-  if (b.tier === "core1")
+    );
+  if (b.tier === "core1" && !DIFF)
     reviewers.push(() =>
       call(
         P.reviewA,
@@ -478,7 +527,7 @@ async function runBatch(L, b, attempt = 1) {
     R[L.lang].unresolved.push(`${b.id}: check-page failing`);
   if (wantsRedo)
     R[L.lang].unresolved.push(`${b.id}: retranslate requested twice`);
-  if (reviews.length < 2)
+  if (reviews.length < (DIFF ? 1 : 2))
     R[L.lang].unresolved.push(
       `${b.id}: only ${reviews.length} reviewer result(s)`,
     );
@@ -523,12 +572,14 @@ async function finalize(L) {
       : phase === "core"
         ? "core docs and chrome"
         : "everything";
-  const sweep = await call(P.sweep, vars(L, null, { SCOPE: scope }), {
-    label: `${L.lang} sweep`,
-    phase: "Finalize",
-    schema: SWEEP,
-    effort: "medium",
-  });
+  const sweep = sweepOn
+    ? await call(P.sweep, vars(L, null, { SCOPE: scope }), {
+        label: `${L.lang} sweep`,
+        phase: "Finalize",
+        schema: SWEEP,
+        effort: "medium",
+      })
+    : null;
   R[L.lang].sweep = sweep;
   R[L.lang].screenshots = shots[L.lang] ? await shots[L.lang] : null;
   const summary = JSON.stringify({
@@ -560,6 +611,24 @@ async function finalize(L) {
   );
 }
 
+// diff mode: one gate for all locales (they share the worktree), no sweep, no commit
+async function gateDiff() {
+  const files = [...new Set(items.map((i) => i.b.files).flat())];
+  const gate = await call(
+    P.gateDiff,
+    vars(locales[0], null, {
+      LANGS: locales.map((L) => L.lang).join(" "),
+      FILES: files.map((f) => `- ${f}`).join("\n"),
+      SUMMARY: JSON.stringify(
+        Object.fromEntries(locales.map((L) => [L.lang, R[L.lang]])),
+      ),
+    }),
+    { label: "gate (diff)", phase: "Finalize", schema: GATE, effort: "medium" },
+  );
+  for (const L of locales) R[L.lang].gate = gate;
+  log(`diff gate: build=${gate?.build} format=${gate?.formatCheck}`);
+}
+
 await pipeline(items, async ({ L, b }) => {
   if (b.kind === "site") {
     R[L.lang].site = await runSite(L, b);
@@ -567,7 +636,8 @@ await pipeline(items, async ({ L, b }) => {
   }
   const rec = await runBatch(L, b);
   if (rec) R[L.lang].batches[b.id] = rec;
-  if (--remaining[L.lang] === 0) await buildLock(() => finalize(L)); // locale done → serialised finalize, no global barrier
+  if (--remaining[L.lang] === 0 && !DIFF) await buildLock(() => finalize(L)); // locale done → serialised finalize, no global barrier
 });
+if (DIFF) await gateDiff();
 if (!docsWork) await Promise.all(Object.values(shots));
-return { phase, commit, locales: R };
+return { phase, commit, mode, locales: R };

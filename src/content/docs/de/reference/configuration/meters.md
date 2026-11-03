@@ -1,12 +1,12 @@
 ---
 title: "meters"
-description: "Beschreibt, wie du Zähler für Netz, PV-Anlage, Hausbatterie und Verbraucher in der evcc.yaml definierst, welche Vorzeichenkonvention gilt und welche Zählertypen es gibt."
+description: "Hier steht, wie du Zähler für Netz, PV-Anlage, Hausbatterie und Verbraucher in der evcc.yaml definierst, welche Vorzeichen gelten und welche Zählertypen es gibt."
 sidebar:
   order: 5
-translatedFrom: "731e5e09d04f"
+translatedFrom: "469542e8d8c5"
 ---
 
-Unter _meters_ (Zähler) steht eine Liste von Geräten im Haus, die Leistung und Energieverbrauch, PV-Erzeugung oder die Nutzung der Hausbatterie messen können. Ein `meter` definiert einen Messpunkt für Energie und kann ein physisches Gerät sein (z. B. ein Zähler am Netzanschlusspunkt), ein PV-Wechselrichter (AC oder bei Hybridwechselrichtern auch DC) oder ein Batteriewechselrichter.
+Unter _meters_ (Zähler) steht eine Liste von Geräten im Haus, die Leistung und Energie messen können, etwa für den Verbrauch, die PV-Erzeugung oder die Hausbatterie. Ein `meter` definiert einen Messpunkt für Energie und kann ein physisches Gerät sein (z. B. ein Zähler am Netzanschlusspunkt), ein PV-Wechselrichter (AC oder bei Hybridwechselrichtern auch DC) oder ein Batteriewechselrichter.
 
 Wallboxen können einen eingebauten Zähler haben, oder der Zähler wird extern angeschlossen. Hat eine Wallbox einen internen Zähler, muss dafür in `meters` kein Eintrag angelegt werden. Hat die Wallbox keinen solchen Zähler, verwendet evcc den hier definierten Zähler, den du der Wallbox in der Ladepunkt-Konfiguration unter [`meter`](/de/reference/configuration/loadpoints#meter) zuweist. Ohne Zähler nimmt evcc an, dass die eingestellte Ladeleistung auch tatsächlich genutzt wird.
 
@@ -46,7 +46,7 @@ Im Folgenden werden die verschiedenen Parameter erklärt.
 
 ### `name`
 
-Eine Kurzbezeichnung des Zählers. Der Wert wird verwendet, um das Gerät in der Konfiguration des [Standorts](/de/reference/configuration/site) oder des [Ladepunkts](/de/reference/configuration/loadpoints#meter) zu referenzieren.
+Eine Kurzbezeichnung des Zählers. Über diesen Wert wird in der Konfiguration des [Standorts](/de/reference/configuration/site) oder des [Ladepunkts](/de/reference/configuration/loadpoints#meter) auf das Gerät verwiesen.
 
 **Beispiel**:
 
@@ -58,7 +58,7 @@ name: wallbox1
 
 ### `type`
 
-Dies ist der evcc-spezifische Zählertyp, über den die Kommunikation mit dem Gerät läuft. Den passenden Typ für bekannte Geräte findest du unter [Geräte – Hausinstallation](/de/meters).
+Der evcc-spezifische Zählertyp, über den die Kommunikation mit dem Gerät läuft. Den passenden Typ für bekannte Geräte findest du unter [Geräte – Hausinstallation](/de/meters).
 
 **Beispiel**:
 
@@ -72,7 +72,7 @@ Im Folgenden sind die verschiedenen möglichen Typen und ihre weiteren Parameter
 
 :::note[Hinweis]
 Die zusätzlichen Zählerfelder `title` und `icon` werden in der `evcc.yaml` aus technischen Gründen nicht unterstützt.
-Titel und Icons (je nach Anwendungsfall) können nur für Zähler definiert werden, die über die Oberfläche angelegt wurden.
+Titel und Icons (je nach Verwendung) können nur für Zähler definiert werden, die über die Konfigurationsoberfläche angelegt wurden.
 :::
 
 ## Unterstützte Typen
@@ -116,7 +116,7 @@ Geräte, die über die Modbus-Schnittstelle angebunden sind und vom Projekt [MBM
 
 #### Erforderliche Parameter
 
-Zusätzlich zu den hier definierten Parametern sind weitere Parameter notwendig. Diese sind in der [Modbus](/de/reference/modbus)-Dokumentation aufgeführt.
+Zusätzlich zu den hier beschriebenen Parametern sind weitere Parameter notwendig. Diese sind in der [Modbus](/de/reference/modbus)-Dokumentation aufgeführt.
 
 ##### `power`
 
@@ -201,7 +201,7 @@ uri: https://192.0.2.2/
 
 ##### `password`
 
-Hier muss die Registriernummer des LG-ESS-Home-Wechselrichters eingetragen werden.
+Hier muss die Registriernummer des Wechselrichters LG ESS HOME eingetragen werden.
 
 **Beispiel**:
 
@@ -213,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Verwendet die Messwerte einer OpenWB-Wallbox.
+Verwendet die Messwerte einer openWB-Wallbox.
 
 **Beispiel**:
 
@@ -239,7 +239,7 @@ Definiert, welche Messwerte hier benötigt werden.
 
 ##### `broker`
 
-Definiert den Hostnamen oder die IP-Adresse und den Port der OpenWB im Heimnetzwerk.
+Definiert den Hostnamen oder die IP-Adresse und den Port der openWB im Heimnetzwerk.
 
 **Beispiel**:
 
@@ -251,7 +251,7 @@ broker: 192.0.2.2:1883
 
 ### `sma`
 
-Für die Verwendung des SMA Home Manager 2.0, des SMA Energy Meters oder eines SMA-Wechselrichters. Die Geräte müssen das Speedwire-Protokoll unterstützen.
+Für die Verwendung des SMA Home Managers 2.0, des SMA Energy Meters oder eines SMA-Wechselrichters. Die Geräte müssen das Speedwire-Protokoll unterstützen.
 
 **Beispiel**:
 
@@ -466,7 +466,19 @@ Plugin-Definition, die den Ladestand der Batterie in Prozent (%) liefert.
 
 #### `capacity`
 
-Gibt die Batteriekapazität an. Das ist nur bei mehreren Batterien sinnvoll und dient dazu, den Gesamtladestand zu ermitteln.
+Batteriekapazität in kWh.
+Sie dient dazu, den Gesamtladestand mehrerer Batterien zu ermitteln, und wird vom [Optimizer](/de/features/optimizer) genutzt, um das Laden der Batterie zu planen.
+Statt eines festen Werts kann jedes [Float-Plugin](/de/reference/plugins) die Kapazität aus dem Gerät auslesen.
+Der Wert wird einmal nach dem Start ausgelesen und danach beibehalten.
+Bis zum ersten erfolgreichen Auslesen gilt die Kapazität als unbekannt.
+
+**Beispiel**:
+
+```yaml
+  capacity: # aus dem Gerät gelesen statt fester Wert
+    source: modbus
+    ...
+```
 
 ---
 

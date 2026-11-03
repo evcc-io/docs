@@ -1,12 +1,12 @@
 ---
 title: "meters"
-description: "V evcc.yaml definujete měřiče pro síť, solár, domácí baterii a spotřebiče podle jednotné znaménkové konvence a zvolíte vhodný typ měřiče."
+description: "Jak v evcc.yaml definovat měřiče pro síť, solár, domácí baterii a spotřebiče, jaká znaménková konvence platí a které typy měřičů jsou k dispozici."
 sidebar:
   order: 5
-translatedFrom: "731e5e09d04f"
+translatedFrom: "469542e8d8c5"
 ---
 
-_Měřiče_ (elektroměry) jsou zařízení v domě, která dokážou měřit výkon a spotřebu energie, výrobu ze soláru nebo využití domácí baterie. `meter` definuje bod měření energie a může jít o fyzické zařízení (např. měřič v předávacím místě sítě), solární střídač (AC, nebo u hybridních střídačů DC) nebo bateriový střídač.
+_Měřiče_ (elektroměry) jsou seznam zařízení v domě, která dokážou měřit výkon a spotřebu energie, výrobu ze soláru nebo využití domácí baterie. `meter` definuje bod měření energie. Může jít o fyzické zařízení (např. měřič v předávacím místě sítě), solární střídač (AC, nebo u hybridních střídačů DC) nebo bateriový střídač.
 
 Nabíječky mohou mít integrovaný měřič, nebo může být měřič připojen externě. Pokud má nabíječka vlastní měřič, není pro ni potřeba vytvářet záznam v `meters`. Pokud nabíječka takový měřič nemá, použije evcc měřič nakonfigurovaný zde a přiřazený nabíječce v konfiguraci nabíjecího bodu pod [`meter`](/cs/reference/configuration/loadpoints#meter), nebo předpokládá, že se nastavený nabíjecí výkon skutečně odebírá.
 
@@ -58,7 +58,7 @@ name: charger1
 
 ### `type`
 
-Typ, přes který evcc s měřičem komunikuje. Vhodný typ pro známá zařízení najdete v části [Zařízení – domácí instalace](/cs/meters).
+Jde o typ měřiče specifický pro evcc, který umožňuje komunikaci se zařízením. Vhodný typ pro známá zařízení najdete v části [Zařízení – domácí instalace](/cs/meters).
 
 **Příklad**:
 
@@ -66,22 +66,22 @@ Typ, přes který evcc s měřičem komunikuje. Vhodný typ pro známá zaříz
 type: modbus
 ```
 
-Jednotlivé možné typy a jejich další parametry jsou popsány níže:
+Jednotlivé možné typy a jejich další parametry jsou popsány níže.
 
 ---
 
 :::note[Poznámka]
 Další pole měřiče `title` a `icon` nejsou v souboru `evcc.yaml` z technických důvodů podporována.
-Názvy a ikony (podle způsobu použití) lze definovat pouze pro měřiče vytvořené v konfiguračním rozhraní.
+Názvy a ikony (podle využití měřiče) lze definovat pouze pro měřiče vytvořené v konfiguračním rozhraní.
 :::
 
 ## Podporované typy
 
 ### `movingaverage`
 
-Tento typ měřiče dokáže vyhladit kolísající naměřené hodnoty. Lze ho použít pro všechna využití měřiče (`usage`). Parametr `decay` udává, kolik procent nové hodnoty se započítá do výpočtu.
+Tento typ měřiče dokáže vyhladit kolísající naměřené hodnoty. Lze ho použít pro jakékoli využití měřiče (`usage`). Parametr `decay` udává, kolik procent nové hodnoty se započítá do výpočtu.
 
-**Příklad**
+**Příklad**:
 
 ```yaml
 meters:
@@ -96,7 +96,7 @@ meters:
     ...
 ```
 
-V tomto příkladu se započítá 10 % nové hodnoty. Po 10 cyklech se nejstarší hodnota z výpočtu odstraní. Jak dlouho to trvá, závisí na `interval`.
+V tomto příkladu se započítá 10 % nové hodnoty. Po 10 cyklech se nejstarší hodnota z výpočtu odstraní. Jak dlouho to trvá, závisí na parametru `interval`.
 
 ---
 
@@ -120,7 +120,7 @@ Kromě zde definovaných parametrů jsou nutné další parametry. Jsou uvedeny 
 
 ##### `power`
 
-Definuje naměřenou hodnotu MBMD pro výkon, obvykle `Power`.
+Určuje veličinu MBMD pro výkon, obvykle `Power`.
 
 **Příklad**:
 
@@ -132,7 +132,7 @@ power: Power
 
 ##### `energy`
 
-Definuje naměřenou hodnotu MBMD pro energii, obvykle `Sum`.
+Určuje veličinu MBMD pro energii, obvykle `Sum`.
 
 **Příklad**:
 
@@ -146,7 +146,7 @@ energy: Sum
 
 ##### `soc`
 
-Definuje naměřenou hodnotu MBMD pro stav nabití baterie, obvykle `ChargeState`.
+Určuje veličinu MBMD pro stav nabití baterie, obvykle `ChargeState`.
 
 **Příklad**:
 
@@ -170,14 +170,14 @@ password: "DE200..."
 ```
 
 :::note
-Parametry `uri` a `password` jsou u zařízení `meter` nutné pouze tehdy, je-li nakonfigurováno více zařízení.
+Parametry `uri` a `password` jsou u měřiče (`meter`) nutné pouze tehdy, je-li nakonfigurováno více zařízení.
 :::
 
 #### Povinné parametry
 
 ##### `usage`
 
-Definuje, která měření jsou zde potřeba.
+Určuje, jaké hodnoty má měřič poskytovat (využití měřiče).
 
 **Možné hodnoty**:
 
@@ -201,7 +201,7 @@ uri: https://192.0.2.2/
 
 ##### `password`
 
-Sem je potřeba zadat registrační číslo střídače LG ESS HOME.
+Sem je potřeba zadat registrační číslo střídače LG ESS Home.
 
 **Příklad**:
 
@@ -213,7 +213,7 @@ password: "DE200..."
 
 ### `openwb`
 
-Použití měření z nabíječky OpenWB
+Použije měření z nabíječky OpenWB.
 
 **Příklad**:
 
@@ -227,7 +227,7 @@ broker: 192.0.2.2
 
 ##### `usage`
 
-Definuje, která měření jsou zde potřeba.
+Určuje, jaké hodnoty má měřič poskytovat (využití měřiče).
 
 **Možné hodnoty**:
 
@@ -251,7 +251,7 @@ broker: 192.0.2.2:1883
 
 ### `sma`
 
-Pro použití SMA Home Manageru 2.0, SMA Energy Meteru nebo střídače SMA. Zařízení musí podporovat protokol Speedwire.
+Tento typ slouží pro SMA Home Manager 2.0, SMA Energy Meter nebo střídače SMA. Zařízení musí podporovat protokol Speedwire.
 
 **Příklad**:
 
@@ -306,7 +306,7 @@ interface: eth0
 
 ### `tesla`
 
-_`tesla`_: Pro měření ze zařízení Tesla Powerwall.
+_`tesla`_: použití měření ze zařízení Tesla Powerwall.
 
 **Příklad**:
 
@@ -323,7 +323,7 @@ password: "***"
 
 ##### `usage`
 
-Definuje, která měření jsou zde potřeba.
+Určuje, jaké hodnoty má měřič poskytovat (využití měřiče).
 
 **Možné hodnoty**:
 
@@ -466,7 +466,19 @@ Definice pluginu, který vrací stav nabití baterie v procentech (%).
 
 #### `capacity`
 
-Údaj o kapacitě baterie. Má smysl pouze při více bateriích. Slouží k určení celkového stavu nabití.
+Kapacita baterie v kWh.
+Slouží k určení celkového stavu nabití více baterií a [optimalizátor](/cs/features/optimizer) ji využívá k plánování nabíjení baterie.
+Místo pevné hodnoty může kapacitu ze zařízení načíst libovolný [plugin, který vrací desetinné číslo](/cs/reference/plugins).
+Hodnota se z pluginu načte jednou po spuštění a pak se už nemění.
+Do prvního úspěšného načtení se kapacita považuje za neznámou.
+
+**Příklad**:
+
+```yaml
+  capacity: # načtení ze zařízení místo pevné hodnoty
+    source: modbus
+    ...
+```
 
 ---
 

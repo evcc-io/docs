@@ -3,7 +3,7 @@ title: "hems"
 description: "Configura in evcc.yaml i limiti esterni per consumo e immissione in rete, ad es. per § 14a EnWG o § 9 EEG, tramite relè, centralina di controllo FNN o EEBUS."
 sidebar:
   order: 8
-translatedFrom: "426c429c285d"
+translatedFrom: "3c6cc27abcd0"
 ---
 
 La sezione `hems` configura il controllo esterno della potenza di consumo e di immissione in rete.
@@ -35,6 +35,7 @@ Definisce il tipo di controllo esterno.
 - `relay`: collegamento tramite contatto di commutazione
 - `fnn`: collegamento tramite centralina di controllo FNN con più contatti di commutazione
 - `eebus`: collegamento tramite il protocollo EEBUS
+- `custom`: limiti letti da plugin, vedi [dispositivi definiti dall’utente](/it/user-defined-devices#external-limit-custom)
 
 ---
 
