@@ -1,19 +1,19 @@
 ---
 title: "meters"
-description: "Zo definieert u in evcc.yaml meters voor net, zonne-energie, thuisbatterij en verbruikers, met de tekenconventie en de beschikbare metertypes."
+description: "Zo definieert u in evcc.yaml meters voor net, zonne-energie, thuisbatterij en verbruikers, en welke tekenconventie en metertypes daarbij gelden."
 sidebar:
   order: 5
-translatedFrom: "731e5e09d04f"
+translatedFrom: "469542e8d8c5"
 ---
 
 De lijst _meters_ (meetapparaten) bevat de apparaten in huis die vermogen en energieverbruik, de productie van zonne-energie of het gebruik van de thuisbatterij kunnen meten. Een `meter` definieert een meetpunt voor energie en kan een fysiek apparaat zijn (bijv. een meter op het netaansluitpunt), een omvormer van het zonnepanelensysteem (AC of DC bij hybride omvormers) of een batterijomvormer.
 
-Laders kunnen een ingebouwde meter hebben of een extern aangesloten meter gebruiken. Als een lader een ingebouwde meter heeft, hoeft daarvoor geen vermelding in `meters` te worden aangemaakt. Heeft de lader geen eigen meter, dan gebruikt evcc de meter die hier is geconfigureerd en in de configuratie van het laadpunt onder [`meter`](/nl/reference/configuration/loadpoints#meter) aan de lader is toegewezen. Is die er ook niet, dan gaat evcc ervan uit dat het ingestelde laadvermogen daadwerkelijk wordt gebruikt.
+Laders kunnen een ingebouwde meter hebben of een extern aangesloten meter gebruiken. Als een lader een ingebouwde meter heeft, hoeft daarvoor geen item in `meters` te worden aangemaakt. Heeft de lader geen eigen meter, dan gebruikt evcc de meter die hier is geconfigureerd en in de configuratie van het laadpunt onder [`meter`](/nl/reference/configuration/loadpoints#meter) aan de lader is toegewezen, of gaat evcc ervan uit dat het ingestelde laadvermogen daadwerkelijk wordt gebruikt.
 
 evcc gebruikt een consistente tekenconventie voor vermogens- en stroomwaarden (`power`, `powers`, `currents`):
 
 - **Positief (+)** voor inkomende energie: netafname, productie van zonne-energie, batterijontlading
-- **Negatief (-)** voor uitgaande energie: teruglevering, stand-byverbruik van de omvormer van het zonnepanelensysteem, laden van de thuisbatterij
+- **Negatief (-)** voor uitgaande energie: teruglevering, stand-byverbruik van de omvormer van het zonnepanelensysteem, batterijlading
 - **Verbruikers** (lader, aux-meters) zijn altijd **positief (+)**
 
 Als het apparaat waarden met het omgekeerde teken levert, kan dit in de [pluginconfiguratie](/nl/reference/plugins) worden gecorrigeerd met `scale: -1`.
@@ -58,7 +58,7 @@ name: charger1
 
 ### `type`
 
-Dit is het evcc-specifieke metertype waarmee met het apparaat wordt gecommuniceerd. Het passende type voor bekende apparaten vindt u onder [Apparaten - Huisinstallatie](/nl/meters).
+Dit is het evcc-specifieke metertype waarmee evcc met het apparaat communiceert. Het passende type voor bekende apparaten vindt u onder [Apparaten - Huisinstallatie](/nl/meters).
 
 **Voorbeeld**:
 
@@ -251,7 +251,7 @@ broker: 192.0.2.2:1883
 
 ### `sma`
 
-Voor het gebruik van de SMA Home Manager 2.0, de SMA Energy Meter of een SMA-omvormer. De apparaten moeten het Speedwire-protocol ondersteunen.
+Voor de SMA Home Manager 2.0, de SMA Energy Meter of een SMA-omvormer. De apparaten moeten het Speedwire-protocol ondersteunen.
 
 **Voorbeeld**:
 
@@ -306,7 +306,7 @@ interface: eth0
 
 ### `tesla`
 
-_`tesla`_: voor het gebruik van metingen van een Tesla Powerwall.
+_`tesla`_: gebruikt de metingen van een Tesla Powerwall.
 
 **Voorbeeld**:
 
@@ -359,7 +359,7 @@ password: "ThePassword"
 
 ### `custom`
 
-Standaardimplementatie waarbij de afzonderlijke waarden via [plugins](/nl/user-defined-devices#meter) worden gedefinieerd.
+Generieke implementatie waarbij de afzonderlijke waarden via [plugins](/nl/user-defined-devices#meter) worden gedefinieerd.
 
 **Voorbeeld**:
 
@@ -466,7 +466,19 @@ Plugindefinitie die het laadniveau van de batterij in procent (%) levert.
 
 #### `capacity`
 
-De capaciteit van de batterij. Dit is alleen zinvol als er meerdere batterijen zijn. De waarde wordt dan gebruikt om het totale laadniveau te berekenen.
+Batterijcapaciteit in kWh.
+Hiermee wordt het totale laadniveau van meerdere batterijen bepaald, en de [optimizer](/nl/features/optimizer) gebruikt de waarde om het laden van de batterij te plannen.
+In plaats van een vaste waarde kan elke [float-plugin](/nl/reference/plugins) de capaciteit uit het apparaat uitlezen.
+De capaciteit wordt na het starten één keer via de plugin uitgelezen en blijft daarna behouden.
+Tot de eerste geslaagde uitlezing geldt de capaciteit als onbekend.
+
+**Voorbeeld**:
+
+```yaml
+  capacity: # uitlezen uit het apparaat in plaats van een vaste waarde
+    source: modbus
+    ...
+```
 
 ---
 

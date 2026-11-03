@@ -3,17 +3,17 @@ title: "meters"
 description: "Definisci in evcc.yaml i contatori per rete, impianto fotovoltaico, batteria domestica e consumatori, e scopri la convenzione dei segni e i tipi di contatore disponibili."
 sidebar:
   order: 5
-translatedFrom: "731e5e09d04f"
+translatedFrom: "469542e8d8c5"
 ---
 
-I _contatori_ (dispositivi di misura della corrente) sono un elenco di dispositivi della casa che possono misurare potenza e consumo di energia, produzione solare o utilizzo della batteria domestica. Un `meter` definisce un punto di misurazione dell’energia e può essere un dispositivo fisico (ad es. un contatore al punto di connessione alla rete), un inverter solare (AC o, nel caso di inverter ibridi, DC) o un inverter per batterie.
+I _contatori_ (strumenti di misura) sono i dispositivi della casa che possono misurare potenza e consumo di energia, produzione solare o utilizzo della batteria domestica. Un `meter` definisce un punto di misurazione dell’energia e può essere un dispositivo fisico (ad es. un contatore al punto di connessione alla rete), un inverter solare (AC o, nel caso di inverter ibridi, DC) o un inverter per batterie.
 
 I caricabatterie possono avere un contatore integrato oppure un contatore collegato esternamente. Se un caricabatterie ha un contatore integrato, non serve creare una voce in `meters`. Se il caricabatterie non ha un contatore di questo tipo, evcc usa il contatore configurato qui e assegnato al caricabatterie in [`meter`](/it/reference/configuration/loadpoints#meter) nella configurazione del punto di ricarica, oppure presume che la potenza di ricarica impostata venga effettivamente usata.
 
 evcc usa una convenzione dei segni coerente per i valori di potenza e corrente (`power`, `powers`, `currents`):
 
 - **Positivo (+)** per l’energia in entrata: prelievo dalla rete, produzione solare, scarica della batteria domestica
-- **Negativo (-)** per l’energia in uscita: immissione in rete, consumo in standby dell’inverter solare, carica della batteria domestica
+- **Negativo (−)** per l’energia in uscita: immissione in rete, consumo in standby dell’inverter solare, carica della batteria domestica
 - I **consumatori** (caricabatterie, contatori aux) sono sempre **positivi (+)**
 
 Se il dispositivo restituisce valori con il segno opposto, lo si può correggere nella [configurazione del plugin](/it/reference/plugins) con `scale: -1`.
@@ -116,7 +116,7 @@ Dispositivi collegati tramite l’interfaccia Modbus e supportati dal progetto [
 
 #### Parametri obbligatori
 
-Oltre ai parametri definiti qui, servono altri parametri. Sono elencati nella documentazione [Modbus](/it/reference/modbus).
+Oltre a quelli descritti qui servono altri parametri. Sono elencati nella documentazione [Modbus](/it/reference/modbus).
 
 ##### `power`
 
@@ -201,7 +201,7 @@ uri: https://192.0.2.2/
 
 ##### `password`
 
-Qui va inserito il numero di registrazione dell’inverter LG ESS HOME.
+Qui va inserito il numero di registrazione dell’inverter LG ESS Home.
 
 **Ad esempio**:
 
@@ -306,7 +306,7 @@ interface: eth0
 
 ### `tesla`
 
-_`tesla`_: Per usare le misurazioni di una Tesla Powerwall.
+_`tesla`_: per usare le misurazioni di una Tesla Powerwall.
 
 **Ad esempio**:
 
@@ -359,7 +359,7 @@ password: "ThePassword"
 
 ### `custom`
 
-Implementazione standard, in cui i singoli valori vengono definiti tramite [plugin](/it/user-defined-devices#meter).
+Implementazione generica in cui i singoli valori vengono definiti tramite [plugin](/it/user-defined-devices#meter).
 
 **Ad esempio**:
 
@@ -379,25 +379,25 @@ Implementazione standard, in cui i singoli valori vengono definiti tramite [plug
     ...
   capacity: # Capacità della batteria, opzionale (kWh)
   currents: # Corrente (A) per fase
-    - source: # Tipo di plugin fase 1
+    - source: # Tipo di plugin per la fase 1
       ...
-    - source: # Tipo di plugin fase 2
+    - source: # Tipo di plugin per la fase 2
       ...
-    - source: # Tipo di plugin fase 3
+    - source: # Tipo di plugin per la fase 3
       ...
   powers: # Potenza (W) per fase
-    - source: # Tipo di plugin fase 1
+    - source: # Tipo di plugin per la fase 1
       ...
-    - source: # Tipo di plugin fase 2
+    - source: # Tipo di plugin per la fase 2
       ...
-    - source: # Tipo di plugin fase 3
+    - source: # Tipo di plugin per la fase 3
       ...
   voltages: # Tensione (V) per fase
-    - source: # Tipo di plugin fase 1
+    - source: # Tipo di plugin per la fase 1
       ...
-    - source: # Tipo di plugin fase 2
+    - source: # Tipo di plugin per la fase 2
       ...
-    - source: # Tipo di plugin fase 3
+    - source: # Tipo di plugin per la fase 3
       ...
   ...
 ```
@@ -466,7 +466,19 @@ Definizione del plugin che restituisce il livello di carica della batteria in pe
 
 #### `capacity`
 
-Indicazione della capacità della batteria. Utile solo se sono presenti più batterie. Serve a determinare il livello di carica complessivo.
+Capacità della batteria in kWh.
+Serve a determinare il livello di carica complessivo di più batterie e permette all’[ottimizzatore](/it/features/optimizer) di pianificare la carica della batteria.
+Al posto di un valore fisso puoi usare un qualsiasi [plugin float](/it/reference/plugins) che legga la capacità dal dispositivo.
+Il plugin viene letto una volta dopo l’avvio e da quel momento il valore resta invariato.
+Fino alla prima lettura riuscita, la capacità è considerata sconosciuta.
+
+**Ad esempio**:
+
+```yaml
+  capacity: # letta dal dispositivo invece di un valore fisso
+    source: modbus
+    ...
+```
 
 ---
 
@@ -478,11 +490,11 @@ Un elenco di definizioni di plugin che restituiscono la corrente in ampere (A) p
 
 ```yaml
   currents: # Corrente (A) per fase
-    - source: # Tipo di plugin fase 1
+    - source: # Tipo di plugin per la fase 1
       ...
-    - source: # Tipo di plugin fase 2
+    - source: # Tipo di plugin per la fase 2
       ...
-    - source: # Tipo di plugin fase 3
+    - source: # Tipo di plugin per la fase 3
       ...
   ...
 ```
@@ -497,11 +509,11 @@ Un elenco di definizioni di plugin che restituiscono la potenza in watt (W) per 
 
 ```yaml
   powers: # Potenza (W) per fase
-    - source: # Tipo di plugin fase 1
+    - source: # Tipo di plugin per la fase 1
       ...
-    - source: # Tipo di plugin fase 2
+    - source: # Tipo di plugin per la fase 2
       ...
-    - source: # Tipo di plugin fase 3
+    - source: # Tipo di plugin per la fase 3
       ...
   ...
 ```
@@ -516,11 +528,11 @@ Un elenco di definizioni di plugin che restituiscono la tensione in volt (V) per
 
 ```yaml
   voltages: # Tensione (V) per fase
-    - source: # Tipo di plugin fase 1
+    - source: # Tipo di plugin per la fase 1
       ...
-    - source: # Tipo di plugin fase 2
+    - source: # Tipo di plugin per la fase 2
       ...
-    - source: # Tipo di plugin fase 3
+    - source: # Tipo di plugin per la fase 3
       ...
   ...
 ```

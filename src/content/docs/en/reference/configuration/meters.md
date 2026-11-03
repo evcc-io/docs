@@ -465,7 +465,19 @@ Plugin definition to return battery charge level in percentage (%).
 
 #### `capacity`
 
-Indication of battery capacity. Only useful when multiple batteries are present. Used to determine the overall charge level.
+Battery capacity in kWh.
+Used to determine the overall charge level of several batteries and by the [optimizer](/en/features/optimizer) to plan battery charging.
+Instead of a fixed value, any [float plugin](/en/reference/plugins) can read the capacity from the device.
+The plugin is read once after start and the value is kept from then on.
+Until the first successful read, the capacity counts as unknown.
+
+**For example**:
+
+```yaml
+  capacity: # read from the device instead of a fixed value
+    source: modbus
+    ...
+```
 
 ---
 
