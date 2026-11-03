@@ -1,16 +1,16 @@
 ---
 title: Benutzerdefinierte Geräte
-description: "Zeigt, wie du Wallboxen, Zähler, Fahrzeuge oder Heizungen ohne eingebaute Vorlage einbindest und Messwerte und Steuerung selbst per HTTP, MQTT oder Modbus definierst."
+description: "Wallboxen, Zähler, Fahrzeuge oder Heizungen ohne eingebaute Vorlage bindest du ein, indem du Messwerte und Steuerbefehle selbst per HTTP, MQTT oder Modbus definierst."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3be6e303b568"
+translatedFrom: "88dfca4fdde4"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-Beim Anlegen einer Wallbox, eines Heizgeräts, eines Netzzählers, einer Hausbatterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes kannst du in der Geräteliste den Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
+Beim Anlegen einer Wallbox, einer Heizung, eines Netzzählers, einer Hausbatterie, einer PV-Anlage, eines weiteren Verbrauchers, eines Fahrzeugs, eines Tarifs, eines Einspeisebegrenzers oder eines Benachrichtigungsdienstes kannst du in der Auswahl der Gerätetypen den Eintrag **Benutzerdefiniertes Gerät** wählen und eine eigene Logik auf Basis des [Plugin-Systems](/de/reference/plugins) beschreiben.
 
-So lassen sich auch Geräte einbinden, für die es keine eingebaute Vorlage gibt, z. B. indem du die aktuelle Leistung über einen HTTP-Endpunkt liest oder einen Zielstrom per Modbus schreibst.
+So lassen sich auch Geräte einbinden, für die es keine eingebaute Vorlage gibt, z. B. indem du die aktuelle Leistung über einen HTTP-Endpunkt liest oder einen Ladestrom per Modbus vorgibst.
 
 ## Ein Gerät definieren
 
@@ -35,7 +35,7 @@ meters:
       topic: home/current/imsys/chn2/raw
 ```
 
-Alle weiteren Beispiele auf dieser Seite verwenden die flache Attributblock-Form, wie du sie in der Oberfläche eingibst.
+Alle weiteren Beispiele auf dieser Seite zeigen nur den Attributblock, so wie du ihn in der Oberfläche eingibst.
 
 Die Liste der verfügbaren Plugin-Quellen (`http`, `mqtt`, `modbus`, …) und Hilfsfunktionen (`calc`, `map`, `watchdog`, …) steht in der [Plugin-Referenz](/de/reference/plugins).
 
@@ -45,7 +45,7 @@ Jedes benutzerdefinierte Gerät besteht aus drei Arten von Feldern:
 
 - **Leseattribute**: Plugins, die evcc regelmäßig abfragt, um einen Wert zu erhalten (z. B. `power`, `soc`, `status`).
 - **Schreibattribute**: Plugins, die evcc aufruft, um einen Wert zu setzen oder eine Aktion auszulösen (z. B. `enable`, `maxcurrent`, `wakeup`). Der zu schreibende Wert steht im Plugin zur Verfügung.
-- **Features**: `features`-Liste, die abweichendes Verhalten freischaltet. Verfügbare Flags hängen vom Gerätetyp ab.
+- **Features**: Eine `features`-Liste schaltet abweichendes Verhalten frei. Welche Features verfügbar sind, hängt vom Gerätetyp ab.
 
 Allgemeine Form:
 
@@ -73,7 +73,7 @@ features:
   - integrateddevice
 ```
 
-Welche Attributnamen und Feature-Flags verfügbar sind, hängt vom Gerätetyp ab und steht in den nachfolgenden Abschnitten.
+Welche Attributnamen und Features verfügbar sind, hängt vom Gerätetyp ab und steht in den nachfolgenden Abschnitten.
 
 ## Zähler \{#meter\}
 
@@ -91,9 +91,9 @@ Zähler unter `meters:` können in `site` referenziert werden:
 `power` ist das einzig erforderliche Attribut.
 Nicht alle Zählerrollen unterstützen alle Attribute:
 
-- `limitsoc` und `batterymode` werden ausschließlich für Batteriezähler genutzt (referenziert in `site.battery`).
+- `limitsoc` und `batterymode` werden ausschließlich für Hausbatteriezähler genutzt (referenziert in `site.battery`).
 - `curtail` und `curtailed` werden gemeinsam für `pv`-Zähler verwendet, die eine Abregelung der Einspeisung unterstützen (§ 9 EEG).
-- `currents`, `voltages` und `powers` sind Phasen-Attribute, die genau drei Plugin-Konfigurationen (als YAML-Array) erwarten und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
+- `currents`, `voltages` und `powers` sind Phasenattribute, die genau drei Plugin-Konfigurationen (als YAML-Array) erwarten und für Netzzähler (`grid`) und Wallboxen (`charge`) verwendet werden können.
 
 Plugins müssen den richtigen Datentyp zurückliefern.
 Zur Konvertierung dienen die [Lese-Pipelines](/de/reference/plugins#reading).
@@ -136,11 +136,11 @@ Echte Zählerstände liefern genauere Langzeitstatistiken.
 
 ### Schreibattribute \{#meter-write-attributes\}
 
-| Attribut      | Typ   | Erforderlich | Kontext   | Beschreibung                                                                                                                                                        |
-| ------------- | ----- | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `limitsoc`    | `int` | nein         | `battery` | Setzt das Ladeziel der Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.           |
-| `curtail`     | `int` | nein         | `pv`      | Setzt das Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
-| `batterymode` | `int` | nein         | `battery` | Setzt den Steuerungsmodus der Batterie direkt. Die Modi sind unten aufgeführt.                                                                                      |
+| Attribut      | Typ   | Erforderlich | Kontext   | Beschreibung                                                                                                                                                       |
+| ------------- | ----- | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `limitsoc`    | `int` | nein         | `battery` | Setzt das Ladeziel der Batterie in %. Das Ladeziel wird aus den konfigurierten `MinSoc`, `MaxSoc` und dem aktuellen Ladestand (Attribut `soc`) berechnet.          |
+| `curtail`     | `int` | nein         | `pv`      | Setzt das Einspeiselimit in % der installierten PV-Leistung (0 bis 100, `100` = kein Limit). Nur zusammen mit `curtailed`. Siehe [Einspeisebegrenzer](#curtailer). |
+| `batterymode` | `int` | nein         | `battery` | Setzt den Steuerungsmodus der Batterie direkt. Die Modi sind unten aufgeführt.                                                                                     |
 
 #### Batteriemodi \{#battery-modes\}
 
@@ -156,10 +156,11 @@ Es werden nur die Batteriemodi genutzt, die das Gerät unterstützt.
 Ist `batterymode` ein [`switch`](/de/reference/plugins#switch), werden die unterstützten Modi aus dessen `case`-Werten übernommen.
 Das funktioniert auch, wenn der Switch in einem [`watchdog`](/de/reference/plugins#watchdog) steckt.
 Für alle anderen Plugins müssen die unterstützten Modi in `batterymodes` angegeben werden, z. B. `batterymodes: ["normal", "hold", "charge"]`.
+[`evcc meter verifybatterymodes`](/de/reference/cli/evcc_meter_verifybatterymodes) schaltet die konfigurierten Modi an der echten Batterie nacheinander durch und zeigt, ob die Batterieleistung wie erwartet reagiert.
 
 ### Beispiele
 
-Lies die aktuelle Netzleistung über einen HTTP-Endpunkt.
+Dieses Beispiel liest die aktuelle Netzleistung über einen HTTP-Endpunkt.
 
 ```yaml
 meters:
@@ -171,8 +172,8 @@ meters:
       jq: .data.tuples[0][1]
 ```
 
-Lies Leistung und Ladestand einer Hausbatterie und setze ihren Modus über HTTP.
-Der `switch` deckt die Modi normal, hold und charge ab, evcc bietet also genau diese drei an.
+Dieses Beispiel liest Leistung und Ladestand einer Hausbatterie und setzt ihren Modus über HTTP.
+Der `switch` deckt die Modi normal, hold und charge ab, daher bietet evcc genau diese drei an.
 
 ```yaml
 meters:
@@ -211,7 +212,7 @@ meters:
 ## Wallbox \{#charger\}
 
 Der Standardtyp `type: custom` deckt Wallboxen mit stufenloser Stromregelung ab.
-Für andere Geräte stehen spezialisierte Wallbox-Typen unter [schaltbare Steckdosen](#charger-switchsocket) und [Wärmepumpen](#charger-heating) bereit.
+Für [schaltbare Steckdosen](#charger-switchsocket) und [Wärmepumpen](#charger-heating) gibt es spezialisierte Wallbox-Typen.
 
 ### Leseattribute
 
@@ -278,12 +279,12 @@ features:
   - integrateddevice
   - heating
   - continuous
-  - switchdevice # optional, wenn keine Stromregelung vorhanden (SG Ready)
+  - switchdevice # optional, wenn keine Stromregelung vorhanden ist (SG Ready)
 ```
 
 ### Beispiele
 
-Frage den Ladestatus einer Wallbox per Modbus ab.
+Dieses Beispiel fragt den Ladestatus einer Wallbox per Modbus ab.
 
 ```yaml
 features:
@@ -299,7 +300,7 @@ enabled:
     decode: uint16
 ```
 
-Schalte eine Tasmota-Steckdose per MQTT-Nachricht.
+Dieses Beispiel schaltet eine Tasmota-Steckdose per MQTT-Nachricht.
 
 ```yaml
 enable:
@@ -313,7 +314,7 @@ enable:
 
 **`type: switchsocket`**
 
-Für schaltbare Steckdosen und vergleichbare Relais-Geräte, die nur ein-/ausgeschaltet werden können, ohne stufenlose Stromregelung.
+Dieser Typ ist für schaltbare Steckdosen und vergleichbare Relaisgeräte gedacht, die sich nur ein- und ausschalten lassen und keine stufenlose Stromregelung bieten.
 Der Ladestatus wird aus der aktuellen Leistung abgeleitet (eine Leistung oberhalb von `standbypower` gilt als Laden).
 Die vollständige Einrichtung ist unter [Schaltbare Steckdosen](/de/smartswitches) beschrieben.
 
@@ -336,8 +337,8 @@ Die vollständige Einrichtung ist unter [Wärmepumpen, Heizstäbe](/de/heating) 
 
 **`type: heatpump`**
 
-Für wechselrichtergesteuerte Wärmepumpen, die einen kontinuierlichen Leistungs-Sollwert per Modbus, HTTP o. Ä. annehmen.
-Die Ziel-Heizleistung wird direkt über `setmaxpower` geschrieben.
+Für drehzahlgeregelte Wärmepumpen (Inverter-Wärmepumpen), die einen kontinuierlichen Leistungssollwert per Modbus, HTTP o. Ä. annehmen.
+Die gewünschte Heizleistung wird direkt über `setmaxpower` geschrieben.
 
 | Attribut      | Typ     | Erforderlich | Beschreibung                         |
 | ------------- | ------- | ------------ | ------------------------------------ |
@@ -413,23 +414,23 @@ Fahrzeugparameter können ebenfalls über Plugins ausgelesen werden.
 
 ### Konfiguration
 
-| Attribut   | Typ      | Erforderlich | Beschreibung                   |
-| ---------- | -------- | ------------ | ------------------------------ |
-| `title`    | `string` | nein         | Anzeigename des Fahrzeugs      |
-| `capacity` | `float`  | nein         | Batteriekapazität in kWh       |
-| `icon`     | `string` | nein         | Icon in der Benutzeroberfläche |
+| Attribut   | Typ      | Erforderlich | Beschreibung              |
+| ---------- | -------- | ------------ | ------------------------- |
+| `title`    | `string` | nein         | Anzeigename des Fahrzeugs |
+| `capacity` | `float`  | nein         | Batteriekapazität in kWh  |
+| `icon`     | `string` | nein         | Icon in der Oberfläche    |
 
 ### Features \{#vehicle-features\}
 
-| Feature         | Beschreibung                                                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `coarsecurrent` | Fahrzeug akzeptiert den Ladestrom nur in ganzen 1-A-Schritten. Die Regelung wird auf grobe 1-A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
-| `streaming`     | Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). Ladestand-Updates außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.     |
-| `welcomecharge` | Fahrzeug erwartet beim Anschließen eine aktive Wallbox, um die Verbindung als funktionierend zu erkennen. Andernfalls meldet das Fahrzeug einen Fehler.       |
+| Feature         | Beschreibung                                                                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coarsecurrent` | Das Fahrzeug akzeptiert den Ladestrom nur in ganzen 1-A-Schritten. Die Regelung wird auf grobe 1-A-Stufen beschränkt, auch wenn die Wallbox feiner regeln könnte. |
+| `streaming`     | Das Fahrzeug liefert Daten per Push statt per Polling (z. B. BMW Cardata). Ladestandsmeldungen außerhalb aktiver Ladevorgänge werden als zuverlässig behandelt.   |
+| `welcomecharge` | Das Fahrzeug erwartet beim Anschließen eine aktive Wallbox, um die Verbindung als funktionierend zu erkennen. Andernfalls meldet das Fahrzeug einen Fehler.       |
 
 ### Beispiele
 
-Lies die aktuelle Reichweite aus MQTT-Nachrichten.
+Dieses Beispiel liest die aktuelle Reichweite aus MQTT-Nachrichten.
 
 ```yaml
 title: Grüner Mazda # Anzeigename (optional)
@@ -441,7 +442,7 @@ range:
   topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
 ```
 
-Wecke das Fahrzeug per HTTP-Ping auf, bevor weitere Abfragen folgen.
+Dieses Beispiel weckt das Fahrzeug per HTTP-Ping auf, bevor weitere Abfragen folgen.
 
 ```yaml
 wakeup:
@@ -461,7 +462,7 @@ onIdentify:
   mode: smart
 ```
 
-Verfügbare Modi sind: `off`, `smart`, `now`.
+Verfügbare Modi sind `off`, `smart` und `now`.
 Die veralteten Werte `pv` und `minpv` werden weiterhin akzeptiert und aktivieren `smart` mit ausgeschaltetem bzw. eingeschaltetem [Dauerhaft laden](/de/features/modes#always-charge).
 
 ## Tarif und Vorhersage \{#tariff\}
@@ -499,7 +500,7 @@ Genau eines der Attribute `price` oder `forecast` muss konfiguriert sein.
 
 ### Beispiele
 
-**Aktueller Preis via HTTP**:
+**Aktueller Preis per HTTP**:
 
 ```yaml
 price:
@@ -507,7 +508,7 @@ price:
   uri: https://example.com/api/price
 ```
 
-**Vorhersage via HTTP**:
+**Vorhersage per HTTP**:
 
 ```yaml
 forecast:
@@ -559,7 +560,7 @@ tax: 0.19
 formula: math.Min(0.5, (price + charges) * (1 + tax))
 ```
 
-Deckelt das Ergebnis bei 50 ct/kWh.
+Die Formel deckelt das Ergebnis bei 50 ct/kWh.
 
 **Keine Einspeisevergütung bei negativen Börsenpreisen** (deutsche PV-Anlagen, Inbetriebnahme nach dem 25. Februar 2025):
 
@@ -567,7 +568,7 @@ Deckelt das Ergebnis bei 50 ct/kWh.
 formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 ```
 
-Zahlt eine feste Einspeisevergütung von 7 ct/kWh, außer wenn der Börsenstrompreis negativ ist.
+Diese Formel ergibt eine feste Einspeisevergütung von 7 ct/kWh, außer wenn der Börsenstrompreis negativ ist.
 
 ## Externe Begrenzung \{#external-limit\}
 
@@ -642,7 +643,7 @@ limit:
 </TabItem>
 <TabItem label="Modbus">
 
-Wenn die Steuerbox oder ein Gateway das Leistungslimit via Modbus bereitstellt:
+Wenn die Steuerbox oder ein Gateway das Leistungslimit per Modbus bereitstellt:
 
 ```yaml
 type: relay
@@ -650,7 +651,7 @@ maxPower: 4200 # Beispiel für 1 SteuVE
 limit:
   source: modbus
   uri: 192.168.179.200:4703 # Beispiel: Relais am 2. S0-Zähler einer cFos Power Brain solar Wallbox
-  id: 3 # Modbus Slave-ID
+  id: 3 # Modbus-Slave-ID
   timeout: 5s
   register:
     type: holding
@@ -714,7 +715,7 @@ Steuerbox und evcc müssen einmalig [gekoppelt](/de/external-limit#eebus-pairing
 | `ski`                                 | `string`   | ja           | SKI (Subject Key Identifier) der Steuerbox.                 |
 | `contractualConsumptionNominalMax`    | `int` (W)  | nein         | Vertragliche maximale Bezugsleistung.                       |
 | `failsafeConsumptionActivePowerLimit` | `int` (W)  | nein         | Failsafe-Limit für die Bezugsleistung.                      |
-| `productionNominalMax`                | `int` (W)  | nein         | Installierte Generatorleistung (Wp).                        |
+| `productionNominalMax`                | `int` (W)  | nein         | Installierte PV-Leistung (Wp).                              |
 | `failsafeProductionActivePowerLimit`  | `int` (W)  | nein         | Failsafe-Limit für die Einspeiseleistung.                   |
 | `failsafeDurationMinimum`             | `duration` | nein         | Failsafe-Mindestdauer, z. B. `2h`.                          |
 | `passthrough`                         | Plugin     | nein         | Leitet das Begrenzungssignal an ein externes System weiter. |
@@ -734,7 +735,7 @@ Mindestens eines der Attribute `maxConsumptionPower` oder `curtailedPercent` mus
 | ---------------------- | ---------- | ------------ | ----------------------------------------------------------------------------------------------------- |
 | `maxConsumptionPower`  | Plugin     | nein¹        | Liest das Gesamtleistungslimit in W. `0` = kein Limit.                                                |
 | `curtailedPercent`     | Plugin     | nein¹        | Liest die erlaubte Einspeisung in % von `productionNominalMax` (0 bis 100). `100` = keine Abregelung. |
-| `productionNominalMax` | `int` (W)  | nein²        | Installierte Generatorleistung (Wp).                                                                  |
+| `productionNominalMax` | `int` (W)  | nein²        | Installierte PV-Leistung (Wp).                                                                        |
 | `interval`             | `duration` | nein         | Abfrageintervall für die Plugins. Standard `10s`.                                                     |
 
 ¹ mindestens eines von beiden ist erforderlich, ² erforderlich, wenn `curtailedPercent` konfiguriert ist.
@@ -748,23 +749,23 @@ maxConsumptionPower:
 curtailedPercent:
   source: mqtt
   topic: hems/curtail/percent # Erlaubte Einspeisung in Prozent, 100 = keine Abregelung
-productionNominalMax: 10000 # Installierte Generatorleistung (Wp)
+productionNominalMax: 10000 # Installierte PV-Leistung (Wp)
 ```
 
 ## Einspeisebegrenzer \{#curtailer\}
 
 Ein benutzerdefinierter Einspeisebegrenzer begrenzt die Einspeisung der PV-Anlage auf Anforderung des Netzbetreibers (§ 9 EEG), wenn der Wechselrichter nicht über seine [Zähler](#meter)-Konfiguration abgeregelt werden kann.
-Wähle dazu in der Oberfläche unter **Konfiguration → Netzanschluss → Einspeisebegrenzung hinzufügen** die Option **Benutzerdefiniertes Gerät**.
+Wähle dazu in der Oberfläche unter **Konfiguration → Netz → Einspeisebegrenzung hinzufügen** die Option **Benutzerdefiniertes Gerät**.
 Siehe auch die [`curtailers`-Konfigurationsreferenz](/de/reference/configuration/curtailers) und [Externe Begrenzung](/de/external-limit#curtailment-devices).
 
-Das Gerät erhält die erlaubte Einspeisung in Prozent der installierten Generatorleistung und muss sie am Wechselrichter umsetzen.
+Das Gerät erhält die erlaubte Einspeisung in Prozent der installierten PV-Leistung und muss sie am Wechselrichter umsetzen.
 `100` bedeutet kein Limit.
 
 ### Attribute
 
 | Attribut    | Typ    | Erforderlich | Beschreibung                                                                                                                                                |
 | ----------- | ------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `curtail`   | Plugin | ja           | Setzt das Einspeiselimit in % der Nennleistung der Erzeugung (0 bis 100). Muss Schreibzugriff unterstützen.                                                 |
+| `curtail`   | Plugin | ja           | Setzt das Einspeiselimit in % der installierten PV-Leistung (0 bis 100). Muss Schreibzugriff unterstützen.                                                  |
 | `curtailed` | Plugin | ja           | Liest das aktuelle Einspeiselimit in %. Kann das Gerät es nicht liefern, wird das [`error`](/de/reference/plugins#error)-Plugin verwendet (siehe Beispiel). |
 
 ### Beispiele
@@ -821,7 +822,7 @@ Die Nachricht wird dem Plugin im Parameter `${send}` (bzw. als Template-Paramete
 
 Die möglichen Werte für `encoding` sind:
 
-| Encoding        | Inhalt von `${send}`                                                                                                         |
+| Kodierung       | Inhalt von `${send}`                                                                                                         |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `json`          | JSON-Objekt `{ "msg": msg, "title": title }`. Das Feld `title` wird nur hinzugefügt, wenn es für das Ereignis definiert ist. |
 | `csv`           | `title` und `msg` als kommagetrennte Liste                                                                                   |

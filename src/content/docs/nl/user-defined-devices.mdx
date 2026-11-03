@@ -1,9 +1,9 @@
 ---
 title: Gebruikersgedefinieerde apparaten
-description: "Toont hoe u een lader, meter, voertuig of verwarmingstoestel zonder ingebouwde template koppelt door uitlezen en aansturen zelf via HTTP, MQTT of Modbus in te stellen."
+description: "Toont hoe u een lader, meter, voertuig of verwarmer zonder ingebouwde template koppelt door de uitlezing en aansturing zelf via HTTP, MQTT of Modbus te definiëren."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3be6e303b568"
+translatedFrom: "88dfca4fdde4"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -43,14 +43,14 @@ De lijst met beschikbare pluginbronnen (`http`, `mqtt`, `modbus`, …) en hulpfu
 
 Elk gebruikersgedefinieerd apparaat wordt beschreven met drie soorten velden:
 
-- **Leesattributen**: plugins die evcc aanroept om een waarde op te halen (bijv. `power`, `soc`, `status`).
+- **Leesattributen**: plugins die evcc periodiek opvraagt om een waarde op te halen (bijv. `power`, `soc`, `status`).
 - **Schrijfattributen**: plugins die evcc aanroept om een waarde in te stellen of een actie te starten (bijv. `enable`, `maxcurrent`, `wakeup`). De te schrijven waarde is in de plugin beschikbaar.
 - **Features**: de lijst `features` schakelt afwijkend gedrag in. De beschikbare features hangen af van het apparaattype.
 
 Algemene opbouw:
 
 ```yaml
-# read attributes
+# leesattributen
 power:
   source: http
   uri: http://meter.local/power
@@ -58,7 +58,7 @@ soc:
   source: mqtt
   topic: battery/soc
 
-# write attributes
+# schrijfattributen
 enable:
   source: http
   uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
@@ -80,40 +80,40 @@ De beschikbare attribuutnamen en features verschillen per apparaattype en staan 
 Vermogensmeters worden in de sectie [`meters`](/nl/reference/configuration/meters) geconfigureerd.
 Naar meters die onder `meters:` zijn gedefinieerd, kan vanuit `site` worden verwezen:
 
-- `grid`: Netmeter
-- `pv`: Meter voor zonne-energie
-- `battery`: Meter van de thuisbatterij
-- `charge`: Meter voor het laadvermogen van de lader
-- `aux`: Verbruiksmeter voor intelligente verbruikers
-- `consumer`: Meter voor een gewone verbruiker, die voor de verbruiksstatistieken wordt vastgelegd
-- `ext`: Extra meter die niet voor de regeling wordt gebruikt en niet in de gebruikersinterface verschijnt, maar alleen wordt gelogd en geëxporteerd
+- `grid`: netmeter
+- `pv`: meter voor zonne-energie
+- `battery`: meter van de thuisbatterij
+- `charge`: meter voor het laadvermogen van de lader
+- `aux`: verbruiksmeter voor intelligente verbruikers
+- `consumer`: meter voor een gewone verbruiker, waarvan het verbruik in de statistieken wordt opgenomen
+- `ext`: extra meter die niet voor de regeling wordt gebruikt en niet in de gebruikersinterface verschijnt, maar alleen wordt gelogd en geëxporteerd
 
 `power` is het enige verplichte attribuut.
 Niet elke meterrol ondersteunt alle attributen:
 
 - `limitsoc` en `batterymode` worden uitsluitend gebruikt voor batterijmeters (waarnaar vanuit `site.battery` wordt verwezen).
 - `curtail` en `curtailed` worden samen gebruikt voor `pv`-meters die opwekbegrenzing ondersteunen (§ 9 EEG).
-- `currents`, `voltages` en `powers` zijn faseattributen die elk met precies drie pluginitems (als YAML-array) moeten worden geconfigureerd en gelden voor netmeters (`grid`) en laders (`charge`).
+- `currents`, `voltages` en `powers` zijn faseattributen die elk met precies drie pluginitems (als YAML-array) moeten worden geconfigureerd en gelden voor netmeters (`grid`) en laadmeters (`charge`).
 
 Elke plugin moet het juiste datatype teruggeven.
 Gebruik voor de omzetting de [leespijplijnen](/nl/reference/plugins#reading).
 
 ### Leesattributen
 
-| Attribuut      | Type                  | Verplicht | Context        | Beschrijving                                                                                       |
-| -------------- | --------------------- | --------- | -------------- | -------------------------------------------------------------------------------------------------- |
-| `power`        | `float`               | ja        | alle           | Actueel vermogen in W                                                                              |
-| `energy`       | `float`               | nee       | alle           | Meterstand in kWh                                                                                  |
-| `returnenergy` | `float`               | nee       | alle           | Meterstand in omgekeerde richting in kWh (zie hieronder)                                           |
-| `maxpower`     | `int`                 | nee       | `pv` (hybride) | Maximaal AC-vermogen in W                                                                          |
-| `curtailed`    | `int`                 | nee       | `pv`           | Actuele terugleveringslimiet in % (0 tot 100). Alleen samen met `curtail`.                         |
-| `soc`          | `int`                 | nee       | `battery`      | Laadniveau in %                                                                                    |
-| `capacity`     | `float`               | nee       | `battery`      | Capaciteit in kWh                                                                                  |
-| `powers`       | `[float,float,float]` | nee       | alle           | Fasevermogens in W. Hiermee wordt de richting bepaald als de stromen zonder teken worden geleverd. |
-| `currents`     | `[float,float,float]` | nee       | alle           | Fasestromen in A. Voor het herkennen van actieve fasen.                                            |
-| `voltages`     | `[float,float,float]` | nee       | alle           | Fasespanningen in V. Voor het herkennen van de aansluiting (1p/3p).                                |
+| Attribuut      | Type                  | Verplicht | Context        | Beschrijving                                                                                           |
+| -------------- | --------------------- | --------- | -------------- | ------------------------------------------------------------------------------------------------------ |
+| `power`        | `float`               | ja        | alle           | Actueel vermogen in W                                                                                  |
+| `energy`       | `float`               | nee       | alle           | Meterstand in kWh                                                                                      |
+| `returnenergy` | `float`               | nee       | alle           | Meterstand in omgekeerde richting in kWh (zie hieronder)                                               |
+| `maxpower`     | `int`                 | nee       | `pv` (hybride) | Maximaal AC-vermogen in W                                                                              |
+| `curtailed`    | `int`                 | nee       | `pv`           | Actuele terugleveringslimiet in % (0 tot 100). Alleen samen met `curtail`.                             |
+| `soc`          | `int`                 | nee       | `battery`      | Laadniveau in %                                                                                        |
+| `capacity`     | `float`               | nee       | `battery`      | Capaciteit in kWh                                                                                      |
+| `powers`       | `[float,float,float]` | nee       | alle           | Fasevermogens in W. Hiermee wordt de richting bepaald als de stromen zonder voorteken worden geleverd. |
+| `currents`     | `[float,float,float]` | nee       | alle           | Fasestromen in A. Voor het herkennen van actieve fasen.                                                |
+| `voltages`     | `[float,float,float]` | nee       | alle           | Fasespanningen in V. Voor het herkennen van de aansluiting (1p/3p).                                    |
 
-### Tekens en richtingen \{#signs-and-directions\}
+### Voortekens en richtingen \{#signs-and-directions\}
 
 Wat een positieve `power`-waarde en de twee energierichtingen betekenen, hangt af van de meterrol:
 
@@ -156,6 +156,7 @@ Alleen de batterijmodi die het apparaat ondersteunt, worden gebruikt.
 Als `batterymode` een [`switch`](/nl/reference/plugins#switch) is, worden de ondersteunde modi uit de `case`-waarden afgeleid.
 Dat werkt ook wanneer de switch in een [`watchdog`](/nl/reference/plugins#watchdog) is verpakt.
 Elke andere plugin heeft `batterymodes` nodig met de ondersteunde modi, bijv. `batterymodes: ["normal", "hold", "charge"]`.
+[`evcc meter verifybatterymodes`](/nl/reference/cli/evcc_meter_verifybatterymodes) schakelt de echte batterij achtereenvolgens door de geconfigureerde modi en toont of het batterijvermogen reageert zoals verwacht.
 
 ### Voorbeelden
 
@@ -172,7 +173,7 @@ meters:
 ```
 
 Lees vermogen en laadniveau van een thuisbatterij en stel de modus via HTTP in.
-De `switch` dekt de modi normal, hold en charge af, dus biedt evcc precies deze drie aan.
+De `switch` omvat de modi normal, hold en charge, dus biedt evcc precies deze drie aan.
 
 ```yaml
 meters:
@@ -210,28 +211,28 @@ meters:
 
 ## Lader \{#charger\}
 
-Het standaardtype `type: custom` dekt laders met traploze stroomregeling af.
+Het standaardtype `type: custom` is bedoeld voor laders met traploze stroomregeling.
 Gespecialiseerde ladertypes voor andere apparaten staan beschreven onder [Schakelbaar stopcontact](#charger-switchsocket) en [Warmtepompen](#charger-heating).
 
 ### Leesattributen
 
-| Attribuut      | Type                  | Verplicht | Beschrijving                                                                                       |
-| -------------- | --------------------- | --------- | -------------------------------------------------------------------------------------------------- |
-| `status`       | `string`              | ja        | Status (A..F)                                                                                      |
-| `enabled`      | `bool`                | ja        | Is laden ingeschakeld?                                                                             |
-| `power`        | `float`               | nee       | Laadvermogen in W                                                                                  |
-| `energy`       | `float`               | nee       | Meterstand in kWh                                                                                  |
-| `returnenergy` | `float`               | nee       | Meterstand in omgekeerde richting in kWh (ontladen energie, V2X)                                   |
-| `identify`     | `string`              | nee       | Actuele RFID-identificatie                                                                         |
-| `soc`          | `int`                 | nee       | Laadniveau in %                                                                                    |
-| `limitsoc`     | `int`                 | nee       | Laadlimiet in %                                                                                    |
-| `temp`         | `float`               | nee       | Actuele temperatuur in °C (verwarming, alias voor `soc`)                                           |
-| `limittemp`    | `int`                 | nee       | Temperatuurlimiet in °C (verwarming, alias voor `limitsoc`)                                        |
-| `finishtime`   | `string`              | nee       | Geschatte eindtijd van het laden (RFC3339, Go-duur, Unix-tijdstempel of resterende seconden)       |
-| `phases`       | `int`                 | nee       | Aantal fysieke fasen (1..3)                                                                        |
-| `powers`       | `[float,float,float]` | nee       | Fasevermogens in W. Hiermee wordt de richting bepaald als de stromen zonder teken worden geleverd. |
-| `currents`     | `[float,float,float]` | nee       | Fasestromen in A. Voor het herkennen van actieve fasen.                                            |
-| `voltages`     | `[float,float,float]` | nee       | Fasespanningen in V. Voor het herkennen van de aansluiting (1p/3p).                                |
+| Attribuut      | Type                  | Verplicht | Beschrijving                                                                                           |
+| -------------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| `status`       | `string`              | ja        | Status (A t/m F)                                                                                       |
+| `enabled`      | `bool`                | ja        | Is laden ingeschakeld?                                                                                 |
+| `power`        | `float`               | nee       | Laadvermogen in W                                                                                      |
+| `energy`       | `float`               | nee       | Meterstand in kWh                                                                                      |
+| `returnenergy` | `float`               | nee       | Meterstand in omgekeerde richting in kWh (ontladen energie, V2X)                                       |
+| `identify`     | `string`              | nee       | Actuele RFID-identificatie                                                                             |
+| `soc`          | `int`                 | nee       | Laadniveau in %                                                                                        |
+| `limitsoc`     | `int`                 | nee       | Laadlimiet in %                                                                                        |
+| `temp`         | `float`               | nee       | Actuele temperatuur in °C (verwarming, alias voor `soc`)                                               |
+| `limittemp`    | `int`                 | nee       | Temperatuurlimiet in °C (verwarming, alias voor `limitsoc`)                                            |
+| `finishtime`   | `string`              | nee       | Geschatte eindtijd van het laden (RFC3339, Go-duur, Unix-tijdstempel of resterende seconden)           |
+| `phases`       | `int`                 | nee       | Aantal fysieke fasen (1 t/m 3)                                                                         |
+| `powers`       | `[float,float,float]` | nee       | Fasevermogens in W. Hiermee wordt de richting bepaald als de stromen zonder voorteken worden geleverd. |
+| `currents`     | `[float,float,float]` | nee       | Fasestromen in A. Voor het herkennen van actieve fasen.                                                |
+| `voltages`     | `[float,float,float]` | nee       | Fasespanningen in V. Voor het herkennen van de aansluiting (1p/3p).                                    |
 
 ### Schrijfattributen
 
@@ -245,12 +246,12 @@ Gespecialiseerde ladertypes voor andere apparaten staan beschreven onder [Schake
 
 ### Features \{#charger-features\}
 
-| Feature            | Beschrijving                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `integrateddevice` | Geen voertuigselectie. Het apparaat werkt zonder aangesloten voertuig en zonder laadsessies (bijv. warmtepomp, verwarmingselement, vast geïnstalleerde verbruiker).                                                                                                                                                                                            |
-| `heating`          | Apparaat als verwarming behandelen: laadniveau en limieten worden in °C in plaats van % weergegeven.                                                                                                                                                                                                                                                           |
-| `continuous`       | Het apparaat blijft in de eigen normale werking draaien wanneer het “uitgeschakeld” is. De gebruikersinterface toont “Normale werking” in plaats van “Stand-by”. Een verzoek om meer vermogen (bijv. bij een zonneoverschot of goedkope netstroom) heet “Boost”. De modi heten **Normaal**, **Slim** en **Boost** in plaats van **Uit**, **Slim** en **Snel**. |
-| `switchdevice`     | Het apparaat kan alleen aan/uit worden geschakeld (geen traploze stroomregeling). Maximale stroom en de optie **Altijd laden** worden niet getoond. Minimale stroom en fasen bepalen het inschakelvermogen voor zonne-energie. Zonder `continuous` heten de modi **Uit**, **Slim** en **Aan**.                                                                 |
+| Feature            | Beschrijving                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Geen voertuigselectie. Het apparaat werkt zonder aangesloten voertuig en zonder laadsessies (bijv. warmtepomp, verwarmingselement, vast geïnstalleerde verbruiker).                                                                                                                                                                                                    |
+| `heating`          | Apparaat als verwarming behandelen: laadniveau en limieten worden in °C in plaats van % weergegeven.                                                                                                                                                                                                                                                                   |
+| `continuous`       | Het apparaat blijft in zijn eigen normale bedrijfsmodus draaien wanneer het “uitgeschakeld” is. De gebruikersinterface toont “Normale werking” in plaats van “Stand-by”. Een verzoek om meer vermogen (bijv. bij een zonneoverschot of goedkope netstroom) heet “Boost”. De modi heten **Normaal**, **Slim** en **Boost** in plaats van **Uit**, **Slim** en **Snel**. |
+| `switchdevice`     | Het apparaat kan alleen aan/uit worden geschakeld (geen traploze stroomregeling). Maximale stroom en de optie **Altijd laden** worden niet getoond. Minimale stroom en fasen bepalen het inschakelvermogen voor zonne-energie. Zonder `continuous` heten de modi **Uit**, **Slim** en **Aan**.                                                                         |
 
 Gebruikelijke combinaties van features in ingebouwde templates:
 
@@ -267,8 +268,8 @@ features:
 ```yaml
 features:
   - switchdevice
-  - integrateddevice # optional, when the socket drives a fixed load
-  - heating # optional, when it controls a heating device
+  - integrateddevice # optioneel, als het stopcontact een vaste belasting aanstuurt
+  - heating # optioneel, als het een verwarmingstoestel aanstuurt
 ```
 
 **Warmtepomp**:
@@ -278,7 +279,7 @@ features:
   - integrateddevice
   - heating
   - continuous
-  - switchdevice # optional, when no current control is available (SG Ready)
+  - switchdevice # optioneel, als er geen stroomregeling beschikbaar is (SG Ready)
 ```
 
 ### Voorbeelden
@@ -339,14 +340,14 @@ Hoe u dit instelt, staat beschreven onder [Warmtepompen, elektrische verwarming]
 Voor invertergestuurde warmtepompen die een traploze vermogensinstelwaarde via Modbus, HTTP of iets vergelijkbaars accepteren.
 Het gewenste verwarmingsvermogen wordt direct via `setmaxpower` geschreven.
 
-| Attribuut     | Type    | Verplicht | Beschrijving                                |
-| ------------- | ------- | --------- | ------------------------------------------- |
-| `power`       | `float` | nee       | Actueel vermogen in W                       |
-| `energy`      | `float` | nee       | Meterstand in kWh                           |
-| `temp`        | `float` | nee       | Actuele temperatuur in °C                   |
-| `limittemp`   | `int`   | nee       | Apparaatinterne temperatuurlimiet in °C     |
-| `setmaxpower` | `int`   | ja        | Maximaal verwarmingsvermogen in W instellen |
-| `getmaxpower` | `float` | nee       | Actueel maximaal verwarmingsvermogen in W   |
+| Attribuut     | Type    | Verplicht | Beschrijving                                     |
+| ------------- | ------- | --------- | ------------------------------------------------ |
+| `power`       | `float` | nee       | Actueel vermogen in W                            |
+| `energy`      | `float` | nee       | Meterstand in kWh                                |
+| `temp`        | `float` | nee       | Actuele temperatuur in °C                        |
+| `limittemp`   | `int`   | nee       | Interne temperatuurlimiet van het apparaat in °C |
+| `setmaxpower` | `int`   | ja        | Maximaal verwarmingsvermogen in W instellen      |
+| `getmaxpower` | `float` | nee       | Actueel maximaal verwarmingsvermogen in W        |
 
   </TabItem>
   <TabItem label="SG-Ready">
@@ -361,7 +362,7 @@ Er worden drie modi ondersteund: `1` verlaagd, `2` normaal, `3` boost.
 | `power`       | `float` | nee       | Actueel vermogen in W                                       |
 | `energy`      | `float` | nee       | Meterstand in kWh                                           |
 | `temp`        | `float` | nee       | Actuele temperatuur in °C                                   |
-| `limittemp`   | `int`   | nee       | Apparaatinterne temperatuurlimiet in °C                     |
+| `limittemp`   | `int`   | nee       | Interne temperatuurlimiet van het apparaat in °C            |
 | `setmode`     | `int`   | ja        | SG-Ready-modus wijzigen (1: verlaagd, 2: normaal, 3: boost) |
 | `getmode`     | `int`   | nee       | Actuele SG-Ready-modus (1, 2, 3)                            |
 | `setmaxpower` | `int`   | nee       | Maximaal verwarmingsvermogen in W instellen                 |
@@ -372,16 +373,16 @@ Er worden drie modi ondersteund: `1` verlaagd, `2` normaal, `3` boost.
 **`type: sgready-relay`**
 
 Voor warmtepompen waarvan de SG-Ready-ingang als twee potentiaalvrije relaiscontacten (boost + dim) is bedraad.
-Elk contact wordt aangestuurd door een aparte sublader die via zijn eigen ladertype wordt geconfigureerd, niet via plugins.
+Elk contact wordt aangestuurd door een aparte sublader waarnaar via het type wordt verwezen, niet via plugins.
 
-| Attribuut   | Type            | Verplicht | Beschrijving                            |
-| ----------- | --------------- | --------- | --------------------------------------- |
-| `power`     | `float`         | nee       | Actueel vermogen in W                   |
-| `energy`    | `float`         | nee       | Meterstand in kWh                       |
-| `temp`      | `float`         | nee       | Actuele temperatuur in °C               |
-| `limittemp` | `int`           | nee       | Apparaatinterne temperatuurlimiet in °C |
-| `boost`     | `charger-typed` | ja        | Relais voor het SG-Ready-boostcontact   |
-| `dim`       | `charger-typed` | nee       | Relais voor het SG-Ready-dimcontact     |
+| Attribuut   | Type            | Verplicht | Beschrijving                                     |
+| ----------- | --------------- | --------- | ------------------------------------------------ |
+| `power`     | `float`         | nee       | Actueel vermogen in W                            |
+| `energy`    | `float`         | nee       | Meterstand in kWh                                |
+| `temp`      | `float`         | nee       | Actuele temperatuur in °C                        |
+| `limittemp` | `int`           | nee       | Interne temperatuurlimiet van het apparaat in °C |
+| `boost`     | `charger-typed` | ja        | Relais voor het SG-Ready-boostcontact            |
+| `dim`       | `charger-typed` | nee       | Relais voor het SG-Ready-dimcontact              |
 
   </TabItem>
 </Tabs>
@@ -396,7 +397,7 @@ Ook voertuigparameters kunnen via plugins worden gelezen.
 | --------------- | -------- | --------- | -------------------------------------------------------------------------------------------- |
 | `soc`           | `int`    | ja        | Laadniveau in %                                                                              |
 | `limitsoc`      | `int`    | nee       | Laadlimiet in %                                                                              |
-| `status`        | `string` | nee       | Status (A..F)                                                                                |
+| `status`        | `string` | nee       | Status (A t/m F)                                                                             |
 | `range`         | `int`    | nee       | Actieradius in km                                                                            |
 | `odometer`      | `int`    | nee       | Kilometerstand in km                                                                         |
 | `climater`      | `bool`   | nee       | Klimaatregeling actief?                                                                      |
@@ -432,8 +433,8 @@ Ook voertuigparameters kunnen via plugins worden gelezen.
 Lees de actuele actieradius uit MQTT-berichten.
 
 ```yaml
-title: Green Mazda # display name (optional)
-capacity: 50 # battery capacity in kWh (optional)
+title: Groene Mazda # weergavenaam (optioneel)
+capacity: 50 # batterijcapaciteit in kWh (optioneel)
 features:
   - coarsecurrent
 range:
@@ -441,7 +442,7 @@ range:
   topic: mazda2mqtt/c53/chargeInfo/drivingRangeKm
 ```
 
-Wek een auto via een HTTP-ping voordat verdere opvragingen worden verstuurd.
+Wek een auto via een HTTP-ping voordat verdere verzoeken worden verstuurd.
 
 ```yaml
 wakeup:
@@ -462,33 +463,33 @@ onIdentify:
 ```
 
 Beschikbare modi: `off`, `smart`, `now`.
-De verouderde waarden `pv` en `minpv` worden nog geaccepteerd en activeren `smart` met [Altijd laden](/nl/features/modes#always-charge) uit of aan.
+De verouderde waarden `pv` en `minpv` worden nog geaccepteerd en activeren `smart` met [Altijd laden](/nl/features/modes#always-charge) respectievelijk uit en aan.
 
-## Tarief en voorspelling \{#tariff\}
+## Tarief en verwachting \{#tariff\}
 
-Een gebruikersgedefinieerd tarief koppelt evcc via het pluginmechanisme aan een eigen waardebron.
+Een gebruikersgedefinieerd tarief koppelt evcc via het pluginsysteem aan een eigen waardebron.
 Het attribuut `tariff` bepaalt wat de bron weergeeft en welke eenheid de waarden hebben.
 
 ### Leesattributen
 
-Precies één van `price` en `forecast` moet zijn geconfigureerd.
+Er moet precies één van beide zijn geconfigureerd: `price` of `forecast`.
 
-| Attribuut  | Type     | Beschrijving                                                                                                           |
-| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `price`    | `float`  | Actuele waarde. Float die de plugin teruggeeft.                                                                        |
-| `forecast` | `string` | Voorspelling als JSON-string met een lijst van tijdvakken en waarden (zie schema hieronder). Wordt elk uur opgevraagd. |
+| Attribuut  | Type     | Beschrijving                                                                                                          |
+| ---------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `price`    | `float`  | Actuele waarde als float, teruggegeven door de plugin.                                                                |
+| `forecast` | `string` | Verwachting als JSON-string met een lijst van tijdvakken en waarden (zie schema hieronder). Wordt elk uur opgevraagd. |
 
 ### Configuratie
 
-| Attribuut      | Type       | Verplicht | Beschrijving                                                                                                                                                                                                                   |
-| -------------- | ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `tariff`       | `string`   | nee       | `price` (standaard), `co2`, `solar` of `temperature`. Bepaalt de eenheid van de teruggegeven waarden: prijs in de ingestelde valuta per kWh, CO₂-intensiteit in g/kWh, voorspelling van zonne-energie in W, temperatuur in °C. |
-| `charges`      | `float`    | nee       | Vaste opslag per kWh die bij elke waarde wordt opgeteld. Standaard `0`.                                                                                                                                                        |
-| `chargesZones` | `list`     | nee       | Tijdsafhankelijke opslagen (bijv. netbeheerkosten) die `charges` voor bepaalde periodes vervangen. Zie [tijdsafhankelijke netbeheerkosten](/nl/reference/configuration/tariffs#charges-zones).                                 |
-| `tax`          | `float`    | nee       | Belastingpercentage dat op het resultaat wordt toegepast, bijv. `0.2` voor 20%. Standaard `0`.                                                                                                                                 |
-| `formula`      | `string`   | nee       | Go-expressie voor een eigen berekening, waarin `price`, `charges` en `tax` beschikbaar zijn. Zie [voorbeelden](#formula-examples).                                                                                             |
-| `interval`     | `duration` | nee       | Opvraaginterval voor `forecast`. Standaard `1h`.                                                                                                                                                                               |
-| `cache`        | `duration` | nee       | Cacheduur voor `price`. Standaard `15m`.                                                                                                                                                                                       |
+| Attribuut      | Type       | Verplicht | Beschrijving                                                                                                                                                                                                                  |
+| -------------- | ---------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tariff`       | `string`   | nee       | `price` (standaard), `co2`, `solar` of `temperature`. Bepaalt de eenheid van de teruggegeven waarden: prijs in de ingestelde valuta per kWh, CO₂-intensiteit in g/kWh, verwachting van zonne-energie in W, temperatuur in °C. |
+| `charges`      | `float`    | nee       | Vaste opslag per kWh die bij elke waarde wordt opgeteld. Standaard `0`.                                                                                                                                                       |
+| `chargesZones` | `list`     | nee       | Tijdsafhankelijke opslagen (bijv. netbeheerkosten) die `charges` voor bepaalde periodes vervangen. Zie [tijdsafhankelijke netbeheerkosten](/nl/reference/configuration/tariffs#charges-zones).                                |
+| `tax`          | `float`    | nee       | Belastingpercentage dat op het resultaat wordt toegepast, bijv. `0.2` voor 20%. Standaard `0`.                                                                                                                                |
+| `formula`      | `string`   | nee       | Go-expressie voor een eigen berekening, waarin `price`, `charges` en `tax` beschikbaar zijn. Zie [voorbeelden](#formula-examples).                                                                                            |
+| `interval`     | `duration` | nee       | Opvraaginterval voor `forecast`. Standaard `1h`.                                                                                                                                                                              |
+| `cache`        | `duration` | nee       | Cacheduur voor `price`. Standaard `15m`.                                                                                                                                                                                      |
 
 ### Features \{#tariff-features\}
 
@@ -507,7 +508,7 @@ price:
   uri: https://example.com/api/price
 ```
 
-**Voorspelling via HTTP**:
+**Verwachting via HTTP**:
 
 ```yaml
 forecast:
@@ -547,9 +548,9 @@ evcc werkt intern met intervallen van 15 minuten; plugins mogen ook uurwaarden t
 
 <a id="formula-examples"></a>
 
-Het veld `formula` accepteert een Go-expressie waarin `price`, `charges`, `tax` en het tijdstempel van het tijdvak `ts` beschikbaar zijn.
+Het veld `formula` accepteert een Go-expressie waarin `price`, `charges`, `tax` en het tijdstempel `ts` van het tijdvak beschikbaar zijn.
 De [`math`-bibliotheek](https://pkg.go.dev/math) en de methoden van [`time.Time`](https://pkg.go.dev/time#Time) op `ts` zijn beschikbaar.
-De formule wordt uitgevoerd voor de actuele prijs en voor elk tijdvak van de voorspelling.
+De formule wordt uitgevoerd voor de actuele prijs en voor elk tijdvak van de verwachting.
 
 **Prijsplafond**:
 
@@ -567,14 +568,14 @@ Begrenst het resultaat tot 50 ct/kWh.
 formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 ```
 
-Betaalt een vaste terugleververgoeding van 7 ct/kWh, behalve wanneer de prijs op de day-aheadmarkt negatief is.
+Rekent met een vaste terugleververgoeding van 7 ct/kWh, behalve wanneer de prijs op de day-aheadmarkt negatief is.
 
 ## Externe limiet \{#external-limit\}
 
 Een gebruikersgedefinieerde integratie voor de functie [Externe limiet](/nl/external-limit) koppelt een stuurbox of energiebeheersysteem dat niet door een ingebouwde integratie wordt ondersteund.
 Kies in de gebruikersinterface **Gebruiker-gedefiniëerde integratie** onder **Configuratie → Externe limiet**.
 
-Het type bepaalt op welke van vier manieren het limietsignaal binnenkomt: `relay` (één schakelcontact), `fnn` (FNN-stuurbox met meerdere schakelcontacten), `eebus` (EEBUS-protocol) of `custom` (dynamische limietwaarden via plugins).
+Het type bepaalt op welke van de vier manieren het limietsignaal binnenkomt: `relay` (één schakelcontact), `fnn` (FNN-stuurbox met meerdere schakelcontacten), `eebus` (EEBUS-protocol) of `custom` (dynamische limietwaarden via plugins).
 Elk signaal wordt gelezen via een [pluginconfiguratie](/nl/reference/plugins) (GPIO, MQTT, HTTP, Modbus).
 Zie ook de [configuratiereferentie voor `hems`](/nl/reference/configuration/hems).
 
@@ -591,7 +592,7 @@ De stuurbox activeert een contact dat door uw evcc-installatie wordt uitgelezen.
 | `interval`    | `duration` | nee       | Opvraaginterval voor het schakelcontact. Standaard `10s`.                                               |
 
 De vermogenslimiet krijgt u van de netbeheerder.
-Bij meerdere aanstuurbare verbruiksapparaten (SteuVE) wordt rekening gehouden met de gelijktijdigheidsfactor.
+Bij meerdere aanstuurbare verbruiksapparaten (in Duitsland SteuVE, steuerbare Verbrauchseinrichtungen) wordt rekening gehouden met de gelijktijdigheidsfactor.
 U kunt de limiet ook zelf berekenen met de formule: **Totale limiet = aantal SteuVE × 4,2 kW × gelijktijdigheidsfactor**. Details over de berekening vindt u [hier](https://www.inexogy.com/blog/14a-enwg/).
 
 <Tabs>
@@ -601,12 +602,12 @@ Bij gebruik van een Raspberry Pi kan de GPIO-pin direct worden gelezen:
 
 ```yaml
 type: relay
-maxPower: 8400 # Example for 2 SteuVE
+maxPower: 8400 # Voorbeeld voor 2 SteuVE
 limit:
   source: gpio
   function: read
-  pin: 17 # Read GPIO pin 17
-  # Return value: false = not limited, true = limited
+  pin: 17 # GPIO-pin 17 lezen
+  # Retourwaarde: false = niet begrensd, true = begrensd
 ```
 
 Meer details over de GPIO-plugin vindt u in de [plugindocumentatie](/nl/reference/plugins#gpio).
@@ -618,25 +619,25 @@ Als de stuurbox of gateway MQTT-berichten verstuurt:
 
 ```yaml
 type: relay
-maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
+maxPower: 11340 # Voorbeeld voor 3 SteuVE met gelijktijdigheidsfactor 0,9
 limit:
   source: mqtt
   topic: hems/limit/status
-  # Expected values: 0/false = normal, 1/true = limited
+  # Verwachte waarden: 0/false = normaal, 1/true = begrensd
 ```
 
 </TabItem>
 <TabItem label="HTTP API">
 
-Voor stuurboxen met een REST API:
+Voor stuurboxen met een REST-API:
 
 ```yaml
 type: relay
-maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
+maxPower: 13440 # Voorbeeld voor 4 SteuVE met gelijktijdigheidsfactor 0,8
 limit:
   source: http
   uri: http://steuerbox.local/api/limit
-  jq: .limited # JSON path to boolean value
+  jq: .limited # JSON-pad naar booleaanse waarde
 ```
 
 </TabItem>
@@ -646,17 +647,17 @@ Als de stuurbox of een gateway de vermogenslimiet via Modbus aanbiedt:
 
 ```yaml
 type: relay
-maxPower: 4200 # Example for 1 SteuVE
+maxPower: 4200 # Voorbeeld voor 1 SteuVE
 limit:
   source: modbus
-  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
-  id: 3 # Modbus slave ID
+  uri: 192.168.179.200:4703 # Voorbeeld: relais op de 2e S0-meter van een cFos Power Brain-wallbox voor zonne-energie
+  id: 3 # Modbus-slave-ID
   timeout: 5s
   register:
     type: holding
     decode: uint16
     address: 8056
-  # Return value: 0 = not limited, 1 = limited
+  # Retourwaarde: 0 = niet begrensd, 1 = begrensd
 ```
 
 </TabItem>
@@ -666,7 +667,7 @@ limit:
 
 Stuurboxen volgens de FNN-standaard signaleren dimmen en opwekbegrenzing via afzonderlijke schakelcontacten.
 Het dimmen van het verbruik (W4) en de opwekbegrenzing (W3, S2, S1) werken onafhankelijk van elkaar.
-Minstens één van de signalen `w4` en `w3` moet zijn geconfigureerd.
+Minstens één van de signalen `w4` of `w3` moet zijn geconfigureerd.
 
 | Attribuut         | Type       | Verplicht | Beschrijving                                                                                |
 | ----------------- | ---------- | --------- | ------------------------------------------------------------------------------------------- |
@@ -682,13 +683,13 @@ Minstens één van de signalen `w4` en `w3` moet zijn geconfigureerd.
 
 ```yaml
 type: fnn
-maxDimPower: 4200 # Consumption limit while dimmed (in watts)
-maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
+maxDimPower: 4200 # Verbruikslimiet tijdens dimmen (in watt)
+maxCurtailPower: 10000 # Geïnstalleerd vermogen zonnepanelen, basis voor begrenzingsstappen (in watt)
 w4:
   source: gpio
   function: read
-  pin: 17 # Read GPIO pin 17
-  # Return value: false = normal, true = active
+  pin: 17 # GPIO-pin 17 lezen
+  # Retourwaarde: false = normaal, true = actief
 w3:
   source: gpio
   function: read
@@ -705,7 +706,7 @@ s1:
 
 ### EEBUS \{#external-limit-eebus\}
 
-De digitale aansluiting via het EEBUS-protocol.
+Dit is de digitale aansluiting via het EEBUS-protocol.
 De stuurbox communiceert direct met uw evcc-installatie en geeft de vermogenslimiet automatisch door.
 Stuurbox en evcc moeten eenmalig worden [gekoppeld](/nl/external-limit#eebus-pairing).
 
@@ -721,14 +722,14 @@ Stuurbox en evcc moeten eenmalig worden [gekoppeld](/nl/external-limit#eebus-pai
 
 ```yaml
 type: eebus
-ski: "1234-5678-90AB-CDEF" # SKI of the control box
+ski: "1234-5678-90AB-CDEF" # SKI van de stuurbox
 ```
 
 ### Gebruikersgedefinieerd \{#external-limit-custom\}
 
-De generieke integratie voor aansturingssystemen die dynamische limietwaarden leveren in plaats van schakelcontacten.
+Dit is de generieke integratie voor aansturingssystemen die dynamische limietwaarden leveren in plaats van schakelcontacten.
 Verbruikslimiet en opwekbegrenzing worden via plugins gelezen en werken onafhankelijk van elkaar.
-Minstens één van `maxConsumptionPower` en `curtailedPercent` moet zijn geconfigureerd.
+Minstens één van `maxConsumptionPower` of `curtailedPercent` moet zijn geconfigureerd.
 
 | Attribuut              | Type       | Verplicht | Beschrijving                                                                                                           |
 | ---------------------- | ---------- | --------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -744,17 +745,17 @@ type: custom
 maxConsumptionPower:
   source: http
   uri: http://steuerbox.local/api/limit
-  jq: .maxPower # Power limit in watts, 0 = no limit
+  jq: .maxPower # Vermogenslimiet in watt, 0 = geen limiet
 curtailedPercent:
   source: mqtt
-  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
-productionNominalMax: 10000 # Installed generator power (Wp)
+  topic: hems/curtail/percent # Toegestane teruglevering in procent, 100 = geen opwekbegrenzing
+productionNominalMax: 10000 # Geïnstalleerd opwekvermogen (Wp)
 ```
 
 ## Opwekbegrenzingsapparaat \{#curtailer\}
 
 Een gebruikersgedefinieerd opwekbegrenzingsapparaat begrenst de teruglevering van het zonnepanelensysteem op verzoek van de netbeheerder (§ 9 EEG) wanneer de omvormer niet via zijn [meterconfiguratie](#meter) kan worden begrensd.
-Kies in de gebruikersinterface **Gebruiker-gedefiniëerd apparaat** onder **Configuratie → Netaansluiting → Voeg opwekbegrenzingsapparaat toe**.
+Kies in de gebruikersinterface **Gebruiker-gedefiniëerd apparaat** onder **Configuratie → Net → Voeg opwekbegrenzingsapparaat toe**.
 Zie ook de [configuratiereferentie voor `curtailers`](/nl/reference/configuration/curtailers) en [Externe limiet](/nl/external-limit#curtailment-devices).
 
 Het apparaat ontvangt de toegestane teruglevering als percentage van het geïnstalleerde opwekvermogen en moet deze op de omvormer toepassen.
@@ -786,7 +787,7 @@ curtailed:
 </TabItem>
 <TabItem label="Modbus">
 
-De omvormer kan zijn limiet niet melden, daarom geeft `curtailed` de waarde `ErrNotAvailable` terug en wordt de limiet geschreven zodra deze verandert.
+Omdat de omvormer zijn limiet niet kan melden, geeft `curtailed` de waarde `ErrNotAvailable` terug en wordt de limiet geschreven zodra deze verandert.
 
 ```yaml
 curtail:
@@ -835,16 +836,16 @@ De mogelijke waarden voor `encoding` zijn:
 messaging:
   events:
     connect:
-      title: "${vehicleTitle} connected"
-      msg: "${vehicleTitle} was connected (charging mode: ${mode})."
+      title: "${vehicleTitle} verbonden"
+      msg: "${vehicleTitle} is verbonden (laadmodus: ${mode})."
   services:
     - type: custom
       encoding: json
       send:
-        # plugin type
+        # plugintype
         source: script
-        # plugin-specific configuration;
-        # {{.send}} contains the JSON message
+        # pluginspecifieke configuratie;
+        # {{.send}} bevat het JSON-bericht
         cmd: /usr/local/bin/evcc_message "{{.send}}"
 ```
 

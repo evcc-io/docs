@@ -3,7 +3,7 @@ title: "Hausbatterie"
 description: "evcc stimmt das Laden deines Autos auf die Hausbatterie ab, vom Vorrang beim PV-Überschuss über Batterie Boost bis zur aktiven Batteriesteuerung."
 sidebar:
   order: 6
-translatedFrom: "88352c30868d"
+translatedFrom: "df84d89113c0"
 ---
 
 import Screenshot from "@components/Screenshot.astro";
@@ -17,9 +17,9 @@ Ist der Batterie- bzw. Hybridwechselrichter konfiguriert, kennt evcc den Ladesta
 ## Wohin geht die PV-Energie zuerst? \{#priority\}
 
 Hausbatterien reagieren sehr schnell auf verfügbaren Überschuss und nehmen diese Energie auf.
-Im Standardfall würde daher erst die Hausbatterie komplett geladen werden, bevor freier Überschuss in das Elektroauto fließt.
+Im Standardfall würde daher erst die Hausbatterie komplett geladen werden, bevor der restliche Überschuss ins Elektroauto fließt.
 
-Besitzt du eine größere Hausbatterie, kann es aber auch sinnvoll sein, bereits früher mit der Ladung des Elektroautos zu beginnen.
+Besitzt du eine größere Hausbatterie, kann es auch sinnvoll sein, bereits früher mit der Ladung des Elektroautos zu beginnen.
 Dieses Verhalten kannst du auf der **Batterie**-Seite konfigurieren, die du über die Navigationsleiste erreichst.
 
 <Screenshot
@@ -33,13 +33,13 @@ Oberhalb dieses Ladestands erhalten die Ladepunkte den Überschuss.
 
 <Screenshot
   name="features/screenshots/battery-priority"
-  caption="Priorität Haus und Auto"
+  caption="Priorität zwischen Hausbatterie und Auto"
 />
 
-Beispiel: Du setzt die Grenze auf 50%. Das bedeutet, dass PV-Energie erst einmal in die Hausbatterie fließt.
+Beispiel: Du setzt das Limit auf 50%. Das bedeutet, dass PV-Energie erst einmal in die Hausbatterie fließt.
 Erreicht die Batterie einen Ladestand von 50%, werden Ladepunkte im Smart-Modus freigegeben.
 Die Ladeleistung wird so geregelt, dass die Hausbatterie ihren Ladestand hält.
-Übersteigt der Überschuss die maximale Ladeleistung der Batterie, wird das Fahrzeug bereits vor Erreichen der Grenze geladen.
+Übersteigt der Überschuss die maximale Ladeleistung der Batterie, wird das Fahrzeug bereits vor Erreichen des Limits geladen.
 Ist kein Fahrzeug angeschlossen oder ist es vollständig geladen, fließt überschüssige Energie weiterhin in die Batterie.
 
 ## Batterieunterstütztes Fahrzeugladen
@@ -62,7 +62,7 @@ Zusätzlich zum verfügbaren Überschuss werden jetzt auch die freigegebenen obe
 Ist kein Überschuss mehr verfügbar, wird mit minimaler Leistung weitergeladen, bis der Ladestand der Hausbatterie auf 75% gefallen ist.
 Die Batterieunterstützung endet früher, wenn die Hausbatterie die minimale Ladeleistung nicht liefern kann (z. B. wegen ihrer maximalen Entladeleistung) und deshalb Netzbezug nötig wäre.
 
-Die Batterieunterstützung wirkt nicht bei [Dauerhaft laden](/de/features/modes#always-charge), da hier ohnehin ohne Unterbrechung geladen wird.
+Bei [Dauerhaft laden](/de/features/modes#always-charge) greift die Batterieunterstützung nicht, da hier ohne Unterbrechung geladen wird.
 
 Diese Funktion ist besonders nützlich, wenn du eine Hausbatterie besitzt, deren Kapazität mehr als deinen üblichen Hausverbrauch abdecken kann.
 Dann ermöglicht sie dir, das Auto z. B. in den Abendstunden zu laden, wenn nur noch wenig Sonne scheint.
@@ -91,7 +91,7 @@ Batterie Boost unterstützt den **Smart**-Modus mit Leistung aus der Hausbatteri
 Zusätzlich zur verfügbaren Leistung der PV-Anlage wird die maximal verfügbare Leistung der Hausbatterie genutzt.
 Um die Hausbatterie an ihre maximale Ausgangsleistung zu bringen, ist ein kleiner Netzbezug nötig.
 
-Die Aktivierung des Boosts erfolgt in zwei Schritten.
+Du aktivierst den Boost in zwei Schritten.
 Wähle zuerst in den Einstellungen des Ladepunkts ein **Batterie Boost**-Limit.
 Damit wird die Funktion aktiviert und festgelegt, wie weit die Hausbatterie entladen werden darf.
 
@@ -112,7 +112,7 @@ Er endet auch, wenn das Auto abgesteckt oder der Modus umgeschaltet wird.
 />
 
 Beispiel:
-Das ist nützlich, wenn du in Kürze mit dem Auto losfährst und in den kommenden Stunden PV-Überschuss zu erwarten ist.
+Batterie Boost ist nützlich, wenn du in Kürze mit dem Auto losfährst und in den kommenden Stunden PV-Überschuss zu erwarten ist.
 So landet möglichst viel Energie im Auto, und die Hausbatterie lädt sich wieder auf, während das Auto unterwegs ist.
 
 Die oben beschriebenen Prioritätseinstellungen werden für diesen Ladevorgang außer Kraft gesetzt.
@@ -134,20 +134,22 @@ Die oben beschriebenen Funktionen sind mit allen Batteriesystemen kompatibel.
 evcc passt dabei lediglich die Laderegelung des Elektroautos in Abhängigkeit vom Ladestand der Hausbatterie an.
 In einigen Fällen ist diese Regelung aber nicht ausreichend und es ist notwendig, die Batterie direkt zu steuern.
 Viele neuere Batterie- bzw. Hybridwechselrichter bieten hierfür eine Schnittstelle an.
+Ob deine Batterie den Batteriemodi tatsächlich folgt, kannst du auf der Kommandozeile mit [`evcc meter verifybatterymodes`](/de/reference/cli/evcc_meter_verifybatterymodes) prüfen.
+Der Befehl schaltet die unterstützten Modi nacheinander durch und zeigt, ob die Batterieleistung wie erwartet reagiert.
 
 ### Entladesperre
 
 Szenario 1: Du musst spontan zu einem Termin und möchtest dein Auto schnell laden.
 Allerdings möchtest du nicht, dass die Hausbatterie dadurch komplett entladen wird.
 
-Szenario 2: Du hast einen dynamischen Stromtarif und möchtest dein Auto nachts laden, weil die Energie dann besonders günstig ist.
+Szenario 2: Du hast einen dynamischen Tarif und möchtest dein Auto nachts laden, weil die Energie dann besonders günstig ist.
 Allerdings wird die Hausbatterie versuchen, den Ladebedarf zu decken, solange sie noch Energie hat.
 Erst wenn die Hausbatterie leer ist, wird der günstige Nachtstrom genutzt.
 
 Unterstützt dein System aktive Batteriesteuerung, kannst du auf der **Batterie**-Seite die Option „Entladung der Hausbatterie im Schnell-Modus und bei geplantem Laden verhindern“ aktivieren.
 Damit wird die Hausbatterie in einen Sperrzustand versetzt, wenn ein schneller Ladevorgang aktiv ist. Das kann durch den Schnell-Modus, smartes Netzladen, Ladepläne oder Mindestladung ausgelöst werden.
 
-Der Sperrzustand gilt, solange dieser Ladevorgang läuft.
+Der Sperrzustand gilt, solange der schnelle Ladevorgang läuft.
 In dieser Zeit wird die Hausbatterie nicht entladen.
 
 ### Netzladen \{#gridcharge\}
@@ -181,4 +183,4 @@ Optional kannst du einen maximalen Ladestand festlegen, bis zu dem die Batterie 
 Erreicht die Batterie diesen Wert, wird das Netzladen automatisch gestoppt.
 Die Option **Maximaler Ladestand** (`maxsoc`) findest du in der Gerätekonfiguration deines Batteriesystems.
 
-Unter [PV, Hausbatterie, Netz, Zähler](/de/meters) erkennst du an der Markierung **Aktive Batteriesteuerung**, ob dein System Batteriesteuerung unterstützt und ob `maxsoc` verfügbar ist.
+Auf der Seite [PV, Hausbatterie, Netz, Zähler](/de/meters) erkennst du an der Markierung **Batteriesteuerung**, ob dein System Batteriesteuerung unterstützt und ob `maxsoc` verfügbar ist.

@@ -3,7 +3,7 @@ title: Zařízení definovaná uživatelem
 description: "Připojte nabíječku, měřič, vozidlo nebo topení, pro které neexistuje vestavěná šablona, a jejich hodnoty i ovládání si definujte sami přes HTTP, MQTT nebo Modbus."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3be6e303b568"
+translatedFrom: "88dfca4fdde4"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -24,7 +24,7 @@ power:
   topic: home/current/imsys/chn2/raw
 ```
 
-Případně můžete celou konfiguraci zapsat přímo do `evcc.yaml` s `name`, `type: custom` a blokem atributů pod nimi:
+Případně můžete celou konfiguraci zapsat přímo do `evcc.yaml`, s klíči `name` a `type: custom` a pod nimi s blokem atributů:
 
 ```yaml
 meters:
@@ -45,7 +45,7 @@ Každé zařízení definované uživatelem popisují tři druhy polí:
 
 - **Atributy pro čtení**: pluginy, které evcc dotazuje, aby získal hodnotu (např. `power`, `soc`, `status`).
 - **Atributy pro zápis**: pluginy, které evcc volá, aby nastavil hodnotu nebo spustil akci (např. `enable`, `maxcurrent`, `wakeup`). Zapisovaná hodnota je v pluginu k dispozici.
-- **Funkce**: seznam `features`, který zapíná nestandardní chování. Dostupné příznaky závisejí na typu zařízení.
+- **Funkce**: seznam `features`, který zapíná nestandardní chování. Dostupné funkce závisejí na typu zařízení.
 
 Obecný tvar:
 
@@ -73,7 +73,7 @@ features:
   - integrateddevice
 ```
 
-Dostupné názvy atributů a příznaky funkcí se liší podle typu zařízení a jsou uvedeny v následujících sekcích.
+Dostupné názvy atributů a funkcí se liší podle typu zařízení a jsou uvedeny v následujících sekcích.
 
 ## Měřič \{#meter\}
 
@@ -93,7 +93,7 @@ Ne všechny role měřičů podporují všechny atributy:
 
 - `limitsoc` a `batterymode` se používají výhradně pro měřiče baterie (odkazované ze `site.battery`).
 - `curtail` a `curtailed` se používají společně pro měřiče `pv`, které podporují omezení výkonu (§ 9 EEG).
-- `currents`, `voltages` a `powers` jsou fázové atributy pro měřiče sítě (`grid`) a nabíječky (`charge`), z nichž každý musí obsahovat přesně tři pluginy (jako pole YAML).
+- `currents`, `voltages` a `powers` jsou fázové atributy, z nichž každý musí obsahovat přesně tři pluginy (jako pole YAML); platí pro měřiče sítě (`grid`) a nabíječky (`charge`).
 
 Každý plugin musí vracet správný datový typ.
 Pro převod použijte [čtecí pipeline](/cs/reference/plugins#reading).
@@ -117,13 +117,13 @@ Pro převod použijte [čtecí pipeline](/cs/reference/plugins#reading).
 
 Co znamená kladná hodnota `power` a oba směry energie, závisí na roli měřiče:
 
-| Role                     | `power` kladné               | `energy`     | `returnenergy`               |
-| ------------------------ | ---------------------------- | ------------ | ---------------------------- |
-| `grid`                   | Odběr ze sítě                | Odebráno     | Exportováno (export do sítě) |
-| `pv`                     | Výroba                       | Vyrobeno     | Spotřebováno (zřídka)        |
-| `battery`                | Vybíjení (záporné: nabíjení) | Vybito       | Nabito                       |
-| `charge`                 | Nabíjení                     | Nabito       | Vybito (V2X)                 |
-| `aux`, `ext`, `consumer` | Spotřeba                     | Spotřebováno | Vyrobeno (zřídka)            |
+| Role                     | `power` kladné               | `energy`     | `returnenergy`        |
+| ------------------------ | ---------------------------- | ------------ | --------------------- |
+| `grid`                   | Odběr ze sítě                | Odebráno     | Exportováno do sítě   |
+| `pv`                     | Výroba                       | Vyrobeno     | Spotřebováno (zřídka) |
+| `battery`                | Vybíjení (záporné: nabíjení) | Vybito       | Nabito                |
+| `charge`                 | Nabíjení                     | Nabito       | Vybito (V2X)          |
+| `aux`, `ext`, `consumer` | Spotřeba                     | Spotřebováno | Vyrobeno (zřídka)     |
 
 `energy` a `returnenergy` jsou rostoucí stavy měřiče v kWh, ideálně celkové hodnoty od uvedení měřiče do provozu, jako jsou registry odběru a exportu u měřiče sítě.
 Rozdíly mezi stavy se počítají automaticky, takže plugin musí vracet stav měřiče, a ne hodnoty spotřeby za interval.
@@ -156,6 +156,7 @@ Používají se jen ty režimy baterie, které zařízení podporuje.
 Pokud je `batterymode` typu [`switch`](/cs/reference/plugins#switch), podporované režimy se převezmou z jeho hodnot `case`.
 Funguje to i tehdy, když je switch vložený do pluginu [`watchdog`](/cs/reference/plugins#watchdog).
 Každý jiný plugin potřebuje `batterymodes` se seznamem podporovaných režimů, např. `batterymodes: ["normal", "hold", "charge"]`.
+[`evcc meter verifybatterymodes`](/cs/reference/cli/evcc_meter_verifybatterymodes) postupně přepne nakonfigurované režimy na skutečné baterii a ukáže, zda výkon baterie reaguje podle očekávání.
 
 ### Příklady
 
@@ -240,17 +241,17 @@ Specializované typy nabíječek pro jiná zařízení najdete v sekcích [Pře
 | `enable`           | `bool`  | ano     | Povolí/zakáže nabíjení                                     |
 | `maxcurrent`       | `int`   | ano     | Nastaví maximální nabíjecí proud v A                       |
 | `maxcurrentmillis` | `float` | ne      | Nastaví maximální nabíjecí proud v A (s desetinnými místy) |
-| `phases1p3p`       | `int`   | ne      | Přepnout fáze (vyžaduje `tos: true`)                       |
+| `phases1p3p`       | `int`   | ne      | Přepne fáze (vyžaduje `tos: true`)                         |
 | `wakeup`           | `bool`  | ne      | Probudí vozidlo                                            |
 
 ### Funkce \{#charger-features\}
 
-| Funkce             | Popis                                                                                                                                                                                                                                                                                                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `integrateddevice` | Bez výběru vozidla. Zařízení běží bez připojeného vozidla a bez nabíjecích relací (např. tepelné čerpadlo, topná tyč, trvale instalovaný spotřebič).                                                                                                                                                                                                               |
-| `heating`          | Zařízení se považuje za topení: stav nabití a limity se zobrazují v °C místo v %.                                                                                                                                                                                                                                                                                  |
-| `continuous`       | Zařízení ve stavu „vypnuto“ dál běží ve vlastním běžném provozu. Uživatelské rozhraní zobrazuje **Běžný režim** místo **Pohotovostní režim**. Požadavek na zvýšení výkonu (např. při solárním přebytku nebo levné energii ze sítě) se označuje jako **Boost**. Režimy se označují **Normální**, **Chytrý** a **Boost** místo **Vypnuto**, **Chytrý** a **Rychlé**. |
-| `switchdevice`     | Zařízení lze pouze zapnout/vypnout (bez plynulého řízení proudu). Maximální proud a volba **Vždy nabíjet** se nezobrazují. Minimální proud a fáze určují výkon pro zapnutí ze soláru. Bez `continuous` se režimy označují **Vypnuto**, **Chytrý** a **Zapnuto**.                                                                                                   |
+| Funkce             | Popis                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Bez výběru vozidla. Zařízení běží bez připojeného vozidla a bez nabíjecích relací (např. tepelné čerpadlo, topná tyč, trvale instalovaný spotřebič).                                                                                                                                                                                                          |
+| `heating`          | Zařízení se považuje za topení: stav nabití a limity se zobrazují v °C místo v %.                                                                                                                                                                                                                                                                             |
+| `continuous`       | Zařízení ve stavu „vypnuto“ dál běží ve vlastním běžném provozu. Uživatelské rozhraní zobrazuje „Běžný provoz“ místo „Pohotovostní režim“. Požadavek na zvýšení výkonu (např. při solárním přebytku nebo levné energii ze sítě) se označuje jako „Boost“. Režimy se označují **Normální**, **Chytrý** a **Boost** místo **Vypnuto**, **Chytrý** a **Rychlé**. |
+| `switchdevice`     | Zařízení lze pouze zapnout/vypnout (bez plynulého řízení proudu). Maximální proud a volba **Vždy nabíjet** se nezobrazují. Minimální proud a počet fází určují, od jakého solárního přebytku se zařízení zapne. Bez `continuous` se režimy označují **Vypnuto**, **Chytrý** a **Zapnuto**.                                                                    |
 
 Běžné kombinace funkcí ve vestavěných šablonách:
 
@@ -356,15 +357,15 @@ Cílový topný výkon se zapisuje přímo přes `setmaxpower`.
 Pro tepelná čerpadla, která poskytují standardní rozhraní SG-Ready jako jedinou hodnotu režimu.
 Podporovány jsou tři režimy: `1` snížený, `2` normální, `3` boost.
 
-| Atribut       | Typ     | Povinné | Popis                                                     |
-| ------------- | ------- | ------- | --------------------------------------------------------- |
-| `power`       | `float` | ne      | Aktuální výkon ve W                                       |
-| `energy`      | `float` | ne      | Stav měřiče v kWh                                         |
-| `temp`        | `float` | ne      | Aktuální teplota v °C                                     |
-| `limittemp`   | `int`   | ne      | Interní teplotní limit zařízení v °C                      |
-| `setmode`     | `int`   | ano     | Změnit režim SG-Ready (1: snížený, 2: normální, 3: boost) |
-| `getmode`     | `int`   | ne      | Aktuální režim SG-Ready (1, 2, 3)                         |
-| `setmaxpower` | `int`   | ne      | Nastaví maximální topný výkon ve W                        |
+| Atribut       | Typ     | Povinné | Popis                                                    |
+| ------------- | ------- | ------- | -------------------------------------------------------- |
+| `power`       | `float` | ne      | Aktuální výkon ve W                                      |
+| `energy`      | `float` | ne      | Stav měřiče v kWh                                        |
+| `temp`        | `float` | ne      | Aktuální teplota v °C                                    |
+| `limittemp`   | `int`   | ne      | Interní teplotní limit zařízení v °C                     |
+| `setmode`     | `int`   | ano     | Změní režim SG-Ready (1: snížený, 2: normální, 3: boost) |
+| `getmode`     | `int`   | ne      | Aktuální režim SG-Ready (1, 2, 3)                        |
+| `setmaxpower` | `int`   | ne      | Nastaví maximální topný výkon ve W                       |
 
   </TabItem>
   <TabItem label="SG-Ready přes relé">
@@ -567,7 +568,7 @@ Omezí výsledek na 50 ct/kWh.
 formula: factor := 1.0; if price < 0 { factor = 0.0 }; factor * 0.07
 ```
 
-Vyplácí pevný tarif výkupu energie 7 ct/kWh, kromě případů, kdy je cena na denním trhu záporná.
+Vrací pevnou výkupní cenu 7 ct/kWh, kromě případů, kdy je cena na denním trhu záporná.
 
 ## Externí limit \{#external-limit\}
 
@@ -664,15 +665,15 @@ limit:
 
 ### Řídicí jednotka FNN \{#external-limit-fnn\}
 
-Řídicí jednotky podle standardu FNN signalizují snížení odběru a omezení výkonu přes samostatné spínací kontakty.
-Snížení odběru (W4) a omezení výkonu (W3, S2, S1) fungují nezávisle na sobě.
+Řídicí jednotky podle standardu FNN signalizují snížení spotřeby a omezení výkonu přes samostatné spínací kontakty.
+Snížení spotřeby (W4) a omezení výkonu (W3, S2, S1) fungují nezávisle na sobě.
 Nakonfigurovat je nutné alespoň jeden ze signálů `w4` nebo `w3`.
 
 | Atribut           | Typ        | Povinné | Popis                                                                        |
 | ----------------- | ---------- | ------- | ---------------------------------------------------------------------------- |
-| `maxDimPower`     | `int` (W)  | ano¹    | Limit spotřeby, dokud je aktivní signál snížení (W4).                        |
+| `maxDimPower`     | `int` (W)  | ano¹    | Limit spotřeby, dokud je aktivní signál snížení spotřeby (W4).               |
 | `maxCurtailPower` | `int` (W)  | ano²    | Instalovaný solární výkon, základní hodnota pro stupně omezení výkonu.       |
-| `w4`              | plugin     | ne      | Čte signál snížení. Omezí spotřebu na `maxDimPower`.                         |
+| `w4`              | plugin     | ne      | Čte signál snížení spotřeby. Omezí spotřebu na `maxDimPower`.                |
 | `w3`              | plugin     | ne      | Čte signál omezení výkonu. Omezí export do sítě na 0 % z `maxCurtailPower`.  |
 | `s2`              | plugin     | ne      | Čte signál omezení výkonu. Omezí export do sítě na 30 % z `maxCurtailPower`. |
 | `s1`              | plugin     | ne      | Čte signál omezení výkonu. Omezí export do sítě na 60 % z `maxCurtailPower`. |
@@ -753,7 +754,7 @@ productionNominalMax: 10000 # Installed generator power (Wp)
 
 ## Zařízení pro omezení výkonu \{#curtailer\}
 
-Zařízení pro omezení výkonu definované uživatelem omezuje na žádost provozovatele distribuční soustavy (§ 9 EEG) export do sítě z fotovoltaické elektrárny, pokud střídač nelze omezit přes konfiguraci jeho [měřiče](#meter).
+Zařízení pro omezení výkonu definované uživatelem snižuje export do sítě z fotovoltaické elektrárny na žádost provozovatele distribuční soustavy (§ 9 EEG), pokud střídač nelze regulovat přes konfiguraci jeho [měřiče](#meter).
 V uživatelském rozhraní zvolte **Zařízení nastavené uživatelem** v **Konfigurace → Síť → Přidat zařízení omezující výkon**.
 Viz také [referenci konfigurace `curtailers`](/cs/reference/configuration/curtailers) a [Externí limit](/cs/external-limit#curtailment-devices).
 
