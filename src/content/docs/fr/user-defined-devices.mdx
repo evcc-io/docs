@@ -1,6 +1,6 @@
 ---
 title: Appareils personnalisés
-description: "Intégrez un chargeur, un compteur, un véhicule ou un point de chauffage sans modèle intégré en définissant vous-même ses valeurs et commandes via HTTP, MQTT ou Modbus."
+description: "Intégrez un chargeur, un compteur, un véhicule ou un chauffage sans modèle intégré en définissant vous-même ses valeurs et commandes via HTTP, MQTT ou Modbus."
 tableOfContents:
   maxHeadingLevel: 4
 translatedFrom: "88dfca4fdde4"
@@ -8,14 +8,14 @@ translatedFrom: "88dfca4fdde4"
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-Lors de la création d’un chargeur, d’un point de chauffage, d’un compteur général, d’une batterie domestique, d’une installation photovoltaïque, d’un autre consommateur, d’un véhicule, d’un tarif, d’un appareil de bridage ou d’un service de notification, vous pouvez choisir l’option **Appareil personnalisé** dans la liste des types d’appareils et décrire votre propre logique à l’aide du [système de plugins](/fr/reference/plugins).
+Lors de la création d’un chargeur, d’un chauffage, d’un compteur avant réseau, d’une batterie domestique, d’une installation photovoltaïque, d’un autre consommateur, d’un véhicule, d’un tarif, d’un appareil de bridage ou d’un service de notification, vous pouvez choisir l’option **Appareil personnalisé** dans la liste des types d’appareils et décrire votre propre logique à l’aide du [système de plugins](/fr/reference/plugins).
 
 Vous pouvez ainsi intégrer des appareils qui ne sont pas couverts par un modèle intégré, p. ex. lire la puissance actuelle depuis un point de terminaison HTTP ou écrire un courant cible via Modbus.
 
 ## Définir un appareil
 
 Dans l’interface, chaque type d’appareil propose une entrée **Appareil personnalisé** dans le sélecteur de modèle.
-Ce choix ouvre un éditeur dans lequel vous saisissez votre propre configuration.
+Ce choix ouvre l’éditeur de votre propre configuration.
 Un appareil avec `type: custom` est créé par défaut. Le type peut être remplacé par une autre valeur si nécessaire (p. ex. `type: heatpump`).
 
 ```yaml
@@ -35,7 +35,7 @@ meters:
       topic: home/current/imsys/chn2/raw
 ```
 
-Tous les autres exemples de cette page utilisent la forme courte du bloc d’attributs, telle que vous la saisissez dans l’interface.
+Tous les autres exemples de cette page utilisent la forme plate du bloc d’attributs que vous saisissez dans l’interface.
 
 Pour la liste des sources de plugins disponibles (`http`, `mqtt`, `modbus`, …) et des fonctions auxiliaires (`calc`, `map`, `watchdog`, …), consultez la [référence des plugins](/fr/reference/plugins).
 
@@ -50,7 +50,7 @@ Chaque appareil personnalisé est décrit par trois sortes de champs :
 Forme générale :
 
 ```yaml
-# attributs de lecture
+# read attributes
 power:
   source: http
   uri: http://meter.local/power
@@ -58,7 +58,7 @@ soc:
   source: mqtt
   topic: battery/soc
 
-# attributs d’écriture
+# write attributes
 enable:
   source: http
   uri: "http://charger/relay?turn={{if .enable}}on{{else}}off{{end}}"
@@ -67,7 +67,7 @@ maxcurrent:
   topic: charger/maxcurrent
   payload: ${maxcurrent:%d}
 
-# fonctionnalités
+# features
 features:
   - heating
   - integrateddevice
@@ -78,9 +78,9 @@ Les noms d’attributs et les options de fonctionnalités disponibles diffèrent
 ## Compteur \{#meter\}
 
 Les compteurs de puissance sont configurés dans la section [`meters`](/fr/reference/configuration/meters).
-Les compteurs définis sous `meters:` peuvent être référencés depuis `site` :
+Dans la section `site`, les compteurs définis sous `meters:` sont affectés aux rôles suivants :
 
-- `grid` : compteur général
+- `grid` : compteur avant réseau
 - `pv` : compteur solaire
 - `battery` : compteur de la batterie domestique
 - `charge` : compteur de la puissance de charge du chargeur
@@ -93,25 +93,25 @@ Tous les rôles de compteur ne prennent pas en charge tous les attributs :
 
 - `limitsoc` et `batterymode` sont utilisés exclusivement pour les compteurs de batterie (référencés depuis `site.battery`).
 - `curtail` et `curtailed` s’utilisent ensemble pour les compteurs `pv` qui prennent en charge le bridage (§ 9 EEG).
-- `currents`, `voltages` et `powers` sont des attributs de phase qui doivent chacun être configurés avec exactement trois entrées de plugin (sous forme de tableau YAML) et s’appliquent aux compteurs généraux (`grid`) et aux chargeurs (`charge`).
+- `currents`, `voltages` et `powers` sont des attributs de phase qui doivent chacun être configurés avec exactement trois entrées de plugin (sous forme de tableau YAML) et s’appliquent aux compteurs avant réseau (`grid`) et aux chargeurs (`charge`).
 
 Chaque plugin doit renvoyer le bon type de données.
 Pour la conversion, utilisez les [pipelines de lecture](/fr/reference/plugins#reading).
 
 ### Attributs de lecture
 
-| Attribut       | Type                  | Obligatoire | Contexte       | Description                                                                                            |
-| -------------- | --------------------- | ----------- | -------------- | ------------------------------------------------------------------------------------------------------ |
-| `power`        | `float`               | oui         | tous           | Puissance actuelle en W                                                                                |
-| `energy`       | `float`               | non         | tous           | Index du compteur en kWh                                                                               |
-| `returnenergy` | `float`               | non         | tous           | Index du compteur dans le sens inverse en kWh (voir ci-dessous)                                        |
-| `maxpower`     | `int`                 | non         | `pv` (hybride) | Puissance AC maximale en W                                                                             |
-| `curtailed`    | `int`                 | non         | `pv`           | Limite actuelle d’export vers le réseau en % (0 à 100). Uniquement avec `curtail`.                     |
-| `soc`          | `int`                 | non         | `battery`      | Niveau de charge en %                                                                                  |
-| `capacity`     | `float`               | non         | `battery`      | Capacité en kWh                                                                                        |
-| `powers`       | `[float,float,float]` | non         | tous           | Puissances par phase en W. Permet de déterminer le signe lorsque les courants sont fournis sans signe. |
-| `currents`     | `[float,float,float]` | non         | tous           | Courants par phase en A. Pour détecter les phases actives.                                             |
-| `voltages`     | `[float,float,float]` | non         | tous           | Tensions par phase en V. Pour détecter le raccordement (1p/3p).                                        |
+| Attribut       | Type                  | Obligatoire | Contexte       | Description                                                                        |
+| -------------- | --------------------- | ----------- | -------------- | ---------------------------------------------------------------------------------- |
+| `power`        | `float`               | oui         | tous           | Puissance actuelle en W                                                            |
+| `energy`       | `float`               | non         | tous           | Index du compteur en kWh                                                           |
+| `returnenergy` | `float`               | non         | tous           | Index du compteur dans le sens inverse en kWh (voir ci-dessous)                    |
+| `maxpower`     | `int`                 | non         | `pv` (hybride) | Puissance AC maximale en W                                                         |
+| `curtailed`    | `int`                 | non         | `pv`           | Limite actuelle d’export vers le réseau en % (0 à 100). Uniquement avec `curtail`. |
+| `soc`          | `int`                 | non         | `battery`      | Niveau de charge en %                                                              |
+| `capacity`     | `float`               | non         | `battery`      | Capacité en kWh                                                                    |
+| `powers`       | `[float,float,float]` | non         | tous           | Puissances par phase en W. Pour détecter le signe des courants non signés.         |
+| `currents`     | `[float,float,float]` | non         | tous           | Courants par phase en A. Pour détecter les phases actives.                         |
+| `voltages`     | `[float,float,float]` | non         | tous           | Tensions par phase en V. Pour détecter le raccordement (1p/3p).                    |
 
 ### Signes et sens \{#signs-and-directions\}
 
@@ -125,8 +125,8 @@ La signification d’une valeur `power` positive et des deux sens d’énergie d
 | `charge`                 | Charge                      | Chargé   | Déchargé (V2X)                  |
 | `aux`, `ext`, `consumer` | Consommation                | Consommé | Produit (rare)                  |
 
-`energy` et `returnenergy` sont des index de compteur croissants en kWh, idéalement des cumuls depuis la mise en service, comme les registres d’import et d’export d’un compteur général.
-Les différences entre les index étant calculées automatiquement, le plugin doit renvoyer un index de compteur et non des valeurs de consommation par intervalle.
+`energy` et `returnenergy` sont des index de compteur croissants en kWh, idéalement des cumuls depuis la mise en service, comme les registres d’import et d’export d’un compteur avant réseau.
+Les différences entre les relevés étant calculées automatiquement, le plugin doit renvoyer un index de compteur et non des valeurs de consommation par intervalle.
 Un compteur qui se remet à zéro périodiquement (p. ex. chaque jour) fonctionne aussi, car la remise à zéro est détectée automatiquement.
 Une valeur de `0` est considérée comme non disponible.
 
@@ -156,7 +156,7 @@ Seuls les modes de batterie pris en charge par l’appareil sont utilisés.
 Si `batterymode` est un [`switch`](/fr/reference/plugins#switch), les modes pris en charge sont déduits de ses valeurs `case`.
 Cela fonctionne aussi lorsque ce plugin est encapsulé dans un [`watchdog`](/fr/reference/plugins#watchdog).
 Tout autre plugin nécessite `batterymodes` avec la liste des modes pris en charge, p. ex. `batterymodes: ["normal", "hold", "charge"]`.
-[`evcc meter verifybatterymodes`](/fr/reference/cli/evcc_meter_verifybatterymodes) passe en revue les modes configurés sur la batterie réelle et indique si la puissance de la batterie réagit comme prévu.
+[`evcc meter verifybatterymodes`](/fr/reference/cli/evcc_meter_verifybatterymodes) active tour à tour les modes configurés sur la batterie réelle et indique si la puissance de la batterie réagit comme prévu.
 
 ### Exemples
 
@@ -216,23 +216,23 @@ Pour les autres appareils, des types de chargeurs spécialisés sont décrits da
 
 ### Attributs de lecture
 
-| Attribut       | Type                  | Obligatoire | Description                                                                                            |
-| -------------- | --------------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
-| `status`       | `string`              | oui         | Statut (A à F)                                                                                         |
-| `enabled`      | `bool`                | oui         | La charge est-elle activée ?                                                                           |
-| `power`        | `float`               | non         | Puissance de charge en W                                                                               |
-| `energy`       | `float`               | non         | Index du compteur en kWh                                                                               |
-| `returnenergy` | `float`               | non         | Index du compteur dans le sens inverse en kWh (énergie déchargée, V2X)                                 |
-| `identify`     | `string`              | non         | Identifiant RFID actuel                                                                                |
-| `soc`          | `int`                 | non         | Niveau de charge en %                                                                                  |
-| `limitsoc`     | `int`                 | non         | Limite de charge en %                                                                                  |
-| `temp`         | `float`               | non         | Température actuelle en °C (chauffage, alias de `soc`)                                                 |
-| `limittemp`    | `int`                 | non         | Limite de température en °C (chauffage, alias de `limitsoc`)                                           |
-| `finishtime`   | `string`              | non         | Heure de fin de charge estimée (RFC3339, durée Go, horodatage Unix ou secondes restantes)              |
-| `phases`       | `int`                 | non         | Nombre de phases physiques (1 à 3)                                                                     |
-| `powers`       | `[float,float,float]` | non         | Puissances par phase en W. Permet de déterminer le signe lorsque les courants sont fournis sans signe. |
-| `currents`     | `[float,float,float]` | non         | Courants par phase en A. Pour détecter les phases actives.                                             |
-| `voltages`     | `[float,float,float]` | non         | Tensions par phase en V. Pour détecter le raccordement (1p/3p).                                        |
+| Attribut       | Type                  | Obligatoire | Description                                                                               |
+| -------------- | --------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| `status`       | `string`              | oui         | Statut (A à F)                                                                            |
+| `enabled`      | `bool`                | oui         | La charge est-elle activée ?                                                              |
+| `power`        | `float`               | non         | Puissance de charge en W                                                                  |
+| `energy`       | `float`               | non         | Index du compteur en kWh                                                                  |
+| `returnenergy` | `float`               | non         | Index du compteur dans le sens inverse en kWh (énergie déchargée, V2X)                    |
+| `identify`     | `string`              | non         | Identifiant RFID actuel                                                                   |
+| `soc`          | `int`                 | non         | Niveau de charge en %                                                                     |
+| `limitsoc`     | `int`                 | non         | Limite de charge en %                                                                     |
+| `temp`         | `float`               | non         | Température actuelle en °C (chauffage, alias de `soc`)                                    |
+| `limittemp`    | `int`                 | non         | Limite de température en °C (chauffage, alias de `limitsoc`)                              |
+| `finishtime`   | `string`              | non         | Heure de fin de charge estimée (RFC3339, durée Go, horodatage Unix ou secondes restantes) |
+| `phases`       | `int`                 | non         | Nombre de phases physiques (1 à 3)                                                        |
+| `powers`       | `[float,float,float]` | non         | Puissances par phase en W. Pour détecter le signe des courants non signés.                |
+| `currents`     | `[float,float,float]` | non         | Courants par phase en A. Pour détecter les phases actives.                                |
+| `voltages`     | `[float,float,float]` | non         | Tensions par phase en V. Pour détecter le raccordement (1p/3p).                           |
 
 ### Attributs d’écriture
 
@@ -246,12 +246,12 @@ Pour les autres appareils, des types de chargeurs spécialisés sont décrits da
 
 ### Fonctionnalités \{#charger-features\}
 
-| Fonctionnalité     | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `integrateddevice` | Pas de sélection de véhicule. L’appareil fonctionne sans véhicule connecté et sans sessions de charge (p. ex. pompe à chaleur, résistance électrique, consommateur installé à demeure).                                                                                                                                                                                                                                       |
-| `heating`          | L’appareil est traité comme un chauffage : le niveau de charge et les limites s’affichent en °C au lieu de %.                                                                                                                                                                                                                                                                                                                 |
-| `continuous`       | L’appareil continue de fonctionner normalement, de façon autonome, lorsqu’il est « désactivé ». L’interface affiche « Opération normale » au lieu de « En attente ». Une demande d’augmentation de puissance (p. ex. en cas de surplus solaire ou d’énergie bon marché du réseau) est libellée « Boost ». Les modes s’appellent **Normal**, **Intelligent** et **Boost** au lieu d’**Arrêté**, **Intelligent** et **Rapide**. |
-| `switchdevice`     | L’appareil peut seulement être allumé ou éteint (pas de pilotage continu du courant). Le courant maximal et l’option **Toujours en charge** ne sont pas affichés. Le courant minimal et le nombre de phases déterminent le surplus solaire à partir duquel l’appareil est allumé. Sans `continuous`, les modes s’appellent **Arrêté**, **Intelligent** et **Allumé**.                                                         |
+| Fonctionnalité     | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrateddevice` | Pas de sélection de véhicule. L’appareil fonctionne sans véhicule connecté et sans sessions de charge (p. ex. pompe à chaleur, résistance électrique, consommateur installé à demeure).                                                                                                                                                                                                                               |
+| `heating`          | L’appareil est traité comme un chauffage : le niveau de charge et les limites s’affichent en °C au lieu de %.                                                                                                                                                                                                                                                                                                         |
+| `continuous`       | L’appareil continue de fonctionner en mode normal autonome lorsqu’il est « désactivé ». L’interface affiche « Opération normale » au lieu de « En attente ». Une demande d’augmentation de puissance (p. ex. en cas de surplus solaire ou d’énergie bon marché du réseau) est libellée « Boost ». Les modes s’appellent **Normal**, **Intelligent** et **Boost** au lieu d’**Arrêté**, **Intelligent** et **Rapide**. |
+| `switchdevice`     | L’appareil peut seulement être allumé ou éteint (pas de pilotage continu du courant). Le courant maximal et l’option **Toujours en charge** ne sont pas affichés. Le courant minimal et les phases déterminent la puissance d’activation solaire. Sans `continuous`, les modes s’appellent **Arrêté**, **Intelligent** et **Enclenché**.                                                                              |
 
 Combinaisons de fonctionnalités courantes dans les modèles intégrés :
 
@@ -268,8 +268,8 @@ features:
 ```yaml
 features:
   - switchdevice
-  - integrateddevice # facultatif, si la prise alimente une charge fixe
-  - heating # facultatif, si elle commande un dispositif de chauffage
+  - integrateddevice # optional, when the socket drives a fixed load
+  - heating # optional, when it controls a heating device
 ```
 
 **Pompe à chaleur** :
@@ -279,7 +279,7 @@ features:
   - integrateddevice
   - heating
   - continuous
-  - switchdevice # facultatif, si aucun pilotage du courant n’est possible (SG Ready)
+  - switchdevice # optional, when no current control is available (SG Ready)
 ```
 
 ### Exemples
@@ -316,7 +316,7 @@ enable:
 
 Pour les prises connectées et les appareils à relais similaires qui peuvent seulement être allumés ou éteints, sans pilotage continu du courant.
 Le statut de charge est déduit de la puissance actuelle (au-dessus de `standbypower`, l’appareil est considéré comme en charge).
-Tous les détails de mise en place se trouvent sur la page [Prises commutables](/fr/smartswitches).
+Tous les détails de mise en place se trouvent dans la page [Prises commutables](/fr/smartswitches).
 
 | Attribut       | Type    | Obligatoire | Description                                                                                                |
 | -------------- | ------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
@@ -330,14 +330,14 @@ Tous les détails de mise en place se trouvent sur la page [Prises commutables](
 ### Pompes à chaleur \{#charger-heating\}
 
 Les pompes à chaleur et les dispositifs de chauffage similaires utilisent des types de chargeurs dédiés, chacun avec ses propres attributs.
-La mise en place complète est décrite sur la page [Pompes à chaleur, résistances électriques](/fr/heating).
+La mise en place complète est décrite dans la page [Pompes à chaleur, résistances électriques](/fr/heating).
 
 <Tabs>
   <TabItem label="Pompe à chaleur">
 
 **`type: heatpump`**
 
-Pour les pompes à chaleur à vitesse variable qui acceptent une consigne de puissance continue via Modbus, HTTP ou un protocole similaire.
+Pour les pompes à chaleur à vitesse variable (Inverter) qui acceptent une consigne de puissance continue via Modbus, HTTP ou un protocole similaire.
 La puissance de chauffage cible est écrite directement via `setmaxpower`.
 
 | Attribut      | Type    | Obligatoire | Description                                       |
@@ -354,7 +354,7 @@ La puissance de chauffage cible est écrite directement via `setmaxpower`.
 
 **`type: sgready`**
 
-Pour les pompes à chaleur qui proposent l’interface standard SG-Ready sous la forme d’une valeur de mode unique.
+Pour les pompes à chaleur qui exposent l’interface standard SG-Ready sous forme d’une valeur de mode unique.
 Trois modes sont pris en charge : `1` réduit, `2` normal, `3` boost.
 
 | Attribut      | Type    | Obligatoire | Description                                                  |
@@ -372,7 +372,7 @@ Trois modes sont pris en charge : `1` réduit, `2` normal, `3` boost.
 
 **`type: sgready-relay`**
 
-Pour les pompes à chaleur dont l’entrée SG-Ready est câblée sous la forme de deux contacts secs de relais (boost et réduction).
+Pour les pompes à chaleur dont l’entrée SG-Ready est câblée sous forme de deux contacts secs de relais (boost + dim).
 Chaque contact est piloté par un sous-chargeur distinct, référencé par son type et non via des plugins.
 
 | Attribut    | Type            | Obligatoire | Description                                       |
@@ -433,8 +433,8 @@ Les paramètres du véhicule peuvent aussi être lus via des plugins.
 Lire l’autonomie actuelle depuis des messages MQTT.
 
 ```yaml
-title: Green Mazda # nom affiché (facultatif)
-capacity: 50 # capacité de la batterie en kWh (facultatif)
+title: Green Mazda # display name (optional)
+capacity: 50 # battery capacity in kWh (optional)
 features:
   - coarsecurrent
 range:
@@ -463,7 +463,7 @@ onIdentify:
 ```
 
 Modes disponibles : `off`, `smart`, `now`.
-Les valeurs obsolètes `pv` et `minpv` sont toujours acceptées et activent `smart` avec [Toujours en charge](/fr/features/modes#always-charge) respectivement désactivé ou activé.
+Les valeurs obsolètes `pv` et `minpv` sont toujours acceptées et activent `smart` avec [Toujours en charge](/fr/features/modes#always-charge) désactivé ou activé.
 
 ## Tarif et prévision \{#tariff\}
 
@@ -483,9 +483,9 @@ Il faut configurer soit `price`, soit `forecast`, mais pas les deux.
 
 | Attribut       | Type       | Obligatoire | Description                                                                                                                                                                                                  |
 | -------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `tariff`       | `string`   | non         | `price` (par défaut), `co2`, `solar` ou `temperature`. Définit l’unité des valeurs renvoyées : prix par kWh dans la devise configurée, intensité de CO₂ en g/kWh, prévision solaire en W, température en °C. |
+| `tariff`       | `string`   | non         | `price` (par défaut), `co2`, `solar` ou `temperature`. Définit l’unité des valeurs renvoyées : prix dans la devise configurée par kWh, intensité de CO₂ en g/kWh, prévision solaire en W, température en °C. |
 | `charges`      | `float`    | non         | Majoration fixe par kWh ajoutée à chaque valeur. Par défaut `0`.                                                                                                                                             |
-| `chargesZones` | `list`     | non         | Majorations par plage horaire (p. ex. frais de réseau) qui remplacent `charges` pour certaines périodes. Voir [frais de réseau par plage horaire](/fr/reference/configuration/tariffs#charges-zones).        |
+| `chargesZones` | `list`     | non         | Majorations horaires (p. ex. frais de réseau) qui remplacent `charges` pour certaines périodes. Voir [frais de réseau horaires](/fr/reference/configuration/tariffs#charges-zones).                          |
 | `tax`          | `float`    | non         | Taxe en pourcentage appliquée au résultat, p. ex. `0.2` pour 20 %. Par défaut `0`.                                                                                                                           |
 | `formula`      | `string`   | non         | Expression Go pour un calcul personnalisé, avec `price`, `charges` et `tax` disponibles. Voir les [exemples](#formula-examples).                                                                             |
 | `interval`     | `duration` | non         | Intervalle d’interrogation pour `forecast`. Par défaut `1h`.                                                                                                                                                 |
@@ -582,7 +582,7 @@ Voir aussi la [référence de configuration `hems`](/fr/reference/configuration/
 ### Relais
 
 Le raccordement via un contact de commutation unique est la solution la plus simple.
-Le boîtier de commande ferme un contact que votre instance evcc surveille.
+Le boîtier de commande active un contact qui est évalué par votre instance evcc.
 
 | Attribut      | Type       | Obligatoire | Description                                                                                             |
 | ------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------- |
@@ -602,12 +602,12 @@ Avec un Raspberry Pi, la broche GPIO peut être lue directement :
 
 ```yaml
 type: relay
-maxPower: 8400 # Exemple pour 2 SteuVE
+maxPower: 8400 # Example for 2 SteuVE
 limit:
   source: gpio
   function: read
-  pin: 17 # Lire la broche GPIO 17
-  # Valeur renvoyée : false = non limité, true = limité
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = not limited, true = limited
 ```
 
 Pour plus de détails sur le plugin GPIO, consultez la [documentation des plugins](/fr/reference/plugins#gpio).
@@ -619,11 +619,11 @@ Si le boîtier de commande ou la passerelle envoie des messages MQTT :
 
 ```yaml
 type: relay
-maxPower: 11340 # Exemple pour 3 SteuVE avec un facteur de simultanéité de 0.9
+maxPower: 11340 # Example for 3 SteuVE with simultaneity factor 0.9
 limit:
   source: mqtt
   topic: hems/limit/status
-  # Valeurs attendues : 0/false = normal, 1/true = limité
+  # Expected values: 0/false = normal, 1/true = limited
 ```
 
 </TabItem>
@@ -633,11 +633,11 @@ Pour les boîtiers de commande avec API REST :
 
 ```yaml
 type: relay
-maxPower: 13440 # Exemple pour 4 SteuVE avec un facteur de simultanéité de 0.8
+maxPower: 13440 # Example for 4 SteuVE with simultaneity factor 0.8
 limit:
   source: http
   uri: http://steuerbox.local/api/limit
-  jq: .limited # chemin JSON vers la valeur booléenne
+  jq: .limited # JSON path to boolean value
 ```
 
 </TabItem>
@@ -647,17 +647,17 @@ Si le boîtier de commande ou une passerelle fournit la limite de puissance via 
 
 ```yaml
 type: relay
-maxPower: 4200 # Exemple pour 1 SteuVE
+maxPower: 4200 # Example for 1 SteuVE
 limit:
   source: modbus
-  uri: 192.168.179.200:4703 # Exemple : relais sur le 2e compteur S0 d’une borne cFos Power Brain Solar
-  id: 3 # ID esclave Modbus
+  uri: 192.168.179.200:4703 # Example: relay on the 2nd S0 meter of a cFos Power Brain solar wallbox
+  id: 3 # Modbus slave ID
   timeout: 5s
   register:
     type: holding
     decode: uint16
     address: 8056
-  # Valeur renvoyée : 0 = non limité, 1 = limité
+  # Return value: 0 = not limited, 1 = limited
 ```
 
 </TabItem>
@@ -683,13 +683,13 @@ Au moins un des signaux `w4` ou `w3` doit être configuré.
 
 ```yaml
 type: fnn
-maxDimPower: 4200 # limite de consommation pendant la réduction (en watts)
-maxCurtailPower: 10000 # puissance solaire installée, base des paliers de bridage (en watts)
+maxDimPower: 4200 # Consumption limit while dimmed (in watts)
+maxCurtailPower: 10000 # Installed solar power, base for curtailment steps (in watts)
 w4:
   source: gpio
   function: read
-  pin: 17 # Lire la broche GPIO 17
-  # Valeur renvoyée : false = normal, true = actif
+  pin: 17 # Read GPIO pin 17
+  # Return value: false = normal, true = active
 w3:
   source: gpio
   function: read
@@ -722,7 +722,7 @@ Le boîtier de commande et evcc doivent être [appairés](/fr/external-limit#eeb
 
 ```yaml
 type: eebus
-ski: "1234-5678-90AB-CDEF" # SKI du boîtier de commande
+ski: "1234-5678-90AB-CDEF" # SKI of the control box
 ```
 
 ### Intégration personnalisée \{#external-limit-custom\}
@@ -731,12 +731,12 @@ Cette intégration générique s’adresse aux systèmes de commande qui fournis
 La limite de consommation et le bridage sont lus via des plugins et fonctionnent indépendamment l’un de l’autre.
 Au moins un des attributs `maxConsumptionPower` ou `curtailedPercent` doit être configuré.
 
-| Attribut               | Type       | Obligatoire | Description                                                                                                                  |
-| ---------------------- | ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `maxConsumptionPower`  | plugin     | non¹        | Lit la limite de puissance totale en watts. `0` = aucune limite.                                                             |
-| `curtailedPercent`     | plugin     | non¹        | Lit la part autorisée de l’export vers le réseau, en pourcentage de `productionNominalMax` (0 à 100). `100` = aucun bridage. |
-| `productionNominalMax` | `int` (W)  | non²        | Puissance de production installée (Wc).                                                                                      |
-| `interval`             | `duration` | non         | Intervalle d’interrogation des plugins. Par défaut `10s`.                                                                    |
+| Attribut               | Type       | Obligatoire | Description                                                                                                               |
+| ---------------------- | ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `maxConsumptionPower`  | plugin     | non¹        | Lit la limite de puissance totale en watts. `0` = aucune limite.                                                          |
+| `curtailedPercent`     | plugin     | non¹        | Lit la part d’export vers le réseau autorisée, en pourcentage de `productionNominalMax` (0 à 100). `100` = aucun bridage. |
+| `productionNominalMax` | `int` (W)  | non²        | Puissance de production installée (Wc).                                                                                   |
+| `interval`             | `duration` | non         | Intervalle d’interrogation des plugins. Par défaut `10s`.                                                                 |
 
 ¹ au moins l’un des deux est obligatoire, ² obligatoire lorsque `curtailedPercent` est configuré.
 
@@ -745,21 +745,21 @@ type: custom
 maxConsumptionPower:
   source: http
   uri: http://steuerbox.local/api/limit
-  jq: .maxPower # limite de puissance en watts, 0 = aucune limite
+  jq: .maxPower # Power limit in watts, 0 = no limit
 curtailedPercent:
   source: mqtt
-  topic: hems/curtail/percent # export autorisé en pourcentage, 100 = aucun bridage
-productionNominalMax: 10000 # puissance de production installée (Wc)
+  topic: hems/curtail/percent # Allowed feed-in in percent, 100 = no curtailment
+productionNominalMax: 10000 # Installed generator power (Wp)
 ```
 
 ## Appareil de bridage \{#curtailer\}
 
-Un appareil de bridage personnalisé (appelé « appareil limitant » dans l’interface) limite l’export vers le réseau de l’installation photovoltaïque à la demande du gestionnaire de réseau (§ 9 EEG) lorsque l’onduleur ne peut pas être bridé via la configuration de son [compteur](#meter).
+Un appareil de bridage personnalisé limite l’export vers le réseau de l’installation photovoltaïque à la demande du gestionnaire de réseau (§ 9 EEG) lorsque l’onduleur ne peut pas être bridé via la configuration de son [compteur](#meter).
 Dans l’interface, choisissez **Appareil personnalisé** sous **Configuration → Réseau → Ajouter un appareil limitant**.
 Voir aussi la [référence de configuration `curtailers`](/fr/reference/configuration/curtailers) et [Limite externe](/fr/external-limit#curtailment-devices).
 
-L’appareil reçoit la part autorisée de l’export vers le réseau, en pourcentage de la puissance de production installée, et doit l’appliquer à l’onduleur.
-`100` correspond à l’absence de limite.
+L’appareil reçoit la part d’export vers le réseau autorisée, en pourcentage de la puissance de production installée, et doit l’appliquer à l’onduleur.
+`100` signifie aucune limite.
 
 ### Attributs
 
@@ -842,10 +842,10 @@ messaging:
     - type: custom
       encoding: json
       send:
-        # type de plugin
+        # plugin type
         source: script
-        # configuration propre au plugin ;
-        # {{.send}} contient le message JSON
+        # plugin-specific configuration;
+        # {{.send}} contains the JSON message
         cmd: /usr/local/bin/evcc_message "{{.send}}"
 ```
 
