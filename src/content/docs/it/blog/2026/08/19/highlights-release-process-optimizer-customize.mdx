@@ -1,0 +1,139 @@
+---
+date: 2026-08-19
+title: "Novità: processo di rilascio, ottimizzatore, personalizzazione"
+description: "Novità di agosto 2026 su evcc 0.314, con il nuovo processo di rilascio, i progressi dell’ottimizzatore, una configurazione più curata e un’interfaccia su misura."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner delle novità"
+  image: "../../../../../en/blog/2026/08/19/highlights-release-process-optimizer-customize.webp"
+translatedFrom: "9b8919d1e112"
+---
+
+import Video from "@components/Video.astro";
+import configUiVideo from "../../../../../en/blog/2026/08/19/config-ui-navigation.mp4";
+import configUiPoster from "../../../../../en/blog/2026/08/19/config-ui-navigation.webp";
+
+Solo quattro settimane dopo l’[ultimo post sulle novità](/it/blog/2026/07/18/highlights-remote-access-widgets-optimizer) siamo di nuovo qui.
+In passato, tra un post e l’altro passavano di solito diversi mesi.
+Vogliamo cambiare questa abitudine.
+In questo post diamo una panoramica delle novità di evcc: il nuovo processo di rilascio, i progressi dell’ottimizzatore, i miglioramenti all’interfaccia di configurazione, la personalizzazione dell’interfaccia e altro ancora.
+
+{/* excerpt */}
+
+## Nuovo processo di rilascio
+
+Finora pubblicavamo le release a intervalli regolari.
+Dopo ogni release trattenevamo per un po’ le modifiche più grandi e le nuove funzioni, per vedere se emergevano bugfix urgenti o regressioni.
+Poi le lasciavamo ancora qualche tempo nella nightly, per raccogliere feedback.
+Questo creava problemi ogni volta che dovevamo pubblicare in fretta, ad es. perché un produttore di veicoli aveva modificato la sua API.
+In quei casi dovevamo togliere temporaneamente le funzioni non ancora finite, oppure ti arrivavano un po’ meno mature del previsto 🙈.
+
+Il nostro nuovo modello risolve il problema: ora distinguiamo esplicitamente tra bugfix da distribuire rapidamente e funzioni più grandi che finiscono nella prossima feature release.
+Così possiamo applicare correttamente il [versionamento semantico](https://semver.org):
+
+- Le **feature release** come <code>0.<u>314</u>.0</code> arrivano ogni due-quattro settimane.
+- Le **bugfix release** come <code>0.314.<u>1</u></code> sono facili da pubblicare nel frattempo.
+- La **nightly** come <code>0.315.0<u>-dev.1787769000</u></code> contiene sempre lo stato attuale del branch `master`, cioè tutte le funzioni e tutti i bugfix.
+
+Tutto lo sviluppo avviene ancora su `master`.
+La novità è il comando `/backport` su GitHub, che seleziona singole pull request per la prossima bugfix release.
+Un agente basato su Claude si occupa del processo e risolve gli eventuali conflitti.
+
+## Ottimizzazioni dell’ottimizzatore
+
+Con l’[ottimizzatore](/it/features/optimizer) lavoriamo per ottimizzare il comportamento dell’intero sistema energetico per i prossimi giorni, in base alle previsioni di consumo e produzione e all’andamento del prezzo dell’energia.
+Ne abbiamo già parlato nell’[ultimo post sulle novità](/it/blog/2026/07/18/highlights-remote-access-widgets-optimizer#optimizer).
+L’ottimizzatore è ancora sperimentale.
+Per ora il piano calcolato viene solo visualizzato: come raccomandazione sul punto di ricarica, sulla pagina della batteria e sulla [pagina dell’ottimizzatore rinnovata](https://github.com/evcc-io/evcc/pull/32837).
+Il prossimo passo è che l’ottimizzatore prenda davvero il controllo della batteria e dei punti di ricarica; la [pull request](https://github.com/evcc-io/evcc/pull/32881) è in preparazione.
+
+Novità di questa release: l’ottimizzatore tiene conto dei dati dei piani di ricarica e ottimizza più piani di ricarica insieme; finora ogni piano veniva considerato solo singolarmente.
+Oltre a questo, sono successe molte cose:
+
+- Ora indica [se il piano calcolato è realizzabile](https://github.com/evcc-io/evcc/pull/32632), ad es. se tutti gli obiettivi di ricarica si possono raggiungere in tempo.
+- Si può configurare un [limite statico di immissione in rete](https://github.com/evcc-io/evcc/pull/32541), che viene considerato nell’ottimizzazione.
+- L’[impostazione di carica ritardata](https://github.com/evcc-io/evcc/pull/32872) (precondizionamento) del piano di ricarica viene considerata nell’ottimizzazione.
+- Ricalcola subito in caso di [cambio di veicolo e quando colleghi o scolleghi il veicolo](https://github.com/evcc-io/evcc/pull/32681).
+- I punti di ricarica con un veicolo di capacità sconosciuta (ad es. un veicolo ospite) ora contribuiscono con la loro [potenza di ricarica misurata come consumo](https://github.com/evcc-io/evcc/pull/32681); prima mancavano del tutto nell’ottimizzazione.
+- [Smette di richiedere la ricarica](https://github.com/evcc-io/evcc/pull/32633) quando il veicolo è carico.
+
+![Pagina dell’ottimizzatore con piano di ricarica e proiezione del livello di carica](../../../../../en/blog/2026/08/19/optimizer.webp)
+
+Provalo: attiva le funzioni sperimentali in **Configurazione → Sperimentale** e poi abilita l’ottimizzatore.
+Controlla la pagina dell’ottimizzatore e verifica se il piano risultante ti sembra plausibile.
+Saremo felici di ricevere il tuo feedback.
+
+## Ottimizzazione dell’interfaccia di configurazione
+
+La configurazione dal browser è sempre più rifinita:
+
+- I [dispositivi si possono disattivare](https://github.com/evcc-io/evcc/pull/29455) senza eliminarli, ad es. quando un dispositivo è temporaneamente offline o stai riorganizzando la tua installazione.
+- Le finestre di dialogo [avvisano prima della chiusura](https://github.com/evcc-io/evcc/pull/32826) se ci sono modifiche non salvate.
+- I valori di energia e potenza scelgono automaticamente un’[unità adatta](https://github.com/evcc-io/evcc/pull/32754).
+- Su dispositivi mobili, la pagina di configurazione ha ora una vera [navigazione per sezioni](https://github.com/evcc-io/evcc/pull/32810) invece di un unico lungo elenco.
+
+<Video
+  src={configUiVideo}
+  poster={configUiPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Navigazione per sezioni della configurazione su dispositivi mobili"
+/>
+
+## Personalizzare l’interfaccia
+
+Ora l’interfaccia si può personalizzare: logo, nome del marchio, sito web, e-mail e numero di telefono dell’assistenza.
+Questo è interessante ad es. per elettricisti e installatori che usano evcc nei progetti per i clienti.
+Se configuri un’e-mail di assistenza personalizzata, le segnalazioni di problemi dall’interfaccia vengono inviate al tuo indirizzo di assistenza invece che a GitHub.
+La [pagina white label](/it/reference/white-label) spiega quali opzioni sono disponibili e come adattare l’aspetto dell’interfaccia ai tuoi gusti con il tuo CSS.
+
+![Finestra di dialogo Informazioni con branding personalizzato](../../../../../en/blog/2026/08/19/white-label.webp)
+
+## Modifiche incompatibili e integrazioni
+
+Abbiamo cambiato il formato con cui i dati delle previsioni e delle tariffe vengono pubblicati tramite API e MQTT.
+Invece di oggetti prolissi, i dati arrivano ora come [array compatti con timestamp Unix](https://github.com/evcc-io/evcc/pull/32391), e MQTT pubblica [un messaggio per ogni tipo di previsione](https://github.com/evcc-io/evcc/pull/32716).
+Il risultato: payload molto più piccoli, caricamento più rapido e meno banda, cosa che si nota soprattutto nell’app e con connessioni lente.
+
+Si tratta di una modifica incompatibile.
+Un enorme grazie a tutti i maintainer delle integrazioni di evcc che hanno adattato i loro progetti prima della release: [marq24](https://github.com/marq24) e [mkshb](https://github.com/mkshb) ([Home Assistant](/it/smarthome/home-assistant)), [Newan](https://github.com/Newan) ([ioBroker](/it/smarthome/iobroker)), [rdvnit](https://github.com/rdvnit) ([Homey](/it/smarthome/homey)), [TheNinth7](https://github.com/TheNinth7) ([Garmin](/it/smarthome/garmin)) e il team dietro il [binding openHAB](/it/smarthome/openhab).
+È bellissimo vedere un ecosistema così attivo intorno a evcc.
+
+Nella navigazione della documentazione abbiamo aggiunto una nuova sezione **Smart home** dedicata a queste integrazioni.
+Nella pagina [Altri progetti fantastici](/it/smarthome/awesome) raccogliamo anche progetti più piccoli della community, dalle dashboard Grafana a un display e-ink e un’app per la barra dei menu.
+Se hai creato un piccolo strumento, uno script o un’integrazione per evcc, proponilo pure per l’elenco tramite pull request, così anche altri possono trovarlo.
+
+## Piccoli miglioramenti
+
+- **Nuovo motore per i grafici:** la migrazione da [Chart.js](https://github.com/chartjs/Chart.js) ad [Apache ECharts](https://echarts.apache.org) è completata; purtroppo lo sviluppo di Chart.js si è fermato.
+  ECharts ci dà una base solida per i nostri grandi piani sulla visualizzazione dei dati (resta sintonizzato)…
+- **Ottimizzazione per il touch:** [scorri per passare da un intervallo di tempo all’altro](https://github.com/evcc-io/evcc/pull/32614), i tooltip [compaiono e scompaiono correttamente al tocco](https://github.com/evcc-io/evcc/pull/32613) e i dati storici si caricano sensibilmente più velocemente grazie a [prefetching e caching](https://github.com/evcc-io/evcc/pull/32699).
+- **Piano di ricarica:** le impostazioni della strategia sono più facili da trovare; obiettivo di ottimizzazione e carica ritardata si trovano ora direttamente nella [finestra di dialogo del piano di ricarica](/it/features/plans).
+- **Carica e autonomia aggiunte:** se il tuo veicolo comunica il livello di carica, ogni sessione di ricarica registra la carica guadagnata e l’autonomia aggiunta stimata, visibili nei dettagli della sessione e nella [panoramica delle sessioni](/it/features/sessions).
+- **Accesso remoto:** gli errori di connessione del tunnel ora sono visibili nell’interfaccia e, dopo un avvio senza internet, la tua istanza ripristina da sola la [connessione di accesso remoto](/it/features/remote-access).
+- **Riferimento dell’API di stato:** la nostra struttura dati dello stato (`/api/state`) finora non era documentata.
+  La nuova [pagina di riferimento](/it/reference/state) cambia le cose: è [generata direttamente dalle definizioni dei tipi dell’interfaccia](https://github.com/evcc-io/evcc/pull/32431), quindi corrisponde sempre all’API reale.
+
+## Nuovi dispositivi supportati
+
+**Caricabatterie:** NEcharge Pro (OCPP), Youliq One, più miglioramenti per Atmoce e Voltie
+
+**Contatori, impianti fotovoltaici e batterie:** Socomec Countis E3x/E4x, Ferroamp, Fronius Argeno e Smart Meter IP, SunEnergyXT 500, contatore di carico AC Victron GX, Tesla Powerwall tramite Fleet API e controllo della batteria per FoxESS H3 e Solplanet
+
+**Limitazione della produzione (§ 9 EEG):** ora si possono limitare Goodwe, Fronius Gen24, Huawei EMMA e Huawei SmartLogger
+
+Naturalmente ci sono stati anche molti bugfix e miglioramenti alle integrazioni esistenti.
+I dettagli si trovano nelle [note di rilascio](https://github.com/evcc-io/evcc/releases/tag/0.314.0).
+
+---
+
+💚 Un grande grazie a tutti quelli che fanno andare avanti il progetto: con codice, idee, test, discussioni e supporto finanziario: senza tutto questo il progetto non sarebbe possibile in questa forma.
+
+Ti auguriamo una fine estate piena di sole.
+
+**Un caro saluto**<br />
+Il team evcc<br />
+Michael, Andi & Uli

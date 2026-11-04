@@ -1,0 +1,104 @@
+---
+title: "Sessions de charge"
+description: "Explique les valeurs affichées par evcc pendant la charge, le fonctionnement de l’historique des sessions avec statistiques et export CSV et le détail d’une session."
+sidebar:
+  order: 7
+translatedFrom: "d1b4445f95e6"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+La tâche principale d’evcc est la charge intelligente des véhicules en fonction de l’énergie solaire, de la batterie domestique et des tarifs d’électricité.
+Ce pilotage se fait automatiquement et en arrière-plan.
+Pour que vous puissiez voir l’effet de ces optimisations, nous enregistrons quelques mesures pendant la session de charge.
+
+## Session de charge en cours
+
+La vue principale affiche des informations sur la session de charge en cours.
+
+<Screenshot
+  name="features/screenshots/sessions-main-ui"
+  caption="Mesures pendant la charge"
+/>
+
+1.  **Puissance :** affiche la puissance de charge actuelle en kW.
+    L’éclair vert indique qu’une charge est active.
+    Sous la puissance, le nombre de phases actives et leur utilisation sont représentés par de petites barres vertes.
+
+2.  **Chargé :** affiche la quantité d’énergie déjà chargée.
+    Si votre chargeur intègre un compteur, les valeurs proviennent de celui-ci.
+    Pour les chargeurs sans compteur, evcc calcule la quantité d’énergie à partir de la puissance de charge.
+
+3.  **Autres valeurs :** selon votre installation, d’autres valeurs mesurées sont disponibles.
+    Vous pouvez les sélectionner en cliquant sur leur nom.
+    Vous pouvez aussi cliquer sur la valeur numérique pour passer à l’affichage suivant.
+
+            * **Temps restant :** affiche le temps restant jusqu’à ce que l’objectif de charge soit atteint.
+            Si votre véhicule le permet, le temps restant est déterminé à partir des données du véhicule.
+            Sinon, le temps restant est calculé à partir de la puissance de charge actuelle et de l’objectif de charge.
+
+            * **Heure de fin :** affiche l’heure à laquelle l’objectif de charge sera atteint, d’après le temps restant.
+            Comme pour le temps restant, il faut que le véhicule puisse le déterminer à partir de ses données.
+
+            * **Durée :** affiche la durée effective de la session de charge.
+            Si la session de charge est en pause (p. ex. faute de surplus solaire suffisant), le temps est arrêté.
+
+            * **Solaire :** le pourcentage indique quelle part de l’énergie chargée provient de l’installation photovoltaïque.
+            L’énergie de la batterie domestique est comptée comme énergie solaire.
+
+            * **Prix ⌀ :** affiche le prix moyen par kWh.
+            Il se base sur le prix actuel de l’électricité, la part d’autoconsommation et, le cas échéant, le manque à gagner sur le tarif d’export vers le réseau.
+            Disponible uniquement si un [tarif d’électricité dynamique](/fr/features/dynamic-prices) est configuré.
+
+            * **Coût :** coût total de la session de charge en cours. Il se base sur le prix actuel de l’électricité, la part d’autoconsommation et, le cas échéant, le manque à gagner sur le tarif d’export vers le réseau.
+            Disponible uniquement si un [tarif d’électricité dynamique](/fr/features/dynamic-prices) est configuré.
+
+            * **CO₂ ⌀ :** affiche les émissions moyennes de CO₂ par kWh.
+            Elles se basent sur la part d’autoconsommation combinée aux émissions de CO₂ du mix électrique.
+            Votre propre électricité solaire (consommation solaire directe et batterie domestique) est considérée comme sans CO₂.
+            Disponible uniquement si une [source de CO₂](/fr/features/co2) est configurée.
+
+## Liste des sessions de charge
+
+Dans evcc, une session de charge correspond à la période entre le branchement du câble de charge et son débranchement.
+Il est tout à fait possible que la charge ait été mise en pause et relancée plusieurs fois pendant cette période.
+Les sessions de charge au cours desquelles aucune énergie n’a été chargée ne sont pas enregistrées.
+
+Dans le menu, sous « Sessions de charge », vous trouverez la liste de toutes les sessions de charge passées, regroupées par mois.
+Les données sont présentées sous forme de tableau et peuvent être exportées au format CSV ou Excel.
+Vous pouvez filtrer par point de charge et par véhicule, et consulter les totaux et les moyennes.
+
+<Screenshot
+  name="features/screenshots/sessions-list"
+  caption="Liste des sessions de charge du mois"
+/>
+
+Remarque : sur les petits écrans, une vue plus compacte avec moins de colonnes s’affiche.
+En cliquant sur les en-têtes de colonnes, vous pouvez choisir les informations à afficher.
+
+## Détail d’une session de charge
+
+Un clic sur une entrée de la liste ouvre la vue détaillée de la session de charge.
+Vous y voyez toutes les valeurs disponibles, y compris le kilométrage de votre véhicule s’il est connu.
+
+Si un véhicule n’a pas été correctement détecté, vous pouvez aussi corriger l’attribution du véhicule ou supprimer la session de charge dans cette vue.
+
+<Screenshot
+  name="features/screenshots/sessions-detail"
+  caption="Vue détaillée d’une session de charge"
+/>
+
+## Prises commutables et chauffage
+
+Contrairement aux chargeurs, il n’existe aucun moyen de détecter la session de charge avec des prises commutables (p. ex. chargeur sur prise domestique, vélo électrique) ou des dispositifs de chauffage (p. ex. pompe à chaleur, résistance chauffante).
+
+### Dispositifs de chauffage
+
+Pour les dispositifs de chauffage (pompes à chaleur, résistances chauffantes, etc.), les sessions de charge sont automatiquement réinitialisées chaque jour à minuit.
+Ainsi, les mesures sont enregistrées séparément pour chaque jour et la liste des sessions de charge reste lisible.
+
+### Prises commutables
+
+Pour les prises commutables, les sessions de charge enregistrées couvrent de longues périodes.
+Si evcc redémarre, une nouvelle session de charge est enregistrée.
+Vous pouvez aussi démarrer une nouvelle session manuellement : passez le point de charge en mode **Arrêté**, puis relancez la charge.

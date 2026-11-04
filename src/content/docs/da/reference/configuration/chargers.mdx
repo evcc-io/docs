@@ -1,0 +1,118 @@
+---
+title: "chargers"
+description: "Sådan definerer du opladere i evcc.yaml med de påkrævede felter og markerer integrerede enheder, opvarmning eller styrbare stikkontakter."
+sidebar:
+  order: 4
+translatedFrom: "8ce278855648"
+---
+
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+For at styre opladningen skal evcc kunne kommunikere med en oplader.
+
+En oplader skal mindst have følgende konfiguration:
+
+```yaml
+chargers:
+  - name: charger1 # referencenavn
+    type: ...
+    ...
+```
+
+Nedenfor forklares de mulige parametre.
+
+---
+
+## Påkrævede parametre
+
+### `name`
+
+En kort betegnelse for den oplader, der defineres her. Værdien bruges, når der henvises til opladeren i konfigurationen af [ladepunktet](/da/reference/configuration/loadpoints#charger).
+
+**Eksempel**:
+
+```yaml
+name: charger1
+```
+
+---
+
+### `type`
+
+Dette er den evcc-specifikke opladertype, der muliggør kommunikationen med opladeren. Kendte opladere kan integreres med typen `template`. Den passende (template-)type finder du under [Enheder - Opladere](/da/chargers).
+
+For ukendte opladere (eller hvis du har andre grunde) definerer du en [brugerdefineret oplader](/da/user-defined-devices#charger).
+
+**Eksempel**:
+
+```yaml
+type: custom
+```
+
+---
+
+## Valgfrie parametre
+
+### `integrateddevice`
+
+Med denne parameter vises der intet køretøj ved opladere, der fungerer uden et ”køretøj” (f.eks. varmepumpe, elcykel), og køretøjsgenkendelsen springes over.
+
+I forbindelse med denne parameter kan der også tildeles et ikon (se [`vehicle.icon`](/da/reference/configuration/vehicles#icon)), som så vises ved opladeren.
+
+**Eksempel**:
+
+```yaml
+features:
+  - integrateddevice
+icon: bike
+```
+
+---
+
+### `heating`
+
+Denne parameter bevirker, at opladningsniveauet for opladere i gruppen ”styrbare stikkontakter (switchsockets)” vises i grader i stedet for procent.
+
+**Eksempel**:
+
+```yaml
+features:
+  - heating
+```
+
+---
+
+### `continuous`
+
+Markerer en enhed, der fortsætter i sin egen normale drift, når den er ”deaktiveret”.
+Brugerfladen viser **Normal drift** i stedet for **Standby**.
+En anmodning om at øge effekten (f.eks. ved soloverskud eller billig strøm fra elnettet) vises som **Boost**.
+
+Aktivér denne funktion, når din enhed fortsætter i sin normale drift uden aktiv styring.
+Typisk drejer det sig om en varmepumpe. Forudkonfigurerede varmepumpetyper og passende skabeloner aktiverer allerede funktionen.
+
+**Eksempel**:
+
+```yaml
+features:
+  - continuous
+```
+
+---
+
+### `switchdevice`
+
+Markerer en enhed, der kun kan tændes og slukkes og ikke understøtter trinløs strømregulering (f.eks. varmepumper med tænd/sluk, styrbare stikkontakter).
+Brugerfladen skjuler indstillingerne for min./maks. strøm og indstillingen **Oplad altid** for dette ladepunkt.
+
+Passende skabeloner og forudkonfigurerede typer aktiverer allerede denne funktion.
+Ved brugerdefinerede konfigurationer via `type: custom` uden trinløs strømregulering skal du aktivere denne funktion.
+
+**Eksempel**:
+
+```yaml
+features:
+  - switchdevice
+```
+
+---

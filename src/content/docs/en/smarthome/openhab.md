@@ -14,8 +14,8 @@ It requires evcc version 0.209.8 or newer.
 Once the connection is set up, your configured devices are discovered automatically.
 The binding provides Things for:
 
-- Loadpoints with charging power, charge mode, current limits, and session data
-- Vehicles with state of charge and charging plans
+- Charging points with charging power, charge mode, current limits, and session data
+- Vehicles with charge level and charging plans
 - Site data such as grid power, solar production, and home battery
 - Heating devices
 

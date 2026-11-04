@@ -1,0 +1,113 @@
+---
+translatedFrom: "bbae10b17f51"
+---
+
+## Konfigurace relé SG-Ready \{#sgready-configuration\}
+
+### Konfigurace s relé pro boost \{#boost-relay\}
+
+Tento příklad ukazuje konfiguraci tepelného čerpadla se Shelly 1 pro režim boost a Shelly 3EM pro měření výkonu.
+Používá se k tomu typ `sgready-relay`.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Konfigurace s relé pro boost a dim \{#boost-dim-relay\}
+
+Pokud vaše tepelné čerpadlo podporuje režimy boost i dim, můžete pro kontakt dim nakonfigurovat druhé relé.
+V režimu dim se příkon tepelného čerpadla sníží.
+To se hodí ke snížení příkonu při omezeních sítě nebo v rámci § 14a EnWG.
+
+Můžete použít buď dvě samostatná relé, nebo jedno vícekanálové relé (např. Shelly s různými hodnotami `channel`).
+Kromě Shelly lze použít i jiná [ovladatelná relé](/cs/smartswitches).
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Volitelně můžete doplnit aktuální teplotu (`temp`), interní teplotní limit zařízení (`limittemp`), výkon (`power`) a energii (`energy`) [pomocí pluginu](/cs/reference/plugins).
+Tyto hodnoty slouží jen k zobrazení a tepelné čerpadlo neřídí.
+
+## Zobrazení stavu \{#status-display\}
+
+Protože tepelná čerpadla řídí vytápění vlastní logikou nezávisle na evcc, zobrazuje rozhraní dva stavy:
+
+- **Běžný režim**: žádný zásah, tepelné čerpadlo se řídí vlastní regulací.
+- **Rychlé dobití aktivní**: požadavek na zvýšení výkonu.
+  Dokud tepelné čerpadlo nezareaguje (např. kvůli minimální době chodu nebo blokovacím časům), zobrazuje stav „Rychlé dobití vyžádáno…“.
+
+Předkonfigurované typy tepelných čerpadel a odpovídající šablony už potřebné [příznaky funkcí](/cs/user-defined-devices#charger-features) nastavují.
+U vlastních konfigurací přes `type: custom` nastavte odpovídající kombinaci `integrateddevice`, `heating`, `continuous` a případně `switchdevice`.
+
+## Elektrické ohřívače vody \{#electric-water-heaters\}
+
+Jednoduché elektrické ohřívače může evcc pouze zapínat a vypínat.
+Obvykle se připojují přes [přepínatelnou zásuvku](/cs/smartswitches).
+Při dostatečném přebytku evcc zásuvku zapne (enable) a když to podmínky vyžadují, opět ji vypne (disable).
+
+Speciálním elektrickým ohřívačům s vlastní plynulou regulací předává evcc aktuálně dostupný výkon.
+Tento dostupný výkon se průběžně přizpůsobuje aktuální situaci, obdobně jako při nabíjení vozidla.
+
+evcc nabízí nastavitelné limity, kterými můžete nastavit požadovanou teplotu.
+Nejedná se však o bezpečnostní funkci.
+Regulace teploty by měla běžně probíhat přes funkci termostatu samotného ohřívače.
+
+:::danger
+Váš elektrický ohřívač vody musí mít vždy vlastní teplotní limit, který spolehlivě zabrání přehřátí v případě výpadku nebo poruchy evcc či chyby obsluhy.
+:::

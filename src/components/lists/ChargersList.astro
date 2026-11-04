@@ -3,7 +3,6 @@ import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
 import DeviceFilter from "@components/DeviceFilter.astro";
-import ChargersIntro from "@components/intros/ChargersIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
 import SponsorInfoBox from "@components/SponsorInfoBox.astro";
@@ -15,9 +14,10 @@ import {
   nightlyPageHead,
 } from "@utils/devices";
 import type { Channel } from "@utils/devices";
+import { intro } from "@utils/intros";
 
 interface Props {
-  lang: "de" | "en";
+  lang: string;
   channel: Channel;
 }
 const { lang, channel } = Astro.props;
@@ -32,32 +32,22 @@ const generic = allDevices.filter((d: any) => !(d.data.product.brand || "").trim
 
 const filterFeatures = availableOverviewFeatures(allDevices as any, { showSponsorFree: true });
 
-const title = lang === "de" ? "Wallboxen" : "Chargers";
-const description =
-  lang === "de"
-    ? "Übersicht aller unterstützten Wallboxen und Ladestationen."
-    : "Overview of all supported chargers and charging stations.";
+const title = Astro.locals.t("list.chargers.title");
+const description = Astro.locals.t("list.chargers.description");
 
-const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
-const genericTitle = lang === "de" ? "Generische Unterstützung" : "Generic support";
+const supportedTitle = Astro.locals.t("list.supported");
+const genericTitle = Astro.locals.t("list.generic");
+const Intro = intro(lang, "chargers");
 
 const hasSponsorship = allDevices.some((d: any) =>
   (d.data.requirements ?? []).includes("sponsorship"),
 );
 
-const headings = lang === "de"
-  ? [
-      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
-      { depth: 2, slug: "features", text: "Eigenschaften" },
-      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
-      { depth: 2, slug: "generic", text: genericTitle },
-    ]
-  : [
-      { depth: 2, slug: "setup", text: "Setup" },
-      { depth: 2, slug: "features", text: "Features" },
-      { depth: 2, slug: "supported", text: "Supported devices" },
-      { depth: 2, slug: "generic", text: genericTitle },
-    ];
+const headings = [
+  ...Intro.getHeadings(),
+  { depth: 2, slug: "supported", text: supportedTitle },
+  ...(generic.length > 0 ? [{ depth: 2, slug: "generic", text: genericTitle }] : []),
+];
 
 const frontmatter = {
   title,
@@ -69,7 +59,7 @@ const frontmatter = {
 
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="chargers" />}
-  <ChargersIntro lang={lang} />
+  <Intro.Content />
   {hasSponsorship && <SponsorInfoBox lang={lang} />}
   <DeviceFilter lang={lang} features={filterFeatures} />
   <h2 id="supported">{supportedTitle}</h2>

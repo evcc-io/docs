@@ -1,0 +1,163 @@
+---
+date: 2025-01-20
+title: "v0.133 - Serve un Tesla Developer Account"
+description: "Note di rilascio di evcc 0.133 di gennaio 2025: la Tesla Fleet API diventa a pagamento, quindi ti serve un tuo Tesla Developer Account e tesla.evcc.io chiude."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+cover:
+  alt: "Aggiornamento dell’API Tesla"
+  image: "../../../../../en/blog/2025/01/20/tesla-api-update-wide.webp"
+translatedFrom: "abfdb68354cd"
+---
+
+A partire da evcc v0.133 serve un [Tesla Developer Account](https://developer.tesla.com/).
+L’uso resta gratuito, ma richiede un passaggio di configurazione in più.
+
+{/* excerpt */}
+
+:::note[Aggiornamento]
+Questo articolo è stato rivisto.
+
+**[8 febbraio 2025](https://github.com/evcc-io/docs/pull/723/files):** istruzioni più dettagliate per la configurazione della Tesla Fleet API e di myteslamate.com.<br/>
+**[27 marzo 2025](https://github.com/evcc-io/docs/pull/775/files):** aggiornamento alla nuova procedura di configurazione di myteslamate.com.
+
+:::
+
+## Tesla Fleet API a pagamento da febbraio
+
+L’anno scorso abbiamo integrato la [Tesla Fleet API](/it/blog/2024/02/01/v0124-new-tesla-api) in evcc.
+Tesla è stata il primo produttore a offrire un’API ufficiale e soprattutto aperta per comunicare con i propri veicoli.
+
+Tesla aveva già annunciato che questa API non sarebbe rimasta gratuita.
+Ora i prezzi sono noti ed entreranno in vigore dal 1° febbraio 2025.
+La fatturazione si basa sull’utilizzo, con costi diversi a seconda del tipo di richiesta.
+
+Con [tesla.evcc.io](https://tesla.evcc.io) abbiamo messo a disposizione un servizio che permette agli utenti di evcc di generare token di accesso per l’uso dell’API.
+Da febbraio 2025 la comunicazione con l’API tramite questi token verrebbe fatturata a noi.
+I costi per utente dipendono dal numero di veicoli, dalle abitudini di ricarica e dalla configurazione specifica dell’intervallo di aggiornamento.
+Per la maggior parte degli utenti questi costi superano il nostro modello di sponsorizzazione da 2 dollari al mese e non sarebbero sostenibili per noi, nemmeno rendendo obbligatoria la sponsorizzazione per l’integrazione Tesla.
+
+## Credito API gratuito per i privati
+
+Tesla offre ai privati un credito API mensile di 10 dollari, che dovrebbe bastare alla maggior parte degli utenti di evcc.
+
+[![Credito API di Tesla](../../../../../en/blog/2025/01/20/tesla-credit-en.png)](https://developer.tesla.com/)
+
+Con la versione 0.133 abbiamo adattato la comunicazione con l’API di Tesla in modo che tu possa usare il tuo Tesla Developer Account.
+I vecchi token generati con [tesla.evcc.io](https://tesla.evcc.io) non funzioneranno più.
+Abbiamo valutato di estendere la nostra procedura di generazione dei token per permetterti di usare il tuo Tesla Developer Account.
+Per fortuna [myteslamate.com](https://app.myteslamate.com) ha già implementato questa funzione.
+Lì puoi generare **Access Token e Refresh Token** con il tuo Developer Account.
+Così abbiamo deciso di non reinventare la ruota.
+
+## Cosa fare?
+
+<a id="vehicle"></a>
+
+### Per chi guida una Tesla
+
+Per la configurazione in evcc ti servono tre informazioni:
+
+- **Client ID:** dal [Tesla Developer Portal](https://developer.tesla.com/)
+- **Access Token:** tramite lo script di [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/)
+- **Refresh Token:** tramite lo script di [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/)
+
+Segui le istruzioni su [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/) per generare queste informazioni.
+
+Dato che lavorerai in parallelo su myteslamate.com e developer.tesla.com, ti consigliamo di eseguire questi passaggi in due finestre del browser contemporaneamente.
+Al termine della procedura devi scaricare uno script ed eseguirlo nel terminale del tuo computer.
+
+Durante il login compare una finestra di dialogo per le autorizzazioni.
+Per il funzionamento con un normale caricabatterie (non Tesla Wall Connector) evcc richiede le seguenti **autorizzazioni dell’API Tesla**:
+
+- Informazioni del profilo _(regione, elenco dei veicoli)_
+- Informazioni sul veicolo _(livello di carica, stato del veicolo, ecc.)_
+- Posizione del veicolo _(per il riconoscimento del veicolo, non ancora implementato)_
+- Comandi del veicolo _(per il risveglio)_
+
+Una volta completata la procedura, inserisci le informazioni nella configurazione di evcc:
+
+Esempio:
+
+```yaml {6-8}
+vehicles:
+  - name: my_car
+    type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-... # da developer.tesla.com
+    accessToken: ey1234567890... # da myteslamate.com
+    refreshToken: EU_1234567890... # da myteslamate.com
+```
+
+Puoi tenere traccia del credito API usato nella [panoramica del Tesla Developer Portal](https://developer.tesla.com/dashboard/).
+
+:::note
+Il progetto evcc non ha alcun legame con myteslamate.com.
+
+Siamo in contatto con [jlestel](https://github.com/jlestel), lo sviluppatore di myteslamate.com.
+Ha esplicitamente consentito l’uso gratuito del servizio agli utenti di evcc.
+Prima di usare il servizio, leggi i [Termini di servizio](https://www.myteslamate.com/terms-of-service) e l’[Informativa sulla privacy](https://www.myteslamate.com/privacy-policy).
+:::
+
+### Per chi usa un Tesla Wall Connector
+
+Se usi un Tesla Wall Connector servono passaggi aggiuntivi, perché i comandi di ricarica richiedono una comunicazione firmata e devono passare da un server raggiungibile pubblicamente.
+myteslamate.com mette a disposizione un proxy di questo tipo.
+La fatturazione avviene in base all’utilizzo, direttamente tramite myteslamate.com.
+Questi comandi non consumano il tuo credito API Tesla.
+
+Diamo per scontato che tu abbia già completato i [passaggi descritti sopra](#vehicle).
+Accedi di nuovo a myteslamate.com e segui le istruzioni per configurare il proxy dei comandi a pagamento.
+Copia il **proxy token** dalla sezione **Use MyTeslamate API**.
+Inserisci questo token nella configurazione di evcc:
+
+```yaml {9}
+vehicles:
+  - name: my_car
+    type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-... # da developer.tesla.com
+    accessToken: ey1234567890... # da myteslamate.com
+    refreshToken: EU_1234567890... # da myteslamate.com
+    proxyToken: aaaaa-bbbbb-... # da myteslamate.com
+```
+
+Con questa configurazione evcc invia i comandi di ricarica al proxy di myteslamate.com, che li firma con la tua applicazione Tesla e li inoltra all’API Tesla originale.
+
+:::caution[Il proxy token è molto potente]
+Limita le autorizzazioni su myteslamate.com alle funzioni necessarie.
+Per evcc servono solo le funzioni **Charge Start**, **Charge Stop** e **Set Charging Amps**.
+:::
+
+## tesla.evcc.io verrà dismesso
+
+tesla.evcc.io verrà dismesso a febbraio.
+Tutti i token generati con questo servizio perderanno la loro validità.
+Per continuare a usare l’API Tesla è necessario aggiornare evcc alla versione 0.133.
+
+## Alternative
+
+La comunicazione con l’API Tesla in evcc non è legata a myteslamate.com.
+Puoi generare i token da solo con l’infrastruttura adatta (serve un URL di callback pubblico) e inserirli nella configurazione di evcc indicata sopra.
+
+Sono possibili anche integrazioni alternative tramite servizi come [TeslaLogger](https://docs.evcc.io/docs/vehicles#teslalogger), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [TeslaBleHttpProxy](https://docs.evcc.io/docs/vehicles#tesla-ble), [Tessie](https://docs.evcc.io/docs/vehicles#tessie) o [Tronity](https://docs.evcc.io/docs/vehicles#tronity).
+
+Chi possiede un Tesla Wall Connector può continuare a usare [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy) come _command proxy_ locale.
+
+## Conclusione
+
+Abbiamo valutato diverse alternative per l’integrazione Tesla.
+Erano sul tavolo anche servizi speciali e fasce di prezzo per gli utenti Tesla.
+Crediamo che la soluzione attuale sia la migliore dal punto di vista degli utenti.
+Per la maggior parte dei privati non comporta costi aggiuntivi.
+L’integrazione resta utilizzabile senza sponsorizzazione.
+La comunicazione con l’API non richiede servizi di terze parti.
+Anche gli utenti con flotte più grandi possono usare evcc: i costi dell’API vengono addebitati direttamente da Tesla quando si supera il credito API mensile.
+
+**Un caro saluto**<br/>
+Il team evcc<br/>
+Michael, Andi e Uli

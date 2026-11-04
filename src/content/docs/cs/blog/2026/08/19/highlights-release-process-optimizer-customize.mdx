@@ -1,0 +1,140 @@
+---
+date: 2026-08-19
+title: "Novinky: proces vydávání, optimalizátor, přizpůsobení"
+description: "Přehled novinek ve verzi evcc 0.314 ze srpna 2026, která přináší nový proces vydávání, pokroky v optimalizátoru, lepší konfiguraci v prohlížeči a přizpůsobení rozhraní."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner s novinkami"
+  image: "../../../../../en/blog/2026/08/19/highlights-release-process-optimizer-customize.webp"
+translatedFrom: "9b8919d1e112"
+---
+
+import Video from "@components/Video.astro";
+import configUiVideo from "../../../../../en/blog/2026/08/19/config-ui-navigation.mp4";
+import configUiPoster from "../../../../../en/blog/2026/08/19/config-ui-navigation.webp";
+
+Jen čtyři týdny po [posledním přehledu novinek](/cs/blog/2026/07/18/highlights-remote-access-widgets-optimizer) jsme zpět.
+Dříve od sebe naše příspěvky obvykle dělilo několik měsíců.
+To chceme změnit.
+V tomto příspěvku vám představíme, co je v evcc nového: nový proces vydávání, pokroky v optimalizátoru, vylepšení konfigurace v prohlížeči, přizpůsobení rozhraní a další.
+
+{/* excerpt */}
+
+## Nový proces vydávání
+
+Dosud jsme nové verze vydávali v pravidelných intervalech.
+Po každém vydání jsme větší změny a nové funkce nějakou dobu zadržovali, abychom viděli, zda se neobjeví naléhavé opravy chyb nebo regrese.
+Potom jsme větším změnám dali nějaký čas v nightly verzi, abychom sesbírali zpětnou vazbu.
+To způsobovalo problémy pokaždé, když jsme museli vydávat rychle, např. když výrobce vozidel přepracoval své API.
+Pak jsme buď museli nedokončené funkce dočasně vrátit zpět, nebo se k vám dostaly o něco méně vyzrálé, než jsme zamýšleli 🙈.
+
+Náš nový model to řeší: nyní výslovně rozlišujeme mezi opravami chyb, které mají vyjít rychle, a většími novinkami, které přijdou v příštím vydání s novými funkcemi.
+Díky tomu můžeme pořádně zavést [sémantické verzování](https://semver.org):
+
+- **Vydání s novými funkcemi** jako <code>0.<u>314</u>.0</code> vycházejí každé dva až čtyři týdny.
+- **Opravná vydání** jako <code>0.314.<u>1</u></code> můžeme snadno vydávat mezi nimi.
+- **Nightly** verze jako <code>0.315.0<u>-dev.1787769000</u></code> dál vždy obsahuje aktuální stav větve `master`, tj. všechny funkce a opravy chyb.
+
+Veškerý vývoj nadále probíhá na `master`.
+Novinkou je příkaz `/backport` na GitHubu, který vybírá jednotlivé pull requesty pro příští opravné vydání.
+O celý proces se stará agent založený na Claude, který řeší i případné konflikty.
+
+## Optimalizace optimalizátoru
+
+S [optimalizátorem](/cs/features/optimizer) pracujeme na tom, aby se chování celého vašeho energetického systému optimalizovalo na několik dní dopředu na základě předpovědí spotřeby a výroby i průběhu cen elektřiny.
+Zmínili jsme ho už v [posledním přehledu novinek](/cs/blog/2026/07/18/highlights-remote-access-widgets-optimizer#optimizer).
+Optimalizátor je stále experimentální.
+Vypočítaný plán se zatím jen zobrazuje: jako doporučení u nabíjecího bodu, na stránce baterie a na [přepracované stránce optimalizátoru](https://github.com/evcc-io/evcc/pull/32837).
+Dalším krokem je, aby optimalizátor skutečně převzal řízení baterie a nabíjecích bodů, a příslušný [pull request](https://github.com/evcc-io/evcc/pull/32881) se právě připravuje.
+
+Novinka v tomto vydání: optimalizátor zohledňuje termíny plánů nabíjení a optimalizuje více plánů společně, zatímco dosud se každý plán posuzoval samostatně.
+Kromě toho se událo mnoho dalšího:
+
+- Nyní hlásí, [zda je vypočítaný plán proveditelný](https://github.com/evcc-io/evcc/pull/32632), např. zda lze všech cílů nabíjení dosáhnout včas.
+- Lze nastavit [statický limit exportu do sítě](https://github.com/evcc-io/evcc/pull/32541), se kterým optimalizace počítá.
+- Optimalizace zohledňuje [nastavení odloženého nabíjení](https://github.com/evcc-io/evcc/pull/32872) (precondition) v plánu nabíjení.
+- Spouští se znovu okamžitě [při změně vozidla a při připojení nebo odpojení](https://github.com/evcc-io/evcc/pull/32681).
+- Nabíjecí body bez známé kapacity vozidla (např. s vozidlem hosta) se nyní do optimalizace započítávají svým [naměřeným nabíjecím výkonem jako spotřeba](https://github.com/evcc-io/evcc/pull/32681), zatímco dříve v optimalizaci zcela chyběly.
+- [Přestane požadovat nabíjení](https://github.com/evcc-io/evcc/pull/32633), jakmile je vozidlo plně nabité.
+
+![Stránka optimalizátoru s plánem nabíjení a předpovídaným vývojem stavu nabití](../../../../../en/blog/2026/08/19/optimizer.webp)
+
+Vyzkoušejte to: zapněte experimentální funkce v **Konfigurace → Experimentální** a potom zapněte optimalizátor.
+Podívejte se na stránku optimalizátoru a posuďte, zda vám výsledný plán připadá věrohodný.
+Budeme moc rádi za vaši zpětnou vazbu.
+
+## Optimalizace konfiguračního rozhraní
+
+Konfigurace v prohlížeči je stále propracovanější:
+
+- [Zařízení lze deaktivovat](https://github.com/evcc-io/evcc/pull/29455), aniž byste je museli smazat, např. když je zařízení dočasně offline nebo když svou instalaci přestavujete.
+- Dialogová okna [před zavřením varují](https://github.com/evcc-io/evcc/pull/32826), pokud obsahují neuložené změny.
+- Hodnoty energie a výkonu si automaticky volí [vhodnou jednotku](https://github.com/evcc-io/evcc/pull/32754).
+- Na mobilu dostala stránka konfigurace pořádnou [navigaci po sekcích](https://github.com/evcc-io/evcc/pull/32810) místo jednoho dlouhého seznamu.
+
+<Video
+  src={configUiVideo}
+  poster={configUiPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Navigace po sekcích konfigurace na mobilu"
+/>
+
+## Přizpůsobení rozhraní
+
+Rozhraní si nyní můžete přizpůsobit: logo, název značky, webovou stránku, e-mail a telefonní číslo podpory.
+To se hodí např. elektrikářům a instalačním firmám, které nasazují evcc v zákaznických projektech.
+Pokud nastavíte vlastní e-mail podpory, hlášení problémů z rozhraní se místo na GitHub odesílají na vaši adresu podpory.
+Na [stránce White label](/cs/reference/white-label) najdete, jaké možnosti jsou k dispozici a jak rozhraní upravit podle svých představ pomocí vlastního CSS.
+
+![Dialogové okno s informacemi o aplikaci a vlastní značkou](../../../../../en/blog/2026/08/19/white-label.webp)
+
+## Nekompatibilní změny a integrace
+
+Změnili jsme formát, ve kterém se data předpovědí a tarifů publikují přes API a MQTT.
+Místo rozvláčných objektů nyní data přicházejí jako [kompaktní pole s unixovými časovými značkami](https://github.com/evcc-io/evcc/pull/32391) a MQTT publikuje [jednu zprávu pro každý typ předpovědi](https://github.com/evcc-io/evcc/pull/32716).
+Výsledek: mnohem menší objem dat, rychlejší načítání a menší zatížení přenosové kapacity, což poznáte hlavně v aplikaci a na pomalém připojení.
+
+Jde o nekompatibilní změnu.
+Obrovské díky všem správcům integrací evcc, kteří své projekty upravili ještě před vydáním: [marq24](https://github.com/marq24) a [mkshb](https://github.com/mkshb) ([Home Assistant](/cs/smarthome/home-assistant)), [Newan](https://github.com/Newan) ([ioBroker](/cs/smarthome/iobroker)), [rdvnit](https://github.com/rdvnit) ([Homey](/cs/smarthome/homey)), [TheNinth7](https://github.com/TheNinth7) ([Garmin](/cs/smarthome/garmin)) a týmu, který stojí za [openHAB bindingem](/cs/smarthome/openhab).
+Je úžasné vidět kolem evcc tak aktivní ekosystém.
+
+Do navigace dokumentace jsme přidali novou sekci **Chytrá domácnost**, která tyto integrace popisuje.
+Na stránce [Další skvělé projekty](/cs/smarthome/awesome) také sbíráme menší komunitní projekty, od dashboardů pro Grafanu přes e-ink displej až po aplikaci pro lištu nabídek.
+Pokud jste kolem evcc postavili malý nástroj, pomůcku nebo integraci, klidně je navrhněte do seznamu přes pull request, aby je našli i ostatní.
+
+## Menší vylepšení
+
+- **Nový engine pro grafy:** Přechod z [Chart.js](https://github.com/chartjs/Chart.js) na [Apache ECharts](https://echarts.apache.org) je dokončen.
+  Vývoj Chart.js se bohužel zastavil.
+  ECharts nám dává pevný základ pro naše velké plány v oblasti vizualizace dat (nechte se překvapit)…
+- **Optimalizace pro dotykové ovládání:** [Přejetím prstem lze listovat mezi časovými obdobími](https://github.com/evcc-io/evcc/pull/32614), popisky se [na dotykových zařízeních správně zobrazují a skrývají](https://github.com/evcc-io/evcc/pull/32613) a historická data se díky [přednačítání a ukládání do mezipaměti](https://github.com/evcc-io/evcc/pull/32699) načítají znatelně rychleji.
+- **Plán nabíjení:** Nastavení strategie se snáze najde: cíl optimalizace a odložené nabíjení jsou nyní přímo v [dialogovém okně plánu nabíjení](/cs/features/plans).
+- **Přidané nabití a dojezd:** Pokud vaše vozidlo hlásí stav nabití, každá nabíjecí relace zaznamená přírůstek stavu nabití a odhadovaný přidaný dojezd, které uvidíte v detailu relace a v [přehledu nabíjecích relací](/cs/features/sessions).
+- **Vzdálený přístup:** Chyby tunelového připojení jsou nyní vidět v rozhraní a po spuštění bez internetu vaše instance sama obnoví [připojení vzdáleného přístupu](/cs/features/remote-access).
+- **Reference stavového API:** Naše datová struktura stavu (`/api/state`) dosud nebyla zdokumentovaná.
+  To mění nová [referenční stránka](/cs/reference/state): je [generovaná přímo z typových definic rozhraní](https://github.com/evcc-io/evcc/pull/32431), takže vždy odpovídá skutečnému API.
+
+## Podpora nových zařízení
+
+**Nabíječky:** NEcharge Pro (OCPP), Youliq One a vylepšení pro Atmoce a Voltie
+
+**Měřiče, solár a bateriové systémy:** Socomec Countis E3x/E4x, Ferroamp, Fronius Argeno a Smart Meter IP, SunEnergyXT 500, měřič AC zátěže Victron GX, Tesla Powerwall přes Fleet API a řízení baterie pro FoxESS H3 a Solplanet
+
+**Omezení výkonu (§ 9 EEG):** Goodwe, Fronius Gen24, Huawei EMMA a Huawei SmartLogger lze nyní omezovat
+
+Samozřejmě přibyla také řada oprav chyb a vylepšení stávajících integrací.
+Podrobnosti najdete v [poznámkách k vydání](https://github.com/evcc-io/evcc/releases/tag/0.314.0).
+
+---
+
+💚 Velké díky všem, kdo projekt posouvají dopředu: kódem, nápady, testováním, diskusemi i finanční podporou, bez které by projekt v této podobě nebyl možný.
+
+Přejeme vám slunečný konec léta.
+
+**S pozdravem**<br />
+Tým evcc<br />
+Michael, Andi & Uli

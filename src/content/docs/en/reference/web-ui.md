@@ -13,41 +13,41 @@ The URL can set both the page and the display settings.
 Each page has its own hash route.
 Link to it directly or bookmark it.
 
-| Page              | Route        | Login | Parameters                                        |
-| ----------------- | ------------ | ----- | ------------------------------------------------- |
-| Home / loadpoints | `#/`         | no    | `lp`                                              |
-| Home Battery      | `#/battery`  | no    | —                                                 |
-| Forecast          | `#/forecast` | no    | —                                                 |
-| Charging Sessions | `#/sessions` | no    | `month`, `year`, `loadpoint`, `vehicle`, `period` |
-| Configuration     | `#/config`   | yes   | —                                                 |
-| Logs              | `#/log`      | yes   | `areas`, `level`                                  |
-| History 🧪        | `#/history`  | no    | `day`, `month`, `year`, `period`                  |
-| Optimize 🧪       | `#/optimize` | no    | —                                                 |
-| Report a problem  | `#/issue`    | yes   | —                                                 |
+| Page                   | Route        | Login | Parameters                                        |
+| ---------------------- | ------------ | ----- | ------------------------------------------------- |
+| Home / charging points | `#/`         | no    | `lp`                                              |
+| Home Battery           | `#/battery`  | no    | —                                                 |
+| Forecast               | `#/forecast` | no    | —                                                 |
+| Charging Sessions      | `#/sessions` | no    | `month`, `year`, `loadpoint`, `vehicle`, `period` |
+| Configuration          | `#/config`   | yes   | —                                                 |
+| Logs                   | `#/log`      | yes   | `areas`, `level`                                  |
+| History 🧪             | `#/history`  | no    | `day`, `month`, `year`, `period`                  |
+| Optimize 🧪            | `#/optimize` | no    | —                                                 |
+| Report a problem       | `#/issue`    | yes   | —                                                 |
 
 🧪 marks experimental pages.
 
 | Parameter   | Description                                   |
 | ----------- | --------------------------------------------- |
-| `lp`        | Loadpoint number, starting at `1`             |
+| `lp`        | Charging point number, starting at `1`        |
 | `year`      | Year to show, e.g. `2026`                     |
 | `month`     | Month, `1`–`12`                               |
 | `day`       | Day of month, `1`–`31`                        |
 | `period`    | Time range: `day`, `month`, `year` or `total` |
-| `loadpoint` | Loadpoint title                               |
+| `loadpoint` | Charging point title                          |
 | `vehicle`   | Vehicle title                                 |
 | `areas`     | Log areas to show, comma-separated            |
 | `level`     | Minimum log level                             |
 
 ### Examples {#examples}
 
-Pre-select a loadpoint on the home screen:
+Pre-select a charging point on the home screen:
 
 ```
 http://evcc.local:7070/#/?lp=1
 ```
 
-The simplest way to get the right link is to select the loadpoint in the UI and copy the address from your browser.
+The simplest way to get the right link is to select the charging point in the UI and copy the address from your browser.
 
 Filter **Charging Sessions** or **History** by time range or device:
 

@@ -1,0 +1,109 @@
+## SG-Ready relay configuration \{#sgready-configuration\}
+
+### Configuration with boost relay \{#boost-relay\}
+
+This example shows how to configure a heat pump using a Shelly 1 for boost mode and a Shelly 3EM for power measurement.
+The type `sgready-relay` is used for this.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Configuration with boost and dim relays \{#boost-dim-relay\}
+
+If your heat pump supports both boost and dim modes, you can configure a second relay for the dim contact.
+In dim mode, the power consumption of the heat pump is reduced.
+This is useful for limiting power consumption during grid constraints or within § 14a EnWG.
+
+You can use either two separate relays or a relay with multiple channels (e.g. Shelly with different `channel` values).
+Besides Shelly, other [controllable relays](/en/smartswitches) are also possible.
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+You can optionally add the current temperature (`temp`), device-internal temperature limit (`limittemp`), power (`power`), and energy (`energy`) [via plugin](/en/reference/plugins).
+These are only used for display and don't control the heat pump.
+
+## Status display \{#status-display\}
+
+Since heat pumps run their own heating logic independently of evcc, the UI shows two states:
+
+- **Normal operation** – no intervention, the heat pump follows its own control.
+- **Boost active** – a request to increase power.
+  While the heat pump has not yet responded (e.g. due to minimum runtimes or blocking periods), the status shows "Boost requested…".
+
+Preconfigured heat pump types and matching templates already set the required [feature flags](/en/user-defined-devices#charger-features).
+For custom configurations via `type: custom`, set the matching combination of `integrateddevice`, `heating`, `continuous`, and optionally `switchdevice`.
+
+## Electric water heaters \{#electric-water-heaters\}
+
+Plain electric heaters can only be switched on or off by evcc.
+They are typically connected via a [switchable socket](/en/smartswitches).
+With sufficient surplus, evcc activates the socket (enable) and disables it again when conditions require (disable).
+
+For special electric heaters with their own continuous control, evcc forwards the currently available power to the device.
+This available power is continuously adapted to the current situation, analogously to charging a vehicle.
+
+evcc offers adjustable limits, with which you can set your desired temperature.
+This should not be understood as a safety feature.
+Temperature regulation should normally happen via the thermostat function of the heater itself.
+
+:::danger
+Your electric water heater must always have its own temperature limit that reliably prevents overheating in case of a failure or malfunction of evcc, or operator error.
+:::

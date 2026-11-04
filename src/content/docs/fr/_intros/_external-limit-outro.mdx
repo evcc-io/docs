@@ -1,0 +1,70 @@
+---
+translatedFrom: "de9f2699a051"
+---
+
+## Fonctionnement \{#how-it-works\}
+
+En fonctionnement normal, evcc charge sans limitation de puissance externe.
+Les points de charge fonctionnent avec leur configuration habituelle et sont, le cas échéant, soumis aux restrictions supplémentaires de la [gestion de la charge](/fr/features/loadmanagement).
+
+Lorsque le gestionnaire de réseau envoie un signal de réduction :
+
+1. **Boîtier de commande FNN** : le contact W4 est fermé, evcc active la limite de consommation configurée
+2. **EEBUS** : le boîtier de commande transmet numériquement la limite totale calculée
+3. **Relais** : le contact est fermé, evcc active la limite de puissance configurée
+
+La limite plafonne le circuit racine de la [gestion de la charge](/fr/features/loadmanagement), et tous les points de charge affectés à des circuits sont réduits en conséquence.
+Si la consommation totale est trop élevée, des charges en cours peuvent aussi être arrêtées.
+Le pilotage s’applique à tous les modes (Intelligent, Rapide).
+
+**Pilotage de la batterie pendant la réduction :**
+Si le [pilotage actif de la batterie](/fr/features/battery#battery-control) est configuré et que la [charge depuis le réseau](/fr/features/battery#gridcharge) de la batterie domestique est active, cette charge est automatiquement suspendue.
+La batterie est mise en mode « maintien » afin de ne plus se décharger.
+La charge de la batterie à partir du surplus solaire reste généralement possible.
+À la fin de la réduction de puissance, la [charge depuis le réseau](/fr/features/battery#gridcharge) reprend automatiquement.
+
+Lorsqu’une limite externe est active, une **bannière d’avertissement** s’affiche sur la page principale d’evcc.
+La limite de consommation et le bridage de l’export sont affichés séparément.
+
+## Journalisation \{#logging\}
+
+Toutes les demandes de limitation du gestionnaire de réseau sont automatiquement consignées dans un journal.
+Les données du journal peuvent être téléchargées au format CSV sous **Configuration → Limite externe**.
+
+Chaque entrée contient :
+
+- Heure de début et de fin de la limitation
+- Type de pilotage (réduction de la consommation ou bridage de l’export)
+- Puissance du réseau mesurée au début de la limitation
+- Limite de puissance définie
+
+Ce journal peut être fourni au gestionnaire de réseau sur demande pour prouver le respect des demandes de pilotage.
+
+:::note[Responsabilité (réglementation allemande § 14a, § 9)]
+L’électricien qualifié doit vérifier après l’installation que la limite externe fonctionne comme prévu.
+L’exploitant de l’installation est responsable du bon fonctionnement et doit conserver le journal pendant au moins 2 ans.
+:::
+
+## Pilotage d’autres consommateurs \{#additional-consumers\}
+
+Outre les points de charge, d’autres consommateurs pilotables peuvent aussi être intégrés à la gestion de la charge selon le § 14a allemand.
+C’est le cas p. ex. des pompes à chaleur ou des batteries domestiques raccordées via EEBUS ou configurées comme compteurs avec une sortie relais supplémentaire.
+
+Le pilotage tient compte de la consommation actuelle de tous les consommateurs pilotables.
+Cela inclut automatiquement tous les points de charge ainsi que, comme autres consommateurs, tous les compteurs disposant de sorties de commutation correspondantes ou d’une interface EEBUS avec le cas d’usage LPC.
+
+D’abord, tous les autres consommateurs sont modulés.
+La puissance restante est ensuite répartie entre les points de charge actifs.
+En raison de la modulation forfaitaire des autres consommateurs, la puissance de charge disponible pour les points de charge actifs peut même, dans certains cas, dépasser celle du fonctionnement normal.
+Si la réduction des points de charge, y compris la modulation de tous les autres consommateurs, ne suffit pas, les charges en cours sur les points de charge sont interrompues.
+
+:::note[Disponibilité]
+Actuellement, il n’existe qu’un seul compteur modulable (consommateur EEBUS).
+Cette fonction est en cours d’extension et les compteurs compatibles seront signalés dans la [documentation des appareils](/fr/meters).
+:::
+
+## Informations complémentaires \{#further-information\}
+
+- [Gestion de la charge](/fr/features/loadmanagement) : principes de la répartition de la charge
+- [Intégration personnalisée](/fr/user-defined-devices#external-limit) : raccordement via relais ou sources de données personnalisées
+- [Plugins](/fr/reference/plugins) : configurations avancées des plugins

@@ -1,0 +1,104 @@
+---
+title: "Nabíjecí relace"
+description: "Během nabíjení evcc zobrazuje aktuální hodnoty a v historii nabíjecích relací najdete statistiky, export do CSV a podrobnosti každé relace."
+sidebar:
+  order: 7
+translatedFrom: "d1b4445f95e6"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Hlavním úkolem evcc je inteligentní nabíjení vozidel na základě soláru, domácí baterie a tarifů elektřiny.
+Toto řízení probíhá automaticky a na pozadí.
+Abyste viděli účinek těchto optimalizací, zaznamenáváme během nabíjecí relace některé naměřené hodnoty.
+
+## Aktuální nabíjecí relace
+
+V hlavním zobrazení vidíte informace o aktuální nabíjecí relaci.
+
+<Screenshot
+  name="features/screenshots/sessions-main-ui"
+  caption="Naměřené hodnoty během nabíjení"
+/>
+
+1.  **Výkon:** Zobrazuje aktuální nabíjecí výkon v kW.
+    Zelený blesk znamená, že probíhá nabíjení.
+    Pod výkonem se jako malé zelené pruhy zobrazuje počet aktivních fází a jejich vytížení.
+
+2.  **Nabito:** Zobrazuje množství již nabité energie.
+    Pokud má vaše nabíječka zabudovaný měřič, hodnoty se přebírají z něj.
+    U nabíječek bez měřiče vypočítá evcc množství energie z nabíjecího výkonu.
+
+3.  **Další hodnoty:** Podle vaší instalace jsou k dispozici další naměřené hodnoty.
+    Vybrat je můžete kliknutím na název.
+    Případně kliknutím na číselnou hodnotu přepnete na další zobrazení.
+
+            * **Zbývající:** Zobrazuje čas zbývající do dosažení cíle nabíjení.
+            Pokud to vaše vozidlo podporuje, určí se zbývající čas z dat vozidla.
+            Jinak se zbývající čas vypočítá z aktuálního nabíjecího výkonu a cíle nabíjení.
+
+            * **Čas dokončení:** Zobrazuje čas, kdy bude podle zbývajícího času dosaženo cíle nabíjení.
+            Stejně jako u zbývajícího času se předpokládá, že vozidlo dokáže zbývající čas určit ze svých dat.
+
+            * **Doba trvání:** Zobrazuje efektivní dobu trvání nabíjecí relace.
+            Pokud je nabíjecí relace pozastavená (např. protože chybí solární přebytek), čas se zastaví.
+
+            * **Solár:** Procentní hodnota ukazuje, jaký podíl nabité energie pochází z fotovoltaické elektrárny.
+            Energie z domácí baterie se počítá jako solární energie.
+
+            * **⌀ Cena:** Zobrazuje průměrnou cenu za kWh.
+            Základem je aktuální cena elektřiny, podíl vlastní spotřeby a případný ušlý výnos z tarifu výkupu energie.
+            K dispozici jen tehdy, pokud je nastavený [dynamický tarif elektřiny](/cs/features/dynamic-prices).
+
+            * **Náklad:** Zobrazuje celkové náklady aktuální nabíjecí relace. Základem je aktuální cena elektřiny, podíl vlastní spotřeby a případný ušlý výnos z tarifu výkupu energie.
+            K dispozici jen tehdy, pokud je nastavený [dynamický tarif elektřiny](/cs/features/dynamic-prices).
+
+            * **⌀ CO₂:** Zobrazuje průměrné emise CO₂ na kWh.
+            Základem je podíl vlastní spotřeby v kombinaci s emisemi CO₂ energetického mixu.
+            Vlastní solární energie (přímé využití soláru a domácí baterie) se považuje za bezemisní.
+            K dispozici jen tehdy, pokud je nastavený [zdroj dat CO₂](/cs/features/co2).
+
+## Seznam nabíjecích relací
+
+Nabíjecí relace je v evcc období mezi připojením a odpojením nabíjecího kabelu.
+Během tohoto období se nabíjení mohlo klidně několikrát pozastavit a znovu spustit.
+Nabíjecí relace, při kterých se nespotřebovala žádná energie, se nezaznamenávají.
+
+V nabídce pod položkou **Nabíjecí relace** najdete seznam všech dosavadních nabíjecích relací seskupených podle měsíců.
+Data se zobrazují v tabulce a lze je exportovat jako soubor CSV nebo Excel.
+Můžete filtrovat podle nabíjecího bodu a vozidla a zobrazit součty a průměrné hodnoty.
+
+<Screenshot
+  name="features/screenshots/sessions-list"
+  caption="Seznam nabíjecích relací za měsíc"
+/>
+
+Poznámka: Na menších obrazovkách se používá kompaktnější zobrazení s menším počtem sloupců.
+Kliknutím na záhlaví sloupců můžete zvolit, které informace se mají zobrazit.
+
+## Podrobnosti nabíjecí relace
+
+Kliknutím na položku v seznamu otevřete podrobné zobrazení nabíjecí relace.
+Tam vidíte všechny dostupné hodnoty včetně ujetých kilometrů vašeho vozidla, pokud jsou k dispozici.
+
+Pokud vozidlo nebylo správně rozpoznáno, můžete v tomto zobrazení také opravit přiřazení vozidla nebo nabíjecí relaci smazat.
+
+<Screenshot
+  name="features/screenshots/sessions-detail"
+  caption="Podrobné zobrazení nabíjecí relace"
+/>
+
+## Přepínatelné zásuvky a vytápění
+
+Na rozdíl od nabíječek nelze u přepínatelných zásuvek (např. nabíječka do zásuvky Schuko nebo elektrokolo) ani u zařízení pro vytápění (např. tepelné čerpadlo nebo topná tyč) nabíjecí relaci rozpoznat.
+
+### Zařízení pro vytápění
+
+U zařízení pro vytápění (tepelná čerpadla, topné tyče atd.) se nabíjecí relace automaticky ukončí každý den o půlnoci a začne nová.
+Naměřené hodnoty se tak zaznamenávají pro každý den zvlášť a seznam nabíjecích relací zůstává přehledný.
+
+### Přepínatelné zásuvky
+
+U přepínatelných zásuvek se zaznamenávají nabíjecí relace s dlouhými časovými úseky.
+Při restartu evcc se zaznamená nová nabíjecí relace.
+Novou nabíjecí relaci můžete začít i ručně tak, že nabíjení na nabíjecím bodě zastavíte (režim **Vypnuto**) a znovu spustíte.

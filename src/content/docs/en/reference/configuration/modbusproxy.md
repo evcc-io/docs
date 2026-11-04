@@ -59,7 +59,7 @@ port: 5021
 
 The IP address and the port of the target device in common URI Scheme.
 
-Every provided port must be unique and not already in use by another application on the same host, however, it must not be different from the port of the target device. Therefore it is valid to define a configuration for port 502, which refers to port 502 on the target device.
+Every provided port must be unique and not already in use by another application on the evcc host, but it doesn't have to differ from the port of the target device. Therefore it is valid to define a configuration for port 502, which refers to port 502 on the target device.
 
 **For example**:
 
@@ -87,6 +87,17 @@ By setting this parameter, you can prevent Modbus write accesses by third-party 
 - `true`: Write access is blocked without response
 - `deny`: Write access is blocked with a modbus error as response
 - `false`: Write access is forwarded
+
+Function codes the proxy doesn't handle itself, such as Huawei's vendor-specific function code 0x41, can contain write operations.
+Both read-only modes therefore block them with a Modbus error.
+With `readonly: false` the proxy forwards them unchanged, but only to devices connected via Modbus TCP.
+The Home Assistant integration for Huawei inverters, for example, needs `readonly: false`.
+
+:::caution
+The proxy doesn't check who connects.
+With `readonly: false` (the default), any device in your network that can reach the port can write to the target device.
+Only run the proxy in a trusted network.
+:::
 
 **For example**:
 

@@ -11,7 +11,7 @@ It is a community project by [rdvnit](https://github.com/rdvnit) and not part of
 
 The app provides three device types:
 
-- **Charging point** with charge mode, charge limit, charging power, session energy, vehicle battery level and range, and connection and charging status
+- **Charging point** with charge mode, charge limit, charging power, session energy, vehicle charge level and range, and connection and charging status
 - **Site** with solar production, grid power, and home consumption
 - **Home battery** with battery power, battery level, and battery control settings
 

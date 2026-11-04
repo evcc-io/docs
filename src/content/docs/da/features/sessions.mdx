@@ -1,0 +1,104 @@
+---
+title: "Opladningssessioner"
+description: "Forklarer, hvilke værdier evcc viser under opladning, hvordan sessionshistorikken med statistik og CSV-eksport fungerer, og hvad detaljerne for én session indeholder."
+sidebar:
+  order: 7
+translatedFrom: "d1b4445f95e6"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+evcc's kerneopgave er intelligent opladning af køretøjer baseret på sol, hjemmebatteri og eltariffer.
+Styringen foregår automatisk og i baggrunden.
+For at du kan se resultatet af disse optimeringer, registrerer vi nogle måleværdier under opladningssessionen.
+
+## Aktuel opladningssession
+
+I hovedvisningen kan du se oplysninger om den aktuelle opladningssession.
+
+<Screenshot
+  name="features/screenshots/sessions-main-ui"
+  caption="Måleværdier under opladning"
+/>
+
+1.  **Effekt:** Viser den aktuelle ladeeffekt i kW.
+    Det grønne lyn viser, at en opladning er aktiv.
+    Under effekten vises antallet af aktive faser og deres udnyttelse som små grønne bjælker.
+
+2.  **Opladet:** Viser den mængde energi, der allerede er opladet.
+    Hvis din oplader har en indbygget måler, hentes værdierne derfra.
+    For opladere uden måler beregner evcc energimængden ud fra ladeeffekten.
+
+3.  **Andre værdier:** Afhængigt af din installation er andre måleværdier tilgængelige.
+    Du kan vælge dem ved at klikke på navnet.
+    Alternativt skifter et klik på talværdien til den næste visning.
+
+            * **Resterende tid:** Viser den tid, der er tilbage, indtil lademålet er nået.
+            Hvis dit køretøj understøtter det, bestemmes den resterende tid ud fra køretøjets data.
+            Ellers beregnes den resterende tid ud fra den aktuelle ladeeffekt og lademålet.
+
+            * **Sluttidspunkt:** Viser det tidspunkt, hvor lademålet er nået, baseret på den resterende tid.
+            Ligesom ved resterende tid kræver det, at køretøjet leverer data om den resterende tid.
+
+            * **Varighed:** Viser opladningssessionens effektive varighed.
+            Hvis opladningssessionen er sat på pause (f.eks. fordi der ikke er nok soloverskud), stoppes tiden.
+
+            * **Solenergi:** Procentværdien viser, hvor stor en andel af den opladede energi der kommer fra solcelleanlægget.
+            Energi fra hjemmebatteriet tælles som solenergi.
+
+            * **⌀ pris:** Viser den gennemsnitlige pris pr. kWh.
+            Grundlaget er den aktuelle elpris, andelen af egetforbrug og en eventuel mistet eksporttarif.
+            Kun tilgængelig, hvis der er konfigureret en [dynamisk eltarif](/da/features/dynamic-prices).
+
+            * **Pris:** Samlet omkostning for den aktuelle opladningssession. Grundlaget er den aktuelle elpris, andelen af egetforbrug og en eventuel mistet eksporttarif.
+            Kun tilgængelig, hvis der er konfigureret en [dynamisk eltarif](/da/features/dynamic-prices).
+
+            * **⌀ CO₂:** Viser den gennemsnitlige CO₂-emission pr. kWh.
+            Grundlaget er andelen af egetforbrug kombineret med elmiksets CO₂-emission.
+            Din egen solstrøm (direkte solforbrug og hjemmebatteri) regnes som CO₂-fri.
+            Kun tilgængelig, hvis der er konfigureret en [CO₂-kilde](/da/features/co2).
+
+## Liste over opladningssessioner
+
+En opladningssession i evcc er perioden mellem tilslutning og frakobling af ladekablet.
+Det er sagtens muligt, at opladningen er sat på pause og genstartet flere gange i denne periode.
+Opladningssessioner, hvor der ikke er brugt energi, registreres ikke.
+
+I menuen under ”Opladnings sessioner” finder du en liste over alle tidligere opladningssessioner grupperet efter måned.
+Dataene vises i tabelform og kan eksporteres som CSV- eller Excel-fil.
+Du kan filtrere efter ladepunkt og køretøj og se summer og gennemsnitsværdier.
+
+<Screenshot
+  name="features/screenshots/sessions-list"
+  caption="Liste over månedlige opladningssessioner"
+/>
+
+Bemærk: På mindre skærme vises en mere kompakt visning med færre kolonner.
+Ved at klikke på kolonneoverskrifterne kan du vælge, hvilke oplysninger der skal vises.
+
+## Opladningssession i detaljer
+
+Et klik på en post i listen åbner detaljevisningen af opladningssessionen.
+Her kan du se alle tilgængelige værdier inkl. dit køretøjs kilometerstand, hvis den er tilgængelig.
+
+Hvis et køretøj ikke blev genkendt korrekt, kan du også rette tildelingen af køretøjet eller slette opladningssessionen i denne visning.
+
+<Screenshot
+  name="features/screenshots/sessions-detail"
+  caption="Detaljevisning af en opladningssession"
+/>
+
+## Styrbare stikkontakter og opvarmning
+
+I modsætning til opladere kan evcc ikke genkende opladningssessionen ved styrbare stikkontakter (f.eks. Schuko-oplader, elcykel, ...) eller varmesystemer (f.eks. varmepumpe, varmelegeme, ...).
+
+### Varmesystemer
+
+For varmesystemer (varmepumper, varmelegemer osv.) nulstilles opladningssessioner automatisk hver dag ved midnat.
+Det betyder, at måleværdierne registreres separat for hver dag, og at listen over opladningssessioner forbliver overskuelig.
+
+### Styrbare stikkontakter
+
+For styrbare stikkontakter logges opladningssessioner over lange perioder.
+Hvis evcc genstartes, logges en ny opladningssession.
+Det kan også gøres manuelt ved aktivt at stoppe og starte ved ladepunktet (tilstand: Fra).

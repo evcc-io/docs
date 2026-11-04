@@ -1,0 +1,64 @@
+---
+translatedFrom: "42d5067324d9"
+---
+
+evcc understøtter smarte stikkontakter og styrbare kontakter.
+De fungerer på samme måde som opladere, men uden effektstyring.
+evcc tænder og slukker kun for stikkontakten.
+Når der er nok [overskud](/da/features/solar-charging) eller [billig energi](/da/features/dynamic-prices), tændes stikkontakten automatisk.
+
+Opsæt dine styrbare stikkontakter i webgrænsefladen under **Opsætning → Ladere og varmelegemer**.
+
+## Tilstande \{#modes\}
+
+Afhængigt af anvendelsen findes der to tilstande.
+Parameteren `standbypower` (standbyeffekt i watt) afgør, hvilken der bruges.
+I begge tilstande angiver `standbypower`, hvor meget enheden forbruger, og værdien bruges til at opgøre resten af husets forbrug og beregne det resterende soloverskud.
+Hvor stort et overskud der skal til, før stikkontakten [tændes i tilstanden Smart](/da/features/solar-charging), afgøres af minimumsstrømmen i ladepunktets indstillinger.
+
+### Opladningstilstand (standard) \{#charging-mode\}
+
+Denne tilstand egner sig til at styre batteridrevne enheder (elmotorcykler, elcykler, værktøjsbatterier osv.).
+Den målte effekt ved kontakten behandles som ladeeffekt.
+Falder den under `standbypower` (standard 15&nbsp;W), betragter evcc enheden som opladet.
+Tilstanden er aktiv, så længe `standbypower` ikke er negativ.
+Eksempel: `standbypower: 50` afslutter opladningen, når belastningen falder under 50&nbsp;W.
+
+<details class="device-config-section">
+<summary>Konfigurationseksempel til evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: e_bike_outlet
+    type: template
+    template: tasmota
+    host: 192.0.2.1
+    standbypower: 50
+```
+
+</details>
+
+### Statisk tilstand \{#static-mode\}
+
+Denne tilstand egner sig til almindelige forbrugsenheder som varmepumper, klimaanlæg eller varmeapparater.
+Tilstanden aktiveres med en negativ værdi for `standbypower`, og talværdien angiver det anslåede effektforbrug, som evcc bruger til at beregne overskuddet.
+Eksempel: `standbypower: -5000` for en enhed, der bruger ca. 5&nbsp;kW.
+
+<details class="device-config-section">
+<summary>Konfigurationseksempel til evcc.yaml</summary>
+
+```yaml
+chargers:
+  - name: my_sg_ready
+    type: template
+    template: shelly
+    host: 192.0.2.2
+    standbypower: -5000
+```
+
+</details>
+
+:::note
+Opladningstilstanden forudsætter, at kontakten har en indbygget energimåler.
+Det er i øjeblikket ikke muligt at opnå denne adfærd med en ekstra ekstern [energimåler](/da/meters).
+:::

@@ -1,0 +1,252 @@
+---
+title: "site"
+description: "Popište v evcc.yaml svou domácí instalaci, přiřaďte měřič sítě, solární měřiče, domácí baterii a další měřiče a pomocí residualPower dolaďte regulaci přebytku."
+sidebar:
+  order: 2
+translatedFrom: "21103d55d4df"
+---
+
+import prioritySoc from "../../../en/reference/configuration/img/prioritysoc.webp";
+import bufferSoc from "../../../en/reference/configuration/img/buffersoc.webp";
+import bufferStartSoc from "../../../en/reference/configuration/img/bufferstartsoc.webp";
+
+Tato sekce popisuje lokalitu se stávajícími a potřebnými zařízeními domácí instalace a řídí dostupný výkon.
+
+K regulaci nabíjení ze solárního přebytku je nutný měřič přímo za předávacím místem k síti, ze kterého lze číst data. Kromě toho lze zadat solární měřiče a měřiče domácích baterií. Výkon více zařízení se automaticky sčítá, u domácích baterií se vypočítá průměrný stav nabití.
+
+**Příklad**:
+
+```yaml
+site:
+  title: Domov # zobrazovaný název v uživatelském rozhraní
+  meters:
+    grid: mygridmeter # odkaz na měřič sítě
+    pv:
+      - mypv1 # odkaz na první solární měřič
+      - mypv9 # odkaz na druhý solární měřič
+    battery:
+      - mybat5 # odkaz na měřič baterie
+    aux:
+      - myaux1 # samoregulační spotřebič
+    consumer:
+      - myconsumer1 # běžný spotřebič, zaznamenává se pro statistiky spotřeby
+    ext:
+      - myext1 # pro záznam dat, řízení zátěže atd.
+  curtailers:
+    - my_curtailer # odkaz na zařízení omezující výkon
+  residualPower: 100
+```
+
+---
+
+## Povinné parametry
+
+### `title`
+
+Název lokality (místa), který se v uživatelském rozhraní zobrazuje jako titulek.
+
+**Příklad**:
+
+```yaml
+title: Domov
+```
+
+---
+
+### `meters`
+
+Určuje, jakou roli (typ měřicího bodu) mají jednotlivé nakonfigurované měřiče ([`meter`](/cs/reference/configuration/meters)). Tím se definice zařízení logicky propojí s jeho zamýšleným použitím. Původně univerzální měřič tak získá účel podle svého umístění v domácí instalaci.
+
+:::note
+Je nutné nakonfigurovat alespoň jeden prvek `grid` nebo `pv`!
+
+Bez nich nelze evcc používat!
+:::
+
+**Příklad**:
+
+```yaml
+site:
+  meters:
+    grid: mygridmeter # odkaz na měřič sítě
+    pv: mypv1 # odkaz na solární měřič
+    battery: mybat2 # odkaz na měřič baterie
+    aux: myaux1
+```
+
+---
+
+## Volitelné parametry
+
+### `meters.grid`
+
+Určuje měřič ([`meter`](/cs/reference/configuration/meters)), který poskytuje měření na předávacím místě k síti.
+
+**Možné hodnoty**: Hodnota parametru `name` v konfiguraci [`meters`](#meters).
+
+**Příklad**:
+
+```yaml
+grid: mygridmeter # odkaz na měřič sítě
+```
+
+---
+
+### `meters.pv`
+
+Určuje měřiče ([`meter`](/cs/reference/configuration/meters)), ze kterých evcc získává měření solární výroby.
+Lze zadat více zařízení. Údaje o výkonu se automaticky sčítají.
+
+**Možné hodnoty**: Jedna hodnota nebo seznam hodnot parametru name v konfiguraci [`meters`](#meters). Seznam lze použít i pro jedinou hodnotu.
+
+**Příklad**:
+
+```yaml
+pv: myonlypv # odkaz na jediný solární měřič
+```
+
+nebo
+
+```yaml
+pv: # (pvs = zastaralé)
+  - myoldpv # odkaz na první solární měřič
+  - mynewestpv # odkaz na druhý solární měřič
+```
+
+---
+
+### `meters.battery`
+
+Určuje měřiče ([`meter`](/cs/reference/configuration/meters)), které poskytují naměřená data z baterie (baterií).
+Lze zadat více zařízení. Údaje o výkonu se automaticky sčítají a ze stavu nabití baterií se vypočítá průměr.
+
+**Možné hodnoty**: Jedna hodnota nebo seznam hodnot parametru `name` v konfiguraci [`meters`](#meters). Seznam lze použít i pro jedinou hodnotu.
+
+**Příklad**:
+
+```yaml
+battery: myonlybat # odkaz na jediný měřič baterie
+```
+
+nebo
+
+```yaml
+battery: # (batteries = zastaralé)
+  - mysmallbat # odkaz na první měřič baterie
+  - myhugebat # odkaz na druhý měřič baterie
+```
+
+### `meters.aux`
+
+Měřiče pro externí zařízení, která mají vlastní regulaci přebytku, ale evcc je přímo neřídí, např. samoregulační topná tyč. Jejich výkon se započítává do přebytku dostupného pro nabíjení vozidla, a to za předpokladu, že zařízení sníží svou spotřebu, když evcc tento výkon přidělí nabíjení. Hodnoty více měřičů se sčítají.
+
+**Možné hodnoty**: Jedna hodnota nebo seznam hodnot parametru `name` v konfiguraci [`meters`](#meters). Seznam lze použít i pro jedinou hodnotu.
+
+**Příklad**:
+
+```yaml
+aux: myaux # odkaz na jediný měřič aux
+```
+
+nebo
+
+```yaml
+aux:
+  - myaux1 # odkaz na první měřič aux
+  - myaux2 # odkaz na druhý měřič aux
+```
+
+### `meters.consumer`
+
+Měřiče pro běžné spotřebiče, jako je pračka nebo myčka nádobí, které se zaznamenávají pouze pro statistiky spotřeby. Na rozdíl od `aux` se tento výkon nezapočítává do přebytku dostupného pro nabíjení vozidla.
+
+**Možné hodnoty**: Jedna hodnota nebo seznam hodnot parametru `name` v konfiguraci [`meters`](#meters). Seznam lze použít i pro jedinou hodnotu.
+
+**Příklad**:
+
+```yaml
+consumer: myconsumer # odkaz na jediný měřič spotřebiče
+```
+
+nebo
+
+```yaml
+consumer:
+  - myconsumer1 # odkaz na první měřič spotřebiče
+  - myconsumer2 # odkaz na druhý měřič spotřebiče
+```
+
+### `meters.ext`
+
+Měřiče, které se nepoužívají k regulaci ani se nezobrazují v uživatelském rozhraní, např. měřiče podružných rozvaděčů nebo alternativní měřiče sítě či soláru. Jejich data se pouze zaznamenávají a exportují, nezapočítávají se do přebytku ani do statistik spotřeby.
+
+**Možné hodnoty**: Jedna hodnota nebo seznam hodnot parametru `name` v konfiguraci [`meters`](#meters). Seznam lze použít i pro jedinou hodnotu.
+
+**Příklad**:
+
+```yaml
+ext: myext # odkaz na jediný měřič ext
+```
+
+nebo
+
+```yaml
+ext:
+  - myext1 # odkaz na první měřič ext
+  - myext2 # odkaz na druhý měřič ext
+```
+
+### `curtailers`
+
+Zařízení omezující výkon z konfigurace [`curtailers`](/cs/reference/configuration/curtailers), která na pokyn provozovatele distribuční soustavy omezují export do sítě (§ 9 EEG).
+Uplatňují se společně s omezitelnými měřiči `pv`, když integrace [`hems`](/cs/reference/configuration/hems) signalizuje limit.
+
+**Možné hodnoty**: Seznam hodnot parametru `name` v konfiguraci [`curtailers`](/cs/reference/configuration/curtailers).
+
+**Příklad**:
+
+```yaml
+curtailers:
+  - my_curtailer # odkaz na zařízení omezující výkon
+```
+
+### `residualPower`
+
+Nastavuje cílový pracovní bod regulace přebytku na předávacím místě k síti (měřič sítě). Výchozí hodnota je 0 W.
+Kladné hodnoty posouvají cílovou hodnotu směrem k exportu do sítě, záporné hodnoty směrem k odběru ze sítě.
+Tato hodnota v konečném důsledku určuje _klidový stav_ regulační smyčky, ke kterému regulace směřuje.
+
+Zejména v kombinaci s jinými nezávislými systémy regulace přebytku, jako je domácí baterie, je nutné tuto hodnotu upravit, aby se dosáhlo definovaného chování systému s jasnými prioritami.
+
+Pokud chcete v režimu **Chytrý** povolit určitý odběr ze sítě, nastavte zápornou hodnotu odpovídající jeho maximální výši.
+
+#### Je k dispozici `meter` typu `grid`
+
+- Kladná hodnota: zbývající výkon exportu do sítě
+- Záporná hodnota: zbývající výkon odběru ze sítě
+
+#### Je k dispozici pouze `meter` typu `pv`
+
+- Kladná hodnota: typická spotřeba domácnosti, slouží k odhadu solárního přebytku.
+- Záporná hodnota: zadaný výkon se přičte k solárnímu výkonu a zvýší dostupný nabíjecí výkon (pozor: odběr ze sítě).
+
+:::note
+Pokud je k dispozici domácí baterie, důrazně doporučujeme zadat zde malou hodnotu, např. mezi 100 a 300 W, aby se baterie mohla nabíjet podle nastavených priorit (viz `prioritySoc`). Jinak nezávislá regulace domácí baterie neuvidí žádný využitelný přebytek. Zároveň se tím i bez baterie zabrání krátkodobému odběru ze sítě při rychlých změnách výroby a zátěže.
+:::
+
+**Příklad „Domácí baterie“**:
+
+```yaml
+residualPower: 100
+```
+
+**Příklad „Podíl odběru ze sítě“**:
+
+Nabíjení se má v režimu **Chytrý** spustit s alespoň 6 A (jednofázově) i při pouhých 50 % solárního přebytku (zbytek ze sítě).
+Minimální nabíjecí výkon: 1 fáze × 6 A × 230 V = 1 380 W, z toho 50 %: 690 W
+
+Viz také [alternativu pomocí enable/disable, která umožňuje nabíjet zčásti ze soláru a zčásti ze sítě](/cs/features/solar-charging).
+
+```yaml
+residualPower: -690
+```

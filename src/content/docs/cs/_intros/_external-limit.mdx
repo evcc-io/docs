@@ -1,0 +1,59 @@
+---
+translatedFrom: "9bc910cfb8ce"
+---
+
+Provozovatelé distribučních sítí a nadřazené systémy řízení energie mohou externě omezit odběr i export do sítě u vaší instalace.
+Podporovány jsou tyto případy použití:
+
+- **§ 14a EnWG** (německá regulace): dočasné snížení výkonu a tlumení spotřebičů provozovatelem sítě
+- **§ 9 EEG** (německá regulace): omezení výkonu fotovoltaických elektráren při přetížení sítě
+- **Integrace EMS**: uplatnění limitů z jiných systémů řízení energie
+
+## Pozadí \{#background\}
+
+### Řiditelná spotřební zařízení (§ 14a EnWG) \{#dimming\}
+
+§ 14a německého energetického zákona (EnWG) upravuje řízení řiditelných spotřebních zařízení (SteuVE) způsobem šetrným k síti.
+Provozovatelé sítí mohou při přetížení sítě dočasně snížit výkon velkých spotřebičů, jako jsou nabíječky, tepelná čerpadla nebo bateriová úložiště.
+
+Důležité body:
+
+- Týká se spotřebičů s výkonem od 4,2&nbsp;kW
+- Řízení přes Smart Meter Gateway a řídicí jednotku
+
+### Řízení exportu do sítě (§ 9 EEG) \{#curtailment\}
+
+Podle § 9 zákona o obnovitelných zdrojích energie (EEG) mohou provozovatelé sítí při hrozícím přetížení sítě omezit dodávku z obnovitelných zdrojů do sítě.
+Týká se to hlavně větších fotovoltaických elektráren, ale může to být relevantní i u domácností.
+
+Když evcc přijme signál k omezení výkonu, předá se úroveň omezení v procentech všem omezitelným střídačům a každý ji uplatní přímo v zařízení.
+Řídicí jednotky FNN signalizují limity v pevných stupních (60&nbsp;%, 30&nbsp;%, 0&nbsp;%), které se uplatní beze změny.
+Limity ve wattech (např. přes EEBus) se převedou na procenta podle instalovaného výkonu zdroje.
+Střídače bez jemného řízení se po dobu platnosti limitu zcela vypnou.
+Aktivní limit se zobrazuje v rozhraní a po skončení signálu se výroba vrátí na plný výkon.
+
+:::caution[Experimentální]
+Omezení výkonu je podporováno jen u vybraných střídačů.
+Podporovaná zařízení jsou v [přehledu zařízení](/cs/meters) označena jako „Omezitelné“.
+Zařízení, která poskytují pouze omezení exportu do sítě, jsou uvedena v části [Zařízení omezující výkon](#curtailment-devices).
+:::
+
+## Nastavení \{#setup\}
+
+Nastavení provedete v části **Konfigurace → Vnější limit**.
+Vyberte jednu z níže uvedených integrací a zadejte její parametry.
+Případně můžete vytvořit [integraci definovanou uživatelem](/cs/user-defined-devices#external-limit), např. pro připojení přes jediný spínací kontakt (relé).
+
+Aby se limit odběru uplatnil na vaše nabíjecí body, nastavte okruhy v [řízení zátěže](/cs/features/loadmanagement).
+Aktivní limit pak omezí hlavní okruh a na kartě Řízení zátěže se zobrazí upozornění „Spotřeba snížena“.
+Aktivní limity se zobrazují na kartě **Vnější limit** a na hlavní stránce.
+
+### Párování integrací EEBus \{#eebus-pairing\}
+
+U integrací s protokolem EEBus komunikuje řídicí jednotka přímo s evcc a automaticky předává limit výkonu.
+Řídicí jednotku a evcc je nutné jednou spárovat:
+
+1. **V řídicí jednotce**: Přidejte evcc jako HEMS.
+   SKI a IP adresu evcc najdete v části **Konfigurace → EEBus**.
+2. **V evcc**: Zadejte SKI řídicí jednotky v integraci.
+   Najdete ho v dokumentaci řídicí jednotky nebo v jejím webovém rozhraní.

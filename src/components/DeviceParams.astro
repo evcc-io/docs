@@ -1,6 +1,7 @@
 ---
 import UsageIcons from "./UsageIcons.astro";
 import { renderMarkdown } from "@utils/devices";
+import { templateLocale } from "@utils/locales";
 
 interface Param {
   name?: string;
@@ -20,7 +21,7 @@ interface Param {
 
 interface Props {
   params: Param[];
-  lang: "de" | "en";
+  lang: string;
   /** Suppress the section heading so the caller can render it alongside
       other controls (e.g. the nightly-channel toggle in DeviceDetailLayout). */
   hideTitle?: boolean;
@@ -28,13 +29,15 @@ interface Props {
 
 const { params, lang, hideTitle = false } = Astro.props;
 
+const t = (key: string) => Astro.locals.t(key as any);
+
 function localized(
   v: string | Record<string, string> | null | undefined,
-  l: "de" | "en",
+  l: string,
 ): string {
   if (v == null) return "";
   if (typeof v === "string") return v;
-  return v[l] ?? v.en ?? v.de ?? "";
+  return v[templateLocale(l)] ?? v.en ?? v.de ?? "";
 }
 
 function valueChoices(p: Param): (string | number)[] {
@@ -58,14 +61,10 @@ const MODBUS_GROUP_TO_CATEGORIES: Record<string, string[]> = {
   rs485: ["serial", "network"],
   tcpip: ["network"],
 };
-const MODBUS_CATEGORY_LABELS: Record<string, Record<"de" | "en", string>> = {
-  serial: { de: "Seriell", en: "Serial" },
-  network: { de: "Netzwerk", en: "Network" },
-};
 type ConnectionField = {
   name: string;
-  description: Record<"de" | "en", string>;
-  help?: Record<"de" | "en", string>;
+  description: string;
+  help?: string;
   defaultValue?: string | number;
   example?: string | number;
   type?: string;
@@ -76,45 +75,42 @@ type ConnectionField = {
 const MODBUS_CONNECTION_FIELDS: ConnectionField[] = [
   {
     name: "id",
-    description: { de: "Modbus ID", en: "Modbus ID" },
+    description: t("params.modbus.id"),
     type: "int",
     defaultValue: 1,
     categories: ["serial", "network"],
   },
   {
     name: "device",
-    description: { de: "Gerätename", en: "Device name" },
-    help: { de: "USB-RS485 Adapter", en: "USB-RS485 adapter" },
+    description: t("params.modbus.device"),
+    help: t("params.modbus.deviceHelp"),
     example: "/dev/ttyUSB0",
     categories: ["serial"],
   },
   {
     name: "baudrate",
-    description: { de: "Baudrate", en: "Baudrate" },
+    description: t("params.modbus.baudrate"),
     defaultValue: 9600,
     choices: [1200, 9600, 19200, 38400, 57600, 115200],
     categories: ["serial"],
   },
   {
     name: "comset",
-    description: { de: "ComSet", en: "ComSet" },
-    help: {
-      de: "Kommunikationsparameter des Adapters",
-      en: "Communication parameter for the adapter",
-    },
+    description: t("params.modbus.comset"),
+    help: t("params.modbus.comsetHelp"),
     defaultValue: "8N1",
     choices: ["8N1", "8E1", "8N2"],
     categories: ["serial"],
   },
   {
     name: "host",
-    description: { de: "IP-Adresse oder Hostname", en: "IP address or hostname" },
+    description: t("params.modbus.host"),
     example: "192.0.2.2",
     categories: ["network"],
   },
   {
     name: "port",
-    description: { de: "Port", en: "Port" },
+    description: t("params.modbus.port"),
     defaultValue: 502,
     type: "int",
     categories: ["network"],
@@ -174,36 +170,19 @@ const rowParams: Param[] = hasModbus
     ]
   : visible;
 
-const labels =
-  lang === "de"
-    ? {
-        title: "Parameter",
-        name: "Name",
-        desc: "Beschreibung",
-        value: "Wert",
-        level: "Stufe",
-        levelRequired: "erforderlich",
-        levelOptional: "optional",
-        levelAdvanced: "erweitert",
-        usages: "Verfügbar für",
-        defaultLbl: "Standard",
-        exampleLbl: "Beispiel",
-        options: "Optionen",
-      }
-    : {
-        title: "Parameters",
-        name: "Name",
-        desc: "Description",
-        value: "Value",
-        level: "Level",
-        levelRequired: "required",
-        levelOptional: "optional",
-        levelAdvanced: "advanced",
-        usages: "Available for",
-        defaultLbl: "Default",
-        exampleLbl: "Example",
-        options: "options",
-      };
+const labels = {
+  title: t("detail.params"),
+  name: t("params.name"),
+  desc: t("params.description"),
+  value: t("params.value"),
+  level: t("params.level"),
+  levelRequired: t("params.required"),
+  levelOptional: t("params.optional"),
+  levelAdvanced: t("params.advanced"),
+  usages: t("params.usages"),
+  defaultLbl: t("params.default"),
+  exampleLbl: t("params.example"),
+};
 
 function paramLevel(p: Param): { order: number; label: string; key: "required" | "optional" | "advanced" } {
   if (p.required) return { order: 0, label: labels.levelRequired, key: "required" };
@@ -257,7 +236,7 @@ const showUsagesCol = rows.some((r) => r.usages.length > 0);
                   checked={i === 0}
                 />
                 <label class="modbus-filter-label" for={`${filterGroupId}-${cat}`}>
-                  {MODBUS_CATEGORY_LABELS[cat]?.[lang] ?? cat}
+                  {t(`params.${cat}`)}
                 </label>
               </>
             ))}

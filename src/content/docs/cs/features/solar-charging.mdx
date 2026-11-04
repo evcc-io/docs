@@ -1,0 +1,98 @@
+---
+title: "Nabíjení ze solárního přebytku"
+description: "Vysvětluje, jak funguje nabíjení ze solárního přebytku v režimu Chytrý, kdy se nabíjení spustí, pozastaví nebo přepne fáze a jak pomáhá posuvník solárního podílu."
+sidebar:
+  order: 1
+translatedFrom: "ddd5bc4fba6a"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Využijte přebytečnou solární energii k nabíjení elektromobilu.
+To je základní funkce evcc.
+
+<a id="smart-mode"></a>
+
+## Režim Chytrý
+
+Nabíjení ze solárního přebytku se na nabíjecím bodě zapíná režimem **Chytrý**.
+
+<Screenshot
+  name="features/screenshots/smart-mode"
+  caption="Snímek obrazovky nabíjecího bodu. Kurzor klikne na režim Chytrý."
+/>
+
+V tomto režimu se nabíjení spustí automaticky, jakmile fotovoltaická elektrárna dodává **dostatečný výkon**.
+Nabíjecí výkon se průběžně upravuje tak, aby se pokud možno **neodebíral žádný výkon ze sítě**.
+Pokud fotovoltaická elektrárna přestane dodávat dostatečný výkon nebo se zvýší spotřeba domácnosti, nabíjení se pozastaví a později se zase obnoví.
+
+Kromě solárního přebytku pokrývá režim **Chytrý** také nabíjení v levných hodinách [dynamického tarifu](/cs/features/dynamic-prices) a [plány nabíjení](/cs/features/plans).
+Všechny strategie lze kombinovat.
+Přehled všech režimů najdete na [stránce o režimech](/cs/features/modes).
+
+<a id="charging-start"></a>
+
+### Kdy se nabíjení spustí?
+
+Všechny elektromobily mají **minimální nabíjecí výkon**.
+Ten je dán minimálním proudem 6 A, který stanovuje nabíjecí norma [IEC 61851](https://en.wikipedia.org/wiki/IEC_61851).
+Minimální nabíjecí výkon závisí na počtu fází, které vozidlo a nabíječka k nabíjení používají.
+
+| Fáze                | Minimální nabíjecí výkon (6 A)           | Maximální nabíjecí výkon (16 A / 32 A)                         |
+| :------------------ | :--------------------------------------- | :------------------------------------------------------------- |
+| 1fázové             | **1,4 kW** (1 × 6 A × 230 V)             | **3,7 kW** (1 × 16 A × 230 V)                                  |
+| 2fázové             | **2,8 kW** (2 × 6 A × 230 V)             | **7,4 kW** (2 × 16 A × 230 V)                                  |
+| 3fázové<br />&nbsp; | **4,1 kW** (3 × 6 A × 230 V)<br />&nbsp; | **11 kW** (3 × 16 A × 230 V)<br />**22 kW** (3 × 32 A × 230 V) |
+
+Většina dnešních nabíječek je připojena třífázově (11 kW nebo 22 kW).
+Minimální nabíjecí výkon je tedy 4,1 kW.
+U [nabíječek s automatickým přepínáním fází](/cs/chargers#features) (1P/3P) může evcc podle potřeby přepínat mezi jednou a třemi fázemi a spustit nabíjení už od 1,4 kW.
+
+Výkon exportu do sítě se zobrazuje v **diagramu toku energie**.
+Pokud je přebytek po určitou dobu vyšší než minimální nabíjecí výkon, nabíjení se spustí.
+
+<Screenshot
+  name="features/screenshots/energyflow-surplus"
+  caption="Diagram toku energie ukazuje export do sítě 3,4 kW."
+/>
+
+Poznámka: Rozhodující je hodnota na měřiči sítě.
+Nabíjení ze solárního přebytku nefunguje u systémů s regulovaným exportem do sítě („nulový export“).
+
+<a id="not-enough-surplus"></a>
+
+### Nedostatečný přebytek?
+
+Ve výchozím nastavení se nabíjení spustí až tehdy, když přebytek pokryje celý minimální nabíjecí výkon.
+U malých fotovoltaických elektráren nebo v zimních měsících k tomu může docházet jen zřídka.
+Posuvníkem **Solární podíl** povolíte část energie ze sítě, aby se nabíjení alespoň zčásti pokrylo solární energií.
+Najdete ho v nastavení nabíjecího bodu v části **Solární přebytek**.
+
+<Screenshot
+  name="features/screenshots/solar-share"
+  caption="Posuvník solárního podílu v nastavení nabíjecího bodu, nastavený na 50 %."
+/>
+
+Posuvník určuje, jaká část minimálního nabíjecího výkonu musí pocházet ze soláru.
+Při 100 % se nabíjení spustí, až když přebytek pokryje celý minimální nabíjecí výkon.
+Při 50 % se nabíjení spustí, jakmile solár pokryje polovinu, a zbytek se odebírá ze sítě nebo z domácí baterie.
+Při 0 % se nabíjení spustí, jakmile je k dispozici nějaký přebytek.
+Nabíjení se zastaví, když solární podíl na nějakou dobu klesne pod nastavenou hodnotu.
+
+Pokud máte domácí baterii, může chybějící výkon místo sítě dodat baterie.
+V části [priorita baterie](/cs/features/battery#priority) určíte, do jaké míry se smí domácí baterie použít k nabíjení vozidla.
+
+Zpoždění před spuštěním nebo zastavením nabíjení lze upravit v nabídce **Konfigurace → Místo pro nabíjení a topení → [Můj nabíjecí bod]** v části **Chování**.
+Zvolte je tak, aby se nabíjení nezapínalo a nevypínalo příliš často.
+Některá vozidla při příliš častém přerušování přestanou nabíjet a je nutné je znovu probudit, např. odemknutím nebo odpojením a opětovným připojením nabíjecího kabelu.
+Pro tato vozidla udrží volba [Vždy nabíjet](/cs/features/modes#always-charge) nabíjecí relaci v chodu bez přerušení.
+
+<a id="home-battery"></a>
+
+### Součinnost s domácí baterií
+
+Bateriové systémy mají vlastní, rychlou regulaci.
+Ve výchozím nastavení má přednost domácí baterie.
+V režimu **Chytrý** se nabíjení vozidla spustí až tehdy, když domácí baterie už nemůže přijmout žádný výkon.
+
+Jak toto chování upravit, se dozvíte v části [Domácí baterie](/cs/features/battery).

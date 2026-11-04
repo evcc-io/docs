@@ -1,0 +1,113 @@
+---
+translatedFrom: "bbae10b17f51"
+---
+
+## Configurazione con relè SG-Ready \{#sgready-configuration\}
+
+### Configurazione con relè boost \{#boost-relay\}
+
+Questo esempio mostra come configurare una pompa di calore usando uno Shelly 1 per la modalità boost e uno Shelly 3EM per la misura della potenza.
+Per questo si usa il tipo `sgready-relay`.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Configurazione con relè boost e dim \{#boost-dim-relay\}
+
+Se la tua pompa di calore supporta sia la modalità boost sia la modalità dim, puoi configurare un secondo relè per il contatto dim.
+In modalità dim il consumo di potenza della pompa di calore viene ridotto.
+Questo è utile per limitare il consumo di potenza in caso di congestione della rete o nell’ambito del § 14a EnWG.
+
+Puoi usare due relè separati oppure un relè con più canali (ad es. Shelly con valori `channel` diversi).
+Oltre a Shelly sono possibili anche altri [relè controllabili](/it/smartswitches).
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Facoltativamente puoi aggiungere [tramite plugin](/it/reference/plugins) la temperatura attuale (`temp`), il limite di temperatura interno del dispositivo (`limittemp`), la potenza (`power`) e l’energia (`energy`).
+Questi valori servono solo per la visualizzazione e non controllano la pompa di calore.
+
+## Visualizzazione dello stato \{#status-display\}
+
+Poiché le pompe di calore seguono una propria logica di riscaldamento indipendente da evcc, l’interfaccia mostra due stati:
+
+- **Funzionamento normale**: nessun intervento, la pompa di calore segue la propria regolazione.
+- **Boost attivo**: una richiesta di aumentare la potenza.
+  Finché la pompa di calore non ha ancora reagito (ad es. per tempi minimi di funzionamento o periodi di blocco), lo stato indica “Boost richiesto…”.
+
+I tipi di pompa di calore preconfigurati e i relativi template impostano già i [feature flag](/it/user-defined-devices#charger-features) necessari.
+Per le configurazioni personalizzate tramite `type: custom`, imposta la combinazione adatta di `integrateddevice`, `heating`, `continuous` e facoltativamente `switchdevice`.
+
+## Scaldacqua elettrici \{#electric-water-heaters\}
+
+Gli scaldacqua elettrici semplici possono essere solo accesi o spenti da evcc.
+Di solito sono collegati tramite una [presa commutabile](/it/smartswitches).
+Con surplus sufficiente, evcc attiva la presa (enable) e la disattiva di nuovo quando le condizioni lo richiedono (disable).
+
+Per scaldacqua elettrici speciali con una propria regolazione continua, evcc inoltra al dispositivo la potenza attualmente disponibile.
+Questa potenza disponibile viene adattata di continuo alla situazione attuale, in modo analogo alla ricarica di un veicolo.
+
+evcc offre limiti regolabili con cui puoi impostare la temperatura desiderata.
+Questi non vanno intesi come funzione di sicurezza.
+Di norma la regolazione della temperatura dovrebbe avvenire tramite la funzione termostato del riscaldatore stesso.
+
+:::danger
+Il tuo scaldacqua elettrico deve sempre avere un proprio limite di temperatura che impedisca in modo affidabile il surriscaldamento in caso di guasto o malfunzionamento di evcc o di errore dell’operatore.
+:::

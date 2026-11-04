@@ -1,0 +1,178 @@
+---
+title: "Raspberry Pi et Cie"
+description: "L’image pour carte SD est le moyen le plus simple d’utiliser evcc sur Raspberry Pi ou NanoPi, avec configuration Wi-Fi et gestion système via Cockpit dans le navigateur."
+sidebar:
+  order: 3
+translatedFrom: "dd6112dce7f1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+C’est le moyen le plus simple d’installer evcc sur un Raspberry Pi ou un ordinateur monocarte similaire.
+Préconfiguré et prêt à être paramétré via l’interface web !
+
+## Démarrage rapide
+
+<Steps>
+
+1. ### Télécharger le fichier
+
+   Téléchargez la dernière image evcc pour votre appareil :
+
+   | Appareil                             | Téléchargement                                                                                                                                                                                                              |
+   | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | **Raspberry Pi** (3, 4, 5, Zero 2 W) | **[evcc_raspberry-pi.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip)** ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))         |
+   | NanoPi Zero2                         | [evcc_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.sha))             |
+   | NanoPi R3S                           | [evcc_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.sha))                   |
+   | NanoPi R76S                          | [evcc_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))                |
+   | NanoPi NEO3 Plus                     | [evcc_nanopi-neo3-plus.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.sha)) |
+   | NanoPi R28S                          | [evcc_nanopi-r28s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.sha))                |
+
+   Vous trouverez plus de détails sur chaque carte (Wi-Fi, stockage, performances) dans la [liste des cartes prises en charge](https://github.com/evcc-io/images#supported-boards).
+
+2. ### Flasher la carte SD
+
+   Écrivez maintenant l’image téléchargée sur la carte SD. Nous utilisons pour cela **[Armbian Imager](https://imager.armbian.com/#downloads)**. Vous pouvez aussi utiliser [Rufus](https://rufus.ie/) (Windows).
+   - Insérez la carte SD dans l’ordinateur
+   - Ouvrez Armbian Imager
+   - **Use Custom Image** → sélectionnez le fichier téléchargé
+   - Sélectionnez votre carte SD
+   - Lancez le flashage → attendez qu’il soit terminé
+
+   :::tip[Alternative]
+   Au lieu de « Télécharger le fichier » et « Flasher la carte SD », vous pouvez aussi préparer la carte SD avec **[Raspberry Pi Imager](https://www.raspberrypi.com/software/)**.
+
+   L’image evcc figure dans le catalogue officiel. Sélectionnez **Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc**.
+   :::
+
+3. ### Démarrer le Raspberry Pi
+   - Insérez la carte SD dans le Raspberry Pi
+   - Branchez le câble réseau (recommandé), ou [configurez le Wi-Fi](#wifi)
+   - Branchez l’alimentation
+   - Attendez la fin du démarrage
+
+4. ### Interface web d’evcc \{#evcc-web-ui\}
+
+   ![Définition du mot de passe evcc](../../../../assets/installation/evcc-password.webp)
+   - Ouvrez le navigateur
+   - Saisissez **[https://evcc.local/](https://evcc.local/)**
+     - Acceptez l’avertissement de certificat (c’est normal, la connexion est chiffrée)
+     - Ou via l’adresse IP, p. ex. `https://192.168.1.123/` (relevez l’adresse IP dans le routeur)
+   - Définissez le mot de passe administrateur (au premier démarrage)
+   - Configurez les appareils (chargeur, installation photovoltaïque, batterie domestique, véhicules)
+     - Remarque : au moins un point de charge doit être créé pour qu’evcc fonctionne.
+
+   Vous trouverez plus de détails sur la configuration dans le [guide de configuration](/fr/installation/configuration).
+
+   ![Accueil evcc](../../../../assets/installation/evcc-welcome.webp)
+
+   **Terminé !** 🎉
+
+</Steps>
+
+La configuration du système et les mises à jour se font via [Cockpit](#cockpit).
+Connectez-vous une première fois à Cockpit pour changer le mot de passe Linux par défaut.
+
+## Configurer le Wi-Fi \{#wifi\}
+
+Si aucun câble réseau n’est disponible, le Raspberry Pi crée un point d’accès Wi-Fi pour la configuration initiale.
+
+- Recherchez le réseau Wi-Fi **« evcc-setup »** sur votre smartphone
+- Connectez-vous (aucun mot de passe requis)
+- Sélectionnez votre réseau Wi-Fi domestique dans la liste
+- Saisissez le mot de passe de votre réseau Wi-Fi domestique
+- Le Raspberry Pi arrête le point d’accès et se connecte à votre réseau Wi-Fi domestique
+- Continuez avec l’[interface web d’evcc](#evcc-web-ui)
+
+La configuration Wi-Fi peut aussi se faire plus tard via [Cockpit](#cockpit).
+
+## Gestion du système via Cockpit \{#cockpit\}
+
+Cockpit est une interface graphique de gestion système pour Linux.
+Vous pouvez y configurer votre système, installer des mises à jour et modifier les paramètres réseau.
+
+- URL : [https://evcc.local:9090/](https://evcc.local:9090/)
+- Utilisateur : `admin`
+- Mot de passe : `admin` (initial)
+
+À la première connexion, il vous sera demandé de changer le mot de passe par défaut.
+Choisissez un mot de passe sûr pour la gestion du système.
+Si vous l’oubliez, vous devrez flasher à nouveau la carte SD.
+Il n’existe pas de fonction « mot de passe oublié ».
+
+![Connexion à Cockpit](../../../../assets/installation/cockpit.webp)
+
+**Fonctions importantes :**
+
+- **Système :** vue d’ensemble du processeur, de la mémoire et du disque
+- **Journaux :** consulter les [journaux système](/fr/report-a-problem#system-logs)
+- **Réseau :** configurer le réseau et le Wi-Fi
+- **Navigateur :** éditeur de fichiers pour les fichiers de configuration
+- **Terminal :** accès à la ligne de commande
+- **Mises à jour logicielles :** mettre à jour le système
+
+:::caution
+**Le mot de passe Cockpit sert uniquement à la gestion du système (y compris SSH).**
+
+Pour l’interface web d’evcc, vous définissez un mot de passe administrateur distinct.
+:::
+
+## Matériel recommandé
+
+evcc fonctionne sur différents ordinateurs monocartes et n’a besoin que de peu de ressources.
+Même 1 Go de RAM suffit largement.
+
+**Appareils pris en charge :**
+
+- Raspberry Pi 4 et 5 : performances largement suffisantes
+- Raspberry Pi 3 et Zero 2 W : suffisant si evcc est la seule application
+- NanoPi Zero2, R3S et R76S : compacts, abordables, disponibles avec boîtier métallique et stockage eMMC intégré
+
+**Stockage :**
+Au moins une carte SD ou un eMMC de 16 Go.
+Pour une durée de vie plus longue, nous recommandons un eMMC plutôt qu’une carte SD (p. ex. avec un NanoPi).
+Les cartes SD peuvent s’user à cause des écritures fréquentes.
+Voir aussi les [recommandations d’Armbian](https://docs.armbian.com/User-Guide_Getting-Started/#what-do-i-need).
+
+**Alimentation :**
+Utilisez le bloc d’alimentation d’origine du fabricant concerné.
+
+**Réseau :**
+Une connexion filaire est fortement recommandée.
+Le Wi-Fi est possible, mais souvent moins stable.
+
+## À propos de l’image Linux evcc
+
+L’image Linux evcc est basée sur [Armbian](https://www.armbian.com/) et offre quelques fonctions pratiques :
+
+### Services disponibles
+
+| Service              | URL                                                         | Remarque                               |
+| -------------------- | ----------------------------------------------------------- | -------------------------------------- |
+| Interface web d’evcc | `https://evcc.local/`                                       | certificat auto-signé **(par défaut)** |
+|                      | `http://evcc.local:7070/`                                   | non chiffré                            |
+| Serveur OCPP         | `ws://evcc.local:8887/<station-id>`                         | non chiffré **(par défaut)**           |
+|                      | `wss://evcc.local:8888/<station-id>`                        | certificat auto-signé                  |
+| Cockpit              | `https://evcc.local:9090/` (mot de passe initial : `admin`) | certificat auto-signé                  |
+| SSH                  | `ssh admin@evcc.local` (mot de passe initial : `admin`)     |                                        |
+
+L’image propose une variante chiffrée pour tous les services.
+Nous recommandons d’utiliser des connexions chiffrées, même en réseau local.
+Pour OCPP, certains chargeurs ne prennent pas en charge les certificats auto-signés.
+Utilisez dans ce cas la connexion WS non chiffrée.
+
+### Mises à jour
+
+- Système d’exploitation : les mises à jour de sécurité sont installées automatiquement
+- evcc : les mises à jour peuvent être effectuées manuellement via [Cockpit](#cockpit)
+
+### Accès SSH
+
+Vous pouvez vous connecter via SSH avec l’utilisateur `admin` (mêmes identifiants que pour [Cockpit](#cockpit)).
+
+Vous trouverez plus de détails techniques dans le [dépôt GitHub](https://github.com/evcc-io/images).
+
+## Étapes suivantes
+
+Dans la section [Fonctionnalités](/fr/features/solar-charging), vous découvrirez toutes les possibilités d’evcc.
+Téléchargez aussi l’[application iOS/Android](/fr/features/app).

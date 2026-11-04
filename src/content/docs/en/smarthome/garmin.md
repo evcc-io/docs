@@ -10,8 +10,8 @@ It is a community project and not part of evcc.
 
 The app offers two views:
 
-- **Glance**: a quick overview of your home battery and connected vehicles with their state of charge and charging status
-- **Widget**: detailed views with current power flows, loadpoint details, solar forecast, grid prices, and solar energy statistics
+- **Glance**: a quick overview of your home battery and connected vehicles with their charge level and charging status
+- **Widget**: detailed views with current power flows, charging point details, solar forecast, grid prices, and solar energy statistics
 
 Multiple evcc instances (sites) are supported.
 

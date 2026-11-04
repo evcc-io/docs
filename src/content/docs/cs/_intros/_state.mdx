@@ -1,0 +1,19 @@
+---
+translatedFrom: "467d4c7df8e1"
+---
+
+API State je datová struktura, ze které vychází uživatelské rozhraní.
+Přistupovat k ní lze třemi způsoby.
+Zpětná kompatibilita není zaručena, protože se pole mohou mezi vydáními měnit.
+
+- [REST API](/integrations/rest-api): `GET /api/state` vrací celý stav jako jeden dokument JSON zabalený do objektu `result`.
+  Parametr dotazu `jq` filtruje odpověď pomocí výrazu [jq](https://jqlang.org/).
+  - Živý příklad: [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Odpověď omezená na jediné pole: [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/cs/integrations/mqtt-api): každé pole se publikuje jako samostatné téma.
+  Pole na úrovni lokality najdete pod `evcc/site/<field>`, pole nabíjecích bodů pod `evcc/loadpoints/<n>/<field>` s indexy číslovanými od 1.
+  Vnořené objekty a seznamy se rozkládají do podtémat, např. `evcc/site/pv/1/power`.
+  Hodnoty se publikují jako prosté řetězce, časová razítka jako unixový čas v sekundách, doby trvání v sekundách.
+- **Websocket**: po připojení obdrží klient celý stav jako jeden objekt JSON.
+  Pole nabíjecích bodů používají klíče s tečkami, např. `loadpoints.0.chargePower`.
+  Poté se posílají jen průběžné změny: malé objekty JSON se změněnými poli, které klient sloučí do své kopie stavu.

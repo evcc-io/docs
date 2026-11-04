@@ -1,0 +1,178 @@
+---
+title: "Raspberry Pi a další"
+description: "Hotový obraz SD karty je nejjednodušší způsob, jak provozovat evcc na Raspberry Pi nebo NanoPi, včetně nastavení Wi-Fi a správy systému přes Cockpit v prohlížeči."
+sidebar:
+  order: 3
+translatedFrom: "dd6112dce7f1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Toto je nejjednodušší způsob, jak nainstalovat evcc na Raspberry Pi nebo podobné jednodeskové počítače.
+Obraz je předem nakonfigurovaný a připravený k nastavení přes webové rozhraní.
+
+## Rychlý start
+
+<Steps>
+
+1. ### Stažení souboru
+
+   Stáhněte nejnovější obraz evcc pro své zařízení:
+
+   | Zařízení                             | Stažení                                                                                                                                                                                                                     |
+   | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | **Raspberry Pi** (3, 4, 5, Zero 2 W) | **[evcc_raspberry-pi.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip)** ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))         |
+   | NanoPi Zero2                         | [evcc_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.sha))             |
+   | NanoPi R3S                           | [evcc_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.sha))                   |
+   | NanoPi R76S                          | [evcc_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))                |
+   | NanoPi NEO3 Plus                     | [evcc_nanopi-neo3-plus.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.sha)) |
+   | NanoPi R28S                          | [evcc_nanopi-r28s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.sha))                |
+
+   Další podrobnosti o jednotlivých deskách (Wi-Fi, úložiště, výkon) najdete v [seznamu podporovaných desek](https://github.com/evcc-io/images#supported-boards).
+
+2. ### Zápis na SD kartu
+
+   Nyní zapište stažený obraz na SD kartu. K tomu používáme **[Armbian Imager](https://imager.armbian.com/#downloads)**. Případně můžete použít [Rufus](https://rufus.ie/) (Windows).
+   - Vložte SD kartu do počítače
+   - Otevřete Armbian Imager
+   - **Use Custom Image** → vyberte stažený soubor
+   - Vyberte svou SD kartu
+   - Spusťte zápis → počkejte na dokončení
+
+   :::tip[Alternativa]
+   Místo kroků „Stažení souboru“ a „Zápis na SD kartu“ můžete SD kartu připravit také pomocí **[Raspberry Pi Imager](https://www.raspberrypi.com/software/)**.
+
+   Obraz evcc je uveden v oficiálním katalogu. Zvolte **Choose OS → Other specific-purpose OS → Home assistants and home automation → evcc**.
+   :::
+
+3. ### Spuštění Raspberry Pi
+   - Vložte SD kartu do Raspberry Pi
+   - Připojte síťový kabel (doporučeno), případně [nastavte Wi-Fi](#wifi)
+   - Připojte napájecí zdroj
+   - Počkejte, až se systém spustí
+
+4. ### evcc Web UI
+
+   ![Nastavení hesla v evcc](../../../../assets/installation/evcc-password.webp)
+   - Otevřete prohlížeč
+   - Zadejte **[https://evcc.local/](https://evcc.local/)**
+     - Varování o certifikátu je nutné potvrdit (je to normální, spojení je šifrované)
+     - Případně přes IP adresu, např. `https://192.168.1.123/` (IP adresu zjistíte v routeru)
+   - Nastavte heslo administrátora (při prvním spuštění)
+   - Nastavte zařízení (nabíječku, fotovoltaickou elektrárnu, domácí baterii, vozidla)
+     - Poznámka: aby evcc běželo, musí být vytvořen alespoň jeden nabíjecí bod.
+
+   Další podrobnosti o nastavení najdete v [návodu ke konfiguraci](/cs/installation/configuration).
+
+   ![Uvítání v evcc](../../../../assets/installation/evcc-welcome.webp)
+
+   **Hotovo!** 🎉
+
+</Steps>
+
+Konfigurace systému a aktualizace se provádějí přes [Cockpit](#cockpit).
+Hned zpočátku se tam přihlaste a změňte výchozí linuxové heslo.
+
+## Nastavení Wi-Fi \{#wifi\}
+
+Pokud není připojen síťový kabel, vytvoří Raspberry Pi pro prvotní nastavení vlastní hotspot Wi-Fi.
+
+- Na chytrém telefonu vyhledejte Wi-Fi síť **„evcc-setup“**
+- Připojte se (heslo není potřeba)
+- Ze seznamu vyberte svou domácí Wi-Fi síť
+- Zadejte heslo své domácí Wi-Fi sítě
+- Raspberry Pi ukončí hotspot a připojí se k vaší domácí Wi-Fi síti
+- Pokračujte krokem [evcc Web UI](#evcc-web-ui)
+
+Wi-Fi lze nastavit i později přes [Cockpit](#cockpit).
+
+## Správa systému přes Cockpit \{#cockpit\}
+
+Cockpit je grafické rozhraní pro správu systému Linux.
+Můžete v něm konfigurovat systém, instalovat aktualizace a měnit nastavení sítě.
+
+- URL: [https://evcc.local:9090/](https://evcc.local:9090/)
+- Uživatel: `admin`
+- Heslo: `admin` (výchozí)
+
+Při prvním přihlášení budete vyzváni ke změně výchozího hesla.
+Zvolte bezpečné heslo pro správu systému.
+Pokud ho zapomenete, budete muset SD kartu zapsat znovu.
+Funkce „zapomenuté heslo“ neexistuje.
+
+![Přihlášení do Cockpitu](../../../../assets/installation/cockpit.webp)
+
+**Důležité funkce:**
+
+- **System:** přehled procesoru, paměti a disku
+- **Logs:** zobrazení [systémových logů](/cs/report-a-problem#system-logs)
+- **Networking:** nastavení sítě a Wi-Fi
+- **Navigator:** editor konfiguračních souborů
+- **Terminal:** přístup k příkazové řádce
+- **Software Updates:** aktualizace systému
+
+:::caution
+**Heslo do Cockpitu slouží pouze ke správě systému (včetně SSH).**
+
+Pro webové rozhraní evcc si nastavíte samostatné heslo administrátora.
+:::
+
+## Doporučený hardware
+
+evcc běží na různých jednodeskových počítačích a potřebuje jen málo prostředků.
+I 1 GB RAM je zcela dostačující.
+
+**Podporovaná zařízení:**
+
+- Raspberry Pi 4 a 5: výkonu je víc než dost
+- Raspberry Pi 3 a Zero 2 W: stačí, pokud je evcc jedinou aplikací
+- NanoPi Zero2, R3S a R76S: kompaktní, cenově dostupné, k dispozici s kovovou skříní a integrovaným úložištěm eMMC
+
+**Úložiště:**
+SD karta nebo eMMC s kapacitou alespoň 16 GB.
+Pro delší životnost doporučujeme místo SD karty eMMC (např. u NanoPi).
+SD karty se mohou častými zápisy opotřebovat.
+Viz také [doporučení Armbianu](https://docs.armbian.com/User-Guide_Getting-Started/#what-do-i-need).
+
+**Napájení:**
+Používejte originální napájecí zdroj od příslušného výrobce.
+
+**Síť:**
+Důrazně doporučujeme kabelové připojení.
+Připojení přes Wi-Fi je možné, ale často bývá méně stabilní.
+
+## O evcc Linux Image
+
+evcc Linux Image vychází z [Armbianu](https://www.armbian.com/) a nabízí několik praktických funkcí:
+
+### Dostupné služby
+
+| Služba               | URL                                                 | Poznámka                             |
+| -------------------- | --------------------------------------------------- | ------------------------------------ |
+| Webové rozhraní evcc | `https://evcc.local/`                               | self-signed certifikát **(výchozí)** |
+|                      | `http://evcc.local:7070/`                           | nešifrováno                          |
+| Server OCPP          | `ws://evcc.local:8887/<station-id>`                 | nešifrováno **(výchozí)**            |
+|                      | `wss://evcc.local:8888/<station-id>`                | self-signed certifikát               |
+| Cockpit              | `https://evcc.local:9090/` (výchozí heslo: `admin`) | self-signed certifikát               |
+| SSH                  | `ssh admin@evcc.local` (výchozí heslo: `admin`)     |                                      |
+
+Obraz nabízí šifrovanou variantu všech služeb.
+Šifrovaná spojení doporučujeme používat i v lokální síti.
+U OCPP některé nabíječky self-signed certifikáty nepodporují.
+Jako záložní řešení použijte nešifrované WS.
+
+### Aktualizace
+
+- Operační systém: bezpečnostní aktualizace se instalují automaticky
+- evcc: aktualizace lze provést ručně přes [Cockpit](#cockpit)
+
+### Přístup přes SSH
+
+Přes SSH se můžete připojit jako uživatel `admin` (stejné přihlašovací údaje jako pro [Cockpit](#cockpit)).
+
+Další technické podrobnosti najdete v [repozitáři na GitHubu](https://github.com/evcc-io/images).
+
+## Další kroky
+
+V části [Funkce](/cs/features/solar-charging) se dozvíte o všech možnostech evcc.
+Stáhněte si také [aplikaci pro iOS/Android](/cs/features/app).

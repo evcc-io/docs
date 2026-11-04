@@ -66,6 +66,8 @@ _✨ featuring the evcc core team_
 
 ## Podcasts
 
+- October 2026 · Moove (auto motor und sport) (de) \
+  ✨ [E-Auto mit Solarstrom laden: So wird jede Wallbox endlich smart](https://moove.podigee.io/260-e-auto-mit-solarstrom-laden-wird-die-wallbox-so-wirklich-smart)
 - January 2026 · SmartHütte Podcast \
   ✨ [Sonne im Tank - Smartes PV-Überschussladen mit Michael Geers vom evcc Projekt](https://podcast.smarthuette.de/episodes/sonne-im-tank-smartes-pv-uberschussladen-mit-michael-geers-vom-evcc-projekt)
 - October 2025 · The GitHub Podcast \

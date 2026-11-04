@@ -1,0 +1,171 @@
+---
+title: "White label"
+description: "Hier leest u hoe installateurs en leveranciers evcc onder hun eigen merk leveren met eigen kleuren, lettertypen, logo en contactgegevens, en wat de licentie toestaat."
+translatedFrom: "ed0d82720631"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+U kunt uw evcc-installatie onder uw eigen merk leveren: met uw logo, uw contactgegevens en uw kleurenschema.
+Deze pagina is bedoeld voor installateurs en leveranciers die vooraf geconfigureerde apparaten of gehoste installaties aan hun klanten leveren.
+
+## Kleuren en lettertypen \{#custom-css\}
+
+Naast logo en naam kunt u ook kleuren en lettertypen aan uw merk aanpassen.
+`EVCC_CUSTOM_CSS` verwijst naar een CSS-bestand dat naast de standaardstijlen wordt geladen.
+De interface gebruikt veel CSS custom properties voor kleuren en lettertypen.
+De meeste visuele aanpassingen maakt u door deze properties te overschrijven, niet door afzonderlijke elementen op te maken.
+De beschikbare properties zijn gedefinieerd in [`app.css`](https://github.com/evcc-io/evcc/blob/master/assets/css/app.css).
+
+Dit voorbeeld wijzigt de primaire kleur en laadt een ander lettertype van Google Fonts:
+
+```css title="custom.css"
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap");
+
+:root {
+  --evcc-dark-green: #22d3ee;
+  --evcc-darker-green: #0891b2;
+  --bs-body-font-family: "Space Grotesk", sans-serif;
+}
+```
+
+Als dit bestand is geladen, ziet de interface er zo uit:
+
+<Screenshot
+  name="reference/screenshots/white-label-css"
+  caption="Aangepaste primaire kleur en lettertype"
+/>
+
+Een paar aandachtspunten:
+
+- Er zijn geen compatibiliteitsgaranties. Properties en markup kunnen met elke release veranderen. Eigen stijlen moeten na elke update worden gecontroleerd, bij voorkeur al met de nightly builds.
+- Stijlen moeten zowel in de lichte als in de donkere modus werken.
+- Voldoende contrast is belangrijk, bijv. bij tekst op de primaire kleur.
+
+<a id="theme"></a>
+
+## Standaardthema
+
+`EVCC_CUSTOM_THEME` bepaalt met welk thema de interface start: `auto` (standaard), `light` of `dark`.
+Gebruikers kunnen het thema nog steeds in de interface-instellingen wijzigen.
+Hun keuze wordt in de browser opgeslagen en heeft altijd voorrang op deze standaardwaarde.
+
+## Merknaam en logo \{#brand\}
+
+| Variabele                | Effect                            |
+| ------------------------ | --------------------------------- |
+| `EVCC_CUSTOM_BRAND`      | Merknaam in het navigatiemenu     |
+| `EVCC_CUSTOM_LOGO_LIGHT` | Logo voor de lichte modus         |
+| `EVCC_CUSTOM_LOGO_DARK`  | Logo voor de donkere modus        |
+| `EVCC_CUSTOM_WEBSITE`    | Websitelink in het venster Versie |
+| `EVCC_CUSTOM_EMAIL`      | E-mailadres voor support          |
+| `EVCC_CUSTOM_PHONE`      | Telefoonnummer voor support       |
+
+`EVCC_CUSTOM_BRAND` stelt uw merknaam in.
+Die vervangt het item _evcc_ in het navigatiemenu.
+
+<Screenshot
+  name="reference/screenshots/white-label-menu"
+  caption="Navigatiemenu met eigen merknaam"
+  width={400}
+/>
+
+`EVCC_CUSTOM_LOGO_LIGHT` en `EVCC_CUSTOM_LOGO_DARK` vervangen het evcc-logo door uw eigen logo (`svg` of `png`).
+De twee varianten moeten altijd samen worden geconfigureerd.
+Gebruik indien mogelijk `svg`, dat blijft op elk formaat scherp.
+Het logo wordt weergegeven met een hoogte van 64 px en een evenredig geschaalde breedte, dus een liggend formaat werkt het best.
+Een klik op de merknaam in het menu opent het venster **Versie** met uw logo.
+`EVCC_CUSTOM_WEBSITE`, `EVCC_CUSTOM_EMAIL` en `EVCC_CUSTOM_PHONE` voegen uw website, e-mailadres en telefoonnummer voor support aan dit venster toe.
+
+<Screenshot
+  name="reference/screenshots/white-label-about"
+  caption="Venster Versie met eigen logo en contactgegevens"
+/>
+
+## Probleemmeldingen \{#problem-reports\}
+
+Onder **Hulp nodig? → Een probleem melden** kunnen gebruikers [bugs melden en om hulp vragen](/nl/report-a-problem#app).
+Standaard opent dit een vooraf ingevulde GitHub-discussie of GitHub-issue.
+Als `EVCC_CUSTOM_EMAIL` is geconfigureerd, schakelt de pagina in plaats daarvan over op e-mail: gebruikers beschrijven hun probleem en sturen het via hun e-mailprogramma naar uw supportadres (`mailto:`).
+
+<Screenshot
+  name="reference/screenshots/white-label-issue"
+  caption="Probleemmelding via e-mail"
+/>
+
+Om technische redenen bevat de e-mail geen debuggegevens (configuratie, logboeken, status).
+Als u die nodig hebt, vraag uw gebruikers dan om het debugbestand op dezelfde pagina te downloaden en aan hun e-mail toe te voegen.
+
+Het hulpvenster toont ook een e-mailknop **Neem contact op** in plaats van de link **GitHub discussies**.
+
+## Configuratie \{#configuration\}
+
+Elke instelling is een omgevingsvariabele.
+Dezelfde instellingen zijn ook beschikbaar als [CLI-flags](/nl/reference/cli/evcc#options), bijv. `--custom-brand` voor `EVCC_CUSTOM_BRAND`.
+
+U kunt ze rechtstreeks op de opdrachtregel instellen, in een systemd-overridebestand of in uw Docker Compose-bestand:
+
+<Tabs>
+  <TabItem label="CLI">
+
+```sh
+EVCC_CUSTOM_BRAND="G1GA HEMS" \
+EVCC_CUSTOM_LOGO_LIGHT=logo-light.svg \
+EVCC_CUSTOM_LOGO_DARK=logo-dark.svg \
+EVCC_CUSTOM_WEBSITE=https://example.com/hems \
+EVCC_CUSTOM_EMAIL=support@example.com \
+EVCC_CUSTOM_PHONE="+49 123 456789" \
+EVCC_CUSTOM_CSS=custom.css \
+evcc
+```
+
+  </TabItem>
+  <TabItem label="Linux-service">
+
+Maak een overridebestand aan met `sudo systemctl edit evcc`, zie [Linux → Omgevingsvariabelen & CLI-opties](/nl/installation/linux#environment-variables).
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_CUSTOM_BRAND=G1GA HEMS"
+Environment="EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg"
+Environment="EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg"
+Environment="EVCC_CUSTOM_EMAIL=support@example.com"
+Environment="EVCC_CUSTOM_CSS=/etc/branding/custom.css"
+```
+
+  </TabItem>
+  <TabItem label="Docker">
+
+Stel de variabelen in uw compose-bestand in en koppel de logo- en CSS-bestanden aan de container.
+
+```yaml
+services:
+  evcc:
+    image: evcc/evcc:latest
+    environment:
+      - EVCC_CUSTOM_BRAND=G1GA HEMS
+      - EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg
+      - EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg
+      - EVCC_CUSTOM_EMAIL=support@example.com
+      - EVCC_CUSTOM_CSS=/etc/branding/custom.css
+    volumes:
+      - /home/user/branding:/etc/branding
+```
+
+  </TabItem>
+</Tabs>
+
+Alle overige instellingen kunnen ook via omgevingsvariabelen worden opgegeven: `EVCC_` gevolgd door de naam van de `evcc.yaml`-parameter in hoofdletters, bijv. `EVCC_NETWORK_HOST` of `EVCC_DATABASE_DSN`.
+
+## Eigen image \{#custom-image\}
+
+Om een complete SD-kaartimage met uw branding te leveren, maakt u een fork van de repository [evcc-io/images](https://github.com/evcc-io/images).
+Het script [`userpatches/customize-image.sh`](https://github.com/evcc-io/images/blob/main/userpatches/customize-image.sh) configureert evcc tijdens het bouwen van de image.
+In de sectie _EVCC SETUP_ maakt het script het systemd-overridebestand aan, dus daar horen uw regels `Environment="EVCC_CUSTOM_..."` thuis.
+
+## Licenties \{#licensing\}
+
+U mag het officiële binaire bestand of Docker-image gewoon aan uw klanten leveren of verkopen.
+Zorg ervoor dat u de [sponsorvoorwaarden](/nl/sponsorship) en de [licentie](https://github.com/evcc-io/evcc#license) naleeft.
+Installaties die integraties gebruiken waarvoor sponsoring vereist is, hebben elk een eigen sponsortoken nodig.

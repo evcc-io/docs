@@ -1,0 +1,228 @@
+---
+title: "Windows"
+description: "Installer evcc manuelt på Windows, kør det fra kommandoprompten eller som baggrundstjeneste, og opdater eller nedgrader det senere."
+sidebar:
+  order: 10
+translatedFrom: "95912adc36d1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Her finder du en vejledning i at installere evcc manuelt på Windows.
+
+:::caution
+Denne manuelle installation kræver avancerede pc-kundskaber, især når det gælder kommandoprompten eller PowerShell.
+
+Det er muligt at køre evcc på Windows.
+evcc bruges dog typisk i et Linux-miljø (f.eks. Raspberry Pi).
+:::
+
+## Installation
+
+<Steps>
+
+1. ### Installer
+
+   Download den passende fil til dit system, og pak den ud (f.eks. ved at dobbeltklikke):
+   - 64-bit Intel-CPU: [evcc_X.XX_windows_amd64.zip](https://github.com/evcc-io/evcc/releases/latest)
+
+   Åbn kommandoprompten, og gå til den udpakkede mappe. Kontrollér installationen:
+
+   ```sh
+   evcc -v
+   ```
+
+   Du bør nu se den aktuelle version af evcc (f.eks. `evcc version 0.xxx.y`).
+
+2. ### Start
+
+   ```sh
+   ./evcc
+   ```
+
+3. ### Opsætning
+
+   Åbn evcc-grænsefladen i din browser: [http://localhost:7070](http://localhost:7070).
+   Angiv en administratoradgangskode, og konfigurer dine enheder direkte i webgrænsefladen.
+
+</Steps>
+
+## Konfigurationsfil (alternativ)
+
+Som alternativ til webgrænsefladen kan du bruge en `evcc.yaml`-konfigurationsfil.
+Se [Konfiguration](/da/installation/configuration) for detaljer.
+
+Start evcc med:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+## Opgradering/nedgradering
+
+Følg trinene ovenfor, og erstat evcc-programfilen med den nye eller den tidligere version.
+Konfigurationen behøver ikke at blive ændret.
+
+## Baggrundstjeneste
+
+### Opgavestyring
+
+:::note
+Denne vejledning forudsætter, at evcc ligger i `c:\evcc`.
+
+Vejledningen er lavet med Windows 10.
+:::
+
+- Åbn startmenuen, og søg efter ”Opgavestyring”, højreklik derefter på den, og vælg ”Kør som administrator”:
+
+![Opgavestyring i Windows 10](../../en/installation/win10-srv/win10-srv-1.png)
+
+- Når Opgavestyring er startet, vælger du, om den nye opgave skal oprettes i sin egen mappe eller i det generelle Opgavestyringsbibliotek.
+  I dette eksempel opretter vi en separat `evcc`-mappe.
+  Vælg ”Opgavestyringsbibliotek”, højreklik for at åbne genvejsmenuen, og vælg ”Ny mappe...”:
+
+![Opgavestyringsbibliotek](../../en/installation/win10-srv/win10-srv-2.png)
+
+- Vælg nu den nye `evcc`-mappe, og åbn genvejsmenuen igen.
+  Vælg ”Opret opgave”:
+
+![Vinduet Ny opgave](../../en/installation/win10-srv/win10-srv-3.png)
+
+- Giv opgaven et navn (f.eks. ”evcc”) og en kort beskrivelse.
+  Da opgaven skal køre som systemtjeneste, åbner du brugeradministrationen via ”Skift bruger eller gruppe” og skriver `SYSTEM` i feltet.
+  Klik på ”Kontrollér navne”, hvorefter ordet ”SYSTEM” skal være understreget.
+  Klik på OK for at lukke dialogboksen:
+
+![Opgavevindue](../../en/installation/win10-srv/win10-srv-4.png) ![Valg af bruger](../../en/installation/win10-srv/win10-srv-5.png)
+
+- Klik på ”Ny...” under fanen ”Udløsere”.
+  Sæt udløseren til ”Ved start”, og kontrollér, at afkrydsningsfeltet ”Aktiveret” er markeret:
+
+![Udløser](../../en/installation/win10-srv/win10-srv-6.png)
+
+- Klik på ”Ny...” under fanen ”Handlinger”.
+  Sørg for, at ”Start et program” er valgt, og find derefter din `evcc.exe`-programfil med ”Gennemse”.
+  Det anbefales også at angive stien i feltet ”Start i”, så konfigurationsfilen findes automatisk:
+
+![Handlinger](../../en/installation/win10-srv/win10-srv-7.png)
+
+- Under fanen ”Betingelser” kan standardindstillingerne blive, som de er.
+
+  :::note
+  SMA Home Manager kan nogle gange have problemer, når den er forbundet via wi-fi, så prøv at aktivere betingelsen ”Netværk” og vælge den relevante netværksforbindelse i rullemenuen.
+  :::
+
+![Betingelser](../../en/installation/win10-srv/win10-srv-8.png)
+
+- Under fanen ”Indstillinger” skal du vælge ”Kør opgaven så hurtigt som muligt, efter en planlagt start er sprunget over”.
+  Sørg også for, at ”Stop opgaven, hvis den kører længere end:” **ikke** er valgt, ellers stopper evcc uventet.
+
+![Indstillinger](../../en/installation/win10-srv/win10-srv-9.png)
+
+Opgaven kan nu startes manuelt eller testes med en genstart.
+For at kontrollere, at det virker, åbner du `http://localhost:7070` i din browser.
+
+### NSSM \{#nssm\}
+
+:::note
+Denne vejledning forudsætter, at evcc ligger i `c:\Tools\evcc`.
+
+Vejledningen er lavet med Windows 11.
+:::
+
+Som alternativ til Opgavestyring kan du køre evcc som Windows-tjeneste.
+En tjeneste kører uden brugerlogin og giver bedre kontrol over genstartsadfærd og fejlhåndtering.
+
+Da evcc ikke selv understøtter Windows-tjenestegrænsefladen, kan [_nssm_](https://nssm.cc/download) (_Non-Sucking Service Manager_) bruges til at køre evcc som tjeneste.
+
+- Download _nssm_ fra [nssm.cc](https://nssm.cc/download), og pak ZIP-filen ud i `C:\Tools\nssm\`.
+- Åbn en kommandoprompt (`cmd.exe`), og skift til mappen `win64`:
+
+  ```sh
+  cd /D C:\Tools\nssm\nssm-2.24\win64
+  ```
+
+- Installer tjenesten:
+
+  ```sh
+  nssm install evcc
+  ```
+
+- Gå fanerne i dialogboksen igennem.
+  Indstillingerne nedenfor er anbefalede.
+  - **Application**:
+
+    ![Application](../../en/installation/win11-nssm/win11-nssm_01_Application.webp)
+    - _Path_: Sti til `evcc.exe`.
+    - _Start directory_: Arbejdsmappe for evcc.
+    - _Arguments_: Parametre til evcc, f.eks. `-c evcc.yaml`.
+      Valgfrit: `--database evcc.db` for at angive databasestien eksplicit.
+      Uden denne indstilling gemmes databasen i brugerprofilen for den konto, der kører programmet.
+      Under kontoen _System_ vil det være `%SystemRoot%\system32\config\systemprofile\.evcc\evcc.db`, altså et andet sted end ved interaktiv start.
+      Med `--database` sikrer du, at det altid er den samme database, der bruges.
+      Det er relevant, når du [nulstiller adgangskoden](/da/faq#password-reset).
+
+  - **Details**:
+
+    ![Details](../../en/installation/win11-nssm/win11-nssm_02_Details.webp)
+    - _Display Name_: Navnet på tjenesten i konsollen ”Tjenester” (helst det samme som _Service Name_).
+    - _Startup type_: _Automatic_, så tjenesten starter sammen med Windows.
+
+  - **Log on**:
+
+    ![Log on](../../en/installation/win11-nssm/win11-nssm_03_Log_on.webp)
+
+    Standard: Tjenesten kører under kontoen _System_.
+    Detaljer: [nssm-dokumentation](https://nssm.cc/usage).
+
+    :::important
+    Den konto, der vælges her, bestemmer, hvor evcc gemmer sin database `evcc.db` (se _Arguments_ ovenfor).
+    :::
+
+  - **Dependencies**:
+
+    ![Dependencies](../../en/installation/win11-nssm/win11-nssm_04_Dependencies.webp)
+
+    Med `NlaSvc` som afhængighed sikrer du, at netværket er klar, før evcc starter.
+
+  - **Process**:
+
+    ![Process](../../en/installation/win11-nssm/win11-nssm_05_Process.webp)
+
+    Behold standardindstillingerne.
+
+  - **Shutdown**:
+
+    ![Shutdown](../../en/installation/win11-nssm/win11-nssm_06_Shutdown.webp)
+
+    Behold standardindstillingerne.
+    nssm prøver først `Ctrl`+`C`, derefter `WM_CLOSE`/`WM_QUIT`, og afslutter processen med tvang efter timeout.
+
+  - **Exit actions**:
+
+    ![Exit actions](../../en/installation/win11-nssm/win11-nssm_07_Exit_actions.webp)
+
+    Anbefaling: _Restart application_ med 10 sekunders forsinkelse, så evcc automatisk starter igen efter et nedbrud eller en genstart via webgrænsefladen.
+
+  - **I/O**:
+
+    ![I/O](../../en/installation/win11-nssm/win11-nssm_08_IO.webp)
+
+    Valgfrit: Omdiriger `stdout` og `stderr` til logfiler.
+    Hold evcc's logniveau lavt, så filerne ikke vokser for hurtigt.
+
+  - **File rotation**:
+
+    ![File rotation](../../en/installation/win11-nssm/win11-nssm_09_File_rotation.webp)
+
+    Valgfrit: Aktivér logrotation for at begrænse logfilernes størrelse.
+
+  - **Environment**:
+
+    ![Environment](../../en/installation/win11-nssm/win11-nssm_10_Environment.webp)
+
+    Behold standardindstillingerne.
+
+Klik på _Install Service_ for at oprette tjenesten.
+Tjenesten kan derefter startes og stoppes via konsollen ”Tjenester” i Windows.
+For at kontrollere det åbner du `http://localhost:7070` i din browser.

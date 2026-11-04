@@ -5,14 +5,14 @@ sidebar:
   order: 5
 ---
 
-_Meters_ (current measurement devices) is a list of devices in the house that can measure power and energy consumption, PV generation, or house battery usage. A `meter` defines a point of energy measurement and can be a physical device (e.g., a meter at the grid connection point), a PV inverter (AC or DC in the case of hybrid inverters), or a battery inverter.
+_Meters_ (current measurement devices) is a list of devices in the house that can measure power and energy consumption, solar generation, or home battery usage. A `meter` defines a point of energy measurement and can be a physical device (e.g., a meter at the grid connection point), a solar inverter (AC or DC in the case of hybrid inverters), or a battery inverter.
 
-Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meters`](/en/reference/configuration/loadpoints#meter) in the charging point configuration, or assume that the charging power set is actually being used.
+Chargers may have an integrated meter or it can be externally connected. If a charger has an internal current measurement device, no entry for it needs to be created in `meters`. If the charger doesn't have such a meter, evcc will use the meter configured here and assigned to the charger under [`meter`](/en/reference/configuration/loadpoints#meter) in the charging point configuration, or assume that the charging power set is actually being used.
 
 evcc uses a consistent sign convention for power and current values (`power`, `powers`, `currents`):
 
-- **Positive (+)** for incoming energy: grid consumption, PV generation, house battery discharge
-- **Negative (-)** for outgoing energy: grid feed-in, PV inverter standby consumption, house battery charging
+- **Positive (+)** for incoming energy: grid import, solar generation, home battery discharge
+- **Negative (-)** for outgoing energy: grid export, solar inverter standby consumption, home battery charging
 - **Consumers** (charger, aux meters) are always **positive (+)**
 
 If the device returns values with the opposite sign, this can be corrected in the [plugin configuration](/en/reference/plugins) using `scale: -1`.
@@ -45,7 +45,7 @@ Below, the various parameters are explained.
 
 ### `name`
 
-A short designation of the meter. The value is used when referencing the device in the configuration of the [site](/en/reference/configuration/site) or the [charger](/en/reference/configuration/loadpoints#meter).
+A short designation of the meter. The value is used when referencing the device in the configuration of the [site](/en/reference/configuration/site) or the [charging point](/en/reference/configuration/loadpoints#meter).
 
 **For example**:
 
@@ -145,7 +145,7 @@ energy: Sum
 
 ##### `soc`
 
-Defines the method of measurement that MBMD returns for battery state of charge (SoC), typically `ChargeState`.
+Defines the method of measurement that MBMD returns for battery charge level, typically `ChargeState`.
 
 **For example**:
 
@@ -181,8 +181,8 @@ Defines which measurements are needed here.
 **Possible Values**:
 
 - **`grid`**: For measurements at the grid connection point
-- **`pv`**: For measurements of PV generation
-- **`battery`**: For measurements of the house battery
+- **`pv`**: For measurements of solar generation
+- **`battery`**: For measurements of the home battery
 
 ---
 
@@ -222,10 +222,6 @@ usage: grid
 broker: 192.0.2.2
 ```
 
-:::note
-The `uri` and `password` parameters are only required for a `meter` device if multiple devices are configured.
-:::
-
 #### Required Parameters
 
 ##### `usage`
@@ -235,8 +231,8 @@ Defines which measurements are needed here.
 **Possible Values**:
 
 - **`grid`**: For measurements at the grid connection point
-- **`pv`**: For measurements of PV generation
-- **`battery`**: For measurements of the house battery
+- **`pv`**: For measurements of solar generation
+- **`battery`**: For measurements of the home battery
 
 ---
 
@@ -331,8 +327,8 @@ Defines which measurements are needed here.
 **Possible Values**:
 
 - **`grid`**: For measurements at the grid connection point
-- **`pv`**: For measurements of PV generation
-- **`battery`**: For measurements of the house battery
+- **`pv`**: For measurements of solar generation
+- **`battery`**: For measurements of the home battery
 
 ---
 
@@ -441,7 +437,7 @@ Plugin definition to return consumed energy in kilowatt-hours (kWh).
 
 ##### `returnenergy`
 
-Plugin definition to return energy in reverse direction in kilowatt-hours (kWh), e.g. grid feed-in.
+Plugin definition to return energy in reverse direction in kilowatt-hours (kWh), e.g. grid export.
 
 **For example**:
 
@@ -455,7 +451,7 @@ Plugin definition to return energy in reverse direction in kilowatt-hours (kWh),
 
 #### `soc`
 
-Plugin definition to return battery state of charge (SoC) in percentage (%).
+Plugin definition to return battery charge level in percentage (%).
 
 **For example**:
 
@@ -469,7 +465,19 @@ Plugin definition to return battery state of charge (SoC) in percentage (%).
 
 #### `capacity`
 
-Indication of battery capacity. Only useful when multiple batteries are present. Used to determine the overall SoC.
+Battery capacity in kWh.
+Used to determine the overall charge level of several batteries and by the [optimizer](/en/features/optimizer) to plan battery charging.
+Instead of a fixed value, any [float plugin](/en/reference/plugins) can read the capacity from the device.
+The plugin is read once after start and the value is kept from then on.
+Until the first successful read, the capacity counts as unknown.
+
+**For example**:
+
+```yaml
+  capacity: # read from the device instead of a fixed value
+    source: modbus
+    ...
+```
 
 ---
 

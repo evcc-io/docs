@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import { parse } from "yaml";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import { localePaths } from "@utils/locales";
+import { intro } from "@utils/intros";
 
-export async function getStaticPaths() {
-  return [{ params: { lang: "en" } }, { params: { lang: "de" } }];
-}
+export const getStaticPaths = localePaths;
 
-const lang = Astro.params.lang as "de" | "en";
+const Intro = intro(Astro.params.lang!, "state");
 
 // The state schemas are part of the bundled OpenAPI spec (synced from the main
 // evcc repository, generated there from assets/js/types/evcc.ts).
@@ -131,15 +131,8 @@ const sections = [...reachable]
   });
 
 const title = "API State";
-const description =
-  lang === "de"
-    ? "Datenstruktur von /api/state, WebSocket und MQTT."
-    : "Data structure of /api/state, websocket and MQTT.";
-
-const demoUrl = "https://demo.evcc.io/api/state";
-const jqExampleUrl = "https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower";
-
-const typesLabel = lang === "de" ? "Typen" : "Types";
+const description = Astro.locals.t("state.description");
+const typesLabel = Astro.locals.t("state.types");
 
 const frontmatter = { title, description, template: "doc" as const };
 // root State properties render directly below the intro; referenced types are h3s under "Types"
@@ -155,98 +148,7 @@ const headings = [
 ---
 
 <StarlightPage frontmatter={frontmatter} headings={headings}>
-  {
-    lang === "de" ? (
-      <>
-        <p>
-          Der API State ist die Datenstruktur hinter der UI. Er ist über drei Schnittstellen
-          verfügbar. Es gibt keine Kompatibilitätsgarantie, Felder können sich zwischen Releases
-          ändern.
-        </p>
-        <ul>
-          <li>
-            <a href="/integrations/rest-api">REST-API</a>: <code>GET /api/state</code> liefert den
-            kompletten Zustand als ein JSON-Dokument, eingepackt in ein <code>result</code>-Objekt.
-            Mit dem Query-Parameter <code>jq</code> lässt sich die Antwort per{" "}
-            <a href="https://jqlang.org/">jq</a>-Ausdruck filtern.
-            <ul>
-              <li>
-                Live-Beispiel:{" "}
-                <a href={demoUrl}>
-                  <code>{demoUrl}</code>
-                </a>
-              </li>
-              <li>
-                Gefiltert auf ein einzelnes Feld:{" "}
-                <a href={jqExampleUrl}>
-                  <code>{demoUrl}?jq=.loadpoints[2].chargePower</code>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <a href="/de/integrations/mqtt-api">MQTT</a>: jedes Feld wird als eigenes Topic
-            veröffentlicht. Felder der Site liegen unter <code>evcc/site/&lt;feld&gt;</code>,
-            Ladepunkt-Felder unter <code>evcc/loadpoints/&lt;n&gt;/&lt;feld&gt;</code> mit Index ab
-            1. Verschachtelte Objekte und Listen werden in Sub-Topics aufgelöst, z.&nbsp;B.{" "}
-            <code>evcc/site/pv/1/power</code>. Werte werden als einfache Strings veröffentlicht,
-            Zeitstempel als Unix-Sekunden, Zeitdauern in Sekunden.
-          </li>
-          <li>
-            <strong>WebSocket</strong>: beim Verbinden erhält der Client den kompletten Zustand als
-            ein JSON-Objekt. Ladepunkt-Felder verwenden Schlüssel mit Punktnotation wie{" "}
-            <code>loadpoints.0.chargePower</code>. Danach werden nur noch inkrementelle Updates
-            gesendet: kleine JSON-Objekte mit den geänderten Feldern, die der Client in seine Kopie
-            des Zustands übernimmt.
-          </li>
-        </ul>
-      </>
-    ) : (
-      <>
-        <p>
-          The API State is the data structure behind the UI. It is available over three interfaces.
-          There is no compatibility promise, fields may change between releases.
-        </p>
-        <ul>
-          <li>
-            <a href="/integrations/rest-api">REST API</a>: <code>GET /api/state</code> returns the
-            full state as a single JSON document, wrapped in a <code>result</code> object. The{" "}
-            <code>jq</code> query parameter filters the response with a{" "}
-            <a href="https://jqlang.org/">jq</a> expression.
-            <ul>
-              <li>
-                Live example:{" "}
-                <a href={demoUrl}>
-                  <code>{demoUrl}</code>
-                </a>
-              </li>
-              <li>
-                Filtered to a single field:{" "}
-                <a href={jqExampleUrl}>
-                  <code>{demoUrl}?jq=.loadpoints[2].chargePower</code>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <a href="/en/integrations/mqtt-api">MQTT</a>: every field is published as its own
-            topic. Site-level fields appear under <code>evcc/site/&lt;field&gt;</code>, loadpoint
-            fields under <code>evcc/loadpoints/&lt;n&gt;/&lt;field&gt;</code> with 1-based indexes.
-            Nested objects and arrays flatten into subtopics, e.g.{" "}
-            <code>evcc/site/pv/1/power</code>. Values are published as plain strings, timestamps as
-            unix seconds, durations in seconds.
-          </li>
-          <li>
-            <strong>Websocket</strong>: on connect, the client receives the full state as one JSON
-            object. Loadpoint
-            fields use dotted keys like <code>loadpoints.0.chargePower</code>. After that, only
-            incremental updates are sent: small JSON objects containing the changed fields, which
-            the client merges into its copy of the state.
-          </li>
-        </ul>
-      </>
-    )
-  }
+  <Intro.Content />
   {
     sections.map((section, i) => (
       <>

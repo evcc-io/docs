@@ -1,0 +1,163 @@
+---
+date: 2025-01-20
+title: "v0.133 - Tesla Developer Account vereist"
+description: "Releasenotes van evcc 0.133 uit januari 2025: de Tesla Fleet API gaat geld kosten, dus u hebt een eigen Tesla Developer Account nodig en tesla.evcc.io stopt."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+cover:
+  alt: "Tesla-API-update"
+  image: "../../../../../en/blog/2025/01/20/tesla-api-update-wide.webp"
+translatedFrom: "abfdb68354cd"
+---
+
+Vanaf evcc v0.133 is een [Tesla Developer Account](https://developer.tesla.com/) vereist.
+Het gebruik blijft gratis, maar vraagt een extra installatiestap.
+
+{/* excerpt */}
+
+:::note[Update]
+Dit bericht is herzien.
+
+**[8 februari 2025](https://github.com/evcc-io/docs/pull/723/files):** Uitgebreidere instructies voor de configuratie van de Tesla Fleet API en myteslamate.com.<br/>
+**[27 maart 2025](https://github.com/evcc-io/docs/pull/775/files):** Bijgewerkt naar het nieuwe installatieproces van myteslamate.com.
+
+:::
+
+## Betaalde Tesla Fleet API vanaf februari
+
+Vorig jaar hebben we de [Tesla Fleet API](/nl/blog/2024/02/01/v0124-new-tesla-api) in evcc geïntegreerd.
+Tesla was de eerste fabrikant die een officiële en vooral open API aanbood voor de communicatie met zijn voertuigen.
+
+Tesla had al aangekondigd dat deze API niet gratis zou blijven.
+De prijzen zijn nu bekend en gaan in op 1 februari 2025.
+De facturering is gebaseerd op het gebruik, waarbij de kosten per type verzoek verschillen.
+
+Met [tesla.evcc.io](https://tesla.evcc.io) boden we een dienst waarmee evcc-gebruikers toegangstokens voor het API-gebruik konden genereren.
+Het API-verkeer via deze tokens zou vanaf februari 2025 aan ons worden gefactureerd.
+De kosten per gebruiker hangen af van het aantal voertuigen, het laadgedrag en de specifieke instelling van het updateinterval.
+Voor de meeste gebruikers liggen deze kosten hoger dan de “$2 per maand” van ons sponsormodel en zouden ze voor ons niet op te brengen zijn, zelfs als we sponsoring zouden verplichten voor de Tesla-integratie.
+
+## Gratis API-tegoed voor particuliere gebruikers
+
+Tesla biedt particuliere gebruikers een maandelijks API-tegoed van $10, wat voor de meeste evcc-gebruikers voldoende zou moeten zijn.
+
+[![Tesla’s API-tegoed](../../../../../en/blog/2025/01/20/tesla-credit-en.png)](https://developer.tesla.com/)
+
+Met versie 0.133 hebben we de API-communicatie met Tesla zo aangepast dat u uw eigen Tesla Developer Account kunt gebruiken.
+Oude tokens die met [tesla.evcc.io](https://tesla.evcc.io) zijn gegenereerd, werken niet meer.
+We hebben overwogen ons bestaande proces voor het genereren van tokens uit te breiden, zodat u uw eigen Tesla Developer Account kunt gebruiken.
+Gelukkig heeft [myteslamate.com](https://app.myteslamate.com) deze functie al geïmplementeerd.
+Daar kunt u met uw Developer Account **access- en refreshtokens** genereren.
+We hebben daarom besloten het wiel niet opnieuw uit te vinden.
+
+## Wat moet u doen?
+
+<a id="vehicle"></a>
+
+### Voor Tesla-rijders
+
+Voor de installatie in evcc hebt u drie gegevens nodig:
+
+- **Client ID:** uit het [Tesla Developer Portal](https://developer.tesla.com/)
+- **Access Token:** via het script van [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/)
+- **Refresh Token:** via het script van [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/)
+
+Volg de instructies op [myteslamate.com](https://www.myteslamate.com/tesla-api-application-registration/) om deze gegevens te genereren.
+
+Omdat u tegelijk op myteslamate.com en developer.tesla.com werkt, raden we aan deze stappen in twee browservensters naast elkaar uit te voeren.
+Aan het einde van het proces moet een script worden gedownload en op uw computer in de terminal/console worden uitgevoerd.
+
+Tijdens het inloggen verschijnt een venster met machtigingen.
+Voor gebruik met een normale lader (geen Tesla Wall Connector) heeft evcc de volgende **Tesla-API-machtigingen** nodig:
+
+- Profielinformatie _(regio, lijst van voertuigen)_
+- Voertuiginformatie _(laadniveau, voertuigstatus, enz.)_
+- Voertuiglocatie _(voor voertuigherkenning, nog niet geïmplementeerd)_
+- Voertuigopdrachten _(om te wekken)_
+
+Hebt u het proces met succes afgerond, voer de gegevens dan in de evcc-configuratie in:
+
+Voorbeeld:
+
+```yaml {6-8}
+vehicles:
+  - name: mijn_auto
+    type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-... # van developer.tesla.com
+    accessToken: ey1234567890... # van myteslamate.com
+    refreshToken: EU_1234567890... # van myteslamate.com
+```
+
+U kunt uw verbruikte API-tegoed volgen in het [overzicht van het Tesla Developer Portal](https://developer.tesla.com/dashboard/).
+
+:::note
+Het evcc-project is op geen enkele manier verbonden met myteslamate.com.
+
+We hebben contact met [jlestel](https://github.com/jlestel), de ontwikkelaar van myteslamate.com.
+Hij staat uitdrukkelijk toe dat evcc-gebruikers de dienst gratis gebruiken.
+Lees de [gebruiksvoorwaarden](https://www.myteslamate.com/terms-of-service) en het [privacybeleid](https://www.myteslamate.com/privacy-policy) voordat u de dienst gebruikt.
+:::
+
+### Voor gebruikers van een Tesla Wall Connector
+
+Als u een Tesla Wall Connector gebruikt, zijn extra stappen nodig, omdat de laadopdrachten ondertekende communicatie vereisen en via een openbaar bereikbare server moeten lopen.
+myteslamate.com biedt zo’n proxy aan.
+De facturering gebeurt op basis van het gebruik, rechtstreeks via myteslamate.com.
+Deze opdrachten gebruiken uw Tesla-API-tegoed niet.
+
+We gaan ervan uit dat u de [hierboven beschreven stappen](#vehicle) al hebt uitgevoerd.
+Log opnieuw in op myteslamate.com en volg de instructies om de betaalde proxy voor opdrachten in te stellen.
+Kopieer het **Proxy-Token** uit het onderdeel **Use MyTeslamate API**.
+Voeg dit token toe aan uw evcc-configuratie:
+
+```yaml {9}
+vehicles:
+  - name: mijn_auto
+    type: template
+    template: tesla
+    title: Tesla Model 3
+    clientId: aaaaaa-11111-... # van developer.tesla.com
+    accessToken: ey1234567890... # van myteslamate.com
+    refreshToken: EU_1234567890... # van myteslamate.com
+    proxyToken: aaaaa-bbbbb-... # van myteslamate.com
+```
+
+Met deze opzet stuurt evcc laadopdrachten naar de proxy van myteslamate.com, die ze met uw Tesla-applicatie ondertekent en doorstuurt naar de officiële Tesla-API.
+
+:::caution[Het proxytoken geeft veel rechten]
+Het is aan te raden de machtigingen op myteslamate.com te beperken tot de noodzakelijke functies.
+Voor evcc zijn alleen de functies **Charge Start**, **Charge Stop** en **Set Charging Amps** nodig.
+:::
+
+## tesla.evcc.io wordt stopgezet
+
+tesla.evcc.io wordt in februari stopgezet.
+Alle daarmee gegenereerde tokens verliezen hun geldigheid.
+Om de Tesla-API te blijven gebruiken, is een update naar evcc-versie 0.133 nodig.
+
+## Andere mogelijkheden
+
+De Tesla-API-communicatie in evcc is niet gebonden aan myteslamate.com.
+U kunt de tokens met de bijbehorende infrastructuur (openbare callback-URL nodig) ook zelf genereren en in de hierboven genoemde evcc-configuratie invoeren.
+
+Alternatieve integraties via diensten zoals [TeslaLogger](https://docs.evcc.io/docs/vehicles#teslalogger), [TeslaMate](https://docs.evcc.io/docs/vehicles#teslamate), [TeslaBleHttpProxy](https://docs.evcc.io/docs/vehicles#tesla-ble), [Tessie](https://docs.evcc.io/docs/vehicles#tessie) of [Tronity](https://docs.evcc.io/docs/vehicles#tronity) zijn ook mogelijk.
+
+Eigenaren van een Tesla Wall Connector kunnen ook nog steeds [TeslaBleHttpProxy](https://github.com/wimaha/TeslaBleHttpProxy) gebruiken als lokale “proxy voor opdrachten”.
+
+## Conclusie
+
+We hebben verschillende alternatieven voor de Tesla-integratie besproken.
+Speciale diensten en prijsniveaus voor Tesla-gebruikers lagen ook op tafel.
+We denken dat onze huidige oplossing vanuit het oogpunt van de gebruiker de beste is.
+Ze brengt voor de meeste particuliere gebruikers geen extra kosten met zich mee.
+Voor de integratie is geen sponsortoken nodig.
+De API-communicatie vereist geen diensten van derden.
+Ook gebruikers met grotere wagenparken kunnen evcc gebruiken, waarbij Tesla de kosten voor het API-gebruik rechtstreeks in rekening brengt zodra het maandelijkse gratis tegoed op is.
+
+**Met vriendelijke groet**<br/>
+Het evcc-team<br/>
+Michael, Andi & Uli

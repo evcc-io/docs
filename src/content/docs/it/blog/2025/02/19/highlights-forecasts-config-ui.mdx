@@ -1,0 +1,135 @@
+---
+date: 2025-02-19
+title: "Highlight: previsioni, interfaccia di configurazione"
+description: "Highlight della release 0.200 di evcc (febbraio 2025) con previsioni fotovoltaiche, piani di ricarica ricorrenti, pompe di calore SG Ready e configurazione dal browser."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner degli highlight"
+  image: "../../../../../en/blog/2025/02/19/forecasts-banner.webp"
+translatedFrom: "34782fcb035b"
+---
+
+import Video from "@components/Video.astro";
+import forecastsVideo from "../../../../../en/blog/2025/02/19/forecasts.mp4";
+import forecastsPoster from "../../../../../en/blog/2025/02/19/forecasts.webp";
+import configUiVideo from "../../../../../en/blog/2025/02/19/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/02/19/config-ui.webp";
+export const SgreadySvg = "/img/sgready.svg?url";
+
+Con la [release v0.200](https://github.com/evcc-io/evcc/releases) abbiamo fatto un grande passo verso stabilità e facilità d’uso.
+In questo post del blog ti raccontiamo un po’ il perché del salto di versione.
+Per creare un po’ di suspense, lo teniamo per la fine dell’articolo ;)
+
+Ti presentiamo anche alcune nuove funzioni arrivate dopo il [post del blog di novembre](/it/blog/2024/11/22/highlights-charts-stats).
+
+{/* excerpt */}
+
+## Previsioni
+
+La ricarica [ottimizzata per la CO₂](/it/features/co2) e [per il prezzo](/it/features/dynamic-prices) esiste già da tempo.
+Ora, con [Forecast.solar](https://forecast.solar) e [Solcast](https://solcast.com/free-rooftop-solar-forecasting), abbiamo integrato i primi due fornitori di previsioni della produzione fotovoltaica.
+Per questo c’è un nuovo campo `solar` nella [configurazione delle tariffe](/it/tariffs).
+
+Quando è configurata una fonte di previsione fotovoltaica, nella panoramica energetica vedi la produzione fotovoltaica prevista per oggi in kWh.
+Cliccando su questo numero o sulla nuova voce di menu **Previsione** arrivi a una nuova vista che mostra la produzione fotovoltaica prevista per le prossime 48 ore.
+Questa visualizzazione mostra anche le previsioni di prezzo e di CO₂.
+
+<Video src={forecastsVideo} poster={forecastsPoster} />
+
+~Al momento si può configurare una sola previsione fotovoltaica (corrispondente a una falda del tetto).
+Con la prossima release aggiungeremo la possibilità di combinare le previsioni.~<br/>
+Ora è possibile, vedi [previsione fotovoltaica](/it/tariffs#solar).
+
+I dati di previsione fotovoltaica non influenzano ancora la pianificazione della ricarica, ma sono la base per funzioni e ottimizzazioni future.
+
+## Piani di ricarica ricorrenti
+
+Quando evcc conosce il livello di carica del veicolo, diventano disponibili diverse funzioni di ricarica utili.
+La possibilità di raggiungere una [ricarica minima](/it/features/limits#minimum) subito dopo il collegamento esiste da un po’.
+Anche caricare il veicolo in modo efficiente e pulito con un [piano di ricarica](/it/features/plans) (orario di partenza e livello di carica obiettivo) è una funzione di lunga data.
+
+Quasi altrettanto vecchia è la richiesta di piani di ricarica ricorrenti, cioè piani legati ai giorni della settimana che non richiedono attenzione continua.
+Un grande grazie va a [@Maschga](https://github.com/Maschga), che si è fatto carico di questa funzione così corposa.
+Il risultato è davvero bello.
+
+![Piani di ricarica ricorrenti](../../../../../en/blog/2025/02/19/repeating-plans.webp)
+
+All’occorrenza i piani si possono disattivare (ad es. durante le vacanze).
+Fusi orari, ora legale e ora solare vengono gestiti correttamente 🤯.
+Si possono creare più piani ricorrenti.
+Se due piani sono molto ravvicinati, evcc sceglie quello più rilevante e mostra in modo trasparente la sua decisione.
+
+Maggiori informazioni in [Piani di ricarica](/it/features/plans#repeating-plans).
+
+## Pompe di calore e SG Ready
+
+Negli ultimi mesi è arrivata regolarmente la richiesta di supportare le pompe di calore.
+Finora ci siamo concentrati di proposito sul caso d’uso del veicolo elettrico, per mantenere evcc focalizzato e gestibile.
+Integrare dispositivi di riscaldamento era già possibile tramite metodi come [relè, prese commutabili](/it/smartswitches#heating) e l’interfaccia dei plugin ([esempio](https://github.com/naltatis/aton-ctrl)), e c’era chi lo faceva.
+
+Da gennaio offriamo un modello dedicato per il controllo delle pompe di calore.
+Molte pompe di calore supportano lo standard SG Ready.
+Tramite un relè commutabile (ad es. Shelly) si può indicare alla pompa di calore di funzionare più intensamente in caso di surplus o di energia di rete a basso costo.
+
+<SgreadySvg
+  alt="Diagramma del controllo di una pompa di calore tramite relè SG Ready"
+  style={{ maxWidth: "700px" }}
+/>
+
+Alcune pompe di calore supportano anche la comunicazione diretta, ad es. via rete.
+L’elenco di questi dispositivi è ancora relativamente breve.
+Se hai una pompa di calore di questo tipo e sai come controllarla, apri una [issue su GitHub](https://github.com/evcc-io/evcc/issues).
+
+Trovi maggiori informazioni su [pompe di calore e riscaldatori elettrici](/it/heating) nella documentazione.
+
+L’integrazione dei dispositivi di riscaldamento nell’interfaccia funziona, ma non è ancora perfetta.
+Aspetti come le metriche basate sul tempo e una migliore rappresentazione della pompa di calore nella panoramica principale sono nella nostra lista delle cose da fare.
+
+## Interfaccia di configurazione: setup dal browser
+
+Durante lo sviluppo di evcc ci è sempre stato a cuore mantenere l’interfaccia il più semplice e pulita possibile.
+Ci capita spesso di sentire che anche gli altri membri della famiglia (di solito non nerd) si orientano rapidamente nell’interfaccia.
+È una qualità non scontata, soprattutto nei progetti open source “classici”, e ne siamo piuttosto orgogliosi.
+
+Un fattore importante è la forte standardizzazione e il modello di dati sottostante.
+Una volta configurati un inverter, un veicolo o un caricabatterie, le particolarità dei dispositivi non contano più nell’interfaccia.
+
+Il punto più dolente per molti utenti, però, è proprio arrivare allo stato “è tutto configurato”.
+Finora serviva la riga di comando e bisognava modificare un file YAML.
+
+Da tempo lavoriamo per rendere possibile la configurazione iniziale tramite l’interfaccia.
+Nel corso degli ultimi anni abbiamo aggiunto gradualmente singole funzioni come la creazione di veicoli, contatori, inverter, tariffe e altro.
+Anche funzioni necessarie come la vista dei log e un sistema di autenticazione sono ormai presenti.
+
+Con la v0.200 abbiamo aggiunto “l’ultimo grande tassello” per la configurazione tramite interfaccia.
+**Ora punti di ricarica e caricabatterie, i componenti centrali di evcc, si possono creare e modificare dall’interfaccia.**
+Questo ci avvicina sensibilmente a una release 1.0 stabile.
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+L’interfaccia di configurazione è ancora contrassegnata come funzione sperimentale 🧪.
+Non tutti i campi sono già al posto giusto, descritti correttamente e testati a fondo.
+Per questo aspettiamo con molto interesse il tuo feedback, i tuoi suggerimenti e le tue segnalazioni di bug.
+
+Funzioni avanzate, come la creazione di dispositivi definiti dall’utente e migliori strumenti di diagnostica, sono ancora in programma.
+Trovi maggiori dettagli sullo stato e sui progressi del lavoro nell’[Epic Issue](https://github.com/evcc-io/evcc/issues/6029).
+
+### Prova l’interfaccia di configurazione
+
+Se vuoi provare la configurazione solo tramite interfaccia, puoi **avviare evcc con un `evcc.yaml` vuoto**.
+Ti appare una schermata di benvenuto e da lì puoi proseguire con la configurazione tramite l’interfaccia.
+Per farlo, le funzioni sperimentali devono essere attivate nell’interfaccia.
+
+## E molto altro…
+
+Come sempre nei post degli highlight, questa è solo una piccola selezione di tutto ciò su cui stiamo lavorando.
+Dall’ultimo post di novembre sono state sviluppate, revisionate e integrate con successo [oltre 250 pull request](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged) 🤯.
+
+Trovi l’elenco completo delle modifiche nelle [note di rilascio](https://github.com/evcc-io/evcc/releases) su GitHub.
+
+**Un caro saluto**<br/>
+Il team evcc<br/>
+Michael, Andi & Uli

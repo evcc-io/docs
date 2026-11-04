@@ -6,32 +6,33 @@ authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
+translatedFrom: "df005046697e"
 ---
 
-Heute gibt es ein kleines Update hauptsächlich mit einigen Fehlerkorrekturen und weiteren Verbesserungen.
+Das heutige Update ist ein kleines, hauptsächlich mit einigen Fehlerkorrekturen und weiteren Verbesserungen.
 
-## Timer in der UI
+## Timer in der Oberfläche
 
-Die Oberfläche zeigt euch nun die im Hintergrund laufenden Timer an:
+Die Oberfläche zeigt dir nun die im Hintergrund laufenden Timer an:
 
-![Timer Phasenumschaltung](./1p3p.png)
+![Timer Phasenumschaltung](../../../../../en/blog/2021/12/19/1p3p.png)
 
 <!-- excerpt -->
 
-- Im PV Modus:
-  - Wann wird das Laden unterbrochen
-  - Wann wird mit dem Laden wieder begonnen
-- 1p3p Phasenumschaltung:
-  - Wann wird auf 3p hochgeschaltet
-  - Wann wird auf 1p heruntergeschaltet
+- Im PV-Modus:
+  - Wann das Laden unterbrochen wird
+  - Wann das Laden wieder beginnt
+- 1P/3P-Phasenumschaltung:
+  - Wann auf 3P hochgeschaltet wird
+  - Wann auf 1P heruntergeschaltet wird
 
-Zusätzlich wird auch angezeigt mit wievielen Phasen geladen wird.
+Zusätzlich wird angezeigt, mit wie vielen Phasen geladen wird.
 
 ## Zielladen
 
-![Zielladen UI](./zielladen.png)
+![Zielladen-Oberfläche](../../../../../en/blog/2021/12/19/zielladen.png)
 
-Die Zielladen Funktionalität ist zurück. Hiermit kann man das EV auf ein bestimmtes Datum und Uhrzeit auf den geewünschten SoC Wert laden.
+Das Zielladen ist zurück. Damit kannst du das Fahrzeug bis zu einem bestimmten Datum und einer bestimmten Uhrzeit auf den gewünschten Ladestand laden.
 
 ## Download & Installation
 

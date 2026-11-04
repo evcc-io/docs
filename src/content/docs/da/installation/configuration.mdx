@@ -1,0 +1,250 @@
+---
+title: "Konfiguration"
+description: "Her ser du, hvordan du sætter evcc op efter installationen, helst i webinterfacet eller med en evcc.yaml-fil, og hvordan du tester og fejlsøger opsætningen."
+sidebar:
+  order: 11
+translatedFrom: "6672cdb3ee1b"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Når du har installeret evcc, kan du konfigurere dine enheder og indstillinger.
+Den anbefalede måde er konfiguration via webinterfacet.
+Til erfarne brugere findes der også filbaseret konfiguration.
+
+## Via webinterfacet
+
+:::tip[Anbefalet]
+Webinterfacet er den enkleste og hurtigste måde at sætte evcc op på.
+:::
+
+### Kom i gang
+
+<Steps>
+
+1. **Start evcc**: Efter [installationen](/da/installation) starter du evcc som beskrevet i vejledningen til dit system
+2. **Åbn browseren**: Gå til `http://<your-ip>:7070` (f.eks. `http://evcc.local:7070` eller `http://192.168.1.50:7070`)
+3. **Set administrator password**: Ved første start bliver du bedt om at angive en adgangskode
+4. **Opsætning**: Følg vejledningen på velkomstsiden
+
+</Steps>
+
+### Tilføj enheder
+
+I opsætningsområdet kan du sætte følgende komponenter op:
+
+- **Ladere og varmelegemer** (anbefalet): opladere og varmepumper
+- **Elnettet** (anbefalet): elnetsmåler, eltariffer og enheder til effektbegrænsning, vigtigt for en korrekt energistyring
+- **Sol og batteri** (valgfrit): solcelleanlæg og hjemmebatterier
+- **Køretøjer** (valgfrit): integration af køretøjer, så evcc kender batterikapacitet og opladningsniveau og kan lade smartere
+
+Der skal være konfigureret mindst én måler eller ét ladepunkt, for at systemet kan køre.
+
+De fleste enheder tilgås via deres IP-adresse eller værtsnavn.
+Feltet **IP-adresse eller værtsnavn** foreslår de enheder, der er fundet i dit netværk, med adresse, værtsnavn og producent.
+Enheder, der passer til den valgte enhedstype, vises under **Matcher**, alle andre under **Andre**.
+Poster, der er **allerede i brug** af en anden enhed, er markeret.
+Hvis præcis én enhed passer, udfyldes feltet automatisk.
+Du kan altid selv indtaste en adresse.
+Søgningen kører kun lokalt, mens du konfigurerer en enhed.
+Den finder kun enheder i samme netværkssegment som din evcc-installation.
+Enheder i andre VLAN'er eller subnet bliver ikke fundet.
+I en Docker-container kræver det [host-netværk](/da/installation/docker#network) (alternativt macvlan), fordi containeren i bridge-tilstand ikke kan se det lokale netværk.
+
+### Integrationer
+
+Derudover kan du integrere forskellige tjenester og protokoller:
+
+- **MQTT**: dataudveksling med andre systemer i netværket
+- **[Beskeder](/da/notifications)**: push-notifikationer og e-mailbeskeder
+- **InfluxDB**: dataeksport til langtidsanalyse
+- **EEBUS**: kommunikation med andre EEBUS-enheder
+- **OCPP Server**: forbindelse til OCPP-kompatible opladere
+- **Kredsløb**: overvågning og styring af kredsløb
+- **Modbus Proxy**: adgang til Modbus-enheder fra flere systemer
+- **Sunny Home Manager**: integration via SEMP-protokollen
+- **Ekstern grænse**: effektbegrænsning fra netselskaber (§ 14a EnWG, § 9 EEG) eller overordnede energistyringssystemer
+
+### Sikkerhedskopiering og gendannelse \{#backup\}
+
+Webinterfacet har indbyggede funktioner til sikkerhedskopiering af data:
+
+- **Sikkerhedskopier**: download databasen som sikkerhedskopi
+- **Gendan**: gendan data fra en sikkerhedskopifil
+- **Nulstil**: slet konfigurationen eller opladningshistorikken
+
+## Via konfigurationsfil
+
+:::note[Traditionel metode]
+Denne metode bruger en `evcc.yaml`-fil og kræver kendskab til kommandolinjen og YAML-filer. Nogle nye funktioner kan kun konfigureres via webinterfacet.
+:::
+
+### Fra bunden
+
+Du kan også oprette `evcc.yaml`-filen manuelt.
+Her finder du en minimal skabelon, som du kan bruge som udgangspunkt.
+
+#### Oprettelse
+
+Kopiér indholdet ind i en ny `evcc.yaml`-fil.
+
+```yaml title="evcc.yaml"
+## minimal configuration example
+
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid
+    pv:
+      - my_pv
+    battery:
+      - my_battery
+
+# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    vehicle: my_car # default vehicle
+
+# meter definitions
+# name can be freely chosen and is used as reference when assigning meters to site and loadpoints
+# for documentation see https://docs.evcc.io/docs/meters
+meters:
+  # replace with your real grid meter
+  - name: my_grid
+    type: template
+    template: demo-meter
+    usage: grid
+    power: -1000 # 1 kW feed-in
+  # replace with your real solar system
+  - name: my_pv
+    type: template
+    template: demo-meter
+    usage: pv
+    power: 4000 # 4 kW production
+  # replace with your real battery
+  - name: my_battery
+    type: template
+    template: demo-battery
+    usage: battery
+    power: -1000 # 1 kW battery charging
+    soc: 50 # 50 % state of charge
+
+# replace with your real charger
+# see https://docs.evcc.io/docs/chargers
+chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: C # charging
+    power: 2000 # 2 kW charging power
+    enabled: true # optional
+
+# replace with your real vehicle (optional)
+# see https://docs.evcc.io/docs/vehicles
+vehicles:
+  - name: my_car
+    type: template
+    template: offline
+    title: blue e-Golf
+    capacity: 50 # in kWh
+
+# enter your real grid tariff and feed-in price
+# see https://docs.evcc.io/docs/tariffs
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.29 # EUR/kWh
+  feedin:
+    type: fixed
+    price: 0.10 # EUR/kWh
+```
+
+Du kan starte evcc med denne fil.
+Brug den relevante vejledning til dit system.
+
+#### Test
+
+Genstart evcc, og åbn `http://<evcc-ip>:7070` i din browser.
+Tjek, om værdierne ser rimelige ud.
+Hvis du får en fejlmeddelelse, så tjek dine indtastninger.
+
+Ofte er det indrykningsfejl eller tastefejl.
+Filen er skrevet i [YAML-format](https://wikipedia.org/wiki/YAML).
+Du kan bruge onlineværktøjet [YAML Lint](https://www.yamllint.com/) til at tjekke, om din fil har det korrekte format.
+
+#### Tilpasning
+
+Filen indeholder kun demoenheder (`demo-charger`, `demo-meter`, `demo-battery`, `offline`).
+De har faste værdier.
+Gå filen igennem trin for trin, og tilpas værdierne til din opsætning:
+
+- Erstat demoenhederne med dine egne [målere](/da/meters), [opladere](/da/chargers) og [køretøjer](/da/vehicles).
+- Hvis du ikke har et batteri, kan du fjerne det afsnit helt.
+- Hvis du har flere solcelleanlæg, kan du duplikere de tilsvarende afsnit.
+- Hvis du har flere opladere, så kopiér afsnittene for ladepunkt og oplader, og tilpas navnene.
+
+Bemærk, at de enkelte poster refererer til hinanden.
+I posten `site` (`meters`) tildeles målerne (`grid`, `pv`, `battery`) deres roller.
+Til det bruges altid feltet `name`.
+Navnene skal derfor være entydige.
+
+Foretag ændringerne trin for trin, hvis det er muligt.
+Genstart evcc efter hver ændring, og tjek outputtet i browseren.
+På den måde opdager du hurtigt, hvis du har lavet en fejl.
+
+#### Yderligere information
+
+[evcc.dist.yaml](https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml) i hovedprojektet indeholder en komplet liste over alle mulige konfigurationsindstillinger.
+Mere detaljerede forklaringer af indstillingerne finder du under [Reference → evcc.yaml](/da/reference/configuration).
+
+Hvis du vil se en dynamisk demo, kan du også se på indholdet af filen [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml).
+Filen indeholder JavaScript-baserede demoenheder, der simulerer begrænset funktionalitet.
+Den bruges også til [demo.evcc.io](https://demo.evcc.io).
+
+For at køre din egen installation i demotilstand skal du blot starte evcc med parameteren `--demo`.
+Se [CLI-referencen](/da/reference/cli/evcc) for mere information.
+
+## Test
+
+Test, om konfigurationen virker:
+
+```sh
+evcc -c evcc.yaml
+```
+
+Åbn en browser, og indtast URL'en: `http://<your-ip>:7070` (f.eks. `http://evcc.local:7070`).
+Webinterfacet skulle nu vise dine egne enheder.
+
+Hvis alt virker, kan du flytte din `evcc.yaml` til den placering, som din installation kræver.
+
+## Fejlfinding
+
+Hvis der opstår fejl, kan du få yderligere information med følgende kommandoer.
+
+- Syntakstjek
+
+  ```sh
+  evcc -c evcc.yaml checkconfig
+  ```
+
+- Målere (elnet, sol, batteri)
+
+  ```sh
+  evcc -c evcc.yaml -l debug meter
+  ```
+
+- Køretøjer
+
+  ```sh
+  evcc -c evcc.yaml -l debug vehicle
+  ```
+
+- Opladere
+
+  ```sh
+  evcc -c evcc.yaml -l debug charger
+  ```
+
+Tjek, om outputtet fra hver kommando ser rimeligt ud.
