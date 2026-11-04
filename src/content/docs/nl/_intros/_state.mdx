@@ -1,0 +1,19 @@
+---
+translatedFrom: "467d4c7df8e1"
+---
+
+De API State is de datastructuur achter de gebruikersinterface.
+Deze is via drie interfaces beschikbaar.
+Compatibiliteit wordt niet gegarandeerd: velden kunnen per release veranderen.
+
+- [REST API](/integrations/rest-api): `GET /api/state` levert de volledige state als één JSON-document, verpakt in een `result`-object.
+  De queryparameter `jq` filtert het antwoord met een [jq](https://jqlang.org/)-expressie.
+  - Livevoorbeeld: [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Gefilterd op één veld: [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/nl/integrations/mqtt-api): elk veld wordt als apart topic gepubliceerd.
+  Velden op locatieniveau staan onder `evcc/site/<field>`, laadpuntvelden onder `evcc/loadpoints/<n>/<field>` met indexen die bij 1 beginnen.
+  Geneste objecten en arrays worden afgevlakt tot subtopics, bijv. `evcc/site/pv/1/power`.
+  Waarden worden als gewone strings gepubliceerd, tijdstempels als Unix-tijd in seconden en tijdsduren in seconden.
+- **Websocket**: bij het verbinden ontvangt de client de volledige state als één JSON-object.
+  Laadpuntvelden gebruiken sleutels met punten, zoals `loadpoints.0.chargePower`.
+  Daarna worden alleen incrementele updates verstuurd: kleine JSON-objecten met de gewijzigde velden, die de client samenvoegt met zijn kopie van de state.

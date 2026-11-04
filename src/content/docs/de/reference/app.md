@@ -1,11 +1,12 @@
 ---
-title: "evcc App"
+title: "evcc-App"
 description: "Die evcc-App versteht evcc://-Links, die einen Servereintrag vorausfüllen, die Vorhersageseite öffnen oder direkt zu einem Ladepunkt springen, was beim Einrichten hilft."
 sidebar:
   order: 4
+translatedFrom: "3208311edbc2"
 ---
 
-Die [Companion-App](/de/features/app) registriert auf deinem Gerät ein `evcc://`-URL-Schema.
+Die [evcc-App](/de/features/app) registriert auf deinem Gerät ein `evcc://`-URL-Schema.
 Ein solcher Link füllt die Servereinrichtung vor oder öffnet direkt eine Seite.
 
 ## Server hinzufügen {#server}
@@ -23,7 +24,7 @@ evcc://server?url=...&title=...&username=...&password=...
 | ---------- | -------------- |
 | `url`      | Server-URL     |
 | `title`    | Anzeigename    |
-| `username` | Login-Benutzer |
+| `username` | Benutzername   |
 | `password` | Login-Passwort |
 
 Achte darauf, dass die Werte URL-codiert sind.
@@ -42,7 +43,7 @@ evcc://server?url=https://demo.evcc.io&title=Demo%20Server&username=admin&passwo
 evcc://forecast?server=<index>
 ```
 
-`server` ist der bei `0` beginnende Index eines gespeicherten Servers.
+`server` ist der bei null beginnende Index eines gespeicherten Servers.
 Ohne Angabe wird der aktive Server verwendet.
 
 ## Ladepunkt öffnen {#loadpoint}
@@ -53,6 +54,6 @@ Ohne Angabe wird der aktive Server verwendet.
 evcc://loadpoint?lp=<number>&server=<index>
 ```
 
-`lp` wählt den Ladepunkt mit dieser bei `1` beginnenden Nummer.
+`lp` wählt den Ladepunkt mit dieser Nummer, beginnend bei 1.
 Ohne Angabe wird der aktuelle Ladepunkt verwendet.
 `server` funktioniert wie oben.

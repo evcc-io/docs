@@ -8,36 +8,36 @@ prev: false
 next: false
 ---
 
-Auch dieses Jahr geht es weiter mit weiteren Aktualisierungen :) Zusätzlich zu den kleineren Updates mit 0.78 und 0.79, gibt es nun auch ein paar größere Änderungen mit der Version 0.80.
+Updates keep coming this year too :) In addition to the smaller updates in 0.78 and 0.79, version 0.80 brings a few bigger changes.
 
 <!-- excerpt -->
 
-## `evcc configure` Verbesserungen
+## `evcc configure` Improvements
 
-Wenn man eine Konfiguration mit `evcc configure` erstellt, wird zuerst nach dem eigenen Know How gefragt. So können fortgeschrittene Anwender die Konfiguration in technischen Bereichen etwas genauer einstellen. Dieser Modus ist weiterhin auch über `evcc configure --advanced` direkt verfügbar. Einsteiger empfehlen wir diesen Modus jedoch nicht, da mehr Know-How erforderlich ist.
+When you create a configuration with `evcc configure`, you're now first asked about your level of expertise. This lets advanced users fine-tune the configuration in technical areas. This mode is still available directly via `evcc configure --advanced`. We don't recommend it for beginners, though, as it requires more know-how.
 
-Zustätzlich gibt es weitere Geräte Templates, Korrekturen an bisherigen Templates und weitere Einstellmöglichkeiten.
+In addition, there are more device templates, fixes to existing templates and more settings.
 
-## Sonnenenergieanteil und Ersparnis
+## Solar Share and Savings
 
-![Ersparnisdialog](./ersparnis.png)
+![Savings dialog](./ersparnis.png)
 
-Das neue Ersparnisfeature zeigt dir an wie viel deines Ladestroms durch selbsproduzierte Sonnenenergie gedeckt werden konnte.
-Der Prozentwert wird unten rechts in der Ecke angezeigt.
-Beim Klick darauf bekommst du weitere Details in einem Dialog angezeigt.
-Dort siehst du neben der Energiemenge auch deinen effektiven Energiepreis und die Gesamtersparnis gegenüber reinem Netzbezug.
-Hier findest du mehr Informationen zur [Berechnung und Preiskonfiguration](/en/faq#savings-calculation).
+The new savings feature shows you how much of your charging energy was covered by self-produced solar energy.
+The percentage is shown in the bottom right corner.
+Click on it to see more details in a dialog.
+Besides the amount of energy, it shows your effective energy price and your total savings compared to pure grid import.
+More information on the [calculation and price configuration](/en/faq#savings-calculation) is in the FAQ.
 
-[Sponsoren](/en/sponsorship) finden in dem neuen Dialog unter dem Dankeschön-Konfetti-Button einen, _\*drumroll\*_, Link um unsere neuen evcc Sticker zu bekommen.
-Ihr seid die Besten. Danke für euren Support! 💚🥳
+[Sponsors](/en/sponsorship) will find, _\*drumroll\*_, a link to get our new evcc stickers behind the thank-you confetti button in the new dialog.
+You're the best. Thanks for your support! 💚🥳
 
 ## Docker
 
-Wer Docker verwendet, kann nun über die Tags `latest` jeweils die aktuelle Version verwenden. Mit dem Tag `nightly` gibt es dann täglich neue Builds, die aber noch nicht so gut getestet sein können. Weitere Informationen zur Docker Installation sind hier zu finden: [Docker, Synology](/en/installation/docker)
+If you use Docker, you can now use the `latest` tag to always get the current version. The `nightly` tag provides new builds every day, which may not be as well tested yet. More information on the Docker installation can be found here: [Docker, Synology](/en/installation/docker)
 
-## Fehlerkorrekturen
+## Bug Fixes
 
-Diese Version enthält natürlich wieder eine Reihe von Fehlerkorrekturen und vielen kleinen Verbesserungen. Schaut euch gerne über den Changelog Link unten eine detaillierte Auflistung an.
+As always, this version contains a number of bug fixes and many small improvements. Have a look at the changelog links below for a detailed list.
 
 ## Download & Installation
 
@@ -50,12 +50,12 @@ Diese Version enthält natürlich wieder eine Reihe von Fehlerkorrekturen und vi
 
 ### Version 0.80
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.80)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.80)
 
 ### Version 0.79
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.79)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.79)
 
 ### Version 0.78
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.78)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.78)

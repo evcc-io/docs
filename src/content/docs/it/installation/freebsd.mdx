@@ -1,0 +1,112 @@
+---
+title: "FreeBSD"
+description: "Installa evcc su FreeBSD dal pacchetto ufficiale, attivalo come servizio, mantienilo aggiornato e, se vuoi, configura nginx come reverse proxy."
+sidebar:
+  order: 9
+translatedFrom: "2cdd994e3b84"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Questa guida descrive l’installazione su FreeBSD con il [pacchetto ufficiale dell’albero dei Ports di FreeBSD](https://cgit.freebsd.org/ports/tree/www/evcc).
+
+## Installazione
+
+<Steps>
+
+1. ### Installazione
+
+   Apri un terminale con privilegi di root e installa evcc:
+
+   ```sh
+   pkg install evcc
+   ```
+
+2. ### Avvio
+
+   Attiva l’avvio automatico del servizio e avvialo subito:
+
+   ```sh
+   sysrc evcc_enable="YES"
+   service evcc start
+   ```
+
+3. ### Configurazione iniziale
+
+   Apri l’interfaccia di evcc nel browser: [http://localhost:7070](http://localhost:7070).
+   Imposta una password di amministratore e configura i tuoi dispositivi direttamente dall’interfaccia web.
+
+</Steps>
+
+## Configurazione
+
+:::tip[Consigliato]
+Configura evcc direttamente nel browser.
+:::
+
+Dopo il primo avvio puoi configurare la tua istanza evcc all’indirizzo [http://localhost:7070](http://localhost:7070).
+Le impostazioni vengono salvate automaticamente nel database.
+
+In alternativa puoi usare un file di configurazione `evcc.yaml` in `/usr/local/etc/evcc.yaml`.
+Trovi i dettagli in [Configurazione](/it/installation/configuration).
+
+## Aggiornamenti
+
+Per aggiornare a una nuova versione, esegui i passaggi seguenti:
+
+- Controlla nelle [release](https://github.com/evcc-io/evcc/releases) se ci sono modifiche incompatibili (breaking changes) che riguardano la tua installazione
+- Apri un terminale con privilegi di root
+- Aggiorna evcc:
+
+  ```sh
+  pkg upgrade evcc
+  ```
+
+- Riavvia il servizio:
+
+  ```sh
+  service evcc restart
+  ```
+
+## Altri comandi
+
+- Controlla lo stato del server evcc:
+
+  ```sh
+  service evcc status
+  ```
+
+- Visualizza i log:
+
+  ```sh
+  tail -f /var/log/evcc.log
+  ```
+
+## nginx come reverse proxy
+
+Se hai già nginx in esecuzione, aggiungi un nuovo virtualhost con la configurazione seguente:
+
+```nginx
+server {
+  ...
+  server_name evcc.<your-domain>
+  ...
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Host $http_host;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_redirect off;
+    proxy_read_timeout 240s;
+
+    proxy_http_version 1.1;
+
+    proxy_pass http://127.0.0.1:7070;
+  }
+}
+```
+
+L’interfaccia di evcc sarà poi disponibile all’indirizzo `http://evcc.<your-domain>/`.

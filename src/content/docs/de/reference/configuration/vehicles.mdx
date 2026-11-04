@@ -1,18 +1,19 @@
 ---
 title: "vehicles"
-description: "Fahrzeuge in der evcc.yaml anlegen: Batteriekapazität, Phasen, RFID- oder Fahrzeugkennungen zur automatischen Erkennung und das angezeigte Symbol."
+description: "Beschreibt, wie du Fahrzeuge in der evcc.yaml definierst und Batteriekapazität, Phasen, Cache-Dauer, Icon sowie RFID- oder Fahrzeugkennungen für die Erkennung festlegst."
 sidebar:
   order: 7
+translatedFrom: "60b036d74f88"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 import SponsorshipRequired from "@components/SponsorshipRequired.astro";
 
-Ein Fahrzeug repräsentiert ein spezifisches elektrisches Fahrzeug (EV) mit seiner Batterie. Wenn ein Fahrzeug konfiguriert und einem [Ladepunkt](/de/reference/configuration/loadpoints#vehicle) zugewiesen ist, kann in der Benutzeroberfläche u.a. der Ladestatus, der Ladestand und die verbleibende Ladezeit angezeigt werden sowie weitere Daten automatisch vom Fahrzeug abgerufen und verarbeitet werden.
+Ein Fahrzeug steht für ein bestimmtes Elektrofahrzeug mit seiner Batterie. Wenn ein Fahrzeug konfiguriert und einem [Ladepunkt](/de/reference/configuration/loadpoints#vehicle) zugewiesen ist, kann die Oberfläche den Ladestatus, den Ladestand, die verbleibende Ladezeit und weitere Daten anzeigen, die automatisch vom Fahrzeug abgerufen und verarbeitet werden.
 
-Ebenfalls ist es damit möglich die Ladung auf einen bestimmten Ladestand zu begrenzen. Da die meisten Wallboxen diesen nicht kennen können (er wird bislang nur in ganz bestimmten Kombinationen der Wallbox übermittelt), kann evcc mit dieser Konfiguration direkt mit dem Fahrzeug über die Online-Schnittstelle (API) des Fahrzeugherstellers kommunizieren.
+In der Oberfläche kannst du die Ladung außerdem auf einen bestimmten Ladestand begrenzen. Da die meisten Wallboxen den Ladestand des Fahrzeugs nicht kennen können (er wird nur bei ganz bestimmten Kombinationen aus Wallbox und Fahrzeug übermittelt), kann evcc mit dieser Konfiguration direkt über die Online-Schnittstelle (API) des Fahrzeugherstellers mit dem Fahrzeug kommunizieren.
 
-Die `vehicles` Konfiguration ist eine Liste von verschiedenen Fahrzeugen.
+Die `vehicles`-Konfiguration ist eine Liste von verschiedenen Fahrzeugen.
 
 **Beispiel**:
 
@@ -23,9 +24,9 @@ vehicles:
     ...
 ```
 
-Konfigurationen für bekannte Fahrzeuge sind unter [Geräte - Fahrzeuge](/de/vehicles) zu finden.
+Konfigurationen für bekannte Fahrzeuge findest du unter [Geräte – Fahrzeuge](/de/vehicles).
 
-Im folgenden werden nun alle möglichen Parameter erklärt.
+Im Folgenden werden die verschiedenen Parameter erklärt.
 
 ---
 
@@ -33,7 +34,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ### `name`
 
-Eine Kurzbezeichnung des hier konfigurierten Fahrzeugs. Der Wert wird in der Referenzierung des Fahrzeugs in der Konfiguration des [Ladepunktes](/de/reference/configuration/loadpoints#vehicle) verwendet.
+Eine Kurzbezeichnung des konfigurierten Fahrzeugs. Der Wert wird verwendet, um das Fahrzeug in der Konfiguration des [Ladepunkts](/de/reference/configuration/loadpoints#vehicle) zu referenzieren.
 
 **Beispiel**:
 
@@ -45,7 +46,7 @@ name: zoe
 
 ### `title`
 
-Eine Beschreibung des Fahrzeugs welche auf der Benutzeroberfläche angezeigt wird.
+Eine Beschreibung des Fahrzeugs, die in der Oberfläche angezeigt wird.
 
 **Beispiel**:
 
@@ -57,7 +58,7 @@ title: Zoe
 
 ### `type`
 
-Dies ist der evcc Schnittstellen-Typ, mit Hilfe dessen mit dem Fahrzeug kommuniziert werden kann. Bekannte Fahrzeuge können über den Typ `template` eingebunden werden. Den passenden (Template) Typ für bekannte Fahrzeuge und Hinweise für die manuelle Konfiguration `custom` findet man unter [Geräte - Fahrzeuge](/de/vehicles).
+Dies ist der evcc-Schnittstellentyp, über den die Kommunikation mit dem Fahrzeug läuft. Bekannte Fahrzeuge können über den Typ `template` eingebunden werden. Den passenden (Template-)Typ für bekannte Fahrzeuge und Hinweise zur benutzerdefinierten Konfiguration mit `custom` findest du unter [Geräte – Fahrzeuge](/de/vehicles).
 
 ---
 
@@ -65,9 +66,9 @@ Dies ist der evcc Schnittstellen-Typ, mit Hilfe dessen mit dem Fahrzeug kommuniz
 
 ### `capacity`
 
-Die nutzbare Kapazität der Batterie des Fahrzeugs in kWh.
+Die nutzbare Kapazität der Fahrzeugbatterie in Kilowattstunden (kWh).
 
-Wird verwendet um den Energiebedarf für Ladepläne zu berechnen.
+Wird verwendet, um den Energiebedarf für die Ladeplanung zu berechnen.
 
 **Beispiel**:
 
@@ -79,11 +80,9 @@ capacity: 50 # kWh
 
 ### `phases`
 
-Die Anzahl der technisch _maximal_ von diesem Fahrzeug (ggf. inkl. Ladekabel) verwendeten Phasen.
-Der interne Standardwert ist 3. Mögliche Werte sind 1, 2 oder 3.
+Die _maximale_ Anzahl an Phasen, die dieses Fahrzeug nutzen kann (ggf. inkl. Ladekabel). Der interne Standardwert ist 3. Mögliche Werte sind 1, 2 oder 3.
 
-Manche Fahrzeuge, v.a. Plugin-Hybride, nutzen nicht die maximal möglichen 3 Phasen zur Ladung. Während `evcc` die tatsächlich genutzten Phasen bei Beginn eines Ladevorgangs- sofern ein Ladezähler eingebaut ist- ermitteln kann, steht die Information vor einem Ladevorgang nicht zur Verfügung.
-Durch Konfiguration des Parameters `phases` am Fahrzeug kann `evcc` im Smart-Modus den Ladevorgang bereits bei geringerer verfügbarer Leistung beginnen.
+Manche Fahrzeuge, v. a. Plug-in-Hybride, nutzen nicht die maximal möglichen 3 Phasen zum Laden. Zwar kann `evcc` die tatsächlich genutzten Phasen bei Beginn eines Ladevorgangs ermitteln, sofern ein Ladezähler eingebaut ist, vor dem Ladebeginn steht diese Information aber nicht zur Verfügung. Ist `phases` am Fahrzeug gesetzt, kann `evcc` den Ladevorgang im Smart-Modus bereits bei geringerer verfügbarer Leistung starten.
 
 **Beispiel**:
 
@@ -95,22 +94,19 @@ phases: 2
 
 ### `cache`
 
-Die Vorhaltezeit und Unterdrückungsdauer von externen Anfragen an die Fahrzeugdatenschnittstelle (API).
+Wie lange evcc abgerufene Fahrzeugdaten zwischenspeichert und erneute Anfragen an die Fahrzeugdatenschnittstelle (API) zurückhält.
 
 :::note
-Der Wert muss mit angehängter Zeiteinheit (siehe Beispiel) angegeben werden.
-
-`m` steht dabei für Minuten.
+Der Wert muss mit angehängter Zeiteinheit angegeben werden (siehe Beispiel). `m` steht für Minuten.
 :::
 
 :::caution
-Es wird **NICHT** empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. **AUF EIGENES RISIKO.**
+Es wird **NICHT** empfohlen, die Standardeinstellungen zu ändern, denn das könnte dazu führen, dass der Fahrzeughersteller die Ladesteuerung über evcc aktiv unterbindet. **AUF EIGENES RISIKO.**
 :::
 
-Um aktuelle Zustandsdaten vom Fahrzeug zu ermitteln (z. B. Ladestand der Traktionsbatterie) werden regelmäßig die Daten der zugehörigen Datenschnittstelle beim Hersteller online abgefragt. Damit die Server des Fahrzeugherstellers jedoch nicht ständig mit Anfragen überhäuft werden (das kann zur Sperrung des Accounts führen) ist ein Zwischenspeicher (Cache) implementiert der diese Anfragen innerhalb von abfängt und mit den zuletzt abgerufenen Daten bis zu dem hier angegebebenen maximalen Alter beantwortet.
-Da die meisten Fahrzeuge die Daten ohnehin nur während eines laufenden Ladevorgangs in sehr großen Abständen (10 bis 30 Minuten sind üblich) aktualisieren bringen viel häufigere Anfragen keinen Mehrwert.
+Um aktuelle Zustandsdaten vom Fahrzeug zu ermitteln (z. B. den Ladestand der Fahrzeugbatterie), wird regelmäßig die Online-Schnittstelle des Herstellers abgefragt. Damit die Server des Fahrzeugherstellers nicht ständig mit Anfragen überhäuft werden (das kann zur Sperrung des Kontos führen), ist ein Zwischenspeicher (Cache) implementiert, der diese Anfragen abfängt und mit den zuletzt abgerufenen Daten bis zu dem hier angegebenen maximalen Alter beantwortet. Da die meisten Fahrzeuge ihre Daten nur während eines laufenden Ladevorgangs und dann in sehr großen Abständen aktualisieren (10 bis 30 Minuten sind üblich), bringen häufigere Anfragen keinen Mehrwert.
 
-**Standardwert:** `15m`
+**Standardwert**: `15m`
 
 **Beispiel**:
 
@@ -122,20 +118,20 @@ cache: 5m
 
 ### `identifiers`
 
-Eine Liste mit einer oder mehreren Kennungen um das Fahrzeug zu identifizieren. Soll das Fahrzeug zum Beispiel an unterschiedlichen Wallboxen identifiziert werden können, müssen unter Umständen mehrere Kennungen verwendet werden. Die Erkennung kann dabei über folgende Mechanismen erfolgen:
+Eine Liste mit einer oder mehreren Kennungen, um das Fahrzeug zu identifizieren. Soll das Fahrzeug an unterschiedlichen Wallboxen identifiziert werden, können mehrere Kennungen nötig sein. Die Erkennung kann über folgende Mechanismen erfolgen:
 
 #### RFID
 
-Wenn die Wallbox über eine RFID Schnittstelle verfügt, kann eine RFID-Karte einem Fahrzeug zugewiesen werden um es so zu identifizieren. Hierbei wird die `RFID Token ID` benötigt.
+Verfügt die Wallbox über eine RFID-Schnittstelle, kann einem Fahrzeug eine RFID-Karte zur Identifikation zugewiesen werden. In diesem Fall wird die `RFID Token ID` benötigt.
 
 **Beispiel**:
 
 ```yaml
 identifiers:
-  - 12345ABC # RFID token ID
+  - 12345ABC # RFID-Kennung
 ```
 
-Hinweis: Kann der Identifier als Zahl interpretiert werden, muss er in Anführungszeichen verpackt werden
+Hinweis: Falls die Kennung als Zahl interpretiert werden könnte, muss sie in Anführungszeichen stehen.
 
 **Beispiel**:
 
@@ -148,16 +144,16 @@ identifiers:
 
 #### Fahrzeugkennung
 
-Wenn die Wallbox es unterstützt, kann vom Fahrzeug eine Fahrzeugkennung übermittelt werden. Dies kann entweder die MAC Adresse des On-Board-Ladegerätes sein, oder eine Kennung eines fest installierten Plug & Charge Zertifikats (ist ein anderes Zertifikat als für DC Laden!).
+Wenn die Wallbox es unterstützt, empfängt sie vom Fahrzeug eine Fahrzeugkennung. Das kann entweder die MAC-Adresse des On-Board-Ladegeräts sein oder eine Kennung eines fest installierten Plug-&-Charge-Zertifikats (ein anderes Zertifikat als beim DC-Laden!).
 
 **Beispiel**:
 
 ```yaml
 identifiers:
-  - 01:23:45:67:89:0A # MAC address
+  - 01:23:45:67:89:0A # MAC-Adresse
 ```
 
-Manche Fahrzeuge erzeugen jeden Tag eine neue MAC Adresse. Für diesen Fall kann man Wildcards verwenden, falls die vorhandenen Fahrzeuge sich beim nicht ändernden Teil der MAC Adresse unterscheiden.
+Manche Fahrzeuge erzeugen jeden Tag eine neue MAC-Adresse. In diesem Fall kannst du Platzhalter verwenden, wenn sich die vorhandenen Fahrzeuge im unveränderlichen Teil der MAC-Adresse unterscheiden.
 
 ```yaml
 identifiers:
@@ -168,16 +164,16 @@ identifiers:
 
 ### `features: ["coarsecurrent"]`
 
-Markiert dass ein Fahrzeug nicht mit stufenloser Ladestrombegrenzung geregelt werden kann.
+Kennzeichnet, dass ein Fahrzeug nicht mit stufenloser Strombegrenzung geregelt werden kann.
 
 Diese Einstellung sollte für folgende Kombination genutzt werden:
 
 - Fahrzeug kann nur in ganzen Ampere-Schritten regeln
-- Wallbox kann feiner aufgelöste Ladestromvorgaben (z. B. 1 mA) verarbeiten.
+- Wallbox kann feiner aufgelöste Ladestromvorgaben (z. B. 1 mA) verarbeiten
 
-In dieser Kombination kann es vorkommen, dass bei Änderungen von wenigen mA der Phasenstrom für die Regelung unerwartet um 1A verändert wird. Die Regelung fängt dann ggf. an zu schwingen. Dieses Feature beschränkt auch die Regelung auf grobe 1A-Stufen.
+In dieser Kombination kann es vorkommen, dass Änderungen von wenigen mA bei der Regelung zu einer unerwarteten Änderung des Phasenstroms um 1 A führen. Die Regelung kann dann ins Schwingen geraten. Dieser Parameter beschränkt die Regelung ebenfalls auf grobe 1-A-Schritte.
 
-Es kann NICHT in Verbindung mit einem Fahrzeug-Template genutzt werden. Zur Verwendung muss das Fahrzeug als nativer Typ konfiguriert sein.
+Es kann NICHT in Verbindung mit einem Fahrzeug-Template genutzt werden. Dazu muss das Fahrzeug als nativer Typ konfiguriert sein.
 
 **Beispiel**:
 
@@ -189,7 +185,7 @@ features: ["coarsecurrent"]
 
 ### `icon`
 
-Die Fahrzeuge können im UI mit verschiedenen Icon angezeigt werden. Zur Verfügung stehen:
+Fahrzeuge können in der Oberfläche mit verschiedenen Icons angezeigt werden. Zur Verfügung stehen:
 
 - car
 - bike

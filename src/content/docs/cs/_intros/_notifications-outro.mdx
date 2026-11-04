@@ -1,0 +1,107 @@
+---
+translatedFrom: "5833eaf825d2"
+---
+
+## Události \{#events\}
+
+Zprávy lze odesílat při těchto událostech:
+
+| Událost       | Spustí se, když …                               |
+| ------------- | ----------------------------------------------- |
+| `start`       | začne nabíjení                                  |
+| `stop`        | skončí nabíjení                                 |
+| `connect`     | je připojeno vozidlo                            |
+| `disconnect`  | je odpojeno vozidlo                             |
+| `soc`         | se změní stav nabití vozidla                    |
+| `guest`       | je rozpoznáno neznámé vozidlo                   |
+| `asleep`      | vozidlo nenabíjí, přestože je nabíjení povoleno |
+| `planoverrun` | plán nabíjení podle odhadu nesplní svůj cíl     |
+
+Každá událost má nadpis a zprávu.
+Obojí lze upravit pomocí [zástupných symbolů](#placeholders).
+
+## Formát zprávy \{#message-format\}
+
+Zpráva s jednoduchou syntaxí, např. pro událost `stop`:
+
+```txt
+${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
+Solar share: ${sessionSolarPercentage:%.0f}%
+```
+
+Stejná zpráva se syntaxí šablon Go, s výpočty (např. převod W na kW) a podmínkami:
+
+```txt
+{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
+Solar share: {{round .sessionSolarPercentage 0 }}%
+{{- if .sessionPrice}}
+Cost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
+{{- end}}
+```
+
+### Zástupné symboly \{#placeholders\}
+
+Nadpisy a zprávy mohou pomocí proměnných zobrazovat informace z evcc.
+K dispozici jsou dvě syntaxe, které lze i kombinovat:
+
+- **Jednoduchá**: `${variableName}`, např. `${vehicleTitle}`.
+  Volitelně s formátováním jako `${pvPower:%.1fk}`: kromě obvyklých specifikátorů `printf` vydělí přípona `k` hodnotu číslem 1000 (např. Wh → kWh).
+  Doby trvání jako `${chargeDuration}` se zobrazují zaokrouhlené na celé sekundy (např. `1h23m4s`).
+- **Šablona Go**: `{{.variableName}}` umožňuje výpočty, podmínky a [funkce sprig](http://masterminds.github.io/sprig/).
+
+:::note
+Při používání proměnných dbejte na správnou velikost písmen (velká/malá)!
+:::
+
+### Dostupné proměnné \{#variables\}
+
+Dostupné proměnné odpovídají datům z [REST API](/integrations/rest-api).
+Při odesílání zprávy se data nabíjecího bodu, který zprávu vyvolal, a globální data sloučí do ploché struktury.
+Přímo dostupné jsou tak globální hodnoty (např. `pvPower`, `grid.Power`) i hodnoty konkrétního nabíjecího bodu (např. `mode`, `chargedEnergy`, `vehicleTitle`).
+Vnořené hodnoty jako `grid.Power` nebo `battery.Soc` jsou dostupné jen se syntaxí šablon Go, kde jsou nutné názvy polí s velkým počátečním písmenem.
+
+Často používané proměnné nabíjecího bodu:
+
+- `title`: Název nabíjecího bodu
+- `loadpoint`: Číslo nabíjecího bodu 1, 2, …
+- `mode`: Režim nabíjení `off`/`smart`/`now`
+- `charging`: Nabíjení aktivní
+- `enabled`: Nabíjení povoleno
+- `connected`: Vozidlo připojeno
+- `chargedEnergy`: Energie nabitá v relaci ve Wh
+- `chargeDuration`: Doba nabíjení
+- `chargePower`: Aktuální nabíjecí výkon ve W
+- `connectedDuration`: Doba připojení
+- `chargeRemainingDuration`: Zbývající doba nabíjení do cíle
+- `chargeRemainingEnergy`: Zbývající energie do cíle ve Wh
+- `phasesActive`: Aktuálně aktivní fáze
+- `vehicleTitle`: Název vozidla
+- `vehicleName`: Technický název vozidla
+- `vehicleSoc`: Stav nabití vozidla v %
+- `vehicleRange`: Dojezd vozidla v km
+- `vehicleOdometer`: Ujeté kilometry podle tachometru v km
+- `sessionSolarPercentage`: Solární podíl nabíjecí relace v %
+- `sessionPrice`: Náklady na nabíjecí relaci
+- `sessionPricePerKWh`: Průměrná cena za kWh
+- `sessionCo2PerKWh`: Průměrné emise CO₂ na kWh
+- `planActive`: Plán nabíjení aktivní
+- `smartCostActive`: Chytré nabíjení podle ceny aktivní
+
+Často používané globální proměnné:
+
+- `siteTitle`: Název instance evcc
+- `pvPower`: Aktuální solární výkon ve W
+- `homePower`: Aktuální spotřeba domu ve W
+- `grid.Power`: Odběr ze sítě (+) / export do sítě (−) ve W
+- `battery.Power`: Výkon baterie ve W
+- `battery.Soc`: Stav nabití baterie v %
+- `currency`: Měna tarifu
+- `tariffGrid`: Aktuální cena elektřiny ze sítě za kWh
+- `tariffFeedIn`: Tarif výkupu energie za kWh
+- `tariffCo2`: Aktuální intenzita uhlíkové stopy
+- `statistics.<period>.*`: Statistiky nabíjení za období `30d`, `365d`, `thisYear` a `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
+
+Úplný seznam všech dostupných polí najdete v odpovědi API na `http://evcc.local:7070/api/state`.
+
+Obě syntaxe fungují v rozhraní v polích pro nadpis a zprávu.
+Konfigurace přes `evcc.yaml` je popsána v [referenci `messaging`](/cs/reference/configuration/messaging).

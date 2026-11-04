@@ -1,20 +1,23 @@
 ---
 date: 2021-12-31
 title: "Version 0.77"
-description: "Release Notes zu evcc 0.77 vom Dezember 2021, ein kleines Update mit Fehlerkorrekturen für einige Geräte und die Handhabung der PV-Timer in der Oberfläche."
+description: "Release Notes zu evcc 0.77 vom Dezember 2021 mit Fehlerkorrekturen für einige Geräte und die Handhabung der PV-Timer in der Oberfläche."
 authors: [derandereandi]
 tags: [release]
 prev: false
 next: false
+translatedFrom: "df99778322bc"
 ---
 
-Auf den letzten Metern des Jahres 2021 kommt doch nochmals eine Aktualisierung mit ein paar Fehlerkorrekturen. Das Jahr soll ja schließlich positiv enden ;)
+Auf den letzten Metern des Jahres 2021 kommt doch nochmals eine Aktualisierung mit ein paar Fehlerkorrekturen.
+Das Jahr soll ja schließlich positiv enden ;)
 
 <!-- excerpt -->
 
 ## Fehlerkorrekturen
 
-Gegenüber der Version 0.76 haben wir Korrekturen für die Verwendung einiger Geräte und der Handhabung von PV Timern in der UI eingepflegt. Schaut euch gerne über den Changelog Link unten eine detaillierte Auflistung an.
+Gegenüber der Version 0.76 haben wir Korrekturen für die Verwendung einiger Geräte und die Handhabung der PV-Timer in der Oberfläche eingepflegt.
+Eine detaillierte Auflistung findest du über den Changelog-Link unten.
 
 ## Download & Installation
 

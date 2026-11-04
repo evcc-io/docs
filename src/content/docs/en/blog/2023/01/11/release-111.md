@@ -10,27 +10,33 @@ next: false
 
 ![evcc v0.111](./banner-evcc-release-111.webp)
 
-Pünktlich am 11.1. haben wir mit dem Release 0.111 wieder einige neue Funktionen am Start die wir euch hier kurz vorstellen möchten.
+Right on time on 11 January, release 0.111 brings a few new features that we'd like to briefly introduce here.
 
 <!-- excerpt -->
 
-## 🧞‍♂️ Neuer Ladeplaner: Erneuerbaren Netzstrom nutzen
+## 🧞‍♂️ New Charging Planner: Using Renewable Grid Power
 
-Die Zielladenfunktion gibt es in evcc schon seit einiger Zeit. Damit kannst du eine Zielzeit definieren zu der das verbundene Fahrzeug einen bestimmten Ladestand erreichen soll. Die Funktion ist bspw. praktisch um den Wagen vor längeren Fahrten pünktlich zur Abfahrt aufzuladen.
+evcc has had the target charging feature for some time.
+It lets you define a target time by which the connected vehicle should reach a certain charge level.
+The feature is handy e.g. to have the car charged in time for departure before a longer trip.
 
-![Zielladen](./zielladen.webp)
+![Target charging](./zielladen.webp)
 
-Die bisherige Ladestrategie war relativ simpel: Die Ladung wird möglichst spät gestartet, sodass der Akku pünktlich zur Abfahrt den gewünschten Stand erreicht hat. Das schont den Akku da er nicht lange auf hohen Ladeständen geparkt wird.
+The previous charging strategy was fairly simple: charging starts as late as possible so that the battery reaches the desired level right on time for departure.
+This is easy on the battery because it isn't parked at a high charge level for long.
 
-Mit diesem Release wird der Ladeplaner intelligenter und bezieht dynamische Energiepreise und CO₂-Daten mit ein. Damit wird die Ladung auf Zeitfenster geplant in denen besonders viel erneuerbarer Strom im Netz ist. Das spart Geld, entlastet das Stromnetz und reduziert den Bedarf an fossilien Energieträgern.
+With this release the charging planner gets smarter and takes dynamic energy prices and CO₂ data into account.
+Charging is scheduled for time windows with a particularly high share of renewable power in the grid.
+This saves money, relieves the grid and reduces the need for fossil fuels.
 
-### 📈 Börsenpreise mit awattar und Tibber
+### 📈 Exchange Prices With awattar and Tibber
 
-Die stundenabhängigen Tarife von awattar und Tibber haben wir schon länger angebunden. Bislang hatten wir aber nur eine einfache Steuerung, die das Laden unter einem vorher zu konfigurierenden Strompreis freigibt (`cheap`).
+We have supported the hourly tariffs of awattar and Tibber for a while.
+Until now, though, we only had simple control that enables charging below a previously configured electricity price (`cheap`).
 
-Jetzt werden die stündlichen Preise auch in der Ladeplanung verwendet und das Auto lädt dann wenn der Netzstrom besonders günstig ist.
+The hourly prices are now also used in charge planning, and the car charges when grid power is particularly cheap.
 
-Konfiguration für awattar
+Configuration for awattar
 
 ```yaml
 tariffs:
@@ -40,7 +46,7 @@ tariffs:
     region: de # or at
 ```
 
-Konfiguration für Tibber
+Configuration for Tibber
 
 ```yaml
 tariffs:
@@ -50,9 +56,10 @@ tariffs:
     token: "476...963a4" # access token
 ```
 
-### 📊 Manuelle Zeittarife
+### 📊 Manual Time-of-Use Tariffs
 
-Es ist nun auch möglich Zeittarife zu hinterlegen. Hier eine Beispielkonfiguration für günstige Energie zu Nachtzeiten und noch günstigere Energie am Wochenende:
+You can now also enter time-of-use tariffs.
+Here is an example configuration with cheap energy at night and even cheaper energy at the weekend:
 
 ```yaml
 tariffs:
@@ -67,13 +74,16 @@ tariffs:
         price: 0.15 # EUR/kWh
 ```
 
-Auch diese Preisdaten fließen in den neuen Planungsalgorithmus mit ein.
+These prices also feed into the new planning algorithm.
 
-### 🌱 CO₂-Daten von GrünStromIndex und ElectricityMap
+### 🌱 CO₂ Data From GrünStromIndex and Electricity Maps
 
-Wer keinen dynamischen Stromtarif hat kann dennoch klimaschonen Laden. Dafür binden wir jetzt CO₂-Daten ein. Aktuell haben wir zwei Quellen implementiert. Wir sind aber offen für weitere Vorschläge.
+Even without a dynamic electricity tariff you can charge in a climate-friendly way.
+For this we now integrate CO₂ data.
+We currently support two sources, but we are open to further suggestions.
 
-[GrünStromIndex](https://gruenstromindex.de) liefert regionale Vorhersagen über die Sauberkeit des Netzstroms für Deutschland. Du musst lediglich deine Postleitzahl hinterlegen.
+[GrünStromIndex](https://gruenstromindex.de) provides regional forecasts of how clean grid power is in Germany.
+All you need to enter is your postcode.
 
 ```yaml
 planner:
@@ -82,7 +92,9 @@ planner:
   zip: 12349
 ```
 
-[Electricity Map](https://app.electricitymaps.com/map) liefert weltweite Vorhersagen. Für die Nutzung in evcc benötigt Ihr ein Token und den URL Präfix. Diese Daten bekommst du mit dem [kostenlosen Account im API portal](https://api-portal.electricitymaps.com/).
+[Electricity Maps](https://app.electricitymaps.com/map) provides forecasts worldwide.
+To use it with evcc you need a token and the URL prefix.
+You get both with the [free account in the API portal](https://api-portal.electricitymaps.com/).
 
 ```yaml
 planner:
@@ -93,20 +105,21 @@ planner:
   zone: DE
 ```
 
-## Ausblick
+## Outlook
 
-Für eines der nächsten Releases arbeiten wir an einer visuellen Aufbereitung des Ladeplans. Dann kannst du auch die vom Algorithmus errechneten Zeitfenster und die konkrete Kosten- oder CO₂ Ersparnis sehen.
+For one of the next releases we are working on a visual representation of the charging plan.
+You'll then also see the time windows calculated by the algorithm and the actual cost or CO₂ savings.
 
-## Weitere neue Funktionen
+## Other New Features
 
-Dieses Release enthält neben den üblichen kleinen Verbessungen und Bugfixes auch noch ein paar weitere neue Funktionen:
+Besides the usual small improvements and bug fixes, this release also contains a few more new features:
 
-- 🔋🪫 Bessere Unterstützung von mehreren Hausakkus [#5598](https://github.com/evcc-io/evcc/pull/5598)
-- 🌞 Unterstützung für FoxESS [#5721](https://github.com/evcc-io/evcc/pull/5721)
-- 🔌 Unterstützung für den Tesla Wall Connector 3 [#5341](https://github.com/evcc-io/evcc/pull/5341)
-- 🚙 Unterstützung für Volvo Fahrzeuge [#5681](https://github.com/evcc-io/evcc/pull/5681)
-- 🏳️‍🌈 Drei neue UI Sprachen
+- 🔋🪫 Better support for multiple home batteries [#5598](https://github.com/evcc-io/evcc/pull/5598)
+- 🌞 Support for FoxESS [#5721](https://github.com/evcc-io/evcc/pull/5721)
+- 🔌 Support for the Tesla Wall Connector 3 [#5341](https://github.com/evcc-io/evcc/pull/5341)
+- 🚙 Support for Volvo vehicles [#5681](https://github.com/evcc-io/evcc/pull/5681)
+- 🏳️‍🌈 Three new UI languages
 
-**Danke für eure Unterstützung!**<br />
+**Thanks for your support!**<br />
 evcc Core Team<br />
-[@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) und [@naltatis](https://github.com/naltatis)
+[@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) and [@naltatis](https://github.com/naltatis)

@@ -1,0 +1,147 @@
+template: huawei-emma
+product:
+  identifier: huawei-smartassistant-emma
+  brand: Huawei
+  description: SmartAssistant (EMMA)
+description: |
+  Modbus TCP has to be enabled on the EMMA with the installer account in the FusionSolar app (Commission device, Communication settings, Modbus TCP). The EMMA answers at unit ID 0, which the template uses.
+
+  The EMMA accepts a single Modbus TCP client at a time; further connections are reset. To share it with other systems, e.g. Home Assistant, use the [Modbus proxy](https://docs.evcc.io/en/reference/configuration/modbusproxy) of evcc.
+
+  The battery readings of the EMMA are read-only. For active battery control, configure the battery with the SUN2000 Hybrid template instead, using the address of the EMMA and the unit ID of the inverter: the EMMA forwards these requests to the inverter. The unit ID is assigned dynamically and can be found in FusionSolar or by trial. When evcc controls the battery, disable the EMMA's own AI energy optimization in the FusionSolar app and leave it in maximum self-consumption mode: only one system should schedule the battery.
+
+render:
+  - usage: grid
+    default: |
+      type: template
+      template: huawei-emma
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+    advanced: |
+      type: template
+      template: huawei-emma
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+  - usage: pv
+    default: |
+      type: template
+      template: huawei-emma
+      usage: pv
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+    advanced: |
+      type: template
+      template: huawei-emma
+      usage: pv
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+  - usage: battery
+    default: |
+      type: template
+      template: huawei-emma
+      usage: battery
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
+    advanced: |
+      type: template
+      template: huawei-emma
+      usage: battery
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 1
+      host:  # Hostname
+      port: 502 # Port
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
+      maxchargepower: # Maximum charge power (W), Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power. (optional)
+      maxdischargepower: # Maximum discharge power (W), Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging. (optional)
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: false
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default: 0
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit as configured on the battery system. Used by optimizer.
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default: 100
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging.
+    advanced: false
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging.
+    advanced: true
+    optional: true
+modbus:
+  delay:
+  host:
+  id: 1
+  modbus: tcpip
+  port: 502
+  tcpip: true
+  timeout:

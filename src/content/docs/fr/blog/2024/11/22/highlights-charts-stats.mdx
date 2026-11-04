@@ -1,0 +1,145 @@
+---
+date: 2024-11-22
+title: "Nouveautés : graphiques et statistiques"
+description: "Nouveautés de novembre 2024 avec des graphiques pour vos sessions de charge, le boost batterie expérimental, des tarifs flexibles et les onduleurs hybrides."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Bannière des nouveautés"
+  image: "../../../../../en/blog/2024/11/22/charts-stats-banner.webp"
+translatedFrom: "a2eae6887c9f"
+---
+
+Les jours raccourcissent.
+Une bonne raison de faire un petit point sur ce qui a été fait depuis le [dernier article d’août](/fr/blog/2024/08/17/highlights-14a-enwg-ocpp-loadmanagement-elli).
+
+{/* excerpt */}
+
+## Visualisation des sessions de charge
+
+L’aperçu des [sessions de charge](/fr/features/sessions) est disponible depuis un moment.
+En plus des données de base comme l’énergie chargée, les durées de charge, le véhicule et le kilométrage, nous collectons depuis un certain temps des informations sur la part d’énergie solaire autoproduite, les prix réels et les émissions de CO₂.
+
+Auparavant, ces données n’étaient disponibles que sous forme de tableau ou d’export CSV pour vos propres analyses.
+Nous avons maintenant ajouté de belles visualisations de votre énergie chargée, de la part solaire, des coûts et des émissions de CO₂.
+
+![Visualisation de la part solaire](../../../../../en/blog/2024/11/22/ipad-stats-solar.webp)
+
+Si vous avez plusieurs points de charge ou véhicules, vous pouvez regrouper et comparer les données.
+Dans la [documentation](/fr/features/co2), vous découvrirez comment configurer les [sources de données CO₂](/fr/features/co2) et les [tarifs dynamiques](/fr/features/dynamic-prices) nécessaires.
+
+![Visualisation des coûts](../../../../../en/blog/2024/11/22/ipad-stats-per-vehicle.webp)
+
+## Boost batterie
+
+La première mouture du [boost batterie](/fr/features/battery#battery-boost), très demandé, arrive dans cette version en tant que fonction expérimentale 🧪.
+Cette fonction complète la charge classique sur surplus solaire.
+Une fois la fonction activée, l’énergie stockée dans la batterie domestique est aussi utilisée pour charger le véhicule, en plus de l’énergie solaire disponible.
+Le système détermine automatiquement la puissance de charge maximale que la batterie peut fournir.
+
+![Boost batterie](../../../../../en/blog/2024/11/22/ipad-battery-boost.webp)
+
+Le boost peut être activé pour chaque point de charge et se désactive automatiquement lorsque le véhicule est débranché.
+
+Cela peut être particulièrement pratique par temps ensoleillé.
+Si vous voulez partir de chez vous en voiture dans l’après-midi, vous pouvez activer le boost avant votre départ pour transférer au véhicule l’énergie de votre batterie domestique pleine.
+Votre véhicule part avec un niveau de charge plus élevé et votre batterie domestique a de la place pour stocker l’énergie du soleil de l’après-midi, que vous auriez sinon exportée vers le réseau.
+
+Une prochaine version apportera d’autres paramètres, comme des limites de charge, et rendra la fonction plus visible dans l’interface grâce à un bouton Boost.
+
+## Tarifs flexibles
+
+La liste des [différents tarifs](/fr/tariffs) ne cesse de s’allonger.
+Le sujet des tarifs dynamiques va gagner en importance, surtout dans les années à venir.
+
+Des fournisseurs tournés vers le numérique comme Tibber, awattar, Octopus ou Ostrom proposent des API pour le prix actuel et les prévisions de prix du lendemain.
+Ces prix incluent souvent déjà les frais de réseau et d’autres coûts.
+
+Pour les tarifs dynamiques dont le fournisseur ne propose pas d’API, il est possible de déterminer soi-même le prix de l’électricité à partir du prix spot (day-ahead) de la bourse de l’électricité.
+
+Une bonne source de données pour le prix spot est l’interface [Energy Charts](https://api.energy-charts.info) du Fraunhofer ISE.
+Elle peut être utilisée sans inscription préalable.
+
+Voici un exemple de configuration pour la zone de prix allemande :
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # majoration fixe par kWh (p. ex. 20 ct de frais de réseau, 2 ct de frais du fournisseur)
+    tax: 0.19 # majoration en pourcentage (p. ex. 19 % de TVA)
+```
+
+La formule `(price + charges) * (1 + tax)` sert à calculer le prix final par kWh pour le consommateur.
+Cette formule était auparavant codée en dur.
+
+Pour des tarifs plus complexes, p. ex. avec un prix plafond, vous pouvez désormais adapter vous-même cette formule.
+Voici un exemple de tarif dynamique avec un plafond de 50 ct/kWh :
+
+```yaml
+tariffs:
+  grid:
+    type: template
+    template: energy-charts-api
+    bzn: DE-LU
+    charges: 0.22 # majoration fixe par kWh (p. ex. 20 ct de frais de réseau, 2 ct de frais du fournisseur)
+    tax: 0.19 # majoration en pourcentage (p. ex. 19 % de TVA)
+    formula: math.Min(0.5, (price + charges) * (1 + tax))
+```
+
+En plus du prix spot (`price`) et des valeurs de `charges` et `tax`, vous disposez aussi de toute la puissance de la bibliothèque [math](https://pkg.go.dev/math) de Go.
+
+## Onduleurs hybrides à puissance AC limitée
+
+Certains onduleurs hybrides offrent une puissance DC supérieure à leur puissance AC.
+Ils peuvent donc, p. ex., traiter 10 kW de puissance solaire, mais ne fournir que 8 kW de puissance AC au réseau domestique.
+Les 2 kW restants sont stockés côté DC dans la batterie.
+Cela a toujours posé des problèmes dans la régulation du surplus, car evcc se base sur la puissance solaire totale.
+L’option de configuration globale `maxGridSupplyWhileBatteryCharging` (oui, un nom maladroit) était une tentative de contrer ces effets secondaires indésirables.
+
+Nous avons remplacé cette option par une solution plus stable.
+Tous les [modèles d’onduleurs](/fr/meters) concernés (p. ex. Fronius, Growatt, SMA, Sungrow, etc.) disposent désormais de l’option avancée `maxAcPower`.
+Celle-ci vous permet de définir la puissance AC maximale (p. ex. `maxAcPower: 8000` pour 8 kW) par onduleur.
+La régulation du surplus tient désormais compte de cette valeur en conséquence.
+
+## Sponsor cocharge : ouvrez votre point de charge privé au public
+
+Nous sommes heureux d’accueillir la start-up brêmoise [cocharge](https://cocharge.de/evcc) comme nouveau sponsor.
+
+[![Logo cocharge](../../../../../en/blog/2024/11/22/cocharge.webp)](https://cocharge.de/evcc)
+
+cocharge permet aux particuliers d’ouvrir leur point de charge au public.
+Votre chargeur apparaît alors dans les applications des principaux fournisseurs de cartes de recharge, avec en option des horaires d’ouverture définis par vous.
+Pour le propriétaire de la voiture électrique, la charge et la facturation sur votre point de charge fonctionnent exactement comme sur n’importe quelle borne publique.
+cocharge s’occupe des détails techniques, des demandes de quotas THG, des accords d’itinérance et de la bureaucratie.
+**Les revenus supplémentaires issus des sessions de charge externes vous sont versés chaque mois.**
+
+Pour utiliser cocharge, il faut un **chargeur certifié (eichrechtskonform)** qui **prend en charge OCPP**.
+Le point de charge doit aussi être **accessible au public**.
+Il n’y a ni frais d’entrée ni frais récurrents.
+cocharge prélève seulement une commission de 15 % sur chaque session de charge.
+
+Si vous avez une [voiture de fonction](https://cocharge.de/dienstwagen-laden) et une carte de recharge de votre employeur, cette solution peut être particulièrement intéressante pour vous.
+Non seulement la facturation automatique vous épargne la paperasse,
+mais vous pouvez aussi gagner de l’argent en plus si vous chargez avec votre propre électricité solaire ou avec un tarif dynamique aux heures avantageuses.
+
+Utiliser cocharge et evcc ensemble ?
+La plupart des chargeurs certifiés disposent, en plus d’OCPP, d’une interface locale comme Modbus.
+Vous pouvez alors ouvrir votre point de charge au public et optimiser localement la puissance de charge en parallèle avec evcc.
+
+Si cela vous intéresse et que vous voulez faire partie des premiers utilisateurs, jetez un œil à [cocharge.de/evcc](https://cocharge.de/evcc).
+
+## Plein de petites améliorations
+
+Comme d’habitude, il y a aussi eu beaucoup de petites améliorations et de corrections de bugs, ainsi que la prise en charge de nouveaux chargeurs, onduleurs et autres appareils.
+Vous trouverez plus de détails dans les [notes de version](https://github.com/evcc-io/evcc/releases).
+
+💚 Un grand merci à toutes celles et ceux qui soutiennent le projet par leur participation active et leur parrainage financier.
+
+**Bonne charge !**<br/>
+L’équipe evcc<br/>
+Michael, Andi et Uli

@@ -1,0 +1,15 @@
+The API State is the data structure behind the UI.
+It is available over three interfaces.
+There is no compatibility promise, fields may change between releases.
+
+- [REST API](/integrations/rest-api): `GET /api/state` returns the full state as a single JSON document, wrapped in a `result` object.
+  The `jq` query parameter filters the response with a [jq](https://jqlang.org/) expression.
+  - Live example: [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Filtered to a single field: [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/en/integrations/mqtt-api): every field is published as its own topic.
+  Site-level fields appear under `evcc/site/<field>`, loadpoint fields under `evcc/loadpoints/<n>/<field>` with 1-based indexes.
+  Nested objects and arrays flatten into subtopics, e.g. `evcc/site/pv/1/power`.
+  Values are published as plain strings, timestamps as unix seconds, durations in seconds.
+- **Websocket**: on connect, the client receives the full state as one JSON object.
+  Loadpoint fields use dotted keys like `loadpoints.0.chargePower`.
+  After that, only incremental updates are sent: small JSON objects containing the changed fields, which the client merges into its copy of the state.

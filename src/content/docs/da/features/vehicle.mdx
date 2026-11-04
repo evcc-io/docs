@@ -1,0 +1,134 @@
+---
+title: "Køretøjer"
+description: "Forklarer, hvad gæstekøretøjet, offline-køretøjer og køretøjer med online-API kan i evcc, og hvordan flere køretøjer deler én oplader."
+sidebar:
+  order: 8
+translatedFrom: "0c5d9e6473ca"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Hvis du konfigurerer dit køretøj eller dine køretøjer i evcc, får du adgang til flere funktioner.
+Du kan indstille [minimumsopladning og grænser](/da/features/limits), bruge [ladeplaner](/da/features/plans) og få en detaljeret opgørelse pr. køretøj under [opladningssessioner](/da/features/sessions), inkl. oplysninger som kilometerstand.
+
+Det er valgfrit at konfigurere køretøjer. Da evcc i de fleste tilfælde styrer opladningen via opladeren, fungerer sol- og prisafhængig opladning også uden konfiguration af køretøjer.
+
+## Køretøjstyper
+
+Hvilke funktioner der er tilgængelige, afhænger af køretøjstypen. Der skelnes mellem følgende typer:
+
+### Gæstekøretøj
+
+Hvis du ikke har konfigureret et køretøj, vises gæstekøretøjet ved ladepunktet.
+Det er et standardkøretøj, der ikke understøtter særlige funktioner.
+Selv hvis du har konfigureret dit eget køretøj, kan du til enhver tid skifte til gæstekøretøjet.
+Det er f.eks. nyttigt, hvis en gæst med et ikke-konfigureret køretøj oplader ved dit ladepunkt.
+evcc bruger så de standardværdier for effekt og faser, der er konfigureret ved ladepunktet.
+Under [opladningssessioner](/da/features/sessions) tildeles denne opladning til gæstekøretøjet.
+
+### Køretøjer uden API (offline)
+
+Hvis dit køretøj ikke har en online-grænseflade eller ikke har internetforbindelse ved ladepunktet, kan du konfigurere det som offline-køretøj.
+Gå til **Opsætning → Køretøjer → Tilføj køretøj**, og vælg **Generic vehicle (without API)** i feltet **Fabrikant**.
+Giv køretøjet en **Titel** (f.eks. ”Grøn Honda e”), og angiv batteriets **Kapacitet**.
+Når batterikapaciteten er kendt, kan opladningsforløbet og ladegrænsen også vises i procent (f.eks. +25 %).
+
+Bemærk: Du kan også bruge denne funktion til andres køretøjer (venner, familie, leje- eller firmabiler), som du ikke har API-adgang til.
+
+### Køretøjer med API (online)
+
+Hvis dit køretøj har en online-grænseflade, giver det mening også at konfigurere den i evcc.
+Du finder en liste over alle understøttede fabrikanter under [Køretøjer](/da/vehicles).
+Gå til **Opsætning → Køretøjer → Tilføj køretøj**, og vælg din **Fabrikant**, f.eks. Audi.
+Afhængigt af fabrikanten angiver du derefter adgangsdataene til din køretøjskonto, f.eks. brugernavn og adgangskode.
+
+evcc har nu adgang til det aktuelle opladningsniveau.
+Afhængigt af fabrikanten er der også andre oplysninger som opladningsstatus, køretøjets grænser, kilometerstand, klimatisering og forventet rækkevidde.
+
+:::note[Bemærk]
+For at skåne køretøjets batteri opdaterer evcc kun opladningsniveauet, når et køretøj er tilsluttet ladepunktet.
+Afhængigt af fabrikanten kan API-adgangen vække køretøjet og øge standbyforbruget betydeligt.
+Du kan ændre denne adfærd med [`poll`-parameteren](/da/reference/configuration/loadpoints#poll) ved ladepunktet.
+:::
+
+## Flere køretøjer \{#multiple-vehicles\}
+
+Du kan konfigurere flere køretøjer og flere ladepunkter i evcc.
+Der er forskellige muligheder for at tildele køretøjer til ladepunkter:
+
+### Standardkøretøj
+
+Hvis hvert køretøj har sit eget ladepunkt, kan du konfigurere køretøjet som standardkøretøj ved ladepunktet.
+Det er den enkleste og anbefalede konfiguration.
+Gå til **Opsætning → Ladere og varmelegemer → [Mit ladepunkt]**.
+Vælg dit køretøj som **Standard køretøj** i afsnittet **Køretøjer**.
+Når en ny opladning starter, går evcc ud fra, at det er standardkøretøjet.
+Hvis det ikke er tilfældet (f.eks. et gæstekøretøj), kan du skifte køretøj i brugerfladen.
+
+### Tildeling via brugerfladen
+
+Det aktuelt tildelte køretøj vises i brugerfladen ved det pågældende ladepunkt.
+Du kan ændre tildelingen ved at klikke på køretøjets navn.
+Valget gælder derefter for den aktuelle opladning.
+
+<Screenshot
+  name="features/screenshots/vehicle-select"
+  caption="Skift af køretøj ved ladepunktet"
+/>
+
+### Automatisk genkendelse
+
+Hvis flere køretøjer oplader ved samme ladepunkt, bruges automatisk genkendelse, når køretøjet tilsluttes.
+Opladningsstatus for alle konfigurerede køretøjer kontrolleres, og det mest sandsynlige køretøj vælges.
+Hvis genkendelsen har valgt det forkerte køretøj (f.eks. fordi det oplader ved et andet ladepunkt), kan du rette tildelingen manuelt.
+
+### Genkendelse via RFID \{#detection-via-rfid\}
+
+Hvis din oplader har en RFID-kortlæser, kan du også bruge den til tildelingen.
+Her tildeles et (eller flere) RFID-kort til et bestemt køretøj.
+Hver gang køretøjet tilsluttes opladeren igen, skal opladningen først aktiveres med det tilhørende RFID-kort på opladeren.
+
+evcc modtager en entydig identifikationskode fra opladeren.
+Afhængigt af fabrikanten er det enten RFID-koden eller en afledt intern kode som f.eks. et brugernavn fra opladerens konfiguration.
+Når du har holdt RFID-kortet op til opladeren, vises den aktuelle identifikator på ladepunktets kort under **Opsætning → Ladere og varmelegemer**.
+Indtast denne værdi i feltet **RFID-identifikator** for det ønskede køretøj under **Opsætning → Køretøjer**.
+Du kan gemme flere identifikatorer pr. køretøj.
+
+### Genkendelse via Plug & Charge
+
+Hvis din oplader understøtter ISO 15118-standarden, kan genkendelsen også ske direkte via ladekablet.
+Der findes dog i øjeblikket meget få opladere på markedet med denne funktion.
+
+:::note[Bemærk]
+Funktionen ”PLC-forbindelse til køretøjet” skal være aktiveret i opladeren.
+:::
+
+Opsætningen ligner genkendelse via RFID.
+Køretøjet skal være tilsluttet opladeren.
+Identifikatoren (f.eks. `01:23:45:67:89:00`) vises derefter på ladepunktets kort under **Opsætning → Ladere og varmelegemer**.
+Indtast denne værdi i køretøjets felt **RFID-identifikator**.
+
+:::note[Bemærk]
+Hvis køretøjet og opladeren ikke understøtter Plug & Charge, sender køretøjet i stedet en entydig hardwareadresse (MAC-adresse).
+Nogle fabrikanter som VW og Audi ændrer den dog hver dag til en anden tilfældig værdi.
+
+I det tilfælde kan du bruge et jokertegn og kun angive den del, der ikke ændrer sig, f.eks. `01:23:45:*`.
+
+Det virker naturligvis kun, hvis denne del ikke forekommer hos flere eksisterende køretøjer, og den angivne første del af værdien er forskellig for hvert køretøj.
+:::
+
+## Klimatisering
+
+For nogle køretøjer kan evcc også via online-forbindelsen registrere, om køretøjet er i gang med forklimatisering.
+I det tilfælde tillader opladeren den lavest mulige effekt, så køretøjet kan klimatisere med strøm fra opladeren.
+
+Det kan ske, at klimatiseringen i køretøjet kræver mindre end den tilladte effekt.
+Køretøjet bruger så den resterende tilgængelige effekt til at fortsætte opladningen af batteriet, også selv om en angivet grænse for opladningsniveauet allerede er nået.
+
+Så snart klimatiseringen registreres som afsluttet, stopper opladeren igen, så køretøjet ikke kan trække mere strøm fra opladeren, medmindre det allerede oplader.
+
+:::note[Bemærk]
+Dette gælder kun for kombinationen af køretøjer og opladere, der kommunikerer via IEC 61851-standarden. Det er normen i dag.
+
+For køretøjer og opladere, der kommunikerer via ISO 15118-standarden, får køretøjet præcis den mængde energi, som det anmoder om direkte fra opladeren.
+:::

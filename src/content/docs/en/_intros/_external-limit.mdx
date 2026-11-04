@@ -1,0 +1,55 @@
+Grid operators and higher-level energy management systems can externally limit the power consumption and feed-in of your installation.
+The following use cases are supported:
+
+- **§ 14a EnWG** (German regulation): Temporary power reduction and dimming of consumers by the grid operator
+- **§ 9 EEG** (German regulation): Curtailment of solar installations in case of grid overload
+- **EMS integration**: Applying limits from other energy management systems
+
+## Background \{#background\}
+
+### Controllable Consumption Devices (§ 14a EnWG) \{#dimming\}
+
+§ 14a of the German Energy Industry Act (EnWG) regulates grid-friendly control of controllable consumption devices (SteuVE).
+Grid operators can temporarily reduce the power of large consumers such as wallboxes, heat pumps or battery storage systems in the event of grid overload.
+
+Important points:
+
+- Affects consumers from 4.2 kW power
+- Control via Smart Meter Gateway and control box
+
+### Feed-in Management (§ 9 EEG) \{#curtailment\}
+
+According to § 9 of the Renewable Energy Act (EEG), grid operators can curtail the feed-in of renewable energy installations in the event of imminent grid overload.
+This mainly affects larger solar installations, but can also become relevant in the residential sector.
+
+When evcc receives a curtailment signal, the curtailment level is distributed to all curtailable inverters as a percentage and applied directly at the device.
+FNN control boxes signal staged limits (60%, 30%, 0%), which are applied as-is.
+Watt-based limits (e.g. via EEBus) are converted to a percentage based on the installed generator power.
+Inverters without fine-grained control are switched off completely while the limit is active.
+The active limit is shown in the UI; full production resumes once the signal clears.
+
+:::caution[Experimental]
+Curtailment is only supported for selected inverters.
+Supported devices are marked with "Curtailable" in the [device overview](/en/meters).
+Devices that only provide feed-in limitation are listed under [Curtailment](#curtailment-devices).
+:::
+
+## Setup \{#setup\}
+
+Configuration is done via **Configuration → External Limit**.
+Pick one of the integrations listed below and enter its parameters.
+Alternatively, you can create a [user-defined integration](/en/user-defined-devices#external-limit), e.g. for a connection via a single switch contact (relay).
+
+To apply the consumption limit to your charging points, set up circuits in [Load Management](/en/features/loadmanagement).
+An active limit then caps the top-level circuit, indicated by a "Consumption limited" hint on the Load Management card.
+Active limits are shown on the **External Limit** card and on the main page.
+
+### Pairing for EEBus Integrations \{#eebus-pairing\}
+
+With integrations using the EEBus protocol, the control box communicates directly with evcc and automatically transmits the power limit.
+Control box and evcc need to be paired once:
+
+1. **In the control box**: Add evcc as HEMS.
+   The SKI and IP address of evcc are shown under **Configuration → EEBus**.
+2. **In evcc**: Enter the control box SKI in the integration.
+   You can find it in the control box documentation or its web interface.

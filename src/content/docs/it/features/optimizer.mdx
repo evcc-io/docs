@@ -1,0 +1,97 @@
+---
+title: "Ottimizzatore 🧪"
+description: "L’ottimizzatore sperimentale usa previsioni e consumi passati e decide quando conviene ricaricare i veicoli e la batteria domestica, per ora solo a titolo informativo."
+sidebar:
+  order: 13
+translatedFrom: "8465baa052f5"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+:::caution[Sperimentale]
+L’ottimizzatore è in una fase iniziale di sviluppo.
+I dati mostrati sono per ora solo informativi.
+Le azioni di controllo arriveranno nelle prossime versioni.
+:::
+
+L’ottimizzatore analizza previsioni, dati di consumo e stato attuale del tuo sistema energetico per prendere le decisioni più convenienti.
+Integra il controllo basato su regole di evcc con un’ottimizzazione predittiva.
+
+## Perché un ottimizzatore?
+
+evcc lavora in modo deterministico e basato su regole.
+Per molte configurazioni questo approccio va benissimo.
+Ad es. un impianto fotovoltaico, una batteria domestica e un veicolo.
+
+Gli scenari più complessi portano questo approccio al limite:
+
+- **Più veicoli:** quale va ricaricato per primo?
+- **Batteria domestica o veicolo:** dove deve andare l’energia disponibile?
+- **Tariffe dinamiche:** conviene caricare dalla rete stanotte o domani ci sarà abbastanza energia solare?
+
+L’ottimizzatore può rispondere a queste domande.
+Per ora imposti tu stesso valori come i limiti di prezzo o le priorità della batteria domestica.
+In futuro potrai lasciare queste decisioni all’ottimizzatore.
+Sarà lui a trovare automaticamente i valori ottimali.
+Ci stiamo lavorando passo dopo passo.
+
+## Cosa fa l’ottimizzatore?
+
+L’ottimizzatore raccoglie diversi dati:
+
+- **Dati di previsione:** [resa solare](/it/tariffs#solar), [prezzi dell’elettricità](/it/tariffs#price), [tariffe di immissione](/it/features/dynamic-feedin), [temperatura esterna](/it/tariffs#temperature) per prevedere il fabbisogno di riscaldamento
+- **Dati storici:** il profilo di consumo tipico della tua casa
+- **Stato attuale:** livello di carica della batteria domestica, veicoli collegati, fabbisogno di riscaldamento
+
+Sulla base di questi dati, un algoritmo di ottimizzazione calcola il comportamento previsto del tuo sistema energetico.
+Individua le azioni più convenienti: [piani di ricarica](/it/features/plans) efficienti, controllo della batteria (blocco della scarica, carica dalla rete).
+Prevede anche quando la batteria domestica sarà piena o vuota.
+
+Obiettivo: **ridurre al minimo i costi energetici.**
+
+## Usare l’ottimizzatore
+
+Attivalo dall’interfaccia utente:
+
+1. **Configurazione → Sperimentale** → attiva
+2. **Configurazione → Ottimizzatore 🧪** → attiva
+
+L’ottimizzatore richiede una [sponsorizzazione](/it/sponsorship) attiva.
+Nelle nuove installazioni possono servire fino a 24 ore per raccogliere abbastanza dati da mostrare i primi risultati.
+
+- **Vista principale → Flusso di energia (espandi):** mostra quando la batteria domestica sarà presumibilmente piena o vuota.
+- **Menu → Ottimizzatore:** grafici che mostrano come dovrebbero comportarsi la batteria domestica e i punti di ricarica nelle prossime ore e quale sarà il costo energetico previsto sull’orizzonte di ottimizzazione (vedi lo screenshot qui sotto).
+
+<Screenshot
+  name="features/screenshots/optimizer-debug"
+  caption="Vista di debug dell’ottimizzatore con previsioni e risultati dell’ottimizzazione."
+/>
+
+## Stato attuale e prossimi passi
+
+Per ora l’ottimizzatore è solo informativo.
+Mostra previsioni e potenziali risparmi, ma non controlla ancora attivamente nulla.
+
+Prossimi passi:
+
+- Integrare le azioni: controllare attivamente la batteria domestica
+- Far ottimizzare i [piani di ricarica](/it/features/plans) all’ottimizzatore
+- Permettere agli utenti di affidare impostazioni specifiche all’ottimizzatore
+
+## Contesto tecnico \{#technical\}
+
+L’ottimizzatore è basato su Python e sfrutta il solido ecosistema per l’ottimizzazione matematica e la statistica.
+Non fa parte di evcc, ma è un servizio a sé stante.
+
+Quando è attivo, viene interpellato il servizio cloud `optimizer.evcc.io`.
+Il servizio è **stateless**.
+I dati vengono salvati solo quando dai un feedback sulla spiegazione di un piano.
+Per i dettagli sulla privacy consulta la nostra [informativa sulla privacy](https://evcc.io/en/datenschutz/).
+
+Come evcc, anche l’ottimizzatore è open source: [github.com/evcc-io/optimizer](https://github.com/evcc-io/optimizer).
+Puoi anche installare localmente l’immagine Docker [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer).
+Usa la variabile d’ambiente `OPTIMIZER_URI` per indirizzare evcc al tuo endpoint.
+
+Per mantenere veloce il calcolo, evcc accorpa le fasce temporali oltre le 48 ore in fasce orarie.
+Con un’istanza tua dell’ottimizzatore puoi spostare questo limite con la variabile d’ambiente `OPTIMIZER_COARSEN_AFTER` (in ore, ad es. `72`).
+Il valore `0` mantiene le fasce di 15 minuti per l’intera previsione.

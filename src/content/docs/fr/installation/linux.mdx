@@ -1,0 +1,355 @@
+---
+title: "Linux"
+description: "Installez evcc depuis le dépôt APT sous Debian, Ubuntu et les distributions similaires, exécutez-le comme service systemd, mettez-le à jour ou revenez en arrière."
+sidebar:
+  order: 7
+translatedFrom: "773c2321f20d"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Ce guide décrit l’installation sur les distributions Linux basées sur apt comme Debian et Ubuntu.
+
+:::tip[Raspberry Pi]
+Pour un Raspberry Pi, nous recommandons l’installation plus simple avec l’[image Linux evcc](/fr/installation/linux-image).
+:::
+
+:::note
+Pour les autres distributions Linux, consultez le guide [Docker](/fr/installation/docker) ou la section [Installation manuelle](#manual).
+:::
+
+## Première installation
+
+<Steps>
+
+1. ### Installer
+
+   Ouvrez un terminal et installez les dépendances nécessaires :
+
+   ```sh
+   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   ```
+
+   Ajoutez le dépôt APT d’evcc :
+
+   <Tabs groupId="release-type">
+     <TabItem label="Release" default>
+       Version stable actuelle
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/stable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+     <TabItem label="Nightly">
+       Version de développement. Mise à jour quotidiennement. Peut être instable.
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/unstable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+   </Tabs>
+
+   Mettez à jour la liste des paquets et installez evcc :
+
+   ```sh
+   sudo apt update
+   sudo apt install -y evcc
+   ```
+
+   :::note
+   L’installation crée un utilisateur `evcc`. Votre propre compte ne doit donc pas s’appeler `evcc`.
+   :::
+
+   :::note
+   Si une interface série est utilisée, il peut être nécessaire d’exécuter `sudo usermod -a -G plugdev evcc`. Cette commande ajoute l’utilisateur `evcc` au groupe `plugdev` et lui donne accès aux périphériques branchés (USB, interface série, etc.) sans droits root.
+   :::
+
+2. ### Démarrer
+
+   ```sh
+   sudo systemctl start evcc
+   ```
+
+3. ### Configurer
+
+   Ouvrez l’interface web d’evcc dans votre navigateur : [http://localhost:7070](http://localhost:7070).
+   Définissez un mot de passe administrateur et configurez vos appareils directement dans l’interface web.
+
+</Steps>
+
+[![Hébergé par Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat-square)](https://cloudsmith.com)
+
+Merci à [Cloudsmith](https://cloudsmith.com) d’héberger le dépôt !
+
+## Configuration
+
+evcc se configure via l’interface web ou un fichier de configuration.
+
+:::tip[Recommandé]
+La configuration via l’interface web est la façon la plus simple de mettre en place evcc.
+:::
+
+### Interface web (recommandée)
+
+Après le premier démarrage, vous pouvez configurer evcc directement dans le navigateur à l’adresse [http://localhost:7070](http://localhost:7070).
+Les paramètres sont enregistrés automatiquement dans la base de données.
+
+### Fichier de configuration (méthode traditionnelle)
+
+Vous pouvez aussi utiliser un fichier de configuration `evcc.yaml`.
+Consultez [Configuration](/fr/installation/configuration) pour savoir comment créer le fichier de configuration.
+
+:::caution
+Le fichier de configuration doit se trouver à l’emplacement `/etc/evcc.yaml`.
+:::
+
+- Créez le fichier de configuration selon le [guide](/fr/installation/configuration) et enregistrez-le sous `/etc/evcc.yaml`
+
+- Redémarrez le serveur evcc :
+
+  ```sh
+  sudo systemctl restart evcc
+  ```
+
+- Accédez à l’interface web d’evcc à l’adresse [http://localhost:7070](http://localhost:7070)
+
+## Mises à jour
+
+Pour passer à la dernière version d’evcc, suivez ce guide :
+
+- Consultez les [notes de version](https://github.com/evcc-io/evcc/releases) pour repérer les changements incompatibles (BC) qui concernent votre installation
+- Ouvrez un terminal
+- Mettez à jour la liste des paquets :
+
+  ```sh
+  sudo apt update
+  ```
+
+- Mettez à jour evcc :
+
+  ```sh
+  sudo apt --only-upgrade install -y evcc
+  ```
+
+:::note
+Si le dépôt unstable (versions nightly) a été ajouté, les mises à jour installent toujours la dernière version nightly disponible.
+
+Si vous ne le souhaitez plus, vous pouvez supprimer le dépôt unstable avec `sudo rm /etc/apt/sources.list.d/evcc-unstable.list`.
+:::
+
+## Retour à une version antérieure
+
+Si vous devez revenir en arrière pour une raison quelconque, utilisez cette commande :
+
+```sh
+  sudo apt install evcc=x.xxx.x # Version Number
+```
+
+## Service système \{#systemd\}
+
+evcc tourne en arrière-plan comme service système. Voici quelques commandes utiles pour le piloter :
+
+```sh
+sudo systemctl status evcc # shows status
+sudo systemctl start evcc # start the service, if it isn't already running
+sudo systemctl stop evcc # stops the service
+sudo systemctl restart evcc # restart the service
+sudo systemctl enable evcc # sets the service to run at boot
+sudo systemctl disable evcc # stops the service running at boot
+```
+
+## Vérification
+
+Vérifiez l’installation :
+
+- Affichez l’état du service evcc :
+
+  ```sh
+  sudo systemctl status evcc
+  ```
+
+- Consultez les dernières entrées du journal du service evcc :
+
+  ```sh
+  sudo journalctl -u evcc --since "yesterday"
+  ```
+
+- Validez la configuration des compteurs :
+
+  ```sh
+  sudo evcc -l debug meter
+  ```
+
+- Validez la configuration du chargeur :
+
+  ```sh
+  sudo evcc -l debug charger
+  ```
+
+- Validez la configuration du véhicule :
+
+  ```sh
+  sudo evcc -l debug vehicle
+  ```
+
+Ouvrez un navigateur et saisissez l’URL suivante : `http://127.0.0.1:7070`.
+
+:::note
+Remplacez `127.0.0.1` par l’adresse IP ou le nom d’hôte de l’ordinateur si le navigateur n’est pas ouvert sur le même ordinateur.
+:::
+
+## Sauvegarde et restauration
+
+### Via l’interface web (recommandée)
+
+La méthode la plus simple est la sauvegarde via l’interface web.
+Consultez [Configuration → Sauvegarde et restauration](/fr/installation/configuration#backup) pour plus de détails.
+
+### Sauvegarde manuelle
+
+Pour retrouver « l’état d’origine » après une réinstallation, il suffit de sauvegarder le fichier de configuration `evcc.yaml` (s’il est utilisé) et le fichier de base de données `evcc.db`.
+Leur emplacement est indiqué dans le journal au démarrage du programme.
+En général, la configuration se trouve sous `/etc/evcc.yaml` et la base de données sous `/var/lib/evcc/evcc.db`.
+
+Les deux fichiers peuvent être copiés avec la commande Linux `cp`.
+
+Exemple (copie depuis l’emplacement habituel vers le répertoire personnel) :
+
+Copier le fichier de configuration : `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
+
+Copier la base de données : `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Variables d’environnement et options CLI \{#environment-variables\}
+
+Installé via APT, evcc tourne comme service systemd.
+Vous pouvez adapter son comportement avec un fichier de surcharge systemd (override) :
+
+```sh
+sudo systemctl edit evcc
+```
+
+:::caution
+Ne modifiez pas directement `/lib/systemd/system/evcc.service`.
+
+Ce fichier est écrasé par `apt` à chaque mise à jour du paquet et vos modifications seraient perdues.
+Passez toujours par un fichier de surcharge avec `systemctl edit evcc`.
+:::
+
+### Exemple
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_LOG=debug,tariff:trace"
+Environment="EVCC_DATABASE_DSN=/usb/evcc/evcc.db"
+Environment="EVCC_NETWORK_HOST=my-evcc.local"
+Environment="EVCC_NETWORK_PORT=80"
+ExecStart=
+ExecStart=/usr/bin/evcc --custom-css /path/to/my.css
+```
+
+:::note
+La première ligne `ExecStart=` vide est importante pour remplacer la commande par défaut.
+:::
+
+:::tip
+Tous les paramètres de `evcc.yaml` peuvent être définis comme variables d’environnement : `EVCC_` + nom du paramètre en majuscules.
+
+
+Pour la liste complète des options CLI, consultez la [documentation CLI](/fr/reference/cli/evcc).
+:::
+
+## Installation manuelle \{#manual\}
+
+En plus du paquet APT pour Debian/Ubuntu, nous proposons d’autres binaires pour Linux.
+
+### Installation
+
+- Téléchargez le fichier adapté à votre système :
+  - Processeur Intel 64 bits : [evcc_X.XX_linux_amd64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - Processeur ARM 64 bits : [evcc_X.XX_linux_arm64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - Processeur ARM 32 bits (p. ex. Raspberry Pi avec OS 32 bits) : [evcc_X.XX_linux_armv6.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+
+- Décompressez le fichier téléchargé (p. ex. par un double-clic).
+- Le dossier décompressé contient un programme `evcc`.
+- Ouvrez un terminal et allez dans le nouveau dossier.
+- Vérifiez qu’evcc fonctionne avec cette commande :
+  ```
+  ./evcc -v
+  ```
+- La version actuelle d’evcc doit s’afficher (p. ex. `evcc version 0.xxx.y`).
+
+### Configuration
+
+Vous pouvez configurer evcc via l’interface web ou un fichier de configuration.
+Consultez [Configuration](/fr/installation/configuration) pour plus de détails.
+
+Démarrez evcc avec :
+
+```sh
+./evcc
+```
+
+Ouvrez ensuite votre navigateur à l’adresse [http://localhost:7070](http://localhost:7070) et suivez les instructions.
+
+### Mise à jour et retour à une version antérieure
+
+Suivez les étapes ci-dessus et remplacez le fichier du programme evcc par la nouvelle version ou la version précédente.
+Il n’est pas nécessaire de refaire la configuration.
+
+### Configurer le service
+
+Pour une utilisation en production, il est préférable de configurer evcc comme service système.
+Ainsi, evcc démarre avec l’ordinateur et redémarre automatiquement en cas d’erreur.
+
+:::note
+Ce guide part du principe que votre distribution Linux utilise `systemd`.
+:::
+
+- Exécutez la commande suivante pour créer un nouveau fichier pour le service et l’ouvrir dans un éditeur :
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Copiez le contenu suivant dans le fichier :
+
+  ```
+  [Unit]
+  Description=evcc
+  Requires=network-online.target
+  After=syslog.target network.target network-online.target
+  Wants=network-online.target
+  StartLimitIntervalSec=10
+  StartLimitBurst=10
+
+  [Service]
+  ExecStart=/usr/local/bin/evcc
+  Restart=always
+  RestartSec=5
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Adaptez le chemin du fichier `evcc` dans `ExecStart` si le fichier se trouve dans un autre répertoire.
+  On suppose également que le fichier de configuration `evcc.yaml` se trouve à l’emplacement `/etc/evcc.yaml`.
+  Si ce n’est pas le cas, ajoutez le texte `-c /yourpath/evcc.yaml` à la fin de `ExecStart`.
+  Remplacez `yourpath` par le répertoire approprié.
+
+- Testez le service :
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  En cas de succès, la sortie doit contenir : `Active: active (running)`.
+
+- Configurez le service pour qu’il se lance automatiquement au démarrage du système :
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+Pour plus d’informations, consultez la section [Service système](#systemd) ci-dessus.

@@ -1,0 +1,135 @@
+---
+date: 2024-02-01
+title: "v0.124: nieuwe Tesla-integratie"
+description: "Release notes van evcc 0.124 uit februari 2024 met de nieuwe integratie van de officiële Tesla-API via tesla.evcc.io en actieve aansturing van de thuisbatterij."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "d3fd20efbc67"
+---
+
+![Banner met een overzicht van de nieuwe functies](../../../../../en/blog/2024/02/01/v0.124-banner.webp)
+
+De dagen worden langer en laden met zonne-energie begint weer leuk te worden.
+Een goed moment voor een korte update over de laatste ontwikkelingen bij evcc.
+
+{/* excerpt */}
+
+## Nieuwe Tesla-integratie
+
+In [oktober](https://www.notateslaapp.com/news/1653/tesla-creates-official-apis-for-third-party-services-to-start-charging-for-usage) heeft Tesla een nieuwe [officiële API](https://developer.tesla.com/docs/fleet-api) geïntroduceerd.
+Daarnaast heeft Tesla aangekondigd dat de oude, [onofficiële API](https://www.teslaapi.io) begin 2024 wordt uitgeschakeld.
+Vorige week is Tesla begonnen deze stap voor stap uit te schakelen.
+
+### Wat betekent dit voor mij?
+
+Om de nieuwe API te gebruiken, moet u twee wijzigingen aanbrengen in de `evcc.yaml`:
+
+1. **Nieuwe templatenaam:** Omdat de oude API bij sommige gebruikers nu nog werkt, hebben we besloten om voorlopig beide implementaties naast elkaar aan te bieden. Wijzig de templatenaam van `tesla` in `tesla-command` om de nieuwe API te gebruiken.
+
+2. **Nieuwe tokens genereren:** Met de nieuwe API is het nu mogelijk om de benodigde `accessToken` en `refreshToken` direct in de browser te genereren.
+   Daarvoor hebben we een kleine website op [tesla.evcc.io](https://tesla.evcc.io) gemaakt.
+   Vervang de oude tokens in uw `evcc.yaml` door de nieuw gegenereerde.
+
+De configuratie moet er dan zo uitzien:
+
+```yaml
+vehicles:
+ - name: mytesla
+   type: template
+   template: tesla-command # wijzig `tesla` in `tesla-command`
+   accessToken: ... # gegenereerd door tesla.evcc.io
+   refreshToken:  ... # gegenereerd door tesla.evcc.io
+   ...
+```
+
+De tokens die via [tesla.evcc.io](https://tesla.evcc.io) zijn gegenereerd, kunnen **alleen met de officiële evcc-builds** (stable & nightly) worden gebruikt.
+De reden hiervoor is dat de tokens van Tesla’s nieuwe Developer API altijd aan een app van derden gebonden zijn.
+
+U kunt evcc natuurlijk nog steeds zelf bouwen.
+Dan hebt u echter een eigen Tesla Developer Account nodig en moet u de tokens zelf genereren.
+Meer details vindt u in de bijbehorende [pull request](https://github.com/evcc-io/evcc/pull/10802).
+
+### Privacy & beveiliging
+
+Net als bij de oude API loopt de communicatie voor het ophalen van gegevens (laadniveau, status enz.) en voor de aansturing (wekken) rechtstreeks tussen uw lokale evcc-installatie en de infrastructuur van Tesla.
+Alleen het genereren van de tokens loopt eenmalig via onze website.
+Tokens worden niet opgeslagen, maar alleen aan u in de browser getoond.
+
+Voor een uitgebreidere aansturing van het voertuig (laden direct bij het voertuig starten en stoppen) is een extra ondertekend verzoek aan Tesla nodig.
+Dit betreft momenteel de gebruikers van een Tesla Wall Connector.
+Omdat we onze privésleutel voor de app van derden niet in de evcc-binary kunnen en mogen opnemen, bieden we hiervoor waarschijnlijk een [eigen dienst](https://github.com/evcc-io/evcc/pull/11893) aan die deze verzoeken ondertekent en naar Tesla doorstuurt.
+Maar daarover meer in een latere release.
+
+### Kosten
+
+Tesla biedt de nieuwe API momenteel [gratis](https://developer.tesla.com/docs/fleet-api#membership-tiers) aan.
+Tesla heeft echter al aangekondigd dat er in de toekomst kosten voor het gebruik van de API in rekening worden gebracht.
+Helaas weten we nog niet hoe opensourcevriendelijk dit model zal zijn.
+
+Het is goed mogelijk dat we het genereren van tokens in de toekomst niet meer gratis kunnen aanbieden.
+Mogelijk koppelen we het aan het bestaande sponsormodel van evcc.
+Maar daarover meer zodra er nieuwe informatie van Tesla is.
+
+## Actieve batterijaansturing
+
+Een grote nieuwe functie die met de kerstrelease is gekomen, is de actieve batterijaansturing.
+Deze functie is niet langer als experimenteel gemarkeerd.
+Daarnaast zijn er de afgelopen weken enkele nieuw ondersteunde batterijomvormers bijgekomen.
+In de documentatie ziet u nu [of uw omvormer wordt ondersteund](/nl/meters#features).
+
+### Passieve aansturing
+
+Passieve batterijaansturing is al enige tijd beschikbaar in evcc.
+Daarbij regelt evcc het laden met zonne-energie zo dat de thuisbatterij niet onbedoeld wordt ontladen.
+Vorig jaar hebben we een [instellingenvenster](/nl/blog/2023/10/05/feature-highlights-10-2023#battery-settings) geïntroduceerd waarin u de prioriteit tussen het laden van het voertuig en van de thuisbatterij kunt instellen.
+Dit model werkt heel goed voor laden met zonne-energie.
+evcc kent het actuele laadniveau van de thuisbatterij en regelt alleen het laadvermogen van het voertuig.
+Voor snelladen werkt dit mechanisme echter niet.
+Daarvoor is een actieve batterijaansturing nodig.
+
+### Ontladen tijdens snelladen voorkomen
+
+Standaard probeert de thuisbatterij het volledige energieverbruik van het huis (inclusief laders) te dekken.
+Afhankelijk van de actuele stroomprijs of de verwachte productie van zonne-energie kan het echter wenselijk zijn om de energie voor **snelladen van het voertuig** rechtstreeks van het net te halen en niet uit de thuisbatterij.
+Zo blijft de verzamelde zonne-energie in de thuisbatterij en kan deze bijv. ’s nachts voor het verbruik in huis worden gebruikt.
+
+Dit is onze eerste toepassing van actieve batterijaansturing.
+Als uw omvormer deze functie ondersteunt, verschijnt er een bijbehorende optie in het venster met batterij-instellingen.
+
+![Batterijaansturing: ontladen van de batterij bij snelladen voorkomen](../../../../../en/blog/2024/02/01/batterycontrol-en.webp)
+
+Als deze optie actief is, wordt de thuisbatterij tijdens het snelladen vergrendeld.
+In die tijd wordt deze niet ontladen en ook niet geladen.
+Deze vergrendeling is ook actief tijdens [gepland laden](/nl/blog/2023/10/05/feature-highlights-10-2023#charging-planner-visualization) en [Smart Grid laden](/nl/blog/2023/10/05/feature-highlights-10-2023#smart-grid-charging).
+
+### Volgende stap: de batterij laden met goedkope netstroom
+
+De volgende ontwikkelstap voor actieve batterijaansturing is de mogelijkheid om de thuisbatterij met goedkope netstroom te laden.
+Dit is vooral interessant voor gebruikers van dynamische stroomtarieven op donkere dagen.
+Het doel is om de thuisbatterij in perioden met lage prijzen met energie van het net te vullen en deze energie vervolgens in perioden met hoge prijzen in huis te gebruiken.
+De benodigde hardware-integraties hebben we al geïmplementeerd.
+Daarom verwachten we dat deze functie in een van de volgende releases beschikbaar komt.
+
+## Update: overstap naar configuratie in de browser
+
+evcc is een zeer flexibel en krachtig systeem voor uw eigen energieoptimalisatie.
+Onze grootste uitdaging blijft om deze flexibiliteit te combineren met een eenvoudige installatie.
+De afgelopen maanden hebben we grote vooruitgang geboekt op het gebied van configuratie.
+Ons doel is dat u evcc volledig via de browser in gebruik kunt nemen, zonder `evcc.yaml`.
+
+Als u in het instellingenvenster de optie "Show experimental UI features" hebt ingeschakeld, ziet u onder "🧪 Device Configuration" onze huidige ontwikkelstand.
+Momenteel kunt u daar voertuigen, netmeters, zonnepanelensystemen en batterijsystemen toevoegen en bewerken.
+Laders en tarieven volgen in de volgende iteratie.
+Ook al is dit nog _work in progress_, we kijken uit naar uw feedback.
+
+![Apparaatconfiguratie](../../../../../en/blog/2024/02/01/config-ui.webp)
+
+## Kleine verbeteringen en bugfixes
+
+Zoals altijd bevat deze release ook een aantal kleinere verbeteringen en bugfixes.
+Meer details vindt u in de [release notes](https://github.com/evcc-io/evcc/releases/tag/0.124.0).
+
+Het allerbeste<br/>
+het evcc-kernteam

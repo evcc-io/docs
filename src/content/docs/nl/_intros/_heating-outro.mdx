@@ -1,0 +1,113 @@
+---
+translatedFrom: "bbae10b17f51"
+---
+
+## Configuratie van SG Ready-relais \{#sgready-configuration\}
+
+### Configuratie met boostrelais \{#boost-relay\}
+
+Dit voorbeeld laat zien hoe u een warmtepomp configureert met een Shelly 1 voor de boostmodus en een Shelly 3EM voor de vermogensmeting.
+Hiervoor wordt het type `sgready-relay` gebruikt.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Configuratie met boost- en dimrelais \{#boost-dim-relay\}
+
+Ondersteunt uw warmtepomp zowel de boost- als de dimmodus, dan kunt u een tweede relais voor het dimcontact configureren.
+In de dimmodus wordt het opgenomen vermogen van de warmtepomp verlaagd.
+Dit is nuttig om het verbruik te beperken bij netcongestie of in het kader van § 14a EnWG.
+
+U kunt twee afzonderlijke relais gebruiken of één relais met meerdere kanalen (bijv. een Shelly met verschillende `channel`-waarden).
+Naast Shelly zijn ook andere [stuurbare relais](/nl/smartswitches) mogelijk.
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Optioneel kunt u de actuele temperatuur (`temp`), de apparaatinterne temperatuurlimiet (`limittemp`), het vermogen (`power`) en de energie (`energy`) [via een plugin](/nl/reference/plugins) toevoegen.
+Deze waarden worden alleen weergegeven en sturen de warmtepomp niet aan.
+
+## Statusweergave \{#status-display\}
+
+Omdat warmtepompen hun eigen verwarmingslogica onafhankelijk van evcc uitvoeren, toont de interface twee toestanden:
+
+- **Normale werking**: geen ingreep, de warmtepomp volgt haar eigen regeling.
+- **Boost actief**: een verzoek om meer vermogen.
+  Zolang de warmtepomp nog niet heeft gereageerd (bijv. door minimale looptijden of blokkeertijden), toont de status “Boost aangevraagd…”.
+
+Vooraf geconfigureerde warmtepomptypes en de bijbehorende templates stellen de benodigde [functievlaggen](/nl/user-defined-devices#charger-features) al in.
+Voor eigen configuraties via `type: custom` stelt u de passende combinatie van `integrateddevice`, `heating`, `continuous` en optioneel `switchdevice` in.
+
+## Elektrische boilers \{#electric-water-heaters\}
+
+Eenvoudige elektrische verwarmingselementen kunnen door evcc alleen aan- of uitgeschakeld worden.
+Ze worden meestal via een [schakelbaar stopcontact](/nl/smartswitches) aangesloten.
+Bij voldoende overschot activeert evcc het stopcontact (enable) en schakelt het weer uit zodra de omstandigheden dat vereisen (disable).
+
+Bij speciale elektrische verwarmingselementen met een eigen traploze regeling geeft evcc het momenteel beschikbare vermogen door aan het apparaat.
+Dit beschikbare vermogen wordt voortdurend aan de actuele situatie aangepast, net als bij het laden van een voertuig.
+
+evcc biedt instelbare limieten waarmee u de gewenste temperatuur kunt instellen.
+Dit is niet bedoeld als veiligheidsfunctie.
+De temperatuurregeling hoort normaal gesproken via de thermostaatfunctie van het verwarmingselement zelf te gebeuren.
+
+:::danger
+Uw elektrische boiler moet altijd een eigen temperatuurbegrenzing hebben die oververhitting betrouwbaar voorkomt bij een storing of defect van evcc of bij een bedieningsfout.
+:::

@@ -54,10 +54,11 @@ loop((screenshot, { lang }) => {
   test("report a problem", async ({ page }) => {
     await page.getByTestId("tab-more").waitFor();
     await page.goto(`/#/issue`);
+    const report = REPORT[lang] ?? REPORT.en;
     await page.locator("#helpTypeBug").check();
-    await page.locator("#issueTitle").fill(REPORT[lang].title);
-    await page.locator("#issueDescription").fill(REPORT[lang].description);
-    await page.locator("#stepsToReproduce").fill(REPORT[lang].steps);
+    await page.locator("#issueTitle").fill(report.title);
+    await page.locator("#issueDescription").fill(report.description);
+    await page.locator("#stepsToReproduce").fill(report.steps);
     await shortenVersion(page);
     // show a typical installation instead of the local test setup
     await page.evaluate(() => {

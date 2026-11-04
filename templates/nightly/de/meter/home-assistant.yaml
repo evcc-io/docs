@@ -60,7 +60,7 @@ render:
       power: sensor.house_power # Leistungsentität, Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
-      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
     advanced: |
       type: template
       template: homeassistant
@@ -69,7 +69,7 @@ render:
       power: sensor.house_power # Leistungsentität, Entitäts-ID für momentane Leistungsmessung in Watt. Die Entität muss nur numerische Werte liefern (z.B. "1234", nicht "1234 W").
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
-      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
       energy: sensor.house_energy # Energieentität, Entitäts-ID für Gesamtenergie in kWh (z.B. Netzbezug oder Batterieentladung). Keine täglichen oder Intervallwerte. (optional)
       returnEnergy: sensor.house_return_energy # Energieentität (Gegenrichtung), Entitäts-ID für Gesamtenergie in Gegenrichtung in kWh (z.B. Netzeinspeisung oder Batterieladung). Keine täglichen oder Intervallwerte. (optional)
       currentL1: sensor.house_current_l1 # L1 Stromentität, Entitäts-ID für L1 Strommessung in Ampere (optional)
@@ -87,8 +87,8 @@ render:
       modeHoldCharge: script.battery_hold_charge # Laden sperren Skript, Optionales Skript um Laden der Heimbatterie zu verhindern, während Entladen zur Deckung des Hausverbrauchs erlaubt bleibt. (optional)
       modeDischarge: script.battery_grid_discharge # Netzentladung Skript, Optionales Skript um die Heimbatterie ins Netz zu entladen. (optional)
       insecure: # Selbstsignierte Zertifikate akzeptieren, optional
-      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
-      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
+      maxchargepower: # Maximale Ladeleistung (W), Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen. (optional)
+      maxdischargepower: # Maximale Entladeleistung (W), Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert. (optional)
   - usage: aux
     default: |
       type: template
@@ -176,7 +176,7 @@ params:
     choice: []
     unit: '%'
     description: Maximaler Ladestand
-    help: Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt.
+    help: Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen.
     advanced: false
     optional: true
   - name: energy
@@ -347,7 +347,7 @@ params:
     choice: []
     unit: W
     description: Maximale Ladeleistung
-    help: Für erzwungenes Laden des Speichers.
+    help: Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen.
     advanced: true
     optional: true
   - name: maxdischargepower
@@ -356,6 +356,6 @@ params:
     choice: []
     unit: W
     description: Maximale Entladeleistung
-    help: Maximale Entladeleistung des Speichers.
+    help: Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert.
     advanced: true
     optional: true

@@ -1,0 +1,72 @@
+---
+translatedFrom: "de9f2699a051"
+---
+
+## Funktionsweise \{#how-it-works\}
+
+Im Normalbetrieb lädt evcc ohne externe Leistungsbegrenzung.
+Die Ladepunkte arbeiten mit ihrer normalen Konfiguration und werden ggf. durch weitere [Lastmanagement](/de/features/loadmanagement)-Einschränkungen koordiniert.
+
+Wenn der Netzbetreiber ein Reduzierungssignal sendet:
+
+1. **FNN-Steuerbox**: Der W4-Kontakt wird geschlossen und evcc aktiviert das konfigurierte Verbrauchslimit.
+2. **EEBus**: Die Steuerbox übermittelt das berechnete Gesamtlimit digital.
+3. **Relais**: Der Kontakt wird geschlossen und evcc aktiviert das konfigurierte Leistungslimit.
+
+Das Limit begrenzt den Hauptstromkreis im [Lastmanagement](/de/features/loadmanagement).
+Alle den Stromkreisen zugeordneten Ladepunkte werden entsprechend heruntergeregelt.
+Bei zu hohem Gesamtverbrauch können Ladevorgänge auch gestoppt werden.
+Die Regelung betrifft alle Modi (Smart, Schnell).
+
+**Batteriesteuerung während der Reduzierung:**
+Ist [aktive Batteriesteuerung](/de/features/battery#battery-control) konfiguriert und ein [Netzladevorgang](/de/features/battery#gridcharge) der Hausbatterie aktiv, wird dieser automatisch pausiert.
+Die Batterie wird in den _Hold_-Modus versetzt, sodass sie sich nicht mehr entlädt.
+Das Laden der Batterie bei PV-Überschuss ist in der Regel weiterhin möglich.
+Nach Ende der Leistungsreduzierung wird das [Netzladen](/de/features/battery#gridcharge) automatisch fortgesetzt.
+
+Ist ein Limit aktiv, zeigt die Hauptseite ein **Banner mit Regelhinweis**.
+Verbrauchslimit und Einspeisebegrenzung werden separat dargestellt.
+
+## Protokollierung \{#logging\}
+
+Alle Begrenzungsanfragen des Netzbetreibers werden automatisch dokumentiert.
+Die Protokolldaten können unter **Konfiguration → Externe Begrenzung** als CSV-Datei heruntergeladen werden.
+
+Jeder Eintrag enthält:
+
+- Start- und Endzeitpunkt der Begrenzung
+- Art der Steuerung (Verbrauchsreduzierung oder Einspeisebegrenzung)
+- Gemessene Netzleistung zu Beginn der Begrenzung
+- Gesetztes Leistungslimit
+
+Dieses Protokoll kann auf Anfrage dem Netzbetreiber vorgelegt werden, um die Einhaltung der Steueranfragen nachzuweisen.
+
+:::note[Verantwortung (§ 14a, § 9)]
+Die Elektrofachkraft muss nach der Einrichtung überprüfen, dass die externe Begrenzung wie vorgesehen funktioniert.
+Der Anlagenbetreiber ist für den ordnungsgemäßen Betrieb verantwortlich und muss das Protokoll mindestens zwei Jahre aufbewahren.
+:::
+
+## Steuerung weiterer Verbraucher \{#additional-consumers\}
+
+Neben Ladepunkten können auch weitere steuerbare Verbraucher in das Lastmanagement nach § 14a EnWG einbezogen werden.
+Dies betrifft z.&nbsp;B. Wärmepumpen oder Hausbatterien, die über EEBus angebunden oder als Zähler mit zusätzlichem Relaisausgang konfiguriert sind.
+
+Die Steuerung berücksichtigt dabei die aktuelle Leistungsaufnahme aller steuerbaren Verbraucher.
+Dazu zählen automatisch alle Ladepunkte.
+Als sonstige Verbraucher gelten alle Zähler mit passendem Schaltausgang oder mit EEBus-Schnittstelle, die den LPC-Anwendungsfall unterstützt.
+
+Zunächst werden alle sonstigen Verbraucher gedimmt.
+Die verbleibende Leistung wird dann auf die aktiven Ladepunkte verteilt.
+Durch pauschale Dimmung der sonstigen Verbraucher kann die verfügbare Ladeleistung für aktive Ladepunkte in Ausnahmefällen sogar höher sein als im Normalzustand.
+Reicht die Drosselung der Ladepunkte einschließlich der Dimmung aller sonstigen Verbraucher nicht aus, werden Ladevorgänge an Ladepunkten unterbrochen.
+
+:::note[Verfügbarkeit]
+Aktuell existiert nur ein dimmbarer Zähler (EEBus-Verbraucher).
+Diese Funktion wird weiter ausgebaut und entsprechende Zähler werden in der [Gerätedokumentation](/de/meters) markiert.
+:::
+
+## Weiterführende Informationen \{#further-information\}
+
+- [Lastmanagement](/de/features/loadmanagement): Grundlagen der Lastverteilung
+- [Benutzerdefinierte Integration](/de/user-defined-devices#external-limit): Anbindung über Relais oder benutzerdefinierte Datenquellen
+- [Plugins](/de/reference/plugins): Erweiterte Plugin-Konfigurationen

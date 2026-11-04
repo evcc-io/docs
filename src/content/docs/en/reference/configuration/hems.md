@@ -34,6 +34,7 @@ Defines the type of external control.
 - `relay`: Connection via switch contact
 - `fnn`: Connection via FNN control box with multiple switch contacts
 - `eebus`: Connection via the EEBUS protocol
+- `custom`: Limits read from plugins, see [user-defined devices](/en/user-defined-devices#external-limit-custom)
 
 ---
 

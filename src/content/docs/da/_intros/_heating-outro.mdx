@@ -1,0 +1,113 @@
+---
+translatedFrom: "bbae10b17f51"
+---
+
+## Konfiguration af SG-Ready-relæer \{#sgready-configuration\}
+
+### Konfiguration med boost-relæ \{#boost-relay\}
+
+Dette eksempel viser, hvordan du konfigurerer en varmepumpe med en Shelly 1 til boost-tilstand og en Shelly 3EM til effektmåling.
+Til det bruges typen `sgready-relay`.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Konfiguration med boost- og dim-relæ \{#boost-dim-relay\}
+
+Hvis din varmepumpe understøtter både boost- og dim-tilstand, kan du konfigurere et ekstra relæ til dim-kontakten.
+I dim-tilstand reduceres varmepumpens effektforbrug.
+Det er nyttigt til at begrænse effektforbruget ved begrænsninger i elnettet eller inden for rammerne af § 14a EnWG.
+
+Du kan bruge enten to separate relæer eller et relæ med flere kanaler (f.eks. Shelly med forskellige `channel`-værdier).
+Ud over Shelly kan du også bruge andre [styrbare relæer](/da/smartswitches).
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # Geräte-internes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Du kan desuden tilføje den aktuelle temperatur (`temp`), enhedens interne temperaturgrænse (`limittemp`), effekt (`power`) og energi (`energy`) [via plugin](/da/reference/plugins).
+De bruges kun til visning og styrer ikke varmepumpen.
+
+## Statusvisning \{#status-display\}
+
+Da varmepumper kører deres egen varmelogik uafhængigt af evcc, viser brugerfladen to tilstande:
+
+- **Normal drift**: intet indgreb, varmepumpen følger sin egen styring.
+- **Boost er aktiveret**: en anmodning om at øge effekten.
+  Så længe varmepumpen endnu ikke har reageret (f.eks. på grund af minimumsdriftstider eller spærretider), viser status ”Boost anmodning sendt…”.
+
+Forudkonfigurerede varmepumpetyper og passende skabeloner sætter allerede de nødvendige [funktionsflag](/da/user-defined-devices#charger-features).
+Ved brugerdefinerede konfigurationer via `type: custom` skal du sætte den passende kombination af `integrateddevice`, `heating`, `continuous` og eventuelt `switchdevice`.
+
+## Elektriske vandvarmere \{#electric-water-heaters\}
+
+Enkle elektriske vandvarmere kan kun tændes eller slukkes af evcc.
+De tilsluttes typisk via en [styrbar stikkontakt](/da/smartswitches).
+Ved tilstrækkeligt overskud tænder evcc stikkontakten (enable) og slukker den igen, når forholdene kræver det (disable).
+
+Ved særlige elektriske vandvarmere med egen kontinuerlig styring sender evcc den aktuelt tilgængelige effekt videre til enheden.
+Den tilgængelige effekt tilpasses løbende til den aktuelle situation, på samme måde som ved opladning af et køretøj.
+
+evcc har justerbare grænser, som du kan bruge til at indstille din ønskede temperatur.
+Det skal ikke forstås som en sikkerhedsfunktion.
+Temperaturreguleringen bør normalt ske via vandvarmerens egen termostatfunktion.
+
+:::danger
+Din elektriske vandvarmer skal altid have sin egen temperaturbegrænsning, som pålideligt forhindrer overophedning ved fejl eller funktionssvigt i evcc og ved fejlbetjening.
+:::

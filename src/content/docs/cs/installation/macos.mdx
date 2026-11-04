@@ -1,0 +1,188 @@
+---
+title: "macOS"
+description: "Nainstalujte evcc na macOS přes Homebrew, spouštějte ho jako agenta launchd a udržujte ho aktuální, nebo ho nainstalujte ručně a vyzkoušejte verzi nightly."
+sidebar:
+  order: 8
+translatedFrom: "de28eae0a2d4"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Tento návod popisuje instalaci na macOS (10.12 a novější) pomocí správce balíčků [Homebrew](https://brew.sh).
+
+:::note
+Pokud chcete evcc nainstalovat bez správce balíčků nebo vyzkoušet verzi nightly, podívejte se do sekce [Ruční instalace](#manual).
+:::
+
+## Instalace
+
+<Steps>
+
+1. ### Instalace
+
+   Otevřete okno terminálu a nainstalujte [Homebrew](https://brew.sh), pokud ještě není nainstalovaný.
+
+   ```sh
+   brew trust --tap evcc-io/tap
+   brew tap evcc-io/tap
+   brew update
+   brew install --cask evcc
+   ```
+
+2. ### Spuštění \{#start\}
+
+   evcc se dodává jako cask pro Homebrew, který nelze spravovat pomocí `brew services`.
+   Místo toho vytvořte agenta launchd. Ten spustí evcc po přihlášení a znovu ho spustí, pokud se zastaví:
+
+   ```sh
+   mkdir -p "$(brew --prefix)/var/log"
+   cat > ~/Library/LaunchAgents/io.evcc.plist <<EOF
+   <?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+   <plist version="1.0">
+   <dict>
+     <key>Label</key>
+     <string>io.evcc</string>
+     <key>ProgramArguments</key>
+     <array>
+       <string>$(brew --prefix)/bin/evcc</string>
+     </array>
+     <key>WorkingDirectory</key>
+     <string>$(brew --prefix)</string>
+     <key>RunAtLoad</key>
+     <true/>
+     <key>KeepAlive</key>
+     <true/>
+     <key>StandardOutPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+     <key>StandardErrorPath</key>
+     <string>$(brew --prefix)/var/log/evcc.log</string>
+   </dict>
+   </plist>
+   EOF
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
+   ```
+
+3. ### Nastavení
+
+   Otevřete webové rozhraní evcc v prohlížeči: [http://localhost:7070](http://localhost:7070).
+   Nastavte heslo administrátora a nakonfigurujte svá zařízení přímo ve webovém rozhraní.
+
+</Steps>
+
+## Konfigurace
+
+:::tip[Doporučeno]
+Konfigurujte evcc přímo v prohlížeči.
+:::
+
+Po prvním spuštění můžete evcc konfigurovat na adrese [http://localhost:7070](http://localhost:7070).
+Nastavení se automaticky ukládají do databáze.
+
+Případně můžete použít konfigurační soubor `evcc.yaml` uložený v `/etc/evcc.yaml`.
+Podrobnosti najdete v části [Konfigurace](/cs/installation/configuration).
+
+## Aktualizace
+
+Při aktualizaci na novou verzi evcc postupujte takto:
+
+- Otevřete okno terminálu
+- Aktualizujte seznam balíčků:
+
+  ```sh
+  brew update
+  ```
+
+- Aktualizujte evcc:
+
+  ```sh
+  brew upgrade --cask evcc
+  ```
+
+- Restartujte evcc:
+
+  ```sh
+  launchctl kickstart -k gui/$(id -u)/io.evcc
+  ```
+
+:::caution[OCPP a aplikační firewall]
+Každá aktualizace nainstaluje nový spustitelný soubor, který aplikační firewall macOS považuje za novou aplikaci.
+Pokud je firewall zapnutý, příchozí spojení jsou blokována, dokud novou verzi neschválíte.
+Nabíječky s OCPP se pak nemohou připojit, zatímco vše ostatní funguje dál.
+Na Macu bez monitoru dialogové okno ke schválení nikdo neuvidí.
+Po každé aktualizaci proto schvalte spustitelný soubor z příkazového řádku:
+
+```sh
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add "$(brew --prefix)/bin/evcc"
+launchctl kickstart -k gui/$(id -u)/io.evcc
+```
+
+:::
+
+### Přechod z formule Homebrew
+
+Až do verze 0.314.5 se evcc dodával jako formule pro Homebrew a spouštěl se pomocí `brew services`.
+Homebrew již nainstalovanou formuli na cask nepřevede, takže `brew upgrade` dál hlásí starou verzi jako aktuální.
+Formuli jednorázově odeberte a nainstalujte cask:
+
+```sh
+brew services stop evcc
+brew uninstall evcc
+brew update
+brew install --cask evcc
+```
+
+Potom vytvořte agenta launchd podle popisu v části [Spuštění](#start).
+Vaší konfigurace ani databáze se to nedotkne.
+
+## Další příkazy
+
+- Zkontrolujte stav serveru evcc:
+
+  ```sh
+  launchctl print gui/$(id -u)/io.evcc
+  ```
+
+- Zastavte evcc a odeberte agenta launchd:
+
+  ```sh
+  launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/io.evcc.plist
+  ```
+
+- Zobrazte logy:
+
+  ```sh
+  tail -f "$(brew --prefix)/var/log/evcc.log"
+  ```
+
+## Ruční instalace \{#manual\}
+
+Zde najdete návod na ruční instalaci evcc na macOS.
+
+### Instalace
+
+- Stáhněte do svého systému příslušný soubor:
+  - 64bitový procesor ARM nebo Intel: [evcc_X.XX_macOS_all.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+- Rozbalte stažený soubor (např. dvojitým kliknutím)
+- Vznikne nová složka s programem `evcc`
+- Otevřete terminál a přejděte do složky s programem `evcc`
+- Spusťte evcc tímto příkazem:
+  ```sh
+  ./evcc -v
+  ```
+- Měla by se zobrazit aktuální verze evcc (např. `evcc version 0.xxx.y`).
+
+### Konfigurace
+
+Po prvním spuštění otevřete v prohlížeči [http://localhost:7070](http://localhost:7070) a nakonfigurujte evcc přes webové rozhraní.
+
+Případně můžete vytvořit konfigurační soubor `evcc.yaml` (viz [Konfigurace](/cs/installation/configuration)) a spustit s ním evcc:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+### Aktualizace a návrat ke starší verzi
+
+Postupujte podle výše uvedených kroků a nahraďte spustitelný soubor evcc novou nebo předchozí verzí.
+Konfiguraci není nutné provádět znovu.

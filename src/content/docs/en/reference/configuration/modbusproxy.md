@@ -59,7 +59,7 @@ port: 5021
 
 The IP address and the port of the target device in common URI Scheme.
 
-Every provided port must be unique and not already in use by another application on the same host, however, it must not be different from the port of the target device. Therefore it is valid to define a configuration for port 502, which refers to port 502 on the target device.
+Every provided port must be unique and not already in use by another application on the evcc host, but it doesn't have to differ from the port of the target device. Therefore it is valid to define a configuration for port 502, which refers to port 502 on the target device.
 
 **For example**:
 

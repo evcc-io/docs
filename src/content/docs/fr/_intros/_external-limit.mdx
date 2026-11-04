@@ -1,0 +1,59 @@
+---
+translatedFrom: "9bc910cfb8ce"
+---
+
+Les gestionnaires de réseau et les systèmes de gestion de l’énergie de niveau supérieur peuvent limiter de l’extérieur la consommation et l’export vers le réseau de votre installation.
+Les cas d’usage suivants sont pris en charge :
+
+- **§ 14a EnWG** (réglementation allemande) : réduction temporaire de la puissance et modulation des consommateurs par le gestionnaire de réseau
+- **§ 9 EEG** (réglementation allemande) : bridage des installations photovoltaïques en cas de surcharge du réseau
+- **Intégration EMS** : application de limites provenant d’autres systèmes de gestion de l’énergie
+
+## Contexte \{#background\}
+
+### Appareils de consommation pilotables (§ 14a EnWG) \{#dimming\}
+
+Le § 14a de la loi allemande sur l’énergie (EnWG) encadre le pilotage des appareils de consommation pilotables (SteuVE) dans l’intérêt du réseau.
+Les gestionnaires de réseau peuvent réduire temporairement la puissance des gros consommateurs comme les chargeurs, les pompes à chaleur ou les batteries domestiques en cas de surcharge du réseau.
+
+Points importants :
+
+- Concerne les consommateurs à partir de 4,2 kW
+- Pilotage via le Smart Meter Gateway et un boîtier de commande
+
+### Gestion de l’export (§ 9 EEG) \{#curtailment\}
+
+Selon le § 9 de la loi allemande sur les énergies renouvelables (EEG), les gestionnaires de réseau peuvent brider l’export des installations d’énergie renouvelable en cas de surcharge imminente du réseau.
+Cela concerne surtout les grandes installations photovoltaïques, mais peut aussi devenir pertinent dans le secteur résidentiel.
+
+Lorsqu’evcc reçoit un signal de bridage, le niveau de bridage est réparti en pourcentage sur tous les onduleurs bridables et appliqué directement sur l’appareil.
+Les boîtiers de commande FNN signalent des limites par paliers (60 %, 30 %, 0 %), qui sont appliquées telles quelles.
+Les limites en watts (p. ex. via EEBUS) sont converties en pourcentage sur la base de la puissance de production installée.
+Les onduleurs sans pilotage fin sont entièrement arrêtés tant que la limite est active.
+La limite active est affichée dans l’interface, et la production complète reprend dès que le signal disparaît.
+
+:::caution[Expérimental]
+Le bridage n’est pris en charge que pour certains onduleurs.
+Les appareils pris en charge sont marqués « Suspendable » dans la [vue d’ensemble des appareils](/fr/meters).
+Les appareils qui ne font que limiter l’export sont listés sous [Bridage](#curtailment-devices).
+:::
+
+## Configuration \{#setup\}
+
+La configuration se fait via **Configuration → Limite externe**.
+Choisissez l’une des intégrations listées ci-dessous et saisissez ses paramètres.
+Vous pouvez aussi créer une [intégration personnalisée](/fr/user-defined-devices#external-limit), p. ex. pour un raccordement via un simple contact de commutation (relais).
+
+Pour appliquer la limite de consommation à vos points de charge, configurez des circuits dans la [gestion de la charge](/fr/features/loadmanagement).
+Une limite active plafonne alors le circuit racine, ce qu’indique la mention « Consommation limitée » sur la carte **Gestion de la charge**.
+Les limites actives sont affichées sur la carte **Limite externe** et sur la page principale.
+
+### Appairage des intégrations EEBUS \{#eebus-pairing\}
+
+Avec les intégrations utilisant le protocole EEBUS, le boîtier de commande communique directement avec evcc et transmet automatiquement la limite de puissance.
+Le boîtier de commande et evcc doivent être appairés une seule fois :
+
+1. **Dans le boîtier de commande** : ajoutez evcc comme HEMS.
+   Le SKI et l’adresse IP d’evcc sont affichés sous **Configuration → EEBUS**.
+2. **Dans evcc** : saisissez le SKI du boîtier de commande dans l’intégration.
+   Vous le trouverez dans la documentation du boîtier de commande ou dans son interface web.

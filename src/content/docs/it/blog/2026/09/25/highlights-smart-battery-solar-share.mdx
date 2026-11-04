@@ -1,0 +1,167 @@
+---
+date: 2026-09-25
+title: "Novità: modalità Intelligente, pagina Batteria, quota solare"
+description: "Novità di settembre 2026: le release evcc 0.315 e 0.316 introducono la modalità Intelligente, rinnovano la pagina della batteria e aggiungono il cursore Quota solare."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner delle novità"
+  image: "../../../../../en/blog/2026/09/25/highlights-smart-battery-solar-share.webp"
+translatedFrom: "c42f3cc77b71"
+---
+
+Dall’[ultimo post sulle novità](/it/blog/2026/08/19/highlights-release-process-optimizer-customize) sono uscite due release con nuove funzioni: [0.315](https://github.com/evcc-io/evcc/releases/tag/0.315.0) e [0.316](https://github.com/evcc-io/evcc/releases/tag/0.316.0).
+In questo post le presentiamo entrambe.
+I temi principali: le modalità di ricarica hanno una nuova struttura con **Intelligente** e **Carica sempre**, la pagina della batteria domestica è stata rinnovata, il nuovo cursore **Quota solare** sostituisce le poco intuitive soglie in watt e l’ottimizzatore è sempre più vicino a prendere il controllo.
+
+{/* excerpt */}
+
+:::note[Aggiornamento]
+**26 settembre 2026:** la [modalità Intelligente](#modes) ora è spiegata più nel dettaglio e la nuova [pagina sulle modalità](/it/features/modes) descrive tutte le modalità.
+La [sezione sull’ottimizzatore](#optimizer) ora indica che l’ottimizzatore richiede un token sponsor.
+:::
+
+## Nuove modalità: Intelligente e Carica sempre \{#modes\}
+
+Le modalità **Solare** e **Min+Solare** risalgono a quando evcc si occupava solo di ricarica con surplus solare.
+Col tempo abbiamo aggiunto funzioni che con il solare c’entrano poco: tariffe dinamiche, piani di ricarica, pompe di calore e dispositivi commutabili.
+Oggi molte persone usano evcc senza alcun impianto fotovoltaico e i nomi creavano confusione tra i nuovi utenti.
+
+Con la [0.316](https://github.com/evcc-io/evcc/pull/32490) le modalità prendono il nome da ciò che fanno, non da come viene prodotta l’energia.
+**Solare** diventa **Intelligente**.
+
+**Off** e **Veloce** sono semplici interruttori: il dispositivo resta spento oppure funziona alla massima potenza, come un caricabatterie senza evcc.
+Tutto ciò che evcc decide da solo avviene in modalità **Intelligente**:
+
+- [Ricarica con surplus solare](/it/features/solar-charging)
+- Ricarica economica o pulita dalla rete con una [tariffa dinamica](/it/features/dynamic-prices) o una [previsione di CO₂](/it/features/co2)
+- Priorità tra [batteria domestica](/it/features/battery), punti di ricarica e riscaldatori
+- [Piani di ricarica](/it/features/plans)
+
+**Intelligente** è anche la modalità in cui lavorerà il futuro ottimizzatore.
+
+La modalità **Min+Solare** viene rimossa.
+Questa modalità si comportava come **Solare**, ma senza pause e sempre con almeno la potenza minima: una funzione importante per i veicoli che mal sopportano l’avvio e l’interruzione della ricarica, o per impianti con poco surplus solare.
+Questo concetto però ha senso solo per la ricarica dei veicoli, non per dispositivi commutabili, riscaldatori o pompe di calore.
+Per questo ora è l’opzione **Carica sempre** nel menu a tendina del pulsante **Intelligente** dei punti di ricarica per veicoli, invece di una modalità a sé.
+Puoi attivarla in modo permanente oppure, con il pulsante **1x**, solo per la sessione di ricarica corrente.
+Nelle impostazioni del veicolo puoi impostare un valore predefinito per ogni veicolo.
+
+![Opzione Carica sempre nel menu a tendina del pulsante della modalità Intelligente](../../../../../en/blog/2026/09/25/always-charge.webp)
+
+Le etichette delle modalità si adattano al dispositivo: un caricabatterie mostra **Off / Intelligente / Veloce**, un dispositivo commutabile **Off / Intelligente / On**, una pompa di calore **Normale / Intelligente / Boost**.
+La nuova [pagina sulle modalità](/it/features/modes) spiega nel dettaglio tutte le modalità e [Carica sempre](/it/features/modes#always-charge).
+
+Per le integrazioni si tratta di una modifica incompatibile.
+API, MQTT e websocket ora riportano `smart` invece di `pv`, e `minpv` non compare più in lettura.
+I vecchi valori si possono ancora scrivere: `pv` attiva **Intelligente**, `minpv` attiva **Intelligente** con **Carica sempre**, così le automazioni esistenti mantengono il loro comportamento.
+Se la tua integrazione controlla i valori `pv` o `minpv`, è il momento di aggiornarla.
+Le integrazioni principali sono state aggiornate prima della release.
+Grazie a tutti i maintainer che hanno aggiornato i loro progetti 🙌
+
+## Pagina della batteria domestica \{#battery\}
+
+La pagina **Batteria** finora era una semplice pagina di impostazioni.
+Ora ti offre prima una panoramica: una scheda di stato con livello di carica, energia accumulata e potenza attuale.
+Con più batterie ottieni una suddivisione: una scheda per ogni batteria più una complessiva, e il grafico sottostante mostra il livello di carica di ogni batteria negli ultimi giorni.
+Quando l’[ottimizzatore](#optimizer) è attivo, la pagina mostra anche i suoi suggerimenti: cosa farebbe in questo momento con la batteria, ad es. mantenere la carica o caricare dalla rete, e come evolverebbe il livello di carica.
+Ne parliamo più avanti.
+Le impostazioni di utilizzo, cioè priorità, tampone di carica e avvio automatico, ci sono ancora, ma ora sono formulate come frasi più facili da capire invece che come un modulo.
+
+![Pagina Batteria con schede di stato, storico del livello di carica e impostazioni di utilizzo](../../../../../en/blog/2026/09/25/battery-page.webp)
+
+Se avevi attivato le funzioni sperimentali, conosci già questa pagina.
+Con la [0.316](https://github.com/evcc-io/evcc/pull/33434) è quella predefinita per tutti.
+
+**Modalità di controllo della batteria:** il controllo della batteria ora è più granulare.
+Ogni batteria indica quali modalità supporta: funzionamento normale, blocco della scarica, carica dalla rete, blocco della carica e scarica verso la rete.
+evcc offre solo ciò che un dispositivo è davvero in grado di fare.
+La [tabella delle modalità](/it/user-defined-devices#battery-modes) della documentazione spiega cosa fa ciascuna modalità, e i sistemi esterni possono impostare una modalità tramite l’[API REST](/integrations/rest-api/operations/setexternalbatterymode).
+Con queste release il supporto per il controllo attivo della batteria è cresciuto: Huawei SUN2000, Kostal Plenticore, Sungrow, Zendure Solarflow, Anker Solarbank, Atmoce, EcoFlow Stream, Marstek e le batterie di Home Assistant hanno ottenuto modalità aggiuntive.
+L’[elenco dei dispositivi](/it/meters?f=battery-control) mostra quali sistemi di batterie supportano il controllo attivo, e la [pagina sulla batteria domestica](/it/features/battery) spiega cosa puoi farci.
+
+## Quota solare \{#solar-share\}
+
+È una funzione richiesta da molto tempo.
+Per impostazione predefinita, in modalità **Intelligente** la ricarica parte solo quando il surplus copre l’intera potenza minima di ricarica del veicolo.
+Se il tuo impianto fotovoltaico è piccolo o in inverno il sole è basso, quel momento potrebbe non arrivare mai.
+Finora potevi abbassare l’asticella con soglie in watt nella configurazione del punto di ricarica (riavvio necessario).
+Quelle soglie confondono i nuovi utenti da anni e, a dirla tutta, anche parecchi utenti di lunga data 😅.
+
+Il nuovo cursore [**Quota solare**](https://github.com/evcc-io/evcc/pull/32104) nelle impostazioni del punto di ricarica è più semplice: imposti quanta parte della potenza minima di ricarica deve essere solare.
+100% significa che la ricarica aspetta il surplus completo.
+50% significa che metà può arrivare dalla rete.
+0% significa che la ricarica parte non appena c’è un minimo di surplus.
+Niente riavvio, niente watt, solo un cursore.
+Le vecchie soglie funzionano ancora per configurazioni avanzate.
+Finché sono impostate, il cursore è disattivato e ti spiega perché.
+
+![Cursore Quota solare nelle impostazioni del punto di ricarica, impostato al 50%](../../../../../en/blog/2026/09/25/solar-share.webp)
+
+I dettagli sono nella [pagina sulla ricarica solare](/it/features/solar-charging#not-enough-surplus).
+
+## Progressi dell’ottimizzatore \{#optimizer\}
+
+L’[ottimizzatore](/it/features/optimizer) calcola un piano per i prossimi giorni per tutta la casa: batteria, punti di ricarica e riscaldamento, in base a previsioni e prezzi.
+È ancora sperimentale e solo consultivo: mostra cosa farebbe, ma non interviene.
+Nelle ultime due release sono successe molte cose:
+
+- L’orizzonte ora copre [48 ore più il resto della giornata](https://github.com/evcc-io/evcc/pull/32893), e il grafico segna i cambi di giorno con il giorno della settimana.
+- Il fabbisogno domestico è [suddiviso in profili singoli](https://github.com/evcc-io/evcc/pull/33749): carico di base, riscaldamento e punti di ricarica senza capacità nota del veicolo sono mostrati separatamente.
+- La previsione del fabbisogno domestico è migliorata, ad es. per i [riscaldatori](https://github.com/evcc-io/evcc/pull/28232) e per le case in cui alcuni pomeriggi di forte consumo [falsavano il carico di base](https://github.com/evcc-io/evcc/pull/33700).
+- La pagina dell’ottimizzatore ha una [schermata vuota, una voce di menu non appena l’ottimizzatore è attivo e un link per il feedback](https://github.com/evcc-io/evcc/pull/33750) per segnalare piani poco plausibili.
+- I piani vengono [ricalcolati subito](https://github.com/evcc-io/evcc/pull/33467) quando un piano di ricarica cambia lato veicolo, e l’obiettivo di livello di carica del piano [ricade nella fascia oraria corretta](https://github.com/evcc-io/evcc/pull/33832).
+- Carica dalla rete e scarica vengono pianificate solo per le batterie che [supportano davvero la modalità](https://github.com/evcc-io/evcc/pull/33860).
+
+Se non l’hai ancora provato: attiva le funzioni sperimentali in **Configurazione → Sperimentale**, abilita l’ottimizzatore e verifica se il piano sembra plausibile per la tua casa.
+L’ottimizzatore richiede un [token sponsor](/it/sponsorship).
+Il calcolo gira su un servizio cloud gestito da noi, che non memorizza alcun dato.
+Puoi anche eseguire il servizio in autonomia, vedi [contesto tecnico](/it/features/optimizer#technical).
+Ti siamo grati per ogni feedback.
+
+Il prossimo grande passo è la **modalità automatica**: l’ottimizzatore non si limita più a suggerire, ma decide quando la batteria si carica o mantiene la carica e quando i punti di ricarica in modalità **Intelligente** avviano e fermano la ricarica.
+La [pull request](https://github.com/evcc-io/evcc/pull/32881) è in preparazione e abbiamo già ricevuto molti feedback.
+Se ti piace sperimentare, prendi una delle build di test dai commenti della pull request, provala e facci sapere come va.
+C’è ancora lavoro da fare, ma non vediamo l’ora di portarla nella versione nightly.
+
+## Miglioramenti minori
+
+- **Accesso remoto:** [non è più sperimentale](/it/features/remote-access). La scheda è visibile in **Configurazione** anche senza attivare le funzioni sperimentali, e un’opzione di reimpostazione rimuove configurazione e credenziali. Abbiamo introdotto l’accesso remoto nelle [novità di luglio](/it/blog/2026/07/18/highlights-remote-access-widgets-optimizer).
+- **Dispositivi limitatori:** quando il gestore di rete chiede di ridurre l’immissione in rete (§ 9 EEG), evcc di norma dice direttamente a ogni inverter solare di ridurre la potenza. In alcune configurazioni quel comando deve invece andare a un’unità centrale, ad es. l’SMA Sunny Home Manager 2.0 o il controllo dell’immissione di SolarEdge. Questi dispositivi ora hanno una propria [classe di dispositivi](https://github.com/evcc-io/evcc/pull/32416), configurata accanto al contatore di rete, invece di fingersi un contatore. Vedi la [pagina sul limite esterno](/it/external-limit#curtailment-devices).
+- **Formato data:** il formato della data seguiva la lingua selezionata, cosa che non copre le differenze regionali, ad es. l’inglese in Europa. Ora puoi scegliere l’ordine giorno-mese, mese-giorno o ISO nelle [impostazioni dell’interfaccia utente](https://github.com/evcc-io/evcc/pull/29321). Grazie a [webalexeu](https://github.com/webalexeu).
+- **Indicatore delle fasi:** la visualizzazione delle fasi nel punto di ricarica è cambiata. Prima c’era una barra per ogni fase attiva e le fasi inattive venivano semplicemente nascoste. Ora un caricabatterie trifase [mostra sempre tre segmenti](https://github.com/evcc-io/evcc/pull/33173), con quelli attivi evidenziati, così vedi a colpo d’occhio se sta caricando su una o su tre fasi.
+- **Polestar:** l’integrazione basata sul reverse engineering è stata sostituita dall’[API ufficiale Polestar Data Portal](https://github.com/evcc-io/evcc/pull/33814). Grazie a [loebse](https://github.com/loebse).
+- **Nissan:** il login ora usa [MyNISSAN OneID](https://github.com/evcc-io/evcc/pull/33316), dopo che Nissan ha dismesso le vecchie credenziali NissanConnect. Grazie ad [alex-irrgang](https://github.com/alex-irrgang).
+- **Škoda:** la nuova API ufficiale MyŠkoda è supportata, vedi il [post del blog dedicato](/it/blog/2026/08/27/skoda-vehicle-api).
+- **Home Assistant:** l’app evcc [rileva automaticamente l’istanza di Home Assistant e il token](https://github.com/evcc-io/evcc/pull/33000), così i dispositivi di Home Assistant compaiono come dispositivi rilevati senza alcuna configurazione manuale, grazie a [wlcrs](https://github.com/wlcrs). Le batterie di Home Assistant hanno ottenuto le [modalità holdcharge e discharge](https://github.com/evcc-io/evcc/pull/33841), grazie a [igotsoul](https://github.com/igotsoul). Due modifiche incompatibili: il controllo della corrente in milliampere sul [caricabatterie di Home Assistant](https://github.com/evcc-io/evcc/pull/33858) ora è opzionale, e il [preset minsoc/maxsoc della batteria](https://github.com/evcc-io/evcc/pull/33707) non c’è più.
+
+## Nuovi dispositivi supportati
+
+**Caricabatterie:** Steca, prese commutabili Sonoff, più la funzione di contatore per Spelsberg e miglioramenti per go-e, OpenEVSE, NRGkick, Keba, Voltie e Zaptec
+
+**Contatori, impianti fotovoltaici e batterie:** CHINT ECH10K, Solplanet hybrid, API cloud SENEC.Connect, Afore hybrid via RS485, microinverter Deye via Solarman e logger HTTP, Zendure SolarFlow 800 Pro, my-PV HEA THOR 3.5 e 9.0, limitatore di corrente Solax X1/X3-HAC, energia immessa per Youless, openWB Pro e Sungrow
+
+**Veicoli:** Polestar tramite l’API ufficiale Data Portal, nuova API ufficiale MyŠkoda, login Nissan OneID, moto LiveWire S2, energia caricata per Tesla BLE
+
+**Pompe di calore e riscaldamento:** Weishaupt (Modbus TCP), 1SINQ OneKey (SG Ready via MQTT), potenza e temperatura per Viessmann grazie a [ickeundso](https://github.com/ickeundso)
+
+**Tariffe:** prezzi spot EPEX per il Belgio, spotovaelektrina.cz per la Repubblica Ceca, regioni, valute e chiave API aggiuntive per Energy Price Forecast
+
+**Limitazione della produzione (§ 9 EEG):** SMA Sunny Home Manager 2.0, SolarEdge, Sungrow
+
+Naturalmente ci sono stati anche molti bugfix e miglioramenti alle integrazioni esistenti.
+I dettagli si trovano nelle note di rilascio della [0.315](https://github.com/evcc-io/evcc/releases/tag/0.315.0) e della [0.316](https://github.com/evcc-io/evcc/releases/tag/0.316.0).
+
+---
+
+💚 Un grande grazie a tutti quelli che fanno andare avanti il progetto: con codice, idee, test, discussioni e supporto finanziario. Senza tutto questo, evcc non sarebbe possibile in questa forma.
+
+Le giornate si accorciano.
+Sfrutta al meglio il sole. 😉
+Buona ricarica!
+
+**Un caro saluto**<br />
+Il team evcc<br />
+Michael, Andi e Uli

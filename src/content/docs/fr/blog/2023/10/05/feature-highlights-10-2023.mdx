@@ -1,0 +1,161 @@
+---
+date: 2023-10-05
+title: "Nouveautés d’octobre 2023"
+description: "Nouveautés d’octobre 2023 avec la visualisation du plan de charge, la charge minimale dans l’interface, la charge réseau intelligente et les paramètres de la batterie."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "24a3a98a0947"
+---
+
+import Video from "@components/Video.astro";
+import batterysettingsVideo from "../../../../../en/blog/2023/10/05/batterysettings.mp4";
+import batterysettingsPoster from "../../../../../en/blog/2023/10/05/batterysettings.webp";
+import chargingplanVideo from "../../../../../en/blog/2023/10/05/chargingplan.mp4";
+import chargingplanPoster from "../../../../../en/blog/2023/10/05/chargingplan.webp";
+import chargingsessionsVideo from "../../../../../en/blog/2023/10/05/chargingsessions.mp4";
+import chargingsessionsPoster from "../../../../../en/blog/2023/10/05/chargingsessions.webp";
+import dynamicpricesVideo from "../../../../../en/blog/2023/10/05/dynamicprices.mp4";
+import dynamicpricesPoster from "../../../../../en/blog/2023/10/05/dynamicprices.webp";
+import minsocVideo from "../../../../../en/blog/2023/10/05/minsoc.mp4";
+import minsocPoster from "../../../../../en/blog/2023/10/05/minsoc.webp";
+import sessionvaluesVideo from "../../../../../en/blog/2023/10/05/sessionvalues.mp4";
+import sessionvaluesPoster from "../../../../../en/blog/2023/10/05/sessionvalues.webp";
+
+Depuis le dernier article de blog, il s’est passé beaucoup de choses. Nous avons ajouté de nombreuses fonctionnalités et corrigé quelques bugs. Dans cet article, nous présentons quelques-unes de ces nouveautés.
+
+## Visualisation du plan de charge \{#charging-planner-visualization\}
+
+Le planificateur de charge existe depuis un certain temps dans evcc.
+Vous indiquez à quel moment votre véhicule doit avoir atteint le niveau de charge souhaité et evcc trouve les meilleurs créneaux.
+Depuis quelques versions, l’algorithme n’est plus une boîte noire, car nous visualisons le résultat de la planification.
+
+<Video src={chargingplanVideo} poster={chargingplanPoster} />
+
+{/* excerpt */}
+
+Comment fonctionne l’algorithme ?
+
+1. Le surplus d’énergie solaire est prioritaire
+2. Périodes où l’électricité du réseau est bon marché (si un [tarif dynamique](/fr/features/dynamic-prices) existe)
+3. Périodes où l’électricité du réseau est propre (si une [intégration CO₂](/fr/features/co2) est configurée)
+4. Créneaux peu avant le départ
+
+**Perspectives :** nous testons actuellement les données de prévision solaire de [Solcast](https://solcast.com/).
+Elles permettent à l’algorithme de prendre des décisions encore meilleures.
+Si l’heure cible tombe en journée, il peut être judicieux, p. ex., de ne pas charger complètement le véhicule avec l’énergie bon marché de la nuit, mais de laisser de la place pour le surplus de la journée.
+
+## Charge minimale réglable dans l’interface
+
+La fonction de charge minimale existe depuis longtemps dans evcc.
+Elle est utile si vous rentrez avec une batterie presque vide et voulez être sûr d’avoir toujours assez d’autonomie pour un imprévu.
+
+Jusqu’à présent, elle ne pouvait être réglée que via le fichier de configuration ou l’API.
+Vous pouvez désormais aussi la régler dans l’interface sous **Planification** → **Arrivée** → **Charge min. %**.
+
+Les réglages sont enregistrés par véhicule et sont conservés même après un redémarrage ou une mise à jour.
+
+<Video src={minsocVideo} poster={minsocPoster} />
+
+## Charge réseau intelligente \{#smart-grid-charging\}
+
+Quand votre propre surplus solaire ne suffit pas, vous pouvez aussi utiliser l’électricité du réseau lorsqu’elle est particulièrement bon marché ou propre.
+Si vous cliquez sur le prix de l’électricité du réseau ou sur les émissions de CO₂ dans le diagramme du flux d’énergie, la boîte de dialogue **Charge réseau intelligente** s’ouvre.
+
+Vous pouvez y définir un seuil pour le prix ou les émissions de CO₂.
+Si le prix ou les émissions passent sous cette valeur, evcc fait temporairement passer en charge rapide tous les points de charge en mode Solaire.
+
+<Video src={dynamicpricesVideo} poster={dynamicpricesPoster} />
+
+Cette fonction nécessite d’avoir configuré soit un tarif dynamique, soit une intégration CO₂.
+
+Autre petite amélioration : avec la plupart des tarifs dynamiques, vous pouvez désormais corriger les prix fournis par l’API avec des **majorations en pourcentage ou fixes** (`charges` / `tax`).
+Tibber et Octopus Energy (UK) fournissent déjà des valeurs incluant les majorations.
+Avec awattar, Nordpool Estonia et Energinet, vous pouvez maintenant les ajouter.
+
+Au passage : si vous avez un tarif dynamique qui n’est pas encore pris en charge mais qui propose une API, ouvrez un ticket sur GitHub.
+
+## Paramètres de la batterie \{#battery-settings\}
+
+Un énorme avantage d’evcc par rapport à d’autres solutions de charge au surplus est l’intégration de la batterie domestique.
+La valeur de configuration [`prioritySoc`](/fr/features/battery) permet de choisir si le surplus d’énergie solaire doit d’abord être **chargé dans la batterie domestique ou dans le véhicule**.
+
+En général, evcc essaie d’empêcher la batterie domestique de se décharger dans la batterie du véhicule en mode Solaire, afin d’éviter des pertes de conversion inutiles.
+Avec la valeur [`bufferSoc`](/fr/features/battery), vous pouvez toutefois **réserver volontairement une partie de la batterie domestique pour soutenir la charge**.
+
+Vous pouvez également faire démarrer automatiquement la charge dès que la batterie a atteint un certain niveau de charge ([`bufferStartSoc`](/fr/features/battery)).
+La charge automatique démarre même si le soleil ne brille pas.
+
+<Video src={batterysettingsVideo} poster={batterysettingsPoster} />
+
+## Part solaire en %, prix et CO₂ par session de charge
+
+Nous avons aussi quelque chose pour les amateurs d’analyse de données.
+Nous enregistrons désormais pour chaque session de charge la part d’énergie solaire autoproduite (en %), le coût total et le prix par kWh, la durée de charge et les émissions moyennes de CO₂.
+Vous pouvez basculer entre ces valeurs directement dans la session de charge.
+
+<Video src={sessionvaluesVideo} poster={sessionvaluesPoster} />
+
+## Nouveau calcul de la part solaire
+
+Si vous avez remarqué que la part d’énergie solaire a légèrement baissé depuis l’une des dernières versions, cela vient de notre nouveau calcul.
+Jusqu’à présent, evcc répartissait toujours de façon égale la proportion d’énergie du réseau et d’énergie autoproduite entre la consommation de la maison et les sessions de charge.
+
+Nous sommes maintenant passés à un nouveau modèle dans lequel la consommation de la maison reçoit d’abord l’électricité solaire autoproduite et le mix restant va aux sessions de charge.
+Merci à [@MarkusGH](https://github.com/MarkusGH) pour l’implémentation.
+Vous trouverez plus de détails sur ce modèle [dans la documentation](/fr/faq#savings-calculation).
+
+![Nouveau calcul](../../../../../en/blog/2023/10/05/calculation.webp)
+
+## Vue d’ensemble des sessions de charge
+
+Les nouvelles valeurs ont bien sûr aussi trouvé leur place dans la vue d’ensemble des sessions de charge.
+Selon la configuration, les prix et les émissions de CO₂ y sont maintenant visibles.
+Nous avons également entièrement repensé l’affichage et opté pour un **tableau compact par mois**.
+Il peut être **filtré par point de charge et par véhicule**.
+
+Si vous avez besoin d’encore plus de flexibilité, vous pouvez bien sûr utiliser l’export CSV ou récupérer les données brutes directement via InfluxDB ou MQTT.
+
+<Video src={chargingsessionsVideo} poster={chargingsessionsPoster} />
+
+## Priorisation des points de charge et des véhicules
+
+Si vous avez plusieurs points de charge, le paramètre [`priority`](/fr/reference/configuration/loadpoints#priority) vous permet de définir lequel doit être privilégié.
+Vous pouvez aussi faire dépendre la priorisation du véhicule détecté ou la piloter via l’API.
+Il n’y a actuellement pas de configuration via l’interface.
+
+La fonction de priorisation est aussi utile si vous utilisez evcc pour piloter d’autres consommateurs, p. ex. [une résistance chauffante ou une pompe à chaleur raccordée via l’interface de plugin](https://github.com/evcc-io/evcc/pull/9393).
+Vous pouvez ainsi les piloter de sorte qu’ils ne fonctionnent que lorsque la voiture ne charge pas (suffisamment).
+
+## Et ensuite ?
+
+Notre [backlog](https://github.com/evcc-io/evcc/issues?q=is%3Aopen+is%3Aissue+label%3Abacklog) est bien rempli.
+Voici les prochains grands sujets que nous voulons aborder :
+
+**Interface de configuration :** tous les prérequis sont maintenant réunis.
+En 🧪 mode expérimental, il est déjà possible de créer des véhicules, et la configuration du réseau, de l’installation photovoltaïque ou de la batterie n’est plus très loin.
+Il reste encore beaucoup à faire, mais on voit la lumière au bout du tunnel.
+
+**Meilleure planification :** comme mentionné plus haut, nous travaillons à intégrer de bonnes **prévisions solaires** dans l’algorithme de planification et dans l’interface.
+Nous avons aussi un concept pour prendre en charge **plusieurs plans de charge**.
+
+**Révision des modes :** evcc a commencé comme une application de charge au surplus solaire.
+Entre-temps, l’interaction avec la batterie domestique joue aussi un rôle majeur.
+Le sujet de la **charge favorable au réseau** basée sur les tarifs dynamiques ou les émissions de CO₂ prend aussi de l’ampleur.
+C’est pourquoi nous allons revoir nos modes de charge (actuellement Solaire et Min+Solaire) et apporter plus de flexibilité.
+
+## Autres nouveautés
+
+C’était un survol général, du point de vue de l’utilisateur final.
+Bien sûr, beaucoup de travail se fait aussi sous le capot.
+
+- 🔌 Prise en charge de chargeurs de 22 nouveaux fabricants
+- 🌞🔋📟 Prise en charge de compteurs, d’installations photovoltaïques et de systèmes de batterie de 36 nouveaux fabricants
+- 🇬🇧 Site web et documentation en anglais. Merci à [duckfullstop](https://github.com/duckfullstop) & [carygravel](https://github.com/carygravel) 💚
+
+Si vous voulez encore plus de détails, n’hésitez pas à parcourir les [notes de version](https://github.com/evcc-io/evcc/releases) des 49 (!) versions publiées depuis le début de l’année.
+
+**Merci pour votre soutien à evcc !**<br />
+L’équipe principale d’evcc<br />
+[@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) et [@naltatis](https://github.com/naltatis)

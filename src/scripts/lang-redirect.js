@@ -1,22 +1,24 @@
 (function () {
-  var m = location.pathname.match(/^\/(en|de)(\/|$)/);
-  if (!m) return;
-  var current = m[1];
+  // Head.astro injects the JSON array of locale codes here
+  var locales = __LOCALES__;
+  var current = location.pathname.split("/")[1];
+  if (locales.indexOf(current) < 0) return;
   var stored = localStorage.getItem("preferredLang");
   var desired;
-  if (stored === "en" || stored === "de") {
+  if (locales.indexOf(stored) >= 0) {
     desired = stored;
   } else if (sessionStorage.getItem("langAutoRedirected")) {
     return;
   } else {
     var langs = navigator.languages || [navigator.language || ""];
     var match = langs.find(function (l) {
-      return /^(de|en)/i.test(l);
+      return locales.indexOf(l.slice(0, 2).toLowerCase()) >= 0;
     });
-    desired = /^de/i.test(match || "") ? "de" : "en";
+    desired = match ? match.slice(0, 2).toLowerCase() : "en";
     sessionStorage.setItem("langAutoRedirected", "1");
   }
   if (current === desired) return;
+  // slice(3) drops "/xx": all locale codes are two letters
   location.replace(
     "/" +
       desired +

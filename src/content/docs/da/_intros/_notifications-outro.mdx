@@ -1,0 +1,107 @@
+---
+translatedFrom: "5833eaf825d2"
+---
+
+## Hændelser \{#events\}
+
+Der kan sendes beskeder ved følgende hændelser:
+
+| Hændelse      | Udløses, når …                                         |
+| ------------- | ------------------------------------------------------ |
+| `start`       | opladningen starter                                    |
+| `stop`        | opladningen er færdig                                  |
+| `connect`     | et køretøj tilsluttes                                  |
+| `disconnect`  | et køretøj frakobles                                   |
+| `soc`         | køretøjets opladningsniveau ændrer sig                 |
+| `guest`       | et ukendt køretøj registreres                          |
+| `asleep`      | et køretøj ikke lader, selv om opladningen er frigivet |
+| `planoverrun` | en ladeplan forventes ikke at nå sit mål               |
+
+Hver hændelse har en titel og en besked.
+Begge kan tilpasses med [pladsholdere](#placeholders).
+
+## Beskedformat \{#message-format\}
+
+Besked med simpel syntaks, f.eks. til hændelsen `stop`:
+
+```txt
+${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
+Solar share: ${sessionSolarPercentage:%.0f}%
+```
+
+Den samme besked i Go-template-syntaks med beregninger (f.eks. omregning fra W til kW) og betingelser:
+
+```txt
+{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
+Solar share: {{round .sessionSolarPercentage 0 }}%
+{{- if .sessionPrice}}
+Cost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
+{{- end}}
+```
+
+### Pladsholdere \{#placeholders\}
+
+Titler og beskeder kan bruge variabler til at vise oplysninger fra evcc.
+Der findes to syntaksvarianter, som også kan kombineres:
+
+- **Simpel**: `${variableName}`, f.eks. `${vehicleTitle}`.
+  Eventuelt med formatering som `${pvPower:%.1fk}`: ud over de almindelige `printf`-specifikatorer dividerer suffikset `k` værdien med 1.000 (f.eks. Wh → kWh).
+  Varigheder som `${chargeDuration}` vises afrundet til hele sekunder (f.eks. `1h23m4s`).
+- **Go-template**: `{{.variableName}}`: giver mulighed for beregninger, betingelser og [sprig-funktioner](http://masterminds.github.io/sprig/).
+
+:::note
+Vær opmærksom på store og små bogstaver i variabelnavnene!
+:::
+
+### Tilgængelige variabler \{#variables\}
+
+De tilgængelige variabler svarer til dataene fra [REST API](/integrations/rest-api).
+Når en besked sendes, samles dataene fra det udløsende ladepunkt og de globale data i en flad struktur.
+Det betyder, at både globale værdier (f.eks. `pvPower`, `grid.Power`) og ladepunktspecifikke værdier (f.eks. `mode`, `chargedEnergy`, `vehicleTitle`) er direkte tilgængelige.
+Indlejrede værdier som `grid.Power` eller `battery.Soc` er kun tilgængelige med Go-template-syntaksen, og her kræves feltnavnene med stort begyndelsesbogstav.
+
+Ofte brugte variabler for ladepunktet:
+
+- `title`: Ladepunktets navn
+- `loadpoint`: Ladepunktets nummer 1, 2, …
+- `mode`: Opladningstilstand `off`/`smart`/`now`
+- `charging`: Opladning aktiv
+- `enabled`: Opladning frigivet
+- `connected`: Køretøj tilsluttet
+- `chargedEnergy`: Opladet energi i sessionen i Wh
+- `chargeDuration`: Opladningsvarighed
+- `chargePower`: Aktuel ladeeffekt i W
+- `connectedDuration`: Tilslutningsvarighed
+- `chargeRemainingDuration`: Resterende opladningstid indtil målet
+- `chargeRemainingEnergy`: Resterende energi indtil målet i Wh
+- `phasesActive`: Aktuelt aktive faser
+- `vehicleTitle`: Køretøjets navn
+- `vehicleName`: Køretøjets tekniske navn
+- `vehicleSoc`: Køretøjets opladningsniveau i %
+- `vehicleRange`: Køretøjets rækkevidde i km
+- `vehicleOdometer`: Kilometerstand i km
+- `sessionSolarPercentage`: Solandel af opladningssessionen i %
+- `sessionPrice`: Omkostning for opladningssessionen
+- `sessionPricePerKWh`: Gennemsnitspris pr. kWh
+- `sessionCo2PerKWh`: Gennemsnitlig CO₂-emission pr. kWh
+- `planActive`: Ladeplan aktiv
+- `smartCostActive`: Smart opladning fra elnettet aktiv
+
+Ofte brugte globale variabler:
+
+- `siteTitle`: Navnet på evcc-installationen
+- `pvPower`: Aktuel soleffekt i W
+- `homePower`: Aktuelt husforbrug i W
+- `grid.Power`: Import fra elnettet (+) / eksport til elnettet (−) i W
+- `battery.Power`: Batterieffekt i W
+- `battery.Soc`: Batteriets opladningsniveau i %
+- `currency`: Tarifvaluta
+- `tariffGrid`: Aktuel strømpris pr. kWh
+- `tariffFeedIn`: Eksporttarif pr. kWh
+- `tariffCo2`: Aktuel CO₂-intensitet
+- `statistics.<period>.*`: Opladningsstatistik for perioderne `30d`, `365d`, `thisYear` og `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
+
+Den komplette liste over alle tilgængelige felter finder du i API-svaret på `http://evcc.local:7070/api/state`.
+
+Begge syntakser virker i brugerfladens felter for titel og besked.
+Konfiguration via `evcc.yaml` er beskrevet i [`messaging`-referencen](/da/reference/configuration/messaging).

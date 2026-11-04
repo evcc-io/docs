@@ -1,0 +1,152 @@
+---
+title: "Home Assistant"
+description: "Sådan forbinder du evcc og Home Assistant, helst med integrationen ha-evcc eller manuelt via REST API eller MQTT, så du kan visualisere data og automatisere opladningen."
+sidebar:
+  order: 3
+translatedFrom: "f358944d9fa2"
+---
+
+[Home Assistant](https://www.home-assistant.io) indsamler og visualiserer data fra dit smarte hjem og tilbyder omfattende muligheder for automatisering.
+evcc er specialiseret i smart opladning og opvarmning.
+De to systemer supplerer hinanden og kan forbindes på forskellige måder.
+
+:::note
+evcc kan også installeres som Home Assistant-app. Du finder vejledningen [her](/da/installation/home-assistant).
+:::
+
+## Visualisering og automatisering
+
+evcc har mange styringsmuligheder til smart opladning og opvarmning, men kan ikke dække alle behov.
+Integrationen med Home Assistant giver dig mere fleksibilitet.
+Her er nogle eksempler:
+
+- Visualiser måleværdier i dashboards
+- Opret ladeplaner ud fra kalenderbegivenheder
+- Skift ladetilstand ud fra tilstedeværelse
+- ...
+
+### evcc-integration til Home Assistant (anbefalet)
+
+Integrationen [ha-evcc](https://github.com/marq24/ha-evcc) fra [marq24](https://github.com/marq24) bringer evcc-data og -funktioner direkte ind i Home Assistant.
+Det virker, uanset om du kører evcc som Home Assistant-app eller ej.
+Det eneste krav er, at Home Assistant og evcc kan nås på det samme netværk.
+
+Integrationen stiller alle relevante evcc-entiteter til rådighed: måleværdier, indstillinger, ladepunkter og køretøjer.
+Efter installationen får du en omfattende liste over entiteter, som du kan bruge i dashboards og automatiseringer.
+
+**Installation via HACS:**
+
+1. Åbn [HACS](https://hacs.xyz/) i Home Assistant, og søg efter ”evcc”.
+2. Installer posten **evcc☀️🚘- Solar Charging** fra marq24.
+3. Genstart Home Assistant.
+4. Gå til **Indstillinger → Enheder og tjenester → Tilføj integration**, søg efter ”evcc”, og indtast URL'en til din evcc-installation.
+
+Flere installationsmuligheder og detaljer finder du i [GitHub-repositoriet](https://github.com/marq24/ha-evcc).
+
+Til dashboards stiller [hass-evcc-card](https://github.com/mkshb/hass-evcc-card) et Lovelace-kort til rådighed, der viser evcc-oversigten i Home Assistant.
+
+### Manuel integration
+
+Alternativt kan du integrere evcc-data manuelt i Home Assistant via REST API eller MQTT.
+
+#### REST API
+
+evcc tilbyder et [REST API](/integrations/rest-api).
+[Denne vejledning](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) fra [marq24](https://github.com/marq24) beskriver integrationen med Home Assistant i detaljer.
+
+#### MQTT
+
+Du skal bruge en MQTT-broker (f.eks. [Mosquitto](https://mosquitto.org/), som også findes som Home Assistant-app).
+
+Konfigurer broker-forbindelsen i evcc under **Opsætning → MQTT**.
+Den samme broker og det samme topic skal konfigureres i Home Assistant, så de to systemer kan udveksle data.
+
+Du kan bruge et værktøj som [MQTT Explorer](http://mqtt-explorer.com) til at kontrollere, at dine topics kommer korrekt frem.
+En vejledning i opsætning af MQTT-sensorer i Home Assistant finder du på [Alklys blog (på tysk)](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
+
+De tilgængelige topics er dokumenteret i [MQTT API](/da/integrations/mqtt-api).
+
+## Brug af Home Assistant-entiteter
+
+evcc kan forbinde sig direkte til Home Assistant og bruge dets entiteter (sensorer, kontakter, tal) som datakilder.
+Dermed kan du integrere enheder, som evcc ikke understøtter direkte, f.eks. Zigbee-smartstik, sensorer fra andre integrationer eller gør-det-selv-løsninger.
+Så længe dataene er tilgængelige som en Home Assistant-entitet, kan evcc arbejde med dem.
+
+### Understøttede enhedstyper
+
+- **[Målere](/da/meters#home-assistant)** (elnet, sol, hjemmebatteri, ...) med effekt, energi, strømme, spændinger, opladningsniveau
+- **[Opladere](/da/chargers#home-assistant-charger)** med status, aktivering/deaktivering og maksimal ladestrøm
+- **[Styrbare stikkontakter](/da/smartswitches#home-assistant-switch)** med simpel tænd/sluk-styring (til smartstik, relæer)
+- **[Køretøjer](/da/vehicles#home-assistant)** med opladningsniveau, rækkevidde, status, kilometerstand og eventuelt scripts til start/stop
+- **[Notifikationer](/da/notifications)**: under **Opsætning → Beskeder** kan du sende evcc-beskeder via Home Assistant
+
+### Opsætning
+
+Home Assistant-enheder tilføjes som alle andre enheder i konfigurationsgrænsefladen.
+
+1. Gå til **Opsætning**, og tilføj en enhed, f.eks. **Tilføj en ekstra måler**.
+2. Vælg ”Home Assistant” som fabrikant.
+3. Vælg din instans. Instanser på det lokale netværk findes automatisk.
+   Hvis listen forbliver tom, f.eks. fordi Home Assistant kører i et andet subnet, skal du indtaste adressen manuelt (`http://homeassistant.local:8123`).
+4. Godkend adgangen.
+   Home Assistant åbnes i en ny fane, hvor du logger ind og bekræfter anmodningen.
+   Tokenet gemmes af din evcc-installation og fornyes automatisk.
+5. Tildel en entitet til hvert felt, f.eks. ”Effekt”.
+   Du får autofuldførelse med entiteterne fra din instans, og der tilbydes kun entiteter, der passer til feltet.
+6. **Valider & gem** kontrollerer, om entiteterne kan læses.
+
+:::note
+Hvis du kører evcc i Home Assistant som [app](/da/installation/home-assistant), skal du vælge instansen `http://supervisor/core` i trin 3.
+Den er allerede godkendt, så trin 4 springes over.
+:::
+
+<a id="entity-values"></a>
+
+### Entitetsværdier
+
+Hvert felt forventer en bestemt type værdi.
+En entitet, der rapporterer `unknown` eller `unavailable`, regnes som midlertidigt utilgængelig og læses igen ved næste opdatering.
+
+#### Tal
+
+Felter til effekt, energi, strøm og opladningsniveau kræver et rent tal som tilstand, f.eks. `1234`.
+En tilstand som `1234 W` kan ikke læses. Måleenheden hører hjemme i entitetens attribut `unit_of_measurement`.
+`W`/`kW` og `Wh`/`kWh`/`MWh` omregnes automatisk.
+For at vende fortegnet skal du sætte `-` foran entitetens navn (`-sensor.inverter_power`).
+
+#### Tænd/sluk
+
+Felter til tænd/sluk, f.eks. aktiveringstilstanden for en oplader eller en styrbar stikkontakt, accepterer `on`, `true`, `1`, `active` og `yes` samt deres modstykker `off`, `false`, `0`, `inactive` og `no`.
+
+<a id="charge-status"></a>
+
+#### Opladningsstatus
+
+Opladere og køretøjer kræver en statusentitet, der rapporterer, om køretøjet er frakoblet, tilsluttet eller oplader.
+Disse tilstande forstås uden videre:
+
+| Status | Betydning  | Tilstande                                                                                      |
+| ------ | ---------- | ---------------------------------------------------------------------------------------------- |
+| **A**  | frakoblet  | `a`, `disconnected`, `not_plugged`                                                             |
+| **B**  | tilsluttet | `b`, `connected`, `plugged`, `starting`, `stopped`, `paused`, `complete`, `charging_completed` |
+| **C**  | oplader    | `c`, `charging`                                                                                |
+
+Mange integrationer bruger deres egne betegnelser.
+Hvis entiteten rapporterer en tilstand, der ikke står i tabellen, viser loggen den rå værdi sammen med entitetens navn.
+Tilføj den værdi i det tilsvarende felt **Tilstande for status A/B/C** i enhedens avancerede indstillinger.
+Flere værdier adskilles med kommaer, og der skelnes ikke mellem store og små bogstaver.
+
+```yaml
+statusB: charging_stopped, charging_error
+statusC: instant_charging
+```
+
+En `binary_sensor` som statusentitet kræver også en eksplicit tilknytning, f.eks. `statusA: off` og `statusC: on`.
+
+## Yderligere ressourcer (videoer)
+
+Videoerne er på tysk.
+
+- [smart home & more: evcc Basic Installation and Configuration](https://youtu.be/aPq8k2MronY)
+- [smart home & more: Step by Step - Setting up MQTT Sensor using MQTT Explorer](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: Efficient Energy Dashboard for Home Assistant](https://youtu.be/V3p5-16U_oU)

@@ -1,0 +1,287 @@
+---
+title: "Docker"
+description: "Draai evcc als Docker-container op een NAS of Linux-server met Docker Compose en lees waarom we een hostnetwerk aanraden en welke poorten een bridgenetwerk nodig heeft."
+sidebar:
+  order: 4
+translatedFrom: "2cf8f5cf68e7"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+evcc kan als Docker-image worden geïnstalleerd.
+Er zijn images beschikbaar voor AMD64, armv6 en arm64.
+Veelvoorkomende toepassingen zijn onder meer NAS-systemen zoals Synology, QNAP, Unraid en TrueNAS.
+
+:::caution
+Deze handleiding gaat uit van basiservaring met Docker.
+
+Als u nog niet eerder met Docker hebt gewerkt en een eenvoudige oplossing zoekt, raden we in plaats daarvan een apart apparaat aan, bijv. een Raspberry Pi met het [kant-en-klare image](/nl/installation/linux-image).
+
+Als uw apparaten niet via het netwerk bereikbaar zijn (bijv. RS485-adapters), kies dan voor een directe installatie zonder Docker, bijv. onder [Linux](/nl/installation/linux).
+Er bestaan technische oplossingen om dit met Docker te realiseren.
+Die worden hier echter niet behandeld.
+:::
+
+## Netwerkmodus \{#network\}
+
+Voordat u de container aanmaakt, moet u beslissen hoe deze met uw netwerk wordt verbonden.
+We raden het **hostnetwerk** aan.
+De container deelt dan het netwerk van de host en gedraagt zich als een direct geïnstalleerd programma.
+Dit heeft verschillende voordelen:
+
+- Wanneer u een apparaat toevoegt, stelt het veld **IP-adres of hostnaam** de apparaten voor die in uw netwerk zijn gevonden.
+- Functies op basis van mDNS werken, bijv. EEBUS, de SMA Sunny Home Manager en de automatische detectie door de evcc-app.
+- Apparaten die via UDP communiceren, bijv. KEBA-laders en SMA-apparaten, zijn zonder verdere instellingen bereikbaar.
+- U hoeft geen poortlijst bij te houden. Inkomende verbindingen, zoals van OCPP-laders, werken meteen.
+
+Met een **bridgenetwerk** draait de container in een apart Docker-netwerk.
+Dat is prima als u de bovenstaande functies niet nodig hebt of de container liever isoleert.
+U moet dan elke benodigde [poort](#ports) zelf publiceren.
+Apparaten in uw netwerk worden niet voorgesteld, dus u voert hun adressen handmatig in.
+
+Hostnetwerk vereist een Linux-host, en daar horen de gangbare NAS-systemen ook bij.
+Met Docker Desktop op macOS en Windows draait de container in een virtuele machine zonder directe toegang tot uw netwerk.
+Gebruik daar liever de installatie voor [macOS](/nl/installation/macos) of [Windows](/nl/installation/windows).
+
+:::tip[Koppel de map, niet het databasebestand]
+Koppel altijd de **map** `/root/.evcc` en nooit een los `evcc.db`-bestand. evcc bewaart de SQLite-database samen met de bijbehorende bestanden (`evcc.db-wal` en `evcc.db-shm`) in deze map, en die bestanden moeten bij elkaar blijven.
+
+Een [named volume](https://docs.docker.com/engine/storage/volumes/) (`docker volume create evcc`, daarna `evcc:/root/.evcc` koppelen) is de meest robuuste keuze: het houdt de bestanden bij elkaar en staat op het eigen bestandssysteem van de host, dat de bestandsvergrendeling biedt die SQLite nodig heeft. Plaats de database niet op een netwerkshare (NFS/SMB) en bij Docker Desktop voor macOS/Windows ook niet op een bind mount, omdat de vergrendeling van SQLite daardoor kan uitvallen.
+:::
+
+## Installatie
+
+De container kan worden ingericht via Docker Compose, de Docker-CLI of de Docker-interface van uw systeem.
+Alle drie gebruiken hetzelfde image en dezelfde volumes.
+
+Er zijn twee image-tags beschikbaar: `evcc/evcc:latest` (aanbevolen) en `evcc/evcc:nightly` (ontwikkelversie).
+
+### Volumes \{#volumes\}
+
+| Pad op de host         | Pad in de container | Beschrijving                                       | Verplicht |
+| ---------------------- | ------------------- | -------------------------------------------------- | --------- |
+| `/home/user/.evcc`     | `/root/.evcc`       | Map voor de database                               | ja        |
+| `/home/user/evcc.yaml` | `/etc/evcc.yaml`    | Configuratiebestand (alleen als u er een gebruikt) | nee       |
+
+De database bevat uw laadsessies en alles wat u in de webinterface hebt ingesteld.
+Maak de map vóór de eerste start aan op uw hostsysteem.
+Deze handleiding gebruikt `/home/user/.evcc` als voorbeeld.
+
+Het volume voor `evcc.yaml` is alleen nodig als u uw evcc-installatie via een [configuratiebestand](/nl/installation/configuration) configureert in plaats van via de webinterface.
+Verwijder de regel uit de onderstaande voorbeelden als u er geen gebruikt.
+
+### Docker Compose \{#compose\}
+
+[Docker Compose](https://docs.docker.com/compose) is de aanbevolen manier, omdat alle parameters in één bestand staan.
+Maak een bestand `compose.yml` aan met een van de volgende configuraties:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Hostnetwerk (aanbevolen)">
+
+```yaml
+services:
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    network_mode: host
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+  </TabItem>
+  <TabItem label="Bridgenetwerk">
+
+```yaml
+services:
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    ports:
+      - 7070:7070/tcp
+      - 8887:8887/tcp
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+Dit voorbeeld publiceert alleen de webinterface en de OCPP-server.
+Voeg indien nodig extra [poorten](#ports) toe.
+
+  </TabItem>
+</Tabs>
+
+Start de container met:
+
+```sh
+sudo docker compose up -d
+```
+
+Of u `sudo` nodig hebt, hangt af van uw systeem.
+
+### Docker-CLI \{#cli\}
+
+U kunt de container ook met één enkel commando aanmaken en starten:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Hostnetwerk (aanbevolen)">
+
+```sh
+sudo docker run -d --name evcc \
+  --network host \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+  </TabItem>
+  <TabItem label="Bridgenetwerk">
+
+```sh
+sudo docker run -d --name evcc \
+  -p 7070:7070 \
+  -p 8887:8887 \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+Dit voorbeeld publiceert alleen de webinterface en de OCPP-server.
+Voeg indien nodig extra [poorten](#ports) toe.
+
+  </TabItem>
+</Tabs>
+
+### Docker-interface \{#ui\}
+
+Als uw systeem een Docker-interface heeft (bijv. Synology, QNAP, Portainer, Unraid), kunt u de container daar aanmaken.
+Vul het image en de bovenstaande [volumes](#volumes) in en zet de netwerkmodus op `host`.
+Als u in plaats daarvan voor bridgenetwerk kiest, voeg dan de [poorten](#ports) toe die u nodig hebt.
+
+De exacte veldnamen verschillen per systeem.
+De begrippen netwerkmodus, poorten en volumes vindt u echter in alle systemen terug.
+
+## Poorten \{#ports\}
+
+Poorten publiceren is alleen nodig bij bridgenetwerk.
+Bij hostnetwerk zijn deze poorten direct op de host beschikbaar.
+
+| Hostpoort | Containerpoort | Beschrijving           | Verplicht |
+| --------- | -------------- | ---------------------- | --------- |
+| 7070      | 7070/tcp       | Webinterface, API      | ja        |
+| 8887      | 8887/tcp       | OCPP-server            | nee       |
+| 9522      | 9522/udp       | SMA Sunny Home Manager | nee       |
+| 7090      | 7090/udp       | KEBA-laders            | nee       |
+| 28376     | 28376/udp      | EVSE Master-laders     | nee       |
+| 5353      | 5353/udp       | mDNS                   | nee       |
+| 4712      | 4712/tcp       | EEBUS                  | nee       |
+| 8899      | 8899/udp       | Modbus UDP             | nee       |
+
+## Testen \{#test\}
+
+Na het starten van de container bereikt u de webinterface via `http://<host>:7070`.
+`<host>` is het IP-adres of de hostnaam van de computer waarop de container draait.
+
+Bij het eerste gebruik wordt u gevraagd een beheerderswachtwoord in te stellen.
+Daarna kunt u uw apparaten instellen zoals beschreven onder [Configuratie](/nl/installation/configuration).
+
+Als u geen verbinding kunt maken, controleer dan uw [containerlogs](/nl/report-a-problem#system-logs).
+Meer hulp vindt u in de [GitHub Discussions](https://github.com/evcc-io/evcc/discussions).
+
+## Updates \{#update\}
+
+<Tabs>
+  <TabItem label="Docker Compose">
+
+Ga naar de map met het bestand `compose.yml` en haal het nieuwste image op:
+
+```sh
+sudo docker compose pull
+```
+
+Als er een nieuw image beschikbaar is, maakt het volgende commando de container opnieuw aan.
+Anders blijft de bestaande container draaien.
+
+```sh
+sudo docker compose up -d
+```
+
+  </TabItem>
+  <TabItem label="Docker-CLI">
+
+Haal het nieuwste image op en stop en verwijder daarna de bestaande container:
+
+```sh
+sudo docker pull evcc/evcc:latest
+sudo docker stop evcc
+sudo docker rm evcc
+```
+
+Start de container opnieuw met hetzelfde `docker run`-commando als bij de [installatie](#cli).
+
+  </TabItem>
+  <TabItem label="Docker-interface">
+
+Hoe u bijwerkt, hangt af van de Docker-interface die u gebruikt.
+Raadpleeg hiervoor de documentatie van uw systeem.
+
+  </TabItem>
+</Tabs>
+
+:::note
+Als uw laadsessies na een update niet meer worden weergegeven, is de map `/root/.evcc` niet correct gekoppeld.
+:::
+
+## Handleidingen uit de community
+
+Hier vindt u handleidingen van gebruikers voor specifieke systemen.
+We kunnen niet garanderen dat ze juist of actueel zijn.
+
+:::tip[Bijdragen welkom]
+Updates of handleidingen voor andere systemen zijn altijd welkom.
+Dat mag een PDF zijn, een artikel op uw eigen blog of een YouTube-video.
+Maak gerust een pull request aan in de [documentatierepository](https://github.com/evcc-io/docs/pulls).
+:::
+
+### Synology NAS
+
+U kunt evcc via Docker op NAS-systemen van Synology installeren met de grafische interface, zonder de opdrachtregel te gebruiken.
+Deze handleiding gebruikt het aanbevolen [hostnetwerk](#network):
+[Handleiding: Synology Docker (PDF, Duitstalig)](https://github.com/evcc-io/docs/files/10365841/Anleitung.EVCC.Synology.Docker.Elli.Charger.Connect-Pro.pdf)
+
+Een handleiding voor een bridgenetwerk vindt u hier:
+[Handleiding: Synology Docker 2 (PDF, Duitstalig)](https://github.com/evcc-io/docs/files/10365845/EVCC_Synology_Docker-2.pdf) door [at4hawo1](https://github.com/at4hawo1)
+
+### QNAP NAS
+
+De installatie van evcc op QNAP-systemen via Container Station lijkt sterk op de bovenstaande instructies voor Synology.
+Specifieke instructies voor QNAP vindt u hier:
+[Handleiding: QNAP (PDF, Duitstalig)](https://github.com/evcc-io/docs/files/11241693/EVCC_auf_QNAP_Container_Station.pdf)
+
+## Vaste apparaatsuggesties \{#discovery\}
+
+Dit is een geavanceerde optie voor beheerde Docker-omgevingen waarin bewust een bridgenetwerk wordt gebruikt en de apparaten vastliggen.
+De omgevingsvariabele `EVCC_DISCOVERY_HOSTS` levert een vaste lijst met apparaten.
+evcc gebruikt deze lijst dan voor de suggesties in het veld **IP-adres of hostnaam** en doorzoekt het netwerk niet.
+
+De waarde is een JSON-lijst.
+Elk item heeft een `ip` nodig.
+`hostname` en `mac` zijn optioneel.
+Ze worden gebruikt om de fabrikant te tonen en om apparaten die bij het gekozen apparaattype passen onder **Overeenkomstig** te vermelden.
+
+```yaml
+services:
+  evcc:
+    environment:
+      EVCC_DISCOVERY_HOSTS: >-
+        [
+          {"ip": "192.168.1.10", "hostname": "sma3009876543", "mac": "00:15:BB:12:34:56"},
+          {"ip": "192.168.1.20", "hostname": "go-echarger_123456"}
+        ]
+```
+
+Een lege lijst `[]` schakelt de suggesties uit.

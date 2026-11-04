@@ -76,10 +76,10 @@ graph TD;
 
 ### How does evcc work? (A look into the innards)
 
-In order for the system to function, an electricity meter is important. This
-allows us to calculate at any point in time the surplus power. Measuring the
-generated power is interesting, but has no effect on the function, with
-[this exception](/en/faq#configuration)
+In order for the system to function, a grid meter (`grid` meter) is important.
+It determines the current surplus power.
+Measuring the generated power has no effect on the function in this case.
+Running evcc without a grid meter is also possible, see the [FAQ](/en/faq#configuration).
 
 The surplus power is compared with the minimum power required to charge. If
 this is sufficient, the charging process is started.

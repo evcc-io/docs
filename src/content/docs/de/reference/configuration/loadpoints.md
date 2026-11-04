@@ -1,25 +1,26 @@
 ---
 title: "loadpoints"
-description: "Ladepunkte in der evcc.yaml einrichten: Wallbox, Zähler und Fahrzeug verknüpfen, den Standardmodus wählen und Abfrage, Schwellwerte und Phasen anpassen."
+description: "In der evcc.yaml verknüpfst du für jeden Ladepunkt Wallbox, Zähler und Fahrzeug, wählst den Standardmodus und passt Fahrzeugabfrage, Schwellwerte und Phasen an."
 sidebar:
   order: 3
+translatedFrom: "05c846a87f23"
 ---
 
-`loadpoints` (Ladepunkte) ist eine Liste von Ladepunkten und kombiniert für jeden Ladepunkt eine Wallbox, Fahrzeuge und, falls notwendig, einen Zähler mit weiteren optionalen Parametern. Eine minimale Konfiguration erfordert eine Wallbox.
+`loadpoints` (Ladepunkte) ist eine Liste von Ladepunkten, die jeweils eine Wallbox, Fahrzeuge und, falls notwendig, einen Zähler mit weiteren optionalen Parametern kombinieren. Eine minimale Konfiguration erfordert eine Wallbox.
 
 **Beispiel**:
 
 ```yaml
 loadpoints:
-  - title: Garage # display name for UI
-    charger: wallbox # Wallbox Referenz
-    vehicle: audi # Referenz auf Standardfahrzeug
+  - title: Garage # Anzeigename in der UI
+    charger: wallbox # Referenz auf die Wallbox
+    vehicle: audi # Referenz auf das Standardfahrzeug
     mode: smart # Lademodus (off, smart, now)
 ```
 
-Referenzen sind hierbei immer die Werte des Parameters `name` (z. B. `wallbox`) in der jeweiligen Gerätekonfiguration.
+Referenzen entsprechen immer den Werten des Parameters `name` (z. B. `wallbox`) in der jeweiligen Gerätekonfiguration.
 
-Im folgenden werden nun alle möglichen Parameter erklärt.
+Im Folgenden werden alle möglichen Parameter erklärt.
 
 ---
 
@@ -27,7 +28,7 @@ Im folgenden werden nun alle möglichen Parameter erklärt.
 
 ### `title`
 
-Titel des Ladepunktes, wird in der UI angezeigt.
+Eine Beschreibung des Ladepunkts, die in der UI angezeigt wird.
 
 **Beispiel**:
 
@@ -39,14 +40,15 @@ title: Garage
 
 ### `charger`
 
-Referenz auf eine `charger` (Wallbox) Konfiguration.
+Referenz auf eine `charger`-Konfiguration.
+
 **Beispiel**:
 
 ```yaml
 charger: wallbox
 ```
 
-Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox Definition](/de/reference/configuration/chargers#name) entspricht.
+Dabei entspricht der Wert `wallbox` dem Wert des Parameters `name` in der [Wallbox-Definition](/de/reference/configuration/chargers#name).
 
 ---
 
@@ -54,9 +56,9 @@ Wobei hier der Wert `wallbox` dem Wert eines `name` Parameters in der [Wallbox D
 
 ### `meter`
 
-Referenz auf eine `meter` (Strommessgerät) Konfiguration.
+Referenz auf eine `meter`-Konfiguration (Zähler).
 
-Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Strommessung durchführt bzw. die Werte der Messung von evcc nicht ausgelesen werden können. Aber selbst dann ist dieser Eintrag optional, denn evcc nimmt an, dass mit der eingestellten maximalen Stromstärke auch geladen wird.
+Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Strommessung durchführt oder evcc die Messwerte nicht aus der Wallbox auslesen kann. Aber selbst dann ist dieser Eintrag optional, denn evcc nimmt an, dass mit dem eingestellten maximalen Strom auch geladen wird.
 
 **Beispiel**:
 
@@ -64,17 +66,15 @@ Dieser Eintrag wird nur benötigt, wenn die verwendete Wallbox keine eigene Stro
 meter: charge
 ```
 
-Wobei hier der Wert `charge` dem Wert eines `name` Parameters in der [Strommessgeräte Definition](/de/reference/configuration/meters#name) entspricht.
+Dabei entspricht der Wert `charge` dem Wert des Parameters `name` in der [Zähler-Definition](/de/reference/configuration/meters#name).
 
 ---
 
 ### `vehicle`
 
-`vehicle`: Referenz auf eine `vehicle` Konfiguration die dem Ladepunkt als Standardfahrzeug zugewiesen wird.
+`vehicle`: Referenz auf eine `vehicle`-Konfiguration, die dem Ladepunkt als Standardfahrzeug zugewiesen wird.
 
-Beim Anschluss eines Fahrzeugs an den Ladepunkt wird damit immer davon ausgegangen dass dieses Fahrzeug angeschlossen wurde.
-Die automatische Fahrzeugerkennung wird umgangen.
-Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z. B. Gastfahrzeug) lässt sich dies im Anschluss manuell zuweisen.
+Wird ein Fahrzeug an die Wallbox angeschlossen, geht evcc davon aus, dass es sich um dieses Fahrzeug handelt. Die automatische Fahrzeugerkennung wird umgangen. Ist ein anderes Fahrzeug angeschlossen (z. B. ein Gastfahrzeug), lässt es sich nachträglich manuell zuweisen.
 
 **Beispiel**:
 
@@ -82,34 +82,34 @@ Falls doch ausnahmsweise ein anderes Fahrzeug angeschlossen wurde (z. B. Gastfah
 vehicle: renault
 ```
 
-Wobei hier der Wert `renault` dem Wert eines `name` Parameters in der [Fahrzeug Definition](/de/reference/configuration/vehicles#name) entspricht.
+Dabei entspricht der Wert `renault` dem Wert des Parameters `name` in der [Fahrzeug-Definition](/de/reference/configuration/vehicles#name).
 
 ---
 
 ### `mode`
 
 evcc merkt sich den zuletzt genutzten Lademodus.
-Mit dem optionalen Parameter `mode` kann der Lademodus eingestellt werden, der nach dem Abstecken des Fahrzeugs gültig sein soll.
+Mit dem Parameter `mode` kannst du den Lademodus festlegen, der nach dem Abstecken des Fahrzeugs gelten soll.
 
 **Mögliche Werte**:
 
 - `off`: Das Laden ist gestoppt, auch wenn ein Fahrzeug an der Wallbox angeschlossen ist.
-- `smart`: Lade mit PV-Überschuss, in den günstigen Stunden eines dynamischen Tarifs und nach Ladeplan. Pausiere, wenn keine günstige Energie verfügbar ist.
-- `now`: Lade sofort mit der maximal möglichen Leistung.
+- `smart`: Lädt mit PV-Überschuss, in günstigen Stunden eines dynamischen Tarifs und nach Ladeplänen. Pausiert, wenn keine günstige Energie verfügbar ist.
+- `now`: Lädt sofort mit der maximal möglichen Leistung.
 
 **Standardwert:** `smart`
 
 Die veralteten Werte `pv` und `minpv` werden beim Schreiben weiterhin akzeptiert:
-`pv` aktiviert `smart` und schaltet [Dauerhaft laden](/de/features/modes#always-charge) aus, `minpv` aktiviert `smart` und schaltet Dauerhaft laden ein.
+`pv` aktiviert `smart` und schaltet [**Dauerhaft laden**](/de/features/modes#always-charge) aus, `minpv` aktiviert `smart` und schaltet **Dauerhaft laden** ein.
 
-:::caution[Breaking Change]
-Status- und API-Lesezugriffe (`/api/state`, Websocket, MQTT) melden `smart` statt `pv`; `minpv` taucht beim Lesen nicht mehr auf.
+:::caution[Inkompatible Änderung]
+Status- und API-Lesezugriffe (`/api/state`, WebSocket, MQTT) melden `smart` statt `pv`. `minpv` taucht beim Lesen nicht mehr auf.
 Externe Automatisierungen, die beim Lesen mit `pv` oder `minpv` vergleichen, müssen angepasst werden.
-Integrationen erkennen das neue Modus-Schema am Vorhandensein von `loadpoints[].alwaysCharge` in `/api/state`.
+Integrationen erkennen das neue Modusschema am Vorhandensein von `loadpoints[].alwaysCharge` in `/api/state`.
 :::
 
 :::note
-Im allgemeinen benötigt ein EV zum Laden mindestens 1,4kW Leistung pro Phase. Bei Wallboxen und Fahrzeugen welche über den ISO15118 Standard kommunizieren, wird insgesamt mindestens 1,4kW Leistung benötigt, egal mit wievielen Phasen geladen wird.
+Im Allgemeinen benötigt ein Elektroauto zum Laden mindestens 1,4 kW Leistung pro Phase. Bei Wallboxen und Fahrzeugen, die über den Standard ISO 15118 kommunizieren, werden insgesamt mindestens 1,4 kW Leistung benötigt, unabhängig davon, mit wie vielen Phasen geladen wird.
 :::
 
 **Beispiel**:
@@ -122,7 +122,7 @@ mode: smart
 
 ### `soc`
 
-Definiere die Standardeinstellungen für den Umgang mit dem Ladestand eines angeschlossenen Fahrzeugs
+Definiert die Standardeinstellungen für den Umgang mit dem Ladestand eines angeschlossenen Fahrzeugs.
 
 **Beispiel**:
 
@@ -136,25 +136,24 @@ soc:
 
 #### `poll`
 
-Definiert, wie die Fahrzeug APIs benutzt werden um aktuelle Informationen des Fahrzeugs abzurufen.
+Definiert, wie die Fahrzeug-APIs genutzt werden, um aktuelle Informationen über das Fahrzeug abzurufen.
 
-Ist beim Charger das `features`-Flag `integrateddevice` konfiguriert, werden die Daten fortlaufend abgerufen. Dann sind keine `poll` Einstellungen notwendig, bzw. diese werden ignoriert.
+Ist bei der Wallbox das `features`-Flag `integrateddevice` konfiguriert, werden die Daten fortlaufend abgerufen.
+In diesem Fall sind keine `poll`-Einstellungen notwendig, gesetzte Einstellungen werden ignoriert.
 
 :::caution
-Es wird **NICHT** empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird
-
-oder dass der Fahrzeughersteller aktiv verhindert, das Laden mittels evcc zu steuern. **AUF EIGENES RISIKO.**
+Es wird **nicht** empfohlen, die Standardeinstellungen zu ändern, denn dies könnte dazu führen, dass die Fahrzeugbatterie entleert wird oder der Fahrzeughersteller das Steuern des Ladens über evcc aktiv unterbindet. **Nutzung auf eigenes Risiko**.
 :::
 
 #### `poll.mode`
 
-Definiert, unter welchen Bedingungen die Daten für das Fahrzeug abgerufen werden
+Definiert, unter welchen Bedingungen die Fahrzeugdaten abgerufen werden.
 
 **Mögliche Werte**:
 
-- `charging`: aktualisiere die Daten **NUR** während eines Ladevorgangs (dies ist die empfohlene Standardeinstellung)
-- `connected`: aktualisiere die Daten, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur wenn es lädt); der Parameter `interval` definiert wie oft
-- `always`: aktualisiere die Daten immer, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#pollinterval) definiert, wie oft (wird nur für ein Fahrzeug eines Ladepunktes unterstützt)
+- `charging`: Daten **nur** während eines Ladevorgangs aktualisieren (empfohlene Standardeinstellung).
+- `connected`: Daten aktualisieren, wenn das Fahrzeug mit der Wallbox verbunden ist (nicht nur beim Laden); der Parameter `interval` legt die Häufigkeit fest.
+- `always`: Daten immer aktualisieren, auch wenn das Fahrzeug nicht mit der Wallbox verbunden ist; der Parameter [`interval`](#pollinterval) legt die Häufigkeit fest (wird nur für ein Fahrzeug pro Ladepunkt unterstützt).
 
 **Standardwert:** `charging`
 
@@ -166,7 +165,7 @@ mode: charging
 
 #### `poll.interval`
 
-Definiert, wie oft das Fahrzeug nach neuen Daten abgefragt wird, wenn es **NICHT** lädt.
+Definiert, wie oft das Fahrzeug nach Daten abgefragt wird, wenn es **nicht** lädt.
 
 **Standardwert:** `60m`
 
@@ -178,12 +177,12 @@ interval: 60m
 
 #### `estimate`
 
-Berechne eine Schätzung des aktuellen Ladestands anhand der vorliegenden Messwerte (Extrapolation) zwischen den per `interval` eingestellten Abfragezeitpunkten an das Fahrzeug.
+Schätzt den aktuellen Ladestand anhand der gemessenen Ladeenergie (Extrapolation) zwischen den per `interval` eingestellten Fahrzeugabfragen.
 
 **Mögliche Werte**:
 
-- `true`: evcc extrapoliert die Ladestandswerte zwischen den Fahrzeugabfragen (empfohlen)
-- `false`: evcc nutzt nur die Ladestandswerte, welche das Fahrzeug zurückliefert
+- `true`: evcc extrapoliert die Ladestandswerte zwischen den Fahrzeugabfragen (empfohlen).
+- `false`: evcc nutzt nur die Ladestandswerte, die das Fahrzeug zurückliefert.
 
 **Standardwert:** `true`
 
@@ -197,10 +196,10 @@ estimate: false # Keine Extrapolation
 
 ### `enable`
 
-Definiert das Verhalten, wann im Smart-Modus das Laden mit PV-Überschuss begonnen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 1p auf 3p.
+Definiert das Verhalten beim Starten des Ladens mit PV-Überschuss im Smart-Modus. Außerdem legt der Parameter das Verhalten bei der automatischen Phasenumschaltung von 1p auf 3p fest.
 
 :::note
-Um einen Anteil Netzstrom zu erlauben, nutze stattdessen den Regler **PV-Anteil** in den Einstellungen des Ladepunkts (siehe [Nicht genügend Überschuss?](/de/features/solar-charging#not-enough-surplus)).
+Um einen Anteil Netzbezug zu erlauben, nutze stattdessen den Regler **PV-Anteil** in den Einstellungen des Ladepunkts (siehe [Nicht genügend Überschuss?](/de/features/solar-charging#not-enough-surplus)).
 Der Regler ist deaktiviert, solange ein `enable`- oder `disable`-Schwellwert gesetzt ist.
 :::
 
@@ -214,9 +213,9 @@ enable:
 
 #### `threshold`
 
-Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
+Definiert den Leistungsschwellwert am Netzanschlusspunkt in Watt (W).
 
-**Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Export. Bei `0` muss der Export die minimale Ladeleistung erreicht haben.
+**Mögliche Werte**: Ein positiver Wert für Netzbezug, ein negativer Wert für Einspeisung. Bei `0` muss die Einspeisung die Mindestladeleistung erreichen.
 
 **Standardwert:** `0`
 
@@ -227,16 +226,16 @@ threshold: 0
 ```
 
 :::note
-Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
+Ist für den evcc-Standort über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunkts der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold`-Werts berücksichtigt werden.
 
-Ist bspw. `residualPower` auf 200 gesetzt (die evcc Regelung setzt den Soll-Arbeitspunkt auf 200W Einspeisung), dann führt ein `enable` `threshold` Wert von 100 nicht dazu, dass ab 100W Netzbezug der Ladepunkt das Laden startet, sondern dass sich die verbleibende Einspeisung um 100W reduziert und somit ab 100W Einspeisung die Ladung startet.
+Ist z. B. `residualPower` auf 200 gesetzt (die evcc-Regelung setzt den Soll-Arbeitspunkt auf 200 W Einspeisung), dann bedeutet ein `threshold` von 100 unter `enable` nicht, dass das Laden bei 100 W Netzbezug startet. Stattdessen reduziert sich die verbleibende Einspeiseleistung um 100 W, und das Laden startet bei 100 W Einspeisung.
 
-Soll die Ladung bei 100W Netzbezug starten, müsste in dem Fall der `threshold` Wert auf 300 gesetzt werden.
+Soll das Laden in diesem Fall bei 100 W Netzbezug starten, sollte der `threshold`-Wert auf 300 gesetzt werden.
 :::
 
 #### `delay`
 
-Definiert, wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
+Definiert, wie lange der `threshold` erfüllt sein muss.
 
 **Standardwert:** `1m`
 
@@ -250,43 +249,41 @@ delay: 1m
 
 ### `disable`
 
-Definiert das Verhalten, wann im Smart-Modus das Laden mit PV-Überschuss unterbrochen wird. Darüberhinaus definiert es auch das Verhalten bei automatischer Phasenumschaltung von 3p auf 1p.
+Definiert das Verhalten beim Beenden des Ladens mit PV-Überschuss im Smart-Modus. Außerdem legt der Parameter das Verhalten bei der automatischen Phasenumschaltung von 3p auf 1p fest.
 
 **Beispiel**:
 
 ```yaml
 disable:
-  threshold: 200 # maximum import power (W)
+  threshold: 200 # maximale Netzbezugsleistung (W)
   delay: 10m
 ```
 
 #### `threshold`
 
-Definiert den Schwellenwert der Leistung am Netzanschlusspunkt in Watt (W).
+Definiert den Leistungsschwellwert am Netzanschlusspunkt in Watt (W).
 
-**Mögliche Werte**: Ein positiver Wert für Netzbezug. Bei `0` stoppt die Ladung, sobald der Überschuss nicht mehr für die Mindestladeleistung reicht.
+**Mögliche Werte**: Ein positiver Wert für Netzbezug. Bei `0` stoppt das Laden, sobald der Überschuss die Mindestladeleistung nicht mehr deckt.
 
 **Standardwert:** `0`
 
 **Beispiel**:
 
 ```yaml
-threshold: 200 # Ein maximaler Netzbezug von 200W ist erlaubt
+threshold: 200 # Ein maximaler Netzbezug von 200 W ist erlaubt
 ```
 
 :::note
-Ist für die evcc Site über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunktes der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold` Wertes berücksichtigt werden.
-
-Vergleiche dazu auch das Beispiel in der Info zu [`enable`](#enable) `threshold`.
+Ist für den evcc-Standort über den Parameter `residualPower` ein Versatz des Soll-Arbeitspunkts der Überschussregelung definiert, muss dieser Wert beim Setzen des `threshold`-Werts berücksichtigt werden. Siehe dazu das Beispiel im Hinweis zu `threshold` unter [`enable`](#enable).
 :::
 
 :::caution
-Negative Werte sind wirkungslos: solange Überschuss vorhanden ist, lädt evcc weiter und prüft die Schwelle gar nicht.
+Negative Werte sind wirkungslos: Solange Überschuss vorhanden ist, lädt evcc weiter und prüft den Schwellwert gar nicht.
 :::
 
 #### `delay`
 
-Definiert wie lange der `threshold` (Schwellenwert) erfüllt sein muss.
+Definiert, wie lange der `threshold` erfüllt sein muss.
 
 **Standardwert:** `3m`
 
@@ -300,25 +297,25 @@ delay: 10m
 
 ### `phases`
 
-:::note[veraltet in yaml]
-Dieser Wert kann nun im Einstellungsdialog am Ladepunkt gesetzt werden.
+:::note[In YAML veraltet]
+Dieser Wert kann jetzt im Einstellungsdialog des Ladepunkts gesetzt werden.
 :::
 
 **Wallbox ohne automatische Phasenumschaltung**:
 
-Definiert die Anzahl der Phasen mit welcher die Wallbox angeschlossen ist.
+Definiert die Anzahl der Phasen, mit denen die Wallbox angeschlossen ist.
 
-Dieser Parameter ändert nichts am physikalischen Anschluss der Wallbox, sondern dient lediglich dazu, beim Überschussladen (in Verbindung mit `minCurrent`) die minimale Startleistung für die Ladung zu ermitteln.
+Dieser Parameter ändert nichts am elektrischen Anschluss der Wallbox, sondern dient dazu, beim Laden mit PV-Überschuss (in Verbindung mit `minCurrent`) die minimale Startleistung zu ermitteln.
 
-Seit kurzem werden die anliegenden Spannungen ausgewertet, wenn der Zähler der Wallbox diese liefert. Anhand der Spannungen wird der `phases` Wert „automatisch“ per API geändert. In den Fällen in denen die Wallbox per „Lasttrennschalter“ auf 1p oder 3p eingestellt wird, ist somit keine manuelle Änderung des `phases` Wertes mehr notwendig.
+Seit Kurzem werden die anliegenden Spannungen ausgewertet, wenn der Zähler der Wallbox diese liefert. Anhand der Spannungen wird der `phases`-Wert automatisch per API geändert. In Fällen, in denen die Wallbox per Schalter auf 1p oder 3p eingestellt wird, ist damit keine manuelle Änderung des `phases`-Werts mehr notwendig.
 
-In den Fällen, in denen das 1p/3p Laden nicht per Lasttrennschalter, sondern mittels entsprechendem Ladekabel realisiert wird, führt diese "Automatik" zu Problemen. Hier muss der `phases` Wert beim `vehicle`entsprechend angepasst werden. Da dieser nicht per API änderbar ist, gibt es folgende Workaround:
+In Fällen, in denen das 1p/3p-Laden nicht per Schalter, sondern über ein entsprechendes Ladekabel umgesetzt wird, führt diese „Automatik“ zu Problemen. Dann muss der `phases`-Wert beim `vehicle` entsprechend angepasst werden. Da sich dieser Wert nicht per API ändern lässt, hilft folgender Umweg:
 
-Man konfiguriert das Fahrzeug zweimal. Zum einen mit `phases: 1` und ein weiters mal mit `phases: 3`. Je nach gewünschter Ladeart, wählt man dann im UI das entsprechende Fahrzeug aus.
+Konfiguriere das Fahrzeug zweimal: einmal mit `phases: 1` und einmal mit `phases: 3`. Je nach gewünschter Ladeart wählst du dann in der UI das passende Fahrzeug aus.
 
-Wenn ein bekanntes Fahrzeug angeschlossen ist, wird der kleinere Wert aus `vehicle: phases` und `loadpoint: phases` zur Berechnung herangezogen. Bei unbekannten Fahrzeugen wirkt immer `loadpoint: phases` alleine.
+Ist ein bekanntes Fahrzeug angeschlossen, wird der kleinere Wert aus `vehicle: phases` und `loadpoint: phases` zur Berechnung herangezogen. Bei unbekannten Fahrzeugen wird nur `loadpoint: phases` berücksichtigt.
 
-Wenn die Ladung läuft und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird daran die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angesteckt bleibt) für die weitere Berechnung der tatsächlichen Schaltschwellen genutzt. Das funktioniert allerdings prinzipbedingt nur bei dreiphasigen Ladepunkten.
+Während das Fahrzeug lädt und die Wallbox bzw. der Ladezähler die Phasenströme liefert, wird die tatsächliche Anzahl der Phasen erkannt und (solange das Fahrzeug angeschlossen bleibt) für die weitere Berechnung der Schaltschwellen genutzt. Das funktioniert nur bei dreiphasigen Ladepunkten.
 
 **Standardwert:** `3`
 
@@ -332,11 +329,11 @@ phases: 1
 
 **Wallbox mit automatischer Phasenumschaltung**:
 
-Über den Wert kann die Automatik ein- bzw. ausgeschaltet werden.
+Über den Wert wird die automatische Phasenumschaltung ein- bzw. ausgeschaltet.
 
-`phases: 0` = Automatik eingeschaltet
+`phases: 0` = Automatische Umschaltung eingeschaltet
 
-`phases: 1 oder 3` = Automatik aus und der gesetzte Wert ist fix
+`phases: 1 oder 3` = Automatische Umschaltung ausgeschaltet, der gesetzte Wert ist fest
 
 **Standardwert:** `3`
 
@@ -349,26 +346,25 @@ phases: 0
 ```
 
 :::note
-Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link etc.) zugewiesen, **muss** `phases` zwingend auf **1** gesetzt werden, um eine ordnungsgemäße Lade-Steuerung zu gewährleisten.
+Ist dem Ladepunkt keine Wallbox, sondern eine der unterstützten schaltbaren Steckdosen (AVM FritzDECT, Shelly, Tasmota, TP-Link usw.) zugewiesen, muss `phases` auf **1** gesetzt werden, um eine ordnungsgemäße Steuerung des Ladens zu gewährleisten.
 :::
 
 ---
 
 ### `priority`
 
-Dient während der Ladung der Priorisierung von Ladepunkten untereinander.
+Dieser Parameter priorisiert Ladepunkte untereinander während des Ladens.
 
-Dem priorisierten Ladepunkt wird die Ladeleistung der anderen nicht oder geringer priorisierten Ladepunkte zur Verfügung gestellt. Greift dieser darauf zu, kann es kurzzeitig zu Netzbezug führen, bis die Regelung ausnivelliert ist.
+Dem priorisierten Ladepunkt wird die Ladeleistung anderer nicht oder niedriger priorisierter Ladepunkte zur Verfügung gestellt. Greift ein priorisierter Ladepunkt auf diese Leistung zu, kann es kurzzeitig zu Netzbezug kommen, bis sich die Regelung eingependelt hat.
 
-Je höher der Wert, desto größer die Priorität.
-Ladepunkte ohne Eintrag haben `priority: 0`
+Höhere Werte bedeuten eine höhere Priorität. Ladepunkte ohne Eintrag haben `priority: 0`.
 
-Hat bei mehreren Ladepunkten keinen Einfluss darauf in welchen Reihenfolge die Ladungen gestartet werden. Läuft aber die Ladung an einem niedrig priorisierten Ladepunkt, wird ein höher priorisierter unter Umständen eingeschaltet, weil diesem die bereits genutzte Ladeleistung zur Verfügung gestellt wird.
+Bei mehreren Ladepunkten hat dieser Parameter keinen Einfluss darauf, in welcher Reihenfolge die Ladevorgänge gestartet werden. Lädt jedoch ein niedriger priorisierter Ladepunkt, wird ein höher priorisierter unter Umständen eingeschaltet, wenn ihm die ungenutzte Ladeleistung zur Verfügung gestellt wird.
 
-Die Priorisierung wirkt im Modus `smart`. Bei aktivem [Dauerhaft laden](/de/features/modes#always-charge) wird die Ladung aber nicht unterbrochen, sondern lediglich auf Minimum reduziert.
+Diese Priorisierung wirkt im Modus `smart`. Ist [**Dauerhaft laden**](/de/features/modes#always-charge) aktiv, wird das Laden nicht unterbrochen, sondern nur auf das Minimum reduziert.
 
 :::note
-Eine evtl. beim Fahrzeug konfigurierte Priorität ersetzt die Priorität des Ladepunkts, mit dem das Fahrzeug verbunden ist.
+Ist für ein Fahrzeug eine Priorität definiert, ersetzt sie die Priorität des Ladepunkts, mit dem das Fahrzeug verbunden ist.
 :::
 
 **Standardwert:** `0`

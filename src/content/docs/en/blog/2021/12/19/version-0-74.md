@@ -8,30 +8,30 @@ prev: false
 next: false
 ---
 
-Heute gibt es ein kleines Update hauptsächlich mit einigen Fehlerkorrekturen und weiteren Verbesserungen.
+Today's update is a small one, mainly with some bug fixes and further improvements.
 
-## Timer in der UI
+## Timers in the UI
 
-Die Oberfläche zeigt euch nun die im Hintergrund laufenden Timer an:
+The interface now shows you the timers running in the background:
 
-![Timer Phasenumschaltung](./1p3p.png)
+![Phase switching timer](./1p3p.png)
 
 <!-- excerpt -->
 
-- Im PV Modus:
-  - Wann wird das Laden unterbrochen
-  - Wann wird mit dem Laden wieder begonnen
-- 1p3p Phasenumschaltung:
-  - Wann wird auf 3p hochgeschaltet
-  - Wann wird auf 1p heruntergeschaltet
+- In solar mode:
+  - When charging will be paused
+  - When charging will resume
+- 1p3p phase switching:
+  - When it will switch up to 3p
+  - When it will switch down to 1p
 
-Zusätzlich wird auch angezeigt mit wievielen Phasen geladen wird.
+It also shows how many phases are used for charging.
 
-## Zielladen
+## Target Charging
 
-![Zielladen UI](./zielladen.png)
+![Target charging UI](./zielladen.png)
 
-Die Zielladen Funktionalität ist zurück. Hiermit kann man das EV auf ein bestimmtes Datum und Uhrzeit auf den geewünschten SoC Wert laden.
+Target charging is back. It lets you charge the EV to the desired charge level by a specific date and time.
 
 ## Download & Installation
 
@@ -42,4 +42,4 @@ Die Zielladen Funktionalität ist zurück. Hiermit kann man das EV auf ein besti
 
 ## Changelog
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.74)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.74)

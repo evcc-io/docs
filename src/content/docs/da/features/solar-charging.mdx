@@ -1,0 +1,98 @@
+---
+title: "Opladning med soloverskud"
+description: "Sådan fungerer opladning med soloverskud i tilstanden Smart, hvornår opladningen starter, holder pause eller skifter faser, og hvordan skyderen for solandel hjælper."
+sidebar:
+  order: 1
+translatedFrom: "ddd5bc4fba6a"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Brug overskydende solenergi til at oplade køretøjet.
+Det er kernefunktionen i evcc.
+
+<a id="smart-mode"></a>
+
+## Tilstanden Smart
+
+Opladning med soloverskud aktiveres ved ladepunktet med tilstanden **Smart**.
+
+<Screenshot
+  name="features/screenshots/smart-mode"
+  caption="Skærmbillede af et ladepunkt. Markøren klikker på tilstanden Smart."
+/>
+
+I denne tilstand starter opladningen automatisk, så snart solcelleanlægget leverer **nok effekt**.
+Ladeeffekten tilpasses løbende, så der så vidt muligt **ikke trækkes strøm fra elnettet**.
+Hvis solcelleanlægget ikke længere leverer nok effekt, eller hvis husstandens forbrug stiger, sættes opladningen på pause og fortsættes senere.
+
+Ud over soloverskud dækker tilstanden **Smart** også opladning i de billige timer i en [dynamisk tarif](/da/features/dynamic-prices) og [ladeplaner](/da/features/plans).
+Alle strategier kan kombineres.
+Et overblik over alle tilstande finder du på [siden om tilstande](/da/features/modes).
+
+<a id="charging-start"></a>
+
+### Hvornår starter opladningen?
+
+Alle elbiler har en **minimal ladeeffekt**.
+Den bestemmes af den minimale strøm på 6 A, som er fastlagt i ladestandarden [IEC 61851](https://en.wikipedia.org/wiki/IEC_61851).
+Den minimale ladeeffekt afhænger af, hvor mange faser køretøjet og opladeren bruger til opladningen.
+
+| Faser               | Minimal ladeeffekt (6 A)                 | Maksimal ladeeffekt (16 A / 32 A)                              |
+| :------------------ | :--------------------------------------- | :------------------------------------------------------------- |
+| 1-faset             | **1,4 kW** (1 × 6 A × 230 V)             | **3,7 kW** (1 × 16 A × 230 V)                                  |
+| 2-faset             | **2,8 kW** (2 × 6 A × 230 V)             | **7,4 kW** (2 × 16 A × 230 V)                                  |
+| 3-faset<br />&nbsp; | **4,1 kW** (3 × 6 A × 230 V)<br />&nbsp; | **11 kW** (3 × 16 A × 230 V)<br />**22 kW** (3 × 32 A × 230 V) |
+
+De fleste opladere i dag er tilsluttet 3-faset (11 kW eller 22 kW).
+Det betyder, at den minimale ladeeffekt er 4,1 kW.
+Med [opladere med automatisk faseskift](/da/chargers#features) (1P/3P) kan evcc skifte mellem 1-faset og 3-faset efter behov og starte opladningen allerede ved 1,4 kW.
+
+Effekten for eksport til elnettet vises i **energiflowdiagrammet**.
+Hvis overskuddet ligger over den minimale ladeeffekt i et vist tidsrum, starter opladningen.
+
+<Screenshot
+  name="features/screenshots/energyflow-surplus"
+  caption="Energiflowdiagrammet viser 3,4 kW eksport til elnettet."
+/>
+
+Bemærk: Det er værdien på elnetsmåleren, der er afgørende.
+Opladning med soloverskud fungerer ikke for anlæg med reguleret eksport til elnettet (”nuleksport”).
+
+<a id="not-enough-surplus"></a>
+
+### For lidt overskud?
+
+Som standard starter opladningen først, når overskuddet dækker hele den minimale ladeeffekt.
+Ved små solcelleanlæg eller i vintermånederne sker det måske kun sjældent.
+Med skyderen **Solandel** tillader du en andel strøm fra elnettet, så i det mindste en del af dit ladebehov dækkes af solenergi.
+Du finder den i indstillingerne for ladepunktet under **Sol overskud**.
+
+<Screenshot
+  name="features/screenshots/solar-share"
+  caption="Skyderen for solandel i indstillingerne for ladepunktet, sat til 50 %."
+/>
+
+Skyderen angiver, hvor stor en del af den minimale ladeeffekt der skal komme fra solenergi.
+Ved 100 % starter opladningen først, når overskuddet dækker hele den minimale ladeeffekt.
+Ved 50 % starter opladningen, så snart solenergien dækker halvdelen, og resten trækkes fra elnettet eller hjemmebatteriet.
+Ved 0 % starter opladningen, så snart der er noget overskud.
+Opladningen stopper, når solandelen i et stykke tid ligger under den indstillede værdi.
+
+Hvis du har et hjemmebatteri, kan den manglende effekt komme fra batteriet i stedet for elnettet.
+Under [batteriprioritet](/da/features/battery#priority) styrer du, i hvilket omfang hjemmebatteriet må bruges til at oplade køretøjet.
+
+Forsinkelserne, før opladningen starter eller stopper, kan justeres under **Opsætning → Ladere og varmelegemer → [Mit ladepunkt]** i afsnittet **Adfærd**.
+Indstil dem, så opladningen ikke tændes og slukkes for ofte.
+Nogle køretøjer nægter at lade, hvis opladningen afbrydes for ofte, og skal så startes igen, f.eks. ved at låse køretøjet op eller tage ladekablet ud og sætte det i igen.
+For disse køretøjer holder [Oplad altid](/da/features/modes#always-charge) opladningssessionen kørende uden afbrydelser.
+
+<a id="home-battery"></a>
+
+### Samspil med hjemmebatteriet
+
+Batterisystemer har deres egen hurtige regulering.
+Som standard har hjemmebatteriet prioritet.
+I tilstanden **Smart** starter opladningen af køretøjet først, når hjemmebatteriet ikke længere kan optage effekt.
+
+Hvordan du tilpasser denne adfærd, kan du læse under [Hjemmebatteri](/da/features/battery).

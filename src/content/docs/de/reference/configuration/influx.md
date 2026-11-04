@@ -1,21 +1,21 @@
 ---
 title: "influx"
-description: "Ladedaten per evcc.yaml an InfluxDB 1.8, InfluxDB 2 oder VictoriaMetrics schreiben, auch über HTTPS mit selbstsigniertem Zertifikat."
+description: "So schreibt deine evcc-Instanz Ladedaten per evcc.yaml an InfluxDB 1.8, InfluxDB 2 oder VictoriaMetrics, auch über HTTPS mit selbstsigniertem Zertifikat."
 sidebar:
   order: 16
+translatedFrom: "63ea856c515d"
 ---
 
-Definiert die Influx Konfiguration, um Daten in Influx zu schreiben.
+Definiert die Konfiguration, die zum Schreiben von Daten in InfluxDB nötig ist.
 
 ---
 
 ## InfluxDB v1.8.x
 
-:::caution[Wichtig]
-Erfordert mindestens InfluxDB 1.8.3
+:::caution[Erfordert mindestens InfluxDB 1.8.3]
 :::
 
-**Beispiel Influx v1**:
+**Beispiel für InfluxDB v1**:
 
 ```yaml
 influx:
@@ -29,22 +29,22 @@ influx:
 
 ## InfluxDB v2.x
 
-**Beispiel Influx v2**:
+**Beispiel für InfluxDB v2**:
 
 ```yaml
 influx:
   url: http://localhost:8086
-  database: evcc # InfluxDB v2.x uses term `bucket` but for compatibility still named `database` here
+  database: evcc # InfluxDB v2.x verwendet den Begriff `bucket`, aus Kompatibilitätsgründen heißt es hier aber weiterhin `database`
   token: 1234567890abcdef
   org: home
 ```
 
 ---
 
-## HTTPS mit selbst-signiertem Zertifikat
+## HTTPS mit selbstsigniertem Zertifikat
 
 Bei Verwendung von HTTPS (`https://`) wird standardmäßig das TLS-Zertifikat überprüft.
-Falls ein selbst-signiertes Zertifikat verwendet wird, kann die Zertifikatsüberprüfung deaktiviert werden:
+Falls du ein selbstsigniertes Zertifikat verwendest, kannst du die Zertifikatsüberprüfung deaktivieren:
 
 **Beispiel**:
 
@@ -59,9 +59,9 @@ influx:
 
 ## VictoriaMetrics
 
-[VictoriaMetrix](https://github.com/VictoriaMetrics/VictoriaMetrics) ist eine Time Series Datenbank mit InfluxDB kompatibler REST API.
+[VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics) ist eine Zeitreihendatenbank mit InfluxDB-kompatibler REST-API.
 
-HTTP basic authentication ist mit der URL möglich.
+HTTP-Basic-Authentifizierung ist über die URL möglich.
 
 **Beispiel für VictoriaMetrics**:
 

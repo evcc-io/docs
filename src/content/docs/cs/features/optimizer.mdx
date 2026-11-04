@@ -1,0 +1,97 @@
+---
+title: "Optimalizátor 🧪"
+description: "Experimentální optimalizátor podle předpovědí a historie vaší spotřeby hledá nákladově nejvýhodnější rozhodnutí o nabíjení a baterii, zatím je však jen zobrazuje."
+sidebar:
+  order: 13
+translatedFrom: "8465baa052f5"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+:::caution[Experimentální]
+Optimalizátor je v rané fázi vývoje.
+Zobrazená data mají zatím jen informativní charakter.
+Řídicí zásahy přijdou v dalších verzích.
+:::
+
+Optimalizátor analyzuje předpovědi, data o spotřebě a aktuální stav vašeho energetického systému a na jejich základě přijímá nákladově optimální rozhodnutí.
+Doplňuje řízení evcc založené na pravidlech o prediktivní optimalizaci.
+
+## Proč optimalizátor?
+
+evcc pracuje na základě pravidel a deterministicky.
+Pro mnoho sestav to funguje skvěle.
+Např. fotovoltaická elektrárna, domácí baterie a jedno vozidlo.
+
+U složitějších scénářů ale tento přístup naráží na své hranice:
+
+- **Více vozidel:** Které se má nabíjet jako první?
+- **Domácí baterie, nebo vozidlo:** Kam má jít dostupná energie?
+- **Dynamické tarify:** Vyplatí se dnes v noci nabíjet ze sítě, nebo bude zítra dost solární energie?
+
+Optimalizátor dokáže na tyto otázky odpovědět.
+Zatím hodnoty jako cenové stropy nebo prioritu domácí baterie nastavujete sami.
+V budoucnu budete moci tato rozhodnutí přenechat optimalizátoru.
+Ten pak optimální hodnoty najde automaticky.
+Na tom pracujeme krok za krokem.
+
+## Co optimalizátor dělá?
+
+Optimalizátor shromažďuje různá data:
+
+- **Předpovědi:** [solární výroba](/cs/tariffs#solar), [ceny elektřiny](/cs/tariffs#price), [tarify výkupu energie](/cs/features/dynamic-feedin), [venkovní teplota](/cs/tariffs#temperature) pro odhad potřeby tepla
+- **Historická data:** typický profil spotřeby vaší domácnosti
+- **Aktuální stav:** stav nabití domácí baterie, připojená vozidla, potřeba tepla
+
+Na základě těchto dat vypočítá optimalizační algoritmus očekávané chování vašeho energetického systému.
+Určí nákladově optimální kroky: efektivní [plány nabíjení](/cs/features/plans), řízení baterie (blokování vybíjení, nabíjení ze sítě).
+Předpoví také, kdy bude domácí baterie plná nebo prázdná.
+
+Cíl: **Minimalizovat náklady na energii.**
+
+## Použití optimalizátoru
+
+Zapnutí v uživatelském rozhraní:
+
+1. **Konfigurace → Experimentální** → zapnout
+2. **Konfigurace → Optimalizátor 🧪** → zapnout
+
+Optimalizátor vyžaduje aktivní [sponzorství](/cs/sponsorship).
+U nových instalací může trvat až 24 hodin, než se nasbírá dost dat pro první výsledky.
+
+- **Stránka Nabíjení → Tok energie (rozbalit):** Ukazuje, kdy bude domácí baterie pravděpodobně plná nebo prázdná.
+- **Menu → Optimalizátor:** Grafy ukazují, jak se mají domácí baterie a nabíjecí body chovat v příštích hodinách a jaké náklady na energii se očekávají v optimalizačním horizontu (viz snímek obrazovky níže).
+
+<Screenshot
+  name="features/screenshots/optimizer-debug"
+  caption="Ladicí zobrazení optimalizátoru s předpověďmi a výsledky optimalizace."
+/>
+
+## Aktuální stav a další kroky
+
+Optimalizátor má zatím jen informativní charakter.
+Ukazuje předpovědi a možné úspory, ale zatím nic aktivně neřídí.
+
+Další kroky:
+
+- Zapojit řídicí zásahy: aktivně řídit domácí baterii
+- Nechat optimalizátor optimalizovat [plány nabíjení](/cs/features/plans)
+- Umožnit uživatelům předat optimalizátoru konkrétní nastavení
+
+## Technické pozadí \{#technical\}
+
+Optimalizátor je napsaný v Pythonu a využívá bohatý ekosystém knihoven pro matematickou optimalizaci a statistiku.
+Není součástí samotného evcc, ale samostatnou službou.
+
+Po zapnutí se volá cloudová služba `optimizer.evcc.io`.
+Služba je **bezstavová**.
+Data se ukládají jen tehdy, když dáte zpětnou vazbu k vysvětlení plánu.
+Podrobnosti o ochraně soukromí najdete v našich [zásadách ochrany osobních údajů](https://evcc.io/en/datenschutz/).
+
+Stejně jako evcc je i optimalizátor open source: [github.com/evcc-io/optimizer](https://github.com/evcc-io/optimizer).
+Docker image [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer) můžete nainstalovat také lokálně.
+Proměnnou prostředí `OPTIMIZER_URI` nasměrujete evcc na vlastní endpoint.
+
+Aby byl výpočet rychlý, slučuje evcc sloty za hranicí 48 hodin do hodinových slotů.
+S vlastním optimalizátorem můžete tuto hranici posunout proměnnou prostředí `OPTIMIZER_COARSEN_AFTER` v hodinách, např. `72`.
+Hodnota `0` zachová 15minutové sloty pro celou předpověď.

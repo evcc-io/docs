@@ -1,0 +1,107 @@
+---
+translatedFrom: "5833eaf825d2"
+---
+
+## Événements \{#events\}
+
+Des messages peuvent être envoyés pour les événements suivants :
+
+| Événement     | Déclenché quand…                                          |
+| ------------- | --------------------------------------------------------- |
+| `start`       | la charge démarre                                         |
+| `stop`        | la charge se termine                                      |
+| `connect`     | un véhicule est connecté                                  |
+| `disconnect`  | un véhicule est déconnecté                                |
+| `soc`         | le niveau de charge du véhicule change                    |
+| `guest`       | un véhicule inconnu est détecté                           |
+| `asleep`      | un véhicule ne charge pas malgré l’autorisation de charge |
+| `planoverrun` | un plan de charge risque de ne pas atteindre son objectif |
+
+Chaque événement a un titre et un message.
+Les deux peuvent être personnalisés avec des [espaces réservés](#placeholders).
+
+## Format des messages \{#message-format\}
+
+Message en syntaxe simple, p. ex. pour l’événement `stop` :
+
+```txt
+${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
+Solar share: ${sessionSolarPercentage:%.0f}%
+```
+
+Le même message en syntaxe Go template, avec des calculs (p. ex. conversion de W en kW) et des conditions :
+
+```txt
+{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
+Solar share: {{round .sessionSolarPercentage 0 }}%
+{{- if .sessionPrice}}
+Cost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
+{{- end}}
+```
+
+### Espaces réservés \{#placeholders\}
+
+Les titres et les messages peuvent utiliser des variables pour afficher des informations d’evcc.
+Il existe deux syntaxes, qui peuvent aussi être combinées :
+
+- **Simple** : `${variableName}`, p. ex. `${vehicleTitle}`.
+  En option avec un formatage comme `${pvPower:%.1fk}` : outre les spécificateurs `printf` habituels, le suffixe `k` divise la valeur par 1000 (p. ex. Wh → kWh).
+  Les durées comme `${chargeDuration}` sont arrondies à la seconde entière (p. ex. `1h23m4s`).
+- **Go template** : `{{.variableName}}`, qui permet des calculs, des conditions et des [fonctions sprig](http://masterminds.github.io/sprig/).
+
+:::note
+Lorsque vous utilisez des variables, veillez à respecter la casse (majuscules/minuscules) !
+:::
+
+### Variables disponibles \{#variables\}
+
+Les variables disponibles correspondent aux données de l’[API REST](/integrations/rest-api).
+Lors de l’envoi d’un message, les données du point de charge déclencheur et les données globales sont fusionnées en une structure plate.
+Ainsi, les valeurs globales (p. ex. `pvPower`, `grid.Power`) comme les valeurs propres au point de charge (p. ex. `mode`, `chargedEnergy`, `vehicleTitle`) sont directement accessibles.
+Les valeurs imbriquées comme `grid.Power` ou `battery.Soc` ne sont accessibles qu’avec la syntaxe Go template, qui exige les noms de champs avec une majuscule initiale.
+
+Variables courantes du point de charge :
+
+- `title` : nom du point de charge
+- `loadpoint` : numéro du point de charge 1, 2, …
+- `mode` : mode de charge `off`/`smart`/`now`
+- `charging` : charge active
+- `enabled` : charge autorisée
+- `connected` : véhicule connecté
+- `chargedEnergy` : énergie chargée pendant la session, en Wh
+- `chargeDuration` : durée de charge
+- `chargePower` : puissance de charge actuelle en W
+- `connectedDuration` : durée de connexion
+- `chargeRemainingDuration` : temps de charge restant jusqu’à l’objectif
+- `chargeRemainingEnergy` : énergie restante jusqu’à l’objectif, en Wh
+- `phasesActive` : phases actuellement actives
+- `vehicleTitle` : nom du véhicule
+- `vehicleName` : nom technique du véhicule
+- `vehicleSoc` : niveau de charge du véhicule en %
+- `vehicleRange` : autonomie du véhicule en km
+- `vehicleOdometer` : kilométrage en km
+- `sessionSolarPercentage` : part solaire de la session de charge en %
+- `sessionPrice` : coût de la session de charge
+- `sessionPricePerKWh` : prix moyen par kWh
+- `sessionCo2PerKWh` : émissions moyennes de CO₂ par kWh
+- `planActive` : plan de charge actif
+- `smartCostActive` : charge intelligente depuis le réseau active
+
+Variables globales courantes :
+
+- `siteTitle` : nom de l’instance evcc
+- `pvPower` : puissance solaire actuelle en W
+- `homePower` : consommation actuelle de la maison en W
+- `grid.Power` : import du réseau (+) / export vers le réseau (−) en W
+- `battery.Power` : puissance de la batterie en W
+- `battery.Soc` : niveau de charge de la batterie en %
+- `currency` : devise du tarif
+- `tariffGrid` : prix actuel du réseau par kWh
+- `tariffFeedIn` : tarif d’export vers le réseau par kWh
+- `tariffCo2` : intensité de CO₂ actuelle
+- `statistics.<period>.*` : statistiques de charge pour les périodes `30d`, `365d`, `thisYear` et `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
+
+La liste complète de tous les champs disponibles se trouve dans la réponse de l’API à l’adresse `http://evcc.local:7070/api/state`.
+
+Les deux syntaxes fonctionnent dans les champs titre et message de l’interface.
+La configuration via `evcc.yaml` est décrite dans la [référence `messaging`](/fr/reference/configuration/messaging).

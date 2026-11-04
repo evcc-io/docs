@@ -1,38 +1,39 @@
 ---
 title: "site"
-description: "So beschreibst du deine Hausinstallation in der evcc.yaml: Netz-, PV- und Batteriezähler zuordnen und die Überschussregelung mit residualPower abstimmen."
+description: "In der evcc.yaml beschreibst du deine Hausinstallation, ordnest Netz-, PV-, Hausbatterie- und weitere Zähler zu und stimmst die Überschussregelung mit residualPower ab."
 sidebar:
   order: 2
+translatedFrom: "21103d55d4df"
 ---
 
 import prioritySoc from "./img/prioritysoc.webp";
 import bufferSoc from "./img/buffersoc.webp";
 import bufferStartSoc from "./img/bufferstartsoc.webp";
 
-Beschreibt den Standort mit den vorhandenen und benötigten Geräten der Hausinstallation und ist für das Regeln der verfügbaren Leistung zuständig.
+Dieser Abschnitt beschreibt den Standort mit den vorhandenen und benötigten Geräten der Hausinstallation und regelt die verfügbare Leistung.
 
-Um das Laden mit PV-Überschuss zu regeln, ist ein auslesbarer Zähler direkt hinter dem Netzanschlusspunkt notwendig. Zusätzlich können auch Geräte für die PV-Leistung und Hausbatterie(n) angegeben werden. Mehrere Geräte werden dabei in der Leistung intern automatisch addiert. Bei Hausbatterien wird der Mittelwert des Ladestands gebildet.
+Um das Laden mit PV-Überschuss zu regeln, ist ein auslesbarer Zähler direkt hinter dem Netzanschlusspunkt notwendig. Zusätzlich können Geräte für die PV-Leistung und Hausbatterie(n) angegeben werden. Bei mehreren Geräten werden die Leistungen automatisch addiert, bei Hausbatterien wird zusätzlich der mittlere Ladestand gebildet.
 
 **Beispiel**:
 
 ```yaml
 site:
-  title: Zuhause # display name for UI
+  title: Zuhause # Anzeigename in der UI
   meters:
-    grid: mygridmeter # grid meter reference
+    grid: mygridmeter # Referenz auf den Netzzähler
     pv:
-      - mypv1 # first pv meter reference
-      - mypv9 # second pv meter reference
+      - mypv1 # Referenz auf den ersten PV-Zähler
+      - mypv9 # Referenz auf den zweiten PV-Zähler
     battery:
-      - mybat5 # battery meter reference
+      - mybat5 # Referenz auf den Batteriezähler
     aux:
-      - myaux1 # self-regulating consumer
+      - myaux1 # selbstregelnder Verbraucher
     consumer:
-      - myconsumer1 # regular consumer, recorded for consumption statistics
+      - myconsumer1 # regulärer Verbraucher, erfasst für die Verbrauchsstatistik
     ext:
-      - myext1 # for data logging, load management, etc.
+      - myext1 # für Datenaufzeichnung, Lastmanagement usw.
   curtailers:
-    - my_curtailer # curtailment device reference
+    - my_curtailer # Referenz auf den Einspeisebegrenzer
   residualPower: 100
 ```
 
@@ -42,7 +43,7 @@ site:
 
 ### `title`
 
-Die angezeigte Beschreibung des Ladepunktes, wird in der UI angezeigt.
+Der Name des Standorts, der in der UI als Titel angezeigt wird.
 
 **Beispiel**:
 
@@ -54,14 +55,12 @@ title: Zuhause
 
 ### `meters`
 
-Definiert welche konfigurierten [`meter`](/de/reference/configuration/meters) (Strommessgeräte) als welche Art Messpunkt verwendet werden sollen.
-Hier erfolgt somit die logische Verknüpfung der Gerätedefiniton mit dem Verwendungszweck.
-Ein zunächst universeller Zähler bekommt somit entsprechend seines Einbauortes in der Hausinstallation einen Zweck zugewiesen.
+Definiert, welche konfigurierten [`meter`](/de/reference/configuration/meters) (Zähler) als welche Art von Messpunkt verwendet werden sollen. Hier erfolgt die logische Verknüpfung der Gerätedefinition mit dem Verwendungszweck. Ein zunächst universeller Zähler bekommt so entsprechend seinem Einbauort in der Hausinstallation einen Zweck zugewiesen.
 
 :::note
-Es ist mindestens die Konfiguration eines `grid` oder eines `pv` Elementes notwendig!
+Mindestens ein `grid`- oder `pv`-Eintrag ist notwendig.
 
-Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
+Ohne einen dieser Einträge funktioniert evcc nicht.
 :::
 
 **Beispiel**:
@@ -69,9 +68,9 @@ Ohne mindestens einen der beiden Einträge kann evcc nicht verwendet werden!
 ```yaml
 site:
   meters:
-    grid: mygridmeter # grid meter reference
-    pv: mypv1 # pv meter reference
-    battery: mybat2 # battery meter reference
+    grid: mygridmeter # Referenz auf den Netzzähler
+    pv: mypv1 # Referenz auf den PV-Zähler
+    battery: mybat2 # Referenz auf den Batteriezähler
     aux: myaux1
 ```
 
@@ -81,120 +80,120 @@ site:
 
 ### `meters.grid`
 
-Definiert das [`meter`](/de/reference/configuration/meters) (Strommessgerät), welches die Messwerte des Netzanschlusspunktes liefert.
+Definiert das [`meter`](/de/reference/configuration/meters) (Zähler), das die Messwerte des Netzanschlusspunkts liefert.
 
-**Mögliche Werte**: Wert eines `name` Parameters in der [`meters`](#meters) Konfiguration.
+**Mögliche Werte**: Wert eines `name`-Parameters in der [`meters`](#meters)-Konfiguration.
 
 **Beispiel**:
 
 ```yaml
-grid: mygridmeter # grid meter reference
+grid: mygridmeter # Referenz auf den Netzzähler
 ```
 
 ---
 
 ### `meters.pv`
 
-Definiert die [`meter`](/de/reference/configuration/meters) (Strommessgeräte), welche die PV-Erzeugungswerte liefern.
+Definiert die [`meter`](/de/reference/configuration/meters) (Zähler), von denen evcc die PV-Erzeugungswerte abruft.
 Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert.
 
-**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+**Mögliche Werte**: Ein einzelner Wert oder eine Liste von Werten eines name-Parameters in der [`meters`](#meters)-Konfiguration. Die Listenform kann auch bei Einzelwerten genutzt werden.
 
 **Beispiel**:
 
 ```yaml
-pv: myonlypv # single pv meter reference
+pv: myonlypv # Referenz auf einen einzelnen PV-Zähler
 ```
 
 oder
 
 ```yaml
 pv: # (pvs = veraltet)
-  - myoldpv # first pv meter reference
-  - mynewestpv # second pv meter reference
+  - myoldpv # Referenz auf den ersten PV-Zähler
+  - mynewestpv # Referenz auf den zweiten PV-Zähler
 ```
 
 ---
 
 ### `meters.battery`
 
-Definiert die [`meter`](/de/reference/configuration/meters) (Strommessgeräte), welche die Messdaten des/der Hausbatterie(n) liefern.
-Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Ladeständen wird ein Mittelwert gebildet.
+Definiert die [`meter`](/de/reference/configuration/meters) (Zähler), welche die Messdaten der Hausbatterie(n) liefern.
+Es können mehrere Geräte angegeben werden. Die Leistungsdaten werden automatisch addiert und aus den Ladeständen der Batterien wird ein Mittelwert gebildet.
 
-**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+**Mögliche Werte**: Ein einzelner Wert oder eine Liste von Werten eines `name`-Parameters in der [`meters`](#meters)-Konfiguration. Die Listenform kann auch bei Einzelwerten genutzt werden.
 
 **Beispiel**:
 
 ```yaml
-battery: myonlybat # single battery meter reference
+battery: myonlybat # Referenz auf einen einzelnen Batteriezähler
 ```
 
 oder
 
 ```yaml
 battery: # (batteries = veraltet)
-  - mysmallbat # first battery meter reference
-  - myhugebat # second battery meter reference
+  - mysmallbat # Referenz auf den ersten Batteriezähler
+  - myhugebat # Referenz auf den zweiten Batteriezähler
 ```
 
 ### `meters.aux`
 
-Zähler für externe Geräte, die über eine eigene Überschussregelung verfügen, aber nicht direkt durch evcc gesteuert werden, z. B. ein selbstregelnder Heizstab. Ihre Leistung fließt in die verfügbare Überschussleistung zur Fahrzeugladung ein, unter der Annahme, dass das Gerät seinen Verbrauch reduziert, sobald evcc diese Leistung der Ladung zuschlägt. Mehrere Zähler werden addiert.
+Zähler für externe Geräte, die über eine eigene Überschussregelung verfügen, aber nicht direkt durch evcc gesteuert werden, z. B. ein selbstregelnder Heizstab. evcc rechnet ihre Leistung dem verfügbaren Überschuss für das Laden des Fahrzeugs zu und geht davon aus, dass das Gerät seinen Verbrauch reduziert, sobald evcc diese Leistung dem Laden zuteilt. Mehrere Zähler werden addiert.
 
-**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+**Mögliche Werte**: Ein einzelner Wert oder eine Liste von Werten eines `name`-Parameters in der [`meters`](#meters)-Konfiguration. Die Listenform kann auch bei Einzelwerten genutzt werden.
 
 **Beispiel**:
 
 ```yaml
-aux: myaux # single aux meter reference
+aux: myaux # Referenz auf einen einzelnen aux-Zähler
 ```
 
 oder
 
 ```yaml
 aux:
-  - myaux1 # first aux meter reference
-  - myaux2 # second aux meter reference
+  - myaux1 # Referenz auf den ersten aux-Zähler
+  - myaux2 # Referenz auf den zweiten aux-Zähler
 ```
 
 ### `meters.consumer`
 
-Zähler für reguläre Verbraucher wie Waschmaschine oder Spülmaschine, die ausschließlich für die Verbrauchsstatistik erfasst werden. Anders als bei `aux` fließt diese Leistung nicht in die verfügbare Überschussleistung zur Fahrzeugladung ein.
+Zähler für reguläre Verbraucher wie Waschmaschine oder Spülmaschine, die ausschließlich für die Verbrauchsstatistik erfasst werden. Anders als bei `aux` fließt diese Leistung nicht in den verfügbaren Überschuss für das Laden des Fahrzeugs ein.
 
-**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+**Mögliche Werte**: Ein einzelner Wert oder eine Liste von Werten eines `name`-Parameters in der [`meters`](#meters)-Konfiguration. Die Listenform kann auch bei Einzelwerten genutzt werden.
 
 **Beispiel**:
 
 ```yaml
-consumer: myconsumer # single consumer meter reference
+consumer: myconsumer # Referenz auf einen einzelnen Verbraucherzähler
 ```
 
 oder
 
 ```yaml
 consumer:
-  - myconsumer1 # first consumer meter reference
-  - myconsumer2 # second consumer meter reference
+  - myconsumer1 # Referenz auf den ersten Verbraucherzähler
+  - myconsumer2 # Referenz auf den zweiten Verbraucherzähler
 ```
 
 ### `meters.ext`
 
-Zähler, die nicht für die Regelung verwendet oder in der Oberfläche angezeigt werden, z. B. Unterverteilungen oder alternative Netz- oder PV-Zähler. Ihre Daten werden nur geloggt und exportiert, fließen aber nicht in die Überschuss- oder Verbrauchsstatistik ein.
+Zähler, die weder für die Regelung verwendet noch in der UI angezeigt werden, z. B. Unterverteilungen oder alternative Netz- oder PV-Zähler. Ihre Daten werden nur aufgezeichnet und exportiert, fließen aber nicht in den Überschuss oder die Verbrauchsstatistik ein.
 
-**Mögliche Werte**: Ein Wert oder eine Liste von Werten eines `name` Parameters in der [`meters`](#meters) Konfiguration. Wobei die Listenversion auch bei Einzelwerten genutzt werden kann.
+**Mögliche Werte**: Ein einzelner Wert oder eine Liste von Werten eines `name`-Parameters in der [`meters`](#meters)-Konfiguration. Die Listenform kann auch bei Einzelwerten genutzt werden.
 
 **Beispiel**:
 
 ```yaml
-ext: myext # single ext meter reference
+ext: myext # Referenz auf einen einzelnen ext-Zähler
 ```
 
 oder
 
 ```yaml
 ext:
-  - myext1 # first ext meter reference
-  - myext2 # second ext meter reference
+  - myext1 # Referenz auf den ersten ext-Zähler
+  - myext2 # Referenz auf den zweiten ext-Zähler
 ```
 
 ### `curtailers`
@@ -202,51 +201,51 @@ ext:
 Einspeisebegrenzer aus der [`curtailers`](/de/reference/configuration/curtailers)-Konfiguration, die die Einspeisung auf Anforderung des Netzbetreibers begrenzen (§ 9 EEG).
 Sie werden zusammen mit den abregelbaren `pv`-Zählern angesteuert, wenn die [`hems`](/de/reference/configuration/hems)-Integration ein Limit signalisiert.
 
-**Mögliche Werte**: Eine Liste von Werten eines `name` Parameters in der [`curtailers`](/de/reference/configuration/curtailers) Konfiguration.
+**Mögliche Werte**: Eine Liste von Werten eines `name`-Parameters in der [`curtailers`](/de/reference/configuration/curtailers)-Konfiguration.
 
 **Beispiel**:
 
 ```yaml
 curtailers:
-  - my_curtailer # curtailment device reference
+  - my_curtailer # Referenz auf den Einspeisebegrenzer
 ```
 
 ### `residualPower`
 
-Legt den Soll-Arbeitspunkt der Überschussregelung am Netzübergang (Gridmeter) fest. Der Standardwert ist 0 (Watt).
-Positive Werte verschieben den Sollwert in Richtung Netzeinspeisung, negative Werte in Richtung Netzbezug.
-Mit diesem Wert wird der durch die Steuerung einzustellende "Ruhezustand" des Regelkreises eingestellt.
+Legt den Soll-Arbeitspunkt der Überschussregelung am Netzanschlusspunkt (Netzzähler) fest. Der Standardwert ist 0 W.
+Positive Werte verschieben den Sollwert in Richtung Einspeisung, negative Werte in Richtung Netzbezug.
+Letztlich legt dieser Wert den _Ruhezustand_ des Regelkreises fest, den die Regelung einstellen muss.
 
-Insbesondere im Zusammenspiel mit weiteren unabhängigen Überschussausregelungen wie z. B. der einer Hausbatterie ist es obligatorisch, diesen Wert anzupassen, um ein definiertes Systemverhalten mit klaren Prioritäten zu erzielen.
+Insbesondere im Zusammenspiel mit weiteren unabhängigen Überschussregelungen, z. B. einer Hausbatterie, muss dieser Wert angepasst werden, um ein definiertes Systemverhalten mit klaren Prioritäten zu erreichen.
 
-Soll im Smart-Modus ein Netzbezugsanteil verbleiben bzw. zugelassen werden, muss hier eine negative Leistung entsprechend des Maximalanteils des Netzbezugs konfiguriert werden.
+Soll im Smart-Modus ein Teil der Ladeleistung aus dem Netz kommen dürfen, trägst du als negativen Wert den maximal erlaubten Netzbezug ein.
 
-#### `grid` `meter` vorhanden
+#### Mit Netzzähler (`grid` `meter`)
 
-- Positiver Wert: Verbleibende Netzeinspeiseleistung
+- Positiver Wert: Verbleibende Einspeiseleistung
 - Negativer Wert: Verbleibende Netzbezugsleistung
 
-#### Nur `pv` `meter` vorhanden
+#### Nur mit PV-Zähler (`pv` `meter`)
 
-- Positiver Wert: Typischer Hausverbrauch, um damit den PV-Überschuss abschätzen zu können
-- Negativer Wert: angegebene Leistung wird zur PV-Leistung addiert und erhöht die zur Verfügung stehende Ladeleistung (Achtung: Netzbezug)
+- Positiver Wert: Typischer Hausverbrauch, um damit den PV-Überschuss abzuschätzen
+- Negativer Wert: Die angegebene Leistung wird zur PV-Leistung addiert und erhöht die verfügbare Ladeleistung (Achtung: Netzbezug)
 
 :::note
-Bei Existenz einer Hausbatterie wird dringend empfohlen hier einen kleinen Wert von 100 bis 300 (Watt) einzutragen, um damit eine Batterieladung gemäß der konfigurierten Prioritäten (siehe `prioritySoc`) zu ermöglichen. Andernfalls "sieht" die unabhängige Regelung der Hausbatterie keinen nutzbaren Überschuss.
-
-Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Hausbatterie ein kurzzeitiger Netzbezug besser vermeiden.
+Bei vorhandener Hausbatterie wird dringend empfohlen, hier einen kleinen Wert einzutragen, z. B. zwischen 100 und 300 W, um eine Batterieladung gemäß den konfigurierten Prioritäten (siehe `prioritySoc`) zu ermöglichen. Andernfalls sieht die unabhängige Regelung der Hausbatterie keinen nutzbaren Überschuss. Ebenso lässt sich damit bei schnellen Erzeugungs- und Lastwechseln auch ohne Hausbatterie ein kurzzeitiger Netzbezug vermeiden.
 :::
 
-**Beispiel "Hausbatterie"**:
+**Beispiel „Hausbatterie“**:
 
 ```yaml
 residualPower: 100
 ```
 
-**Beispiel "Netzbezugsanteil"**:
+**Beispiel „Netzbezugsanteil“**:
 
-Die Ladung soll im Smart-Modus mit mindestens 6A (einphasig) auch bereits mit nur 50% PV-Anteil beginnen (Rest Netzbezug)
-Mindestladeleistung: 1 Phase _ 6A _ 230V = 1380 W, davon 50%: 690 W. Siehe auch die [Alternative mittels enable/disable um anteilig PV und Netzbezug zu erlauben](/de/features/solar-charging).
+Im Smart-Modus soll das Laden mit mindestens 6 A (einphasig) schon bei nur 50% PV-Überschuss starten (der Rest kommt aus dem Netz).
+Mindestladeleistung: 1 Phase × 6 A × 230 V = 1.380 W, davon 50%: 690 W
+
+Siehe auch die [Alternative mittels enable/disable, um anteilig PV und Netzbezug zu erlauben](/de/features/solar-charging).
 
 ```yaml
 residualPower: -690

@@ -1,15 +1,8 @@
-export type Lang = "de" | "en";
+import { useTranslations } from "@astrojs/starlight/internal";
 
-export const USAGE_LABELS: Record<string, Record<Lang, string>> = {
-  grid: { de: "Netzzähler", en: "Grid meter" },
-  pv: { de: "PV-Produktion", en: "Solar production" },
-  battery: { de: "Batterie", en: "Battery" },
-  charge: { de: "Wallbox-Zähler", en: "Charger meter" },
-  aux: { de: "Intelligenter Verbraucher", en: "Smart consumer" },
-};
+export const USAGE_KEYS = ["grid", "pv", "battery", "charge", "aux"];
 
-export const USAGE_KEYS = Object.keys(USAGE_LABELS);
-
-export function usageLabel(usage: string, lang: Lang): string {
-  return USAGE_LABELS[usage]?.[lang] ?? usage;
+export function usageLabel(usage: string, lang: string | undefined): string {
+  const t = useTranslations(lang);
+  return USAGE_KEYS.includes(usage) ? t(`usage.${usage}` as any) : usage;
 }

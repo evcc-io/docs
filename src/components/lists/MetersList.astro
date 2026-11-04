@@ -3,7 +3,6 @@ import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import DeviceCardList from "@components/DeviceCardList.astro";
 import DeviceFilter from "@components/DeviceFilter.astro";
-import MetersIntro from "@components/intros/MetersIntro.astro";
 import UserDefinedHint from "@components/UserDefinedHint.astro";
 import ChannelListNav from "@components/ChannelListNav.astro";
 import SponsorInfoBox from "@components/SponsorInfoBox.astro";
@@ -15,9 +14,10 @@ import {
   nightlyPageHead,
 } from "@utils/devices";
 import type { Channel } from "@utils/devices";
+import { intro } from "@utils/intros";
 
 interface Props {
-  lang: "de" | "en";
+  lang: string;
   channel: Channel;
 }
 const { lang, channel } = Astro.props;
@@ -37,32 +37,18 @@ const hasSponsorship = allDevices.some((d: any) =>
   (d.data.requirements ?? []).includes("sponsorship"),
 );
 
-const title = lang === "de" ? "PV, Batterie, Netz, Zähler" : "PV, Battery, Grid, Meter";
-const description =
-  lang === "de"
-    ? "Übersicht aller unterstützten Zähler, Wechselrichter und Batteriespeicher."
-    : "Overview of all supported meters, inverters and battery storage devices.";
+const title = Astro.locals.t("list.meters.title");
+const description = Astro.locals.t("list.meters.description");
 
-const supportedTitle = lang === "de" ? "Unterstützte Geräte" : "Supported devices";
-const genericTitle = lang === "de" ? "Generische Unterstützung" : "Generic support";
+const supportedTitle = Astro.locals.t("list.supported");
+const genericTitle = Astro.locals.t("list.generic");
+const Intro = intro(lang, "meters");
 
-const headings = lang === "de"
-  ? [
-      { depth: 2, slug: "einrichtung", text: "Einrichtung" },
-      { depth: 2, slug: "einsatzbereiche", text: "Einsatzbereiche" },
-      { depth: 2, slug: "hybridwechselrichter", text: "Hybridwechselrichter" },
-      { depth: 2, slug: "features", text: "Eigenschaften" },
-      { depth: 2, slug: "supported", text: "Unterstützte Geräte" },
-      { depth: 2, slug: "generic", text: genericTitle },
-    ]
-  : [
-      { depth: 2, slug: "setup", text: "Setup" },
-      { depth: 2, slug: "usage-areas", text: "Usage areas" },
-      { depth: 2, slug: "hybrid-inverters", text: "Hybrid inverters" },
-      { depth: 2, slug: "features", text: "Features" },
-      { depth: 2, slug: "supported", text: "Supported devices" },
-      { depth: 2, slug: "generic", text: genericTitle },
-    ];
+const headings = [
+  ...Intro.getHeadings(),
+  { depth: 2, slug: "supported", text: supportedTitle },
+  ...(generic.length > 0 ? [{ depth: 2, slug: "generic", text: genericTitle }] : []),
+];
 
 const frontmatter = {
   title,
@@ -74,7 +60,7 @@ const frontmatter = {
 
 <StarlightPage frontmatter={frontmatter} headings={headings}>
   {channel === "nightly" && <ChannelListNav lang={lang} channel={channel} category="meters" />}
-  <MetersIntro lang={lang} />
+  <Intro.Content />
   {hasSponsorship && <SponsorInfoBox lang={lang} />}
   <DeviceFilter lang={lang} features={filterFeatures} usages={filterUsages} />
   <h2 id="supported">{supportedTitle}</h2>
