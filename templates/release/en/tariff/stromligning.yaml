@@ -1,0 +1,123 @@
+template: stromligning
+product:
+  identifier: stromligning
+  brand: Strømligning
+  group: Dynamic electricity price
+countries: ["DK"]
+requirements: ["skiptest"]
+description: |
+  Requires an API key from [stromligning.dk](https://stromligning.dk/api/docs/). Prices are in DKK/kWh and include the applicable taxes and grid fees. Production prices exclude VAT and include production tariff deductions, but not electricity company fees. Commercial use requires permission from Strømligning.
+render:
+  - default: |
+      type: template
+      template: stromligning
+      apikey: # API Key
+      supplierid: radius_c # Grid supplier ID
+      pricetype: consumption # Price type, Use consumption for grid prices and production for feed-in prices. [consumption, production] (optional)
+      productid: enkel_energi-enkel_kvartal # Product ID, Used for consumption prices only. Find IDs in the API documentation. (optional)
+      customergroupid: C_egenproducent # Customer group ID, For production prices, leave empty to select the production customer group automatically. (optional)
+      agreementstart: '2025-03-01' # Agreement start, Contract start date (YYYY-MM-DD). Only used for consumption prices, when product ID has discount based on start date. (optional)
+    advanced: |
+      type: template
+      template: stromligning
+      apikey: # API Key
+      supplierid: radius_c # Grid supplier ID
+      pricetype: consumption # Price type, Use consumption for grid prices and production for feed-in prices. [consumption, production] (optional)
+      productid: enkel_energi-enkel_kvartal # Product ID, Used for consumption prices only. Find IDs in the API documentation. (optional)
+      customergroupid: C_egenproducent # Customer group ID, For production prices, leave empty to select the production customer group automatically. (optional)
+      agreementstart: '2025-03-01' # Agreement start, Contract start date (YYYY-MM-DD). Only used for consumption prices, when product ID has discount based on start date. (optional)
+      charges: # Charge, Additional fixed charge per kWh (optional)
+      chargesZones: # Charges zones, Time-based grid fees that override the default charge. (optional)
+      tax: # Tax, Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Formula, Individual formula for calculating the price (optional)
+params:
+  - name: apikey
+    example:
+    default:
+    choice: []
+    unit:
+    description: API Key
+    help:
+    advanced: false
+    optional: false
+  - name: supplierid
+    example: radius_c
+    default:
+    choice: []
+    unit:
+    description: Grid supplier ID
+    help:
+    advanced: false
+    optional: false
+  - name: pricetype
+    example:
+    default: consumption
+    choice: ['consumption', 'production']
+    unit:
+    description: Price type
+    help: Use consumption for grid prices and production for feed-in prices.
+    advanced: false
+    optional: true
+  - name: productid
+    example: enkel_energi-enkel_kvartal
+    default:
+    choice: []
+    unit:
+    description: Product ID
+    help: Used for consumption prices only. Find IDs in the API documentation.
+    advanced: false
+    optional: true
+  - name: customergroupid
+    example: C_egenproducent
+    default:
+    choice: []
+    unit:
+    description: Customer group ID
+    help: For production prices, leave empty to select the production customer group automatically.
+    advanced: false
+    optional: true
+  - name: agreementstart
+    example: '2025-03-01'
+    default:
+    choice: []
+    unit:
+    description: Agreement start
+    help: Contract start date (YYYY-MM-DD). Only used for consumption prices, when product ID has discount based on start date.
+    advanced: false
+    optional: true
+  - name: charges
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charge
+    help: Additional fixed charge per kWh
+    advanced: true
+    optional: true
+  - name: chargesZones
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charges zones
+    help: Time-based grid fees that override the default charge.
+    advanced: true
+    optional: true
+  - name: tax
+    example:
+    default:
+    choice: []
+    unit:
+    description: Tax
+    help: Additional percentage charge (e.g. 0.2 for 20%)
+    advanced: true
+    optional: true
+  - name: formula
+    example: math.Max((price + charges) * (1 + tax), 0.0)
+    default:
+    choice: []
+    unit:
+    description: Formula
+    help: Individual formula for calculating the price
+    advanced: true
+    optional: true

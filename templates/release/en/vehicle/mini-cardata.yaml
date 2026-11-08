@@ -27,6 +27,8 @@ description: |
 
   In case the vehicle detection does not work reliably, `welcomecharge` (charge on connection) should be enabled.
 
+  BMW allows only one streaming connection per account. If another tool already uses it, the streaming data can optionally be read from a local MQTT broker. The tool must publish the unmodified CarData messages, e.g. [bmw-mqtt-bridge](https://github.com/dj0abr/bmw-mqtt-bridge) with its default settings. Only this tool should be allowed to publish to the topic, e.g. using broker ACLs. Login with `clientid` is still required for REST requests.
+
 render:
   - default: |
       type: template
@@ -55,6 +57,11 @@ render:
       climaterdisabled: # Disable climater detection, Ignore the vehicle's climater state for charge control, so charging stops at the SoC or energy limit even when the vehicle signals an active climater request. (optional)
       autodetectdisabled: # Exclude from auto detection, Ignore the vehicle for auto detection of connected vehicles (optional)
       wakeupdisabled: # Disable wake-up calls, Do not send wake-up calls to the vehicle or charger, useful for vehicles that refuse to charge after repeated wake-ups. (optional)
+      broker: 192.168.1.10:1883 # MQTT broker, Read the streaming data from this local MQTT broker instead of BMW. Leave empty to connect to BMW directly. (optional)
+      user: # Username, MQTT broker username (optional)
+      password: # Password, MQTT broker password (optional)
+      topic: bmw/raw/+ # Topic, Topic on the MQTT broker carrying the unmodified CarData messages (optional)
+      cache: 30m # Cache, Time interval for REST data refresh. Default 15m, 30m with streaming. BMW allows 50 requests per day per account, raise it if other tools also use REST requests on the same account. (optional)
 params:
   - name: vin
     example: WBMW...
@@ -207,5 +214,50 @@ params:
     unit:
     description: Disable wake-up calls
     help: Do not send wake-up calls to the vehicle or charger, useful for vehicles that refuse to charge after repeated wake-ups.
+    advanced: true
+    optional: true
+  - name: broker
+    example: 192.168.1.10:1883
+    default:
+    choice: []
+    unit:
+    description: MQTT broker
+    help: Read the streaming data from this local MQTT broker instead of BMW. Leave empty to connect to BMW directly.
+    advanced: true
+    optional: true
+  - name: user
+    example:
+    default:
+    choice: []
+    unit:
+    description: Username
+    help: MQTT broker username
+    advanced: true
+    optional: true
+  - name: password
+    example:
+    default:
+    choice: []
+    unit:
+    description: Password
+    help: MQTT broker password
+    advanced: true
+    optional: true
+  - name: topic
+    example:
+    default: bmw/raw/+
+    choice: []
+    unit:
+    description: Topic
+    help: Topic on the MQTT broker carrying the unmodified CarData messages
+    advanced: true
+    optional: true
+  - name: cache
+    example: 30m
+    default:
+    choice: []
+    unit:
+    description: Cache
+    help: Time interval for REST data refresh. Default 15m, 30m with streaming. BMW allows 50 requests per day per account, raise it if other tools also use REST requests on the same account.
     advanced: true
     optional: true
