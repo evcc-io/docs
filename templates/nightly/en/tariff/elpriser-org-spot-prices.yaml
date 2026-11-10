@@ -1,0 +1,126 @@
+template: elpriser
+product:
+  identifier: elpriser-org-spot-prices
+  brand: elpriser.org
+  description: Spot prices
+  group: Dynamic electricity price
+countries: ["EU", "DK", "NO", "CH", "GB", "IE", "RS", "ME", "MK", "AL"]
+requirements: ["skiptest"]
+description: |
+  Day-ahead electricity prices for 40 European bidding zones in 15-minute slots where the market has them, followed by about a week of forecast (elpriser.org's own statistical model, not an official forecast).
+  Outside Denmark this is the wholesale price without taxes, levies and grid fees; add them with `charges`, `tax` or `formula`.
+  For Denmark (`dk1`, `dk2`) the price type `net_inkl_alt` returns the full price including the grid tariff; it needs the GLN of your grid company.
+  Prices are in the zone's currency (DKK, SEK, NOK, PLN, GBP, ...) or in EUR. The currency set in evcc must match.
+
+render:
+  - default: |
+      type: template
+      template: elpriser
+      zone: de # Price zone, Zone code, e.g. `de`, `fr`, `dk1`, `se3`, `no2`. [dk1, dk2, no1, no2, no3, no4, no5, se1, se2, se3, se4, fi, nl, de, fr, pl, it-n, at, be, ch, cz, hu, si, es, pt, sk, gr, ro, bg, hr, rs, ee, lv, lt, me, mk, al, xk, gb, ie]
+      currency: local # Currency, `local` = the zone's currency (DKK, SEK, NOK, PLN, ... converted with the ECB reference rate), `eur` = euro. Must match the currency set in evcc. Great Britain is always GBP. [local, eur]
+      pricemode: inkl_alt # Price type (Denmark only), Only for dk1 and dk2. `inkl_alt` = spot + Energinet tariffs + electricity duty + VAT (everything except your grid company's tariff); `net_inkl_alt` = the full price including your grid company's tariff, needs `gln`; `spot_ex` / `spot_inkl` = spot price without / with VAT. [inkl_alt, spot_inkl, spot_ex, inkl_alt_minus, inkl_alt_elvarme, net_inkl_alt, net_inkl_alt_elvarme, net_inkl_tarif] (optional)
+      gln: 5790000705689 # Grid company GLN (Denmark only), 13-digit GLN number of your Danish grid company, only for the net_* price types. List: [elpriser.org/tariffer](https://elpriser.org/tariffer) (optional)
+    advanced: |
+      type: template
+      template: elpriser
+      zone: de # Price zone, Zone code, e.g. `de`, `fr`, `dk1`, `se3`, `no2`. [dk1, dk2, no1, no2, no3, no4, no5, se1, se2, se3, se4, fi, nl, de, fr, pl, it-n, at, be, ch, cz, hu, si, es, pt, sk, gr, ro, bg, hr, rs, ee, lv, lt, me, mk, al, xk, gb, ie]
+      currency: local # Currency, `local` = the zone's currency (DKK, SEK, NOK, PLN, ... converted with the ECB reference rate), `eur` = euro. Must match the currency set in evcc. Great Britain is always GBP. [local, eur]
+      pricemode: inkl_alt # Price type (Denmark only), Only for dk1 and dk2. `inkl_alt` = spot + Energinet tariffs + electricity duty + VAT (everything except your grid company's tariff); `net_inkl_alt` = the full price including your grid company's tariff, needs `gln`; `spot_ex` / `spot_inkl` = spot price without / with VAT. [inkl_alt, spot_inkl, spot_ex, inkl_alt_minus, inkl_alt_elvarme, net_inkl_alt, net_inkl_alt_elvarme, net_inkl_tarif] (optional)
+      gln: 5790000705689 # Grid company GLN (Denmark only), 13-digit GLN number of your Danish grid company, only for the net_* price types. List: [elpriser.org/tariffer](https://elpriser.org/tariffer) (optional)
+      actualonly: # Published prices only, Leaves out the days that are only a model forecast (the next day is a forecast until the day-ahead prices are published, around 13:00 CET). (optional)
+      charges: # Charge, Additional fixed charge per kWh (optional)
+      chargesZones: # Charges zones, Time-based grid fees that override the default charge. (optional)
+      tax: # Tax, Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Formula, Individual formula for calculating the price (optional)
+      average: # Average by hour, optional
+params:
+  - name: zone
+    example: de
+    default:
+    choice: ['dk1', 'dk2', 'no1', 'no2', 'no3', 'no4', 'no5', 'se1', 'se2', 'se3', 'se4', 'fi', 'nl', 'de', 'fr', 'pl', 'it-n', 'at', 'be', 'ch', 'cz', 'hu', 'si', 'es', 'pt', 'sk', 'gr', 'ro', 'bg', 'hr', 'rs', 'ee', 'lv', 'lt', 'me', 'mk', 'al', 'xk', 'gb', 'ie']
+    unit:
+    description: Price zone
+    help: Zone code, e.g. `de`, `fr`, `dk1`, `se3`, `no2`.
+    advanced: false
+    optional: false
+  - name: currency
+    example:
+    default: local
+    choice: ['local', 'eur']
+    unit:
+    description: Currency
+    help: '`local` = the zone''s currency (DKK, SEK, NOK, PLN, ... converted with the ECB reference rate), `eur` = euro. Must match the currency set in evcc. Great Britain is always GBP.'
+    advanced: false
+    optional: false
+  - name: pricemode
+    example:
+    default: inkl_alt
+    choice: ['inkl_alt', 'spot_inkl', 'spot_ex', 'inkl_alt_minus', 'inkl_alt_elvarme', 'net_inkl_alt', 'net_inkl_alt_elvarme', 'net_inkl_tarif']
+    unit:
+    description: Price type (Denmark only)
+    help: Only for dk1 and dk2. `inkl_alt` = spot + Energinet tariffs + electricity duty + VAT (everything except your grid company's tariff); `net_inkl_alt` = the full price including your grid company's tariff, needs `gln`; `spot_ex` / `spot_inkl` = spot price without / with VAT.
+    advanced: false
+    optional: true
+  - name: gln
+    example: 5790000705689
+    default:
+    choice: []
+    unit:
+    description: Grid company GLN (Denmark only)
+    help: '13-digit GLN number of your Danish grid company, only for the net_* price types. List: [elpriser.org/tariffer](https://elpriser.org/tariffer)'
+    advanced: false
+    optional: true
+  - name: actualonly
+    example:
+    default:
+    choice: []
+    unit:
+    description: Published prices only
+    help: Leaves out the days that are only a model forecast (the next day is a forecast until the day-ahead prices are published, around 13:00 CET).
+    advanced: true
+    optional: true
+  - name: charges
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charge
+    help: Additional fixed charge per kWh
+    advanced: true
+    optional: true
+  - name: chargesZones
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charges zones
+    help: Time-based grid fees that override the default charge.
+    advanced: true
+    optional: true
+  - name: tax
+    example:
+    default:
+    choice: []
+    unit:
+    description: Tax
+    help: Additional percentage charge (e.g. 0.2 for 20%)
+    advanced: true
+    optional: true
+  - name: formula
+    example: math.Max((price + charges) * (1 + tax), 0.0)
+    default:
+    choice: []
+    unit:
+    description: Formula
+    help: Individual formula for calculating the price
+    advanced: true
+    optional: true
+  - name: average
+    example:
+    default:
+    choice: []
+    unit:
+    description: Average by hour
+    help:
+    advanced: true
+    optional: true
