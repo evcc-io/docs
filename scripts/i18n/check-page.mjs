@@ -2,6 +2,7 @@
 // Usage: node scripts/i18n/check-page.mjs <lang> <en-relative-path> [--stamp]
 // Compares a translated page with its English source and prints {file, errors, warnings}.
 // --stamp writes translatedFrom (git blob hash of the en source) into the target on success.
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, parse, relative, resolve } from "node:path";
@@ -476,6 +477,12 @@ export async function checkPage(lang, rel, { stamp = false } = {}) {
       ? tg.raw.replace(/^translatedFrom:.*$/m, line)
       : [tg.raw, line].filter(Boolean).join("\n");
     writeFileSync(file, `---\n${fm}\n---\n${tg.body}`);
+    // keep the stamped English in git's object store, so endiff.mjs also finds it for uncommitted pages
+    try {
+      execFileSync("git", ["hash-object", "-w", enFile], { stdio: "ignore" });
+    } catch {
+      /* not a git checkout: endiff falls back to the whole page */
+    }
     out.stamped = hash;
   }
   return out;

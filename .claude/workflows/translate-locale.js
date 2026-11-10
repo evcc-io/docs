@@ -24,10 +24,12 @@ export const meta = {
 };
 
 // args: { phase: 'core'|'blog'|'site'|'blog+site'|'all', commit: boolean, scratch: '/abs/dir',
-//         mode: 'full'|'diff', screenshots: boolean, sweep: boolean,
+//         mode: 'full'|'diff', gate: boolean, screenshots: boolean, sweep: boolean,
 //         locales: [{ lang, name, docs, site, batches: [{ id, tier, kind, files, words }] }] }
 // mode 'diff' (maintenance after small English edits): each page gets only the English change since its
 // translatedFrom stamp translated, one reviewer on the changed lines, no sweep, no screenshots, one gate.
+// gate false (small change sets): translate, review and fix only. No sweep, no screenshots, no gate agent and
+// no build; the caller runs status.mjs --check and prettier --check itself and builds once when all work is done.
 const {
   locales,
   phase = "all",
@@ -35,8 +37,9 @@ const {
   scratch,
   enStat = "",
   mode = "full",
-  screenshots = mode === "full",
-  sweep: sweepOn = mode === "full",
+  gate: gateOn = true,
+  screenshots = mode === "full" && gateOn,
+  sweep: sweepOn = mode === "full" && gateOn,
 } = args;
 const DIFF = mode === "diff";
 const MODEL = "claude-opus-5-5";
@@ -636,8 +639,9 @@ await pipeline(items, async ({ L, b }) => {
   }
   const rec = await runBatch(L, b);
   if (rec) R[L.lang].batches[b.id] = rec;
-  if (--remaining[L.lang] === 0 && !DIFF) await buildLock(() => finalize(L)); // locale done → serialised finalize, no global barrier
+  if (--remaining[L.lang] === 0 && !DIFF && gateOn)
+    await buildLock(() => finalize(L)); // locale done → serialised finalize, no global barrier
 });
-if (DIFF) await gateDiff();
+if (DIFF && gateOn) await gateDiff();
 if (!docsWork) await Promise.all(Object.values(shots));
-return { phase, commit, mode, locales: R };
+return { phase, commit, mode, gate: gateOn, locales: R };
