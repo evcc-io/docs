@@ -3,7 +3,7 @@ title: Benutzerdefinierte Geräte
 description: "Zeigt, wie du Wallboxen, Zähler, Fahrzeuge oder Heizungen ohne eingebaute Vorlage einbindest und Messwerte und Steuerung selbst per HTTP, MQTT oder Modbus definierst."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "161eb222a89c"
+translatedFrom: "4505fc9bb930"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -144,19 +144,23 @@ Echte Zählerstände liefern genauere Langzeitstatistiken.
 
 #### Batteriemodi \{#battery-modes\}
 
-| Wert | Modus        | Verhalten                                                          |
-| ---- | ------------ | ------------------------------------------------------------------ |
-| `1`  | `normal`     | Normaler Betrieb: Laden aus Überschuss, Entladen für den Verbrauch |
-| `2`  | `hold`       | Entladen verhindern, Laden aus Überschuss bleibt erlaubt           |
-| `3`  | `charge`     | Aus dem Netz laden, kein Entladen                                  |
-| `4`  | `holdcharge` | Laden verhindern, Entladen für den Verbrauch bleibt erlaubt        |
-| `5`  | `discharge`  | Ins Netz entladen                                                  |
+| Wert | Modus           | Verhalten                                                          |
+| ---- | --------------- | ------------------------------------------------------------------ |
+| `1`  | `normal`        | Normaler Betrieb: Laden aus Überschuss, Entladen für den Verbrauch |
+| `2`  | `holddischarge` | Entladen verhindern, Laden aus Überschuss bleibt erlaubt           |
+| `3`  | `charge`        | Aus dem Netz laden, kein Entladen                                  |
+| `4`  | `holdcharge`    | Laden verhindern, Entladen für den Verbrauch bleibt erlaubt        |
+| `5`  | `discharge`     | Ins Netz entladen                                                  |
 
 Es werden nur die Batteriemodi genutzt, die das Gerät unterstützt.
 Ist `batterymode` ein [`switch`](/de/reference/plugins#switch), werden die unterstützten Modi aus dessen `case`-Werten übernommen.
 Das funktioniert auch, wenn der Switch in einem [`watchdog`](/de/reference/plugins#watchdog) steckt.
-Für alle anderen Plugins müssen die unterstützten Modi in `batterymodes` angegeben werden, z. B. `batterymodes: ["normal", "hold", "charge"]`.
+Für alle anderen Plugins müssen die unterstützten Modi in `batterymodes` angegeben werden, z. B. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/de/reference/cli/evcc_meter_verifybatterymodes) schaltet die konfigurierten Modi an der echten Batterie nacheinander durch und zeigt, ob die Batterieleistung wie erwartet reagiert.
+
+:::note[Umbenannter Modus]
+Der Modus `holddischarge` hieß vor Version [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0) noch `hold`.
+:::
 
 ### Beispiele
 
@@ -173,7 +177,7 @@ meters:
 ```
 
 Lies Leistung und Ladestand einer Hausbatterie und setze ihren Modus über HTTP.
-Der `switch` deckt die Modi normal, hold und charge ab, evcc bietet also genau diese drei an.
+Der `switch` deckt die Modi normal, holddischarge und charge ab, evcc bietet also genau diese drei an.
 
 ```yaml
 meters:
@@ -195,12 +199,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http

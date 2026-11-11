@@ -3,7 +3,7 @@ title: Brugerdefinerede enheder
 description: "Du kan integrere en oplader, en måler, et køretøj eller en varmeenhed uden indbygget skabelon ved selv at definere aflæsning og styring via HTTP, MQTT eller Modbus."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "161eb222a89c"
+translatedFrom: "4505fc9bb930"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -144,19 +144,23 @@ Rigtige målerstande giver mere præcise langtidsstatistikker.
 
 #### Batteritilstande \{#battery-modes\}
 
-| Værdi | Tilstand     | Adfærd                                                      |
-| ----- | ------------ | ----------------------------------------------------------- |
-| `1`   | `normal`     | Normal drift: opladning fra overskud, afladning til forbrug |
-| `2`   | `hold`       | Ingen afladning, opladning fra overskud er stadig tilladt   |
-| `3`   | `charge`     | Opladning fra elnettet, ingen afladning                     |
-| `4`   | `holdcharge` | Ingen opladning, afladning til forbrug er stadig tilladt    |
-| `5`   | `discharge`  | Afladning til elnettet                                      |
+| Værdi | Tilstand        | Adfærd                                                      |
+| ----- | --------------- | ----------------------------------------------------------- |
+| `1`   | `normal`        | Normal drift: opladning fra overskud, afladning til forbrug |
+| `2`   | `holddischarge` | Ingen afladning, opladning fra overskud er stadig tilladt   |
+| `3`   | `charge`        | Opladning fra elnettet, ingen afladning                     |
+| `4`   | `holdcharge`    | Ingen opladning, afladning til forbrug er stadig tilladt    |
+| `5`   | `discharge`     | Afladning til elnettet                                      |
 
 Kun de batteritilstande, som enheden understøtter, bliver brugt.
 Hvis `batterymode` er en [`switch`](/da/reference/plugins#switch), hentes de understøttede tilstande fra dens `case`-værdier.
 Det fungerer også, når switchen er pakket ind i en [`watchdog`](/da/reference/plugins#watchdog).
-Alle andre plugins kræver `batterymodes` med en liste over de understøttede tilstande, f.eks. `batterymodes: ["normal", "hold", "charge"]`.
+Alle andre plugins kræver `batterymodes` med en liste over de understøttede tilstande, f.eks. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/da/reference/cli/evcc_meter_verifybatterymodes) skifter mellem de konfigurerede tilstande på det faktiske batteri og viser, om batteriets effekt reagerer som forventet.
+
+:::note[Omdøbt tilstand]
+Tilstanden `holddischarge` hed `hold` før version [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0).
+:::
 
 ### Eksempler
 
@@ -173,7 +177,7 @@ meters:
 ```
 
 Aflæs effekt og opladningsniveau for et hjemmebatteri, og sæt dets tilstand via HTTP.
-`switch` dækker tilstandene normal, hold og charge, så evcc tilbyder præcis disse tre.
+`switch` dækker tilstandene normal, holddischarge og charge, så evcc tilbyder præcis disse tre.
 
 ```yaml
 meters:
@@ -195,12 +199,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http
