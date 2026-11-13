@@ -1,0 +1,114 @@
+template: kaco-nh3
+product:
+  identifier: kaco-blueplanet-hybrid-nh3
+  brand: KACO
+  description: blueplanet hybrid NH3
+capabilities: ["battery-control"]
+description: |
+  Für KACO blueplanet Hybrid NH3 mit AI-Dongle/WLAN-Stick. Modbus TCP und lokale AISWEI-HTTP-API müssen über die IP-Adresse des Sticks erreichbar sein (Modbus TCP Port 502, Geräte-ID 3; HTTP Port 8484).
+  Die Batterie-Leistungsregelung verwendet die lokale Schnittstelle `fdbg.cgi`. Maximale Lade- und Entladeleistung werden aus SunSpec Model 802 gelesen. Batterie-Lade- und Entladeenergie werden über die lokale AISWEI-HTTP-API ausgelesen.
+  Die Abregelung wird über ein separates KACO NH3 Abregelungsgerät konfiguriert.
+  Der im SunSpec-Modell 203 bereitgestellte Netzzähler liefert Netzleistung, Import-/Export-Energie und phasenbezogene Messwerte.
+
+render:
+  - usage: grid
+    default: |
+      type: template
+      template: kaco-nh3
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+  - usage: pv
+    default: |
+      type: template
+      template: kaco-nh3
+      usage: pv
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+  - usage: battery
+    default: |
+      type: template
+      template: kaco-nh3
+      usage: battery
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+      battery: # Batteriespeichernummer, [1, 2]
+      serial: # Seriennummer des Wechselrichters (isn)
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 10 # Minimaler Ladestand (%), Wird als Entladegrenze an den Wechselrichter geschrieben und vom Optimizer verwendet. Nur einen Wert einstellen, der vom Batteriespeicher unterstützt wird. Mindestwert 5 %. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Wird als Ladegrenze an den Wechselrichter geschrieben und vom Optimizer verwendet. Nur einen Wert einstellen, der vom Batteriespeicher unterstützt wird. (optional)
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip']
+    unit:
+    description: Modbus Typ
+    help:
+    advanced: false
+    optional: false
+  - name: battery
+    example:
+    default:
+    choice: ['1', '2']
+    unit:
+    description: Batteriespeichernummer
+    help:
+    advanced: false
+    optional: false
+  - name: serial
+    example:
+    default:
+    choice: []
+    unit:
+    description: Seriennummer des Wechselrichters (isn)
+    help:
+    advanced: false
+    optional: false
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Akkukapazität
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default: 10
+    choice: []
+    unit: '%'
+    description: Minimaler Ladestand
+    help: Wird als Entladegrenze an den Wechselrichter geschrieben und vom Optimizer verwendet. Nur einen Wert einstellen, der vom Batteriespeicher unterstützt wird. Mindestwert 5 %.
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default: 100
+    choice: []
+    unit: '%'
+    description: Maximaler Ladestand
+    help: Wird als Ladegrenze an den Wechselrichter geschrieben und vom Optimizer verwendet. Nur einen Wert einstellen, der vom Batteriespeicher unterstützt wird.
+    advanced: false
+    optional: true
+modbus:
+  delay:
+  host:
+  id: 3
+  modbus: tcpip
+  port: 502
+  tcpip: true
+  timeout:

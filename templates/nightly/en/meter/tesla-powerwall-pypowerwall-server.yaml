@@ -1,0 +1,173 @@
+template: tesla-powerwall-pypowerwall-server
+product:
+  identifier: tesla-powerwall-pypowerwall-server
+  brand: Tesla
+  description: Powerwall (pypowerwall-server)
+capabilities: ["battery-control"]
+description: |
+  Uses [pypowerwall-server](https://github.com/jasonacox/pypowerwall-server) as backend. Reads come from its proxy API, battery control uses its authenticated `/control/*` routes. For battery control, `PW_CONTROL_SECRET` must be set on the server; `reserve_hold` requires pypowerwall-server v0.10.0 or later.
+  Since pypowerwall-server v0.14.0 the server can optionally serve HTTPS on port 8775. Without a TLS reverse proxy or the HTTPS listener it stays plain HTTP; with `controlSecret`, prefer HTTPS or a trusted network.
+
+caveats:
+  - description: |
+      Without complete system status data, e.g. in Basic LAN mode or during startup, automatic capacity and power limits may be unavailable. Set `capacity`, `maxchargepower` and `maxdischargepower` manually in that case.
+      The actual backup reserve is read from the server cache and may update only after the next poll following a control action.
+
+render:
+  - usage: grid
+    default: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      port: 8675 # Port, optional
+    advanced: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: grid
+      host: 192.0.2.2 # IP address or hostname
+      port: 8675 # Port, optional
+      schema: http # Schema, Use https when the server has PW_HTTPS enabled or is behind a TLS reverse proxy. Set the port to the HTTPS port, usually 8775, when using the server's HTTPS listener. [https, http] (optional)
+      insecure: # Accept self-signed certificates, optional
+      cache: 1s # Cache, Time interval for data refresh (optional)
+  - usage: pv
+    default: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      port: 8675 # Port, optional
+    advanced: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: pv
+      host: 192.0.2.2 # IP address or hostname
+      port: 8675 # Port, optional
+      schema: http # Schema, Use https when the server has PW_HTTPS enabled or is behind a TLS reverse proxy. Set the port to the HTTPS port, usually 8775, when using the server's HTTPS listener. [https, http] (optional)
+      insecure: # Accept self-signed certificates, optional
+      cache: 1s # Cache, Time interval for data refresh (optional)
+  - usage: battery
+    default: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: battery
+      host: 192.0.2.2 # IP address or hostname
+      port: 8675 # Port, optional
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
+    advanced: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: battery
+      host: 192.0.2.2 # IP address or hostname
+      port: 8675 # Port, optional
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
+      schema: http # Schema, Use https when the server has PW_HTTPS enabled or is behind a TLS reverse proxy. Set the port to the HTTPS port, usually 8775, when using the server's HTTPS listener. [https, http] (optional)
+      insecure: # Accept self-signed certificates, optional
+      cache: 1s # Cache, Time interval for data refresh (optional)
+      controlSecret: # Control secret, Value of PW_CONTROL_SECRET. Required for battery control, omit for read-only use. (optional)
+      maxchargepower: # Maximum charge power (W), Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power. (optional)
+      maxdischargepower: # Maximum discharge power (W), Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging. (optional)
+params:
+  - name: host
+    example: 192.0.2.2
+    default:
+    choice: []
+    unit:
+    description: IP address or hostname
+    help:
+    advanced: false
+    optional: false
+  - name: port
+    example:
+    default: 8675
+    choice: []
+    unit:
+    description: Port
+    help:
+    advanced: false
+    optional: true
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default: 0
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Lower limit as configured on the battery system. Used by optimizer.
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default: 100
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging.
+    advanced: false
+    optional: true
+  - name: schema
+    example:
+    default: http
+    choice: ['https', 'http']
+    unit:
+    description: Schema
+    help: Use https when the server has PW_HTTPS enabled or is behind a TLS reverse proxy. Set the port to the HTTPS port, usually 8775, when using the server's HTTPS listener.
+    advanced: true
+    optional: true
+  - name: insecure
+    example:
+    default:
+    choice: []
+    unit:
+    description: Accept self-signed certificates
+    help:
+    advanced: true
+    optional: true
+  - name: cache
+    example: 5m
+    default: 1s
+    choice: []
+    unit:
+    description: Cache
+    help: Time interval for data refresh
+    advanced: true
+    optional: true
+  - name: controlSecret
+    example:
+    default:
+    choice: []
+    unit:
+    description: Control secret
+    help: Value of PW_CONTROL_SECRET. Required for battery control, omit for read-only use.
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum discharge power
+    help: Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging.
+    advanced: true
+    optional: true
