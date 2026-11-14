@@ -3,7 +3,7 @@ title: "MQTT-API"
 description: "Her ser du alle MQTT-topics, evcc udgiver om anlæg, ladepunkter, køretøjer og hjemmebatteri, og dem, du kan skrive til til at ændre tilstande, grænser eller ladeplaner."
 sidebar:
   order: 2
-translatedFrom: "2c690ff491d7"
+translatedFrom: "b9e76bd617b8"
 ---
 
 [API-statussen](/da/reference/state) udgives også via MQTT.
@@ -85,7 +85,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: resteffekt mod elnettet
 - `evcc/site/batteryGridChargeLimit`: prisgrænse for batteriopladning fra elnettet
 - `evcc/site/batteryDischargeControl`: aktiver/deaktiver styring af batteriafladning (true/false)
-- `evcc/site/batteryMode`: ekstern batteritilstand (`normal`, `hold`, `charge`, `holdcharge`, `discharge`), styrer alle styrbare batterier direkte, tilsidesætter andre evcc-tilstande og nulstilles efter 60 s
+- `evcc/site/batteryMode`: ekstern batteritilstand (`normal`, `holddischarge`, `charge`, `holdcharge`, `discharge`), styrer alle styrbare batterier direkte, tilsidesætter andre evcc-tilstande og nulstilles efter 60 s
 - `evcc/site/smartCostLimit`: prisgrænse for smart opladning fra elnettet for alle ladepunkter
 - `evcc/site/smartFeedInPriorityLimit`: grænse for eksportprioritet for alle ladepunkter
 

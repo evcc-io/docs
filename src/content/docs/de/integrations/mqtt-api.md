@@ -3,7 +3,7 @@ title: "MQTT-API"
 description: "Listet alle MQTT-Topics auf, die evcc zu Standort, Ladepunkten, Fahrzeugen und Hausbatterie sendet, und die Topics zum Ändern von Modi, Limits oder Ladeplänen."
 sidebar:
   order: 2
-translatedFrom: "2c690ff491d7"
+translatedFrom: "b9e76bd617b8"
 ---
 
 Der [API State](/de/reference/state) wird auch per MQTT veröffentlicht.
@@ -85,7 +85,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: Residualleistung am Netzanschluss
 - `evcc/site/batteryGridChargeLimit`: Preislimit für das Netzladen der Batterie
 - `evcc/site/batteryDischargeControl`: Entladesteuerung der Batterie aktivieren/deaktivieren (true/false)
-- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `hold`, `charge`, `holdcharge`, `discharge`), steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi und wird nach 60 s zurückgesetzt
+- `evcc/site/batteryMode`: externer Batteriemodus (`normal`, `holddischarge`, `charge`, `holdcharge`, `discharge`), steuert alle regelbaren Batterien direkt, überschreibt andere evcc-Modi und wird nach 60 s zurückgesetzt
 - `evcc/site/smartCostLimit`: Preislimit für smartes Netzladen aller Ladepunkte
 - `evcc/site/smartFeedInPriorityLimit`: Einspeisegrenze für alle Ladepunkte
 

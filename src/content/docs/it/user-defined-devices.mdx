@@ -3,7 +3,7 @@ title: Dispositivi definiti dall’utente
 description: "Mostra come integrare un caricabatterie, un contatore, un veicolo o un riscaldatore senza template integrato, definendo letture e comandi via HTTP, MQTT o Modbus."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "161eb222a89c"
+translatedFrom: "4505fc9bb930"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -144,19 +144,23 @@ Le letture reali del contatore forniscono statistiche a lungo termine più preci
 
 #### Modalità della batteria \{#battery-modes\}
 
-| Valore | Modalità     | Comportamento                                                     |
-| ------ | ------------ | ----------------------------------------------------------------- |
-| `1`    | `normal`     | Funzionamento normale: carica dal surplus, scarica per il consumo |
-| `2`    | `hold`       | Impedisce la scarica, la carica dal surplus resta consentita      |
-| `3`    | `charge`     | Carica dalla rete, nessuna scarica                                |
-| `4`    | `holdcharge` | Impedisce la carica, la scarica per il consumo resta consentita   |
-| `5`    | `discharge`  | Scarica verso la rete                                             |
+| Valore | Modalità        | Comportamento                                                     |
+| ------ | --------------- | ----------------------------------------------------------------- |
+| `1`    | `normal`        | Funzionamento normale: carica dal surplus, scarica per il consumo |
+| `2`    | `holddischarge` | Impedisce la scarica, la carica dal surplus resta consentita      |
+| `3`    | `charge`        | Carica dalla rete, nessuna scarica                                |
+| `4`    | `holdcharge`    | Impedisce la carica, la scarica per il consumo resta consentita   |
+| `5`    | `discharge`     | Scarica verso la rete                                             |
 
 Vengono usate solo le modalità della batteria supportate dal dispositivo.
 Se `batterymode` è uno [`switch`](/it/reference/plugins#switch), le modalità supportate vengono ricavate dai suoi valori `case`.
 Questo funziona anche quando lo switch è racchiuso in un [`watchdog`](/it/reference/plugins#watchdog).
-Qualsiasi altro plugin richiede `batterymodes` con l’elenco delle modalità supportate, ad es. `batterymodes: ["normal", "hold", "charge"]`.
+Qualsiasi altro plugin richiede `batterymodes` con l’elenco delle modalità supportate, ad es. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/it/reference/cli/evcc_meter_verifybatterymodes) attiva una dopo l’altra le modalità configurate sulla batteria reale e mostra se la potenza della batteria reagisce come previsto.
+
+:::note[Modalità rinominata]
+La modalità `holddischarge` si chiamava `hold` prima della versione [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0).
+:::
 
 ### Esempi
 
@@ -173,7 +177,7 @@ meters:
 ```
 
 Leggere potenza e livello di carica di una batteria domestica e impostarne la modalità via HTTP.
-Lo `switch` copre le modalità normal, hold e charge, quindi evcc offre esattamente queste tre.
+Lo `switch` copre le modalità normal, holddischarge e charge, quindi evcc offre esattamente queste tre.
 
 ```yaml
 meters:
@@ -195,12 +199,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http
