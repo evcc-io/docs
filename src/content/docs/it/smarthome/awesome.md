@@ -1,7 +1,7 @@
 ---
 title: "Altri progetti fantastici"
 description: "Raccoglie progetti della community per evcc, come dashboard Grafana, una scheda Home Assistant, un display E-Ink, un anello LED e un’app per la barra dei menu di macOS."
-translatedFrom: "7c4a2e1ed1ad"
+translatedFrom: "65552946ce30"
 ---
 
 La community di evcc è piena di creatività.
@@ -15,6 +15,7 @@ Sono tutti sviluppati in modo indipendente dai rispettivi autori e non fanno par
 - [maschiach/evcc_power_ring](https://github.com/maschiach/evcc_power_ring): anello LED che visualizza lo stato attuale di evcc
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): app per la barra dei menu di macOS con panoramica energetica in tempo reale e stato di ricarica
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): display touch accanto al caricabatterie (ESP32-4848S040C) che mostra la potenza di ricarica e la quota solare e permette di cambiare la modalità di ricarica, installabile direttamente dal browser
+- [mafeko/ladegast](https://github.com/mafeko/ladegast): Permetti agli ospiti di ricaricare al tuo caricabatterie con un link personale e un PIN. Possono cambiare la modalità di ricarica e vedere le proprie sessioni e i relativi costi, mentre evcc resta privato.
 
 Manca un progetto?
 [Modifica questa pagina](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) per aggiungerlo.

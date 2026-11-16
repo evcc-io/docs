@@ -15,6 +15,6 @@ All of them are developed independently by their authors and are not part of evc
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): macOS menu bar app with live energy overview and charging status
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): touch display next to the wallbox (ESP32-4848S040C) that shows charging power and solar share and switches charging modes – installable straight from the browser
 - [mafeko/ladegast](https://github.com/mafeko/ladegast): Let guests charge at your wallbox with a personal link and PIN. They switch charge mode and see their own sessions and costs, evcc stays private.
-  
+
 Missing a project?
 [Edit this page](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) to add it.
