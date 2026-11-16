@@ -1,9 +1,9 @@
 ---
 title: "influx"
-description: "Configurez dans evcc.yaml l’enregistrement des données de charge dans InfluxDB 1.8, InfluxDB 2 ou VictoriaMetrics, y compris en HTTPS avec un certificat auto-signé."
+description: "Configurez dans evcc.yaml l’enregistrement des données de charge dans InfluxDB 1.8, 2 ou 3 ou dans VictoriaMetrics, y compris en HTTPS avec un certificat auto-signé."
 sidebar:
   order: 16
-translatedFrom: "63ea856c515d"
+translatedFrom: "a1fba8b101fa"
 ---
 
 Définit la configuration nécessaire pour écrire des données dans Influx.
@@ -38,6 +38,28 @@ influx:
   token: 1234567890abcdef
   org: home
 ```
+
+---
+
+## InfluxDB 3
+
+InfluxDB 3 Core et Enterprise acceptent l’API d’écriture d’InfluxDB 2, les paramètres d’InfluxDB v2.x s’appliquent donc ici aussi.
+La `database` est créée lors de la première écriture si elle n’existe pas encore.
+Le `token` doit disposer d’un accès en écriture à cette base de données.
+InfluxDB 3 ignore `org`, qui peut donc être omis.
+Le nom d’utilisateur et le mot de passe ne sont pas acceptés.
+
+**Exemple pour InfluxDB 3** :
+
+```yaml
+influx:
+  url: http://localhost:8181
+  database: evcc
+  token: apiv3_1234567890abcdef
+```
+
+Dans l’interface, utilisez le formulaire InfluxDB habituel et saisissez le nom de la base de données dans **Seau**.
+**Organisation** peut rester vide.
 
 ---
 
