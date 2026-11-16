@@ -1,9 +1,9 @@
 ---
 title: "influx"
-description: "Sådan skriver du opladningsdata til InfluxDB 1.8, InfluxDB 2 eller VictoriaMetrics fra evcc.yaml, inkl. HTTPS med et selvsigneret certifikat."
+description: "Sådan skriver du opladningsdata til InfluxDB 1.8, 2 eller 3 eller til VictoriaMetrics fra evcc.yaml, inkl. HTTPS med et selvsigneret certifikat."
 sidebar:
   order: 16
-translatedFrom: "63ea856c515d"
+translatedFrom: "fd6f2baee906"
 ---
 
 Angiver den konfiguration, der er nødvendig for at skrive data til Influx.
@@ -38,6 +38,28 @@ influx:
   token: 1234567890abcdef
   org: home
 ```
+
+---
+
+## InfluxDB 3
+
+InfluxDB 3 Core og Enterprise accepterer write-API'et fra InfluxDB 2, så indstillingerne for InfluxDB v2.x gælder også her.
+`database` oprettes ved første skrivning, hvis den ikke findes endnu.
+`token` skal have skriveadgang til denne database.
+InfluxDB 3 ignorerer `org`, så den kan udelades.
+Brugernavn og adgangskode accepteres ikke.
+
+**Eksempel med InfluxDB 3**:
+
+```yaml
+influx:
+  url: http://localhost:8181
+  database: evcc
+  token: apiv3_1234567890abcdef
+```
+
+I brugerfladen bruger du den almindelige InfluxDB-formular og angiver databasenavnet som **Bucket**.
+**Organisation** er et obligatorisk felt der, men enhver værdi fungerer.
 
 ---
 

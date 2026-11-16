@@ -1,9 +1,9 @@
 ---
 title: "influx"
-description: "Popisuje, jak v evcc.yaml nastavit zápis dat o nabíjení do InfluxDB 1.8, InfluxDB 2 nebo VictoriaMetrics, včetně HTTPS se self-signed certifikátem."
+description: "Popisuje, jak v evcc.yaml nastavit zápis dat o nabíjení do InfluxDB 1.8, 2 nebo 3 či do VictoriaMetrics, včetně HTTPS se self-signed certifikátem."
 sidebar:
   order: 16
-translatedFrom: "63ea856c515d"
+translatedFrom: "fd6f2baee906"
 ---
 
 Určuje konfiguraci potřebnou pro zápis dat do InfluxDB.
@@ -38,6 +38,28 @@ influx:
   token: 1234567890abcdef
   org: home
 ```
+
+---
+
+## InfluxDB 3
+
+InfluxDB 3 Core a Enterprise přijímají zápisové API InfluxDB 2, takže zde platí i nastavení pro InfluxDB v2.x.
+Databáze `database` se při prvním zápisu vytvoří, pokud ještě neexistuje.
+`token` potřebuje oprávnění k zápisu do této databáze.
+InfluxDB 3 ignoruje `org`, takže ho lze vynechat.
+Uživatelské jméno a heslo se nepřijímají.
+
+**Příklad pro InfluxDB 3**:
+
+```yaml
+influx:
+  url: http://localhost:8181
+  database: evcc
+  token: apiv3_1234567890abcdef
+```
+
+V uživatelském rozhraní použijte běžný formulář InfluxDB a název databáze zadejte jako **Úložiště (bucket)**.
+**Organizace** je tam povinné pole, ale funguje libovolná hodnota.
 
 ---
 
