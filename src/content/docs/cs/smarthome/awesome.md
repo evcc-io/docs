@@ -1,7 +1,7 @@
 ---
 title: "Další skvělé projekty"
 description: "Komunitní projekty rozšiřují evcc např. o dashboardy pro Grafanu, kartu pro Home Assistant, E-Ink displej, LED kruh a aplikaci pro lištu nabídek macOS."
-translatedFrom: "65552946ce30"
+translatedFrom: "8f7e827cb6b3"
 ---
 
 Komunita kolem evcc je plná kreativních lidí.
@@ -16,6 +16,7 @@ Všechny tyto projekty vyvíjejí jejich autoři nezávisle a nejsou součást�
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): aplikace pro lištu nabídek macOS s živým přehledem energie a stavem nabíjení
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): dotykový displej vedle nabíječky (ESP32-4848S040C), který zobrazuje nabíjecí výkon a solární podíl a umožňuje přepínat režimy nabíjení; lze ho nainstalovat přímo z prohlížeče
 - [mafeko/ladegast](https://github.com/mafeko/ladegast): Hosté mohou nabíjet u vaší nabíječky přes osobní odkaz a PIN. Sami přepínají režim nabíjení a vidí své vlastní relace a náklady, vaše instance evcc přitom zůstává soukromá.
+- [mobilewhatelse/viertelstunden-waechter](https://github.com/mobilewhatelse/viertelstunden-waechter): integrace pro Home Assistant, která drží nejvyšší čtvrthodinový odběr ze sítě pod limitem pro síťové tarify podle výkonu. Na nabíjecím bodě nastavuje jen strop, takže vaše instance evcc pod ním dál reguluje.
 
 Chybí tu nějaký projekt?
 [Upravte tuto stránku](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) a přidejte ho.
