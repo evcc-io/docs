@@ -1,7 +1,7 @@
 ---
 title: "Weitere tolle Projekte"
 description: "Hier findest du Community-Projekte rund um evcc, etwa Grafana-Dashboards, eine Home-Assistant-Karte, ein E-Ink-Display, einen LED-Ring und eine macOS-Menüleisten-App."
-translatedFrom: "65552946ce30"
+translatedFrom: "8f7e827cb6b3"
 ---
 
 Die evcc-Community ist kreativ.
@@ -16,6 +16,7 @@ Alle werden von ihren Autoren unabhängig entwickelt und sind nicht Teil von evc
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): macOS-Menüleisten-App mit Live-Energieübersicht und Ladestatus
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): Touch-Display neben der Wallbox (ESP32-4848S040C), das Ladeleistung und PV-Anteil zeigt und die Lademodi umschaltet, und es lässt sich direkt aus dem Browser installieren
 - [mafeko/ladegast](https://github.com/mafeko/ladegast): Lass Gäste mit einem persönlichen Link und einer PIN an deiner Wallbox laden. Sie wechseln den Lademodus und sehen ihre eigenen Ladevorgänge und Kosten, deine evcc-Instanz bleibt dabei privat.
+- [mobilewhatelse/viertelstunden-waechter](https://github.com/mobilewhatelse/viertelstunden-waechter): Home-Assistant-Integration, die den höchsten Viertelstunden-Netzbezug für leistungsbasierte Netztarife unter einem Limit hält. Sie setzt nur eine Obergrenze am Ladepunkt, sodass deine evcc-Instanz darunter weiter regelt.
 
 Fehlt ein Projekt?
 [Bearbeite diese Seite](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md), um es zu ergänzen.

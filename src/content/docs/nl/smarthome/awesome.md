@@ -1,7 +1,7 @@
 ---
 title: "Meer geweldige projecten"
 description: "Hier vindt u communityprojecten die op evcc voortbouwen, zoals Grafana-dashboards, een Home Assistant-kaart, een E-Ink-display, een ledring en een macOS-menubalkapp."
-translatedFrom: "65552946ce30"
+translatedFrom: "8f7e827cb6b3"
 ---
 
 De evcc-community is een creatieve groep.
@@ -16,6 +16,7 @@ Ze worden allemaal onafhankelijk door hun makers ontwikkeld en maken geen deel u
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): macOS-menubalkapp met live energieoverzicht en laadstatus
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): touchscreen naast de lader (ESP32-4848S040C) dat het laadvermogen en het aandeel zonne-energie toont en tussen laadmodi schakelt; de firmware installeert u rechtstreeks vanuit de browser
 - [mafeko/ladegast](https://github.com/mafeko/ladegast): Laat gasten met een persoonlijke link en pincode bij uw lader laden. Zij wisselen van laadmodus en zien hun eigen laadsessies en kosten, evcc blijft privé.
+- [mobilewhatelse/viertelstunden-waechter](https://github.com/mobilewhatelse/viertelstunden-waechter): Home Assistant-integratie die de hoogste netafname per kwartier onder een limiet houdt voor vermogensgebaseerde nettarieven. Ze stelt alleen een bovengrens in op het laadpunt, zodat uw evcc-instantie daaronder blijft regelen.
 
 Ontbreekt er een project?
 [Bewerk deze pagina](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) om het toe te voegen.

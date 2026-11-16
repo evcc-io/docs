@@ -1,7 +1,7 @@
 ---
 title: "Flere seje projekter"
 description: "Her finder du fællesskabsprojekter, der bygger på evcc, f.eks. Grafana-dashboards, et Home Assistant-kort, en E-Ink-skærm, en LED-ring og en app til macOS-menulinjen."
-translatedFrom: "65552946ce30"
+translatedFrom: "8f7e827cb6b3"
 ---
 
 evcc-fællesskabet er en kreativ flok.
@@ -16,6 +16,7 @@ De udvikles alle selvstændigt af deres forfattere og er ikke en del af evcc.
 - [fabiofdsantos/EVCCStatusBar](https://github.com/fabiofdsantos/EVCCStatusBar): app til macOS-menulinjen med live-energioversigt og opladningsstatus
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): touchskærm ved siden af opladeren (ESP32-4848S040C), der viser ladeeffekt og solandel, skifter ladetilstand og kan installeres direkte fra browseren
 - [mafeko/ladegast](https://github.com/mafeko/ladegast): Lad gæster lade ved din oplader med et personligt link og en PIN-kode. De skifter ladetilstand og ser deres egne opladningssessioner og omkostninger, mens evcc forbliver privat.
+- [mobilewhatelse/viertelstunden-waechter](https://github.com/mobilewhatelse/viertelstunden-waechter): Home Assistant-integration, der holder den højeste import fra elnettet pr. kvarter under en grænse ved effektbaserede nettariffer. Den sætter kun et loft på ladepunktet, så din evcc-instans fortsat regulerer under det.
 
 Mangler der et projekt?
 [Rediger denne side](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) for at tilføje det.
