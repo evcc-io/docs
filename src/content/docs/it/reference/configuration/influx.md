@@ -3,7 +3,7 @@ title: "influx"
 description: "Configura in evcc.yaml la scrittura dei dati di ricarica in InfluxDB 1.8, 2 o 3 o in VictoriaMetrics, anche tramite HTTPS con un certificato autofirmato."
 sidebar:
   order: 16
-translatedFrom: "fd6f2baee906"
+translatedFrom: "a1fba8b101fa"
 ---
 
 Definisce la configurazione necessaria per scrivere dati in Influx.
@@ -59,7 +59,7 @@ influx:
 ```
 
 Nell’interfaccia usa il normale modulo InfluxDB e inserisci il nome del database come **Bucket**.
-Lì **Società** è un campo obbligatorio, ma va bene qualsiasi valore.
+Il campo **Società** può restare vuoto.
 
 ---
 

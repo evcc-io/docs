@@ -3,7 +3,7 @@ title: "influx"
 description: "Beschrijft hoe u vanuit evcc.yaml laadgegevens naar InfluxDB 1.8, 2 of 3 of naar VictoriaMetrics schrijft, inclusief HTTPS met een zelfondertekend certificaat."
 sidebar:
   order: 16
-translatedFrom: "fd6f2baee906"
+translatedFrom: "a1fba8b101fa"
 ---
 
 Definieert de configuratie die nodig is om gegevens naar Influx te schrijven.
@@ -59,7 +59,7 @@ influx:
 ```
 
 Gebruik in de gebruikersinterface het gewone InfluxDB-formulier en voer de databasenaam in als **Bucket**.
-**Organisatie** is daar een verplicht veld, maar elke waarde werkt.
+**Organisatie** kan leeg blijven.
 
 ---
 

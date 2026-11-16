@@ -3,7 +3,7 @@ title: "influx"
 description: "Sådan skriver du opladningsdata til InfluxDB 1.8, 2 eller 3 eller til VictoriaMetrics fra evcc.yaml, inkl. HTTPS med et selvsigneret certifikat."
 sidebar:
   order: 16
-translatedFrom: "fd6f2baee906"
+translatedFrom: "a1fba8b101fa"
 ---
 
 Angiver den konfiguration, der er nødvendig for at skrive data til Influx.
@@ -59,7 +59,7 @@ influx:
 ```
 
 I brugerfladen bruger du den almindelige InfluxDB-formular og angiver databasenavnet som **Bucket**.
-**Organisation** er et obligatorisk felt der, men enhver værdi fungerer.
+**Organisation** kan lades tom.
 
 ---
 

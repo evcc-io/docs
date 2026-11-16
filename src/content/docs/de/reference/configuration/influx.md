@@ -3,7 +3,7 @@ title: "influx"
 description: "So schreibt deine evcc-Instanz Ladedaten per evcc.yaml an InfluxDB 1.8, 2 oder 3 oder an VictoriaMetrics, auch über HTTPS mit selbstsigniertem Zertifikat."
 sidebar:
   order: 16
-translatedFrom: "fd6f2baee906"
+translatedFrom: "a1fba8b101fa"
 ---
 
 Definiert die Konfiguration, die zum Schreiben von Daten in InfluxDB nötig ist.
@@ -59,7 +59,7 @@ influx:
 ```
 
 Verwende in der Oberfläche das normale InfluxDB-Formular und trage den Datenbanknamen als **Bucket** ein.
-**Organisation** ist dort ein Pflichtfeld, aber jeder Wert funktioniert.
+**Organisation** kann leer bleiben.
 
 ---
 

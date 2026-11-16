@@ -58,7 +58,7 @@ influx:
 ```
 
 In the UI, use the regular InfluxDB form and enter the database name as **Bucket**.
-**Organization** is a required field there, but any value works.
+**Organization** can stay empty.
 
 ---
 

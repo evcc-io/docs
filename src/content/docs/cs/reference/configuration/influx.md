@@ -3,7 +3,7 @@ title: "influx"
 description: "Popisuje, jak v evcc.yaml nastavit zápis dat o nabíjení do InfluxDB 1.8, 2 nebo 3 či do VictoriaMetrics, včetně HTTPS se self-signed certifikátem."
 sidebar:
   order: 16
-translatedFrom: "fd6f2baee906"
+translatedFrom: "a1fba8b101fa"
 ---
 
 Určuje konfiguraci potřebnou pro zápis dat do InfluxDB.
@@ -59,7 +59,7 @@ influx:
 ```
 
 V uživatelském rozhraní použijte běžný formulář InfluxDB a název databáze zadejte jako **Úložiště (bucket)**.
-**Organizace** je tam povinné pole, ale funguje libovolná hodnota.
+**Organizace** může zůstat prázdná.
 
 ---
 
