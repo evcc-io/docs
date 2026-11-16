@@ -1,0 +1,173 @@
+template: tesla-powerwall-pypowerwall-server
+product:
+  identifier: tesla-powerwall-pypowerwall-server
+  brand: Tesla
+  description: Powerwall (pypowerwall-server)
+capabilities: ["battery-control"]
+description: |
+  Nutzt [pypowerwall-server](https://github.com/jasonacox/pypowerwall-server) als Backend. Die Lesezugriffe kommen über dessen Proxy-API, die Batteriesteuerung über die authentifizierten `/control/*`-Routen. Für die Batteriesteuerung muss im Server `PW_CONTROL_SECRET` gesetzt sein; `reserve_hold` benötigt pypowerwall-server v0.10.0 oder neuer.
+  Ab pypowerwall-server v0.14.0 kann der Server optional auch HTTPS auf Port 8775 anbieten. Ohne TLS-Reverse-Proxy oder aktivierten HTTPS-Listener bleibt es bei HTTP; mit `controlSecret` sollte HTTPS oder ein vertrauenswürdiges Netz verwendet werden.
+
+caveats:
+  - description: |
+      Ohne vollständige Systemstatus-Daten, z. B. im Basic-LAN-Modus oder während der Startphase, können automatische Kapazität und Leistungsgrenzen fehlen. Setze `capacity`, `maxchargepower` und `maxdischargepower` in diesem Fall manuell.
+      Die tatsächliche Backup-Reserve wird aus dem Server-Cache gelesen und kann nach einer Steuerungsaktion erst beim nächsten Poll aktualisiert sein.
+
+render:
+  - usage: grid
+    default: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: grid
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 8675 # Port, optional
+    advanced: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: grid
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 8675 # Port, optional
+      schema: http # Schema, https verwenden, wenn der Server PW_HTTPS aktiviert hat oder hinter einem TLS-Reverse-Proxy läuft. Bei aktiviertem HTTPS-Listener des Servers den HTTPS-Port setzen, üblicherweise 8775. [https, http] (optional)
+      insecure: # Selbstsignierte Zertifikate akzeptieren, optional
+      cache: 1s # Cache, Zeitintervall für erneute Datenabfrage (optional)
+  - usage: pv
+    default: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: pv
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 8675 # Port, optional
+    advanced: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: pv
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 8675 # Port, optional
+      schema: http # Schema, https verwenden, wenn der Server PW_HTTPS aktiviert hat oder hinter einem TLS-Reverse-Proxy läuft. Bei aktiviertem HTTPS-Listener des Servers den HTTPS-Port setzen, üblicherweise 8775. [https, http] (optional)
+      insecure: # Selbstsignierte Zertifikate akzeptieren, optional
+      cache: 1s # Cache, Zeitintervall für erneute Datenabfrage (optional)
+  - usage: battery
+    default: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: battery
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 8675 # Port, optional
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
+    advanced: |
+      type: template
+      template: tesla-powerwall-pypowerwall-server
+      usage: battery
+      host: 192.0.2.2 # IP-Adresse oder Hostname
+      port: 8675 # Port, optional
+      capacity: 50 # Akkukapazität (kWh), optional
+      minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
+      schema: http # Schema, https verwenden, wenn der Server PW_HTTPS aktiviert hat oder hinter einem TLS-Reverse-Proxy läuft. Bei aktiviertem HTTPS-Listener des Servers den HTTPS-Port setzen, üblicherweise 8775. [https, http] (optional)
+      insecure: # Selbstsignierte Zertifikate akzeptieren, optional
+      cache: 1s # Cache, Zeitintervall für erneute Datenabfrage (optional)
+      controlSecret: # Control Secret, Wert von PW_CONTROL_SECRET. Für Batteriesteuerung nötig, weglassen für reinen Lesezugriff. (optional)
+      maxchargepower: # Maximale Ladeleistung (W), Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen. (optional)
+      maxdischargepower: # Maximale Entladeleistung (W), Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert. (optional)
+params:
+  - name: host
+    example: 192.0.2.2
+    default:
+    choice: []
+    unit:
+    description: IP-Adresse oder Hostname
+    help:
+    advanced: false
+    optional: false
+  - name: port
+    example:
+    default: 8675
+    choice: []
+    unit:
+    description: Port
+    help:
+    advanced: false
+    optional: true
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Akkukapazität
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default: 0
+    choice: []
+    unit: '%'
+    description: Minimaler Ladestand
+    help: Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt.
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default: 100
+    choice: []
+    unit: '%'
+    description: Maximaler Ladestand
+    help: Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen.
+    advanced: false
+    optional: true
+  - name: schema
+    example:
+    default: http
+    choice: ['https', 'http']
+    unit:
+    description: Schema
+    help: https verwenden, wenn der Server PW_HTTPS aktiviert hat oder hinter einem TLS-Reverse-Proxy läuft. Bei aktiviertem HTTPS-Listener des Servers den HTTPS-Port setzen, üblicherweise 8775.
+    advanced: true
+    optional: true
+  - name: insecure
+    example:
+    default:
+    choice: []
+    unit:
+    description: Selbstsignierte Zertifikate akzeptieren
+    help:
+    advanced: true
+    optional: true
+  - name: cache
+    example: 5m
+    default: 1s
+    choice: []
+    unit:
+    description: Cache
+    help: Zeitintervall für erneute Datenabfrage
+    advanced: true
+    optional: true
+  - name: controlSecret
+    example:
+    default:
+    choice: []
+    unit:
+    description: Control Secret
+    help: Wert von PW_CONTROL_SECRET. Für Batteriesteuerung nötig, weglassen für reinen Lesezugriff.
+    advanced: true
+    optional: true
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Ladeleistung
+    help: Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen.
+    advanced: true
+    optional: true
+  - name: maxdischargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Entladeleistung
+    help: Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert.
+    advanced: true
+    optional: true
