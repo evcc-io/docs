@@ -3,7 +3,7 @@ title: Plugins
 description: "Les plugins lisent et écrivent des valeurs individuelles via Modbus, HTTP, MQTT ou des scripts et servent de briques de base aux appareils personnalisés."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3a558965f35f"
+translatedFrom: "6794b715c615"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -111,22 +111,36 @@ Il convient particulièrement au Raspberry Pi et aux ordinateurs monocartes simi
 
 **Paramètres** :
 
-| Paramètre | Type   | Obligatoire | Description                                         |
-| --------- | ------ | ----------- | --------------------------------------------------- |
-| function  | string | oui         | Mode : `read` (entrée) ou `write` (sortie)          |
-| pin       | int    | oui         | Numéro de broche (numérotation BCM, p. ex. GPIO 17) |
+| Paramètre | Type   | Obligatoire | Description                                                                                     |
+| --------- | ------ | ----------- | ----------------------------------------------------------------------------------------------- |
+| function  | string | oui         | Mode : `read` (entrée) ou `write` (sortie)                                                      |
+| pin       | int    | oui         | Numéro de broche (numérotation BCM, p. ex. GPIO 17)                                             |
+| activelow | bool   | non         | Inverse la logique : `true` = LOW, `false` = HIGH. Par défaut `false`                           |
+| bias      | string | non         | Résistance interne : `pull-up`, `pull-down`, `disabled` ou `as-is`. Par défaut, voir ci-dessous |
+| chip      | string | non         | Puce GPIO. Par défaut `gpiochip0`                                                               |
 
 **Fonctionnement** :
 
 - **Lecture** (`function: read`) : lit l’état d’une broche GPIO sous forme de valeur booléenne (`true` = HIGH, `false` = LOW)
 - **Écriture** (`function: write`) : met une broche GPIO à HIGH (`true`) ou LOW (`false`)
 
-Les entrées utilisent toujours la résistance de rappel interne (pull-up), un contact de commutation se câble donc entre la broche et la masse (GND).
+Avec `activelow: true`, les deux sens sont inversés : une broche à LOW est lue comme `true`, et `true` met la broche à LOW.
+Les sorties démarrent à l’état inactif, c.-à-d. LOW, ou HIGH avec `activelow`.
+
+Les entrées utilisent par défaut la résistance de rappel interne (pull-up), les sorties laissent la résistance inchangée.
+Définissez `bias` pour modifier ce comportement, p. ex. `pull-down` pour un contact câblé entre la broche et 3,3 V.
+Si plusieurs configurations utilisent la même broche, leurs valeurs `bias` ne doivent pas différer.
+
+Avec les paramètres par défaut, un contact de commutation se câble entre la broche et la masse (GND).
 Un contact ouvert est lu comme `true` (HIGH), un contact fermé comme `false` (LOW).
 Pour un signal de limite, utilisez le contact normalement fermé (NF) du relais.
 En fonctionnement normal, le contact est fermé et la broche est lue comme `false`.
 Lorsque la limite est activée, le contact s’ouvre et la broche est lue comme `true`.
 Un câble coupé est également lu comme `true`, la limite s’applique donc par sécurité.
+
+Si votre boîtier de commande ne fournit qu’un contact normalement ouvert (NO), câblez-le de la même manière et définissez `activelow: true`.
+Le contact fermé est alors lu comme `true`.
+Ce câblage n’est pas sûr en cas de défaut : un câble coupé est lu comme `false` et la limite n’est pas appliquée.
 
 La numérotation des broches suit le schéma BCM (numéros Broadcom, pas la position physique de la broche).
 Pour le brochage d’un Raspberry Pi, voir p. ex. [pinout.xyz](https://pinout.xyz/).
@@ -139,6 +153,15 @@ function: read
 pin: 17 # numéro de broche BCM
 ```
 
+**Exemple de lecture** (contact normalement ouvert) :
+
+```yaml
+source: gpio
+function: read
+pin: 17 # numéro de broche BCM
+activelow: true # un contact fermé est lu comme true
+```
+
 **Exemple d’écriture** :
 
 ```yaml
@@ -148,7 +171,7 @@ pin: 27 # numéro de broche BCM
 ```
 
 :::note
-Ce plugin ne fonctionne que sur les systèmes Linux ayant accès à `/dev/gpiomem`.
+Ce plugin ne fonctionne que sur les systèmes Linux ayant accès à la puce GPIO, p. ex. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="lecture" variant="tip" size="small" /> <Badge text="écriture" variant="caution" size="small" /> \{#go\}

@@ -3,7 +3,7 @@ title: Plugins
 description: "Plugins lesen und schreiben einzelne Werte über Modbus, HTTP, MQTT, Skripte und mehr und sind die Bausteine für benutzerdefinierte Geräte."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3a558965f35f"
+translatedFrom: "6794b715c615"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -111,22 +111,36 @@ Es eignet sich besonders für den Raspberry Pi und ähnliche Einplatinencomputer
 
 **Parameter**:
 
-| Parameter | Typ    | Erforderlich | Beschreibung                                   |
-| --------- | ------ | ------------ | ---------------------------------------------- |
-| function  | string | ja           | Modus: `read` (Eingang) oder `write` (Ausgang) |
-| pin       | int    | ja           | Pin-Nummer (BCM-Nummerierung, z. B. GPIO 17)   |
+| Parameter | Typ    | Erforderlich | Beschreibung                                                                               |
+| --------- | ------ | ------------ | ------------------------------------------------------------------------------------------ |
+| function  | string | ja           | Modus: `read` (Eingang) oder `write` (Ausgang)                                             |
+| pin       | int    | ja           | Pin-Nummer (BCM-Nummerierung, z. B. GPIO 17)                                               |
+| activelow | bool   | nein         | Invertiert die Logik: `true` = LOW, `false` = HIGH. Standard `false`                       |
+| bias      | string | nein         | Interner Widerstand: `pull-up`, `pull-down`, `disabled` oder `as-is`. Standard siehe unten |
+| chip      | string | nein         | GPIO-Chip. Standard `gpiochip0`                                                            |
 
 **Funktionsweise**:
 
 - **Lesen** (`function: read`): Liest den Zustand eines GPIO-Pins als booleschen Wert (`true` = HIGH, `false` = LOW)
 - **Schreiben** (`function: write`): Setzt einen GPIO-Pin auf HIGH (`true`) oder LOW (`false`)
 
-Eingänge nutzen immer den internen Pull-up-Widerstand, daher wird ein Schaltkontakt zwischen Pin und Masse (GND) angeschlossen.
+Mit `activelow: true` werden beide Richtungen invertiert: Ein LOW-Pin ergibt `true`, und `true` setzt den Pin auf LOW.
+Ausgänge starten im inaktiven Zustand, d. h. LOW, bzw. HIGH mit `activelow`.
+
+Eingänge nutzen standardmäßig den internen Pull-up-Widerstand, Ausgänge lassen den Widerstand unverändert.
+Setze `bias`, um das zu ändern, z. B. auf `pull-down` für einen Kontakt zwischen Pin und 3,3 V.
+Nutzen mehrere Konfigurationen denselben Pin, dürfen sich ihre `bias`-Werte nicht unterscheiden.
+
+Mit den Standardeinstellungen wird ein Schaltkontakt zwischen Pin und Masse (GND) angeschlossen.
 Ein offener Kontakt ergibt `true` (HIGH), ein geschlossener `false` (LOW).
 Für ein Begrenzungssignal nutze den Öffnerkontakt (NC) des Relais.
 Im Normalbetrieb ist der Kontakt geschlossen und der Pin liefert `false`.
 Wird die Begrenzung aktiviert, öffnet der Kontakt und der Pin liefert `true`.
 Auch ein Kabelbruch ergibt `true`, sodass die Begrenzung ausfallsicher greift.
+
+Stellt deine Steuerbox nur einen Schließerkontakt (NO) bereit, schließe ihn genauso an und setze `activelow: true`.
+Der geschlossene Kontakt ergibt dann `true`.
+Diese Verdrahtung ist nicht ausfallsicher: Ein Kabelbruch ergibt `false` und die Begrenzung greift nicht.
 
 Die Pin-Nummerierung folgt dem BCM-Schema (Broadcom-Nummern, nicht die physische Pin-Position).
 Eine Pinbelegung des Raspberry Pi findest du z. B. auf [pinout.xyz](https://pinout.xyz/).
@@ -139,6 +153,15 @@ function: read
 pin: 17 # BCM-Pin-Nummer
 ```
 
+**Beispiel Lesen** (Schließerkontakt):
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM-Pin-Nummer
+activelow: true # geschlossener Kontakt ergibt true
+```
+
 **Beispiel Schreiben**:
 
 ```yaml
@@ -148,7 +171,7 @@ pin: 27 # BCM-Pin-Nummer
 ```
 
 :::note
-Dieses Plugin funktioniert nur auf Linux-Systemen mit Zugriff auf `/dev/gpiomem`.
+Dieses Plugin funktioniert nur auf Linux-Systemen mit Zugriff auf den GPIO-Chip, z. B. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="lesen" variant="tip" size="small" /> <Badge text="schreiben" variant="caution" size="small" /> \{#go\}
