@@ -664,7 +664,8 @@ nav.sidebar details:has(> summary[id*="authors"]) {
 .tag-sponsorship {
   background: var(--sl-color-accent-low);
   color: var(--sl-color-text-accent);
-  border-color: var(--sl-color-accent-low);
+  /* outline in the tag's own colour, as visible as the grey one of plain tags */
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
 }
 .tag-sponsorfree {
   background: var(--sl-color-gray-6);
@@ -831,8 +832,178 @@ header.header [data-open-modal]::before {
   }
 }
 
+/* Page title row: centre the "Copy page" button on the title and keep the
+   space above and below the title equal. */
+main .content-panel .starlight-llm-actions-row {
+  align-items: center;
+  margin-bottom: 0;
+}
+main .starlight-llm-actions-row > h1 {
+  margin-top: 0;
+}
+
 /* Starlight's reset forces grayscale antialiasing, which renders Roboto
    thinner on macOS than on evcc.io. Use the browser default like the website. */
 body {
   -webkit-font-smoothing: auto;
+}
+
+/* Product photos are transparent cut-outs. The panel behind them is a soft
+   gradient per theme, dark enough that white and black devices both stand out. */
+:root {
+  --evcc-photo-bg: #a6c2ad;
+}
+:root[data-theme="light"] {
+  /* soft green, a step darker than the page greys, so white devices stand out */
+  --evcc-photo-bg: #d5e8d9;
+}
+.photo-panel {
+  --photo-inset: 8%;
+  position: relative;
+  overflow: hidden;
+  background: var(--evcc-photo-bg);
+}
+/* The context sets the size of the panel, the photo is always shown whole. */
+.photo-panel img,
+.photo-panel > svg {
+  position: absolute;
+  inset: var(--photo-inset);
+  width: calc(100% - 2 * var(--photo-inset));
+  height: calc(100% - 2 * var(--photo-inset));
+  object-fit: contain;
+}
+
+/* Product photo on a device page (<ProductPhoto>): beside the intro on wide
+   screens, above it on small ones. */
+.product-photo {
+  display: block;
+  width: 100%;
+  max-width: 20rem;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 1rem;
+  cursor: zoom-in;
+}
+/* Enlarged photo, opened by a click on the product photo */
+.photo-zoom {
+  /* the browser centres a dialog with an auto margin, which the theme resets */
+  margin: auto;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-out;
+}
+.photo-zoom::backdrop {
+  background: rgb(0 0 0 / 0.7);
+}
+.photo-zoom .photo-panel {
+  width: min(90vw, 90vh, 56rem);
+  aspect-ratio: 1;
+  border-radius: 1rem;
+}
+@media (min-width: 50rem) {
+  .product-photo {
+    float: right;
+    width: 16rem;
+    margin: 0 0 1rem 1.5rem;
+  }
+  /* Starlight wraps headings, so the wrapper has to clear the float */
+  .product-photo ~ .sl-heading-wrapper {
+    clear: both;
+  }
+}
+
+/* Small right-aligned line under a block, e.g. the date a list was last checked */
+.sl-markdown-content .caption-end {
+  margin-top: 0.5rem;
+  text-align: end;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+}
+
+/* Traffic-light list: <ul class="status-list status-good">, also
+   status-limited and status-none. A heading or label next to the list names
+   the state, the colour of the bullets only reinforces it. */
+.sl-markdown-content ul.status-list {
+  list-style: none;
+  padding-inline-start: 0;
+}
+.status-list > li {
+  position: relative;
+  padding-inline-start: 1.4rem;
+}
+.status-list > li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0.15rem;
+  top: 0.45em;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--status-color);
+}
+.status-good {
+  --status-color: var(--sl-color-green);
+}
+.status-limited {
+  --status-color: var(--sl-color-orange);
+}
+.status-none {
+  --status-color: var(--sl-color-red);
+}
+
+/* Tags in running content: <Tag>. Builds on the device list tags above. */
+.tag-md {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+}
+.tag-caution {
+  background: var(--sl-color-orange-low);
+  color: var(--sl-color-orange-high);
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+/* Two-column facts table as a card: <SpecTable> around a markdown table */
+.spec-table {
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.sl-markdown-content .spec-table table {
+  display: table;
+  width: 100%;
+  margin: 0;
+}
+.spec-table thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.sl-markdown-content .spec-table td {
+  padding: 0.65rem 1.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  vertical-align: top;
+}
+.sl-markdown-content .spec-table tr:last-child td {
+  border-bottom: 0;
+}
+.sl-markdown-content .spec-table td:first-child {
+  width: 30%;
+  min-width: 7.5rem;
+  background: var(--sl-color-gray-6);
+  font-weight: 500;
+}
+
+/* Row of tags: <TagList> */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }

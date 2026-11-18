@@ -39,11 +39,10 @@ const section: Crumb = isBlog
   : { label: Astro.locals.t("site.docsLabel"), href: locale ? `/${locale}` : "/" };
 
 const hit = isBlog ? null : find(sidebar, [], null);
-const crumbs: Crumb[] = [
-  section,
-  ...(hit ? [...hit.trail, ...(hit.href === path ? [] : [{ label: hit.label, href: hit.href }])] : []),
-  ...(path === section.href ? [] : [{ label: entry.data.title }]),
-];
+const trail: Crumb[] = hit ? [...hit.trail, ...(hit.href === path ? [] : [{ label: hit.label, href: hit.href }])] : [];
+// a group named like its overview page would show the same label twice
+if (trail.at(-1)?.label === entry.data.title) trail.pop();
+const crumbs: Crumb[] = [section, ...trail, ...(path === section.href ? [] : [{ label: entry.data.title }])];
 const last = crumbs.length - 1;
 ---
 

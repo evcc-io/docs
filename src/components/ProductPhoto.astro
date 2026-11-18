@@ -1,0 +1,30 @@
+---
+// Product photo on a device page; a click opens it enlarged.
+// Styled by .photo-panel, .product-photo and .photo-zoom in custom.css.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+}
+
+const { src, alt } = Astro.props;
+---
+
+<button class="photo-panel product-photo" type="button" title={Astro.locals.t("photo.enlarge")} data-photo-zoom>
+  <Image src={src} alt={alt} width={640} quality={90} />
+</button>
+<dialog class="photo-zoom">
+  <div class="photo-panel"><Image src={src} alt="" width={Math.min(src.width, 1400)} quality={90} /></div>
+</dialog>
+
+<script>
+  // the dialog follows its button; a click anywhere on the open dialog closes it, as does Esc
+  document.addEventListener("click", (event) => {
+    const target = event.target as Element;
+    const trigger = target.closest("[data-photo-zoom]");
+    if (trigger) (trigger.nextElementSibling as HTMLDialogElement).showModal();
+    else target.closest<HTMLDialogElement>("dialog.photo-zoom")?.close();
+  });
+</script>

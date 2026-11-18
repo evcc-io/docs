@@ -31,7 +31,8 @@ const CORE = [
     [
       "index",
       "installation/index",
-      "installation/considerations",
+      "installation/hardware",
+      "buyers-guide",
       "installation/configuration",
     ],
   ],
