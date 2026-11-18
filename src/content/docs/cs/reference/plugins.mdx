@@ -3,7 +3,7 @@ title: Pluginy
 description: "Pluginy, které čtou a zapisují jednotlivé hodnoty přes Modbus, HTTP, MQTT, skripty a další rozhraní, tvoří stavební kameny zařízení definovaných uživatelem."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3a558965f35f"
+translatedFrom: "6794b715c615"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -111,22 +111,36 @@ Hodí se zejména pro Raspberry Pi a podobné jednodeskové počítače.
 
 **Parametry**:
 
-| Parametr | Typ    | Povinný | Popis                                       |
-| -------- | ------ | ------- | ------------------------------------------- |
-| function | string | ano     | Režim: `read` (vstup) nebo `write` (výstup) |
-| pin      | int    | ano     | Číslo pinu (číslování BCM, např. GPIO 17)   |
+| Parametr  | Typ    | Povinný | Popis                                                                               |
+| --------- | ------ | ------- | ----------------------------------------------------------------------------------- |
+| function  | string | ano     | Režim: `read` (vstup) nebo `write` (výstup)                                         |
+| pin       | int    | ano     | Číslo pinu (číslování BCM, např. GPIO 17)                                           |
+| activelow | bool   | ne      | Invertuje logiku: `true` = LOW, `false` = HIGH. Výchozí `false`                     |
+| bias      | string | ne      | Interní rezistor: `pull-up`, `pull-down`, `disabled` nebo `as-is`. Výchozí viz níže |
+| chip      | string | ne      | Čip GPIO. Výchozí `gpiochip0`                                                       |
 
 **Jak to funguje**:
 
 - **Čtení** (`function: read`): Čte stav pinu GPIO jako logickou hodnotu (`true` = HIGH, `false` = LOW)
 - **Zápis** (`function: write`): Nastaví pin GPIO na HIGH (`true`) nebo LOW (`false`)
 
-Vstupy vždy používají interní pull-up rezistor, takže se spínací kontakt zapojuje mezi pin a zem (GND).
+S `activelow: true` se invertují oba směry: pin ve stavu LOW se čte jako `true` a `true` nastaví pin na LOW.
+Výstupy začínají v neaktivním stavu, tj. LOW, nebo HIGH s `activelow`.
+
+Vstupy ve výchozím nastavení používají interní pull-up rezistor, výstupy rezistor ponechávají beze změny.
+Chcete-li to změnit, nastavte `bias`, např. `pull-down` pro kontakt zapojený mezi pin a 3,3 V.
+Pokud stejný pin používá více konfigurací, jejich hodnoty `bias` se nesmějí lišit.
+
+Při výchozím nastavení se spínací kontakt zapojuje mezi pin a zem (GND).
 Rozpojený kontakt se čte jako `true` (HIGH), sepnutý kontakt jako `false` (LOW).
 Pro signál limitu použijte rozpínací kontakt (NC) relé.
 Za běžného provozu je kontakt sepnutý a z pinu se čte `false`.
 Když se limit aktivuje, kontakt se rozpojí a z pinu se čte `true`.
 Přerušený kabel se také čte jako `true`, takže limit bezpečně zapůsobí i při poruše.
+
+Pokud vaše řídicí jednotka poskytuje pouze spínací kontakt (NO), zapojte jej stejně a nastavte `activelow: true`.
+Sepnutý kontakt se pak čte jako `true`.
+Toto zapojení není bezpečné při poruše: přerušený kabel se čte jako `false` a limit se neuplatní.
 
 Číslování pinů se řídí schématem BCM (čísla Broadcom, nikoli fyzická pozice pinu).
 Rozložení pinů Raspberry Pi najdete např. na [pinout.xyz](https://pinout.xyz/).
@@ -139,6 +153,15 @@ function: read
 pin: 17 # číslo pinu BCM
 ```
 
+**Příklad čtení** (spínací kontakt):
+
+```yaml
+source: gpio
+function: read
+pin: 17 # číslo pinu BCM
+activelow: true # sepnutý kontakt se čte jako true
+```
+
 **Příklad zápisu**:
 
 ```yaml
@@ -148,7 +171,7 @@ pin: 27 # číslo pinu BCM
 ```
 
 :::note
-Tento plugin funguje pouze v systémech Linux s přístupem k `/dev/gpiomem`.
+Tento plugin funguje pouze v systémech Linux s přístupem k čipu GPIO, např. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="čtení" variant="tip" size="small" /> <Badge text="zápis" variant="caution" size="small" /> \{#go\}

@@ -3,7 +3,7 @@ title: Plugins
 description: "Plugins læser og skriver enkelte værdier via Modbus, HTTP, MQTT, scripts m.m. og udgør byggestenene i brugerdefinerede enheder."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3a558965f35f"
+translatedFrom: "6794b715c615"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -111,22 +111,36 @@ Det er særligt velegnet til Raspberry Pi og lignende enkeltkortcomputere.
 
 **Parametre**:
 
-| Parameter | Type   | Påkrævet | Beskrivelse                                     |
-| --------- | ------ | -------- | ----------------------------------------------- |
-| function  | string | ja       | Tilstand: `read` (input) eller `write` (output) |
-| pin       | int    | ja       | Pinnummer (BCM-nummerering, f.eks. GPIO 17)     |
+| Parameter | Type   | Påkrævet | Beskrivelse                                                                              |
+| --------- | ------ | -------- | ---------------------------------------------------------------------------------------- |
+| function  | string | ja       | Tilstand: `read` (input) eller `write` (output)                                          |
+| pin       | int    | ja       | Pinnummer (BCM-nummerering, f.eks. GPIO 17)                                              |
+| activelow | bool   | nej      | Inverterer logikken: `true` = LOW, `false` = HIGH. Standard `false`                      |
+| bias      | string | nej      | Intern modstand: `pull-up`, `pull-down`, `disabled` eller `as-is`. Standard, se nedenfor |
+| chip      | string | nej      | GPIO-chip. Standard `gpiochip0`                                                          |
 
 **Sådan fungerer det**:
 
 - **Læsning** (`function: read`): Læser tilstanden af en GPIO-pin som en boolsk værdi (`true` = HIGH, `false` = LOW)
 - **Skrivning** (`function: write`): Sætter en GPIO-pin til HIGH (`true`) eller LOW (`false`)
 
-Indgange bruger altid den interne pull-up-modstand, så en kontakt forbindes mellem pinnen og stel (GND).
+Med `activelow: true` inverteres begge retninger: en LOW-pin læses som `true`, og `true` sætter pinnen til LOW.
+Udgange starter i inaktiv tilstand, dvs. LOW, eller HIGH med `activelow`.
+
+Indgange bruger som standard den interne pull-up-modstand, udgange lader modstanden være uændret.
+Indstil `bias` for at ændre dette, f.eks. `pull-down` for en kontakt, der er forbundet mellem pinnen og 3,3 V.
+Hvis flere konfigurationer bruger den samme pin, må deres `bias`-værdier ikke være forskellige.
+
+Med standardindstillingerne forbindes en kontakt mellem pinnen og stel (GND).
 En åben kontakt læses som `true` (HIGH), en lukket kontakt som `false` (LOW).
 Til et begrænsningssignal bruger du relæets normalt lukkede (NC) kontakt.
 Under normal drift er kontakten lukket, og pinnen aflæses som `false`.
 Når grænsen aktiveres, åbner kontakten, og pinnen aflæses som `true`.
 Et kabelbrud læses også som `true`, så grænsen træder i kraft som fejlsikring.
+
+Hvis din styreboks kun har en normalt åben (NO) kontakt, så forbind den på samme måde og indstil `activelow: true`.
+Den lukkede kontakt læses så som `true`.
+Denne ledningsføring er ikke fejlsikker: et kabelbrud læses som `false`, og grænsen anvendes ikke.
 
 Pinnummereringen følger BCM-skemaet (Broadcom-numre, ikke den fysiske pinposition).
 Et pinout-diagram til Raspberry Pi finder du f.eks. på [pinout.xyz](https://pinout.xyz/).
@@ -139,6 +153,15 @@ function: read
 pin: 17 # BCM-pinnummer
 ```
 
+**Eksempel på læsning** (normalt åben kontakt):
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM-pinnummer
+activelow: true # lukket kontakt læses som true
+```
+
 **Eksempel på skrivning**:
 
 ```yaml
@@ -148,7 +171,7 @@ pin: 27 # BCM-pinnummer
 ```
 
 :::note
-Dette plugin virker kun på Linux-systemer med adgang til `/dev/gpiomem`.
+Dette plugin virker kun på Linux-systemer med adgang til GPIO-chippen, f.eks. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="læsning" variant="tip" size="small" /> <Badge text="skrivning" variant="caution" size="small" /> \{#go\}

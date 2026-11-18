@@ -3,7 +3,7 @@ title: Plugin
 description: "I plugin leggono e scrivono singoli valori tramite Modbus, HTTP, MQTT, script e altre sorgenti e sono i mattoni dei dispositivi definiti dall’utente."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3a558965f35f"
+translatedFrom: "6794b715c615"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -111,22 +111,36 @@ Il plugin `gpio` permette l’accesso diretto ai pin GPIO (General Purpose Input
 
 **Parametri**:
 
-| Parametro | Tipo   | Obbligatorio | Descrizione                                      |
-| --------- | ------ | ------------ | ------------------------------------------------ |
-| function  | string | sì           | Modalità: `read` (ingresso) o `write` (uscita)   |
-| pin       | int    | sì           | Numero del pin (numerazione BCM, ad es. GPIO 17) |
+| Parametro | Tipo   | Obbligatorio | Descrizione                                                                               |
+| --------- | ------ | ------------ | ----------------------------------------------------------------------------------------- |
+| function  | string | sì           | Modalità: `read` (ingresso) o `write` (uscita)                                            |
+| pin       | int    | sì           | Numero del pin (numerazione BCM, ad es. GPIO 17)                                          |
+| activelow | bool   | no           | Inverte la logica: `true` = LOW, `false` = HIGH. Predefinito `false`                      |
+| bias      | string | no           | Resistenza interna: `pull-up`, `pull-down`, `disabled` o `as-is`. Predefinito: vedi sotto |
+| chip      | string | no           | Chip GPIO. Predefinito `gpiochip0`                                                        |
 
 **Funzionamento**:
 
 - **Lettura** (`function: read`): legge lo stato di un pin GPIO come valore booleano (`true` = HIGH, `false` = LOW)
 - **Scrittura** (`function: write`): imposta un pin GPIO su HIGH (`true`) o LOW (`false`)
 
-Gli ingressi usano sempre la resistenza di pull-up interna, quindi un contatto di commutazione si collega tra il pin e la massa (GND).
+Con `activelow: true` entrambe le direzioni sono invertite: un pin LOW viene letto come `true` e `true` imposta il pin su LOW.
+Le uscite partono nello stato inattivo, cioè LOW, oppure HIGH con `activelow`.
+
+Per impostazione predefinita gli ingressi usano la resistenza di pull-up interna, mentre le uscite lasciano la resistenza invariata.
+Imposta `bias` per cambiare questo comportamento, ad es. `pull-down` per un contatto collegato tra il pin e 3,3 V.
+Se più configurazioni usano lo stesso pin, i loro valori di `bias` non devono essere diversi.
+
+Con le impostazioni predefinite, un contatto di commutazione si collega tra il pin e la massa (GND).
 Un contatto aperto viene letto come `true` (HIGH), un contatto chiuso come `false` (LOW).
 Per un segnale di limitazione usa il contatto normalmente chiuso (NC) del relè.
 Durante il normale funzionamento il contatto è chiuso e il pin viene letto come `false`.
 Quando la limitazione viene attivata, il contatto si apre e il pin viene letto come `true`.
 Anche un cavo interrotto viene letto come `true`, quindi la limitazione interviene come misura di sicurezza (fail-safe).
+
+Se la tua centralina di controllo fornisce solo un contatto normalmente aperto (NO), collegalo allo stesso modo e imposta `activelow: true`.
+Il contatto chiuso viene quindi letto come `true`.
+Questo collegamento non è fail-safe: un cavo interrotto viene letto come `false` e la limitazione non viene applicata.
 
 La numerazione dei pin segue lo schema BCM (numeri Broadcom, non la posizione fisica del pin).
 Per la piedinatura del Raspberry Pi vedi ad es. [pinout.xyz](https://pinout.xyz/).
@@ -139,6 +153,15 @@ function: read
 pin: 17 # numero di pin BCM
 ```
 
+**Esempio di lettura** (contatto normalmente aperto):
+
+```yaml
+source: gpio
+function: read
+pin: 17 # numero di pin BCM
+activelow: true # il contatto chiuso viene letto come true
+```
+
 **Esempio di scrittura**:
 
 ```yaml
@@ -148,7 +171,7 @@ pin: 27 # numero di pin BCM
 ```
 
 :::note
-Questo plugin funziona solo su sistemi Linux con accesso a `/dev/gpiomem`.
+Questo plugin funziona solo su sistemi Linux con accesso al chip GPIO, ad es. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="lettura" variant="tip" size="small" /> <Badge text="scrittura" variant="caution" size="small" /> \{#go\}

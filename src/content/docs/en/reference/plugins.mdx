@@ -110,22 +110,36 @@ It is particularly suitable for Raspberry Pi and similar single-board computers.
 
 **Parameters**:
 
-| Parameter | Type   | Required | Description                              |
-| --------- | ------ | -------- | ---------------------------------------- |
-| function  | string | yes      | Mode: `read` (input) or `write` (output) |
-| pin       | int    | yes      | Pin number (BCM numbering, e.g. GPIO 17) |
+| Parameter | Type   | Required | Description                                                                         |
+| --------- | ------ | -------- | ----------------------------------------------------------------------------------- |
+| function  | string | yes      | Mode: `read` (input) or `write` (output)                                            |
+| pin       | int    | yes      | Pin number (BCM numbering, e.g. GPIO 17)                                            |
+| activelow | bool   | no       | Inverts the logic: `true` = LOW, `false` = HIGH. Default `false`                    |
+| bias      | string | no       | Internal resistor: `pull-up`, `pull-down`, `disabled` or `as-is`. Default see below |
+| chip      | string | no       | GPIO chip. Default `gpiochip0`                                                      |
 
 **How it works**:
 
 - **Reading** (`function: read`): Reads the state of a GPIO pin as a boolean value (`true` = HIGH, `false` = LOW)
 - **Writing** (`function: write`): Sets a GPIO pin to HIGH (`true`) or LOW (`false`)
 
-Inputs always use the internal pull-up resistor, so a switch contact is wired between the pin and ground (GND).
+With `activelow: true` both directions are inverted: a LOW pin reads as `true`, and `true` sets the pin to LOW.
+Outputs start in the inactive state, i.e. LOW, or HIGH with `activelow`.
+
+Inputs use the internal pull-up resistor by default, outputs leave the resistor unchanged.
+Set `bias` to change this, e.g. `pull-down` for a contact wired between the pin and 3.3 V.
+If several configurations use the same pin, their `bias` values must not differ.
+
+With the default settings, a switch contact is wired between the pin and ground (GND).
 An open contact reads as `true` (HIGH), a closed contact as `false` (LOW).
 For a limit signal, use the normally closed (NC) contact of the relay.
 During normal operation the contact is closed and the pin reads `false`.
 When the limit is activated, the contact opens and the pin reads `true`.
 A broken cable also reads as `true`, so the limit kicks in as a fail-safe.
+
+If your control box only provides a normally open (NO) contact, wire it the same way and set `activelow: true`.
+The closed contact then reads as `true`.
+This wiring is not fail-safe: a broken cable reads as `false` and the limit is not applied.
 
 Pin numbering follows the BCM scheme (Broadcom numbers, not the physical pin position).
 For a Raspberry Pi pinout, see e.g. [pinout.xyz](https://pinout.xyz/).
@@ -138,6 +152,15 @@ function: read
 pin: 17 # BCM pin number
 ```
 
+**Reading Example** (normally open contact):
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM pin number
+activelow: true # closed contact reads as true
+```
+
 **Writing Example**:
 
 ```yaml
@@ -147,7 +170,7 @@ pin: 27 # BCM pin number
 ```
 
 :::note
-This plugin only works on Linux systems with access to `/dev/gpiomem`.
+This plugin only works on Linux systems with access to the GPIO chip, e.g. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="read" variant="tip" size="small" /> <Badge text="write" variant="caution" size="small" /> \{#go\}

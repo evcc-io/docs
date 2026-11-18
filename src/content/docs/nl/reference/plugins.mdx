@@ -3,7 +3,7 @@ title: Plugins
 description: "Plugins lezen en schrijven afzonderlijke waarden via Modbus, HTTP, MQTT, scripts en meer, en vormen de bouwstenen van gebruikersgedefinieerde apparaten."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "3a558965f35f"
+translatedFrom: "6794b715c615"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
@@ -111,22 +111,36 @@ Hij is vooral geschikt voor de Raspberry Pi en vergelijkbare singleboardcomputer
 
 **Parameters**:
 
-| Parameter | Type   | Verplicht | Beschrijving                                |
-| --------- | ------ | --------- | ------------------------------------------- |
-| function  | string | ja        | Modus: `read` (invoer) of `write` (uitvoer) |
-| pin       | int    | ja        | Pinnummer (BCM-nummering, bijv. GPIO 17)    |
+| Parameter | Type   | Verplicht | Beschrijving                                                                              |
+| --------- | ------ | --------- | ----------------------------------------------------------------------------------------- |
+| function  | string | ja        | Modus: `read` (invoer) of `write` (uitvoer)                                               |
+| pin       | int    | ja        | Pinnummer (BCM-nummering, bijv. GPIO 17)                                                  |
+| activelow | bool   | nee       | Keert de logica om: `true` = LOW, `false` = HIGH. Standaard `false`                       |
+| bias      | string | nee       | Interne weerstand: `pull-up`, `pull-down`, `disabled` of `as-is`. Standaard zie hieronder |
+| chip      | string | nee       | GPIO-chip. Standaard `gpiochip0`                                                          |
 
 **Werking**:
 
 - **Lezen** (`function: read`): Leest de toestand van een GPIO-pin als booleaanse waarde (`true` = HIGH, `false` = LOW)
 - **Schrijven** (`function: write`): Zet een GPIO-pin op HIGH (`true`) of LOW (`false`)
 
-Ingangen gebruiken altijd de interne pull-upweerstand, dus een schakelcontact wordt tussen de pin en massa (GND) aangesloten.
+Met `activelow: true` worden beide richtingen omgekeerd: een LOW-pin wordt gelezen als `true`, en `true` zet de pin op LOW.
+Uitgangen starten in de inactieve toestand, d.w.z. LOW, of HIGH met `activelow`.
+
+Ingangen gebruiken standaard de interne pull-upweerstand, uitgangen laten de weerstand ongewijzigd.
+Stel `bias` in om dit te wijzigen, bijv. `pull-down` voor een contact dat tussen de pin en 3,3 V is aangesloten.
+Als meerdere configuraties dezelfde pin gebruiken, mogen hun `bias`-waarden niet verschillen.
+
+Met de standaardinstellingen wordt een schakelcontact tussen de pin en massa (GND) aangesloten.
 Een open contact wordt gelezen als `true` (HIGH), een gesloten contact als `false` (LOW).
 Gebruik voor een limietsignaal het normaal gesloten (NC) contact van het relais.
 Tijdens normaal bedrijf is het contact gesloten en leest de pin `false`.
 Wanneer de limiet wordt geactiveerd, gaat het contact open en leest de pin `true`.
 Bij een kabelbreuk wordt ook `true` gelezen, zodat de limiet als fail-safe ingrijpt.
+
+Als uw stuurbox alleen een normaal open (NO) contact heeft, sluit u het op dezelfde manier aan en stelt u `activelow: true` in.
+Het gesloten contact wordt dan gelezen als `true`.
+Deze bedrading is niet fail-safe: bij een kabelbreuk wordt `false` gelezen en wordt de limiet niet toegepast.
 
 De pinnummering volgt het BCM-schema (Broadcom-nummers, niet de fysieke positie van de pin).
 Een pinoverzicht van de Raspberry Pi vindt u bijv. op [pinout.xyz](https://pinout.xyz/).
@@ -139,6 +153,15 @@ function: read
 pin: 17 # BCM-pinnummer
 ```
 
+**Leesvoorbeeld** (normaal open contact):
+
+```yaml
+source: gpio
+function: read
+pin: 17 # BCM-pinnummer
+activelow: true # gesloten contact wordt gelezen als true
+```
+
 **Schrijfvoorbeeld**:
 
 ```yaml
@@ -148,7 +171,7 @@ pin: 27 # BCM-pinnummer
 ```
 
 :::note
-Deze plugin werkt alleen op Linux-systemen met toegang tot `/dev/gpiomem`.
+Deze plugin werkt alleen op Linux-systemen met toegang tot de GPIO-chip, bijv. `/dev/gpiochip0`.
 :::
 
 ### Go <Badge text="lezen" variant="tip" size="small" /> <Badge text="schrijven" variant="caution" size="small" /> \{#go\}
@@ -599,8 +622,7 @@ De plugin ondersteunt de basisbewerkingen optellen (add), vermenigvuldigen (mul)
 
 Met `scale: -1` op een van de waarden kan eenvoudig worden afgetrokken, met `scale: 0.001` gedeeld, bijv. voor de omrekening van Wh naar kWh.
 
-Met `sign:` wordt elk positief getal +1, elk negatief getal -1 en blijft 0 gelijk.
-In combinatie met `mul` kan zo het teken op andere waarden worden overgedragen.
+Met `sign:` (elk positief getal wordt +1, elk negatief getal -1, 0 blijft 0) kan het teken in combinatie met `mul` op andere waarden worden overgedragen.
 Zo kan bijv. bij meters de “richting” van het vermogen (teruglevering of netafname) op de gemeten stromen worden overgedragen.
 
 Met `abs:` wordt de absolute waarde van een getal berekend.
