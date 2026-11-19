@@ -22,3 +22,41 @@ In that case you reference the same device at every relevant role.
 ## Features \{#features\}
 
 <FeatureList keys={["battery-control", "dim", "curtail"]} />
+
+## Indevolt \{#indevolt-configuration\}
+
+Choose the template for your hardware model:
+
+- `indevolt-hybrid`: models with direct solar inputs and additional solar measurements, even when no panels are connected.
+- `indevolt-battery`: Eco/AC models without direct solar inputs. Eco also denotes an AC-coupled variant.
+
+`indevolt-battery` already supports active battery control.
+[PR #36194](https://github.com/evcc-io/evcc/pull/36194) adds control for hybrid models and checks write acknowledgements for both templates.
+The PR has not been merged; the hybrid control settings below require a build of this PR.
+
+For `usage: battery`, control is then available without an additional `controllable` parameter, including for existing configurations.
+Solar and grid meter usages remain read-only.
+Optional `maxchargepower` sets grid charging power: 1200 W by default for hybrid models and 2400 W for Eco/AC.
+Adjust it to a charging power your device supports.
+`minsoc` and `maxsoc` remain optional with defaults of 0 % and 100 %; use your battery system's limits.
+
+```yaml
+meters:
+  - name: battery
+    type: template
+    template: indevolt-hybrid
+    usage: battery
+    host: indevolt.local
+    maxchargepower: 1200
+```
+
+| Mode     | Behaviour                                                 |
+| -------- | --------------------------------------------------------- |
+| `normal` | Disable grid charging and select self-consumption mode    |
+| `hold`   | Standby: prevents discharge and also stops solar charging |
+| `charge` | Grid charging at `maxchargepower` towards `maxsoc`        |
+
+An acknowledgement with boolean `result: true` confirms that the device accepted the command; check its actual state separately.
+Rejected or malformed responses stop the command sequence without rolling back earlier steps.
+The next control cycle reapplies the current request, including `normal` if a charge request has ended.
+This does not retry immediately or read back the physical mode.
