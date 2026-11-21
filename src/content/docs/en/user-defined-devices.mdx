@@ -143,19 +143,23 @@ Real meter readings give more accurate long-term statistics.
 
 #### Battery modes \{#battery-modes\}
 
-| Value | Mode         | Behaviour                                                        |
-| ----- | ------------ | ---------------------------------------------------------------- |
-| `1`   | `normal`     | Normal operation: charge from surplus, discharge for consumption |
-| `2`   | `hold`       | Prevent discharging, charging from surplus still allowed         |
-| `3`   | `charge`     | Charge from grid, no discharging                                 |
-| `4`   | `holdcharge` | Prevent charging, discharging for consumption still allowed      |
-| `5`   | `discharge`  | Discharge to grid                                                |
+| Value | Mode            | Behaviour                                                        |
+| ----- | --------------- | ---------------------------------------------------------------- |
+| `1`   | `normal`        | Normal operation: charge from surplus, discharge for consumption |
+| `2`   | `holddischarge` | Prevent discharging, charging from surplus still allowed         |
+| `3`   | `charge`        | Charge from grid, no discharging                                 |
+| `4`   | `holdcharge`    | Prevent charging, discharging for consumption still allowed      |
+| `5`   | `discharge`     | Discharge to grid                                                |
 
 Only the battery modes the device supports are used.
 If `batterymode` is a [`switch`](/en/reference/plugins#switch), the supported modes are taken from its `case` values.
 This also works when the switch is wrapped in a [`watchdog`](/en/reference/plugins#watchdog).
-Any other plugin needs `batterymodes` listing the supported modes, e.g. `batterymodes: ["normal", "hold", "charge"]`.
+Any other plugin needs `batterymodes` listing the supported modes, e.g. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/en/reference/cli/evcc_meter_verifybatterymodes) switches through the configured modes on the real battery and shows whether the battery power reacts as expected.
+
+:::note[Renamed mode]
+The mode `holddischarge` was named `hold` before version [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0).
+:::
 
 ### Examples
 
@@ -172,7 +176,7 @@ meters:
 ```
 
 Read power and charge level of a home battery and set its mode via HTTP.
-The `switch` covers the modes normal, hold and charge, so evcc offers exactly these three.
+The `switch` covers the modes normal, holddischarge and charge, so evcc offers exactly these three.
 
 ```yaml
 meters:
@@ -194,12 +198,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http

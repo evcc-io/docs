@@ -3,7 +3,7 @@ title: Appareils personnalisés
 description: "Intégrez un chargeur, un compteur, un véhicule ou un chauffage sans modèle intégré en définissant vous-même ses valeurs et commandes via HTTP, MQTT ou Modbus."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "161eb222a89c"
+translatedFrom: "4505fc9bb930"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -144,19 +144,23 @@ De vrais index de compteur donnent des statistiques à long terme plus précises
 
 #### Modes de batterie \{#battery-modes\}
 
-| Valeur | Mode         | Comportement                                                                    |
-| ------ | ------------ | ------------------------------------------------------------------------------- |
-| `1`    | `normal`     | Fonctionnement normal : charge depuis le surplus, décharge pour la consommation |
-| `2`    | `hold`       | Empêche la décharge, la charge depuis le surplus reste autorisée                |
-| `3`    | `charge`     | Charge depuis le réseau, pas de décharge                                        |
-| `4`    | `holdcharge` | Empêche la charge, la décharge pour la consommation reste autorisée             |
-| `5`    | `discharge`  | Décharge vers le réseau                                                         |
+| Valeur | Mode            | Comportement                                                                    |
+| ------ | --------------- | ------------------------------------------------------------------------------- |
+| `1`    | `normal`        | Fonctionnement normal : charge depuis le surplus, décharge pour la consommation |
+| `2`    | `holddischarge` | Empêche la décharge, la charge depuis le surplus reste autorisée                |
+| `3`    | `charge`        | Charge depuis le réseau, pas de décharge                                        |
+| `4`    | `holdcharge`    | Empêche la charge, la décharge pour la consommation reste autorisée             |
+| `5`    | `discharge`     | Décharge vers le réseau                                                         |
 
 Seuls les modes de batterie pris en charge par l’appareil sont utilisés.
 Si `batterymode` est un [`switch`](/fr/reference/plugins#switch), les modes pris en charge sont déduits de ses valeurs `case`.
 Cela fonctionne aussi lorsque ce plugin est encapsulé dans un [`watchdog`](/fr/reference/plugins#watchdog).
-Tout autre plugin nécessite `batterymodes` avec la liste des modes pris en charge, p. ex. `batterymodes: ["normal", "hold", "charge"]`.
+Tout autre plugin nécessite `batterymodes` avec la liste des modes pris en charge, p. ex. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/fr/reference/cli/evcc_meter_verifybatterymodes) active tour à tour les modes configurés sur la batterie réelle et indique si la puissance de la batterie réagit comme prévu.
+
+:::note[Mode renommé]
+Le mode `holddischarge` s’appelait `hold` avant la version [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0).
+:::
 
 ### Exemples
 
@@ -173,7 +177,7 @@ meters:
 ```
 
 Lire la puissance et le niveau de charge d’une batterie domestique et définir son mode via HTTP.
-Comme le `switch` couvre les modes normal, hold et charge, evcc propose exactement ces trois modes.
+Comme le `switch` couvre les modes normal, holddischarge et charge, evcc propose exactement ces trois modes.
 
 ```yaml
 meters:
@@ -195,12 +199,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http

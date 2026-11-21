@@ -3,7 +3,7 @@ title: "MQTT API"
 description: "evcc publikuje přes MQTT stav lokality, nabíjecích bodů, vozidel a domácí baterie a přes zapisovatelná témata můžete měnit režimy, limity nebo plány nabíjení."
 sidebar:
   order: 2
-translatedFrom: "2c690ff491d7"
+translatedFrom: "b9e76bd617b8"
 ---
 
 Data ze [stavového API](/cs/reference/state) se publikují také přes MQTT.
@@ -85,7 +85,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: zbytkový výkon sítě
 - `evcc/site/batteryGridChargeLimit`: cenový strop pro nabíjení baterie ze sítě
 - `evcc/site/batteryDischargeControl`: zapnutí/vypnutí řízení vybíjení baterie (true/false)
-- `evcc/site/batteryMode`: externí režim baterie (`normal`, `hold`, `charge`, `holdcharge`, `discharge`). Přímo řídí všechny řiditelné baterie, má přednost před ostatními režimy evcc a po 60 s se vrátí do původního stavu.
+- `evcc/site/batteryMode`: externí režim baterie (`normal`, `holddischarge`, `charge`, `holdcharge`, `discharge`). Přímo řídí všechny řiditelné baterie, má přednost před ostatními režimy evcc a po 60 s se vrátí do původního stavu.
 - `evcc/site/smartCostLimit`: cenový strop chytrého nabíjení pro všechny nabíjecí body
 - `evcc/site/smartFeedInPriorityLimit`: limit priority exportu do sítě pro všechny nabíjecí body
 

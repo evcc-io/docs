@@ -3,7 +3,7 @@ title: Zařízení definovaná uživatelem
 description: "Připojte nabíječku, měřič, vozidlo nebo topení, pro které neexistuje vestavěná šablona, a jejich hodnoty i ovládání si definujte sami přes HTTP, MQTT nebo Modbus."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "161eb222a89c"
+translatedFrom: "4505fc9bb930"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -144,19 +144,23 @@ Skutečné stavy měřiče poskytují přesnější dlouhodobé statistiky.
 
 #### Režimy baterie \{#battery-modes\}
 
-| Hodnota | Režim        | Chování                                                  |
-| ------- | ------------ | -------------------------------------------------------- |
-| `1`     | `normal`     | Běžný provoz: nabíjení z přebytku, vybíjení pro spotřebu |
-| `2`     | `hold`       | Bez vybíjení, nabíjení z přebytku je stále povoleno      |
-| `3`     | `charge`     | Nabíjení ze sítě, bez vybíjení                           |
-| `4`     | `holdcharge` | Bez nabíjení, vybíjení pro spotřebu je stále povoleno    |
-| `5`     | `discharge`  | Vybíjení do sítě                                         |
+| Hodnota | Režim           | Chování                                                  |
+| ------- | --------------- | -------------------------------------------------------- |
+| `1`     | `normal`        | Běžný provoz: nabíjení z přebytku, vybíjení pro spotřebu |
+| `2`     | `holddischarge` | Bez vybíjení, nabíjení z přebytku je stále povoleno      |
+| `3`     | `charge`        | Nabíjení ze sítě, bez vybíjení                           |
+| `4`     | `holdcharge`    | Bez nabíjení, vybíjení pro spotřebu je stále povoleno    |
+| `5`     | `discharge`     | Vybíjení do sítě                                         |
 
 Používají se jen ty režimy baterie, které zařízení podporuje.
 Pokud je `batterymode` typu [`switch`](/cs/reference/plugins#switch), podporované režimy se převezmou z jeho hodnot `case`.
 Funguje to i tehdy, když je switch vložený do pluginu [`watchdog`](/cs/reference/plugins#watchdog).
-Každý jiný plugin potřebuje `batterymodes` se seznamem podporovaných režimů, např. `batterymodes: ["normal", "hold", "charge"]`.
+Každý jiný plugin potřebuje `batterymodes` se seznamem podporovaných režimů, např. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/cs/reference/cli/evcc_meter_verifybatterymodes) postupně přepne nakonfigurované režimy na skutečné baterii a ukáže, zda výkon baterie reaguje podle očekávání.
+
+:::note[Přejmenovaný režim]
+Režim `holddischarge` se před verzí [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0) jmenoval `hold`.
+:::
 
 ### Příklady
 
@@ -173,7 +177,7 @@ meters:
 ```
 
 Čtení výkonu a stavu nabití domácí baterie a nastavení jejího režimu přes HTTP.
-`switch` pokrývá režimy normal, hold a charge, takže evcc nabízí právě tyto tři.
+`switch` pokrývá režimy normal, holddischarge a charge, takže evcc nabízí právě tyto tři.
 
 ```yaml
 meters:
@@ -195,12 +199,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http
