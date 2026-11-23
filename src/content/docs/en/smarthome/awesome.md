@@ -16,6 +16,7 @@ All of them are developed independently by their authors and are not part of evc
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display): touch display next to the wallbox (ESP32-4848S040C) that shows charging power and solar share and switches charging modes – installable straight from the browser
 - [mafeko/ladegast](https://github.com/mafeko/ladegast): Let guests charge at your wallbox with a personal link and PIN. They switch charge mode and see their own sessions and costs, evcc stays private.
 - [mobilewhatelse/viertelstunden-waechter](https://github.com/mobilewhatelse/viertelstunden-waechter): Home Assistant integration that keeps the highest quarter-hour grid import below a limit for power-based grid tariffs – it only sets a ceiling on the loadpoint, so your evcc instance keeps regulating below it
+- [flushbug/wallbox-knob-display](https://github.com/flushbug/wallbox-knob-display): round knob display next to the wallbox (ESP32-C3) that shows solar and charging power, battery levels and active phases and switches charging modes – runs as an ESPHome package for Home Assistant or as standalone firmware that talks to evcc directly
 
 Missing a project?
 [Edit this page](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) to add it.
