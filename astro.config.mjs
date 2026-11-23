@@ -65,6 +65,13 @@ export default defineConfig({
     format: "directory",
   },
   vite: {
+    server: {
+      watch: {
+        // Locale worktrees and scratch folders hold hundreds of thousands of
+        // files (full dist builds); watching them makes dev startup take minutes.
+        ignored: ["**/.worktrees/**", "**/.tmp-*/**"],
+      },
+    },
     build: {
       rolldownOptions: {
         // Astro injects "use astro:head-inject" into every MDX module; rolldown
@@ -90,6 +97,12 @@ export default defineConfig({
     "/de/features/external-control": "/de/external-limit",
     "/en/integrations/home-assistant": "/en/smarthome/home-assistant",
     "/de/integrations/home-assistant": "/de/smarthome/home-assistant",
+    ...Object.fromEntries(
+      LANGS.map((l) => [
+        `/${l}/installation/considerations`,
+        `/${l}/buyers-guide`,
+      ]),
+    ),
   },
   integrations: [
     mermaid({
@@ -178,14 +191,19 @@ export default defineConfig({
               "Supported devices (chargers, meters, vehicles, tariffs) are listed in https://docs.evcc.io/llms-devices.txt.",
             // Bundles and index stay English; other locales keep their .md routes.
             exclude: LANGS.filter((l) => l !== "en").map((l) => `${l}/**`),
-            promote: ["en", "en/installation/**", "en/features/**"],
+            promote: [
+              "en",
+              "en/installation/**",
+              "en/buyers-guide",
+              "en/features/**",
+            ],
             demote: ["en/reference/cli/**", "en/media", "en/blog/**"],
             subsets: [
               {
                 label: "Installation",
                 description:
-                  "installing and initial setup on Linux, Raspberry Pi, Docker, Home Assistant, macOS, Windows",
-                paths: ["en/installation/**"],
+                  "choosing hardware and devices, installing and initial setup on Linux, Raspberry Pi, Docker, Home Assistant, macOS, Windows",
+                paths: ["en/installation/**", "en/buyers-guide"],
               },
               {
                 label: "Features",
@@ -250,12 +268,32 @@ export default defineConfig({
         {
           ...label("installation"),
           items: [
-            { autogenerate: { directory: "installation", collapsed: true } },
+            { slug: "installation" },
+            {
+              ...label("hardware"),
+              collapsed: true,
+              items: [
+                { ...label("overview"), slug: "installation/hardware" },
+                { autogenerate: { directory: "installation/hardware" } },
+              ],
+            },
+            ...[
+              "linux-image",
+              "docker",
+              "home-assistant",
+              "proxmox",
+              "linux",
+              "macos",
+              "freebsd",
+              "windows",
+              "configuration",
+            ].map((page) => ({ slug: `installation/${page}` })),
           ],
         },
         {
           ...label("devices"),
           items: [
+            { ...label("buyersGuide"), slug: "buyers-guide" },
             {
               ...label("chargers"),
               link: "/chargers",
