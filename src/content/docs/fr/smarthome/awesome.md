@@ -1,7 +1,7 @@
 ---
 title: "Autres projets géniaux"
 description: "Présente des projets communautaires basés sur evcc, comme des tableaux de bord Grafana, une carte Home Assistant, un écran E-Ink, un anneau LED et une application macOS."
-translatedFrom: "8f7e827cb6b3"
+translatedFrom: "5e2ec0857253"
 ---
 
 La communauté evcc ne manque pas de créativité.
@@ -17,6 +17,7 @@ Tous sont développés de manière indépendante par leurs auteurs et ne font pa
 - [tobymarks/evcc-garage-display](https://github.com/tobymarks/evcc-garage-display) : écran tactile à placer près du chargeur (ESP32-4848S040C) : il affiche la puissance de charge et la part solaire, permet de changer de mode de charge et s’installe directement depuis le navigateur
 - [mafeko/ladegast](https://github.com/mafeko/ladegast) : permet à vos invités de recharger sur votre chargeur avec un lien personnel et un code PIN. Ils changent de mode de charge et voient leurs propres sessions de charge et leurs coûts, tandis qu’evcc reste privé.
 - [mobilewhatelse/viertelstunden-waechter](https://github.com/mobilewhatelse/viertelstunden-waechter) : intégration Home Assistant qui maintient sous une limite l’import du réseau le plus élevé par quart d’heure pour les tarifs réseau basés sur la puissance. Elle fixe seulement un plafond sur le point de charge, votre instance evcc continue donc de réguler en dessous.
+- [flushbug/wallbox-knob-display](https://github.com/flushbug/wallbox-knob-display) : écran rond à bouton rotatif à placer près du chargeur (ESP32-C3) : il affiche la puissance solaire et la puissance de charge, les niveaux de charge des batteries et les phases actives, et permet de changer de mode de charge. Il fonctionne comme paquet ESPHome pour Home Assistant ou comme firmware autonome qui communique directement avec evcc.
 
 Il manque un projet ?
 [Modifiez cette page](https://github.com/evcc-io/docs/edit/main/src/content/docs/en/smarthome/awesome.md) pour l’ajouter.
