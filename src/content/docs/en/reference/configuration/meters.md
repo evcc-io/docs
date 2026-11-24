@@ -373,9 +373,11 @@ Standard implementation, in which individual values are defined via [plugins](/e
   returnenergy: # Energy in reverse direction (kWh)
     source: # Plugin Type
     ...
-  soc: # Battery SOC (%)
+  soc: # Charge level (%)
     source: # Plugin Type
     ...
+  minsoc: 10 # Minimum charge level (%)
+  maxsoc: 90 # Maximum charge level (%)
   capacity: # Optional Battery Capacity (kWh)
   currents: # Current (A) per phase
     - source: # Phase 1 Plugin Type
@@ -456,8 +458,30 @@ Plugin definition to return battery charge level in percentage (%).
 **For example**:
 
 ```yaml
-  soc: ... # Battery SOC (%)
+  soc: ... # Charge level (%)
     source: # Plugin Type
+    ...
+```
+
+---
+
+#### `minsoc` and `maxsoc`
+
+Lower and upper charge level of the battery in percent, as set on the battery system.
+Both only apply to batteries, i.e. together with `soc`.
+The [optimizer](/en/features/optimizer) keeps the planned charge level within these limits.
+Charging the battery from the grid stops at `maxsoc`, and discharging it to the grid stops at `minsoc`.
+With [`limitsoc`](/en/user-defined-devices#meter-write-attributes), the [battery modes](/en/user-defined-devices#battery-modes) are set through these limits: `normal` writes `minsoc`, `charge` writes `maxsoc` and `holddischarge` writes the current charge level, at least `minsoc`.
+The defaults are `0` and `100`.
+Instead of a fixed value, any [float plugin](/en/reference/plugins) can read the limits from the device.
+The plugin is read on every cycle, and a failed read keeps the last value.
+
+**For example**:
+
+```yaml
+  minsoc: 10 # Minimum charge level (%)
+  maxsoc: # read from the device instead of a fixed value
+    source: modbus
     ...
 ```
 
