@@ -37,5 +37,5 @@ evcc meter [name] [flags]
 
 ## See also
 
-- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc](/en/reference/cli/evcc) - evcc - smart charging
 - [evcc meter verifybatterymodes](/en/reference/cli/evcc_meter_verifybatterymodes) - Cycle through battery mode transitions and verify battery power interactively

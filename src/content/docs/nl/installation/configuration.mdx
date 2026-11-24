@@ -1,0 +1,250 @@
+---
+title: "Configuratie"
+description: "Na de installatie stelt u evcc in, bij voorkeur via de webinterface of anders met een evcc.yaml-bestand, en leest u hoe u het test en problemen oplost."
+sidebar:
+  order: 11
+translatedFrom: "6672cdb3ee1b"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Na de installatie van evcc kunt u uw apparaten en instellingen configureren.
+De aanbevolen manier is configuratie via de webinterface.
+Voor gevorderde gebruikers is ook configuratie via een bestand beschikbaar.
+
+## Via de webinterface
+
+:::tip[Aanbevolen]
+De webinterface is de eenvoudigste en snelste manier om evcc in te stellen.
+:::
+
+### Aan de slag
+
+<Steps>
+
+1. **evcc starten**: Start evcc na de [installatie](/nl/installation) volgens de instructies voor uw systeem
+2. **Browser openen**: Ga naar `http://<your-ip>:7070` (bijv. `http://evcc.local:7070` of `http://192.168.1.50:7070`)
+3. **Set administrator password**: Bij de eerste start wordt u gevraagd een wachtwoord in te stellen
+4. **Instellen**: Volg de instructies op de welkomstpagina
+
+</Steps>
+
+### Apparaten toevoegen
+
+In het configuratiegedeelte kunt u de volgende onderdelen instellen:
+
+- **Laadpunten & verwarmers** (aanbevolen): laders en warmtepompen
+- **Netaansluiting** (aanbevolen): netmeter, stroomtarieven en opwekbegrenzingsapparaten, belangrijk voor een goed energiebeheer
+- **PV & thuisbatterij** (optioneel): zonnepanelensystemen en thuisbatterijen
+- **Voertuigen** (optioneel): voertuigintegraties voor batterijcapaciteit en laadniveau, die slimmer laden mogelijk maken
+
+Er moet minstens één meter of laadpunt zijn geconfigureerd om het systeem te laten draaien.
+
+De meeste apparaten worden via hun IP-adres of hostnaam aangesproken.
+Het veld **IP-adres of hostnaam** stelt de apparaten voor die in uw netwerk zijn gevonden, met hun adres, hostnaam en fabrikant.
+Apparaten die bij het gekozen apparaattype passen, staan onder **Overeenkomstig**, alle andere onder **Anders**.
+Items die al door een ander apparaat worden gebruikt, zijn gemarkeerd met **reeds in gebruik**.
+Past er precies één apparaat, dan wordt het automatisch ingevuld.
+U kunt altijd zelf een adres invoeren.
+Er wordt alleen lokaal gezocht terwijl u een apparaat configureert.
+Daarbij worden alleen apparaten in hetzelfde netwerksegment als uw evcc-installatie gevonden.
+Apparaten in andere VLAN’s of subnetten worden niet gevonden.
+In een Docker-container is hiervoor [host networking](/nl/installation/docker#network) nodig (of als alternatief macvlan), omdat de container in bridge-modus het lokale netwerk niet ziet.
+
+### Integraties
+
+Daarnaast kunt u verschillende diensten en protocollen koppelen:
+
+- **MQTT**: gegevensuitwisseling met andere systemen in het netwerk
+- **[Meldingen](/nl/notifications)**: pushmeldingen en e-mailberichten
+- **InfluxDB**: gegevensexport voor analyse op de lange termijn
+- **EEBUS**: communicatie met andere EEBUS-apparaten
+- **OCPP Server**: verbinding met OCPP-compatibele laders
+- **Circuits**: bewaking en aansturing van circuits
+- **Modbus Proxy**: meervoudige toegang tot Modbus-apparaten
+- **Sunny Home Manager**: integratie via het SEMP-protocol
+- **Externe limiet**: vermogensbegrenzing door netbeheerders (§ 14a EnWG, § 9 EEG) of bovenliggende energiebeheersystemen
+
+### Back-up en herstel \{#backup\}
+
+De webinterface biedt ingebouwde functies voor gegevensback-ups:
+
+- **Backup**: database downloaden als back-up
+- **Herstel**: gegevens herstellen uit een back-upbestand
+- **Reset**: configuratie of laadhistorie verwijderen
+
+## Via een configuratiebestand
+
+:::note[Traditionele methode]
+Deze methode gebruikt een `evcc.yaml`-bestand en vereist kennis van de commandoregel en YAML-bestanden. Sommige nieuwe functies zijn alleen via de webinterface te configureren.
+:::
+
+### Vanaf nul
+
+U kunt het `evcc.yaml`-bestand ook handmatig aanmaken.
+Hier vindt u een minimaal sjabloon dat u als uitgangspunt kunt gebruiken.
+
+#### Aanmaken
+
+Kopieer de inhoud naar een nieuw `evcc.yaml`-bestand.
+
+```yaml title="evcc.yaml"
+## minimal configuration example
+
+site:
+  title: Home # display name for UI
+  meters:
+    grid: my_grid
+    pv:
+      - my_pv
+    battery:
+      - my_battery
+
+# see https://docs.evcc.io/en/docs/reference/configuration/loadpoints
+loadpoints:
+  - title: Garage # display name for UI
+    charger: my_charger # charger
+    vehicle: my_car # default vehicle
+
+# meter definitions
+# name can be freely chosen and is used as reference when assigning meters to site and loadpoints
+# for documentation see https://docs.evcc.io/docs/meters
+meters:
+  # replace with your real grid meter
+  - name: my_grid
+    type: template
+    template: demo-meter
+    usage: grid
+    power: -1000 # 1 kW feed-in
+  # replace with your real solar system
+  - name: my_pv
+    type: template
+    template: demo-meter
+    usage: pv
+    power: 4000 # 4 kW production
+  # replace with your real battery
+  - name: my_battery
+    type: template
+    template: demo-battery
+    usage: battery
+    power: -1000 # 1 kW battery charging
+    soc: 50 # 50 % state of charge
+
+# replace with your real charger
+# see https://docs.evcc.io/docs/chargers
+chargers:
+  - name: my_charger
+    type: template
+    template: demo-charger
+    status: C # charging
+    power: 2000 # 2 kW charging power
+    enabled: true # optional
+
+# replace with your real vehicle (optional)
+# see https://docs.evcc.io/docs/vehicles
+vehicles:
+  - name: my_car
+    type: template
+    template: offline
+    title: blue e-Golf
+    capacity: 50 # in kWh
+
+# enter your real grid tariff and feed-in price
+# see https://docs.evcc.io/docs/tariffs
+tariffs:
+  currency: EUR
+  grid:
+    type: fixed
+    price: 0.29 # EUR/kWh
+  feedin:
+    type: fixed
+    price: 0.10 # EUR/kWh
+```
+
+U kunt evcc met dit bestand starten.
+Volg daarvoor de instructies voor uw systeem.
+
+#### Testen
+
+Herstart evcc en ga in uw browser naar `http://<evcc-ip>:7070`.
+Controleer of de waarden plausibel zijn.
+Krijgt u een foutmelding, controleer dan uw invoer.
+
+Vaak gaat het om inspring- of typfouten.
+Het bestand is geschreven in [YAML-formaat](https://wikipedia.org/wiki/YAML).
+Met de online tool [YAML Lint](https://www.yamllint.com/) kunt u controleren of uw bestand het juiste formaat heeft.
+
+#### Aanpassen
+
+Het bestand bevat alleen demo-apparaten (`demo-charger`, `demo-meter`, `demo-battery`, `offline`).
+Die hebben vaste waarden.
+Loop het bestand stap voor stap door en pas de waarden aan uw installatie aan:
+
+- Vervang de demo-apparaten door uw eigen [meters](/nl/meters), [laders](/nl/chargers) en [voertuigen](/nl/vehicles).
+- Hebt u geen batterij, dan kunt u dat gedeelte volledig verwijderen.
+- Hebt u meerdere zonnepanelensystemen, dan kunt u de betreffende gedeelten dupliceren.
+- Hebt u meerdere laders, kopieer dan de gedeelten voor laadpunt en lader en pas de namen aan.
+
+Let op: de afzonderlijke gedeelten verwijzen naar elkaar.
+In het gedeelte `site` (`meters`) worden de meters (`grid`, `pv`, `battery`) aan hun rol toegewezen.
+Daarvoor wordt altijd het veld `name` gebruikt.
+Namen moeten daarom uniek zijn.
+
+Voer deze wijzigingen zo mogelijk stap voor stap door.
+Herstart evcc na elke wijziging en controleer het resultaat in de browser.
+Zo merkt u snel of u een fout hebt gemaakt.
+
+#### Meer informatie
+
+De [evcc.dist.yaml](https://github.com/evcc-io/evcc/blob/master/evcc.dist.yaml) in het hoofdproject bevat een volledige lijst met alle mogelijke configuratieopties.
+Uitgebreidere uitleg over de opties vindt u onder [Referentie → evcc.yaml](/nl/reference/configuration).
+
+Wilt u een dynamische demo zien, dan kunt u ook de inhoud van het bestand [demo.yaml](https://github.com/evcc-io/evcc/blob/master/cmd/demo.yaml) bekijken.
+Dit bestand bevat op JavaScript gebaseerde demo-apparaten die een beperkte functionaliteit simuleren.
+Het wordt ook gebruikt voor [demo.evcc.io](https://demo.evcc.io).
+
+Om uw eigen installatie in demomodus te draaien, start u evcc gewoon met de parameter `--demo`.
+Zie de [CLI-referentie](/nl/reference/cli/evcc) voor meer informatie.
+
+## Testen
+
+Test of de configuratie werkt:
+
+```sh
+evcc -c evcc.yaml
+```
+
+Open een browser en voer de URL in: `http://<your-ip>:7070` (bijv. `http://evcc.local:7070`).
+De evcc-interface zou nu uw eigen apparaten moeten tonen.
+
+Werkt alles, dan kunt u uw `evcc.yaml` verplaatsen naar de locatie die uw installatie vereist.
+
+## Probleemoplossing
+
+Treden er fouten op, dan krijgt u met de volgende commando’s extra informatie.
+
+- Syntaxcontrole
+
+  ```sh
+  evcc -c evcc.yaml checkconfig
+  ```
+
+- Meters (net, zonne-energie, batterij)
+
+  ```sh
+  evcc -c evcc.yaml -l debug meter
+  ```
+
+- Voertuigen
+
+  ```sh
+  evcc -c evcc.yaml -l debug vehicle
+  ```
+
+- Laders
+
+  ```sh
+  evcc -c evcc.yaml -l debug charger
+  ```
+
+Controleer de uitvoer van elk commando op plausibiliteit.

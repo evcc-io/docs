@@ -1,0 +1,118 @@
+---
+title: "chargers"
+description: "Definisci i caricabatterie in evcc.yaml, scopri i campi obbligatori e come contrassegnare dispositivi integrati, dispositivi di riscaldamento o prese commutabili."
+sidebar:
+  order: 4
+translatedFrom: "8ce278855648"
+---
+
+import SponsorshipRequired from "@components/SponsorshipRequired.astro";
+
+Per controllare la ricarica, evcc deve poter comunicare con un caricabatterie.
+
+Un caricabatterie deve avere almeno la seguente configurazione:
+
+```yaml
+chargers:
+  - name: charger1 # nome di riferimento
+    type: ...
+    ...
+```
+
+Di seguito vengono spiegati i parametri possibili.
+
+---
+
+## Parametri obbligatori
+
+### `name`
+
+Una breve denominazione del caricabatterie definito qui. Il valore viene usato per fare riferimento al caricabatterie nella configurazione del [punto di ricarica](/it/reference/configuration/loadpoints#charger).
+
+**Ad esempio**:
+
+```yaml
+name: charger1
+```
+
+---
+
+### `type`
+
+È il tipo di caricabatterie specifico di evcc che permette la comunicazione con il caricabatterie. I caricabatterie noti si possono integrare con il tipo `template`. Il tipo (template) adatto si trova in [Dispositivi - Caricabatterie](/it/chargers).
+
+Per i caricabatterie non noti, o se hai esigenze particolari, definisci un [caricabatterie definito dall’utente](/it/user-defined-devices#charger).
+
+**Ad esempio**:
+
+```yaml
+type: custom
+```
+
+---
+
+## Parametri opzionali
+
+### `integrateddevice`
+
+Per i caricabatterie che funzionano senza un “veicolo” (ad es. pompa di calore, e-bike), questo parametro nasconde il veicolo e ne disattiva il riconoscimento.
+
+Insieme a questo parametro si può assegnare anche un’icona (vedi [`vehicle.icon`](/it/reference/configuration/vehicles#icon)), che viene poi mostrata per il caricabatterie.
+
+**Ad esempio**:
+
+```yaml
+features:
+  - integrateddevice
+icon: bike
+```
+
+---
+
+### `heating`
+
+Con questo parametro, il livello di carica dei caricabatterie del gruppo “prese commutabili (switchsockets)” viene mostrato in gradi invece che in percentuale.
+
+**Esempio**:
+
+```yaml
+features:
+  - heating
+```
+
+---
+
+### `continuous`
+
+Contrassegna un dispositivo che, quando è “disattivato”, continua a funzionare normalmente.
+L’interfaccia mostra “Funzionamento normale” invece di “Standby”.
+Una richiesta di aumentare la potenza (ad es. con surplus solare o energia di rete economica) viene indicata come “Boost”.
+
+Imposta questa funzionalità se il tuo dispositivo continua a funzionare nella sua modalità normale senza un controllo attivo.
+Il caso tipico è una pompa di calore; i tipi di pompa di calore preconfigurati e i template corrispondenti impostano già la funzionalità.
+
+**Esempio**:
+
+```yaml
+features:
+  - continuous
+```
+
+---
+
+### `switchdevice`
+
+Contrassegna un dispositivo che si può solo accendere e spegnere e non supporta il controllo continuo della corrente (ad es. pompe di calore on/off, prese commutabili).
+L’interfaccia nasconde le impostazioni di corrente minima e massima e l’opzione **Carica sempre** per questo punto di ricarica.
+
+I template corrispondenti e i tipi preconfigurati impostano già questa funzionalità.
+Per le configurazioni definite dall’utente tramite `type: custom` senza controllo continuo della corrente, imposta questa funzionalità.
+
+**Esempio**:
+
+```yaml
+features:
+  - switchdevice
+```
+
+---

@@ -27,6 +27,8 @@ description: |
 
   Sollte die Fahrzeugerkennung nicht zuverlässig funktionieren, sollte `welcomecharge` (Laden bei Verbindung) aktiviert werden.
 
+  BMW erlaubt nur eine Streaming-Verbindung pro Konto. Wird diese bereits von einem anderen Tool genutzt, können die Streamingdaten optional von einem lokalen MQTT-Broker gelesen werden. Das Tool muss die CarData-Nachrichten unverändert veröffentlichen, z.B. [bmw-mqtt-bridge](https://github.com/dj0abr/bmw-mqtt-bridge) mit Standardeinstellungen. Nur dieses Tool sollte auf dem Topic veröffentlichen dürfen, z.B. per ACL des MQTT-Brokers. Die Anmeldung mit `clientid` wird weiterhin für die REST-Abfragen benötigt.
+
 render:
   - default: |
       type: template
@@ -55,6 +57,11 @@ render:
       climaterdisabled: # Klimatisierungserkennung deaktivieren, Klimatisierungsstatus des Fahrzeugs für die Ladesteuerung ignorieren, sodass der Ladevorgang am SoC- oder Energielimit endet, auch wenn das Fahrzeug einen aktiven Klimatisierungswunsch signalisiert. (optional)
       autodetectdisabled: # Von automatischer Erkennung ausschließen, Das Fahrzeug von der automatischen Erkennung beim Anschließen eines Fahrzeugs ausschließen (optional)
       wakeupdisabled: # Aufweck-Aufrufe deaktivieren, Keine Aufweck-Aufrufe an Fahrzeug oder Ladegerät senden, hilfreich bei Fahrzeugen, die nach wiederholtem Aufwecken das Laden verweigern. (optional)
+      broker: 192.168.1.10:1883 # MQTT-Broker, Streamingdaten von diesem lokalen MQTT-Broker statt von BMW lesen. Leer lassen, um direkt mit BMW zu verbinden. (optional)
+      user: # Benutzerkonto, Benutzername für den MQTT-Broker (optional)
+      password: # Passwort, Passwort für den MQTT-Broker (optional)
+      topic: bmw/raw/+ # Topic, Topic auf dem MQTT-Broker mit den unveränderten CarData-Nachrichten (optional)
+      cache: 30m # Cache, Zeitintervall für erneute REST-Datenabfrage. Standard 15m, 30m mit Streaming. BMW erlaubt 50 Abfragen pro Tag und Konto, bei REST-Abfragen weiterer Tools am selben Konto erhöhen. (optional)
 params:
   - name: vin
     example: WBMW...
@@ -207,5 +214,50 @@ params:
     unit:
     description: Aufweck-Aufrufe deaktivieren
     help: Keine Aufweck-Aufrufe an Fahrzeug oder Ladegerät senden, hilfreich bei Fahrzeugen, die nach wiederholtem Aufwecken das Laden verweigern.
+    advanced: true
+    optional: true
+  - name: broker
+    example: 192.168.1.10:1883
+    default:
+    choice: []
+    unit:
+    description: MQTT-Broker
+    help: Streamingdaten von diesem lokalen MQTT-Broker statt von BMW lesen. Leer lassen, um direkt mit BMW zu verbinden.
+    advanced: true
+    optional: true
+  - name: user
+    example:
+    default:
+    choice: []
+    unit:
+    description: Benutzerkonto
+    help: Benutzername für den MQTT-Broker
+    advanced: true
+    optional: true
+  - name: password
+    example:
+    default:
+    choice: []
+    unit:
+    description: Passwort
+    help: Passwort für den MQTT-Broker
+    advanced: true
+    optional: true
+  - name: topic
+    example:
+    default: bmw/raw/+
+    choice: []
+    unit:
+    description: Topic
+    help: Topic auf dem MQTT-Broker mit den unveränderten CarData-Nachrichten
+    advanced: true
+    optional: true
+  - name: cache
+    example: 30m
+    default:
+    choice: []
+    unit:
+    description: Cache
+    help: Zeitintervall für erneute REST-Datenabfrage. Standard 15m, 30m mit Streaming. BMW erlaubt 50 Abfragen pro Tag und Konto, bei REST-Abfragen weiterer Tools am selben Konto erhöhen.
     advanced: true
     optional: true

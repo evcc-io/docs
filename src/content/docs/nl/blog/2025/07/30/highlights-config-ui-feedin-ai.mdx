@@ -1,0 +1,246 @@
+---
+date: 2025-07-30
+title: "Highlights: configuratie-interface, teruglevering & AI"
+description: "Release-highlights van evcc 0.206 en 0.207 uit juli 2025 met een ingrijpende REST-API-wijziging, laat opladen in laadplannen, dynamische teruglevering en AI via MCP."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Highlights-banner"
+  image: "../../../../../en/blog/2025/07/30/config-ui-mcp-feedin-banner.webp"
+translatedFrom: "5704e9a73f8e"
+---
+
+import Video from "@components/Video.astro";
+import configUiVideo from "../../../../../en/blog/2025/07/30/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/07/30/config-ui.webp";
+import mcpVideo from "../../../../../en/blog/2025/07/30/mcp-integration.mp4";
+import mcpPoster from "../../../../../en/blog/2025/07/30/mcp-integration.webp";
+
+Tijd voor een nieuw overzicht van functies! Ik heb een handvol interessante onderwerpen uitgekozen.
+
+{/* excerpt */}
+
+Voordat we bij de functies komen, eerst een belangrijke mededeling voor alle gebruikers van de REST API.
+
+## Ingrijpende wijziging: REST API
+
+Met release v0.207 verandert de REST API.
+De endpoints blijven gelijk, maar het antwoordformaat wordt gestroomlijnd.
+Concreet verdwijnt het buitenste `result`-niveau.
+
+Hier een voorbeeld van het endpoint `GET /api/state`:
+
+Huidig JSON-antwoord:
+
+```json
+{
+  "result": {
+    "loadpoints": [...],
+    ...
+  }
+}
+```
+
+Toekomstig JSON-antwoord:
+
+```json
+{
+  "loadpoints": [...],
+  ...
+}
+```
+
+De beheerders van populaire evcc-integraties zijn op de hoogte gebracht en hebben de nodige aanpassingen al doorgevoerd.
+
+Gebruikers met eigen scripts of automatiseringen die rechtstreeks de REST API aanspreken, moeten deze zelf aanpassen.
+Meer details staan in het bijbehorende [GitHub-issue.](https://github.com/evcc-io/evcc/pull/22299)
+
+:::note[Opmerkingen over de migratie]
+Om de overstap te vergemakkelijken hebben we twee versies uitgebracht: **v0.206 en v0.207 hebben dezelfde functies**.
+De API-wijzigingen zitten **vanaf v0.207** in de software.
+Als het nieuwe antwoordformaat problemen geeft, kunt u teruggaan naar v0.206.
+Zo krijgt u alle nieuwe functies die hier beschreven staan en kunt u uw scripts en integraties in uw eigen tempo voorbereiden op de ingrijpende wijziging.
+:::
+
+## Plannen: laat opladen
+
+Laadplannen hebben een nieuwe functie gekregen: _Laat opladen_.
+Standaard optimaliseert het planningsalgoritme het laden zo dat het in de goedkoopste of schoonste uren plaatsvindt.
+Het kan echter ook zinvol zijn om het voertuig laat te laden, d.w.z. vlak voor de ingestelde vertrektijd.
+
+Toepassingen zijn onder meer:
+
+- **Voorconditioneren**: vooral in de winter kan het nuttig zijn om de voertuigbatterij op te warmen door rond de vertrektijd te laden. Dat bespaart energie, omdat er tijdens de rit minder verwarmd of gekoeld hoeft te worden.
+- **Klimaatregeling**: als de klimaatregeling in de auto bij vertrek is ingeschakeld, zorgt deze instelling ervoor dat de benodigde energie uit de lader komt en niet uit de autobatterij.
+- **Batterijonderhoud**: wie voor lange ritten tot 100% laadt, wil niet dat de batterij lang volgeladen blijft staan.
+
+![Laat opladen](../../../../../en/blog/2025/07/30/plan-late.webp)
+
+Naast het selectievakje om laat opladen in te schakelen, kunt u ook instellen hoe lang er direct vóór vertrek geladen moet worden.
+Zo kunt u bijv. het grootste deel nog steeds op prijsgeoptimaliseerde momenten laden en de auto pas in het laatste uur volladen, zoals in de schermafbeelding hierboven.
+
+Meer details staan in de [documentatie](/nl/features/plans#late-charging).
+
+<a id="config-ui"></a>
+
+## Configuratie via de browser
+
+Op het gebied van de eerste installatie via de browser wordt veel vooruitgang geboekt.
+Sinds een paar weken is het mogelijk om zonder `evcc.yaml` te beginnen, al startte dit tot nu toe altijd in de [demomodus](https://demo.evcc.io/).
+
+Nu begint de installatie met een keuzevenster:
+
+- Klassieke configuratie met `evcc.yaml`
+- Configuratie via de browser _🧪 experimenteel_
+
+In de volgende video ziet u het configuratieproces met meerdere voertuigen, meters, zonnepanelen- en batterijsystemen, laders en warmtepompen:
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+### Demomodus
+
+Om de interface zonder configuratie te testen, is de demomodus nog steeds beschikbaar.
+U start die met de [CLI-vlag](https://docs.evcc.io/docs/reference/cli/evcc) `--demo`.
+
+In deze modus gebruiken zonnepanelen, batterij en laders gesimuleerde gegevens.
+Daarnaast is het authenticatiesysteem uitgeschakeld, waardoor alle beveiligde functies (configuratie, logboeken, ...) gedeactiveerd zijn.
+
+### Door de gebruiker gedefinieerde apparaten (plug-ins)
+
+Via de configuratie-interface konden voertuigen, meters, zonnepanelen- en batterijsystemen, laders, tarieven, slimme schakelaars en warmtepompen al worden aangemaakt.
+Dat is gebaseerd op onze grote bibliotheek met apparaattemplates voor inmiddels meer dan 550 producten.
+
+Een andere sterke kant is het [flexibele plug-insysteem](/nl/reference/plugins).
+Daarmee kunnen zelfs exotische apparaten en integraties worden aangesloten via HTTP, Modbus, Script, MQTT enz.
+Deze door de gebruiker gedefinieerde apparaten (`type: custom`) moesten tot nu toe via `evcc.yaml` worden geconfigureerd.
+Nu kan dat ook via de UI, met syntaxmarkering, validatie en testfunctie.
+
+![Door de gebruiker gedefinieerde apparaten (plug-ins)](../../../../../en/blog/2025/07/30/custom-devices.webp)
+
+### Laden & verwarmen
+
+evcc is ontstaan om elektrische auto’s slim te laden.
+Inmiddels ondersteunt het systeem ook een groeiende lijst warmtepompen en verwarmingselementen.
+De basisdoelen van de optimalisatie, zoals efficiënt gebruik van eigen energie of kostengeoptimaliseerd laden van het net, zijn op beide gebieden gelijk.
+Het regelgedrag, de eisen aan de weergave en de instelmogelijkheden verschillen echter in de details.
+
+In de configuratie-interface heet het onderdeel _Laadpunten_ daarom nu _Laden & verwarmen_.
+Ook het instelproces is herzien, zodat het de instellingen toont die voor de betreffende toepassing relevant zijn.
+
+In de [video hierboven](#config-ui) (vanaf 2:10) ziet u de verschillende werkwijzen voor laden en verwarmen.
+Hier een schermafbeelding van het eerste instelvenster:
+
+![Laden & verwarmen](../../../../../en/blog/2025/07/30/charging-heating.webp)
+
+In de komende releases volgen verdere stappen om _verwarmen_ in evcc een volwaardige plaats te geven.
+Meer details staan in dit [GitHub-issue](https://github.com/evcc-io/evcc/issues/19753).
+
+### Backup & herstel
+
+Nu steeds meer functies naar de UI verhuizen, ontstaan nieuwe vragen:
+
+- Hoe maak ik een backup van mijn configuratie?
+- Hoe verhuis ik mijn installatie naar een nieuw systeem?
+- Kan ik de configuratie resetten en opnieuw beginnen?
+
+Om deze vragen te beantwoorden, hebben we een functie voor backup & herstel gebouwd.
+Daarmee kunt u de evcc-database op uw computer opslaan, een opgeslagen stand terugzetten of de configuratie wissen en bijv. de laadgeschiedenis behouden.
+
+![Backup & herstel](../../../../../en/blog/2025/07/30/backup-restore.webp)
+
+Veel dank aan [@maschga](https://github.com/maschga) voor de hulp bij de implementatie.
+
+### Er komt meer
+
+Het aantal openstaande todo’s rond de installatie via de browser wordt steeds kleiner.
+Er zijn nog enkele apparaten die niet kunnen worden aangemaakt, en de debuginformatie voor GitHub-issues moet nog beter.
+En natuurlijk kunnen bestaande functies altijd nog verbeterd worden.
+
+Het is nu echter te voorzien dat configuratie via de webinterface binnenkort de nieuwe standaard wordt.
+Versie 1.0.0 komt dichterbij.
+
+Let op: configuratie via `evcc.yaml` blijft ook in de toekomst mogelijk.
+
+## Dynamische teruglevering
+
+Met [dynamische stroomtarieven](/nl/features/dynamic-prices) kunt u het laad- en verwarmingsgedrag afstemmen op de actuele prijssituatie.
+Deze functie is nu ook beschikbaar voor teruglevering.
+
+Als u een tarief met [dynamische terugleverprijzen](/nl/features/dynamic-feedin) hebt (bijv. directe stroomverkoop op de markt, dynamische nettarieven, Nederland, Australië, ...), verschijnt de functie [teruglevering voorrang geven](/nl/features/dynamic-feedin#feed-in-priority) in het instellingenvenster van het laadpunt.
+
+![Dynamische teruglevering](../../../../../en/blog/2025/07/30/smart-feedin.webp)
+
+Daarmee kunt u het laden of verwarmen pauzeren op momenten waarop het lucratiever is om energie aan het net terug te leveren.
+U kunt hiervoor een vaste prijslimiet instellen.
+Automatisering met externe scripts of systemen via de API is uiteraard ook mogelijk.
+
+In de komende releases bouwen we meer functies rond dynamische teruglevering.
+We experimenteren met het pauzeren van teruglevering bij negatieve prijzen en het verlagen van de productie.
+Meer hierover leest u [hier](https://github.com/evcc-io/evcc/issues/21747).
+
+## AI-integratie via MCP 🧪
+
+Met het [Model Context Protocol](https://en.wikipedia.org/wiki/Model_Context_Protocol) (kortweg MCP) kunnen LLM’s zoals Claude, Gemini en ChatGPT gestructureerde toegang krijgen tot externe systemen, zoals evcc.
+
+Wanneer de experimentele functie [MCP](/nl/integrations/mcp) is ingeschakeld, start evcc een MCP-server.
+U kunt het nieuwe endpoint (bijv. `http://evcc.local:7070/mcp`) opnemen in de configuratie van uw LLM.
+
+MCP en de beschikbare tools zijn nog erg jong en veranderen voortdurend.
+We zien hier echter veel potentieel en spannende nieuwe mogelijkheden, vooral op het gebied van optimalisatie en automatisering met lokale modellen.
+
+De volgende video toont een voorbeeld van evcc in combinatie met Claude Code (Sonnet 4):
+
+<Video src={mcpVideo} poster={mcpPoster} />
+
+Verzoek: _“De gebruiker wil morgen om 8 uur met zijn Tesla naar Hamburg rijden.”_
+
+Het LLM ...
+
+- ... vindt het juiste laadpunt: “witte Model 3”
+- ... berekent de afstand: Bremen (titel) -> Hamburg (verzoek)
+- ... berekent het benodigde laadniveau: 90%
+- ... maakt een laadplan aan: 90% om 8 uur voor de Tesla Model 3
+- ... zet de laadmodus van “Uit” op “PV”, omdat plannen alleen in de modus (Min+)PV actief zijn
+
+Tot slot haalt het LLM het door evcc berekende laadplan op en geeft dit aan de gebruiker terug.
+
+Dit relatief eenvoudige voorbeeld laat goed zien welke kant het in de toekomst op kan gaan.
+We zijn benieuwd hoe MCP zich ontwikkelt.
+Probeer het gerust zelf uit en deel uw ervaringen in de [GitHub Discussions](https://github.com/evcc-io/evcc/discussions).
+
+Meer details over het gebruik van MCP met bijv. Claude Code staan in de [documentatie](/nl/integrations/mcp).
+
+## Productie, batterij en laadpunten uitklapbaar
+
+Als u meerdere zonnepanelen- en batterijsystemen of laadpunten hebt geconfigureerd, kunt u die nu in de energiestroom uitklappen voor meer details.
+Apparaten die via de configuratie-interface zijn aangemaakt, kunnen hiervoor een naam krijgen.
+
+:::note
+Zonnepanelen, batterijen en andere meters een naam geven is om technische redenen niet mogelijk via `evcc.yaml`.
+:::
+
+## Nieuwe apparaten
+
+Sinds februari hebben we verschillende nieuwe fabrikanten toegevoegd:
+
+- **Laders:** Ampure, Autoaid, Charge Amps, Elecq, eledio, EN+, enercab, EntraTek, Free2Move, Free2move eSolutions, Huawei, Kathrein, Plugchoice, Volt Time, ZJ Beny
+- **Slimme schakelaars:** Home Assistant
+- **Warmtepompen & elektrische verwarming:** alpha innotec, Bosch, Buderus, Bösch, CTA All-In-One, Daikin, Elco, IDM, Junkers, Kermi, Lambda, my-PV, Nibe, Novelan, Roth, Stiebel Eltron, Tecalor, Vaillant, Viessmann, Wolf, Zewotherm
+- **Meters:** Axitec, Bosch, IAMMETER, IOmeter, ORNO, Saia-Burgess Controls (SBC), Sigenergy, Wago
+- **Zonnepanelen- en batterijsystemen:** Axitec, batterX, Bosch, IAMMETER, Marstek, Sigenergy
+- **Voertuigen:** Toyota
+
+Daarnaast zijn er natuurlijk bugs opgelost en bestaande implementaties verbeterd.
+
+## Nog veel meer ...
+
+Dit is slechts een selectie.
+De volledige lijst met nieuwe functies staat zoals gewoonlijk in de [GitHub-releasenotes](https://github.com/evcc-io/evcc/releases).
+Hartelijk dank aan iedereen die actief meewerkt aan de ontwikkeling van evcc.
+U bent geweldig 🤘.
+
+**Met vriendelijke groet**<br />
+Het evcc-team<br />
+Michael, Andi & Uli

@@ -1,9 +1,10 @@
 ---
 title: "Vorträge, Videos & Blogs"
-description: "Sammelt Videos, Vorträge, Podcasts und Blogbeiträge aus der Community, die zeigen, wie du evcc einrichtest, und die Geschichte hinter dem Projekt erzählen."
+description: "Hier findest du Videos, Vorträge, Podcasts und Blogbeiträge aus der Community, die zeigen, wie du evcc einrichtest, oder die Geschichte hinter dem Projekt erzählen."
+translatedFrom: "662cea38fa42"
 ---
 
-Abseits der offiziellen Dokumentation gibt es inzwischen viele gute und praxisnahe Einstiegs- und Erklärvideos.
+Abseits der offiziellen Dokumentation gibt es viele gute und praxisnahe Einstiegs- und Erklärvideos.
 Wenn du etwas Hintergrund zum Projekt suchst, schau dir die Vorträge und Podcasts an.
 
 ## Videos
@@ -49,11 +50,11 @@ Wenn du etwas Hintergrund zum Projekt suchst, schau dir die Vorträge und Podcas
 - Februar 2023 · verdrahtet \
   [PV Überschussladen von A bis Z // evcc, ioBroker und Homematic Integration](https://youtu.be/6JxktkEaZ2o)
 
-_✨ mit evcc Core Team Besetzung_
+_✨ mit dem evcc-Core-Team_
 
 ## Vorträge
 
-- März 2025 · FOSS Backstage, Berlin \
+- März 2025 · FOSS Backstage, Berlin (en) \
   ✨ [More Hearts than Stars: Smart Charging & Community Funding](https://www.youtube.com/watch?v=k7mGNL8dDwY) ([Folien](https://speakerdeck.com/naltatis/more-hearts-than-stars-smart-charging-and-community-funding))
 - September 2024 · Kieler Open Source und Linux Tage \
   ✨ [evcc: Sonne, Autos und dynamische Strompreise](https://youtu.be/PejujWgAAlw) ([Folien](https://speakerdeck.com/naltatis/evcc-sonne-autos-and-dynamische-stromtarife))
@@ -62,7 +63,7 @@ _✨ mit evcc Core Team Besetzung_
 - Mai 2023 · Augsburger Linux-Infotag \
   ✨ [Open Source Sonne tanken - Wallboxen mit evcc smarter machen](https://www.youtube.com/watch?v=qN8JwBWOlzw) ([Folien](https://speakerdeck.com/naltatis/open-source-sonne-tanken-wallboxen-mit-evcc-smarter-machen))
 
-_✨ mit evcc Core Team Besetzung_
+_✨ mit dem evcc-Core-Team_
 
 ## Podcasts
 
@@ -70,14 +71,14 @@ _✨ mit evcc Core Team Besetzung_
   ✨ [E-Auto mit Solarstrom laden: So wird jede Wallbox endlich smart](https://moove.podigee.io/260-e-auto-mit-solarstrom-laden-wird-die-wallbox-so-wirklich-smart)
 - Januar 2026 · SmartHütte Podcast \
   ✨ [Sonne im Tank - Smartes PV-Überschussladen mit Michael Geers vom evcc Projekt](https://podcast.smarthuette.de/episodes/sonne-im-tank-smartes-pv-uberschussladen-mit-michael-geers-vom-evcc-projekt)
-- Oktober 2025 · The GitHub Podcast \
+- Oktober 2025 · The GitHub Podcast (en) \
   ✨ [Live from GitHub Universe: Inside the GitHub Secure Open Source Fund](https://the-github-podcast.simplecast.com/episodes/live-from-github-universe-inside-the-github-secure-open-source-fund-EV0GufSU)
 
-_✨ mit evcc Core Team Besetzung_
+_✨ mit dem evcc-Core-Team_
 
-## Blogartikel
+## Blogbeiträge
 
-Neuigkeiten und Ankündigungen vom Core Team findest du im [offiziellen evcc-Blog](/de/blog).
+Neuigkeiten und Ankündigungen vom Core-Team findest du im [offiziellen evcc-Blog](/de/blog).
 
 Hier ist eine Liste von Artikeln aus der Community:
 

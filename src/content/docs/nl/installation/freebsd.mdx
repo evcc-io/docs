@@ -1,0 +1,112 @@
+---
+title: "FreeBSD"
+description: "Installeer evcc op FreeBSD uit het officiële pakket, schakel het in als service, houd het actueel en zet er optioneel nginx als reverse proxy voor."
+sidebar:
+  order: 9
+translatedFrom: "2cdd994e3b84"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Deze handleiding beschrijft de installatie op FreeBSD met het officiële [pakket uit de FreeBSD Ports-tree](https://cgit.freebsd.org/ports/tree/www/evcc).
+
+## Installatie
+
+<Steps>
+
+1. ### Installeren
+
+   Open een terminal als root en installeer evcc:
+
+   ```sh
+   pkg install evcc
+   ```
+
+2. ### Starten
+
+   Laat de service automatisch starten bij het opstarten van het systeem en start hem nu:
+
+   ```sh
+   sysrc evcc_enable="YES"
+   service evcc start
+   ```
+
+3. ### Instellen
+
+   Open de evcc-webinterface in uw browser: [http://localhost:7070](http://localhost:7070).
+   Stel een beheerderswachtwoord in en configureer uw apparaten direct via de webinterface.
+
+</Steps>
+
+## Configuratie
+
+:::tip[Aanbevolen]
+Configureer evcc direct in uw browser.
+:::
+
+Na de eerste start kunt u uw evcc-installatie configureren op [http://localhost:7070](http://localhost:7070).
+Instellingen worden automatisch in de database opgeslagen.
+
+U kunt ook een configuratiebestand `evcc.yaml` gebruiken, dat in `/usr/local/etc/evcc.yaml` staat.
+Details vindt u onder [Configuratie](/nl/installation/configuration).
+
+## Updates
+
+Voer de volgende stappen uit om naar een nieuwe versie te updaten:
+
+- Controleer de [releases](https://github.com/evcc-io/evcc/releases) op ingrijpende wijzigingen (breaking changes, BC) die uw installatie raken
+- Open een terminal als root
+- Update evcc:
+
+  ```sh
+  pkg upgrade evcc
+  ```
+
+- Herstart de service:
+
+  ```sh
+  service evcc restart
+  ```
+
+## Overige commando’s
+
+- Controleer de status van de evcc-server:
+
+  ```sh
+  service evcc status
+  ```
+
+- Bekijk de logs:
+
+  ```sh
+  tail -f /var/log/evcc.log
+  ```
+
+## nginx als reverse proxy
+
+Draait u al nginx, voeg dan een nieuwe virtualhost toe met de volgende configuratie:
+
+```nginx
+server {
+  ...
+  server_name evcc.<your-domain>
+  ...
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Host $http_host;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_redirect off;
+    proxy_read_timeout 240s;
+
+    proxy_http_version 1.1;
+
+    proxy_pass http://127.0.0.1:7070;
+  }
+}
+```
+
+De evcc-webinterface is dan bereikbaar op `http://evcc.<your-domain>/`.

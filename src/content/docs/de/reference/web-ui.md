@@ -1,8 +1,9 @@
 ---
 title: "Web UI"
-description: "Jede Seite der Weboberfläche hat eine eigene URL zum Verlinken oder als Lesezeichen, und Einstellungen wie Design, Sprache oder Einheiten lassen sich per URL setzen."
+description: "Jede Seite der Weboberfläche hat eine eigene URL, die du verlinken oder als Lesezeichen speichern kannst, und Design, Sprache oder Einheiten lassen sich per URL setzen."
 sidebar:
   order: 3
+translatedFrom: "e90418bf26a9"
 ---
 
 Die Weboberfläche läuft auf Port `7070` und nutzt Hash-Routing.
@@ -13,23 +14,23 @@ Die Weboberfläche läuft auf Port `7070` und nutzt Hash-Routing.
 Jede Seite hat ihre eigene Hash-Route.
 Du kannst direkt darauf verlinken oder sie als Lesezeichen speichern.
 
-| Seite              | Route        | Login | Parameter                                         |
-| ------------------ | ------------ | ----- | ------------------------------------------------- |
-| Start / Ladepunkte | `#/`         | nein  | `lp`                                              |
-| Hausbatterie       | `#/battery`  | nein  | —                                                 |
-| Vorhersage         | `#/forecast` | nein  | —                                                 |
-| Ladevorgänge       | `#/sessions` | nein  | `month`, `year`, `loadpoint`, `vehicle`, `period` |
-| Konfiguration      | `#/config`   | ja    | —                                                 |
-| Logs               | `#/log`      | ja    | `areas`, `level`                                  |
-| Historie 🧪        | `#/history`  | nein  | `day`, `month`, `year`, `period`                  |
-| Optimize 🧪        | `#/optimize` | nein  | —                                                 |
-| Problem melden     | `#/issue`    | ja    | —                                                 |
+| Seite                   | Route        | Login | Parameter                                         |
+| ----------------------- | ------------ | ----- | ------------------------------------------------- |
+| Startseite / Ladepunkte | `#/`         | nein  | `lp`                                              |
+| Hausbatterie            | `#/battery`  | nein  | —                                                 |
+| Vorhersage              | `#/forecast` | nein  | —                                                 |
+| Ladevorgänge            | `#/sessions` | nein  | `month`, `year`, `loadpoint`, `vehicle`, `period` |
+| Konfiguration           | `#/config`   | ja    | —                                                 |
+| Logs                    | `#/log`      | ja    | `areas`, `level`                                  |
+| Historie 🧪             | `#/history`  | nein  | `day`, `month`, `year`, `period`                  |
+| Optimize 🧪             | `#/optimize` | nein  | —                                                 |
+| Problem melden          | `#/issue`    | ja    | —                                                 |
 
 🧪 kennzeichnet experimentelle Seiten.
 
 | Parameter   | Beschreibung                                  |
 | ----------- | --------------------------------------------- |
-| `lp`        | Ladepunkt-Nummer, beginnend bei `1`           |
+| `lp`        | Ladepunktnummer, beginnend bei `1`            |
 | `year`      | Anzuzeigendes Jahr, z. B. `2026`              |
 | `month`     | Monat, `1`–`12`                               |
 | `day`       | Tag des Monats, `1`–`31`                      |
@@ -41,7 +42,7 @@ Du kannst direkt darauf verlinken oder sie als Lesezeichen speichern.
 
 ### Beispiele {#examples}
 
-Wählt einen Ladepunkt auf dem Startbildschirm vor:
+Einen Ladepunkt auf der Startseite vorauswählen:
 
 ```
 http://evcc.local:7070/#/?lp=1
@@ -49,7 +50,7 @@ http://evcc.local:7070/#/?lp=1
 
 Am einfachsten kommst du an den passenden Link, indem du den Ladepunkt in der Oberfläche auswählst und die Adresse aus dem Browser kopierst.
 
-Filtere **Ladevorgänge** oder **Historie** nach Zeitraum oder Gerät:
+**Ladevorgänge** oder **Historie** nach Zeitraum oder Gerät filtern:
 
 ```
 http://evcc.local:7070/#/sessions?year=2026&month=3

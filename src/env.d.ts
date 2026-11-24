@@ -14,3 +14,8 @@ declare module "virtual:starlight/user-config" {
   const Config: import("@astrojs/starlight/types").StarlightConfig;
   export default Config;
 }
+
+declare namespace StarlightApp {
+  type UIStrings = typeof import("./content/i18n/en.json");
+  interface I18n extends UIStrings {}
+}

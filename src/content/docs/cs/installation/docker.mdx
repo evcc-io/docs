@@ -1,0 +1,287 @@
+---
+title: "Docker"
+description: "Spusťte evcc jako kontejner Dockeru na NASu nebo linuxovém serveru pomocí Docker Compose a zjistěte, proč doporučujeme režim host a které porty potřebuje režim bridge."
+sidebar:
+  order: 4
+translatedFrom: "2cf8f5cf68e7"
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+evcc lze nainstalovat jako obraz Dockeru.
+Obrazy jsou k dispozici pro AMD64, armv6 a arm64.
+Typickým použitím jsou systémy NAS jako Synology, QNAP, Unraid a TrueNAS.
+
+:::caution
+Tento návod předpokládá základní zkušenosti s Dockerem.
+
+Pokud jste s Dockerem dosud nepracovali a hledáte jednoduchou cestu, doporučujeme místo toho samostatné zařízení, např. Raspberry Pi s [hotovým obrazem](/cs/installation/linux-image).
+
+Pokud vaše zařízení nejsou dostupná přes síť (např. adaptéry RS485), zvolte přímou instalaci bez Dockeru, např. pod [Linuxem](/cs/installation/linux).
+Existují technická řešení, jak to s Dockerem zprovoznit.
+Ta zde ale nepopisujeme.
+:::
+
+## Síťový režim \{#network\}
+
+Než kontejner vytvoříte, musíte se rozhodnout, jak bude připojen k vaší síti.
+Doporučujeme **síťový režim host**.
+Kontejner pak sdílí síť hostitele a chová se jako přímo nainstalovaný program.
+To má několik výhod:
+
+- Když přidáváte zařízení, pole **IP adresa nebo název hostitele** nabízí zařízení nalezená ve vaší síti.
+- Funkce založené na mDNS fungují, např. EEBUS, SMA Sunny Home Manager a automatické vyhledání v aplikaci evcc.
+- Zařízení komunikující přes UDP, např. nabíječky KEBA a zařízení SMA, jsou dostupná bez dalšího nastavování.
+- Není potřeba udržovat seznam portů. Příchozí spojení, např. od nabíječek OCPP, fungují hned.
+
+V **režimu bridge** běží kontejner v samostatné síti Dockeru.
+To je v pořádku, pokud výše uvedené funkce nepotřebujete nebo chcete kontejner izolovat.
+Každý potřebný [port](#ports) pak musíte publikovat sami.
+Zařízení ve vaší síti se nenabízejí, takže jejich adresy zadáváte ručně.
+
+Režim host vyžaduje linuxového hostitele, což zahrnuje i běžné systémy NAS.
+V aplikaci Docker Desktop na macOS a Windows běží kontejner ve virtuálním počítači bez přímého přístupu k vaší síti.
+Použijte tam místo toho instalaci pro [macOS](/cs/installation/macos) nebo [Windows](/cs/installation/windows).
+
+:::tip[Připojte adresář, ne soubor databáze]
+Vždy připojte **adresář** `/root/.evcc`, nikdy jen samotný soubor `evcc.db`. evcc ukládá databázi SQLite v tomto adresáři spolu s jejími doprovodnými soubory (`evcc.db-wal` a `evcc.db-shm`) a všechny musí zůstat pohromadě.
+
+Nejspolehlivější volbou je [pojmenovaný svazek](https://docs.docker.com/engine/storage/volumes/) (`docker volume create evcc`, poté připojte `evcc:/root/.evcc`): drží soubory pohromadě a leží v nativním souborovém systému hostitele, který poskytuje zamykání souborů, jež SQLite potřebuje. Neukládejte databázi na síťové úložiště (NFS/SMB) ani do bind mountu v aplikaci Docker Desktop pro macOS/Windows, protože to může zamykání SQLite narušit.
+:::
+
+## Instalace
+
+Kontejner lze nastavit pomocí Docker Compose, Docker CLI nebo grafického rozhraní Dockeru ve vašem systému.
+Všechny tři způsoby používají stejný obraz i svazky.
+
+K dispozici jsou dva tagy obrazu: `evcc/evcc:latest` (doporučeno) a `evcc/evcc:nightly` (vývojová verze).
+
+### Svazky \{#volumes\}
+
+| Cesta na hostiteli     | Cesta v kontejneru | Popis                                        | Povinné |
+| ---------------------- | ------------------ | -------------------------------------------- | ------- |
+| `/home/user/.evcc`     | `/root/.evcc`      | Adresář pro databázi                         | ano     |
+| `/home/user/evcc.yaml` | `/etc/evcc.yaml`   | Konfigurační soubor (jen pokud ho použijete) | ne      |
+
+Databáze obsahuje vaše nabíjecí relace a vše, co jste nastavili ve webovém rozhraní.
+Před prvním spuštěním vytvořte adresář na hostitelském systému.
+Tento návod používá jako příklad `/home/user/.evcc`.
+
+Svazek `evcc.yaml` potřebujete jen tehdy, když svou instanci konfigurujete pomocí [konfiguračního souboru](/cs/installation/configuration) místo webového rozhraní.
+Pokud ho nepoužíváte, odstraňte tento řádek z níže uvedených příkladů.
+
+### Docker Compose \{#compose\}
+
+[Docker Compose](https://docs.docker.com/compose) je doporučený způsob, protože všechny parametry jsou uloženy v jednom souboru.
+Vytvořte soubor `compose.yml` s jednou z následujících konfigurací:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Režim host (doporučeno)">
+
+```yaml
+services:
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    network_mode: host
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+  </TabItem>
+  <TabItem label="Režim bridge">
+
+```yaml
+services:
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    ports:
+      - 7070:7070/tcp
+      - 8887:8887/tcp
+    volumes:
+      - /home/user/.evcc:/root/.evcc
+      - /home/user/evcc.yaml:/etc/evcc.yaml # optional
+    restart: unless-stopped
+```
+
+Tento příklad publikuje jen webové rozhraní a server OCPP.
+Další [porty](#ports) přidejte podle potřeby.
+
+  </TabItem>
+</Tabs>
+
+Spusťte kontejner příkazem:
+
+```sh
+sudo docker compose up -d
+```
+
+Zda potřebujete `sudo`, závisí na vašem systému.
+
+### Docker CLI \{#cli\}
+
+Kontejner můžete také vytvořit a spustit jediným příkazem:
+
+<Tabs syncKey="docker-network">
+  <TabItem label="Režim host (doporučeno)">
+
+```sh
+sudo docker run -d --name evcc \
+  --network host \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+  </TabItem>
+  <TabItem label="Režim bridge">
+
+```sh
+sudo docker run -d --name evcc \
+  -p 7070:7070 \
+  -p 8887:8887 \
+  -v /home/user/.evcc:/root/.evcc \
+  -v /home/user/evcc.yaml:/etc/evcc.yaml \
+  --restart unless-stopped \
+  evcc/evcc:latest
+```
+
+Tento příklad publikuje jen webové rozhraní a server OCPP.
+Další [porty](#ports) přidejte podle potřeby.
+
+  </TabItem>
+</Tabs>
+
+### Grafické rozhraní Dockeru \{#ui\}
+
+Pokud má váš systém grafické rozhraní pro Docker (např. Synology, QNAP, Portainer, Unraid), můžete kontejner vytvořit v něm.
+Zadejte obraz a [svazky](#volumes) uvedené výše a nastavte síťový režim na `host`.
+Pokud místo toho zvolíte režim bridge, přidejte potřebné [porty](#ports).
+
+Přesné názvy polí se systém od systému liší.
+Pojmy síťový režim, porty a svazky ale najdete ve všech.
+
+## Porty \{#ports\}
+
+Publikování portů je nutné jen v režimu bridge.
+V režimu host jsou tyto porty dostupné přímo na hostiteli.
+
+| Port hostitele | Port kontejneru | Popis                  | Povinné |
+| -------------- | --------------- | ---------------------- | ------- |
+| 7070           | 7070/tcp        | Webové rozhraní, API   | ano     |
+| 8887           | 8887/tcp        | Server OCPP            | ne      |
+| 9522           | 9522/udp        | SMA Sunny Home Manager | ne      |
+| 7090           | 7090/udp        | Nabíječky KEBA         | ne      |
+| 28376          | 28376/udp       | Nabíječky EVSE Master  | ne      |
+| 5353           | 5353/udp        | mDNS                   | ne      |
+| 4712           | 4712/tcp        | EEBUS                  | ne      |
+| 8899           | 8899/udp        | Modbus UDP             | ne      |
+
+## Ověření \{#test\}
+
+Po spuštění kontejneru je webové rozhraní dostupné na adrese `http://<host>:7070`.
+`<host>` je IP adresa nebo název hostitele počítače, na kterém kontejner běží.
+
+Při prvním použití budete vyzváni k nastavení hesla administrátora.
+Poté můžete nastavit svá zařízení podle popisu v části [Konfigurace](/cs/installation/configuration).
+
+Pokud se nedaří navázat spojení, zkontrolujte [logy kontejneru](/cs/report-a-problem#system-logs).
+Další pomoc najdete v [GitHub Discussions](https://github.com/evcc-io/evcc/discussions).
+
+## Aktualizace \{#update\}
+
+<Tabs>
+  <TabItem label="Docker Compose">
+
+Přejděte do adresáře se souborem `compose.yml` a stáhněte nejnovější obraz:
+
+```sh
+sudo docker compose pull
+```
+
+Pokud je k dispozici nový obraz, následující příkaz kontejner znovu vytvoří.
+Jinak poběží dál stávající kontejner.
+
+```sh
+sudo docker compose up -d
+```
+
+  </TabItem>
+  <TabItem label="Docker CLI">
+
+Stáhněte nejnovější obraz a poté zastavte a odstraňte stávající kontejner:
+
+```sh
+sudo docker pull evcc/evcc:latest
+sudo docker stop evcc
+sudo docker rm evcc
+```
+
+Kontejner znovu spusťte stejným příkazem `docker run` jako při [instalaci](#cli).
+
+  </TabItem>
+  <TabItem label="Grafické rozhraní Dockeru">
+
+Postup aktualizace závisí na konkrétním grafickém rozhraní pro Docker.
+Řiďte se prosím dokumentací vašeho systému.
+
+  </TabItem>
+</Tabs>
+
+:::note
+Pokud se po aktualizaci přestanou zobrazovat vaše nabíjecí relace, není správně připojen adresář `/root/.evcc`.
+:::
+
+## Návody od komunity
+
+Zde najdete návody pro konkrétní systémy, které vytvořili uživatelé.
+Nemůžeme zaručit, že jsou správné nebo aktuální.
+
+:::tip[Příspěvky vítány]
+Aktualizace nebo návody pro další systémy jsou vždy vítány.
+Může jít o PDF, článek na osobním blogu nebo video na YouTube.
+Klidně vytvořte pull request v [repozitáři dokumentace](https://github.com/evcc-io/docs/pulls).
+:::
+
+### Synology NAS
+
+evcc můžete na systémech Synology NAS nainstalovat přes Docker pomocí grafického rozhraní, bez použití příkazové řádky.
+Tento návod používá doporučený [režim host](#network):
+[Anleitung: Synology Docker (PDF / DE)](https://github.com/evcc-io/docs/files/10365841/Anleitung.EVCC.Synology.Docker.Elli.Charger.Connect-Pro.pdf)
+
+Návod pro režim bridge najdete zde:
+[Anleitung: Synology Docker 2 (PDF / DE)](https://github.com/evcc-io/docs/files/10365845/EVCC_Synology_Docker-2.pdf) od [at4hawo1](https://github.com/at4hawo1)
+
+### QNAP NAS
+
+Instalace evcc na systémech QNAP přes Container Station je velmi podobná výše uvedenému návodu pro Synology.
+Návod specifický pro QNAP najdete zde:
+[Anleitung: QNAP (PDF / DE)](https://github.com/evcc-io/docs/files/11241693/EVCC_auf_QNAP_Container_Station.pdf)
+
+## Statické návrhy zařízení \{#discovery\}
+
+Jde o pokročilou možnost pro spravovaná prostředí Dockeru, kde je záměrně použit režim bridge a zařízení se nemění.
+Proměnná prostředí `EVCC_DISCOVERY_HOSTS` poskytuje statický seznam zařízení.
+Tento seznam se pak místo prohledávání sítě použije pro návrhy v poli **IP adresa nebo název hostitele**.
+
+Hodnota je seznam ve formátu JSON.
+Každá položka potřebuje `ip`.
+`hostname` a `mac` jsou volitelné.
+Slouží k zobrazení výrobce a k zařazení zařízení odpovídajících zvolenému typu do skupiny **Odpovídající**.
+
+```yaml
+services:
+  evcc:
+    environment:
+      EVCC_DISCOVERY_HOSTS: >-
+        [
+          {"ip": "192.168.1.10", "hostname": "sma3009876543", "mac": "00:15:BB:12:34:56"},
+          {"ip": "192.168.1.20", "hostname": "go-echarger_123456"}
+        ]
+```
+
+Prázdný seznam `[]` návrhy vypne.

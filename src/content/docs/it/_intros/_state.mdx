@@ -1,0 +1,19 @@
+---
+translatedFrom: "467d4c7df8e1"
+---
+
+L’API State è la struttura dati su cui si basa l’interfaccia web.
+È accessibile in tre modi.
+Non c’è alcuna garanzia di compatibilità: i campi possono cambiare da una versione all’altra.
+
+- [REST API](/integrations/rest-api): `GET /api/state` restituisce lo stato completo come singolo documento JSON, racchiuso in un oggetto `result`.
+  Il parametro di query `jq` filtra la risposta con un’espressione [jq](https://jqlang.org/).
+  - Esempio dal vivo: [`https://demo.evcc.io/api/state`](https://demo.evcc.io/api/state)
+  - Filtrato su un singolo campo: [`https://demo.evcc.io/api/state?jq=.loadpoints[2].chargePower`](https://demo.evcc.io/api/state?jq=.loadpoints%5B2%5D.chargePower)
+- [MQTT](/it/integrations/mqtt-api): ogni campo viene pubblicato come topic a sé.
+  I campi a livello di sito compaiono sotto `evcc/site/<field>`, quelli dei punti di ricarica e dei riscaldatori sotto `evcc/loadpoints/<n>/<field>` con indici a partire da 1.
+  Oggetti e array annidati vengono appiattiti in topic secondari, ad es. `evcc/site/pv/1/power`.
+  I valori vengono pubblicati come semplici stringhe, i timestamp in secondi Unix, le durate in secondi.
+- **WebSocket**: alla connessione, il client riceve lo stato completo come un unico oggetto JSON.
+  I campi dei punti di ricarica e dei riscaldatori usano chiavi separate da punti, ad es. `loadpoints.0.chargePower`.
+  Dopodiché vengono inviati solo aggiornamenti incrementali: piccoli oggetti JSON con i campi modificati, che il client integra nella propria copia dello stato.

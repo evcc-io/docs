@@ -1,0 +1,228 @@
+---
+title: "Windows"
+description: "Installa evcc manualmente su Windows, eseguilo dal prompt dei comandi o come servizio in background, aggiornalo o torna a una versione precedente."
+sidebar:
+  order: 10
+translatedFrom: "95912adc36d1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Qui trovi le istruzioni per installare evcc manualmente su Windows.
+
+:::caution
+Questa installazione manuale richiede conoscenze informatiche avanzate, soprattutto nell’uso del prompt dei comandi o di PowerShell.
+
+È possibile eseguire evcc su Windows.
+Di solito però evcc viene usato in un ambiente Linux (ad es. Raspberry Pi).
+:::
+
+## Installazione
+
+<Steps>
+
+1. ### Installa
+
+   Scarica il file adatto al tuo sistema ed estrailo (ad es. con un doppio clic):
+   - CPU Intel a 64 bit: [evcc_X.XX_windows_amd64.zip](https://github.com/evcc-io/evcc/releases/latest)
+
+   Apri il prompt dei comandi e vai nella cartella estratta. Verifica l’installazione:
+
+   ```sh
+   evcc -v
+   ```
+
+   Dovresti vedere la versione attuale di evcc (ad es. `evcc version 0.xxx.y`).
+
+2. ### Avvia
+
+   ```sh
+   ./evcc
+   ```
+
+3. ### Configura
+
+   Apri l’interfaccia web di evcc nel browser: [http://localhost:7070](http://localhost:7070).
+   Imposta una password di amministratore e configura i tuoi dispositivi direttamente dall’interfaccia web.
+
+</Steps>
+
+## File di configurazione (alternativa)
+
+In alternativa all’interfaccia web puoi usare un file di configurazione `evcc.yaml`.
+Per i dettagli consulta [Configurazione](/it/installation/configuration).
+
+Avvia evcc con:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+## Aggiornamento e downgrade
+
+Segui i passaggi descritti sopra e sostituisci il file del programma evcc con la versione nuova o precedente.
+Non è necessario ripetere la configurazione.
+
+## Servizio in background
+
+### Utilità di pianificazione
+
+:::note
+Questa guida presuppone che evcc si trovi in `c:\evcc`.
+
+Queste istruzioni si riferiscono a Windows 10.
+:::
+
+- Apri il menu Start e cerca “Utilità di pianificazione”, poi fai clic con il tasto destro e scegli “Esegui come amministratore”:
+
+![Utilità di pianificazione di Windows 10](../../en/installation/win10-srv/win10-srv-1.png)
+
+- Dopo aver avviato l’Utilità di pianificazione, scegli se creare il nuovo servizio in una cartella dedicata o nella “Libreria Utilità di pianificazione” generale.
+  In questo esempio creiamo una cartella `evcc` dedicata.
+  Seleziona “Libreria Utilità di pianificazione”, poi fai clic con il tasto destro per aprire il menu contestuale e scegli “Nuova cartella...”:
+
+![Libreria Utilità di pianificazione](../../en/installation/win10-srv/win10-srv-2.png)
+
+- Ora seleziona la nuova cartella `evcc` e apri di nuovo il menu contestuale.
+  Scegli “Crea attività”:
+
+![Finestra Nuova attività](../../en/installation/win10-srv/win10-srv-3.png)
+
+- Assegna un nome all’attività (ad es. “evcc”) e una breve descrizione.
+  Poiché l’attività deve essere eseguita come servizio di sistema, apri la gestione utenti con “Cambia utente o gruppo” e inserisci `SYSTEM` nella casella.
+  Fai clic su “Controlla nomi”: la parola “SYSTEM” dovrebbe risultare sottolineata.
+  Fai clic su OK per chiudere la finestra di dialogo:
+
+![Finestra dell’attività](../../en/installation/win10-srv/win10-srv-4.png) ![Selezione utente](../../en/installation/win10-srv/win10-srv-5.png)
+
+- Nella scheda “Attivazione” fai clic su “Nuovo...”.
+  Imposta l’attivazione su “All’avvio” e verifica che la casella “Abilitata” sia selezionata:
+
+![Attivazione](../../en/installation/win10-srv/win10-srv-6.png)
+
+- Nella scheda “Azioni” fai clic su “Nuovo...”.
+  Assicurati che sia selezionato “Avvio programma”, poi cerca l’eseguibile `evcc.exe` con “Sfoglia”.
+  È consigliabile impostare il percorso anche nella casella “Inizio”, così il file di configurazione viene trovato automaticamente:
+
+![Azioni](../../en/installation/win10-srv/win10-srv-7.png)
+
+- Nella scheda “Condizioni” puoi lasciare le impostazioni predefinite.
+
+  :::note
+  SMA Home Manager a volte può dare problemi se usato con il Wi-Fi: prova ad attivare la condizione “Rete” e a selezionare l’interfaccia di connessione adatta nel menu a tendina.
+  :::
+
+![Condizioni](../../en/installation/win10-srv/win10-srv-8.png)
+
+- Nella scheda “Impostazioni” assicurati di selezionare “Esegui l’attività appena possibile dopo un avvio pianificato non eseguito”.
+  Assicurati inoltre che “Arresta l’attività se viene eseguita per più di:” **non** sia selezionato, altrimenti evcc smetterà di funzionare in momenti casuali.
+
+![Impostazioni](../../en/installation/win10-srv/win10-srv-9.png)
+
+Ora puoi avviare l’attività manualmente o provarla con un riavvio.
+Per verificare che funzioni, apri `http://localhost:7070` nel browser.
+
+### NSSM \{#nssm\}
+
+:::note
+Questa guida presuppone che evcc si trovi in `c:\Tools\evcc`.
+
+Queste istruzioni si riferiscono a Windows 11.
+:::
+
+In alternativa all’Utilità di pianificazione puoi eseguire evcc come servizio Windows.
+Un servizio funziona senza che un utente abbia effettuato l’accesso e offre un controllo migliore sul riavvio e sulla gestione degli errori.
+
+Poiché evcc non supporta nativamente l’interfaccia dei servizi Windows, puoi usare [_nssm_](https://nssm.cc/download) (_Non-Sucking Service Manager_) come wrapper di servizio.
+
+- Scarica _nssm_ da [nssm.cc](https://nssm.cc/download) ed estrai il file ZIP in `C:\Tools\nssm\`.
+- Apri un prompt dei comandi (`cmd.exe`) e passa alla cartella `win64`:
+
+  ```sh
+  cd /D C:\Tools\nssm\nssm-2.24\win64
+  ```
+
+- Installa il servizio:
+
+  ```sh
+  nssm install evcc
+  ```
+
+- Scorri le schede della finestra di dialogo.
+  Le impostazioni seguenti sono quelle consigliate.
+  - **Application**:
+
+    ![Application](../../en/installation/win11-nssm/win11-nssm_01_Application.webp)
+    - _Path_: percorso di `evcc.exe`.
+    - _Start directory_: directory di lavoro di evcc.
+    - _Arguments_: parametri per evcc, ad es. `-c evcc.yaml`.
+      Facoltativo: `--database evcc.db` per impostare esplicitamente il percorso del database.
+      Senza questa opzione il database viene salvato nel profilo utente dell’account che esegue evcc.
+      Con l’account _System_ sarebbe `%SystemRoot%\system32\config\systemprofile\.evcc\evcc.db`, cioè una posizione diversa rispetto all’avvio interattivo.
+      Con `--database` ti assicuri che venga usato sempre lo stesso database.
+      Questo è rilevante quando [reimposti la password](/it/faq#password-reset).
+
+  - **Details**:
+
+    ![Details](../../en/installation/win11-nssm/win11-nssm_02_Details.webp)
+    - _Display Name_: nome del servizio nei Servizi di Windows (idealmente uguale a _Service Name_).
+    - _Startup type_: _Automatic_ per l’avvio automatico all’accensione.
+
+  - **Log on**:
+
+    ![Log on](../../en/installation/win11-nssm/win11-nssm_03_Log_on.webp)
+
+    Predefinito: il servizio viene eseguito con l’account _System_.
+    Dettagli: [documentazione di nssm](https://nssm.cc/usage).
+
+    :::important
+    L’account scelto qui determina dove evcc salva il suo database `evcc.db` (vedi _Arguments_ sopra).
+    :::
+
+  - **Dependencies**:
+
+    ![Dependencies](../../en/installation/win11-nssm/win11-nssm_04_Dependencies.webp)
+
+    Aggiungere `NlaSvc` come dipendenza garantisce che la rete sia pronta prima dell’avvio di evcc.
+
+  - **Process**:
+
+    ![Process](../../en/installation/win11-nssm/win11-nssm_05_Process.webp)
+
+    Lascia i valori predefiniti.
+
+  - **Shutdown**:
+
+    ![Shutdown](../../en/installation/win11-nssm/win11-nssm_06_Shutdown.webp)
+
+    Lascia i valori predefiniti.
+    nssm prova prima `Ctrl`+`C`, poi `WM_CLOSE`/`WM_QUIT`, e termina forzatamente il processo dopo il timeout.
+
+  - **Exit actions**:
+
+    ![Exit actions](../../en/installation/win11-nssm/win11-nssm_07_Exit_actions.webp)
+
+    Consiglio: _Restart application_ con un ritardo di 10 secondi, così evcc si riavvia automaticamente dopo un crash o un riavvio dall’interfaccia web.
+
+  - **I/O**:
+
+    ![I/O](../../en/installation/win11-nssm/win11-nssm_08_IO.webp)
+
+    Facoltativo: reindirizza `stdout` e `stderr` su file di log.
+    Mantieni basso il livello di log di evcc, per evitare che i file crescano troppo in fretta.
+
+  - **File rotation**:
+
+    ![File rotation](../../en/installation/win11-nssm/win11-nssm_09_File_rotation.webp)
+
+    Facoltativo: attiva la rotazione dei log per limitare la dimensione dei file di log.
+
+  - **Environment**:
+
+    ![Environment](../../en/installation/win11-nssm/win11-nssm_10_Environment.webp)
+
+    Lascia i valori predefiniti.
+
+Fai clic su _Install Service_ per installare il servizio.
+Il servizio si può poi avviare e arrestare dalla console di gestione dei Servizi di Windows.
+Per verificare, apri `http://localhost:7070` nel browser.

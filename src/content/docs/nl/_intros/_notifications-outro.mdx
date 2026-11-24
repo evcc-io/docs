@@ -1,0 +1,107 @@
+---
+translatedFrom: "5833eaf825d2"
+---
+
+## Gebeurtenissen \{#events\}
+
+Berichten kunnen voor de volgende gebeurtenissen worden verstuurd:
+
+| Gebeurtenis   | Wordt verstuurd wanneer …                          |
+| ------------- | -------------------------------------------------- |
+| `start`       | het laden start                                    |
+| `stop`        | het laden eindigt                                  |
+| `connect`     | een voertuig wordt aangesloten                     |
+| `disconnect`  | een voertuig wordt losgekoppeld                    |
+| `soc`         | het laadniveau van het voertuig verandert          |
+| `guest`       | een onbekend voertuig wordt herkend                |
+| `asleep`      | een voertuig niet laadt ondanks vrijgave           |
+| `planoverrun` | een laadplan naar verwachting zijn doel niet haalt |
+
+Elke gebeurtenis heeft een titel en een bericht.
+Beide kunnen met [plaatshouders](#placeholders) worden aangepast.
+
+## Berichtformaat \{#message-format\}
+
+Bericht met eenvoudige syntaxis, bijv. voor de gebeurtenis `stop`:
+
+```txt
+${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
+Solar share: ${sessionSolarPercentage:%.0f}%
+```
+
+Hetzelfde bericht met Go-template-syntaxis, met berekeningen (bijv. W omrekenen naar kW) en voorwaarden:
+
+```txt
+{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
+Solar share: {{round .sessionSolarPercentage 0 }}%
+{{- if .sessionPrice}}
+Cost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
+{{- end}}
+```
+
+### Plaatshouders \{#placeholders\}
+
+Titels en berichten kunnen variabelen gebruiken om informatie uit evcc weer te geven.
+Er zijn twee syntaxisvarianten, die ook gecombineerd kunnen worden:
+
+- **Eenvoudig**: `${variableName}`, bijv. `${vehicleTitle}`.
+  Optioneel met opmaak zoals `${pvPower:%.1fk}`: naast de gebruikelijke `printf`-specificaties deelt het achtervoegsel `k` de waarde door 1.000 (bijv. Wh → kWh).
+  Tijdsduren zoals `${chargeDuration}` worden afgerond op hele seconden weergegeven (bijv. `1h23m4s`).
+- **Go-template**: `{{.variableName}}`, maakt berekeningen, voorwaarden en [sprig-functies](http://masterminds.github.io/sprig/) mogelijk.
+
+:::note
+Let bij variabelen op het juiste gebruik van hoofdletters en kleine letters!
+:::
+
+### Beschikbare variabelen \{#variables\}
+
+De beschikbare variabelen komen overeen met de gegevens van de [REST API](/integrations/rest-api).
+Bij het versturen van een bericht worden de gegevens van het laadpunt dat het bericht activeert en de globale gegevens samengevoegd tot een platte structuur.
+Daardoor zijn zowel globale waarden (bijv. `pvPower`, `grid.Power`) als laadpuntspecifieke waarden (bijv. `mode`, `chargedEnergy`, `vehicleTitle`) direct toegankelijk.
+Geneste waarden zoals `grid.Power` of `battery.Soc` zijn alleen met de Go-template-syntaxis toegankelijk, en daar zijn de veldnamen met hoofdletter vereist.
+
+Veelgebruikte laadpuntvariabelen:
+
+- `title`: naam van het laadpunt
+- `loadpoint`: nummer van het laadpunt 1, 2, …
+- `mode`: laadmodus `off`/`smart`/`now`
+- `charging`: laden actief
+- `enabled`: laden vrijgegeven
+- `connected`: voertuig aangesloten
+- `chargedEnergy`: in de sessie geladen energie in Wh
+- `chargeDuration`: laadduur
+- `chargePower`: actueel laadvermogen in W
+- `connectedDuration`: verbindingsduur
+- `chargeRemainingDuration`: resterende laadtijd tot het doel
+- `chargeRemainingEnergy`: resterende energie tot het doel in Wh
+- `phasesActive`: momenteel actieve fasen
+- `vehicleTitle`: naam van het voertuig
+- `vehicleName`: technische naam van het voertuig
+- `vehicleSoc`: laadniveau van het voertuig in %
+- `vehicleRange`: actieradius van het voertuig in km
+- `vehicleOdometer`: kilometerstand in km
+- `sessionSolarPercentage`: aandeel zonne-energie van de laadsessie in %
+- `sessionPrice`: kosten van de laadsessie
+- `sessionPricePerKWh`: gemiddelde prijs per kWh
+- `sessionCo2PerKWh`: gemiddelde CO₂-uitstoot per kWh
+- `planActive`: laadplan actief
+- `smartCostActive`: slim laden op basis van prijs of CO₂ actief
+
+Veelgebruikte globale variabelen:
+
+- `siteTitle`: naam van de evcc-installatie
+- `pvPower`: actueel vermogen van het zonnepanelensysteem in W
+- `homePower`: actueel huisverbruik in W
+- `grid.Power`: netafname (+) / teruglevering (−) in W
+- `battery.Power`: batterijvermogen in W
+- `battery.Soc`: laadniveau van de batterij in %
+- `currency`: valuta van het tarief
+- `tariffGrid`: actuele netafnameprijs per kWh
+- `tariffFeedIn`: terugleververgoeding per kWh
+- `tariffCo2`: actuele CO₂-intensiteit
+- `statistics.<period>.*`: laadstatistieken voor de perioden `30d`, `365d`, `thisYear` en `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
+
+De volledige lijst van alle beschikbare velden staat in het API-antwoord op `http://evcc.local:7070/api/state`.
+
+Beide syntaxisvarianten werken in de titel- en berichtvelden van de interface.
+De configuratie via `evcc.yaml` wordt beschreven in de [`messaging`-referentie](/nl/reference/configuration/messaging).

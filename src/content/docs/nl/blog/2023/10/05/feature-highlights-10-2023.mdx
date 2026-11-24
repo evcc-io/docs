@@ -1,0 +1,161 @@
+---
+date: 2023-10-05
+title: "Hoogtepunten 10/2023"
+description: "Hoogtepunten van oktober 2023 over de visualisatie van het laadplan, de minimale lading in de UI, Smart Grid laden en de batterij-instellingen."
+authors: [naltatis]
+tags: [release]
+prev: false
+next: false
+translatedFrom: "24a3a98a0947"
+---
+
+import Video from "@components/Video.astro";
+import batterysettingsVideo from "../../../../../en/blog/2023/10/05/batterysettings.mp4";
+import batterysettingsPoster from "../../../../../en/blog/2023/10/05/batterysettings.webp";
+import chargingplanVideo from "../../../../../en/blog/2023/10/05/chargingplan.mp4";
+import chargingplanPoster from "../../../../../en/blog/2023/10/05/chargingplan.webp";
+import chargingsessionsVideo from "../../../../../en/blog/2023/10/05/chargingsessions.mp4";
+import chargingsessionsPoster from "../../../../../en/blog/2023/10/05/chargingsessions.webp";
+import dynamicpricesVideo from "../../../../../en/blog/2023/10/05/dynamicprices.mp4";
+import dynamicpricesPoster from "../../../../../en/blog/2023/10/05/dynamicprices.webp";
+import minsocVideo from "../../../../../en/blog/2023/10/05/minsoc.mp4";
+import minsocPoster from "../../../../../en/blog/2023/10/05/minsoc.webp";
+import sessionvaluesVideo from "../../../../../en/blog/2023/10/05/sessionvalues.mp4";
+import sessionvaluesPoster from "../../../../../en/blog/2023/10/05/sessionvalues.webp";
+
+Sinds de laatste blogpost is er veel gebeurd. We hebben veel nieuwe functies toegevoegd en een aantal bugs verholpen. In dit artikel lichten we enkele van de nieuwe functies uit.
+
+## Visualisatie van de laadplanner \{#charging-planner-visualization\}
+
+De laadplanner bestaat al een tijdje in evcc.
+U geeft aan wanneer uw voertuig een gewenst laadniveau moet hebben en evcc zoekt de beste tijdvakken.
+Sinds een paar releases is het algoritme geen black box meer, omdat we het resultaat van de planning visualiseren.
+
+<Video src={chargingplanVideo} poster={chargingplanPoster} />
+
+{/* excerpt */}
+
+Hoe werkt het algoritme?
+
+1. Overschot aan zonne-energie krijgt voorrang
+2. Tijden met goedkope netstroom (als er een [dynamisch stroomtarief](/nl/features/dynamic-prices) is)
+3. Tijden met ecologische netstroom (als de [CO₂-interface](/nl/features/co2) is geconfigureerd)
+4. Tijdvakken kort voor vertrek
+
+**Vooruitblik:** we experimenteren momenteel met voorspellingsgegevens voor zonne-energie van [Solcast](https://solcast.com/).
+Daarmee kan het algoritme nog betere beslissingen nemen.
+Als het laaddoel bijv. overdag ligt, kan het zinvol zijn om het voertuig niet volledig met goedkope nachtstroom te laden, maar ruimte te laten voor overschot overdag.
+
+## Minimale lading instelbaar in de UI
+
+De functie voor minimale lading bestaat al heel lang in evcc.
+Ze is handig als u met maar een paar procent thuiskomt en zeker wilt weten dat u altijd genoeg actieradius hebt voor iets onverwachts.
+
+Tot nu toe kon u dit alleen via het configuratiebestand of de API instellen.
+Nu kan dat ook via de UI onder **Plan** → **Aankomst** → **Min. lading %**.
+
+De instellingen worden per voertuig opgeslagen en blijven ook na een herstart of update behouden.
+
+<Video src={minsocVideo} poster={minsocPoster} />
+
+## Smart Grid laden \{#smart-grid-charging\}
+
+Als uw eigen zonneoverschot niet genoeg is, kunt u ook netstroom gebruiken wanneer die bijzonder goedkoop of schoon is.
+Als u in het energiestroomdiagram op de netstroomprijs of de CO₂-uitstoot klikt, wordt het venster **Smart Grid laden** geopend.
+
+Daar kunt u een grenswaarde voor de prijs of de CO₂-uitstoot instellen.
+Zodra de prijs of de CO₂-uitstoot onder deze grenswaarde komt, zet evcc alle laadpunten die in de modus **PV** staan tijdelijk op snelladen.
+
+<Video src={dynamicpricesVideo} poster={dynamicpricesPoster} />
+
+Voorwaarde voor deze functie is dat u een dynamisch stroomtarief of een CO₂-integratie hebt geconfigureerd.
+
+Een andere kleine verbetering is dat u bij de meeste dynamische stroomtarieven nu de prijswaarden uit de API kunt corrigeren met **procentuele of vaste toeslagen** (`charges` / `tax`).
+Tibber en Octopus Energy (UK) leveren al waarden inclusief toeslagen.
+Bij awattar, Nordpool Estonia en Energinet kunt u deze nu toevoegen.
+
+Trouwens: als u een dynamisch stroomtarief hebt dat nog niet wordt ondersteund, maar wel een API biedt, open dan een GitHub-issue.
+
+## Batterij-instellingen \{#battery-settings\}
+
+Een groot voordeel van evcc ten opzichte van andere oplossingen voor laden met overschot is de integratie met de thuisbatterij.
+Met de configuratiewaarde [`prioritySoc`](/nl/features/battery) kunt u bepalen of overschot aan zonne-energie eerst **in de thuisbatterij of in het voertuig** moet worden geladen.
+
+Over het algemeen probeert evcc in de PV-modus te voorkomen dat de thuisbatterij in de voertuigbatterij wordt ontladen, om onnodige omzettingsverliezen te vermijden.
+Met de waarde [`bufferSoc`](/nl/features/battery) kunt u echter bewust **een deel van de thuisbatterij inzetten om het laden te ondersteunen**.
+
+U kunt het laden ook automatisch laten starten zodra de batterij een bepaald laadniveau heeft bereikt ([`bufferStartSoc`](/nl/features/battery)).
+Het automatische laden start dan ook als de zon niet schijnt.
+
+<Video src={batterysettingsVideo} poster={batterysettingsPoster} />
+
+## Zonne-energie %, prijs, CO₂ per laadsessie
+
+We hebben ook iets voor de liefhebbers van data-analyse.
+We registreren nu per laadsessie het aandeel eigen zonne-energie (in %), de prijs (totaal en per kWh), de laadduur en de gemiddelde CO₂-uitstoot.
+U kunt direct bij de laadsessie tussen deze waarden wisselen.
+
+<Video src={sessionvaluesVideo} poster={sessionvaluesPoster} />
+
+## Nieuwe berekening van het aandeel zonne-energie
+
+Als het u is opgevallen dat het aandeel zonne-energie sinds een van de laatste versies iets is gedaald, dan komt dat door onze nieuwe berekening.
+Tot nu toe verdeelde evcc de verhouding tussen netstroom en eigen energie altijd gelijkmatig over het huisverbruik en de laadsessies.
+
+We zijn nu overgestapt op een nieuw model waarin het huisverbruik eerst de groene stroom krijgt en de resterende mix naar de laadsessies gaat.
+Dank aan [@MarkusGH](https://github.com/MarkusGH) voor de implementatie.
+Meer details over het model vindt u [in de documentatie](/nl/faq#savings-calculation).
+
+![Nieuwe berekening](../../../../../en/blog/2023/10/05/calculation.webp)
+
+## Overzicht van laadsessies
+
+De nieuwe waarden zijn natuurlijk ook in het overzicht van de laadsessies terechtgekomen.
+Afhankelijk van de configuratie zijn hier nu ook prijzen en CO₂-uitstoot te zien.
+Daarnaast hebben we de weergave volledig opnieuw ontworpen en gekozen voor een **compacte tabelweergave per maand**.
+Deze kan **op laadpunt en voertuig worden gefilterd**.
+
+Als u hier nog meer flexibiliteit nodig hebt, kunt u natuurlijk ook de CSV-export gebruiken of de ruwe gegevens direct via InfluxDB of MQTT ophalen.
+
+<Video src={chargingsessionsVideo} poster={chargingsessionsPoster} />
+
+## Prioriteit van laadpunten en voertuigen
+
+Als u meerdere laadpunten hebt, kunt u met de instelling [`priority`](/nl/reference/configuration/loadpoints#priority) aangeven welk laadpunt voorrang moet krijgen.
+U kunt de prioriteit ook afhankelijk maken van het herkende voertuig of via de API aansturen.
+Instellen via de UI is momenteel nog niet mogelijk.
+
+De prioriteitsfunctie is ook handig als u evcc gebruikt om andere verbruikers aan te sturen, bijv. [een verwarmingselement of warmtepomp die via de plugin-interface is aangesloten](https://github.com/evcc-io/evcc/pull/9393).
+Zo kunt u ze alleen laten draaien als de auto niet (genoeg) laadt.
+
+## Wat komt er hierna?
+
+Onze [backlog](https://github.com/evcc-io/evcc/issues?q=is%3Aopen+is%3Aissue+label%3Abacklog) is goed gevuld.
+Dit zijn de volgende grote onderwerpen die we willen aanpakken:
+
+**Configuratie-UI:** aan alle voorwaarden is nu voldaan.
+Momenteel kunnen voertuigen al in de 🧪 experimentele modus worden aangemaakt en de stap naar de configuratie van net, zonne-energie of batterij is niet ver meer.
+Er is hier nog veel te doen, maar het licht aan het eind van de tunnel is zichtbaar.
+
+**Betere planning:** zoals hierboven vermeld, werken we eraan om goede **voorspellingen van zonne-energie** in het planningsalgoritme en de UI te integreren.
+We hebben ook een concept voor de ondersteuning van **meerdere laadplannen**.
+
+**Herziening van de modi:** evcc is begonnen als toepassing voor laden met zonneoverschot.
+Inmiddels speelt ook de samenwerking met de thuisbatterij een grote rol.
+Ook het onderwerp **netvriendelijk laden** op basis van dynamische stroomtarieven of CO₂-uitstoot wint aan belang.
+Daarom gaan we onze laadmodi (momenteel **PV** en **Min+PV**) herzien en meer flexibiliteit bieden.
+
+## Meer nieuwe functies
+
+Dit was een overzicht in vogelvlucht, vanuit het perspectief van de eindgebruiker.
+Natuurlijk wordt er ook onder de motorkap veel gewerkt.
+
+- 🔌 Ondersteuning voor extra laders van 22 nieuwe fabrikanten
+- 🌞🔋📟 Ondersteuning voor meters, PV- en batterijsystemen van 36 nieuwe fabrikanten
+- 🇬🇧 Website en documentatie in het Engels. Dank aan [duckfullstop](https://github.com/duckfullstop) & [carygravel](https://github.com/carygravel) 💚
+
+Wilt u nog meer details, dan kunt u gerust de [release notes](https://github.com/evcc-io/evcc/releases) van de laatste 49(!) releases sinds het begin van het jaar doornemen.
+
+**Bedankt voor uw steun aan evcc!**<br />
+Het evcc-kernteam<br />
+[@andig](https://github.com/andig), [@premultiply](https://github.com/premultiply) en [@naltatis](https://github.com/naltatis)

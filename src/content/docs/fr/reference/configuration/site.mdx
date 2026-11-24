@@ -1,0 +1,252 @@
+---
+title: "site"
+description: "Décrivez votre installation dans evcc.yaml, attribuez-y les compteurs (réseau, solaire, batterie domestique, etc.) et ajustez la régulation du surplus avec residualPower."
+sidebar:
+  order: 2
+translatedFrom: "21103d55d4df"
+---
+
+import prioritySoc from "../../../en/reference/configuration/img/prioritysoc.webp";
+import bufferSoc from "../../../en/reference/configuration/img/buffersoc.webp";
+import bufferStartSoc from "../../../en/reference/configuration/img/bufferstartsoc.webp";
+
+Décrit le lieu, avec les appareils existants et nécessaires de l’installation domestique, et se charge de réguler la puissance disponible.
+
+Pour réguler la charge avec le surplus solaire, il faut un compteur, placé directement après le point de raccordement au réseau, dont evcc peut lire les valeurs. Vous pouvez en outre indiquer des appareils pour la production solaire et la ou les batteries domestiques. Les puissances de plusieurs appareils sont additionnées automatiquement et, pour les batteries domestiques, le niveau de charge moyen est calculé.
+
+**Exemple** :
+
+```yaml
+site:
+  title: Home # nom affiché dans l’interface
+  meters:
+    grid: mygridmeter # référence au compteur avant réseau
+    pv:
+      - mypv1 # référence au premier compteur solaire
+      - mypv9 # référence au deuxième compteur solaire
+    battery:
+      - mybat5 # référence au compteur de batterie
+    aux:
+      - myaux1 # consommateur autorégulé
+    consumer:
+      - myconsumer1 # consommateur ordinaire, enregistré pour les statistiques de consommation
+    ext:
+      - myext1 # pour la journalisation, la gestion de la charge, etc.
+  curtailers:
+    - my_curtailer # référence à l’appareil de bridage
+  residualPower: 100
+```
+
+---
+
+## Paramètres obligatoires
+
+### `title`
+
+Le nom du site (localisation), affiché comme titre dans l’interface.
+
+**Exemple** :
+
+```yaml
+title: Home
+```
+
+---
+
+### `meters`
+
+Définit le rôle de chaque [`meter`](/fr/reference/configuration/meters) configuré (appareil de mesure), c.-à-d. le point de mesure auquel il correspond. Cela relie logiquement la définition de l’appareil à son usage prévu. Un compteur, générique au départ, reçoit ainsi une fonction selon son emplacement dans l’installation domestique.
+
+:::note
+Au moins un élément `grid` ou `pv` doit être configuré !
+
+evcc ne peut pas être utilisé sans au moins l’une de ces entrées !
+:::
+
+**Exemple** :
+
+```yaml
+site:
+  meters:
+    grid: mygridmeter # référence au compteur avant réseau
+    pv: mypv1 # référence au compteur solaire
+    battery: mybat2 # référence au compteur de batterie
+    aux: myaux1
+```
+
+---
+
+## Paramètres facultatifs
+
+### `meters.grid`
+
+Définit le [`meter`](/fr/reference/configuration/meters) (appareil de mesure) qui fournit les mesures au point de raccordement au réseau.
+
+**Valeurs possibles** : valeur d’un paramètre `name` dans la configuration [`meters`](#meters).
+
+**Exemple** :
+
+```yaml
+grid: mygridmeter # référence au compteur avant réseau
+```
+
+---
+
+### `meters.pv`
+
+Définit les [`meter`](/fr/reference/configuration/meters) (appareils de mesure) auprès desquels evcc récupère les mesures de la production solaire.
+Plusieurs appareils peuvent être indiqués. Les puissances sont additionnées automatiquement.
+
+**Valeurs possibles** : une valeur unique ou une liste de valeurs d’un paramètre name dans la configuration [`meters`](#meters). La forme en liste peut aussi être utilisée avec une seule valeur.
+
+**Exemple** :
+
+```yaml
+pv: myonlypv # référence à un seul compteur solaire
+```
+
+ou
+
+```yaml
+pv: # (pvs = obsolète)
+  - myoldpv # référence au premier compteur solaire
+  - mynewestpv # référence au deuxième compteur solaire
+```
+
+---
+
+### `meters.battery`
+
+Définit les [`meter`](/fr/reference/configuration/meters) (appareils de mesure) qui fournissent les mesures de la ou des batteries.
+Plusieurs appareils peuvent être indiqués. Les puissances sont additionnées automatiquement et une moyenne est calculée à partir du niveau de charge des batteries.
+
+**Valeurs possibles** : une valeur unique ou une liste de valeurs d’un paramètre `name` dans la configuration [`meters`](#meters). La forme en liste peut aussi être utilisée avec une seule valeur.
+
+**Exemple** :
+
+```yaml
+battery: myonlybat # référence à un seul compteur de batterie
+```
+
+ou
+
+```yaml
+battery: # (batteries = obsolète)
+  - mysmallbat # référence au premier compteur de batterie
+  - myhugebat # référence au deuxième compteur de batterie
+```
+
+### `meters.aux`
+
+Compteurs d’appareils externes qui effectuent leur propre régulation du surplus mais ne sont pas pilotés directement par evcc, p. ex. un thermoplongeur autorégulé. Leur puissance compte dans le surplus disponible pour la charge des véhicules, en partant du principe que l’appareil réduit sa consommation quand evcc attribue cette puissance à la charge. Plusieurs compteurs sont additionnés.
+
+**Valeurs possibles** : une valeur unique ou une liste de valeurs d’un paramètre `name` dans la configuration [`meters`](#meters). La forme en liste peut aussi être utilisée avec une seule valeur.
+
+**Exemple** :
+
+```yaml
+aux: myaux # référence à un seul compteur aux
+```
+
+ou
+
+```yaml
+aux:
+  - myaux1 # référence au premier compteur aux
+  - myaux2 # référence au deuxième compteur aux
+```
+
+### `meters.consumer`
+
+Compteurs de consommateurs ordinaires comme un lave-linge ou un lave-vaisselle, enregistrés uniquement pour les statistiques de consommation. Contrairement à `aux`, cette puissance n’entre pas dans le surplus disponible pour la charge des véhicules.
+
+**Valeurs possibles** : une valeur unique ou une liste de valeurs d’un paramètre `name` dans la configuration [`meters`](#meters). La forme en liste peut aussi être utilisée avec une seule valeur.
+
+**Exemple** :
+
+```yaml
+consumer: myconsumer # référence à un seul compteur de consommateur
+```
+
+ou
+
+```yaml
+consumer:
+  - myconsumer1 # référence au premier compteur de consommateur
+  - myconsumer2 # référence au deuxième compteur de consommateur
+```
+
+### `meters.ext`
+
+Compteurs qui ne servent pas à la régulation et ne sont pas affichés dans l’interface, p. ex. ceux de tableaux divisionnaires ou des compteurs alternatifs pour le réseau ou le solaire. Leurs données sont uniquement journalisées et exportées, sans entrer dans le surplus ni dans les statistiques de consommation.
+
+**Valeurs possibles** : une valeur unique ou une liste de valeurs d’un paramètre `name` dans la configuration [`meters`](#meters). La forme en liste peut aussi être utilisée avec une seule valeur.
+
+**Exemple** :
+
+```yaml
+ext: myext # référence à un seul compteur ext
+```
+
+ou
+
+```yaml
+ext:
+  - myext1 # référence au premier compteur ext
+  - myext2 # référence au deuxième compteur ext
+```
+
+### `curtailers`
+
+Appareils de bridage issus de la configuration [`curtailers`](/fr/reference/configuration/curtailers) qui limitent l’export vers le réseau à la demande du gestionnaire de réseau (§ 9 EEG).
+Ils sont bridés en même temps que les compteurs `pv` bridables lorsque l’intégration [`hems`](/fr/reference/configuration/hems) signale une limite.
+
+**Valeurs possibles** : une liste de valeurs d’un paramètre `name` dans la configuration [`curtailers`](/fr/reference/configuration/curtailers).
+
+**Exemple** :
+
+```yaml
+curtailers:
+  - my_curtailer # référence à l’appareil de bridage
+```
+
+### `residualPower`
+
+Définit le point de fonctionnement visé par la régulation du surplus au point de raccordement au réseau (compteur avant réseau). La valeur par défaut est 0 W.
+Les valeurs positives déplacent la consigne du côté de l’export vers le réseau, les valeurs négatives du côté de l’import du réseau.
+Cette valeur fixe ainsi l’« état de repos » de la boucle de régulation, vers lequel le régulateur tend.
+
+En particulier avec d’autres systèmes de régulation du surplus indépendants, comme une batterie domestique, cette valeur doit être ajustée pour que le système se comporte de façon prévisible, avec des priorités claires.
+
+Si une certaine part d’import du réseau doit subsister ou être autorisée en mode Intelligent, vous pouvez configurer une valeur négative correspondant à la part maximale d’import du réseau.
+
+#### Avec un `meter` `grid`
+
+- Valeur positive : puissance d’export vers le réseau restante
+- Valeur négative : puissance d’import du réseau restante
+
+#### Avec uniquement un `meter` `pv`
+
+- Valeur positive : consommation domestique typique, utilisée pour estimer le surplus solaire.
+- Valeur négative : la puissance indiquée est ajoutée à la puissance solaire et augmente la puissance de charge disponible (attention : import du réseau)
+
+:::note
+Si une batterie domestique est présente, il est fortement recommandé d’indiquer ici une petite valeur, p. ex. entre 100 et 300 W, afin de permettre la charge de la batterie selon les priorités configurées (voir `prioritySoc`). Sinon, la régulation indépendante de la batterie domestique ne verra aucun surplus utilisable. Cela évite également un import temporaire du réseau, même sans batterie, lors de variations rapides de la production et de la consommation.
+:::
+
+**Exemple « Batterie domestique »** :
+
+```yaml
+residualPower: 100
+```
+
+**Exemple « Part d’import du réseau »** :
+
+La charge doit démarrer en mode Intelligent avec au moins 6 A (monophasé) même avec seulement 50 % de surplus solaire (le reste venant du réseau).
+Puissance de charge minimale : 1 phase × 6 A × 230 V = 1 380 W, dont 50 % : 690 W
+
+Voir aussi l’[alternative avec enable/disable pour autoriser une part de solaire et d’import du réseau](/fr/features/solar-charging).
+
+```yaml
+residualPower: -690
+```

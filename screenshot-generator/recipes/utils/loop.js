@@ -2,10 +2,14 @@ const { test } = require("@playwright/test");
 const sharp = require("sharp");
 
 const screenshotBase = "../src/assets";
+// every docs locale unless LANGS restricts it, e.g. LANGS=en,de
+const LANGS =
+  process.env.LANGS?.split(",") ??
+  Object.keys(require("../../../src/locales.json"));
 
 export function loop(body) {
   ["light", "dark"].forEach((theme) => {
-    ["en", "de"].forEach((lang) => {
+    LANGS.forEach((lang) => {
       async function screenshot(page, name, element, padding = {}) {
         const paddingLeft = padding.left ?? padding.x ?? padding.all ?? 20;
         const paddingRight = padding.right ?? padding.x ?? padding.all ?? 20;

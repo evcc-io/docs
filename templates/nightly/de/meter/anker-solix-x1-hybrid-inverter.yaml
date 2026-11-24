@@ -3,10 +3,15 @@ product:
   identifier: anker-solix-x1-hybrid-inverter
   brand: Anker
   description: SOLIX X1 Hybrid Inverter
+capabilities: ["battery-control"]
 description: |
   Die Modbus-TCP-Schnittstelle muss in der Anker-App freigeschaltet werden.
   Diese Konfiguration wurde mit der Firmware-Version 1.0.16.1 getestet.
   Ältere oder neuere Firmware-Versionen können andere Registeradressen verwenden und daher falsche Daten liefern.
+  evcc kann die Batterie aus dem Netz laden (Arbeitsmodus Drittanbietersteuerung mit der maximalen Ladeleistung `maxchargepower`) und sie zurück in den Eigenverbrauch schalten. Ein in der Anker-App eingestellter Arbeitsmodus wird dabei überschrieben.
+  evcc schreibt nur auf den X1, wenn eine Batteriefunktion aktiv ist (Netzladen, Entladesperre, automatische Steuerung des Optimizers oder ein externer Batteriemodus). Ohne diese behält der X1 den in der Anker-App eingestellten Modus.
+  Der X1 kehrt nicht von selbst in den Eigenverbrauch zurück: Endet evcc unerwartet während des Netzladens, lädt der X1 weiter, bis evcc wieder einen Modus setzt.
+  Halten wird nicht unterstützt und fällt auf den Normalbetrieb zurück: Der X1 bietet keine Möglichkeit, das Entladen zu sperren und gleichzeitig PV-Überschuss zu speichern.
 
 render:
   - usage: grid
@@ -30,6 +35,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      watchdog: 60s # Watchdog, optional
   - usage: pv
     default: |
       type: template
@@ -52,6 +58,7 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxacpower: 0 # Maximale AC Leistung des Hybrid-Wechselrichters (W), optional
+      watchdog: 60s # Watchdog, optional
   - usage: battery
     default: |
       type: template
@@ -63,9 +70,10 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximale Ladeleistung (W), Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen.
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
-      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
     advanced: |
       type: template
       template: anker-solix-x1
@@ -76,11 +84,12 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximale Ladeleistung (W), Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen.
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
-      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt. (optional)
-      maxchargepower: # Maximale Ladeleistung (W), Für erzwungenes Laden des Speichers. (optional)
-      maxdischargepower: # Maximale Entladeleistung (W), Maximale Entladeleistung des Speichers. (optional)
+      maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
+      maxdischargepower: # Maximale Entladeleistung (W), Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert. (optional)
+      watchdog: 60s # Watchdog, optional
 params:
   - name: modbus
     example:
@@ -89,6 +98,15 @@ params:
     unit:
     description: Modbus Typ
     help:
+    advanced: false
+    optional: false
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximale Ladeleistung
+    help: Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen.
     advanced: false
     optional: false
   - name: capacity
@@ -115,7 +133,7 @@ params:
     choice: []
     unit: '%'
     description: Maximaler Ladestand
-    help: Obere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer und für Netzladen genutzt.
+    help: Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen.
     advanced: false
     optional: true
   - name: maxacpower
@@ -127,22 +145,22 @@ params:
     help:
     advanced: true
     optional: true
-  - name: maxchargepower
-    example:
-    default:
-    choice: []
-    unit: W
-    description: Maximale Ladeleistung
-    help: Für erzwungenes Laden des Speichers.
-    advanced: true
-    optional: true
   - name: maxdischargepower
     example:
     default:
     choice: []
     unit: W
     description: Maximale Entladeleistung
-    help: Maximale Entladeleistung des Speichers.
+    help: Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert.
+    advanced: true
+    optional: true
+  - name: watchdog
+    example:
+    default: 60s
+    choice: []
+    unit:
+    description: Watchdog
+    help:
     advanced: true
     optional: true
 modbus:

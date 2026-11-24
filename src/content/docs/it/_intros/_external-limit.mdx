@@ -1,0 +1,59 @@
+---
+translatedFrom: "9bc910cfb8ce"
+---
+
+I gestori di rete e i sistemi di gestione dell’energia di livello superiore possono limitare dall’esterno il consumo di potenza e l’immissione in rete del tuo impianto.
+Sono supportati i seguenti casi d’uso:
+
+- **§ 14a EnWG** (normativa tedesca): riduzione temporanea della potenza e limitazione dei consumatori da parte del gestore di rete
+- **§ 9 EEG** (normativa tedesca): limitazione della produzione degli impianti fotovoltaici in caso di sovraccarico della rete
+- **Integrazione EMS**: applicazione dei limiti provenienti da altri sistemi di gestione dell’energia
+
+## Contesto \{#background\}
+
+### Dispositivi di consumo controllabili (§ 14a EnWG) \{#dimming\}
+
+Il § 14a della legge tedesca sull’industria energetica (EnWG) disciplina la gestione dei dispositivi di consumo controllabili (SteuVE) in modo compatibile con la rete.
+In caso di sovraccarico della rete, i gestori di rete possono ridurre temporaneamente la potenza di grandi consumatori come caricabatterie, pompe di calore o batterie domestiche.
+
+Punti importanti:
+
+- Riguarda i consumatori a partire da 4,2 kW di potenza
+- Controllo tramite Smart Meter Gateway e control box
+
+### Gestione dell’immissione (§ 9 EEG) \{#curtailment\}
+
+Secondo il § 9 della legge sulle energie rinnovabili (EEG), i gestori di rete possono limitare l’immissione degli impianti a energia rinnovabile in caso di imminente sovraccarico della rete.
+Questo riguarda soprattutto gli impianti fotovoltaici più grandi, ma può diventare rilevante anche in ambito residenziale.
+
+Quando evcc riceve un segnale di limitazione, il livello di limitazione viene distribuito in percentuale a tutti gli inverter limitabili e applicato direttamente sul dispositivo.
+Le control box FNN segnalano limiti a gradini (60%, 30%, 0%), che vengono applicati così come sono.
+I limiti espressi in watt (ad es. tramite EEBus) vengono convertiti in percentuale in base alla potenza installata del generatore.
+Gli inverter che non consentono una regolazione graduale vengono spenti completamente finché il limite è attivo.
+Il limite attivo viene mostrato nell’interfaccia e la piena produzione riprende appena il segnale cessa.
+
+:::caution[Sperimentale]
+La limitazione della produzione è supportata solo per alcuni inverter.
+I dispositivi supportati sono contrassegnati come **Limitabile** nella [panoramica dei dispositivi](/it/meters).
+I dispositivi che offrono solo la limitazione dell’immissione sono elencati in [Limitazione della produzione](#curtailment-devices).
+:::
+
+## Configurazione \{#setup\}
+
+La configurazione avviene in **Configurazione → Limite prelievo da rete**.
+Scegli una delle integrazioni elencate qui sotto e inserisci i suoi parametri.
+In alternativa puoi creare un’[integrazione definita dall’utente](/it/user-defined-devices#external-limit), ad es. per un collegamento tramite un singolo contatto di commutazione (relè).
+
+Per applicare il limite di consumo ai tuoi punti di ricarica, configura i circuiti nella [gestione del carico](/it/features/loadmanagement).
+Un limite attivo agisce quindi sul circuito principale; sulla scheda **Gestione del carico** compare l’indicazione “Consumi limitati”.
+I limiti attivi vengono mostrati sulla scheda **Limite prelievo da rete** e nella pagina principale.
+
+### Accoppiamento per le integrazioni EEBus \{#eebus-pairing\}
+
+Con le integrazioni che usano il protocollo EEBus, la control box comunica direttamente con evcc e trasmette automaticamente il limite di potenza.
+Control box ed evcc devono essere accoppiati una volta:
+
+1. **Nella control box**: aggiungi evcc come HEMS.
+   L’SKI e l’indirizzo IP di evcc sono indicati in **Configurazione → EEBus**.
+2. **In evcc**: inserisci l’SKI della control box nell’integrazione.
+   Lo trovi nella documentazione della control box o nella sua interfaccia web.

@@ -1,15 +1,16 @@
 ---
 title: "Optimizer 🧪"
-description: "Der experimentelle Optimizer nutzt Vorhersagen und deine Verbrauchshistorie, um kostenoptimale Lade- und Batterieentscheidungen zu berechnen, derzeit nur zur Information."
+description: "Der experimentelle Optimizer ermittelt aus Vorhersagen und deinem Verbrauch die günstigste Steuerung von Ladepunkten und Hausbatterie, zeigt sie aber nur an."
 sidebar:
   order: 13
+translatedFrom: "8465baa052f5"
 ---
 
 import Screenshot from "@components/Screenshot.astro";
 
 :::caution[Experimentell]
 Der Optimizer befindet sich in einer frühen Entwicklungsphase.
-Die angezeigten Daten sind aktuell rein informativ.
+Die angezeigten Daten dienen aktuell nur zur Information.
 Steuerungsaktionen folgen in zukünftigen Versionen.
 :::
 
@@ -19,18 +20,18 @@ Er ergänzt die regelbasierte Steuerung von evcc um eine vorausschauende Optimie
 ## Warum ein Optimizer?
 
 evcc arbeitet regelbasiert und deterministisch.
-Das funktioniert hervorragend für viele Setups.
-Z. B. mit PV-Anlage, Hausbatterie und einem Fahrzeug.
+Für viele Installationen funktioniert das hervorragend.
+Das gilt z. B. für Systeme mit PV-Anlage, Hausbatterie und einem Fahrzeug.
 
 Bei komplexeren Szenarien stößt dieser Ansatz an Grenzen:
 
 - **Mehrere Fahrzeuge:** Welches soll zuerst geladen werden?
 - **Hausbatterie oder Fahrzeug:** Wohin soll die verfügbare Energie fließen?
-- **Dynamische Tarife:** Lohnt sich Netzladen heute Nacht oder reicht die Sonne morgen?
+- **Dynamische Tarife:** Lohnt sich Laden aus dem Netz heute Nacht, oder gibt es morgen genug PV-Energie?
 
 Der Optimizer kann diese Fragen beantworten.
-Aktuell legst du Einstellungen wie Preislimits oder Hausbatterie-Prioritäten selbst fest.
-Perspektivisch kannst du diese Entscheidungen dem Optimizer überlassen.
+Aktuell legst du Werte wie Preislimits oder Prioritäten der Hausbatterie selbst fest.
+Künftig kannst du diese Entscheidungen dem Optimizer überlassen.
 Er findet dann automatisch die optimalen Werte.
 Wir arbeiten Schritt für Schritt daran.
 
@@ -39,18 +40,18 @@ Wir arbeiten Schritt für Schritt daran.
 Der Optimizer sammelt verschiedene Daten:
 
 - **Vorhersagedaten:** [PV-Ertrag](/de/tariffs#solar), [Strompreise](/de/tariffs#price), [Einspeisevergütungen](/de/features/dynamic-feedin), [Außentemperatur](/de/tariffs#temperature) für die Vorhersage des Heizbedarfs
-- **Historische Daten:** typisches Verbrauchsprofil deines Haushalts
-- **Aktueller Zustand:** Ladestand der Hausbatterie, angeschlossene Fahrzeuge, Wärmebedarf
+- **Historische Daten:** Das typische Verbrauchsprofil deines Haushalts
+- **Aktueller Zustand:** Ladestand der Hausbatterie, angeschlossene Fahrzeuge, Heizbedarf
 
 Auf Basis dieser Daten berechnet ein Optimierungsalgorithmus das voraussichtliche Verhalten deines Energiesystems.
-Er identifiziert kostenoptimale Aktionen: effiziente [Ladepläne](/de/features/plans), Batteriesteuerung (Halten, Netzladen).
+Er ermittelt die kostengünstigsten Maßnahmen: effiziente [Ladepläne](/de/features/plans), Batteriesteuerung (Entladesperre, Netzladen).
 Außerdem prognostiziert er, wann die Hausbatterie voll oder leer sein wird.
 
 Ziel: **Energiekosten minimieren.**
 
 ## Optimizer nutzen
 
-Aktivierung über die Benutzeroberfläche:
+So aktivierst du den Optimizer in der Benutzeroberfläche:
 
 1. **Konfiguration → Experimentell** → aktivieren
 2. **Konfiguration → Optimizer 🧪** → aktivieren
@@ -59,17 +60,17 @@ Der Optimizer erfordert ein aktives [Sponsoring](/de/sponsorship).
 Bei neuen Installationen kann es bis zu 24 Stunden dauern, bis genug Daten gesammelt wurden, um erste Ergebnisse anzuzeigen.
 
 - **Hauptansicht → Energiefluss (aufklappen):** Zeigt an, wann die Hausbatterie voraussichtlich voll oder leer sein wird.
-- **Menü → Optimizer:** Diagramme, die zeigen, wie sich Hausbatterie und Ladepunkte in den nächsten Stunden verhalten sollen und wie die zu erwartenden Energiekosten im Optimierungszeitraum sein werden (siehe Screenshot unten).
+- **Menü → Optimizer:** Diagramme, die zeigen, wie sich Hausbatterie und Ladepunkte in den nächsten Stunden verhalten sollen und wie hoch die Energiekosten im Optimierungszeitraum voraussichtlich sind (siehe Screenshot unten).
 
 <Screenshot
   name="features/screenshots/optimizer-debug"
-  caption="Optimizer Debug-Ansicht mit Vorhersagen und Optimierungsergebnissen."
+  caption="Debug-Ansicht des Optimizers mit Vorhersagen und Optimierungsergebnissen."
 />
 
-## Aktueller Stand und Ausblick
+## Aktueller Stand und nächste Schritte
 
-Der Optimizer ist aktuell rein informativ.
-Er zeigt Vorhersagen und Einsparpotenziale an, greift aber noch nicht aktiv in die Steuerung ein.
+Der Optimizer zeigt aktuell nur Informationen an.
+Er zeigt Vorhersagen und mögliche Ersparnisse an, greift aber noch nicht aktiv in die Steuerung ein.
 
 Nächste Schritte:
 
@@ -79,18 +80,18 @@ Nächste Schritte:
 
 ## Technischer Hintergrund \{#technical\}
 
-Der Optimizer ist Python-basiert und nutzt das starke Ökosystem für mathematische Optimierung und Statistik.
+Der Optimizer ist Python-basiert und nutzt die umfangreichen Python-Bibliotheken für mathematische Optimierung und Statistik.
 Er ist kein Teil von evcc selbst, sondern ein eigenständiger Dienst.
 
-Bei Aktivierung wird der Cloud-Service `optimizer.evcc.io` aufgerufen.
+Bei Aktivierung wird der Cloud-Dienst `optimizer.evcc.io` aufgerufen.
 Der Dienst arbeitet **zustandslos**.
 Daten werden nur gespeichert, wenn du Feedback zu einer Plan-Erklärung gibst.
 Details zum Datenschutz findest du in unserer [Datenschutzerklärung](https://evcc.io/datenschutz/).
 
 Der Optimizer ist wie evcc selbst Open Source: [github.com/evcc-io/optimizer](https://github.com/evcc-io/optimizer).
-Du kannst dir das fertige Docker Image [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer) auch lokal installieren.
-Über die Umgebungsvariable `OPTIMIZER_URI` gibst du dann deinen eigenen Endpunkt an.
+Du kannst das Docker-Image [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer) auch lokal installieren.
+Über die Umgebungsvariable `OPTIMIZER_URI` gibst du evcc die Adresse deines eigenen Endpunkts an.
 
-Damit die Berechnung schnell bleibt, fasst evcc die Zeitabschnitte nach 48 Stunden zu Stunden zusammen.
-Bei einem eigenen Optimizer verschiebst du diese Grenze mit der Umgebungsvariable `OPTIMIZER_COARSEN_AFTER` in Stunden, z. B. `72`.
-Mit dem Wert `0` bleiben die 15-Minuten-Abschnitte für die gesamte Prognose erhalten.
+Damit die Berechnung schnell bleibt, fasst evcc die Zeitabschnitte nach 48 Stunden zu Stundenabschnitten zusammen.
+Bei einem eigenen Optimizer verschiebst du diese Grenze mit der Umgebungsvariable `OPTIMIZER_COARSEN_AFTER` (Angabe in Stunden, z. B. `72`).
+Mit dem Wert `0` bleiben die 15-Minuten-Abschnitte für die gesamte Vorhersage erhalten.

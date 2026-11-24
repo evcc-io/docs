@@ -1,0 +1,246 @@
+---
+date: 2025-07-30
+title: "Highlight: configurazione via browser, immissione e IA"
+description: "Highlight di luglio 2025 sulle release 0.206 e 0.207 di evcc, con una breaking change dell’API REST, carica ritardata nei piani, immissione dinamica e IA via MCP."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner degli highlight"
+  image: "../../../../../en/blog/2025/07/30/config-ui-mcp-feedin-banner.webp"
+translatedFrom: "5704e9a73f8e"
+---
+
+import Video from "@components/Video.astro";
+import configUiVideo from "../../../../../en/blog/2025/07/30/config-ui.mp4";
+import configUiPoster from "../../../../../en/blog/2025/07/30/config-ui.webp";
+import mcpVideo from "../../../../../en/blog/2025/07/30/mcp-integration.mp4";
+import mcpPoster from "../../../../../en/blog/2025/07/30/mcp-integration.webp";
+
+È di nuovo il momento di fare il punto sulle novità! Ho scelto alcuni argomenti interessanti.
+
+{/* excerpt */}
+
+Prima di passare alle funzioni, un annuncio importante per tutti gli utenti dell’API REST.
+
+## Breaking change: API REST
+
+Con la release v0.207 cambia l’API REST.
+Gli endpoint restano invariati, ma il formato delle risposte viene semplificato.
+In concreto, viene rimosso il livello esterno `result`.
+
+Ecco un esempio per l’endpoint `GET /api/state`:
+
+Risposta JSON attuale:
+
+```json
+{
+  "result": {
+    "loadpoints": [...],
+    ...
+  }
+}
+```
+
+Risposta JSON futura:
+
+```json
+{
+  "loadpoints": [...],
+  ...
+}
+```
+
+Chi mantiene le integrazioni di evcc più diffuse è stato informato e ha già apportato le modifiche necessarie.
+
+Chi usa script o automazioni propri che accedono direttamente all’API REST deve adattarli da sé.
+Trovi maggiori dettagli nella relativa [issue su GitHub.](https://github.com/evcc-io/evcc/pull/22299)
+
+:::note[Note sulla migrazione]
+Per facilitare il passaggio abbiamo pubblicato due versioni: **v0.206 e v0.207 hanno le stesse funzioni**.
+Le modifiche all’API sono **incluse a partire dalla v0.207**.
+Se il nuovo formato delle risposte ti crea problemi, puoi tornare alla v0.206.
+Così ottieni tutte le novità descritte qui e puoi preparare i tuoi script e le tue integrazioni alla breaking change con calma.
+:::
+
+## Piani: carica ritardata
+
+I piani di ricarica hanno una nuova funzione: _Carica ritardata_.
+Di norma l’algoritmo di pianificazione ottimizza la ricarica in modo che avvenga nelle ore più economiche o più pulite.
+Può però avere senso anche ricaricare il veicolo tardi, cioè a ridosso dell’orario di partenza impostato.
+
+Alcuni casi d’uso:
+
+- **Precondizionamento**: soprattutto in inverno può essere utile scaldare la batteria del veicolo ricaricando all’ora di partenza. Si risparmia energia, perché durante il viaggio serve meno climatizzazione attiva.
+- **Climatizzazione**: se all’ora di partenza la climatizzazione dell’auto è attiva, questa impostazione fa sì che l’energia necessaria venga prelevata dal caricabatterie e non dalla batteria dell’auto.
+- **Cura della batteria**: se ricarichi al 100% prima di un lungo viaggio, la batteria non dovrebbe restare piena per molto tempo.
+
+![Carica ritardata](../../../../../en/blog/2025/07/30/plan-late.webp)
+
+Oltre alla casella per attivare la carica ritardata, puoi impostare anche per quanto tempo ricaricare subito prima della partenza.
+Così puoi, ad es., continuare a caricare la maggior parte dell’energia nelle ore più convenienti e completare la ricarica dell’auto solo nell’ultima ora, come nello screenshot qui sopra.
+
+Trovi maggiori dettagli nella [documentazione](/it/features/plans#late-charging).
+
+<a id="config-ui"></a>
+
+## Configurazione via browser
+
+Con la prima configurazione via browser stiamo facendo molti progressi.
+Da qualche settimana è possibile configurare senza `evcc.yaml`, anche se finora si partiva sempre in [modalità demo](https://demo.evcc.io/).
+
+Ora la configurazione inizia con una finestra di dialogo di scelta:
+
+- Configurazione classica con `evcc.yaml`
+- Configurazione via browser _🧪 sperimentale_
+
+Nel video seguente vedi il processo di configurazione con più veicoli, contatori, impianti fotovoltaici e batterie, caricabatterie e pompe di calore:
+
+<Video src={configUiVideo} poster={configUiPoster} />
+
+### Modalità demo
+
+Per provare l’interfaccia senza configurazione è ancora disponibile la modalità demo.
+Si avvia con il [flag CLI](https://docs.evcc.io/docs/reference/cli/evcc) `--demo`.
+
+In questa modalità l’impianto fotovoltaico, la batteria e il caricabatterie usano dati simulati.
+Inoltre l’autenticazione è disattivata e quindi tutte le funzioni protette (configurazione, log ecc.) non sono disponibili.
+
+### Dispositivi definiti dall’utente (plugin)
+
+Dall’interfaccia di configurazione si potevano già creare veicoli, contatori, impianti fotovoltaici e batterie, caricabatterie, tariffe, prese commutabili e pompe di calore.
+Questo si basa sulla nostra ampia libreria di modelli di dispositivi, che ormai copre oltre 550 prodotti.
+
+Un altro punto di forza è il [sistema di plugin flessibile](/it/reference/plugins).
+Permette di collegare anche dispositivi e integrazioni esotici tramite HTTP, Modbus, script, MQTT ecc.
+Finora questi dispositivi definiti dall’utente (`type: custom`) andavano configurati in `evcc.yaml`.
+Ora è possibile anche dall’interfaccia, con evidenziazione della sintassi, validazione e funzione di test.
+
+![Dispositivi definiti dall’utente (plugin)](../../../../../en/blog/2025/07/30/custom-devices.webp)
+
+### Ricarica e riscaldamento
+
+evcc è nato per la ricarica intelligente delle auto elettriche.
+Nel frattempo supporta anche un elenco crescente di pompe di calore e resistenze elettriche.
+Gli obiettivi di ottimizzazione di base, come l’uso efficiente dell’energia autoprodotta o la ricarica dalla rete al minor costo, sono gli stessi in entrambi gli ambiti.
+Il comportamento di controllo, le esigenze di visualizzazione e le opzioni di impostazione però differiscono nei dettagli.
+
+Per questo nell’interfaccia di configurazione la sezione _Punti di ricarica_ è stata rinominata in _Ricarica e riscaldamento_.
+Anche il flusso di configurazione è stato rivisto per mostrare le impostazioni rilevanti per ciascun caso d’uso.
+
+Nel [video qui sopra](#config-ui) (da 2:10) vedi i diversi flussi per ricarica e riscaldamento.
+Ecco uno screenshot della prima finestra di dialogo di configurazione:
+
+![Ricarica e riscaldamento](../../../../../en/blog/2025/07/30/charging-heating.webp)
+
+Nelle prossime release seguiranno altri passi per rendere il _riscaldamento_ una funzione a pieno titolo di evcc.
+Trovi maggiori dettagli in questa [issue su GitHub](https://github.com/evcc-io/evcc/issues/19753).
+
+### Backup e ripristino
+
+Ora che sempre più funzioni passano all’interfaccia, sorgono nuove domande:
+
+- Come faccio il backup della mia configurazione?
+- Come trasferisco la mia installazione su un nuovo sistema?
+- Posso reimpostare la configurazione e ricominciare da zero?
+
+Per rispondere a queste domande abbiamo implementato una funzione di backup e ripristino.
+Con essa puoi salvare il database di evcc sul tuo computer, ripristinare uno stato salvato o cancellare la configurazione mantenendo, ad es., lo storico delle ricariche.
+
+![Backup e ripristino](../../../../../en/blog/2025/07/30/backup-restore.webp)
+
+Un grande grazie a [@maschga](https://github.com/maschga) per il supporto nell’implementazione.
+
+### Altro in arrivo
+
+Le cose ancora da fare per la configurazione via browser sono sempre meno.
+Ci sono ancora alcuni dispositivi che non si possono creare, e le informazioni di debug per le issue su GitHub vanno ancora migliorate.
+E naturalmente nelle funzioni esistenti c’è sempre margine di miglioramento.
+
+Si vede però già che la configurazione tramite interfaccia web diventerà presto il nuovo standard.
+La versione 1.0.0 si avvicina.
+
+Nota: la configurazione tramite `evcc.yaml` resterà possibile anche in futuro.
+
+## Immissione dinamica
+
+Con le [tariffe elettriche dinamiche](/it/features/dynamic-prices) puoi adattare la ricarica e il riscaldamento alla situazione attuale dei prezzi.
+Questa funzione è ora disponibile anche per l’immissione in rete.
+
+Se hai una tariffa con [prezzi di immissione dinamici](/it/features/dynamic-feedin) (ad es. vendita diretta, oneri di rete dinamici, Paesi Bassi, Australia ecc.), nella finestra di dialogo delle impostazioni del punto di ricarica compare la funzione [priorità di immissione](/it/features/dynamic-feedin#feed-in-priority).
+
+![Immissione dinamica](../../../../../en/blog/2025/07/30/smart-feedin.webp)
+
+Così puoi sospendere la ricarica o il riscaldamento nei periodi in cui è più redditizio immettere energia in rete.
+Per questo puoi impostare un limite di prezzo fisso.
+Naturalmente puoi anche automatizzarla tramite script o sistemi esterni via API.
+
+Nelle prossime release implementeremo altre funzioni legate all’immissione dinamica.
+Stiamo sperimentando la sospensione dell’immissione nei periodi con prezzi negativi e la limitazione della produzione.
+Maggiori informazioni [qui](https://github.com/evcc-io/evcc/issues/21747).
+
+## Integrazione IA via MCP 🧪
+
+Con il [Model Context Protocol](https://en.wikipedia.org/wiki/Model_Context_Protocol) (in breve MCP) è possibile dare a LLM come Claude, Gemini e ChatGPT un accesso strutturato a sistemi esterni, come evcc.
+
+Se attivi le funzioni sperimentali, in evcc viene abilitato un server [MCP](/it/integrations/mcp) sperimentale.
+Puoi inserire il nuovo endpoint (ad es. `http://evcc.local:7070/mcp`) nella configurazione del tuo LLM.
+
+Il tema MCP e gli strumenti disponibili sono ancora molto giovani e in continua evoluzione.
+Ci vediamo però un grande potenziale e nuove possibilità entusiasmanti, soprattutto nell’ottimizzazione e nell’automazione con modelli locali.
+
+Il video seguente mostra un esempio di evcc al lavoro con Claude Code (Sonnet 4):
+
+<Video src={mcpVideo} poster={mcpPoster} />
+
+Richiesta: _“L’utente vuole andare domani alle 8:00 ad Amburgo con la sua Tesla.”_
+
+L’LLM…
+
+- …individua il punto di ricarica giusto: “white Model 3”
+- …calcola la distanza: Brema (dal titolo) → Amburgo (dalla richiesta)
+- …calcola il livello di carica necessario: 90%
+- …crea un piano di ricarica: 90% alle 8:00 per la Tesla Model 3
+- …cambia la modalità di ricarica da **Off** a **Solare**, perché i piani sono attivi solo in modalità (Min+)Solare
+
+Infine interroga il piano di ricarica calcolato da evcc e lo restituisce all’utente.
+
+Questo esempio relativamente semplice fa già intuire dove si potrà arrivare in futuro.
+Siamo curiosi di vedere come si svilupperà il tema MCP.
+Provalo tu stesso e condividi le tue esperienze nelle [Discussioni su GitHub](https://github.com/evcc-io/evcc/discussions).
+
+Trovi maggiori dettagli sull’uso di MCP con ad es. Claude Code nella [documentazione](/it/integrations/mcp).
+
+## Produzione, batteria e punti di ricarica espandibili
+
+Se hai configurato più impianti fotovoltaici, batterie o punti di ricarica, ora puoi espanderli nella vista del flusso di energia per vedere più dettagli.
+A questo scopo puoi dare un nome ai dispositivi creati dall’interfaccia di configurazione.
+
+:::note
+Per motivi tecnici non è possibile dare un nome a impianti fotovoltaici, batterie e altri contatori tramite `evcc.yaml`.
+:::
+
+## Nuovi dispositivi supportati
+
+Da febbraio abbiamo aggiunto diversi nuovi produttori di dispositivi:
+
+- **Caricabatterie:** Ampure, Autoaid, Charge Amps, Elecq, eledio, EN+, enercab, EntraTek, Free2Move, Free2move eSolutions, Huawei, Kathrein, Plugchoice, Volt Time, ZJ Beny
+- **Prese commutabili:** Home Assistant
+- **Pompe di calore e resistenze elettriche:** alpha innotec, Bosch, Buderus, Bösch, CTA All-In-One, Daikin, Elco, IDM, Junkers, Kermi, Lambda, my-PV, Nibe, Novelan, Roth, Stiebel Eltron, Tecalor, Vaillant, Viessmann, Wolf, Zewotherm
+- **Contatori:** Axitec, Bosch, IAMMETER, IOmeter, ORNO, Saia-Burgess Controls (SBC), Sigenergy, Wago
+- **Impianti fotovoltaici e batterie:** Axitec, batterX, Bosch, IAMMETER, Marstek, Sigenergy
+- **Veicoli:** Toyota
+
+Naturalmente abbiamo anche corretto bug e migliorato le implementazioni esistenti.
+
+## Molto altro…
+
+Questo è solo un estratto.
+Come sempre, l’elenco completo delle novità si trova nelle [note di rilascio su GitHub](https://github.com/evcc-io/evcc/releases).
+Un grande grazie a tutti quelli che partecipano attivamente allo sviluppo di evcc.
+Siete fantastici 🤘.
+
+**Un caro saluto**<br />
+Il team evcc<br />
+Michael, Andi e Uli

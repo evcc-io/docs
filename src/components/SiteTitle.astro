@@ -1,82 +1,59 @@
 ---
+// Logo only, linking to evcc.io; Blog and Docs links live in the header navigation (SocialIcons).
 import { logos } from "virtual:starlight/user-images";
-import config from "virtual:starlight/user-config";
-const lang =
-  Astro.locals.starlightRoute?.locale ??
-  (Astro.params.lang === "de" ? "de" : "en");
-const label = lang === "de" ? "Doku" : "Docs";
-const logoHref = "https://evcc.io/";
-const labelHref = `/${lang}`;
-const blogPrefix = `/${lang}/blog`;
-const isDocs =
-  Astro.url.pathname !== blogPrefix &&
-  !Astro.url.pathname.startsWith(`${blogPrefix}/`);
 ---
 
 <div class="site-title sl-flex">
-  <a href={logoHref} class="site-title-logo">
-    {
-      config.logo && logos.dark && (
-        <>
-          <img
-            class:list={{ "light:sl-hidden print:hidden": !("src" in config.logo) }}
-            alt={config.logo.alt}
-            src={logos.dark.src}
-            width={logos.dark.width}
-            height={logos.dark.height}
-          />
-          {!("src" in config.logo) && (
-            <img
-              class="dark:sl-hidden print:block"
-              alt={config.logo.alt}
-              src={logos.light?.src}
-              width={logos.light?.width}
-              height={logos.light?.height}
-            />
-          )}
-        </>
-      )
-    }
+  <a href="https://evcc.io/" class="site-title-logo">
+    <img
+      class="light:sl-hidden print:hidden"
+      alt="evcc"
+      src={logos.dark?.src}
+      width={logos.dark?.width}
+      height={logos.dark?.height}
+    />
+    <img
+      class="dark:sl-hidden print:block"
+      alt="evcc"
+      src={logos.light?.src}
+      width={logos.light?.width}
+      height={logos.light?.height}
+    />
   </a>
-  <a
-    href={labelHref}
-    class:list={["site-title-label", { active: isDocs }]}
-    translate="no">{label}</a>
+  <span class="site-tagline" translate="no">{Astro.locals.t("site.tagline")}</span>
 </div>
 
 <style>
-  /* Two adjacent links: the logo points at evcc.io (brand), the "Docs"
-     label points back to the docs root. */
   .site-title {
-    gap: 0.75rem;
     align-items: center;
   }
   .site-title-logo {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
+    /* Same placement as on evcc.io: the wordmark's own padding is the only
+       left margin. */
+    margin-inline-start: calc(-1 * var(--sl-nav-pad-x));
   }
   .site-title-logo img {
-    height: 28px;
+    /* evcc.io renders the artwork at 64px for a 76-unit box (scale 0.842);
+       this file crops the same artwork to 36 units, so 30.3px matches. The
+       crop is not centred on the letters, so nudge them down like evcc.io. */
+    height: 30.3px;
     width: auto;
-    /* Optical balance: the wordmark sits slightly above the baseline of
-       the "Docs" link, so nudge it down a hair. */
-    margin-top: 3px;
+    position: relative;
+    top: 1.7px;
   }
-  .site-title-label {
+  /* tagline like on evcc.io: starts at the wordmark's right edge, text
+     baseline on the wordmark's baseline (measured 3.5px), larger screens only */
+  .site-tagline {
+    position: relative;
+    top: 5.8px;
     font-size: 1.125rem;
-    font-weight: 400;
-    color: var(--sl-color-text);
-    text-decoration: none;
     white-space: nowrap;
   }
-  .site-title-label.active,
-  .site-title-label:hover,
-  .site-title-label:focus {
-    text-decoration: underline;
-  }
   @media (max-width: 50rem) {
-    .site-title-label {
+    .site-tagline {
       display: none;
     }
   }

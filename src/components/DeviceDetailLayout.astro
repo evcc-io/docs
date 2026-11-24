@@ -14,10 +14,11 @@ import {
 } from "@utils/devices";
 import type { Channel } from "@utils/devices";
 import { deviceIconSvg } from "@utils/deviceIcon";
+import { templateLocale } from "@utils/locales";
 
 interface Props {
   entry: any;
-  lang: "de" | "en";
+  lang: string;
   /** Which template channel this page renders. */
   channel: Channel;
   /** Path segment used for the back link and overview URL (e.g. "chargers"). */
@@ -62,41 +63,14 @@ const visibleFeatures = features.filter((f) => f !== "sponsorfree");
 // Back link points at the overview of the same channel.
 const overviewHref = `/${lang}${isNightly ? "/nightly" : ""}/${type}`;
 
-const t =
-  lang === "de"
-    ? {
-        config: "Konfigurationsbeispiel für evcc.yaml",
-        configHelp:
-          "Falls du die Konfiguration nicht über die Oberfläche vornehmen möchtest, kannst du alternativ diesen YAML-Block verwenden.",
-        params: "Parameter",
-        viewNightly: "Nightly-Version ansehen",
-        sponsorTitle: "Sponsortoken erforderlich",
-        sponsorBody:
-          "Dieses Gerät steht Unterstützern des Projekts zur Verfügung. Mehr zu unserem [Sponsoring-Modell](/de/sponsorship).",
-        caveatsTitle: "Bekannte Einschränkungen",
-        caveatsMore: "Mehr Details",
-      }
-    : {
-        config: "Configuration example for evcc.yaml",
-        configHelp:
-          "If you don't want to configure via the UI, you can alternatively use this YAML block.",
-        params: "Parameters",
-        viewNightly: "View nightly version",
-        sponsorTitle: "Sponsor token required",
-        sponsorBody:
-          "This device is available to sponsors of the project. Read more about our [sponsorship model](/en/sponsorship).",
-        caveatsTitle: "Known limitations",
-        caveatsMore: "More details",
-      };
+const t = (key: string) => Astro.locals.t(key as any);
 
-const nightlyBannerText =
-  lang === "de"
-    ? counterpartHref
-      ? `Diese Seite zeigt die <strong>Nightly-Version</strong>. Wechsle zur <a href="${counterpartHref}">Release-Version</a>.`
-      : `Diese Seite zeigt die <strong>Nightly-Version</strong>. Eine Release-Version gibt es noch nicht.`
-    : counterpartHref
-      ? `This page shows the <strong>nightly version</strong>. Switch to the <a href="${counterpartHref}">release version</a>.`
-      : `This page shows the <strong>nightly version</strong>. There is no release version yet.`;
+const nightlyBannerText = counterpartHref
+  ? Astro.locals.t("detail.nightlyBanner", {
+      href: counterpartHref,
+      interpolation: { escapeValue: false },
+    })
+  : t("detail.nightlyBannerNoRelease");
 
 // Release pages have a markdown twin at the same URL + ".md" (see
 // src/pages/[lang]/*/[slug].md.ts); advertise it like the docs pages do.
@@ -111,13 +85,31 @@ const markdownAlternate = [
   },
 ];
 
+// Templates exist in en and de only, so the other locales show English template
+// data. Keep those near-duplicates out of search and point at the English page.
+const englishCanonical =
+  templateLocale(lang) !== lang
+    ? [
+        { tag: "meta" as const, attrs: { name: "robots", content: "noindex" } },
+        {
+          tag: "link" as const,
+          attrs: {
+            rel: "canonical",
+            href: new URL(`/en/${type}/${entry.id}`, Astro.site).href,
+          },
+        },
+      ]
+    : [];
+
 const frontmatter = {
   title,
   description: plainText(entry.data.description),
   template: "doc",
   editUrl,
   tableOfContents: false,
-  head: isNightly ? nightlyPageHead : markdownAlternate,
+  head: isNightly
+    ? nightlyPageHead
+    : [...markdownAlternate, ...englishCanonical],
   ...(isNightly ? { pagefind: false } : {}),
 };
 ---
@@ -157,12 +149,12 @@ const frontmatter = {
       requiresSponsorship && (
         <aside
           class="starlight-aside starlight-aside--tip"
-          aria-label={t.sponsorTitle}
+          aria-label={t("sponsor.required")}
         >
-          <p class="starlight-aside__title">💚 {t.sponsorTitle}</p>
+          <p class="starlight-aside__title">💚 {t("sponsor.required")}</p>
           <div
             class="starlight-aside__content"
-            set:html={renderMarkdown(t.sponsorBody)}
+            set:html={renderMarkdown(t("detail.sponsorBody"))}
           />
         </aside>
       )
@@ -172,16 +164,16 @@ const frontmatter = {
       entry.data.caveats?.length > 0 && (
         <aside
           class="starlight-aside starlight-aside--note device-caveats"
-          aria-label={t.caveatsTitle}
+          aria-label={t("detail.caveats")}
         >
-          <p class="starlight-aside__title">🐜 {t.caveatsTitle}</p>
+          <p class="starlight-aside__title">🐜 {t("detail.caveats")}</p>
           <div class="starlight-aside__content">
             {entry.data.caveats.map((c: { description?: string; link?: string }) => (
               <p
                 set:html={
                   renderMarkdownInline(c.description) +
                   (c.link
-                    ? ` <a href="${c.link}" target="_blank" rel="noopener noreferrer">${t.caveatsMore}</a>`
+                    ? ` <a href="${c.link}" target="_blank" rel="noopener noreferrer">${t("detail.caveatsMore")}</a>`
                     : "")
                 }
               />
@@ -193,15 +185,15 @@ const frontmatter = {
 
     <div class="params-block">
       <div class="params-header">
-        <h2 class="params-title">{t.params}</h2>
+        <h2 class="params-title">{t("detail.params")}</h2>
       </div>
 
       <DeviceParams params={entry.data.params ?? []} lang={lang} hideTitle />
     </div>
 
     <details class="device-config-section">
-      <summary>{t.config}</summary>
-      <p class="device-config-help">{t.configHelp}</p>
+      <summary>{t("detail.config")}</summary>
+      <p class="device-config-help">{t("detail.configHelp")}</p>
       <slot name="config">
         {codeBlocks.map((code) => <DeviceConfig code={code} />)}
       </slot>
@@ -212,7 +204,7 @@ const frontmatter = {
         <p class="nightly-link">
           <a class="channel-link" href={counterpartHref}>
             <NightlyIcon />
-            <span>{t.viewNightly}</span>
+            <span>{t("detail.viewNightly")}</span>
           </a>
         </p>
       )

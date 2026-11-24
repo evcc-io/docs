@@ -2,7 +2,7 @@
 title: "evcc"
 ---
 
-evcc - open source solar charging
+evcc - smart charging
 
 ```
 evcc [flags]
@@ -15,6 +15,7 @@ evcc [flags]
       --custom-brand string        Custom brand name shown in the UI
       --custom-css string          Additional user-defined CSS file for custom styling. No compatibility guarantees.
       --custom-email string        Support email address shown in the UI
+      --custom-icon string         Custom app icon file (png, square, 512x512 recommended) used for browser tab, home screen and app install.
       --custom-logo-dark string    Custom dark-mode logo file (svg, png) replacing the evcc logo in the UI. Requires custom-logo-light.
       --custom-logo-light string   Custom light-mode logo file (svg, png) replacing the evcc logo in the UI. Requires custom-logo-dark.
       --custom-phone string        Support phone number shown in the UI
@@ -23,6 +24,7 @@ evcc [flags]
       --database string            Database location (default "~/.evcc/evcc.db")
       --demo                       Enter demo mode. Disables auth, config ui and restart
       --disable-auth               Disable authentication (dangerous)
+      --disable-onboarding         Skip the setup wizard and checklist
   -h, --help                       Help
       --ignore-db                  Run command ignoring service database
   -l, --log string                 Log level (fatal, error, warn, info, debug, trace) (default "info")

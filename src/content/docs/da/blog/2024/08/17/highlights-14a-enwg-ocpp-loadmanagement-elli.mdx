@@ -1,0 +1,189 @@
+---
+date: 2024-08-17
+title: "Højdepunkter: § 14a EnWG, OCPP"
+description: "Højdepunkter fra evcc 0.130 i august 2024 med belastningsstyring og dæmpning efter § 14a EnWG, opladning af hjemmebatteriet fra elnettet og fremskridt med OCPP."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+translatedFrom: "7dd8f1e71013"
+---
+
+I dag udkom [version 0.130](https://github.com/evcc-io/evcc/releases) af evcc.
+Da det er et stykke tid siden det sidste blogindlæg om en udgivelse, får du her et overblik over højdepunkterne fra de seneste udgivelser.
+
+![evcc 0.130](../../../../../en/blog/2024/08/17/v0.130-banner.webp)
+
+{/* excerpt */}
+
+## Belastningsstyring og § 14a EnWG
+
+For nogle udgivelser siden introducerede vi belastningsstyring som en eksperimentel funktion.
+Med den kan du sætte en effekt- og/eller strømgrænse for hele huset.
+evcc styrer opladerne, så disse grænser ikke overskrides.
+Til mere komplekse installationer er der også mulighed for at konfigurere underkredsløb med egne grænser og målere.
+Mere information finder du i [dokumentationen](/da/features/loadmanagement).
+
+### Styrbare forbrugsenheder
+
+I Tyskland er § 14a i Energiewirtschaftsgesetz (EnWG) for tiden et stort emne.
+Den giver netoperatører lov til at reducere effektforbruget hos store forbrugsenheder som opladere, når elnettet er hårdt belastet.
+Hvis kunden accepterer denne regel, får vedkommende reducerede nettariffer.
+
+Den tekniske løsning er interessant her.
+Netoperatøren tilgår ikke opladeren direkte, men sender signalet om at reducere effekten via en Smart Meter Gateway (SMGW).
+Energistyringssystemet i huset skal så reducere de relevante forbrugsenheder.
+
+Med evcc kan du i dag opfylde dette krav (dæmpning) for alle opladere uden at skulle slukke dem, f.eks. via en potentialfri kontakt.
+Ladepunkterne kan fortsætte med at lade med minimumseffekt (f.eks. 4,2 kW) i denne periode.
+Det betyder, at alle opladere, som evcc understøtter, kan bruges i dette scenarie.
+Der er ingen grund til at købe en ny oplader med særlig understøttelse af kommunikation med SMGW eller Steuerbox.
+
+### Sådan fungerer det
+
+Ved overbelastning af elnettet sender netoperatøren et signal til SMGW'en.
+SMGW'en har ikke selv nogen meningsfuld måde at kommunikere med hjemmenetværket på.
+Det sker via en såkaldt Steuerbox, der er tilsluttet bag SMGW'en.
+Denne certificerede boks videresender signalet til de pågældende enheder via EEBus.
+evcc har implementeret EEBus-grænsefladen til Steuerboxen.
+Når et signal om reduktion kommer ind, reagerer evcc og regulerer opladerne tilsvarende.
+
+Et alternativ til EEBus er kommunikation via en simpel koblingskontakt på Steuerboxen.
+Den kan så f.eks. tilsluttes evcc via en GPIO-pin.
+Når Steuerboxen modtager et signal om reduktion, lukkes kontakten, evcc registrerer det og reducerer opladernes maksimale effekt.
+
+Denne enklere løsning med kontakt kan også bruges med eksisterende (radiostyrede) rundstyringsmodtagere (FRSE).
+De er ikke en del af § 14a EnWG, men tolereres som en overgangsløsning.
+
+I praksis mangler der stadig installerede Steuerboxe hos kunderne, før funktionen kan bruges.
+De bliver rullet ud i de kommende måneder.
+Hvis du allerede har sådan en enhed, er du velkommen til at kontakte os.
+
+## Opladning af hjemmebatteriet fra elnettet
+
+I [det seneste blogindlæg om en udgivelse](/da/blog/2024/02/01/v0124-new-tesla-api) introducerede vi ”Undgå afladning under hurtig opladning”, den første funktion, hvor evcc aktivt styrer hjemmebatteriet.
+I version 0.130 har vi udvidet batteristyringen yderligere.
+Nu kan du også bevidst oplade hjemmebatteriet med strøm fra elnettet.
+
+Dette er en eksperimentel funktion, som er tilgængelig, hvis din inverter understøtter aktiv batteristyring ([se dokumentationen](/da/meters)), og du har en dynamisk tarif.
+I så fald kan du sætte en prisgrænse.
+Hvis prisen falder under den, oplader evcc hjemmebatteriet med strøm fra elnettet.
+
+![Oplad hjemmebatteriet med billig energi fra elnettet](../../../../../en/blog/2024/08/17/battery-grid-charge.webp)
+
+Funktionen kan især være nyttig i vintermånederne.
+Hvis der kun forventes lidt solenergi i løbet af dagen, kan batteriet oplades med billig strøm fra elnettet om natten.
+På den måde kan du komme igennem perioder med høje elpriser.
+
+I den nuværende implementering er den faste prisgrænse bevidst enkel og kun et første skridt.
+Hvis du ikke vil tjekke og justere grænsen jævnligt via webbrugerfladen, kan du allerede nu bygge smartere løsninger (f.eks. tids- eller prognosebaserede) med det nye API.
+
+## Elli Charger: statusopdatering
+
+En relativt populær oplader er Elli Charger fra VW-koncernen.
+Den sælges også under navnene ”VW ID. Charger”, ”Skoda iV Charger”, ”Cupra Charger” eller ”Audi Wallbox” og findes afhængigt af mærket i forskellige varianter med navne, der ender på ”Connect”, ”plus”, ”Pro”, ”Connect+” eller ”pro” ([se oversigt](https://github.com/evcc-io/evcc/pull/7757#issuecomment-1529477695)).
+
+Understøttelsen af denne oplader har desværre ikke været nogen fornøjelse de seneste år.
+[DerAndereAndi](https://github.com/DerAndereAndi) har lagt mange kræfter og meget tid i den.
+Tak for det 🙌!
+Kvaliteten af firmwaren er relativt dårlig, og der er mange fejl.
+Det er ikke helt usædvanligt for software og nye produkter.
+Problemet er dog, at produktet har været på markedet i flere år, og at producenten ikke viser nogen seriøse bestræbelser på at rette fejlene med opdateringer.
+
+[Dette indlæg](https://github.com/evcc-io/evcc/discussions/15367) opsummerer de tekniske problemer, der opstår ved styring og aflæsning af opladeren.
+En vedvarende fejlkilde var og er de upålidelige måledata.
+I den aktuelle udgivelse har vi derfor fjernet understøttelsen af den indbyggede måler og anbefaler alle ejere af denne oplader at bruge en separat måler foran den.
+
+![trist Elli Charger](../../../../../en/blog/2024/08/17/sad-elli.webp)
+
+Hvis du overvejer at købe en oplader, der skal kunne styres med evcc, kan vi kun fraråde disse enheder.
+Elli har annonceret en ny generation, [ElliCharger 2](https://www.elli.eco/de/privatkunden/produkte/wallbox).
+Efter hvad vi ved indtil videre, er det en langt mere moden enhed.
+Det ændrer dog ikke ved, at opladerne fra første generation, som stadig sælges aktivt i dag, er helt uacceptable, hvad angår softwarekvaliteten i grænsefladen.
+
+Hvis du ejer sådan en oplader og er ramt af de problemer, der er beskrevet ovenfor, anbefaler vi, at du kontakter Ellis kundeservice.
+Vi har ikke meget håb om, at der kommer softwareopdateringer.
+Vi synes dog ikke, det er særlig bæredygtigt at udskifte teknisk god hardware med nyere, bare fordi softwaren ikke længere vedligeholdes.
+
+Vi ville også sætte pris på direkte teknisk kontakt med Elli.
+Indtil videre har alle vores forsøg dog været forgæves.
+
+## Statusindikatorer ved ladepunktet
+
+En visuel ændring, der for nylig er kommet i evcc, er omarbejdningen af statusteksterne.
+Indtil nu blev beskeder som ”Overskud tilgængeligt. Start om 1:22 min …” eller ”Ladeplan aktiv. Start kl. 23.12.” vist over bjælken for opladningsniveau.
+
+![To ladepunkter med nye statusindikatorer](../../../../../en/blog/2024/08/17/status-icons.webp)
+
+Med det voksende antal funktioner er denne visning blevet lidt ufleksibel, og flere tilstande som soltimeren, ladeplanen og prisgrænsen kunne ikke vises på samme tid.
+Derfor har vi omarbejdet området.
+Opladerens tilstand vises stadig som en kort tekst (”Forbundet”, ”Oplader” …).
+Yderligere information som soltimeren, ladeplanen, prisgrænsen, klimatisering eller køretøjets grænse vises nu som et ikon med et forklarende tooltip, når det er relevant.
+Det gør visningen tydeligere og mere fleksibel.
+
+Her er en oversigt over de nye ikoner og tooltips:
+
+![Oversigt over nye ikoner og tooltips](../../../../../en/blog/2024/08/17/icons-tooltips.webp)
+
+## OCPP: stabilitet, funktioner og sponsorat
+
+Det har været muligt at køre evcc som OCPP-server i ret lang tid.
+I de seneste måneder har vi igen fokuseret på emnet og [lagt meget arbejde](https://github.com/evcc-io/evcc/pulls?q=is%3Apr+is%3Amerged+sort%3Aupdated-desc+ocpp) i stabiliteten og funktionaliteten af vores implementering.
+Indtil nu krævede nogle opladere særlige konfigurationsparametre under opsætningen.
+De er nu, med meget få undtagelser, alle overflødige.
+Funktioner som måledata, forespørgselsintervaller, ping- og heartbeat-signaler konfigureres nu automatisk.
+Da der stadig findes opladere, som ikke fuldt ud overholder standarden, har vi været nødt til at implementere en særlig håndtering for enkelte enheder.
+Den er nu usynlig for brugeren.
+
+### RFID og godkendelse
+
+Den største ændring eller nyhed set fra brugerens side er standardkonform understøttelse af godkendelse.
+Det gør nu også [genkendelse af køretøjer via RFID](/da/features/vehicle#detection-via-rfid) mulig.
+Øjeblikkelig opladning uden godkendelse er stadig mulig.
+Det kræver, at den pågældende funktion i opladeren (”Autostart”, ”Freies Laden”, ”Free Vending” eller lignende) er aktiveret.
+Hvis din oplader ikke har denne indstilling (hvilket er ret sjældent), kan du også gendanne den tidligere opførsel i evcc via parameteren `remotestart: true`.
+Så starter evcc opladningen uden godkendelse fra enheden.
+
+### Mange opladere testet
+
+Vi har med succes testet implementeringen med en lang række enheder og tilføjet dem til [dokumentationen](/da/chargers).
+Listen er bestemt ikke komplet.
+Hvis din OCPP-oplader ikke står på listen, men fungerer godt med evcc, vil vi meget gerne [høre fra dig](https://github.com/evcc-io/evcc/issues/new/choose), så vi kan tilføje den til dokumentationen for andre brugere.
+Hvis din oplader ikke fungerer som forventet, vil vi også gerne vide det 😉.
+
+### Sponsorat påkrævet
+
+Med version 0.130 bliver OCPP-understøttelse en funktion, der kræver 💚 sponsorat.
+Vi er klar over, at ændringen kan være ubehagelig for brugere, der indtil nu har brugt evcc gratis.
+Alligevel har vi besluttet at foretage ændringen.
+Der er primært to grunde til det:
+
+1. I mange nye kommercielle opladere er OCPP blevet den foretrukne kommunikationsprotokol og ofte den eneste styringsgrænseflade. Derfor synes vi, det er fair, især over for brugere af andre opladere, at OCPP-understøttelse kræver sponsorat og dermed støtter hele projektet.
+
+2. Som beskrevet ovenfor har vi lagt meget energi og tid i at forbedre implementeringen og vil gerne fortsætte med det for at sikre stabilitet og funktionalitet. Din økonomiske støtte hjælper os med at skaffe de nødvendige ressourcer til det.
+
+Vi håber, at du har forståelse for ændringen.
+
+## Yderligere forbedringer
+
+- **Log-brugerflade:** Logs kan nu ses, filtreres og eksporteres direkte i webbrugerfladen.
+- **Sprog:** evcc understøtter nu 27 sprog. En stor tak til alle oversættere.
+- **Konfigurationsbrugerflade:** I de seneste udgivelser er der tilføjet mange funktioner, der er nødvendige for at erstatte `evcc.yaml`. Mere om det i et senere blogindlæg.
+- **Fejlrettelser:** Som altid har vi rettet mange fejl og forbedret stabiliteten.
+- **Nye enheder:** Vi udvider hele tiden listen over understøttede opladere, invertere, målere og tariffer.
+
+Flere detaljer finder du altid i [ændringsloggene for udgivelserne](https://github.com/evcc-io/evcc/releases) og de pull requests og diskussioner, der linkes til der.
+
+## Nye sponsorer
+
+Vi vil også gerne takke alle jer, der støtter projektet med sponsorat.
+Det er ret fedt at kunne arbejde på et open source-projekt, der næsten udelukkende finansieres af fællesskabet og brugerne.
+
+Som vi kan se, bliver evcc nu også taget alvorligt i erhvervslivet.
+Det viser sig ved, at producenter nogle gange kontakter os direkte for at sikre en god integration af deres enheder.
+
+Vi har vundet tre virksomheder som økonomiske sponsorer: [CUBOS](https://www.cubos.com), en virksomhed inden for solceller og kommerciel opladningsinfrastruktur, [lekker Energie](https://www.lekker.de), en energileverandør fra Berlin, og [Victron Energy](https://www.victronenergy.com), en producent af åbne og modulære inverter-, batteri- og opladningssystemer.
+
+**God opladning!**<br/>
+evcc-teamet<br/>
+Michael, Andi & Uli

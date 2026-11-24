@@ -1,0 +1,103 @@
+## Events \{#events\}
+
+Messages can be sent for the following events:
+
+| Event         | Fires when …                                     |
+| ------------- | ------------------------------------------------ |
+| `start`       | charging starts                                  |
+| `stop`        | charging finishes                                |
+| `connect`     | a vehicle is connected                           |
+| `disconnect`  | a vehicle is disconnected                        |
+| `soc`         | the vehicle state of charge changes              |
+| `guest`       | an unknown vehicle is detected                   |
+| `asleep`      | a vehicle does not charge despite charge release |
+| `planoverrun` | a charging plan is projected to miss its target  |
+
+Each event has a title and a message.
+Both can be customised with [placeholders](#placeholders).
+
+## Message Format \{#message-format\}
+
+Message with simple syntax, e.g. for the `stop` event:
+
+```txt
+${title}: ${vehicleTitle} charged ${chargedEnergy:%.1fk}kWh in ${chargeDuration}.
+Solar share: ${sessionSolarPercentage:%.0f}%
+```
+
+The same message with Go template syntax, with calculations (e.g. converting W to kW) and conditions:
+
+```txt
+{{.title}}: {{round (divf .chargedEnergy 1000) 1 }} kWh in {{.chargeDuration}}.
+Solar share: {{round .sessionSolarPercentage 0 }}%
+{{- if .sessionPrice}}
+Cost: {{round .sessionPrice 2 }} {{.currency}} ({{round .sessionPricePerKWh 2 }} {{.currency}}/kWh)
+{{- end}}
+```
+
+### Placeholders \{#placeholders\}
+
+Titles and messages can use variables to display evcc information.
+There are two syntax options, which can also be combined:
+
+- **Simple**: `${variableName}`, e.g. `${vehicleTitle}`.
+  Optionally with formatting like `${pvPower:%.1fk}`: besides the usual `printf` specifiers, the suffix `k` divides the value by 1000 (e.g. Wh → kWh).
+  Durations like `${chargeDuration}` render rounded to whole seconds (e.g. `1h23m4s`).
+- **Go template**: `{{.variableName}}` — enables calculations, conditions, and [sprig functions](http://masterminds.github.io/sprig/).
+
+:::note
+When using variables, make sure to use the correct capitalisation (uppercase/lowercase)!
+:::
+
+### Available Variables \{#variables\}
+
+The available variables correspond to the data from the [REST API](/integrations/rest-api).
+When sending a message, the data of the triggering loadpoint and the global data are merged into a flat structure.
+This means both global values (e.g. `pvPower`, `grid.Power`) and loadpoint-specific values (e.g. `mode`, `chargedEnergy`, `vehicleTitle`) are directly accessible.
+Nested values like `grid.Power` or `battery.Soc` are only accessible with the Go template syntax; the capitalised field names are required there.
+
+Commonly used loadpoint variables:
+
+- `title`: Loadpoint name
+- `loadpoint`: Loadpoint number 1, 2, …
+- `mode`: Charge mode `off`/`smart`/`now`
+- `charging`: Charging active
+- `enabled`: Charging enabled
+- `connected`: Vehicle connected
+- `chargedEnergy`: Energy charged in session in Wh
+- `chargeDuration`: Charging duration
+- `chargePower`: Current charge power in W
+- `connectedDuration`: Connection duration
+- `chargeRemainingDuration`: Remaining charge time until target
+- `chargeRemainingEnergy`: Remaining energy until target in Wh
+- `phasesActive`: Currently active phases
+- `vehicleTitle`: Vehicle name
+- `vehicleName`: Technical vehicle name
+- `vehicleSoc`: Vehicle state of charge in %
+- `vehicleRange`: Vehicle range in km
+- `vehicleOdometer`: Odometer reading in km
+- `sessionSolarPercentage`: Solar share of charging session in %
+- `sessionPrice`: Cost of charging session
+- `sessionPricePerKWh`: Average price per kWh
+- `sessionCo2PerKWh`: Average CO₂ emissions per kWh
+- `planActive`: Charge plan active
+- `smartCostActive`: Smart cost charging active
+
+Commonly used global variables:
+
+- `siteTitle`: Name of the evcc instance
+- `pvPower`: Current solar power in W
+- `homePower`: Current home consumption in W
+- `grid.Power`: Grid import (+) / export (−) in W
+- `battery.Power`: Battery power in W
+- `battery.Soc`: Battery state of charge in %
+- `currency`: Tariff currency
+- `tariffGrid`: Current grid price per kWh
+- `tariffFeedIn`: Feed-in tariff per kWh
+- `tariffCo2`: Current CO₂ intensity
+- `statistics.<period>.*`: Charging statistics for the periods `30d`, `365d`, `thisYear`, and `total` (`avgCo2`, `avgPrice`, `chargedKWh`, `solarPercentage`)
+
+The complete list of all available fields can be found in the API response at `http://evcc.local:7070/api/state`.
+
+Both syntaxes work in the title and message fields of the UI.
+Configuration via `evcc.yaml` is described in the [`messaging` reference](/en/reference/configuration/messaging).

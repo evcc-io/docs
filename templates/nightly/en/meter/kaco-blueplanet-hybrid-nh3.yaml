@@ -1,0 +1,114 @@
+template: kaco-nh3
+product:
+  identifier: kaco-blueplanet-hybrid-nh3
+  brand: KACO
+  description: blueplanet hybrid NH3
+capabilities: ["battery-control"]
+description: |
+  For KACO blueplanet Hybrid NH3 with AI dongle/Wi-Fi stick. Modbus TCP and the local AISWEI HTTP API must be reachable at the stick's IP address (Modbus TCP port 502, device ID 3; HTTP port 8484).
+  Battery power control uses the local `fdbg.cgi` endpoint. Maximum charge and discharge power are read from SunSpec Model 802. Battery charge and discharge energy are read from the local AISWEI HTTP API.
+  Configure curtailment through a separate KACO NH3 curtailer device.
+  The grid meter exposed through SunSpec Model 203 provides grid power, import/export energy, and per-phase measurements.
+
+render:
+  - usage: grid
+    default: |
+      type: template
+      template: kaco-nh3
+      usage: grid
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+  - usage: pv
+    default: |
+      type: template
+      template: kaco-nh3
+      usage: pv
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+  - usage: battery
+    default: |
+      type: template
+      template: kaco-nh3
+      usage: battery
+
+      # Modbus TCP
+      modbus: tcpip
+      id: 3
+      host:  # Hostname
+      port: 502 # Port
+      battery: # Battery number, [1, 2]
+      serial: # Inverter serial number (isn)
+      capacity: 50 # Battery capacity (kWh), optional
+      minsoc: 10 # Minimum charge (%), Written to the inverter as the discharge limit and used by the optimizer. Only set a value supported by the battery. Minimum value is 5%. (optional)
+      maxsoc: 100 # Maximum charge (%), Written to the inverter as the charge limit and used by the optimizer. Only set a value supported by the battery. (optional)
+params:
+  - name: modbus
+    example:
+    default:
+    choice: ['tcpip']
+    unit:
+    description: Modbus Type
+    help:
+    advanced: false
+    optional: false
+  - name: battery
+    example:
+    default:
+    choice: ['1', '2']
+    unit:
+    description: Battery number
+    help:
+    advanced: false
+    optional: false
+  - name: serial
+    example:
+    default:
+    choice: []
+    unit:
+    description: Inverter serial number (isn)
+    help:
+    advanced: false
+    optional: false
+  - name: capacity
+    example: 50
+    default:
+    choice: []
+    unit: kWh
+    description: Battery capacity
+    help:
+    advanced: false
+    optional: true
+  - name: minsoc
+    example: 25
+    default: 10
+    choice: []
+    unit: '%'
+    description: Minimum charge
+    help: Written to the inverter as the discharge limit and used by the optimizer. Only set a value supported by the battery. Minimum value is 5%.
+    advanced: false
+    optional: true
+  - name: maxsoc
+    example: 95
+    default: 100
+    choice: []
+    unit: '%'
+    description: Maximum charge
+    help: Written to the inverter as the charge limit and used by the optimizer. Only set a value supported by the battery.
+    advanced: false
+    optional: true
+modbus:
+  delay:
+  host:
+  id: 3
+  modbus: tcpip
+  port: 502
+  tcpip: true
+  timeout:

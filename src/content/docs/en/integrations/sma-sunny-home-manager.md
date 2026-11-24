@@ -21,7 +21,7 @@ The SEMP endpoint is accessible at `http://[evcc-IP]:7070/semp/` and displays an
 
 ## Setup in Sunny Home Manager
 
-After configuring evcc, the charging points are automatically suggested as new devices in the Sunny Portal under **Configuration > Device overview**.
+Once your charging points are set up in evcc, they are automatically suggested as new devices in the Sunny Portal under **Configuration → Device overview**.
 There you can activate them and follow the configuration wizard.
 See the [SMA manual](https://manuals.sma.de/HM-20/en-US/10426801547.html) for setup details.
 
@@ -41,5 +41,5 @@ Where:
 - **AAAAAAAA**: The Vendor ID (8 characters, hexadecimal)
 - **BBBBBBBBBBBB**: The Device ID (12 characters, hexadecimal)
 
-If you want to override this automatism (e.g. when moving to different evcc hardware), you can copy the existing IDs from the `/semp/` endpoint of the old system and adjust them under **Settings > Sunny Home Manager**.
+If you want to override this automatism (e.g. when moving to different evcc hardware), you can copy the existing IDs from the `/semp/` endpoint of the old system and adjust them under **Configuration → Sunny Home Manager**.
 This ensures the SHM continues to recognise the devices.

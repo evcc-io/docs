@@ -1,0 +1,171 @@
+---
+title: "White label"
+description: "Vysvětluje, jak mohou instalatéři a dodavatelé nasadit evcc pod vlastní značkou s vlastními barvami, písmy, logem a kontakty a co k tomu říká licence."
+translatedFrom: "ed0d82720631"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Svou instanci evcc můžete dodávat pod vlastní značkou, se svým logem, kontaktními údaji a barevným schématem.
+Tato stránka je určena instalatérům a dodavatelům, kteří svým zákazníkům dodávají předkonfigurovaná zařízení nebo hostované instalace.
+
+## Barvy a písma \{#custom-css\}
+
+Kromě loga a názvu můžete také přizpůsobit barvy a písma své značce.
+`EVCC_CUSTOM_CSS` odkazuje na soubor CSS, který se načte navíc ke standardním stylům.
+Rozhraní ve velké míře používá pro barvy a písma proměnné CSS (custom properties).
+Většinu vizuálních úprav provedete přepsáním těchto proměnných místo stylování jednotlivých prvků.
+Dostupné proměnné jsou definovány v [`app.css`](https://github.com/evcc-io/evcc/blob/master/assets/css/app.css).
+
+Tento příklad mění primární barvu a načítá jiné písmo z Google Fonts:
+
+```css title="custom.css"
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap");
+
+:root {
+  --evcc-dark-green: #22d3ee;
+  --evcc-darker-green: #0891b2;
+  --bs-body-font-family: "Space Grotesk", sans-serif;
+}
+```
+
+S tímto souborem vypadá rozhraní takto:
+
+<Screenshot
+  name="reference/screenshots/white-label-css"
+  caption="Upravená primární barva a písmo"
+/>
+
+Na co je dobré myslet:
+
+- Neexistují žádné záruky kompatibility. Proměnné i markup se mohou změnit s každým vydáním. Vlastní styly je vhodné ověřit po každé aktualizaci, ideálně už na nightly verzích.
+- Styly by měly fungovat ve světlém i tmavém režimu.
+- Záleží na dostatečném kontrastu, např. u textu na primární barvě.
+
+<a id="theme"></a>
+
+## Výchozí design
+
+`EVCC_CUSTOM_THEME` nastavuje design, se kterým se rozhraní otevře: `auto` (výchozí), `light` nebo `dark`.
+Uživatelé mohou design i nadále změnit v nastavení rozhraní.
+Jejich volba se uloží v prohlížeči a vždy má přednost před tímto výchozím nastavením.
+
+## Název značky a logo \{#brand\}
+
+| Proměnná                 | Účinek                               |
+| ------------------------ | ------------------------------------ |
+| `EVCC_CUSTOM_BRAND`      | Název značky v navigačním menu       |
+| `EVCC_CUSTOM_LOGO_LIGHT` | Logo pro světlý režim                |
+| `EVCC_CUSTOM_LOGO_DARK`  | Logo pro tmavý režim                 |
+| `EVCC_CUSTOM_WEBSITE`    | Odkaz na web v dialogovém okně Verze |
+| `EVCC_CUSTOM_EMAIL`      | E-mailová adresa podpory             |
+| `EVCC_CUSTOM_PHONE`      | Telefonní číslo podpory              |
+
+`EVCC_CUSTOM_BRAND` nastavuje název vaší značky.
+Nahrazuje položku _evcc_ v navigačním menu.
+
+<Screenshot
+  name="reference/screenshots/white-label-menu"
+  caption="Navigační menu s vlastním názvem značky"
+  width={400}
+/>
+
+`EVCC_CUSTOM_LOGO_LIGHT` a `EVCC_CUSTOM_LOGO_DARK` nahrazují logo evcc vaším vlastním (`svg` nebo `png`).
+Obě varianty je nutné vždy nastavit společně.
+Pokud je to možné, použijte `svg`, protože zůstane ostré v jakékoli velikosti.
+Logo se zobrazuje ve výšce 64 px a šířka se přizpůsobí, proto se nejlépe hodí formát na šířku.
+Kliknutím na název značky v menu se otevře dialogové okno **Verze** s vaším logem.
+`EVCC_CUSTOM_WEBSITE`, `EVCC_CUSTOM_EMAIL` a `EVCC_CUSTOM_PHONE` do tohoto dialogového okna přidají váš web, e-mailovou adresu podpory a telefonní číslo.
+
+<Screenshot
+  name="reference/screenshots/white-label-about"
+  caption="Dialogové okno Verze s vlastním logem a kontaktními údaji"
+/>
+
+## Hlášení problémů \{#problem-reports\}
+
+V **Potřebujete poradit? → Nahlásit problém** mohou uživatelé [hlásit chyby a žádat o pomoc](/cs/report-a-problem#app).
+Ve výchozím stavu se otevře předvyplněná diskuse nebo issue na GitHubu.
+Pokud je nastaveno `EVCC_CUSTOM_EMAIL`, přepne se stránka místo toho na e-mailový postup: uživatelé popíší svůj problém a odešlou ho na vaši adresu podpory přes svého e-mailového klienta (`mailto:`).
+
+<Screenshot
+  name="reference/screenshots/white-label-issue"
+  caption="Hlášení problému e-mailem"
+/>
+
+Z technických důvodů e-mail neobsahuje ladicí údaje (konfiguraci, protokoly, stav).
+Pokud je potřebujete, požádejte uživatele, aby si na stejné stránce stáhli ladicí soubor a přiložili ho k e-mailu.
+
+Dialogové okno nápovědy navíc místo odkazu **GitHub diskuse** zobrazí e-mailové tlačítko **Kontaktujte nás**.
+
+## Konfigurace \{#configuration\}
+
+Každé nastavení je proměnná prostředí.
+Stejná nastavení jsou k dispozici také jako [parametry CLI](/cs/reference/cli/evcc#options), např. `--custom-brand` pro `EVCC_CUSTOM_BRAND`.
+
+Můžete je nastavit přímo na příkazovém řádku, v souboru override pro systemd nebo v souboru Docker compose:
+
+<Tabs>
+  <TabItem label="CLI">
+
+```sh
+EVCC_CUSTOM_BRAND="G1GA HEMS" \
+EVCC_CUSTOM_LOGO_LIGHT=logo-light.svg \
+EVCC_CUSTOM_LOGO_DARK=logo-dark.svg \
+EVCC_CUSTOM_WEBSITE=https://example.com/hems \
+EVCC_CUSTOM_EMAIL=support@example.com \
+EVCC_CUSTOM_PHONE="+49 123 456789" \
+EVCC_CUSTOM_CSS=custom.css \
+evcc
+```
+
+  </TabItem>
+  <TabItem label="Služba v Linuxu">
+
+Soubor override vytvořte příkazem `sudo systemctl edit evcc`, viz [Linux → Proměnné prostředí a parametry CLI](/cs/installation/linux#environment-variables).
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_CUSTOM_BRAND=G1GA HEMS"
+Environment="EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg"
+Environment="EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg"
+Environment="EVCC_CUSTOM_EMAIL=support@example.com"
+Environment="EVCC_CUSTOM_CSS=/etc/branding/custom.css"
+```
+
+  </TabItem>
+  <TabItem label="Docker">
+
+Nastavte proměnné v souboru compose a připojte soubory loga a CSS do kontejneru.
+
+```yaml
+services:
+  evcc:
+    image: evcc/evcc:latest
+    environment:
+      - EVCC_CUSTOM_BRAND=G1GA HEMS
+      - EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg
+      - EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg
+      - EVCC_CUSTOM_EMAIL=support@example.com
+      - EVCC_CUSTOM_CSS=/etc/branding/custom.css
+    volumes:
+      - /home/user/branding:/etc/branding
+```
+
+  </TabItem>
+</Tabs>
+
+Veškerou další konfiguraci lze rovněž předat přes proměnné prostředí: `EVCC_` následované názvem parametru z `evcc.yaml` velkými písmeny, např. `EVCC_NETWORK_HOST` nebo `EVCC_DATABASE_DSN`.
+
+## Vlastní obraz \{#custom-image\}
+
+Pokud chcete dodávat kompletní obraz SD karty s vaší značkou, vytvořte fork repozitáře [evcc-io/images](https://github.com/evcc-io/images).
+Skript [`userpatches/customize-image.sh`](https://github.com/evcc-io/images/blob/main/userpatches/customize-image.sh) nastavuje evcc během sestavení obrazu.
+V jeho sekci _EVCC SETUP_ se zapisuje soubor override pro systemd, takže právě sem patří vaše řádky `Environment="EVCC_CUSTOM_..."`.
+
+## Licence \{#licensing\}
+
+Dodávat nebo prodávat oficiální binárku či obraz Dockeru svým zákazníkům je naprosto v pořádku.
+Dbejte přitom na dodržení [podmínek sponzorství](/cs/sponsorship) a [licence](https://github.com/evcc-io/evcc#license).
+Každá instance, která používá integrace vyžadující sponzorství, potřebuje vlastní sponzorský token.

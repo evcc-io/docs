@@ -1,0 +1,59 @@
+---
+translatedFrom: "9bc910cfb8ce"
+---
+
+Netbeheerders en bovenliggende energiemanagementsystemen kunnen het verbruik en de teruglevering van uw installatie extern begrenzen.
+De volgende toepassingen worden ondersteund:
+
+- **§ 14a EnWG** (Duitse regelgeving): tijdelijke vermogensreductie en dimmen van verbruikers door de netbeheerder
+- **§ 9 EEG** (Duitse regelgeving): opwekbegrenzing van zonnepanelensystemen bij overbelasting van het net
+- **EMS-integratie**: limieten van andere energiemanagementsystemen toepassen
+
+## Achtergrond \{#background\}
+
+### Stuurbare verbruiksinrichtingen (§ 14a EnWG) \{#dimming\}
+
+§ 14a van de Duitse Energiewet (EnWG) regelt de netvriendelijke aansturing van stuurbare verbruiksinrichtingen (SteuVE).
+Netbeheerders kunnen bij overbelasting van het net het vermogen van grote verbruikers zoals laders, warmtepompen of thuisbatterijen tijdelijk verlagen.
+
+Belangrijke punten:
+
+- Geldt voor verbruikers vanaf 4,2 kW vermogen
+- Aansturing via Smart Meter Gateway en stuurbox
+
+### Terugleverbeheer (§ 9 EEG) \{#curtailment\}
+
+Volgens § 9 van de Duitse wet voor hernieuwbare energie (EEG) kunnen netbeheerders bij dreigende overbelasting van het net de teruglevering van installaties voor hernieuwbare energie begrenzen.
+Dit betreft vooral grotere zonnepanelensystemen, maar kan ook voor woningen relevant worden.
+
+Ontvangt evcc een signaal voor opwekbegrenzing, dan wordt het begrenzingsniveau als percentage over alle begrensbare omvormers verdeeld en direct op het apparaat toegepast.
+FNN-stuurboxen signaleren getrapte limieten (60%, 30%, 0%), die ongewijzigd worden toegepast.
+Limieten in watt (bijv. via EEBUS) worden op basis van het geïnstalleerde opwekvermogen omgerekend naar een percentage.
+Omvormers zonder traploze regeling worden volledig uitgeschakeld zolang de limiet actief is.
+De actieve limiet wordt in de interface getoond, en de volledige productie wordt hervat zodra het signaal vervalt.
+
+:::caution[Experimenteel]
+Opwekbegrenzing wordt alleen voor geselecteerde omvormers ondersteund.
+Ondersteunde apparaten zijn in het [apparatenoverzicht](/nl/meters) gemarkeerd met “Curtailbaar”.
+Apparaten die alleen terugleverbegrenzing bieden, staan onder [Opwekbegrenzing](#curtailment-devices).
+:::
+
+## Instellen \{#setup\}
+
+De configuratie gebeurt via **Configuratie → Externe limiet**.
+Kies een van de hieronder vermelde integraties en vul de parameters in.
+U kunt ook een [gebruikergedefinieerde integratie](/nl/user-defined-devices#external-limit) aanmaken, bijv. voor een aansluiting via één schakelcontact (relais).
+
+Om de verbruikslimiet op uw laadpunten toe te passen, richt u circuits in onder [load management](/nl/features/loadmanagement).
+Een actieve limiet begrenst dan het hoofdcircuit, wat op de kaart Load Balancing wordt aangegeven met de melding “Verbruik gelimiteerd”.
+Actieve limieten worden getoond op de kaart **Externe limiet** en op de Laden-pagina.
+
+### Koppelen bij EEBUS-integraties \{#eebus-pairing\}
+
+Bij integraties die het EEBUS-protocol gebruiken, communiceert de stuurbox rechtstreeks met evcc en geeft deze de vermogenslimiet automatisch door.
+Stuurbox en evcc moeten eenmalig worden gekoppeld:
+
+1. **In de stuurbox**: voeg evcc toe als HEMS.
+   De SKI en het IP-adres van evcc staan onder **Configuratie → EEBUS**.
+2. **In evcc**: voer de SKI van de stuurbox in bij de integratie.
+   U vindt deze in de documentatie of de webinterface van de stuurbox.

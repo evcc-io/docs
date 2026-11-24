@@ -1,0 +1,70 @@
+---
+translatedFrom: "de9f2699a051"
+---
+
+## Zo werkt het \{#how-it-works\}
+
+In normaal bedrijf laadt evcc zonder externe vermogensbegrenzing.
+De laadpunten werken met hun normale configuratie en worden waar nodig door aanvullende beperkingen van [load management](/nl/features/loadmanagement) gecoördineerd.
+
+Wanneer de netbeheerder een reductiesignaal stuurt:
+
+1. **FNN-stuurbox**: het W4-contact wordt gesloten, evcc activeert de geconfigureerde verbruikslimiet
+2. **EEBUS**: de stuurbox geeft de berekende totale limiet digitaal door
+3. **Relais**: het contact wordt gesloten, evcc activeert de geconfigureerde vermogenslimiet
+
+De limiet begrenst het hoofdcircuit van [load management](/nl/features/loadmanagement), en alle laadpunten die aan circuits zijn toegewezen, worden dienovereenkomstig teruggeregeld.
+Is het totale verbruik te hoog, dan kunnen laadprocessen ook worden gestopt.
+De aansturing geldt voor alle modi (Slim, Snel).
+
+**Batterijsturing tijdens reductie:**
+Als [actieve batterijsturing](/nl/features/battery#battery-control) is geconfigureerd en het [laden met netstroom](/nl/features/battery#gridcharge) van de thuisbatterij actief is, wordt dit automatisch gepauzeerd.
+De batterij wordt in de modus “vasthouden” gezet, zodat ze niet meer ontlaadt.
+Het laden van de batterij met zonneoverschot is meestal nog steeds mogelijk.
+Na afloop van de vermogensreductie wordt het [laden met netstroom](/nl/features/battery#gridcharge) automatisch hervat.
+
+Is er een stuurlimiet actief, dan verschijnt op de Laden-pagina van evcc een **banner met stuurmelding**.
+Verbruikslimiet en opwekbegrenzing worden apart weergegeven.
+
+## Logboek \{#logging\}
+
+Alle begrenzingsverzoeken van de netbeheerder worden automatisch vastgelegd.
+De loggegevens kunt u als CSV-bestand downloaden onder **Configuratie → Externe limiet**.
+
+Elk item bevat:
+
+- Begin- en eindtijd van de begrenzing
+- Soort aansturing (verbruiksreductie of opwekbegrenzing)
+- Gemeten netvermogen aan het begin van de begrenzing
+- Ingestelde vermogenslimiet
+
+Deze gegevens kunt u op verzoek aan de netbeheerder verstrekken om aan te tonen dat de stuurverzoeken zijn opgevolgd.
+
+:::note[Verantwoordelijkheid (Duitse regelgeving § 14a, § 9)]
+De erkende installateur moet na de installatie controleren of de externe limiet werkt zoals verwacht.
+De exploitant van de installatie is verantwoordelijk voor de correcte werking en moet het logboek minstens 2 jaar bewaren.
+:::
+
+## Extra verbruikers aansturen \{#additional-consumers\}
+
+Naast laadpunten kunnen ook andere stuurbare verbruikers in het Duitse § 14a-load management worden opgenomen.
+Dit geldt bijv. voor warmtepompen of thuisbatterijen die via EEBUS zijn verbonden of als meter met een extra relaisuitgang zijn geconfigureerd.
+
+De aansturing houdt rekening met het actuele opgenomen vermogen van alle stuurbare verbruikers.
+Daarbij worden automatisch alle laadpunten en, als overige verbruikers, alle meters met bijbehorende schakeluitgangen of een EEBUS-interface met de use case LPC meegenomen.
+
+Eerst worden alle overige verbruikers gedimd.
+Het resterende vermogen wordt daarna over de actieve laadpunten verdeeld.
+Doordat overige verbruikers gelijkmatig worden gedimd, kan het beschikbare laadvermogen voor actieve laadpunten in uitzonderlijke gevallen zelfs hoger zijn dan in de normale toestand.
+Is het terugregelen van de laadpunten inclusief het dimmen van alle overige verbruikers niet voldoende, dan worden laadprocessen op laadpunten onderbroken.
+
+:::note[Beschikbaarheid]
+Op dit moment bestaat er slechts één dimbare meter (EEBUS-verbruiker).
+Deze functie wordt uitgebreid, en compatibele meters worden in de [apparaatdocumentatie](/nl/meters) gemarkeerd.
+:::
+
+## Meer informatie \{#further-information\}
+
+- [Load management](/nl/features/loadmanagement): basisprincipes van lastverdeling
+- [Gebruikersgedefinieerde integratie](/nl/user-defined-devices#external-limit): aansluiting via relais of eigen gegevensbronnen
+- [Plugins](/nl/reference/plugins): geavanceerde pluginconfiguraties

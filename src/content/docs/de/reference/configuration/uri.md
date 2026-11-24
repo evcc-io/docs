@@ -1,25 +1,29 @@
 ---
 title: "network"
-description: "Netzwerkeinstellungen in der evcc.yaml: Hostname oder IP-Adresse, Port und die externe URL, die hinter einem Reverse-Proxy oder von der App genutzt wird."
+description: "So legst du in der evcc.yaml Hostname, IP-Adresse und Port der Weboberfläche fest und setzt die externe URL hinter einem Reverse-Proxy oder für die App."
 sidebar:
   order: 9
+translatedFrom: "dbac4fd9896b"
 ---
 
-Defines the IP address or hostname and port on which the web interface should be accessed.
+Definiert die IP-Adresse oder den Hostnamen und den Port, unter dem die Weboberfläche erreichbar sein soll.
 
 **Beispiel**:
 
 ```yaml
 network:
-  # port is the listening port for UI and api
-  # evcc will listen on all available interfaces
-  port: 7070
-  # host is the hostname or IP address
-  # if the host name contains a `.local` suffix, the name will be announced on MDNS
-  # docker: MDNS announcements don't work. host must be set to the docker host's name.
+  # schema ist das HTTP-Schema
+  # `https` aktiviert kein HTTPS, sondern ändert nur, wie URLs erzeugt werden
+  schema: http
+  # host ist der Hostname oder die IP-Adresse
+  # endet der Hostname auf `.local`, wird der Name per MDNS bekannt gegeben
+  # Docker: MDNS-Ankündigungen funktionieren nicht. host muss auf den Namen des Docker-Hosts gesetzt werden.
   host: evcc.local
-  # externalUrl is the URL you use to access evcc in your browser
-  # used for autodiscovery by the evcc app and by services/devices connecting to evcc
-  # if you're running evcc behind a reverse proxy, use that URL, e.g. "https://evcc.example.com" (note: ensure you add proper authentication)
+  # port ist der Port für UI und API
+  # evcc lauscht auf allen verfügbaren Schnittstellen
+  port: 7070
+  # externalUrl ist die URL, über die du evcc im Browser aufrufst
+  # wird für die automatische Erkennung durch die evcc-App und von Diensten/Geräten genutzt, die sich mit evcc verbinden
+  # läuft evcc hinter einem Reverse-Proxy, nutze dessen URL, z. B. "https://evcc.example.com" (erfordert Authentifizierung am Proxy)
   externalUrl: https://evcc.local
 ```

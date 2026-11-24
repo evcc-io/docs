@@ -1,0 +1,134 @@
+---
+title: "Veicoli"
+description: "Spiega cosa possono fare in evcc il veicolo ospite, i veicoli offline e quelli con API online e come più veicoli condividono un caricabatterie."
+sidebar:
+  order: 8
+translatedFrom: "0c5d9e6473ca"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Se configuri i tuoi veicoli in evcc, hai a disposizione funzioni aggiuntive.
+Puoi configurare [ricarica minima e limiti](/it/features/limits), usare i [piani di ricarica](/it/features/plans) e ottenere un’analisi dettagliata per veicolo nelle [sessioni di ricarica](/it/features/sessions), incluse informazioni come il chilometraggio.
+
+Registrare i veicoli è facoltativo. Dato che nella maggior parte dei casi evcc controlla la ricarica tramite il caricabatterie, la ricarica solare e in base al prezzo funziona anche senza configurare un veicolo.
+
+## Tipi di veicolo
+
+Le funzioni disponibili dipendono dal tipo di veicolo. Si distinguono i seguenti tipi:
+
+### Veicolo ospite
+
+Se non hai configurato nessun veicolo, al punto di ricarica viene mostrato il veicolo ospite.
+È un veicolo standard che non supporta funzioni particolari.
+Anche se hai configurato il tuo veicolo, puoi passare al veicolo ospite in qualsiasi momento.
+Questo è utile ad es. quando al tuo punto di ricarica si ricarica un veicolo non configurato (ad es. di un ospite occasionale).
+evcc usa allora i valori standard di potenza e fasi configurati per il punto di ricarica.
+Nelle [sessioni di ricarica](/it/features/sessions) questa ricarica viene assegnata al veicolo ospite.
+
+### Veicoli senza API (offline)
+
+Se il tuo veicolo non ha un’interfaccia online o al punto di ricarica non c’è connessione internet, puoi configurarlo come veicolo offline.
+Vai su **Configurazione → Veicoli → Aggiungi veicolo** e nel campo **Produttore** scegli **Veicolo generico (senza API)**.
+Assegna al veicolo un **Titolo** (ad es. “Honda e verde”) e inserisci la **Capacità** della sua batteria.
+Ora che la capacità della batteria è nota, anche l’avanzamento della ricarica e il limite di ricarica possono essere mostrati in percentuale (ad es. +25%).
+
+Nota: puoi usare questa funzione anche per veicoli di terzi (amici, famiglia, auto a noleggio o aziendali) alla cui API non hai accesso.
+
+### Veicoli con API (online)
+
+Se il tuo veicolo ha un’interfaccia online, conviene configurarla anche in evcc.
+Trovi un elenco di tutti i produttori supportati in [Veicoli](/it/vehicles).
+Vai su **Configurazione → Veicoli → Aggiungi veicolo** e scegli il tuo **Produttore**, ad es. Audi.
+A seconda del produttore, inserisci poi i dati di accesso del tuo account del produttore, come nome utente e password.
+
+Ora evcc ha accesso al livello di carica attuale.
+A seconda del produttore sono disponibili anche altre informazioni come stato di ricarica, limiti del veicolo, chilometraggio, climatizzazione e autonomia stimata.
+
+:::note[Nota]
+Per proteggere la batteria del veicolo, evcc aggiorna il livello di carica solo quando un veicolo è collegato al punto di ricarica.
+A seconda del produttore, l’accesso all’API può risvegliare il veicolo e aumentare notevolmente il consumo in standby.
+Puoi modificare questo comportamento con il [parametro `poll`](/it/reference/configuration/loadpoints#poll) del punto di ricarica.
+:::
+
+## Più veicoli \{#multiple-vehicles\}
+
+In evcc puoi configurare più veicoli e più punti di ricarica.
+Ci sono diverse opzioni per assegnare i veicoli ai punti di ricarica:
+
+### Veicolo predefinito
+
+Se ogni veicolo ha il proprio punto di ricarica, puoi configurare il veicolo come veicolo predefinito del punto di ricarica.
+Questa è la configurazione più semplice e consigliata.
+Vai su **Configurazione → Ricarica e riscaldamento → [Il mio punto di ricarica]**.
+Nella sezione **Veicoli** seleziona il tuo veicolo come **Veicolo predefinito**.
+Quando inizia una nuova sessione di ricarica, evcc presume che si tratti del veicolo predefinito.
+Se non è così (ad es. veicolo ospite), puoi cambiare il veicolo nell’interfaccia.
+
+### Assegnazione tramite l’interfaccia
+
+Il veicolo attualmente assegnato viene mostrato nell’interfaccia al rispettivo punto di ricarica.
+Puoi cambiare l’assegnazione facendo clic sul nome del veicolo.
+Questa selezione vale poi per la sessione di ricarica in corso.
+
+<Screenshot
+  name="features/screenshots/vehicle-select"
+  caption="Cambiare il veicolo al punto di ricarica"
+/>
+
+### Rilevamento automatico
+
+Se più veicoli si ricaricano a uno stesso punto di ricarica, al collegamento viene usato il rilevamento automatico.
+Viene controllato lo stato di ricarica di tutti i veicoli configurati e viene selezionato il veicolo più plausibile.
+Se il rilevamento ha selezionato il veicolo sbagliato (ad es. perché sta caricando a un altro punto di ricarica), puoi correggere l’assegnazione manualmente.
+
+### Rilevamento tramite RFID \{#detection-via-rfid\}
+
+Se il tuo caricabatterie ha un lettore di tessere RFID, puoi usarlo anche per l’assegnazione.
+In questo caso assegni una (o più) tessere RFID a un determinato veicolo.
+Ogni volta che il veicolo viene ricollegato al caricabatterie, la ricarica deve prima essere abilitata con la tessera RFID corrispondente sul caricabatterie.
+
+evcc riceve dal caricabatterie un codice identificativo univoco.
+A seconda del produttore, si tratta del codice RFID o di un codice interno derivato, come un nome utente della configurazione del caricabatterie.
+Dopo l’abilitazione con la tessera, l’identificatore attuale viene mostrato nella scheda del punto di ricarica in **Configurazione → Ricarica e riscaldamento**.
+Inserisci questo valore nel campo **Identificatore RFID** del veicolo desiderato in **Configurazione → Veicoli**.
+Puoi registrare più identificatori per veicolo.
+
+### Rilevamento tramite Plug & Charge
+
+Se il tuo caricabatterie supporta lo standard ISO 15118, il rilevamento può avvenire anche direttamente tramite il cavo di ricarica.
+Al momento però sul mercato ci sono pochissimi caricabatterie con questa funzione.
+
+:::note[Nota]
+Nel caricabatterie deve essere attivata la funzione “Connessione PLC al veicolo”.
+:::
+
+La configurazione è simile al rilevamento tramite RFID.
+Il veicolo deve essere collegato al caricabatterie.
+L’identificatore (ad es. `01:23:45:67:89:00`) viene poi mostrato nella scheda del punto di ricarica in **Configurazione → Ricarica e riscaldamento**.
+Inserisci questo valore nel campo **Identificatore RFID** del veicolo.
+
+:::note[Nota]
+Se il veicolo e il caricabatterie non supportano Plug & Charge, il veicolo restituisce un indirizzo hardware univoco (indirizzo MAC).
+Alcuni produttori come VW e Audi però lo cambiano ogni giorno in un valore casuale diverso.
+
+In questo caso puoi usare un carattere jolly e indicare solo la parte che non cambia, ad es. `01:23:45:*`.
+
+Naturalmente funziona solo se la parte iniziale indicata non compare in più veicoli configurati, cioè se è diversa per ogni veicolo.
+:::
+
+## Climatizzazione
+
+Per alcuni veicoli evcc può rilevare tramite la connessione online anche se il veicolo sta eseguendo una preclimatizzazione.
+In questo caso sul caricabatterie viene abilitata la potenza più bassa possibile, così che il veicolo possa climatizzare l’abitacolo con la potenza del caricabatterie.
+
+Può succedere che la climatizzazione del veicolo richieda meno della potenza abilitata.
+Il veicolo usa allora la potenza disponibile rimanente per continuare a caricare la batteria, anche se un limite impostato sul livello di carica è già stato raggiunto.
+
+Non appena la climatizzazione viene riconosciuta come terminata, il caricabatterie viene di nuovo bloccato, così che il veicolo non possa più prelevare potenza dal caricabatterie, a meno che non stia già caricando.
+
+:::note[Nota]
+Questo vale solo per le combinazioni di veicoli e caricabatterie che comunicano tramite lo standard IEC 61851. Oggi è il caso più comune.
+
+Per veicoli e caricabatterie che comunicano tramite lo standard ISO 15118, il veicolo riceve esattamente la quantità di energia che richiede direttamente al caricabatterie.
+:::

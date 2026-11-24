@@ -1,13 +1,22 @@
 ---
 interface Props {
-  href: string;
+  /** without a link the button is shown inactive, e.g. for something that is not available yet */
+  href?: string;
+  /** full-size button aligned with the text instead of centred */
+  align?: "center" | "start";
 }
 
-const { href } = Astro.props;
+const { href, align = "center" } = Astro.props;
+// links that leave the docs, e.g. to a shop, open in a new tab
+const external = href && /^https?:/.test(href) ? { target: "_blank", rel: "noopener" } : {};
 ---
 
-<div class="cta-container">
-  <a class="cta-button" href={href}><slot /></a>
+<div class:list={["cta-container", { "cta-start": align === "start" }]}>
+  {href ? (
+    <a class="cta-button" href={href} {...external}><slot /></a>
+  ) : (
+    <span class="cta-button cta-inactive"><slot /></span>
+  )}
 </div>
 
 <style>
@@ -29,6 +38,17 @@ const { href } = Astro.props;
   }
   .cta-button:hover {
     background-color: #076f20;
+  }
+  .cta-button.cta-inactive,
+  .cta-button.cta-inactive:hover,
+  :global([data-theme="dark"]) .cta-button.cta-inactive {
+    background-color: var(--sl-color-gray-5);
+    color: var(--sl-color-gray-2);
+    cursor: default;
+  }
+  .cta-start {
+    text-align: start;
+    margin: 2rem 0 1.25rem;
   }
   :global([data-theme="dark"]) .cta-button {
     background-color: #0fdd42;

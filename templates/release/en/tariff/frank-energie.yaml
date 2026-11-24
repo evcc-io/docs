@@ -1,0 +1,78 @@
+template: frank-energie
+product:
+  identifier: frank-energie
+  brand: Frank Energie
+  group: Dynamic electricity price
+countries: ["NL"]
+requirements: ["skiptest"]
+description: |
+  Dynamic prices from the public Frank Energie API, no login required. Import returns the all-in price including energy tax, markup and VAT. Export returns the bare market price, use `charges`, `tax` or `formula` for the feed-in fee or bonus of your contract. If `charges`, `tax` or `formula` is set, import is also calculated from the bare market price.
+render:
+  - default: |
+      type: template
+      template: frank-energie
+      tariffDirection: import # Tariff direction, Use 'export' for the feed-in tariff. Frank pays the market price plus a purchase fee (inkoopvergoeding), and with Slim Terugleveren a bonus of about 15% during the day. Set the current fee as `formula`, e.g. `price + 0.0182`, or with Slim Terugleveren `price * 1.15 + 0.0182`. [import, export] (optional)
+    advanced: |
+      type: template
+      template: frank-energie
+      tariffDirection: import # Tariff direction, Use 'export' for the feed-in tariff. Frank pays the market price plus a purchase fee (inkoopvergoeding), and with Slim Terugleveren a bonus of about 15% during the day. Set the current fee as `formula`, e.g. `price + 0.0182`, or with Slim Terugleveren `price * 1.15 + 0.0182`. [import, export] (optional)
+      charges: # Charge, Additional fixed charge per kWh (optional)
+      chargesZones: # Charges zones, Time-based grid fees that override the default charge. (optional)
+      tax: # Tax, Additional percentage charge (e.g. 0.2 for 20%) (optional)
+      formula: math.Max((price + charges) * (1 + tax), 0.0) # Formula, Individual formula for calculating the price (optional)
+      average: # Average by hour, optional
+params:
+  - name: tariffDirection
+    example:
+    default: import
+    choice: ['import', 'export']
+    unit:
+    description: Tariff direction
+    help: Use 'export' for the feed-in tariff. Frank pays the market price plus a purchase fee (inkoopvergoeding), and with Slim Terugleveren a bonus of about 15% during the day. Set the current fee as `formula`, e.g. `price + 0.0182`, or with Slim Terugleveren `price * 1.15 + 0.0182`.
+    advanced: false
+    optional: true
+  - name: charges
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charge
+    help: Additional fixed charge per kWh
+    advanced: true
+    optional: true
+  - name: chargesZones
+    example:
+    default:
+    choice: []
+    unit:
+    description: Charges zones
+    help: Time-based grid fees that override the default charge.
+    advanced: true
+    optional: true
+  - name: tax
+    example:
+    default:
+    choice: []
+    unit:
+    description: Tax
+    help: Additional percentage charge (e.g. 0.2 for 20%)
+    advanced: true
+    optional: true
+  - name: formula
+    example: math.Max((price + charges) * (1 + tax), 0.0)
+    default:
+    choice: []
+    unit:
+    description: Formula
+    help: Individual formula for calculating the price
+    advanced: true
+    optional: true
+  - name: average
+    example:
+    default:
+    choice: []
+    unit:
+    description: Average by hour
+    help:
+    advanced: true
+    optional: true

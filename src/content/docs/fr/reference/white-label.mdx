@@ -1,0 +1,171 @@
+---
+title: "Marque blanche"
+description: "Les installateurs et les revendeurs peuvent livrer evcc sous leur propre marque, avec leurs couleurs, polices, logo et coordonnées, et voici ce que la licence permet."
+translatedFrom: "ed0d82720631"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Vous pouvez livrer votre instance evcc sous votre propre marque : avec votre logo, vos coordonnées et vos couleurs.
+Cette page s’adresse aux installateurs et aux revendeurs qui fournissent à leurs clients des appareils préconfigurés ou des installations hébergées.
+
+## Couleurs et polices \{#custom-css\}
+
+Au-delà du logo et du nom, vous pouvez aussi adapter les couleurs et les polices à votre marque.
+`EVCC_CUSTOM_CSS` pointe vers un fichier CSS chargé en plus des styles standard.
+L’interface s’appuie largement sur les propriétés personnalisées CSS pour les couleurs et les polices.
+La plupart des ajustements visuels consistent à redéfinir ces propriétés plutôt qu’à mettre en forme des éléments individuels.
+Les propriétés disponibles sont définies dans [`app.css`](https://github.com/evcc-io/evcc/blob/master/assets/css/app.css).
+
+Cet exemple modifie la couleur principale et charge une autre police depuis Google Fonts :
+
+```css title="custom.css"
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap");
+
+:root {
+  --evcc-dark-green: #22d3ee;
+  --evcc-darker-green: #0891b2;
+  --bs-body-font-family: "Space Grotesk", sans-serif;
+}
+```
+
+Une fois ce fichier chargé, l’interface ressemble à ceci :
+
+<Screenshot
+  name="reference/screenshots/white-label-css"
+  caption="Couleur principale et police adaptées"
+/>
+
+Quelques points à garder en tête :
+
+- Il n’y a aucune garantie de compatibilité. Les propriétés et le balisage peuvent changer à chaque version. Les styles personnalisés doivent être vérifiés après chaque mise à jour, idéalement dès les versions nightly.
+- Les styles doivent fonctionner en mode clair comme en mode sombre.
+- Un contraste suffisant est important, p. ex. pour le texte sur la couleur principale.
+
+<a id="theme"></a>
+
+## Thème par défaut
+
+`EVCC_CUSTOM_THEME` définit le thème avec lequel l’interface démarre : `auto` (par défaut), `light` ou `dark`.
+Les utilisateurs peuvent à tout moment changer le thème dans les paramètres de l’interface.
+Leur choix est enregistré dans le navigateur et l’emporte toujours sur cette valeur par défaut.
+
+## Nom de marque et logo \{#brand\}
+
+| Variable                 | Effet                                                   |
+| ------------------------ | ------------------------------------------------------- |
+| `EVCC_CUSTOM_BRAND`      | Nom de marque dans le menu de navigation                |
+| `EVCC_CUSTOM_LOGO_LIGHT` | Logo pour le mode clair                                 |
+| `EVCC_CUSTOM_LOGO_DARK`  | Logo pour le mode sombre                                |
+| `EVCC_CUSTOM_WEBSITE`    | Lien vers le site web dans la boîte de dialogue Version |
+| `EVCC_CUSTOM_EMAIL`      | Adresse e-mail du support                               |
+| `EVCC_CUSTOM_PHONE`      | Numéro de téléphone du support                          |
+
+`EVCC_CUSTOM_BRAND` définit votre nom de marque.
+Il remplace l’entrée _evcc_ dans le menu de navigation.
+
+<Screenshot
+  name="reference/screenshots/white-label-menu"
+  caption="Menu de navigation avec un nom de marque personnalisé"
+  width={400}
+/>
+
+`EVCC_CUSTOM_LOGO_LIGHT` et `EVCC_CUSTOM_LOGO_DARK` remplacent le logo evcc par le vôtre (`svg` ou `png`).
+Les deux variantes doivent toujours être configurées ensemble.
+Utilisez si possible `svg`, qui reste net quelle que soit la taille.
+Le logo s’affiche avec une hauteur de 64 px et une largeur proportionnelle, si bien qu’un format paysage convient le mieux.
+Un clic sur le nom de marque dans le menu ouvre la boîte de dialogue **Version** avec votre logo.
+`EVCC_CUSTOM_WEBSITE`, `EVCC_CUSTOM_EMAIL` et `EVCC_CUSTOM_PHONE` ajoutent à cette boîte de dialogue votre site web ainsi que l’adresse e-mail et le numéro de téléphone du support.
+
+<Screenshot
+  name="reference/screenshots/white-label-about"
+  caption="Boîte de dialogue Version avec logo et coordonnées personnalisés"
+/>
+
+## Signalements de problèmes \{#problem-reports\}
+
+Sous **Besoin d'aide ? → Signaler un problème**, les utilisateurs peuvent [signaler des bugs et demander de l’aide](/fr/report-a-problem#app).
+Par défaut, cela ouvre une discussion GitHub ou un ticket GitHub préremplis.
+Lorsque `EVCC_CUSTOM_EMAIL` est configuré, la page passe à un envoi par e-mail : les utilisateurs décrivent leur problème et l’envoient à votre adresse de support via leur client de messagerie (`mailto:`).
+
+<Screenshot
+  name="reference/screenshots/white-label-issue"
+  caption="Signalement d’un problème par e-mail"
+/>
+
+Pour des raisons techniques, l’e-mail ne contient pas les détails de débogage (configuration, journaux, état).
+Si vous en avez besoin, demandez à vos utilisateurs de télécharger le fichier de débogage sur la même page et de le joindre à leur e-mail.
+
+La boîte de dialogue d’aide affiche aussi un bouton e-mail **Contactez-nous** à la place du lien **Discussions GitHub**.
+
+## Configuration \{#configuration\}
+
+Chaque paramètre est une variable d’environnement.
+Les mêmes paramètres sont aussi disponibles sous forme d’[options CLI](/fr/reference/cli/evcc#options), p. ex. `--custom-brand` pour `EVCC_CUSTOM_BRAND`.
+
+Vous pouvez les définir directement en ligne de commande, dans un fichier de surcharge systemd ou dans votre fichier Docker compose :
+
+<Tabs>
+  <TabItem label="CLI">
+
+```sh
+EVCC_CUSTOM_BRAND="G1GA HEMS" \
+EVCC_CUSTOM_LOGO_LIGHT=logo-light.svg \
+EVCC_CUSTOM_LOGO_DARK=logo-dark.svg \
+EVCC_CUSTOM_WEBSITE=https://example.com/hems \
+EVCC_CUSTOM_EMAIL=support@example.com \
+EVCC_CUSTOM_PHONE="+49 123 456789" \
+EVCC_CUSTOM_CSS=custom.css \
+evcc
+```
+
+  </TabItem>
+  <TabItem label="Service Linux">
+
+Créez un fichier de surcharge avec `sudo systemctl edit evcc`, voir [Linux → Variables d’environnement et options CLI](/fr/installation/linux#environment-variables).
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_CUSTOM_BRAND=G1GA HEMS"
+Environment="EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg"
+Environment="EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg"
+Environment="EVCC_CUSTOM_EMAIL=support@example.com"
+Environment="EVCC_CUSTOM_CSS=/etc/branding/custom.css"
+```
+
+  </TabItem>
+  <TabItem label="Docker">
+
+Définissez les variables dans votre fichier compose et montez les fichiers du logo et du CSS dans le conteneur.
+
+```yaml
+services:
+  evcc:
+    image: evcc/evcc:latest
+    environment:
+      - EVCC_CUSTOM_BRAND=G1GA HEMS
+      - EVCC_CUSTOM_LOGO_LIGHT=/etc/branding/logo-light.svg
+      - EVCC_CUSTOM_LOGO_DARK=/etc/branding/logo-dark.svg
+      - EVCC_CUSTOM_EMAIL=support@example.com
+      - EVCC_CUSTOM_CSS=/etc/branding/custom.css
+    volumes:
+      - /home/user/branding:/etc/branding
+```
+
+  </TabItem>
+</Tabs>
+
+Toute autre configuration peut aussi être fournie via des variables d’environnement : `EVCC_` suivi du nom du paramètre `evcc.yaml` en majuscules, p. ex. `EVCC_NETWORK_HOST` ou `EVCC_DATABASE_DSN`.
+
+## Image personnalisée \{#custom-image\}
+
+Pour livrer une image de carte SD complète à votre marque, créez un fork du dépôt [evcc-io/images](https://github.com/evcc-io/images).
+Le script [`userpatches/customize-image.sh`](https://github.com/evcc-io/images/blob/main/userpatches/customize-image.sh) configure evcc pendant la construction de l’image.
+Dans sa section _EVCC SETUP_, il écrit le fichier de surcharge systemd, c’est donc là que vont vos lignes `Environment="EVCC_CUSTOM_..."`.
+
+## Licence \{#licensing\}
+
+Livrer ou vendre le binaire officiel ou l’image Docker officielle à vos clients ne pose aucun problème.
+Veillez à respecter les [conditions de parrainage](/fr/sponsorship) et la [licence](https://github.com/evcc-io/evcc#license).
+Les instances qui utilisent des intégrations nécessitant un parrainage ont chacune besoin de leur propre jeton de parrain.

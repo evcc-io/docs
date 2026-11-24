@@ -1,0 +1,145 @@
+---
+date: 2025-10-04
+title: "Community: Tobias fra Trebur"
+description: "Community-portræt fra oktober 2025: Tobias fra Trebur har gjort sit gasopvarmede hus til et stort set selvforsynende smart home med belastningsstyring og evcc."
+authors: [naltatis, detlef]
+tags: [community]
+prev: false
+next: false
+cover:
+  alt: "Tobias foran huset med solpaneler"
+  image: "../../../../../en/blog/2025/10/04/tobias-vor-haus-mit-photovoltaik.webp"
+translatedFrom: "c5093141b5fb"
+---
+
+Tobias har trin for trin forvandlet sit hus i Trebur i det sydlige Hessen fra en husstand med gasfyr til et stort set energiuafhængigt smart home.
+Fotografen [Detlef](https://hee.se) var på besøg og tog billeder.
+
+{/* excerpt */}
+
+## Energiuafhængighed i stedet for gasfyr
+
+**Michael:** Hej Tobias, dejligt at du tager dig tid til at vise os dit hjem og den tekniske opsætning.
+Vil du kort præsentere dig selv?
+
+**Tobias:** Hej Michael, fedt at vi gør det her.
+Jeg hedder Tobias og er 41 år.
+Ligesom nogle af mine forgængere i portrætserien har jeg en baggrund inden for datalogi og er en passioneret nørd, når det gælder energieffektivitet og smart home-teknik.
+Min familie og jeg arvede et parcelhus for nogle år siden og har løbende forbedret det hele, siden vi flyttede ind for over 10 år siden.
+Vi har altid ledt efter måder at sænke vores udgifter til forsyning på.
+Det var i bund og grund en forvandling trin for trin fra en husstand med gasfyr til et stort set energiuafhængigt smart home.
+
+**Michael:** Okay, det lyder som meget arbejde, men også som om man ender med skræddersyede løsninger, der passer perfekt til ens vaner og behov.
+Havde du stadig tid til andre ting?
+
+**Tobias:** Selvfølgelig!
+En af de større udfordringer var at udskifte vores gasfyr med en varmepumpe.
+Vi gav en landsdækkende entreprenør opgaven med hele anlægget.
+Desværre var installationen kaotisk: Tre planlagte dage blev til en uge, de havde glemt eltilslutningen, og bagefter opstod der forskellige tekniske problemer, fra forkert tilsluttet buffertank til en overdimensioneret cirkulationspumpe.
+Efter flere rettelser, egne undersøgelser og entreprenørens konkurs måtte vi selv lave de sidste justeringer.
+I dag kører varmepumpen stabilt og effektivt med grøn strøm fra vores eget tag: Vejen var bumpet, men det var det værd.
+
+## Fra hybrid til fuldt elektrisk
+
+**Michael:** Det lyder som en ægte tålmodighedsprøve.
+Men godt, at det hele virker til sidst.
+Hvordan kom du ind på elmobilitet?
+
+**Tobias:** For nogle år siden fik vi en plug-in-hybrid, en VW Passat.
+Solcelleanlægget kom lidt senere.
+Målet dengang var at nå op på omkring 10 kWp uden at skulle opgive solvarmeanlægget.
+
+Opsætningen af solcelleanlægget var i starten lidt af et puslespil, fordi leverandøren leverede to ekstra moduler, og vi skulle finde ud af, hvordan vi også kunne montere dem.
+Når de nu var der, ville vi også bruge dem.
+Efter solcelleanlægget kom den første rigtige elbil, en Tesla Model Y, og kort efter den anden, en Ora Funky Cat.
+I starten havde vi en KEBA P-30-oplader.
+Den fungerede ikke så godt, og vi udskiftede den med en WARP Charger 2 Pro.
+Da elbil nummer to kom, installerede vi en oplader mere.
+For at udnytte overskuddet fra solen optimalt kom WARP Energy Manager til, så vi kunne skifte mellem 1 og 3 faser.
+Siden har vi opgraderet begge opladere til WARP Charger 3 med indbygget faseskift for at forenkle systemet.
+
+![Tobias ved siden af varmepumpen](../../../../../en/blog/2025/10/04/tobias-neben-waermepumpe.webp)
+
+## Belastningsstyring i stedet for større tilslutning
+
+**Michael:** Det leder os over til, hvor og hvorfor du bruger evcc.
+
+**Tobias:** Præcis, nu går vi i detaljer.
+I starten kørte jeg evcc som Docker-container på en Proxmox-klynge.
+Med tiden er jeg kommet mere og mere ind i Home Assistant og kører nu kun en Home Assistant Yellow med PoE, CM4 med 8 GB RAM og en SSD på 1 TB for også at spare strøm her.
+Jeg brugte evcc som add-on i Home Assistant.
+
+**Michael:** Hvordan ser din opsætning ud?
+
+![Tobias i teknikrummet](../../../../../en/blog/2025/10/04/tobias-in-technikraum.webp)
+
+**Tobias:** Vores system består i dag af et solcelleanlæg på 10,1 kWp (27x Heckert Solar NeMo), et Sungrow-batteri på 16 kWh, 2 WARP Charger 3 Pro, en Vaillant-varmepumpe (Arotherm plus) og en sauna (9 kW).
+At få de forskellige forbrugsenheder, lagre og energikilder til at spille sammen krævede en del finjustering, men det er på en eller anden måde sjovt.
+
+![evcc-diagram](../../../../../en/blog/2025/10/04/tobias-diagram.svg)
+
+Vi har i dag direkte måling af elforbruget i husets eltavle.
+Det betyder, at måleren varigt kan belastes med 44 A (30,4 kW).
+Så vi måtte beslutte os: Enten en udvidelse af tilslutningen med transformermåling eller styring af det hele via dynamisk belastningsstyring.
+Af økonomiske grunde valgte vi i første omgang dynamisk belastningsstyring.
+
+Vi måler ikke saunaens effekt aktivt, så vi arbejder med to kredsløb i evcc.
+Kredsløbet (Main) har en strømgrænse på 44 A, og kredsløbet (Driveway) har maksimalt 32 A.
+Begge opladere deler de 32 A fra kredsløbet (Driveway), så teoretisk set kunne én oplader altid lade med 22 kW, selvom næsten ingen køretøjer understøtter det i dag.
+Saunaen og varmepumpen hører til kredsløbet (Main).
+De har altid forrang for de to opladere.
+Det sikrer, at hovedtilslutningen aldrig belastes med mere end 44 A.
+Hvis saunaen og varmepumpen kører for fuld kraft, mens vi bager småkager, ville evcc midlertidigt sænke ladeeffekten for vores biler.
+
+![Tobias med WARP Charger og Tesla](../../../../../en/blog/2025/10/04/tobias-warp-charger-tesla.webp)
+
+| Komponent         | Detaljer                                                       |
+| ----------------- | -------------------------------------------------------------- |
+| **Solcelleanlæg** | 10,1 kWp (27x Heckert Solar NeMo 3.0 120M)                     |
+| **Inverter**      | Sungrow SH10.0RT Hybrid                                        |
+| **Batteri**       | Sungrow SBR 16 kWh                                             |
+| **Opladere**      | 2x WARP Charger 3 Pro                                          |
+| **Køretøjer**     | Tesla Model Y, Ora Funky Cat                                   |
+| **Varmepumpe**    | Vaillant Arotherm plus vwl 125/6                               |
+| **Sauna**         | 9 kW elektrisk saunaovn                                        |
+| **Styring**       | evcc som Home Assistant-add-on (Home Assistant Yellow med PoE) |
+
+## Fra PV Magazine til evcc
+
+**Michael:** Fedt, så har du dækket to opladere, en sauna og de almindelige forbrugsenheder i husholdningen.
+Hvordan stødte du på evcc?
+
+**Tobias:** Gennem en artikel i PV Magazine i 2022.
+På det tidspunkt vidste vi allerede, at vi ville installere et solcelleanlæg, og vi ville udnytte overskuddet så effektivt som muligt.
+Dengang fandtes der kun meget dyre løsninger eller løsninger, der kun fungerede godt inden for producentens eget økosystem.
+
+**Michael:** Ja, det var også en af grundene til, at jeg synes, projektet er så fedt: overskudsopladning.
+Hvilke andre funktioner bruger du, eller er det faktisk det vigtigste formål?
+
+**Tobias:** Indtil sidste år havde vi også Tibber, så evcc styrede billig opladning af bilerne.
+Med installationen af varmepumpen og de kommende udfordringer skiftede vi tilbage til en billigere, fast eltarif og havde brug for belastningsstyring.
+Der kunne evcc virkelig vise, hvad det kan.
+Så vi bruger det til at styre opladerne, integrere køretøjerne og til belastningsstyring.
+Jeg har konfigureret styringen af varmepumpen, men bruger den ikke i øjeblikket, fordi det ikke giver mening sammen med solvarmeanlægget.
+
+![Tobias i saunaen](../../../../../en/blog/2025/10/04/tobias-in-sauna.webp)
+
+## Ønsker til fremtiden
+
+**Michael:** Hvad ønsker du dig af evcc?
+Hvilket område skal vi lægge mere energi i?
+
+**Tobias:** Jeg kunne godt tænke mig en direkte integration af Vaillant-varmepumpen via EEBUS eller EBUS.
+Jeg tror, der stadig er potentiale der.
+Alt i alt kan jeg sige, at vi har lært meget og opnået meget.
+Jeg er virkelig stolt af det, vi har nået: Huset har et effektivt (og mere bæredygtigt) varmesystem, solcelleanlægget producerer det, vi har brug for i løbet af dagen, og sammen med buffertanken giver det os en høj grad af uafhængighed.
+
+**Michael:** Tak, det er en god pointe.
+Og mange tak, fordi du viste os, hvordan det fungerer hos dig.
+Jeg er sikker på, at det vil inspirere en og anden til at lave ændringer i sin opsætning.
+
+---
+
+**Hvordan ser din evcc-opsætning ud?**
+Hvis du har lyst til at dele dine erfaringer, din historie og din teknik i form af et community-portræt, så tilmeld dig [her via formularen](https://airtable.com/appDI3xIiev1DOpMY/shrW1zGH26KElfZOK).
+Vi leder især efter portrætter af usædvanlige installationer eller af brugere uden for Tyskland.

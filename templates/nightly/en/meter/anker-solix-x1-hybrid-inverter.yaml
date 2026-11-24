@@ -3,10 +3,15 @@ product:
   identifier: anker-solix-x1-hybrid-inverter
   brand: Anker
   description: SOLIX X1 Hybrid Inverter
+capabilities: ["battery-control"]
 description: |
   The Modbus TCP interface must be enabled in the Anker app.
   This configuration was tested with the Firmware Version 1.0.16.1.
   Older or newer Firmware Versions may use different register addresses and therefore deliver incorrect data.
+  evcc can charge the battery from the grid (work mode third-party control with the maximum charge power `maxchargepower`) and return it to self-consumption. A work mode set in the Anker app is overwritten.
+  evcc only writes to the X1 when a battery function is enabled (grid charging, discharge lock, automatic optimizer control or an external battery mode). Otherwise the X1 keeps the mode set in the Anker app.
+  The X1 does not return to self-consumption on its own: if evcc stops unexpectedly while grid charging, the X1 keeps charging until evcc sets a mode again.
+  Holding is not supported and falls back to normal operation: the X1 offers no way to block discharging while still storing PV surplus.
 
 render:
   - usage: grid
@@ -30,6 +35,7 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      watchdog: 60s # Watchdog, optional
   - usage: pv
     default: |
       type: template
@@ -52,6 +58,7 @@ render:
       host:  # Hostname
       port: 502 # Port
       maxacpower: 0 # Maximum AC power of the hybrid inverter (W), optional
+      watchdog: 60s # Watchdog, optional
   - usage: battery
     default: |
       type: template
@@ -63,9 +70,10 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximum charge power (W), Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power.
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
-      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
     advanced: |
       type: template
       template: anker-solix-x1
@@ -76,11 +84,12 @@ render:
       id: 1
       host:  # Hostname
       port: 502 # Port
+      maxchargepower: # Maximum charge power (W), Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power.
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
-      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
-      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
-      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
+      maxdischargepower: # Maximum discharge power (W), Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging. (optional)
+      watchdog: 60s # Watchdog, optional
 params:
   - name: modbus
     example:
@@ -89,6 +98,15 @@ params:
     unit:
     description: Modbus Type
     help:
+    advanced: false
+    optional: false
+  - name: maxchargepower
+    example:
+    default:
+    choice: []
+    unit: W
+    description: Maximum charge power
+    help: Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power.
     advanced: false
     optional: false
   - name: capacity
@@ -115,7 +133,7 @@ params:
     choice: []
     unit: '%'
     description: Maximum charge
-    help: Upper limit as configured on the battery system. Used by optimizer and for grid charging.
+    help: Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging.
     advanced: false
     optional: true
   - name: maxacpower
@@ -127,22 +145,22 @@ params:
     help:
     advanced: true
     optional: true
-  - name: maxchargepower
-    example:
-    default:
-    choice: []
-    unit: W
-    description: Maximum charge power
-    help: For forced charging of the battery.
-    advanced: true
-    optional: true
   - name: maxdischargepower
     example:
     default:
     choice: []
     unit: W
     description: Maximum discharge power
-    help: Maximum discharge power of the storage.
+    help: Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging.
+    advanced: true
+    optional: true
+  - name: watchdog
+    example:
+    default: 60s
+    choice: []
+    unit:
+    description: Watchdog
+    help:
     advanced: true
     optional: true
 modbus:

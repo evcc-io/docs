@@ -1,0 +1,60 @@
+---
+// Row of evcc device icons on a plate, e.g. below a section heading.
+// Illustration only: the icons carry no labels and are hidden from screen readers.
+import { deviceIconSvg } from "@utils/deviceIcon";
+
+interface Props {
+  /** evcc device icons as "<list>/<device>", e.g. "meters/shelly-pro-em", or the markup of an SVG file imported with ?raw */
+  icons: string[];
+  /** icons per row; by default all icons share one row */
+  columns?: number;
+  /** for icons that are wider than tall, e.g. vehicles: trims the empty space above and below */
+  wide?: boolean;
+}
+
+const { columns, wide = false } = Astro.props;
+
+const svgs = (
+  await Promise.all(
+    Astro.props.icons.map((icon) => {
+      if (icon.trimStart().startsWith("<")) return icon;
+      const [list = "", slug = ""] = icon.split("/");
+      return deviceIconSvg(list, slug);
+    }),
+  )
+).filter(Boolean);
+---
+
+<div
+  class:list={["icon-banner", "not-content", { "icon-banner-wide": wide }]}
+  aria-hidden="true"
+  style={`--icon-banner-columns: ${columns ?? svgs.length}`}
+>
+  {svgs.map((svg) => <div class="icon-banner-item" set:html={svg} />)}
+</div>
+
+<style>
+  .icon-banner {
+    display: grid;
+    grid-template-columns: repeat(var(--icon-banner-columns), minmax(0, 5.5rem));
+    justify-content: space-around;
+    gap: 0.5rem 1rem;
+    margin: 1.25rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem;
+    background: var(--evcc-photo-bg);
+  }
+  .icon-banner-item :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* the icons are square; show only their middle band */
+  .icon-banner-wide .icon-banner-item {
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+  }
+  .icon-banner-wide .icon-banner-item :global(svg) {
+    margin-top: -25%;
+  }
+</style>

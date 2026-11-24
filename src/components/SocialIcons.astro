@@ -1,79 +1,55 @@
 ---
-import config from "virtual:starlight/user-config";
-
-const links = (config.social ?? []).filter(({ icon }) => icon === "github");
+// Header navigation like on evcc.io: Blog, Docs and the GitHub icon. The active section is
+// underlined; on small screens it is omitted (the breadcrumb row already names it).
 const locale = Astro.locals.starlightRoute.locale ?? "";
+const docsHref = locale ? `/${locale}` : "/";
 const blogHref = locale ? `/${locale}/blog` : "/blog";
 const isBlog =
   Astro.url.pathname === blogHref ||
   Astro.url.pathname.startsWith(`${blogHref}/`);
 ---
 
-<a href={blogHref} class:list={["blog-link", { active: isBlog }]}>Blog</a>
-
-{
-  links.length > 0 && (
-    <>
-      {links.map(({ label, href }) => (
-        <a {href} rel="me" class="sl-flex social-link" aria-label={label}>
-          <span class="sr-only">{label}</span>
-          <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="1.5em"
-              height="1.5em"
-              viewBox="0 0 256 256"
-              aria-hidden="true"
-            >
-              <rect width="256" height="256" fill="none" />
-              <path
-                d="M119.83,56A52,52,0,0,0,76,32a51.92,51.92,0,0,0-3.49,44.7A49.28,49.28,0,0,0,64,104v8a48,48,0,0,0,48,48h48a48,48,0,0,0,48-48v-8a49.28,49.28,0,0,0-8.51-27.3A51.92,51.92,0,0,0,196,32a52,52,0,0,0-43.83,24Z"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="24"
-              />
-              <path
-                d="M104,232V192a32,32,0,0,1,32-32h0a32,32,0,0,1,32,32v40"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="24"
-              />
-              <path
-                d="M104,208H76a32,32,0,0,1-32-32,32,32,0,0,0-32-32"
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="24"
-              />
-            </svg>
-        </a>
-      ))}
-    </>
-  )
-}
-
+<a href={blogHref} class:list={["nav-link", "blog-link", { active: isBlog }]}
+  >Blog</a
+>
+<a
+  href={docsHref}
+  class:list={["nav-link", "docs-link", { active: !isBlog }]}
+  translate="no">{Astro.locals.t("site.docsLabel")}</a
+>
+<a href="https://github.com/evcc-io/evcc" rel="me" class="sl-flex social-link">
+  <span class="sr-only">GitHub</span>
+          {/* H2D2 Shopicons (Apache 2.0), https://github.com/H2D2-Design/h2d2-shopicons */}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="1.5em" height="1.5em" fill="currentColor" aria-hidden="true">
+            <path d="M39.155 13.946c-.214-.604-.538-1.212-.999-1.869.848-3.154.253-5.792.225-5.915l-.365-1.564-1.606.019c-.15.002-3.48.063-6.724 1.955a29.635 29.635 0 0 0-11.371 0c-3.243-1.892-6.573-1.953-6.724-1.955l-1.607-.02-.365 1.564c-.028.123-.623 2.761.225 5.915-.461.657-.785 1.266-.999 1.869-1.187 3.356-1.187 6.76.001 10.117 1.07 3.023 4.697 6.116 7.225 6.862.851.251 1.704.422 2.558.545A5.236 5.236 0 0 0 18 34.004v1.281c-.062.036-.127.065-.187.108-.289.211-2.869 1.967-5.505.09-.93-.946-1.386-1.639-1.826-2.309-.988-1.5-1.841-2.586-4.588-3.96a2 2 0 1 0-1.789 3.579c1.991.995 2.341 1.525 3.035 2.581.515.781 1.155 1.754 2.445 3.044l.215.186c1.692 1.27 3.447 1.723 5.053 1.723A9.286 9.286 0 0 0 18 39.76v4.253h4V34.004c0-1.103.897-2 2-2s2 .897 2 2v10h4v-10c0-.955-.23-1.803-.628-2.534a18.287 18.287 0 0 0 2.558-.545c2.527-.746 6.154-3.839 7.226-6.863 1.187-3.357 1.187-6.76-.001-10.116zm-3.77 8.781c-.591 1.667-3.167 3.942-4.588 4.362-4.509 1.331-9.083 1.332-13.594 0-1.421-.42-3.997-2.695-4.587-4.361-.875-2.472-.853-4.969-.001-7.447.485-1.41 1.724-2.427 1.724-2.427l-.398-1.08a9.24 9.24 0 0 1-.548-2.886c.992.233 2.247.664 3.416 1.459l.716.487.845-.188a25.659 25.659 0 0 1 11.262 0l.845.188.716-.487c1.167-.794 2.423-1.225 3.415-1.458a9.169 9.169 0 0 1-.547 2.885l-.398 1.08s1.093.81 1.724 2.427c.951 2.441.872 4.976-.002 7.446z" />
+          </svg>
+</a>
 <style>
   .social-link {
     color: inherit;
     padding: 0.25em;
     margin: -0.25em;
   }
-  .social-link:hover,
-  .social-link:focus {
-    color: var(--sl-color-text-accent);
+  .social-link:hover {
+    opacity: 0.66;
   }
-  .blog-link {
+  .nav-link {
     color: inherit;
     font-size: 1.125rem;
     text-decoration: none;
+    white-space: nowrap;
   }
-  .blog-link.active,
-  .blog-link:hover,
-  .blog-link:focus {
+  .nav-link.active,
+  .nav-link:hover,
+  .nav-link:focus {
     text-decoration: underline;
+  }
+  /* narrow phones: both links no longer fit next to logo, search, GitHub and
+     language (measured 403px with "Doku"), and the breadcrumb row names the
+     active section anyway */
+  @media (max-width: 26rem) {
+    .nav-link.active {
+      display: none;
+    }
   }
 </style>

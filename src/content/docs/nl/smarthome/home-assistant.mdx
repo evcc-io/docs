@@ -1,0 +1,152 @@
+---
+title: "Home Assistant"
+description: "Koppel evcc aan Home Assistant, bij voorkeur met de ha-evcc-integratie of handmatig via de REST API of MQTT, om gegevens te visualiseren en het laden te automatiseren."
+sidebar:
+  order: 3
+translatedFrom: "f358944d9fa2"
+---
+
+[Home Assistant](https://www.home-assistant.io) verzamelt en visualiseert gegevens uit uw smarthome en biedt uitgebreide automatiseringsmogelijkheden.
+evcc is gespecialiseerd in slim laden en verwarmen.
+Beide systemen vullen elkaar aan en kunnen op verschillende manieren worden gekoppeld.
+
+:::note
+evcc kan ook als Home Assistant-app worden geïnstalleerd. De handleiding vindt u [hier](/nl/installation/home-assistant).
+:::
+
+## Visualiseren en automatiseren
+
+evcc biedt veel regelmogelijkheden voor slim laden en verwarmen, maar kan niet elke toepassing afdekken.
+De koppeling met Home Assistant geeft u meer flexibiliteit.
+Enkele voorbeelden:
+
+- Meetwaarden in dashboards visualiseren
+- Laadplannen maken op basis van agenda-afspraken
+- Laadmodi wisselen op basis van aanwezigheid
+- ...
+
+### evcc-integratie voor Home Assistant (aanbevolen)
+
+De integratie [ha-evcc](https://github.com/marq24/ha-evcc) van [marq24](https://github.com/marq24) brengt evcc-gegevens en -functies rechtstreeks naar Home Assistant.
+Dit werkt ongeacht of u evcc als Home Assistant-app draait of niet.
+De enige voorwaarde is dat Home Assistant en evcc in hetzelfde netwerk bereikbaar zijn.
+
+De integratie levert alle relevante evcc-entiteiten: meetwaarden, instellingen, laadpunten en voertuigen.
+Na de installatie krijgt u een uitgebreide lijst met entiteiten die u in dashboards en automatiseringen kunt gebruiken.
+
+**Installatie via HACS:**
+
+1. Open [HACS](https://hacs.xyz/) in Home Assistant en zoek naar “evcc”.
+2. Installeer het item **evcc☀️🚘- Solar Charging** van marq24.
+3. Start Home Assistant opnieuw.
+4. Ga naar **Instellingen → Apparaten & diensten → Integratie toevoegen**, zoek naar “evcc” en voer de URL van uw evcc-installatie in.
+
+Meer installatieopties en details vindt u in de [GitHub-repository](https://github.com/marq24/ha-evcc).
+
+Voor dashboards biedt [hass-evcc-card](https://github.com/mkshb/hass-evcc-card) een Lovelace-kaart die het evcc-overzicht in Home Assistant toont.
+
+### Handmatige integratie
+
+U kunt evcc-gegevens ook handmatig via de REST API of MQTT in Home Assistant integreren.
+
+#### REST API
+
+evcc biedt een [REST API](/integrations/rest-api).
+[Deze handleiding](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) van [marq24](https://github.com/marq24) beschrijft de integratie met Home Assistant in detail.
+
+#### MQTT
+
+U hebt een MQTT-broker nodig (bijv. [Mosquitto](https://mosquitto.org/), ook beschikbaar als Home Assistant-app).
+
+Stel de brokerverbinding in evcc in onder **Configuratie → MQTT**.
+Dezelfde broker en hetzelfde topic moeten in Home Assistant zijn ingesteld, zodat beide systemen gegevens kunnen uitwisselen.
+
+Met een tool als [MQTT Explorer](http://mqtt-explorer.com) kunt u controleren of de topics correct binnenkomen.
+Een handleiding voor het instellen van MQTT-sensoren in Home Assistant vindt u op de [blog van Alkly (Duitstalig)](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
+
+De beschikbare topics zijn gedocumenteerd in de [MQTT API](/nl/integrations/mqtt-api).
+
+## Home Assistant-entiteiten gebruiken
+
+evcc kan rechtstreeks verbinding maken met Home Assistant en de entiteiten daarvan (sensoren, schakelaars, getallen) als gegevensbron gebruiken.
+Zo kunt u apparaten in evcc integreren die niet standaard worden ondersteund, bijv. slimme Zigbee-stekkers, sensoren uit andere integraties of zelfbouwoplossingen.
+Zolang de gegevens als Home Assistant-entiteit beschikbaar zijn, kan evcc ermee werken.
+
+### Ondersteunde apparaattypen
+
+- **[Meters](/nl/meters#home-assistant)** (net, zonne-energie, thuisbatterij, ...) met vermogen, energie, stromen, spanningen, laadniveau
+- **[Laders](/nl/chargers#home-assistant-charger)** met status, in-/uitschakelen en maximale laadstroom
+- **[Slimme schakelaars](/nl/smartswitches#home-assistant-switch)** met eenvoudige aan/uit-bediening (voor slimme stekkers, relais)
+- **[Voertuigen](/nl/vehicles#home-assistant)** met laadniveau, actieradius, status, kilometerstand; optioneel scripts voor start/stop
+- **[Meldingen](/nl/notifications)**: onder **Configuratie → Meldingen** kunt u evcc-berichten via Home Assistant versturen
+
+### Instellen
+
+Home Assistant-apparaten voegt u net als elk ander apparaat toe in de configuratie-interface.
+
+1. Ga naar **Configuratie** en voeg een apparaat toe, bijv. **Extra meter toevoegen**.
+2. Kies “Home Assistant” als fabrikant.
+3. Kies uw instantie. Instanties in het lokale netwerk worden automatisch gevonden.
+   Als de lijst leeg blijft, bijv. omdat Home Assistant in een ander subnet draait, voer het adres dan handmatig in (`http://homeassistant.local:8123`).
+4. Autoriseer de toegang.
+   Home Assistant opent in een nieuw tabblad, waar u inlogt en het verzoek bevestigt.
+   Het token wordt door uw evcc-installatie opgeslagen en automatisch vernieuwd.
+5. Wijs aan elk veld een entiteit toe, bijv. “Vermogen”.
+   Tijdens het typen worden de entiteiten van uw instantie automatisch aangevuld; alleen entiteiten die bij het veld passen, worden aangeboden.
+6. **Valideren & opslaan** controleert of de entiteiten gelezen kunnen worden.
+
+:::note
+Als u evcc binnen Home Assistant als [app](/nl/installation/home-assistant) draait, kies dan in stap 3 de instantie `http://supervisor/core`.
+Die is al geautoriseerd, dus stap 4 vervalt.
+:::
+
+<a id="entity-values"></a>
+
+### Waarden van entiteiten
+
+Elk veld verwacht een bepaald soort waarde.
+Een entiteit die `unknown` of `unavailable` meldt, geldt als tijdelijk niet beschikbaar en wordt bij de volgende update opnieuw gelezen.
+
+#### Getallen
+
+Velden voor vermogen, energie, stroom en laadniveau hebben een gewoon getal als toestand nodig, bijv. `1234`.
+Een toestand zoals `1234 W` kan niet worden gelezen; de eenheid hoort in het attribuut `unit_of_measurement` van de entiteit.
+`W`/`kW` en `Wh`/`kWh`/`MWh` worden automatisch omgerekend.
+Om het voorteken om te keren, zet u `-` voor de naam van de entiteit (`-sensor.inverter_power`).
+
+#### Aan/uit
+
+Voor de ingeschakelde toestand van een lader, een slimme schakelaar en vergelijkbare velden worden `on`, `true`, `1`, `active` en `yes` geaccepteerd, evenals hun tegenhangers `off`, `false`, `0`, `inactive` en `no`.
+
+<a id="charge-status"></a>
+
+#### Laadstatus
+
+Laders en voertuigen hebben een statusentiteit nodig die meldt of het voertuig losgekoppeld, verbonden of aan het laden is.
+Deze toestanden worden standaard herkend:
+
+| Status | Betekenis    | Toestanden                                                                                     |
+| ------ | ------------ | ---------------------------------------------------------------------------------------------- |
+| **A**  | losgekoppeld | `a`, `disconnected`, `not_plugged`                                                             |
+| **B**  | verbonden    | `b`, `connected`, `plugged`, `starting`, `stopped`, `paused`, `complete`, `charging_completed` |
+| **C**  | laden        | `c`, `charging`                                                                                |
+
+Veel integraties gebruiken hun eigen bewoordingen.
+Als de entiteit een toestand meldt die niet in de tabel staat, toont het logboek de ruwe waarde samen met de naam van de entiteit.
+Voeg die waarde toe aan het passende veld **Waarden voor status A/B/C** in de geavanceerde opties van het apparaat.
+Meerdere waarden worden door komma’s gescheiden; hoofd- en kleine letters maken niet uit.
+
+```yaml
+statusB: charging_stopped, charging_error
+statusC: instant_charging
+```
+
+Een `binary_sensor` als statusentiteit heeft ook een expliciete toewijzing nodig, bijv. `statusA: off` en `statusC: on`.
+
+## Meer informatie (video’s)
+
+De video’s zijn in het Duits.
+
+- [smart home & more: evcc-basisinstallatie en -configuratie](https://youtu.be/aPq8k2MronY)
+- [smart home & more: stap voor stap een MQTT-sensor instellen met MQTT Explorer](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: efficiënt energiedashboard voor Home Assistant](https://youtu.be/V3p5-16U_oU)

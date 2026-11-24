@@ -1,0 +1,355 @@
+---
+title: "Linux"
+description: "Installeer evcc uit de apt-repository op Debian, Ubuntu en vergelijkbare distributies, draai het als systemd-service en update het of ga terug naar een oudere versie."
+sidebar:
+  order: 7
+translatedFrom: "773c2321f20d"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Deze handleiding beschrijft de installatie voor apt-gebaseerde Linux-distributies zoals Debian en Ubuntu.
+
+:::tip[Raspberry Pi]
+Voor de Raspberry Pi raden we de eenvoudigere installatie met het [Linux-image van evcc](/nl/installation/linux-image) aan.
+:::
+
+:::note
+Zie voor andere Linux-distributies de handleiding voor [Docker](/nl/installation/docker) of het gedeelte [Handmatige installatie](#manual).
+:::
+
+## Eerste installatie
+
+<Steps>
+
+1. ### Installeren
+
+   Open een terminal en installeer de benodigde afhankelijkheden:
+
+   ```sh
+   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   ```
+
+   Voeg de apt-repository van evcc toe:
+
+   <Tabs groupId="release-type">
+     <TabItem label="Release" default>
+       Huidige stabiele release
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/stable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+     <TabItem label="Nightly">
+       Ontwikkelversie die dagelijks wordt bijgewerkt en instabiel kan zijn.
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/unstable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+   </Tabs>
+
+   Werk de pakketlijst bij en installeer evcc:
+
+   ```sh
+   sudo apt update
+   sudo apt install -y evcc
+   ```
+
+   :::note
+   Tijdens de installatie wordt een gebruiker `evcc` aangemaakt. Zorg er daarom voor dat de ingelogde gebruiker niet de naam `evcc` heeft.
+   :::
+
+   :::note
+   Als een seriële interface wordt gebruikt, moet u mogelijk `sudo usermod -a -G plugdev evcc` uitvoeren. Dit voegt de gebruiker `evcc` toe aan de groep `plugdev`, waardoor deze zonder rootrechten toegang krijgt tot aangesloten apparaten (USB, seriële interface enz.).
+   :::
+
+2. ### Starten
+
+   ```sh
+   sudo systemctl start evcc
+   ```
+
+3. ### Instellen
+
+   Open de evcc-webinterface in uw browser: [http://localhost:7070](http://localhost:7070).
+   Stel een beheerderswachtwoord in en configureer uw apparaten direct via de webinterface.
+
+</Steps>
+
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat-square)](https://cloudsmith.com)
+
+Dank aan [Cloudsmith](https://cloudsmith.com) voor het hosten van de repository!
+
+## Configuratie
+
+evcc kan via de webinterface of via een configuratiebestand worden geconfigureerd.
+
+:::tip[Aanbevolen]
+Configuratie via de webinterface is de eenvoudigste manier om evcc in te stellen.
+:::
+
+### Webinterface (aanbevolen)
+
+Na de eerste start kunt u evcc direct in de browser configureren op [http://localhost:7070](http://localhost:7070).
+De instellingen worden automatisch in de database opgeslagen.
+
+### Configuratiebestand (traditioneel)
+
+U kunt ook een configuratiebestand `evcc.yaml` gebruiken.
+Zie [Configuratie](/nl/installation/configuration) voor details over het aanmaken van het configuratiebestand.
+
+:::caution
+Het configuratiebestand moet in `/etc/evcc.yaml` staan.
+:::
+
+- Maak het configuratiebestand aan volgens de [handleiding](/nl/installation/configuration) en sla het op als `/etc/evcc.yaml`
+
+- Herstart de evcc-server:
+
+  ```sh
+  sudo systemctl restart evcc
+  ```
+
+- Open de evcc-webinterface op [http://localhost:7070](http://localhost:7070)
+
+## Updates
+
+Volg deze handleiding om naar de nieuwste versie van evcc te updaten:
+
+- Controleer de [releases](https://github.com/evcc-io/evcc/releases) op ingrijpende wijzigingen (breaking changes, BC) die uw installatie raken
+- Open een terminal
+- Werk de pakketlijst bij:
+
+  ```sh
+  sudo apt update
+  ```
+
+- Update evcc:
+
+  ```sh
+  sudo apt --only-upgrade install -y evcc
+  ```
+
+:::note
+Als de unstable-repository (nightly-versies) is toegevoegd, installeert een update altijd de nieuwste beschikbare nightly-versie.
+
+Wilt u dat niet meer, dan kunt u de unstable-repository verwijderen met `sudo rm /etc/apt/sources.list.d/evcc-unstable.list`.
+:::
+
+## Downgrade
+
+Moet u om welke reden dan ook teruggaan naar een oudere versie, dan kan dat met dit commando:
+
+```sh
+  sudo apt install evcc=x.xxx.x # Version Number
+```
+
+## Systeemservice \{#systemd\}
+
+evcc draait als systeemservice op de achtergrond. Met deze handige commando’s beheert u de service:
+
+```sh
+sudo systemctl status evcc # shows status
+sudo systemctl start evcc # start the service, if it isn't already running
+sudo systemctl stop evcc # stops the service
+sudo systemctl restart evcc # restart the service
+sudo systemctl enable evcc # sets the service to run at boot
+sudo systemctl disable evcc # stops the service running at boot
+```
+
+## Testen
+
+Controleer de installatie:
+
+- Toon de status van de evcc-service:
+
+  ```sh
+  sudo systemctl status evcc
+  ```
+
+- Bekijk de laatste logregels van de evcc-service:
+
+  ```sh
+  sudo journalctl -u evcc --since "yesterday"
+  ```
+
+- Controleer de meterconfiguratie:
+
+  ```sh
+  sudo evcc -l debug meter
+  ```
+
+- Controleer de laderconfiguratie:
+
+  ```sh
+  sudo evcc -l debug charger
+  ```
+
+- Controleer de voertuigconfiguratie:
+
+  ```sh
+  sudo evcc -l debug vehicle
+  ```
+
+Open een browser en voer de volgende URL in: `http://127.0.0.1:7070`.
+
+:::note
+Vervang `127.0.0.1` door het IP-adres of de hostnaam van de computer als de browser niet op dezelfde computer wordt geopend.
+:::
+
+## Back-up en herstel
+
+### Via de webinterface (aanbevolen)
+
+De eenvoudigste methode is een back-up via de webinterface.
+Zie [Configuratie → Backup & Herstel](/nl/installation/configuration#backup) voor details.
+
+### Handmatige back-up
+
+Om na een herinstallatie de oorspronkelijke toestand te herstellen, volstaat het om een back-up te maken van het configuratiebestand `evcc.yaml` (indien gebruikt) en het databasebestand `evcc.db`.
+De opslaglocatie staat bij het starten van het programma in het logbestand.
+Meestal staat de configuratie in `/etc/evcc.yaml` en de database in `/var/lib/evcc/evcc.db`.
+
+Beide bestanden kunnen met het Linux-commando `cp` worden gekopieerd.
+
+Voorbeeld (kopiëren van de gebruikelijke opslaglocatie naar de thuismap):
+
+YAML kopiëren: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
+
+Database kopiëren: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Omgevingsvariabelen en CLI-opties \{#environment-variables\}
+
+Bij installatie via apt draait evcc als systemd-service.
+U kunt het gedrag aanpassen met een override-bestand:
+
+```sh
+sudo systemctl edit evcc
+```
+
+:::caution
+Bewerk `/lib/systemd/system/evcc.service` niet direct.
+
+Dat bestand wordt bij elke pakketupdate door `apt` overschreven en uw wijzigingen gaan verloren.
+Gebruik in plaats daarvan altijd een systemd-drop-in via `systemctl edit evcc`.
+:::
+
+### Voorbeeld
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_LOG=debug,tariff:trace"
+Environment="EVCC_DATABASE_DSN=/usb/evcc/evcc.db"
+Environment="EVCC_NETWORK_HOST=my-evcc.local"
+Environment="EVCC_NETWORK_PORT=80"
+ExecStart=
+ExecStart=/usr/bin/evcc --custom-css /path/to/my.css
+```
+
+:::note
+De eerste lege regel `ExecStart=` is belangrijk om het standaardcommando te overschrijven.
+:::
+
+:::tip
+Alle parameters uit `evcc.yaml` kunnen als omgevingsvariabelen worden ingesteld: `EVCC_` + parameternaam in hoofdletters.
+
+
+Een volledige lijst van alle CLI-opties vindt u in de [CLI-documentatie](/nl/reference/cli/evcc).
+:::
+
+## Handmatige installatie \{#manual\}
+
+Naast het apt-pakket voor Debian/Ubuntu bieden we ook andere binaries voor Linux aan.
+
+### Installatie
+
+- Download het juiste bestand voor uw systeem:
+  - 64-bits Intel-CPU: [evcc_X.XX_linux_amd64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 64-bits ARM-CPU: [evcc_X.XX_linux_arm64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 32-bits ARM-CPU (bijv. Raspberry Pi met 32-bits OS): [evcc_X.XX_linux_armv6.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+
+- Pak het gedownloade bestand uit (bijv. door erop te dubbelklikken).
+- De uitgepakte map bevat een programma `evcc`.
+- Open een terminal en ga naar de nieuwe map.
+- Controleer met dit commando of evcc werkt:
+  ```
+  ./evcc -v
+  ```
+- U zou nu de huidige versie van evcc moeten zien (bijv. `evcc version 0.xxx.y`).
+
+### Configuratie
+
+U kunt evcc via de webinterface of via een configuratiebestand configureren.
+Zie [Configuratie](/nl/installation/configuration) voor details.
+
+Start evcc met:
+
+```sh
+./evcc
+```
+
+Open daarna uw browser op [http://localhost:7070](http://localhost:7070) en volg de instructies.
+
+### Upgrade/downgrade
+
+Volg de stappen hierboven en vervang het evcc-programmabestand door de nieuwe of vorige versie.
+De configuratie hoeft niet opnieuw te worden ingesteld.
+
+### Service instellen
+
+Voor dagelijks gebruik richt u evcc het best in als systeemservice.
+Zo start evcc bij het opstarten van de computer en herstart het automatisch bij fouten.
+
+:::note
+Deze documentatie gaat ervan uit dat Linux `systemd` ondersteunt.
+:::
+
+- Voer het volgende commando uit om een nieuw bestand voor de service aan te maken en in een editor te openen:
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Kopieer de volgende inhoud naar het bestand:
+
+  ```
+  [Unit]
+  Description=evcc
+  Requires=network-online.target
+  After=syslog.target network.target network-online.target
+  Wants=network-online.target
+  StartLimitIntervalSec=10
+  StartLimitBurst=10
+
+  [Service]
+  ExecStart=/usr/local/bin/evcc
+  Restart=always
+  RestartSec=5
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Pas het pad van het bestand `evcc` in `ExecStart` aan als het bestand in een andere map staat.
+  Hierbij wordt ook aangenomen dat het configuratiebestand `evcc.yaml` in `/etc/evcc.yaml` staat.
+  Is dat niet het geval, voeg dan de tekst `-c /yourpath/evcc.yaml` toe aan het einde van `ExecStart`.
+  Vervang `yourpath` door de juiste map.
+
+- Test de service:
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  Als alles goed gaat, bevat de uitvoer `Active: active (running)`.
+
+- Stel de service in om automatisch te starten bij het opstarten van het systeem:
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+Zie voor meer informatie het gedeelte [Systeemservice](#systemd) hierboven.

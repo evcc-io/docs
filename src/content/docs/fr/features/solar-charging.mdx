@@ -1,0 +1,98 @@
+---
+title: "Charge avec le surplus solaire"
+description: "En mode Intelligent, la charge suit le surplus solaire : elle démarre, s’interrompt ou change de nombre de phases selon la puissance, et la part solaire l’ajuste."
+sidebar:
+  order: 1
+translatedFrom: "ddd5bc4fba6a"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+Utilisez le surplus solaire pour charger la voiture électrique.
+C’est la fonction centrale d’evcc.
+
+<a id="smart-mode"></a>
+
+## Mode Intelligent
+
+Pour charger avec le surplus solaire, sélectionnez le mode **Intelligent** au point de charge.
+
+<Screenshot
+  name="features/screenshots/smart-mode"
+  caption="Capture d’écran d’un point de charge. Le curseur clique sur le mode Intelligent."
+/>
+
+Dans ce mode, la charge démarre automatiquement dès que l’installation photovoltaïque fournit **suffisamment de puissance**.
+La puissance de charge est ajustée en continu afin que, dans la mesure du possible, **aucune puissance ne soit prélevée sur le réseau**.
+Si l’installation photovoltaïque ne fournit plus assez de puissance ou si la consommation du foyer augmente, la charge est mise en pause et reprend plus tard.
+
+Outre le surplus solaire, le mode **Intelligent** couvre aussi la charge pendant les heures bon marché d’un [tarif dynamique](/fr/features/dynamic-prices) et les [plans de charge](/fr/features/plans).
+Toutes les stratégies peuvent être combinées.
+Vous trouverez une vue d’ensemble de tous les modes sur la [page des modes](/fr/features/modes).
+
+<a id="charging-start"></a>
+
+### Quand la charge démarre-t-elle ?
+
+Toutes les voitures électriques ont une **puissance de charge minimale**.
+Elle découle du courant minimal de 6 A fixé par la norme de charge [IEC 61851](https://en.wikipedia.org/wiki/IEC_61851).
+La puissance de charge minimale dépend du nombre de phases que la voiture et le chargeur utilisent pour la charge.
+
+| Phases               | Puissance de charge minimale (6 A)       | Puissance de charge maximale (16 A / 32 A)                     |
+| :------------------- | :--------------------------------------- | :------------------------------------------------------------- |
+| Monophasé            | **1,4 kW** (1 × 6 A × 230 V)             | **3,7 kW** (1 × 16 A × 230 V)                                  |
+| Biphasé              | **2,8 kW** (2 × 6 A × 230 V)             | **7,4 kW** (2 × 16 A × 230 V)                                  |
+| Triphasé<br />&nbsp; | **4,1 kW** (3 × 6 A × 230 V)<br />&nbsp; | **11 kW** (3 × 16 A × 230 V)<br />**22 kW** (3 × 32 A × 230 V) |
+
+Aujourd’hui, la plupart des chargeurs sont raccordés en triphasé (11 kW ou 22 kW).
+La puissance de charge minimale est donc de 4,1 kW.
+Avec les [chargeurs à commutation automatique des phases](/fr/chargers#features) (1P/3P), evcc peut basculer entre monophasé et triphasé selon les besoins et démarrer la charge dès 1,4 kW.
+
+La puissance d’export vers le réseau est affichée dans le **diagramme de flux d’énergie**.
+Si le surplus dépasse la puissance de charge minimale pendant un certain temps, la charge démarre.
+
+<Screenshot
+  name="features/screenshots/energyflow-surplus"
+  caption="Le diagramme de flux d’énergie affiche un export vers le réseau de 3,4 kW."
+/>
+
+Remarque : c’est la valeur du compteur avant réseau qui est déterminante.
+La charge avec le surplus solaire ne fonctionne pas avec les installations dont l’export vers le réseau est régulé (« export zéro »).
+
+<a id="not-enough-surplus"></a>
+
+### Pas assez de surplus ?
+
+Par défaut, la charge ne démarre que lorsque le surplus couvre toute la puissance de charge minimale.
+Avec une petite installation photovoltaïque ou pendant les mois d’hiver, cela peut être rare.
+Le curseur **Part solaire** vous permet d’autoriser une part d’électricité du réseau, afin qu’au moins une partie de vos besoins de charge soit couverte par l’énergie solaire.
+Vous le trouverez dans les paramètres du point de charge, sous **Surplus solaire**.
+
+<Screenshot
+  name="features/screenshots/solar-share"
+  caption="Curseur de part solaire dans les paramètres du point de charge, réglé sur 50 %."
+/>
+
+Le curseur définit quelle part de la puissance de charge minimale doit provenir du solaire.
+À 100 %, la charge ne démarre que lorsque le surplus couvre toute la puissance de charge minimale.
+À 50 %, la charge démarre dès que le solaire en couvre la moitié, et le reste provient du réseau ou de la batterie domestique.
+À 0 %, la charge démarre dès qu’un surplus est disponible.
+La charge s’arrête lorsque la part solaire reste un certain temps en dessous de la valeur réglée.
+
+Si vous avez une batterie domestique, la puissance manquante peut provenir de la batterie plutôt que du réseau.
+Avec la [priorité de la batterie](/fr/features/battery#priority), vous définissez dans quelle mesure la batterie domestique peut être utilisée pour charger le véhicule.
+
+Les délais avant le démarrage ou l’arrêt de la charge se règlent sous **Configuration → Bornes de recharge et chauffages → [Mon point de charge]**, dans la section **Comportement**.
+Choisissez-les de sorte que la charge ne soit pas activée et désactivée trop souvent.
+Certains véhicules refusent de charger si la charge est interrompue trop souvent et doivent alors être relancés, p. ex. en les déverrouillant ou en débranchant puis rebranchant le câble de charge.
+Pour ces véhicules, [Toujours en charge](/fr/features/modes#always-charge) maintient la session de charge sans interruption.
+
+<a id="home-battery"></a>
+
+### Interaction avec la batterie domestique
+
+Les batteries domestiques disposent de leur propre régulation rapide.
+Par défaut, la batterie domestique est prioritaire.
+En mode **Intelligent**, la charge du véhicule ne démarre que lorsque la batterie domestique ne peut plus absorber de puissance.
+
+Vous découvrirez comment ajuster ce comportement sur la page [Batterie domestique](/fr/features/battery).

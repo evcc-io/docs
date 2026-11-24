@@ -1,0 +1,354 @@
+---
+title: "Linux"
+description: "Installer evcc fra apt-repositoryet på Debian, Ubuntu og lignende distributioner, kør det som systemd-tjeneste, og hold det opdateret eller rul tilbage."
+sidebar:
+  order: 7
+translatedFrom: "773c2321f20d"
+---
+
+import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";
+
+Denne vejledning beskriver installationen på apt-baserede Linux-distributioner som Debian og Ubuntu.
+
+:::tip[Raspberry Pi]
+Til Raspberry Pi anbefaler vi den enklere installation med [evcc Linux-imaget](/da/installation/linux-image).
+:::
+
+:::note
+Til andre Linux-distributioner kan du se vejledningen til [Docker](/da/installation/docker) eller afsnittet [Manuel installation](#manual).
+:::
+
+## Første installation
+
+<Steps>
+
+1. ### Installer
+
+   Åbn en terminal, og installer de nødvendige afhængigheder:
+
+   ```sh
+   sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+   ```
+
+   Tilføj evcc-APT-repositoryet:
+
+   <Tabs groupId="release-type">
+     <TabItem label="Release" default>
+       Aktuel stabil udgivelse
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/stable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+     <TabItem label="Nightly">
+       Udviklingsversion. Opdateres dagligt. Kan være ustabil.
+
+       ```sh
+       curl -1sLf 'https://dl.evcc.io/public/evcc/unstable/setup.deb.sh' | sudo -E bash
+       ```
+     </TabItem>
+   </Tabs>
+
+   Opdater pakkelisten, og installer evcc:
+
+   ```sh
+   sudo apt update
+   sudo apt install -y evcc
+   ```
+
+   :::note
+   Under installationen oprettes en bruger `evcc`, så sørg for, at den indloggede bruger ikke hedder `evcc`.
+   :::
+
+   :::note
+   Hvis der bruges en seriel grænseflade, skal du muligvis køre `sudo usermod -a -G plugdev evcc`. Det tilføjer brugeren `evcc` til gruppen `plugdev` og giver adgang til tilsluttede enheder (USB, seriel grænseflade osv.) uden root-rettigheder.
+   :::
+
+2. ### Start
+
+   ```sh
+   sudo systemctl start evcc
+   ```
+
+3. ### Opsætning
+
+   Åbn evcc-webgrænsefladen i din browser: [http://localhost:7070](http://localhost:7070).
+   Angiv en administratoradgangskode, og konfigurer dine enheder direkte i webgrænsefladen.
+
+</Steps>
+
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat-square)](https://cloudsmith.com)
+
+Tak til [Cloudsmith](https://cloudsmith.com) for at hoste repositoryet!
+
+## Konfiguration
+
+evcc kan konfigureres via webgrænsefladen eller en konfigurationsfil.
+
+:::tip[Anbefalet]
+Konfiguration via webgrænsefladen er den enkleste måde at sætte evcc op på.
+:::
+
+### Webgrænseflade (anbefalet)
+
+Efter første start kan du konfigurere evcc direkte i browseren på [http://localhost:7070](http://localhost:7070).
+Indstillingerne gemmes automatisk i databasen.
+
+### Konfigurationsfil (traditionel)
+
+Alternativt kan du bruge en `evcc.yaml`-konfigurationsfil.
+Se [Konfiguration](/da/installation/configuration) for detaljer om, hvordan du opretter konfigurationsfilen.
+
+:::caution
+Konfigurationsfilen skal ligge i `/etc/evcc.yaml`.
+:::
+
+- Opret konfigurationsfilen efter [vejledningen](/da/installation/configuration), og gem den i `/etc/evcc.yaml`
+
+- Genstart evcc-serveren:
+
+  ```sh
+  sudo systemctl restart evcc
+  ```
+
+- Åbn evcc-webgrænsefladen på [http://localhost:7070](http://localhost:7070)
+
+## Opgradering
+
+Følg denne vejledning for at opgradere til den nyeste version af evcc:
+
+- Tjek [udgivelserne](https://github.com/evcc-io/evcc/releases) for breaking changes (BC), der påvirker din installation
+- Åbn en terminal
+- Opdater pakkelisten:
+
+  ```sh
+  sudo apt update
+  ```
+
+- Opgrader evcc:
+
+  ```sh
+  sudo apt --only-upgrade install -y evcc
+  ```
+
+:::note
+Hvis det ustabile repository (nightly-versioner) er tilføjet, installerer opdateringer altid den nyeste tilgængelige nightly-version.
+
+Hvis det ikke længere ønskes, kan det ustabile repository fjernes med `sudo rm /etc/apt/sources.list.d/evcc-unstable.list`.
+:::
+
+## Nedgradering
+
+Hvis du af en eller anden grund skal gå tilbage til en ældre version, kan du gøre det med denne kommando:
+
+```sh
+  sudo apt install evcc=x.xxx.x # Version Number
+```
+
+## Systemtjeneste \{#systemd\}
+
+evcc kører som en systemtjeneste i baggrunden. Her er nogle nyttige kommandoer til at styre den:
+
+```sh
+sudo systemctl status evcc # shows status
+sudo systemctl start evcc # start the service, if it isn't already running
+sudo systemctl stop evcc # stops the service
+sudo systemctl restart evcc # restart the service
+sudo systemctl enable evcc # sets the service to run at boot
+sudo systemctl disable evcc # stops the service running at boot
+```
+
+## Test
+
+Sådan kontrollerer du installationen:
+
+- Vis den kørende evcc-tjeneste:
+
+  ```sh
+  sudo systemctl status evcc
+  ```
+
+- Tjek de seneste logposter fra evcc-tjenesten:
+
+  ```sh
+  sudo journalctl -u evcc --since "yesterday"
+  ```
+
+- Valider målerkonfigurationen:
+
+  ```sh
+  sudo evcc -l debug meter
+  ```
+
+- Valider opladerkonfigurationen:
+
+  ```sh
+  sudo evcc -l debug charger
+  ```
+
+- Valider køretøjskonfigurationen:
+
+  ```sh
+  sudo evcc -l debug vehicle
+  ```
+
+Åbn en browser, og indtast følgende URL: `http://127.0.0.1:7070`.
+
+:::note
+Erstat `127.0.0.1` med computerens IP-adresse eller værtsnavn, hvis du bruger browseren på en anden computer.
+:::
+
+## Sikkerhedskopiering og gendannelse
+
+### Via webgrænsefladen (anbefalet)
+
+Den enkleste metode er at tage en sikkerhedskopi via webgrænsefladen.
+Se [Opsætning → Sikkerhedskopiering og gendannelse](/da/installation/configuration#backup) for detaljer.
+
+### Manuel sikkerhedskopiering
+
+For at gendanne den _oprindelige tilstand_ efter en geninstallation er det nok at sikkerhedskopiere konfigurationsfilen `evcc.yaml` (hvis den bruges) og databasefilen `evcc.db`.
+Placeringen fremgår af logfilen ved programstart.
+Typisk ligger konfigurationen i `/etc/evcc.yaml` og databasen i `/var/lib/evcc/evcc.db`.
+
+Begge filer kan kopieres med Linux-kommandoen `cp`.
+
+Eksempel (kopiering fra den sædvanlige placering til hjemmemappen):
+
+Kopier yaml: `sudo cp /etc/evcc.yaml /home/pi/evcc.yaml.bak`
+
+Kopier db: `sudo cp /var/lib/evcc/evcc.db /home/pi/evcc.db.bak`
+
+## Miljøvariabler og CLI-indstillinger \{#environment-variables\}
+
+Når evcc er installeret via APT, kører det som systemd-tjeneste.
+Du kan tilpasse adfærden med en override-fil:
+
+```sh
+sudo systemctl edit evcc
+```
+
+:::caution
+Rediger ikke `/lib/systemd/system/evcc.service` direkte.
+
+Den fil overskrives af `apt` ved hver pakkeopdatering, og dine ændringer går tabt.
+Brug i stedet altid en systemd-drop-in via `systemctl edit evcc`.
+:::
+
+### Eksempel
+
+```ini title="/etc/systemd/system/evcc.service.d/override.conf"
+[Service]
+Environment="EVCC_LOG=debug,tariff:trace"
+Environment="EVCC_DATABASE_DSN=/usb/evcc/evcc.db"
+Environment="EVCC_NETWORK_HOST=my-evcc.local"
+Environment="EVCC_NETWORK_PORT=80"
+ExecStart=
+ExecStart=/usr/bin/evcc --custom-css /path/to/my.css
+```
+
+:::note
+Den første tomme `ExecStart=`-linje er vigtig for at tilsidesætte standardkommandoen.
+:::
+
+:::tip
+Alle parametre fra `evcc.yaml` kan angives som miljøvariabler: `EVCC_` + parameternavnet med store bogstaver.
+
+En komplet liste over alle CLI-indstillinger finder du i [CLI-dokumentationen](/da/reference/cli/evcc).
+:::
+
+## Manuel installation \{#manual\}
+
+Ud over Debian/Ubuntu-APT-pakken tilbyder vi også andre binærfiler til Linux.
+
+### Installation
+
+- Download den passende fil til dit system:
+  - 64-bit Intel-CPU: [evcc_X.XX_linux_amd64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 64-bit ARM-CPU: [evcc_X.XX_linux_arm64.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+  - 32-bit ARM-CPU (f.eks. Raspberry Pi 32-bit OS): [evcc_X.XX_linux_armv6.tar.gz](https://github.com/evcc-io/evcc/releases/latest)
+
+- Udpak den downloadede fil (f.eks. ved at dobbeltklikke).
+- Den udpakkede mappe indeholder et `evcc`-program.
+- Åbn en terminal, og gå til den nye mappe.
+- Tjek, om evcc virker, med denne kommando:
+  ```
+  ./evcc -v
+  ```
+- Du bør se den aktuelle version af evcc (f.eks. `evcc version 0.xxx.y`).
+
+### Konfiguration
+
+Du kan konfigurere evcc via webgrænsefladen eller en konfigurationsfil.
+Se [Konfiguration](/da/installation/configuration) for detaljer.
+
+Start evcc med:
+
+```sh
+./evcc
+```
+
+Åbn derefter [http://localhost:7070](http://localhost:7070) i din browser, og følg instruktionerne.
+
+### Opgradering/nedgradering
+
+Følg trinnene ovenfor, og erstat evcc-programfilen med den nye eller tidligere version.
+Konfigurationen behøver ikke at blive lavet igen.
+
+### Opsætning af tjenesten
+
+Til produktionsbrug bør du sætte evcc op som systemtjeneste.
+Det sikrer, at evcc starter, når computeren booter, og genstarter automatisk ved fejl.
+
+:::note
+Denne dokumentation forudsætter, at Linux understøtter `systemd`.
+:::
+
+- Kør følgende kommando for at oprette en ny fil til tjenesten og åbne den i en editor:
+
+  ```sh
+  sudo nano /etc/systemd/system/evcc.service
+  ```
+
+- Kopier følgende indhold ind i filen:
+
+  ```
+  [Unit]
+  Description=evcc
+  Requires=network-online.target
+  After=syslog.target network.target network-online.target
+  Wants=network-online.target
+  StartLimitIntervalSec=10
+  StartLimitBurst=10
+
+  [Service]
+  ExecStart=/usr/local/bin/evcc
+  Restart=always
+  RestartSec=5
+
+  [Install]
+  WantedBy=multi-user.target
+  ```
+
+  Tilpas stien til `evcc`-filen i `ExecStart`, hvis filen ligger i en anden mappe.
+  Det forudsættes også, at konfigurationsfilen `evcc.yaml` ligger i `/etc/evcc.yaml`.
+  Hvis det ikke er tilfældet, så tilføj teksten `-c /yourpath/evcc.yaml` i slutningen af `ExecStart`.
+  Erstat `yourpath` med den relevante mappe.
+
+- Test tjenesten:
+
+  ```sh
+  sudo systemctl daemon-reload
+  sudo systemctl start evcc
+  sudo systemctl status evcc
+  ```
+
+  Hvis det lykkes, skal outputtet indeholde: `Active: active (running)`.
+
+- Konfigurer tjenesten til at starte automatisk ved systemstart:
+
+  ```sh
+  sudo systemctl enable evcc.service
+  ```
+
+Du finder flere oplysninger i afsnittet [Systemtjeneste](#systemd) ovenfor.

@@ -1,0 +1,113 @@
+---
+translatedFrom: "bbae10b17f51"
+---
+
+## Konfiguration über SG-Ready-Relais \{#sgready-configuration\}
+
+### Konfiguration mit Boost-Relais \{#boost-relay\}
+
+Dieses Code-Beispiel zeigt, wie du eine Wärmepumpe mittels Shelly 1 für den Boost-Modus und Shelly 3EM zur Leistungsmessung konfigurieren kannst.
+Dafür kommt der Typ `sgready-relay` zum Einsatz.
+
+```yaml
+loadpoints:
+  - title: Meine Wärmepumpe
+    charger: heatpump_control
+    meter: heatpump_power
+    # Hier können auch die bekannten Parameter für loadpoints angegeben werden,
+    # insbesondere auch um zu kurze Laufzeiten zu verhindern, z. B.
+    enable:
+      threshold: -1300 # aktivieren bei 1.300 W Überschuss für 5 Minuten
+      delay: 5m
+    disable:
+      threshold: 150 # deaktivieren bei 150 W Netzbezug für 20 Minuten
+      delay: 20m # manche Geräte benötigen eine Mindestlaufzeit pro Start (prüfe Spezifikation / Handbuch deiner Wärmepumpe)
+
+meters:
+  - name: heatpump_power
+    type: template
+    template: shelly-3em # Stromverbrauch der Wärmepumpe
+    host: 192.168.0.102
+
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # geräteinternes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+
+# [...]
+```
+
+### Konfiguration mit Boost- und Dim-Relais \{#boost-dim-relay\}
+
+Wenn deine Wärmepumpe sowohl den Boost- als auch den Dim-Modus unterstützt, kannst du ein zweites Relais für den Dim-Kontakt konfigurieren.
+Im Dim-Modus wird die Leistungsaufnahme der Wärmepumpe reduziert.
+Das ist nützlich, um bei Netzengpässen oder im Rahmen von § 14a EnWG die Leistungsaufnahme zu begrenzen.
+
+Du kannst entweder zwei separate Relais verwenden oder ein Relais mit mehreren Kanälen (z. B. Shelly mit verschiedenen `channel`-Werten).
+Neben Shelly sind auch andere [steuerbare Relais](/de/smartswitches) möglich.
+
+```yaml
+chargers:
+  - name: heatpump_control
+    type: sgready-relay
+    boost: # Relais für den Boost-Kontakt
+      type: template
+      template: shelly
+      host: 192.168.0.101
+    dim: # Relais für den Dim-Kontakt (optional)
+      type: template
+      template: shelly
+      host: 192.168.0.102
+#   power: # Leistungsmessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/power"
+#   energy: # Energiemessung (optional)
+#     source: http
+#     uri: "http://192.168.0.103/energy"
+#   temp: # aktuelle Temperatur (optional)
+#     source: http
+#     uri: "http://192.168.0.103/temperature"
+#   limittemp: # geräteinternes Temperaturlimit (optional)
+#     source: http
+#     uri: "http://192.168.0.103/limittemp"
+```
+
+Optional kannst du auch die aktuelle Temperatur (`temp`), das geräteinterne Temperaturlimit (`limittemp`), Leistung (`power`) und Energie (`energy`) [via Plugin](/de/reference/plugins) hinzufügen.
+Diese dienen lediglich zur Anzeige und werden bei Wärmepumpen nicht für die Steuerung verwendet.
+
+## Statusanzeige \{#status-display\}
+
+Da Wärmepumpen ihren eigenen Heizbetrieb unabhängig von evcc steuern, zeigt die Oberfläche zwei Zustände:
+
+- **Normalbetrieb**: kein Eingriff, die Wärmepumpe folgt ihrer eigenen Regelung.
+- **Boost aktiv**: Anforderung zur Leistungserhöhung.
+  Solange die Wärmepumpe noch nicht reagiert hat (z. B. wegen Mindestlaufzeiten oder Sperrzeiten), wird „Boost angefordert …“ angezeigt.
+
+Bei vorkonfigurierten Wärmepumpentypen und passenden Templates sind die nötigen [Feature-Flags](/de/user-defined-devices#charger-features) bereits gesetzt.
+Bei benutzerdefinierten Konfigurationen über `type: custom` solltest du die passende Kombination aus `integrateddevice`, `heating`, `continuous` und ggf. `switchdevice` setzen.
+
+## Heizstäbe \{#electric-water-heaters\}
+
+Normale Heizstäbe können von evcc nur an- oder abgeschaltet werden.
+Dazu werden diese in der Regel über eine [schaltbare Steckdose](/de/smartswitches) angeschlossen.
+Bei ausreichendem Überschuss schaltet evcc die Steckdose ein (Freigabe) und wieder aus, sobald die Bedingungen es erfordern (Sperre).
+
+Bei speziellen Heizstäben mit eigener stufenloser Steuerung gibt evcc die aktuell verfügbare Leistung an das Gerät weiter.
+Diese verfügbare Leistung wird, analog zum Ladevorgang eines Fahrzeuges, permanent an die aktuelle Situation angepasst.
+
+evcc bietet einstellbare Limits, mit denen du deine Wunschtemperatur einstellen kannst.
+Dies darf aber nicht als Sicherheitsfunktion verstanden werden.
+Normalerweise sollte die Temperaturregelung über die Thermostatfunktion des Heizstabs selbst erfolgen.
+
+:::danger
+Dein Heizstab muss immer eine eigene Temperaturbegrenzung mitbringen, die bei einer Fehlfunktion oder einem Ausfall deiner evcc-Instanz oder bei einer Fehlbedienung eine unzulässige Überhitzung sicher ausschließt.
+:::

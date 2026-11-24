@@ -3,10 +3,11 @@ title: "mqtt"
 description: "So verbindest du deine evcc-Instanz per evcc.yaml mit einem MQTT-Broker, mit oder ohne TLS, inklusive Client-Zertifikaten und eigenem Topic."
 sidebar:
   order: 15
+translatedFrom: "3e4f582ed64e"
 ---
 
-Stellt die Konnektivität mit einem MQTT-Broker her.
-Bei bestehender Verbindung pusht evcc automatisch alle internen Werte via MQTT-Broker auf das angegebene Topic und empfängt dort auch Änderungen.
+Stellt die Verbindung zu einem MQTT-Broker her.
+Bei bestehender Verbindung veröffentlicht evcc automatisch alle internen Werte über den MQTT-Broker unter dem angegebenen Topic und empfängt dort auch Änderungen.
 Siehe dazu auch die Dokumentation zur [`MQTT API`](/de/integrations/mqtt-api).
 
 ---
@@ -18,7 +19,7 @@ Siehe dazu auch die Dokumentation zur [`MQTT API`](/de/integrations/mqtt-api).
 ```yaml
 mqtt:
   broker: localhost:1883
-  topic: evcc # root topic for publishing, set empty to disable publishing
+  topic: evcc # Root-Topic für Veröffentlichungen, leer lassen, um nichts zu veröffentlichen
   # clientid: foo
   # user:
   # password:
@@ -31,17 +32,17 @@ mqtt:
 **Beispiel**:
 
 ```yaml
-# mqtt message broker
+# MQTT-Broker
 mqtt:
   broker: tls://localhost:8883
-  topic: evcc # root topic for publishing, set empty to disable publishing
+  topic: evcc # Root-Topic für Veröffentlichungen, leer lassen, um nichts zu veröffentlichen
   # clientid: foo
   # user:
   # password:
 ```
 
 Bei Verwendung von TLS-Verschlüsselung (`tls://`) wird standardmäßig das TLS-Zertifikat des Brokers überprüft.
-Falls ein selbst-signiertes Zertifikat verwendet wird, gibt es zwei Möglichkeiten:
+Falls du ein selbstsigniertes Zertifikat verwendest, gibt es zwei Möglichkeiten:
 
 1. Das Zertifikat systemweit installieren (z. B. unter Linux in `/etc/ssl/certs`), damit evcc es automatisch verwendet
 2. Die Zertifikatsüberprüfung mit `insecure: true` deaktivieren (siehe unten)
@@ -52,12 +53,12 @@ Falls ein selbst-signiertes Zertifikat verwendet wird, gibt es zwei Möglichkeit
 
 ### `broker`
 
-Verbindungsdaten (Hostname/IP und Port) des verwendeten MQTT-Brokers zu dem sich evcc als Client verbinden soll.
+Verbindungsdaten (Hostname/IP und Port) des MQTT-Brokers, mit dem sich evcc als Client verbinden soll.
 
 ### `topic`
 
-Gibt das Wurzeltopic an welches evcc verwendet.
-Wenn hier nichts angegeben wird findet keine MQTT-Kommunikation statt!
+Legt das Root-Topic fest, das evcc verwendet.
+Wenn hier nichts angegeben ist, findet keine MQTT-Kommunikation statt.
 
 ---
 
@@ -65,16 +66,16 @@ Wenn hier nichts angegeben wird findet keine MQTT-Kommunikation statt!
 
 ### `user`
 
-Der Benutzernamen zur Anmeldung am MQTT-Broker.
+Der Benutzername zur Anmeldung am MQTT-Broker.
 
 ### `password`
 
-Das Anmeldepasswort am MQTT-Broker.
+Das Passwort zur Anmeldung am MQTT-Broker.
 
 ### `clientid`
 
-Erlaubt eine feste MQTT-Client ID vorzugegeben.
-Andernfalls wird diese dynamisch vergeben.
+Legt eine feste MQTT-Client-ID fest.
+Standardmäßig wird sie dynamisch vergeben.
 
 ### `insecure`
 
@@ -91,7 +92,7 @@ mqtt:
 
 ### `caCert`
 
-CA-Zertifikat für die Überprüfung des Broker-Zertifikats (Zertifikatsinhalt).
+Inhalt des CA-Zertifikats, mit dem das Broker-Zertifikat überprüft wird.
 
 **Beispiel**:
 
@@ -108,7 +109,7 @@ mqtt:
 
 ### `clientCert`
 
-Client-Zertifikat für gegenseitige TLS-Authentifizierung (Zertifikatsinhalt).
+Inhalt des Client-Zertifikats für die gegenseitige TLS-Authentifizierung.
 Muss zusammen mit `clientKey` verwendet werden.
 
 **Beispiel**:
@@ -131,5 +132,5 @@ mqtt:
 
 ### `clientKey`
 
-Privater Schlüssel des Client-Zertifikats (Schlüsselinhalt).
+Inhalt des privaten Schlüssels zum Client-Zertifikat.
 Muss zusammen mit `clientCert` verwendet werden.

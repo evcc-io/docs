@@ -1,8 +1,8 @@
 import { defineCollection } from "astro:content";
 import { z } from "zod";
 import { glob } from "astro/loaders";
-import { docsLoader } from "@astrojs/starlight/loaders";
-import { docsSchema } from "@astrojs/starlight/schema";
+import { docsLoader, i18nLoader } from "@astrojs/starlight/loaders";
+import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
 import { blogSchema } from "starlight-blog/schema";
 
 const renderSchema = z.object({
@@ -94,9 +94,15 @@ export const collections = {
   docs: defineCollection({
     loader: docsLoader(),
     schema: docsSchema({
-      extend: (context) => blogSchema(context),
+      extend: (context) =>
+        blogSchema(context).extend({
+          // first 12 hex of the git blob sha of the English source a translation was made from
+          translatedFrom: z.string().optional(),
+        }),
     }),
   }),
+  // custom UI strings; i18nSchema is a loose object, so our keys pass through
+  i18n: defineCollection({ loader: i18nLoader(), schema: i18nSchema() }),
   "chargers-de": deviceCollection("de", "charger"),
   "chargers-en": deviceCollection("en", "charger"),
   "meters-de": deviceCollection("de", "meter"),

@@ -60,7 +60,7 @@ render:
       power: sensor.house_power # Power Entity, Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
-      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
     advanced: |
       type: template
       template: homeassistant
@@ -69,7 +69,7 @@ render:
       power: sensor.house_power # Power Entity, Entity ID for instantaneous power measurement in watts. The entity must provide numeric values only (e.g., "1234", not "1234 W").
       capacity: 50 # Battery capacity (kWh), optional
       minsoc: 0 # Minimum charge (%), Lower limit as configured on the battery system. Used by optimizer. (optional)
-      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and for grid charging. (optional)
+      maxsoc: 100 # Maximum charge (%), Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging. (optional)
       energy: sensor.house_energy # Energy Entity, Entity ID for total energy in kWh (e.g. grid import or battery discharging). No daily or interval values. (optional)
       returnEnergy: sensor.house_return_energy # Return Energy Entity, Entity ID for total energy in reverse direction in kWh (e.g. grid export or battery charging). No daily or interval values. (optional)
       currentL1: sensor.house_current_l1 # L1 Current Entity, Entity ID for L1 current measurement in amperes (optional)
@@ -80,15 +80,15 @@ render:
       voltageL3: sensor.house_voltage_l3 # L3 Voltage Entity, Entity ID for L3 voltage measurement in volts (optional)
       soc: sensor.battery_soc # Battery State of Charge, Entity ID for battery state of charge in percent (optional)
       modeNormal: script.battery_normal # Normal Mode Script, Script to put home battery to normal operation. Required when any other mode script is set. The script is responsible for any necessary state changes on the HA side. (optional)
-      modeHold: script.battery_hold # Hold Mode Script, Optional script to prevent the home battery from discharging. (optional)
+      modeHold: script.battery_hold # Hold Discharge Mode Script, Optional script to prevent the home battery from discharging. (optional)
       modeCharge: script.battery_grid_charge # Grid Charge Mode Script, Optional script to grid-charge the home battery. (optional)
       minSocEntity: number.battery_min_soc # Minimum SoC Entity, Optional entity ID providing the minimum battery state of charge in percent. Overrides the static minimum SoC value. (optional)
       maxSocEntity: number.battery_max_soc # Maximum SoC Entity, Optional entity ID providing the maximum battery state of charge in percent. Overrides the static maximum SoC value. (optional)
       modeHoldCharge: script.battery_hold_charge # Hold Charge Mode Script, Optional script to prevent the home battery from charging while discharging to cover the house load remains allowed. (optional)
       modeDischarge: script.battery_grid_discharge # Grid Discharge Mode Script, Optional script to force-discharge the home battery to the grid. (optional)
       insecure: # Accept self-signed certificates, optional
-      maxchargepower: # Maximum charge power (W), For forced charging of the battery. (optional)
-      maxdischargepower: # Maximum discharge power (W), Maximum discharge power of the storage. (optional)
+      maxchargepower: # Maximum charge power (W), Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power. (optional)
+      maxdischargepower: # Maximum discharge power (W), Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging. (optional)
   - usage: aux
     default: |
       type: template
@@ -176,7 +176,7 @@ params:
     choice: []
     unit: '%'
     description: Maximum charge
-    help: Upper limit as configured on the battery system. Used by optimizer and for grid charging.
+    help: Upper limit as configured on the battery system. Used by optimizer and, on some devices, for grid charging.
     advanced: false
     optional: true
   - name: energy
@@ -274,7 +274,7 @@ params:
     default:
     choice: []
     unit:
-    description: Hold Mode Script
+    description: Hold Discharge Mode Script
     help: Optional script to prevent the home battery from discharging.
     advanced: true
     optional: true
@@ -347,7 +347,7 @@ params:
     choice: []
     unit: W
     description: Maximum charge power
-    help: For forced charging of the battery.
+    help: Highest power the battery system can charge with. The optimizer plans with charging up to this power. Some devices also use it as grid charging power.
     advanced: true
     optional: true
   - name: maxdischargepower
@@ -356,6 +356,6 @@ params:
     choice: []
     unit: W
     description: Maximum discharge power
-    help: Maximum discharge power of the storage.
+    help: Highest power the battery system can discharge with. The optimizer plans with discharging up to this power. Smart mode assumes the battery supplies at most this power to vehicle charging.
     advanced: true
     optional: true

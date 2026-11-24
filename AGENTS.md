@@ -10,27 +10,30 @@ Paths starting with `../evcc/` refer to a local checkout of the main repository 
 ## Repository Structure
 
 ```
-/astro.config.mjs                   # Astro + Starlight config (sidebar, locales, plugins)
-/src/content.config.ts              # Content collections (docs + device templates)
-/src/content/docs/en                # English documentation (default locale)
-/src/content/docs/de                # German documentation
-/src/content/docs/{lang}/blog       # Blog posts per locale
-/src/pages/[lang]/...               # Auto-generated device list & detail pages
-/src/components                     # Astro components (.astro)
-/src/utils                          # Shared TS helpers (devices, usages, icons)
-/src/styles/custom.css              # Theme overrides
-/src/scripts                        # Build-time scripts (legacy redirect emitter)
-/templates                          # YAML device templates (input for device pages)
-/public                             # Static assets served as-is (favicon, openapi.yaml, …)
+/astro.config.mjs              # Astro + Starlight config (sidebar, locales, plugins)
+/src/content.config.ts         # Content collections (docs + device templates)
+/src/content/docs/en           # English documentation (source of all translations)
+/src/content/docs/<lang>       # Translated documentation, one folder per other locale (pipeline output, never edit by hand)
+/src/content/i18n/*.json       # UI strings for components, one dictionary per locale
+/src/locales.json              # Locale list (single source of truth)
+/scripts/i18n                  # Translation pipeline: checks, status, terms, style sheets
+/src/content/docs/{lang}/blog  # Blog posts per locale
+/src/pages/[lang]/...          # Auto-generated device list & detail pages
+/src/components                # Astro components (.astro)
+/src/utils                     # Shared TS helpers (devices, usages, icons)
+/src/styles/custom.css         # Theme overrides
+/src/scripts                   # Build-time scripts (legacy redirect emitter)
+/templates                     # YAML device templates (input for device pages)
+/public                        # Static assets served as-is (favicon, openapi.yaml, …)
 ```
 
-### Documentation content (`/src/content/docs/{en,de}`)
+### Documentation content (`/src/content/docs/en`)
 
 Most content is **manually written**, except for:
 
 - **Device list pages** — `chargers`, `meters`, `vehicles`, `smartswitches`, `heating`, `tariffs`, `external-limit` (hems integrations + curtailment devices), `notifications` — rendered by routes under `src/pages/[lang]/` using `src/utils/devices.ts` against the YAML templates.
 - **Device detail pages** — same routes, one per template.
-- **CLI reference** — `reference/cli/*.md` generated from the main evcc repository (English only, German falls back automatically).
+- **CLI reference** — `reference/cli/*.md` generated from the main evcc repository (English only, the other locales fall back automatically).
 - **REST API** — generated from `public/openapi.yaml` by `starlight-openapi`.
 
 ### Templates (`/templates`)
@@ -45,8 +48,12 @@ The nightly/release toggle in the UI switches which collection is used at runtim
 
 ### Internationalization
 
-- **English is the default locale** (`defaultLocale: "en"` in `astro.config.mjs`).
-- German content lives under `src/content/docs/de/`.
+- **English is the default locale** (`defaultLocale: "en"` in `astro.config.mjs`) and the only hand-written one: edit `src/content/docs/en/` only.
+- Every other locale in `src/locales.json` is generated from English by the translation pipeline and stamped with `translatedFrom` in the frontmatter. Never edit them by hand: change the English page, then run `/translate all` to bring every other locale back in sync at once (`/translate <lang>` only to repair a single locale); `node scripts/i18n/status.mjs <lang>` lists what is missing or outdated.
+- The pipeline follows `scripts/i18n/RULES.md` (what is translated, what stays byte-identical, links, assets) and the per-language style sheets in `scripts/i18n/style/<lang>.md`; `en.md` holds the rules for the source text.
+- Device templates exist in English and German only; device pages in the other locales show English template data with translated UI chrome.
+- Custom UI strings live in `src/content/i18n/<lang>.json` and are read via `Astro.locals.t("key")`, not via `lang === "de" ? … : …` ternaries in components.
+- Translated pages reference English assets relatively (e.g. `../../en/features/x.webp`) and never copy them.
 - Pages missing in one locale fall back to the default locale (English) automatically; the URL still reflects the requested locale.
 - Sidebar group labels are translated via the `translations` field in the sidebar config in `astro.config.mjs`.
 - Header UI strings come from Starlight's built-in i18n; only locale-specific overrides go in our components (e.g. `src/components/SiteTitle.astro`, `LanguageSelect.astro`).
@@ -63,7 +70,7 @@ The nightly/release toggle in the UI switches which collection is used at runtim
 #### CLI documentation
 
 1. Generated from the main evcc repository — see "Update CLI docs" in `README.md`
-2. Output to `src/content/docs/en/reference/cli/*.md` (English only; German falls back)
+2. Output to `src/content/docs/en/reference/cli/*.md` (English only; the other locales fall back)
 
 #### REST API
 
@@ -95,33 +102,24 @@ Everything else is hand-written:
 
 ### Language & Tone
 
-- **Be informal and casual** — address readers directly with "you" (English) or "du" (German)
-- Direct address only for actions the reader actually performs (UI steps, setup instructions). For technical requirements use an impersonal subject: "Das Plugin muss den Zählerstand liefern", not "Liefere den Zählerstand"
+- **Be informal and casual** — address readers directly with "you"
+- Direct address only for actions the reader actually performs (UI steps, setup instructions). For technical requirements use an impersonal subject: "The plugin must return the meter reading", not "Return the meter reading"
 - Write complete, natural sentences — no telegraphic or clipped phrasing, no semicolon-jammed clauses
 - Write for individual professionals, not businesses
-- Avoid corporate or marketing language (e.g. don't use words like "bequem", "convenient", "seamlessly")
+- Avoid corporate or marketing language (e.g. don't use words like "convenient", "seamlessly")
 - Be concise and direct; describe behaviour, not internals (no libraries / quotas / internal naming schemes in user-facing docs)
 - Don't pitch the absence of analytics/telemetry as a feature — frame it as the default
 
 ### Terminology
 
-- **Use the shared glossary** — agreed terms per language with explanations live in `../evcc/i18n/glossary/` (`en.json` + `de.json`, rules in `README.md`). Check it before wording anything user-facing; if a concept is missing there, fall back to the UI strings in `../evcc/i18n/en.json` and `de.json`
-
-#### English
-
+- **Use the shared glossary** — agreed terms per language with explanations live in `../evcc/i18n/glossary/` (`<lang>.json`, rules in `README.md`). Check it before wording anything user-facing; if a concept is missing there, fall back to the UI strings in `../evcc/i18n/<lang>.json`
+- The language rules of every locale live in `scripts/i18n/style/<lang>.md`; `en.md` is the sheet for the English source and the translations follow theirs
 - Use "solar" instead of "PV" or "photovoltaic"
 - Use UK English spelling (e.g., "optimise" not "optimize")
 - Exception: the "optimizer" feature is always spelled with "z", matching the UI — generic verbs and nouns keep UK spelling ("optimising", "optimisation")
 - Use abbreviations: "e.g." not "for example"
 - Use "sponsor token" as two words, lowercase in body text, title case only in headings
-
-#### German
-
-- Use "PV-Anlage" with hyphen (follow Duden rules for compound words)
-- Be consistent with hyphens: "PV-Überschuss", "Smart-Modus"
-- Use abbreviations: "z. B." not "beispielsweise"
-- Use "Sponsortoken" as one word, not "Sponsor Token" or "Sponsor-Token"
-- UI panels are „Kacheln", not „Karten" (e.g. „Lastmanagement-Kachel"); English uses "card"
+- A boxed UI panel is a "card"
 
 ### Formatting Conventions
 
@@ -133,13 +131,12 @@ Everything else is hand-written:
 
 #### Headings
 
-- **German**: Use sentence case (e.g., "Häufige Fragen")
-- **English**: Use title case (e.g., "Frequently Asked Questions")
+- Use title case (e.g., "Frequently Asked Questions"); translations follow their style sheet, most use sentence case
 
 #### UI Elements & Technical Terms
 
-- **Bold** for UI elements and modes: **Smart-Modus**, **Dauerhaft laden**
-- **Bold with `→` separator** for UI navigation paths: **Konfiguration → Externe Steuerung**, **Configuration → EEBus**
+- **Bold** for UI elements and modes: **Smart**, **Charging plan**
+- **Bold with `→` separator** for UI navigation paths: **Configuration → EEBus**
 - `Code formatting` for configuration keys: `residualPower`, `evcc.yaml`
 - _Italics_ for technical terms when introducing concepts
 
@@ -153,15 +150,13 @@ Everything else is hand-written:
 #### Numbers & Units
 
 - **Always use a space** between number and unit: `11 kW`, `230 V`
-- **Percent is the exception**: no space between number and `%`: `50%`, `60%` (both languages)
+- **Percent is the exception**: no space between number and `%`: `50%`, `60%`
 - **Paragraph signs**: space between `§` and number in body text: `§ 14a EnWG`, `§ 9 EEG` (matches the device templates). Only navigation labels and page titles use the compact short form: `§14a, §9`
-- **German**: Use comma for decimals, period for thousands: `1,4 kW`, `11.200 W`
-- **English**: Use period for decimals, comma for thousands: `1.4 kW`, `11,200 W`
+- Use period for decimals, comma for thousands: `1.4 kW`, `11,200 W`
 
 #### Quotation Marks
 
-- **German**: Use „German quotes“ for actual quotations
-- **English**: Use "English quotes" for actual quotations
+- Use "English quotes" for actual quotations
 - Prefer _italics_ over quotes for technical terms
 
 #### Prose style
@@ -173,7 +168,7 @@ Everything else is hand-written:
 #### Media List (`media.md`)
 
 - New entries go at the top of their section (newest first), format: `Month Year · source \` + linked original title
-- Mark entries whose language differs from the page locale with a language marker after the source: `(de)` on the English page, `(en)` on the German page. Same-language entries get no marker.
+- Mark entries whose language differs from English with a language marker after the source, e.g. `(de)`; English entries get no marker. The pipeline adjusts the markers per locale.
 
 #### Markdown Formatting
 
@@ -189,7 +184,7 @@ Everything else is hand-written:
 - Component imports use Astro path aliases:
   - `import Screenshot from "@components/Screenshot.astro";`
   - `import { Tabs, TabItem, Steps } from "@astrojs/starlight/components";`
-- **Same import path in both locales** — no `../../../../../` gymnastics like Docusaurus had
+- **Same import path in every locale** — no `../../../../../` gymnastics like Docusaurus had
 - **Frontmatter** uses Starlight's schema:
   ```yaml
   ---
@@ -200,7 +195,7 @@ Everything else is hand-written:
   ---
   ```
   Don't use Docusaurus' `sidebar_position`.
-- **`description` is mandatory** on every hand-written page in both locales (exception: the generated `reference/cli/*.md`). Add it when creating a page and revise it when the page's scope changes. See "Page Descriptions" below.
+- **`description` is mandatory** on every English page (exception: the generated `reference/cli/*.md`). Add it when creating a page and revise it when the page's scope changes. See "Page Descriptions" below.
 - **Tabs**: `<Tabs>` + `<TabItem label="…">` from `@astrojs/starlight/components`
 - **Admonitions** (Starlight set, slightly different from Docusaurus):
   - `:::note` — general note
@@ -244,10 +239,10 @@ Everything else is hand-written:
 The frontmatter `description` becomes the `<meta name="description">` (search snippets, link previews), the intro line of the page's markdown twin and the page's entry in `llms.txt`, where LLMs decide from that line alone whether to fetch the page.
 
 - **Audience**: a person scanning search results or a page list. They should understand what the page helps them do without opening it. Write for humans first; a good human summary is also the best LLM summary.
-- **Style**: one complete, natural sentence with a verb, 90 to 160 characters (German up to 170), ending with a period. Same tone as the body text: direct, informal, no marketing. No "This page …", no "Learn how to …", no colon followed by a keyword list („Die Liste chargers: name und type …" is not acceptable).
-- **Level**: name the concrete outcome or question the page answers (what you can set up, what behaviour it explains, which platform it covers). Use everyday product terms (charger / Wallbox, meter / Zähler, home battery / Hausbatterie, charging point / Ladepunkt, solar / PV-Anlage). Mention a config key only when it is the thing people look up (e.g. `residualPower`), at most one or two, written without backticks.
-- **Locales**: English and German must convey the same content. Use the glossary terms (`../evcc/i18n/glossary/`), UI wording from `../evcc/i18n/{en,de}.json` and the page's own headings; German uses German terminology („benutzerdefinierte Geräte", not „eigene Geräte").
-- **Blog posts**: start with the kind and date so readers and LLMs can judge age, e.g. "Release notes for evcc 0.124 from February 2024 with …" / „Community-Portrait vom August 2024: …".
+- **Style**: one complete, natural sentence with a verb, 90 to 160 characters (translations up to 170), ending with a period. Same tone as the body text: direct, informal, no marketing. No "This page …", no "Learn how to …", no colon followed by a keyword list ("The chargers list: name and type …" is not acceptable).
+- **Level**: name the concrete outcome or question the page answers (what you can set up, what behaviour it explains, which platform it covers). Use everyday product terms (charger, meter, home battery, charging point, solar). Mention a config key only when it is the thing people look up (e.g. `residualPower`), at most one or two, written without backticks.
+- **Terms**: use the glossary terms (`../evcc/i18n/glossary/`), UI wording from `../evcc/i18n/en.json` and the page's own headings; the pipeline translates the description with the page.
+- **Blog posts**: start with the kind and date so readers and LLMs can judge age, e.g. "Release notes for evcc 0.124 from February 2024 with …" or "Community portrait from August 2024: …".
 - Good: "Install evcc from the apt repository on Debian, Ubuntu and similar distributions, run it as a systemd service and keep it updated or roll back."
 - Bad: "The mqtt section: broker and topic plus user, password, clientid, insecure, caCert, clientCert and clientKey."
 
@@ -257,9 +252,9 @@ The frontmatter `description` becomes the `<meta name="description">` (search sn
 2. Maintain consistency with existing documentation style
 3. Use clear, concise language suitable for technical documentation
 4. Include code examples where appropriate
-5. **Update both English and German versions together** to prevent divergence
+5. **Edit English only** and regenerate all other locales at once with `/translate all` so they stay in sync
 6. Every new or reworked page gets a frontmatter `description` following "Page Descriptions" above; check it still fits after content changes
-7. Test changes locally with `npm run dev` (serves both locales at `/en/...` and `/de/...`)
+7. Test changes locally with `npm run dev` (serves every locale at `/<lang>/...`)
 
 ## Git Workflow
 
@@ -281,7 +276,7 @@ Commit messages are the exception: no footer, and no `Co-Authored-By` trailer. N
 ## Common Tasks
 
 - Updating device docs: edit YAML in `/templates`, rebuild
-- Updating prose docs: edit the relevant `.md`/`.mdx` under `src/content/docs/{en,de}/`
+- Updating prose docs: edit the relevant `.md`/`.mdx` under `src/content/docs/en/`, then `/translate all` for the other locales
 - Adding a new sidebar entry: update `astro.config.mjs`
 - Adding a new component: drop a `.astro` file into `src/components/`, import via `@components/...`
 - Fixing issues: check both templates and rendered output (`npm run build`)

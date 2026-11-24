@@ -1,6 +1,6 @@
 ---
 title: "influx"
-description: "How to write charging data to InfluxDB 1.8, InfluxDB 2 or VictoriaMetrics from evcc.yaml, including HTTPS with a self-signed certificate."
+description: "How to write charging data to InfluxDB 1.8, 2 or 3 or to VictoriaMetrics from evcc.yaml, including HTTPS with a self-signed certificate."
 sidebar:
   order: 16
 ---
@@ -37,6 +37,28 @@ influx:
   token: 1234567890abcdef
   org: home
 ```
+
+---
+
+## InfluxDB 3
+
+InfluxDB 3 Core and Enterprise accept the write API of InfluxDB 2, so the settings for InfluxDB v2.x apply here as well.
+The `database` is created on the first write if it doesn't exist yet.
+The `token` needs write access to this database.
+InfluxDB 3 ignores `org`, so it can be left out.
+Username and password aren't accepted.
+
+**Example for InfluxDB 3**:
+
+```yaml
+influx:
+  url: http://localhost:8181
+  database: evcc
+  token: apiv3_1234567890abcdef
+```
+
+In the UI, use the regular InfluxDB form and enter the database name as **Bucket**.
+**Organization** can stay empty.
 
 ---
 

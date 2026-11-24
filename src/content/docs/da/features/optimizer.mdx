@@ -1,0 +1,97 @@
+---
+title: "Optimizer 🧪"
+description: "Den eksperimentelle optimizer bruger prognoser og din forbrugshistorik til at beregne den billigste styring af opladning og batteri, men viser foreløbig kun resultaterne."
+sidebar:
+  order: 13
+translatedFrom: "8465baa052f5"
+---
+
+import Screenshot from "@components/Screenshot.astro";
+
+:::caution[Eksperimentel]
+Optimizeren er på et tidligt udviklingsstadie.
+De viste data er indtil videre kun til information.
+Styringshandlinger følger i kommende versioner.
+:::
+
+Optimizeren analyserer prognoser, forbrugsdata og den aktuelle tilstand af dit energisystem for at træffe omkostningsoptimale beslutninger.
+Den supplerer evcc's regelbaserede styring med forudseende optimering.
+
+## Hvorfor en optimizer?
+
+evcc arbejder regelbaseret og deterministisk.
+Det fungerer fint i mange opsætninger.
+F.eks. et solcelleanlæg, et hjemmebatteri og et køretøj.
+
+I mere komplekse scenarier når denne tilgang sin grænse:
+
+- **Flere køretøjer:** Hvilket skal oplades først?
+- **Hjemmebatteri eller køretøj:** Hvor skal den tilgængelige energi hen?
+- **Dynamiske tariffer:** Kan det betale sig at oplade fra elnettet i nat, eller kommer der nok solenergi i morgen?
+
+Optimizeren kan besvare disse spørgsmål.
+I dag indstiller du selv værdier som prisgrænser eller hjemmebatteriets prioritet.
+Fremover kan du overlade disse beslutninger til optimizeren.
+Den finder så automatisk de optimale værdier.
+Vi arbejder på det skridt for skridt.
+
+## Hvad gør optimizeren?
+
+Optimizeren indsamler forskellige data:
+
+- **Prognosedata:** [Solproduktion](/da/tariffs#solar), [elpriser](/da/tariffs#price), [eksporttariffer](/da/features/dynamic-feedin), [udetemperatur](/da/tariffs#temperature) til at forudsige varmebehovet
+- **Historiske data:** Din husstands typiske forbrugsprofil
+- **Aktuel tilstand:** Hjemmebatteriets opladningsniveau, tilsluttede køretøjer, varmebehov
+
+Ud fra disse data beregner en optimeringsalgoritme den forventede adfærd for dit energisystem.
+Den finder omkostningsoptimale handlinger: effektive [ladeplaner](/da/features/plans), batteristyring (afladning låst, opladning fra elnettet).
+Den forudsiger også, hvornår hjemmebatteriet vil være fuldt eller tomt.
+
+Mål: **Minimér energiomkostningerne.**
+
+## Brug af optimizeren
+
+Aktivér den via brugergrænsefladen:
+
+1. **Opsætning → Eksperimentel** → aktivér
+2. **Opsætning → Optimering 🧪** → aktivér
+
+Optimizeren kræver et aktivt [sponsorat](/da/sponsorship).
+Ved nye installationer kan det tage op til 24 timer at indsamle nok data til at vise de første resultater.
+
+- **Hovedvisning → Energiflow (fold ud):** Viser, hvornår hjemmebatteriet forventes at være fuldt eller tomt.
+- **Menu → Optimering:** Grafer, der viser, hvordan dit hjemmebatteri og dine ladepunkter bør opføre sig i de kommende timer, og hvad de forventede energiomkostninger over optimeringshorisonten bliver (se skærmbilledet nedenfor).
+
+<Screenshot
+  name="features/screenshots/optimizer-debug"
+  caption="Optimizerens fejlsøgningsvisning med prognoser og optimeringsresultater."
+/>
+
+## Aktuel status og næste skridt
+
+Optimizeren er indtil videre kun til information.
+Den viser prognoser og mulige besparelser, men styrer endnu ikke noget aktivt.
+
+Næste skridt:
+
+- Integrere handlinger: aktiv styring af hjemmebatteriet
+- Lade optimizeren optimere [ladeplaner](/da/features/plans)
+- Give brugerne mulighed for at overlade bestemte indstillinger til optimizeren
+
+## Teknisk baggrund \{#technical\}
+
+Optimizeren er baseret på Python og udnytter det stærke økosystem for matematisk optimering og statistik.
+Den er ikke en del af selve evcc, men en selvstændig tjeneste.
+
+Når den er aktiveret, kaldes cloudtjenesten `optimizer.evcc.io`.
+Tjenesten er **tilstandsløs**.
+Data gemmes kun, når du giver feedback på en forklaring af en plan.
+Detaljer om databeskyttelse finder du i vores [privatlivspolitik](https://evcc.io/en/datenschutz/).
+
+Ligesom evcc selv er optimizeren open source: [github.com/evcc-io/optimizer](https://github.com/evcc-io/optimizer).
+Du kan også installere Docker-imaget [evcc/optimizer](https://hub.docker.com/r/evcc/optimizer) lokalt.
+Brug miljøvariablen `OPTIMIZER_URI` til at pege evcc mod dit eget endpoint.
+
+For at holde beregningen hurtig samler evcc tidsintervallerne efter de første 48 timer til intervaller på en time.
+Med din egen optimizer kan du flytte denne grænse med miljøvariablen `OPTIMIZER_COARSEN_AFTER` i timer, f.eks. `72`.
+Værdien `0` beholder intervaller på 15 minutter for hele prognosen.

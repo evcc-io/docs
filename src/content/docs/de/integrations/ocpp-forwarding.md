@@ -1,10 +1,11 @@
 ---
 title: "OCPP-Weiterleitung"
 description: "Zeigt, wie du die OCPP-Nachrichten einer Wallbox von evcc an ein externes Backend wie eine Abrechnungsplattform weiterleitest, während evcc das Laden weiter steuert."
+translatedFrom: "df48634d807d"
 ---
 
-Manchmal sollen Ladevorgänge zusätzlich in einem externen OCPP-Backend landen, z. B. bei einer Abrechnungsplattform für die Erstattung durch den Arbeitgeber oder einem Charge Point Operator.
-Eine Wallbox kann normalerweise nur mit einem OCPP-Server sprechen.
+Manchmal sollen Ladevorgänge zusätzlich in einem externen OCPP-Backend landen, z. B. bei einer Abrechnungsplattform für die Erstattung durch den Arbeitgeber oder bei einem Ladepunktbetreiber.
+Eine Wallbox kann normalerweise nur mit einem OCPP-Server verbunden sein.
 Mit der Weiterleitung bleibt die Wallbox mit deiner evcc-Instanz verbunden, die ihre Nachrichten zusätzlich an den externen Server weitergibt.
 evcc steuert das Laden weiterhin.
 Der externe Server erhält Ladevorgänge und Zählerwerte live und kann die Wallbox, wenn erlaubt, auch steuern.
@@ -15,12 +16,12 @@ Die Weiterleitung gibt es für Wallboxen, die per OCPP eingebunden sind, also ev
 Richte die Wallbox zuerst ein, danach kannst du die Weiterleitung für sie konfigurieren.
 
 1. Öffne **Konfiguration → OCPP Server**.
-2. Die Liste **Station-IDs** zeigt deine verbundenen OCPP-Wallboxen. Klicke auf die Wolken-Schaltfläche neben der Wallbox, um den Dialog **OCPP-Weiterleitung** zu öffnen.
+2. Die Liste **Station-IDs** zeigt deine verbundenen OCPP-Wallboxen. Klicke auf das Wolkensymbol neben der Wallbox, um den Dialog **OCPP-Weiterleitung** zu öffnen.
 3. Trage die **Upstream-Server-URL** ein, die Adresse des Servers, an den weitergeleitet wird, z. B. `wss://billing.example.com/ocpp`.
 4. Wenn der externe Server eine Anmeldung verlangt, trage **Benutzername** und **Passwort** ein (HTTP Basic Auth). Erwartet er eine andere Wallbox-Kennung, setze die **Station-ID**.
 5. Klicke auf **Speichern**. Die Weiterleitung startet sofort, ein Neustart ist nicht nötig.
 
-Das Wolken-Symbol neben der Wallbox zeigt, ob die Weiterleitung funktioniert.
+Das Wolkensymbol neben der Wallbox zeigt, ob die Weiterleitung funktioniert.
 Verbindungsprobleme werden im Dialog angezeigt.
 
 Um die Weiterleitung zu beenden, öffne den Dialog erneut und klicke auf **Entfernen**.

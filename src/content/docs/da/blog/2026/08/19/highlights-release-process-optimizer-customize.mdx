@@ -1,0 +1,139 @@
+---
+date: 2026-08-19
+title: "Højdepunkter: udgivelsesproces, optimizer, tilpasning"
+description: "Højdepunkter i udgivelsen evcc 0.314 fra august 2026 med den nye udgivelsesproces, fremskridt for optimizeren, en bedre konfigurationsflade og tilpasning af brugerfladen."
+authors: [naltatis]
+tags: [release, highlights]
+prev: false
+next: false
+cover:
+  alt: "Banner med højdepunkter"
+  image: "../../../../../en/blog/2026/08/19/highlights-release-process-optimizer-customize.webp"
+translatedFrom: "9b8919d1e112"
+---
+
+import Video from "@components/Video.astro";
+import configUiVideo from "../../../../../en/blog/2026/08/19/config-ui-navigation.mp4";
+import configUiPoster from "../../../../../en/blog/2026/08/19/config-ui-navigation.webp";
+
+Kun fire uger efter [det seneste highlights-indlæg](/da/blog/2026/07/18/highlights-remote-access-widgets-optimizer) er vi tilbage.
+Tidligere lå der som regel flere måneder mellem vores indlæg.
+Det vil vi gerne ændre.
+I dette blogindlæg giver vi et overblik over, hvad der er nyt i evcc: den nye udgivelsesproces, fremskridt for optimizeren, forbedringer af konfigurationsfladen, tilpasning af brugerfladen og meget mere.
+
+{/* excerpt */}
+
+## Ny udgivelsesproces
+
+Indtil nu har vi udgivet nye versioner med faste mellemrum.
+Efter hver udgivelse holdt vi større ændringer og nye funktioner tilbage i et stykke tid for at se, om der dukkede presserende fejlrettelser eller regressioner op.
+Derefter fik de større ændringer lidt tid i nightly-versionen for at samle feedback.
+Det skabte problemer, hver gang vi hurtigt skulle udgive en ny version, f.eks. fordi en bilproducent havde ændret sit API.
+Så måtte vi enten midlertidigt rulle ufærdige funktioner tilbage, eller de nåede ud til dig lidt mindre modne end planlagt 🙈.
+
+Vores nye model løser det: Vi skelner nu tydeligt mellem fejlrettelser, der skal ud hurtigt, og større funktioner, der kommer med i den næste funktionsudgivelse.
+Det gør det muligt for os at bruge [semantisk versionering](https://semver.org) ordentligt:
+
+- **Funktionsudgivelser** som <code>0.<u>314</u>.0</code> kommer hver anden til fjerde uge.
+- **Fejlrettelsesudgivelser** som <code>0.314.<u>1</u></code> kan vi nemt udgive ind imellem.
+- **Nightly-versionen** som <code>0.315.0<u>-dev.1787769000</u></code> indeholder som hidtil altid den aktuelle tilstand af `master`-branchen, dvs. alle funktioner og fejlrettelser.
+
+Al udvikling foregår stadig på `master`.
+Der er nu en ny `/backport`-kommando på GitHub, der udvælger enkelte pull requests til den næste fejlrettelsesudgivelse.
+En Claude-baseret agent tager sig af processen og løser eventuelle konflikter.
+
+## Optimeringer af optimizeren
+
+Med [optimizeren](/da/features/optimizer) arbejder vi på at optimere hele dit energisystems adfærd for de kommende dage på baggrund af prognoser for forbrug og produktion samt elprisens forløb.
+Vi nævnte den allerede i [det seneste highlights-indlæg](/da/blog/2026/07/18/highlights-remote-access-widgets-optimizer#optimizer).
+Optimizeren er stadig eksperimentel.
+Lige nu bliver den beregnede plan kun vist: som en anbefaling ved ladepunktet, på batterisiden og på den [omarbejdede side for optimizeren](https://github.com/evcc-io/evcc/pull/32837).
+Næste skridt er, at optimizeren rent faktisk overtager styringen af batteri og ladepunkter, og [pull requesten](https://github.com/evcc-io/evcc/pull/32881) til det er under forberedelse.
+
+Nyt i denne udgivelse: Optimizeren tager højde for ladeplanernes data og optimerer flere ladeplaner samlet, hvor hver plan hidtil kun blev betragtet for sig.
+Derudover er der sket en hel del:
+
+- Den melder nu, [om den beregnede plan kan gennemføres](https://github.com/evcc-io/evcc/pull/32632), f.eks. om alle lademål kan nås i tide.
+- En [statisk grænse for eksport til elnettet](https://github.com/evcc-io/evcc/pull/32541) kan konfigureres og indgår i optimeringen.
+- Ladeplanens [indstilling for sen opladning](https://github.com/evcc-io/evcc/pull/32872) (precondition) indgår i optimeringen.
+- Den kører straks igen, [når der skiftes køretøj, og når køretøjet tilsluttes eller frakobles](https://github.com/evcc-io/evcc/pull/32681).
+- Ladepunkter uden kendt batterikapacitet (f.eks. med et gæstekøretøj) bidrager nu med deres [målte ladeeffekt som forbrug](https://github.com/evcc-io/evcc/pull/32681), hvor de før helt manglede i optimeringen.
+- Den [holder op med at kræve opladning](https://github.com/evcc-io/evcc/pull/32633), når køretøjet er fuldt opladet.
+
+![Optimizer-siden med ladeplan og prognose for opladningsniveauet](../../../../../en/blog/2026/08/19/optimizer.webp)
+
+Prøv det selv: Aktivér eksperimentelle funktioner under **Opsætning → Eksperimentel**, og slå derefter optimizeren til.
+Kig på optimizer-siden, og se, om den resulterende plan virker plausibel for dig.
+Vi vil meget gerne høre din feedback.
+
+## Optimering af konfigurationsfladen
+
+Den browserbaserede konfiguration bliver hele tiden mere gennemarbejdet:
+
+- [Enheder kan deaktiveres](https://github.com/evcc-io/evcc/pull/29455) uden at blive slettet, f.eks. når en enhed midlertidigt er offline, eller når du omstrukturerer din opsætning.
+- Dialogbokse [advarer før lukning](https://github.com/evcc-io/evcc/pull/32826), når der er ændringer, som ikke er gemt.
+- Værdier for energi og effekt vises automatisk i en [passende måleenhed](https://github.com/evcc-io/evcc/pull/32754).
+- På mobilen har konfigurationssiden fået en ordentlig [navigation mellem sektionerne](https://github.com/evcc-io/evcc/pull/32810) i stedet for én lang liste.
+
+<Video
+  src={configUiVideo}
+  poster={configUiPoster}
+  autoplay
+  aspect="1 / 1"
+  title="Navigation mellem sektionerne i konfigurationen på mobilen"
+/>
+
+## Tilpas brugerfladen
+
+Brugerfladen kan nu tilpasses: logo, brandnavn, website, support-e-mail og telefonnummer.
+Det er f.eks. interessant for elektrikere og installatører, der bruger evcc i kundeprojekter.
+Når du har konfigureret din egen support-e-mail, bliver fejlrapporter fra brugerfladen sendt til din supportadresse i stedet for til GitHub.
+[Siden om white label](/da/reference/white-label) forklarer, hvilke muligheder der findes, og hvordan du med din egen CSS kan style brugerfladen, som du vil.
+
+![Om-dialogboksen med eget branding](../../../../../en/blog/2026/08/19/white-label.webp)
+
+## Breaking changes og integrationer
+
+Vi har ændret det format, som API'et og MQTT bruger til prognose- og tarifdata.
+I stedet for omfangsrige objekter kommer dataene nu som [kompakte arrays med unix-tidsstempler](https://github.com/evcc-io/evcc/pull/32391), og MQTT udgiver [én besked pr. prognosetype](https://github.com/evcc-io/evcc/pull/32716).
+Resultatet: meget mindre payloads, hurtigere indlæsning og mindre båndbredde, hvilket især kan mærkes i appen og på langsomme forbindelser.
+
+Det er en breaking change.
+En kæmpe tak til alle, der vedligeholder evcc-integrationer og har tilpasset deres projekter før udgivelsen: [marq24](https://github.com/marq24) og [mkshb](https://github.com/mkshb) ([Home Assistant](/da/smarthome/home-assistant)), [Newan](https://github.com/Newan) ([ioBroker](/da/smarthome/iobroker)), [rdvnit](https://github.com/rdvnit) ([Homey](/da/smarthome/homey)), [TheNinth7](https://github.com/TheNinth7) ([Garmin](/da/smarthome/garmin)) og teamet bag [openHAB-bindingen](/da/smarthome/openhab).
+Det er dejligt at se et så aktivt økosystem omkring evcc.
+
+Vi har tilføjet en ny sektion **Smart home** i dokumentationens navigation, som dækker disse integrationer.
+På siden [Flere seje projekter](/da/smarthome/awesome) samler vi også mindre fællesskabsprojekter, fra Grafana-dashboards til et e-ink-display og en app til menulinjen.
+Hvis du har bygget et lille værktøj, en hjælper eller en integration omkring evcc, er du velkommen til at foreslå det til listen via en pull request, så andre kan finde det.
+
+## Mindre forbedringer
+
+- **Ny diagrammotor:** Skiftet fra [Chart.js](https://github.com/chartjs/Chart.js) til [Apache ECharts](https://echarts.apache.org) er gennemført, da udviklingen af Chart.js desværre er gået i stå.
+  ECharts giver os et solidt fundament for vores store planer med datavisualisering (følg med) …
+- **Optimering til touch:** [Swipe for at bladre mellem tidsperioder](https://github.com/evcc-io/evcc/pull/32614), tooltips [vises og forsvinder korrekt ved touch](https://github.com/evcc-io/evcc/pull/32613), og historikdata indlæses mærkbart hurtigere takket være [prefetching og caching](https://github.com/evcc-io/evcc/pull/32699).
+- **Ladeplan:** Strategiindstillingerne er lettere at finde, og optimeringsmål og sen opladning ligger nu direkte i [dialogboksen for ladeplanen](/da/features/plans).
+- **Opladet energi og rækkevidde:** Hvis dit køretøj melder sit opladningsniveau, registrerer hver opladningssession den opladede mængde og den anslåede ekstra rækkevidde, som kan ses i sessionsdetaljerne og i [oversigten over sessioner](/da/features/sessions).
+- **Fjernadgang:** Fejl i tunnelforbindelsen vises nu i brugerfladen, og efter opstart uden internet genopretter din evcc-installation selv [forbindelsen til fjernadgang](/da/features/remote-access).
+- **API-reference for state:** Vores datastruktur for state (`/api/state`) var hidtil udokumenteret.
+  Den nye [referenceside](/da/reference/state) ændrer det: Den bliver [genereret direkte ud fra brugerfladens typedefinitioner](https://github.com/evcc-io/evcc/pull/32431), så den altid svarer til det faktiske API.
+
+## Understøttelse af nye enheder
+
+**Opladere:** NEcharge Pro (OCPP), Youliq One, plus forbedringer for Atmoce og Voltie
+
+**Målere, sol- og batterisystemer:** Socomec Countis E3x/E4x, Ferroamp, Fronius Argeno og Smart Meter IP, SunEnergyXT 500, Victron GX AC-belastningsmåler, Tesla Powerwall via Fleet API samt batteristyring for FoxESS H3 og Solplanet
+
+**Effektbegrænsning (§ 9 EEG):** Goodwe, Fronius Gen24, Huawei EMMA og Huawei SmartLogger kan nu begrænses
+
+Der har selvfølgelig også været mange fejlrettelser og forbedringer af eksisterende integrationer.
+Detaljerne finder du i [udgivelsesnoterne](https://github.com/evcc-io/evcc/releases/tag/0.314.0).
+
+---
+
+💚 En stor tak til alle, der bringer projektet fremad: med kode, idéer, test, diskussioner og økonomisk støtte, uden hvilken projektet ikke ville være muligt i denne form.
+
+Vi ønsker dig en solrig sensommer.
+
+**Venlig hilsen**<br />
+evcc-teamet<br />
+Michael, Andi & Uli

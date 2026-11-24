@@ -1,0 +1,228 @@
+---
+title: "Windows"
+description: "Nainstalujte evcc ve Windows ručně, spouštějte ho z příkazového řádku nebo jako službu na pozadí a později ho aktualizujte nebo se vraťte ke starší verzi."
+sidebar:
+  order: 10
+translatedFrom: "95912adc36d1"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+Zde najdete návod na ruční instalaci evcc ve Windows.
+
+:::caution
+Tato ruční instalace vyžaduje pokročilou znalost práce s počítačem, zejména s příkazovým řádkem nebo PowerShellem.
+
+Provozovat evcc ve Windows je možné.
+evcc se však obvykle používá v prostředí Linuxu (např. na Raspberry Pi).
+:::
+
+## Instalace
+
+<Steps>
+
+1. ### Instalace
+
+   Stáhněte soubor odpovídající vašemu systému a rozbalte ho (např. dvojitým kliknutím):
+   - 64bitový procesor Intel: [evcc_X.XX_windows_amd64.zip](https://github.com/evcc-io/evcc/releases/latest)
+
+   Otevřete příkazový řádek a přejděte do rozbalené složky. Ověřte instalaci:
+
+   ```sh
+   evcc -v
+   ```
+
+   Měla by se zobrazit aktuální verze evcc (např. `evcc version 0.xxx.y`).
+
+2. ### Spuštění
+
+   ```sh
+   ./evcc
+   ```
+
+3. ### Nastavení
+
+   Otevřete webové rozhraní evcc v prohlížeči: [http://localhost:7070](http://localhost:7070).
+   Nastavte heslo administrátora a nakonfigurujte svá zařízení přímo ve webovém rozhraní.
+
+</Steps>
+
+## Konfigurační soubor (alternativa)
+
+Místo webového rozhraní můžete použít konfigurační soubor `evcc.yaml`.
+Podrobnosti najdete v části [Konfigurace](/cs/installation/configuration).
+
+Spusťte evcc příkazem:
+
+```sh
+./evcc -c evcc.yaml
+```
+
+## Aktualizace a návrat ke starší verzi
+
+Postupujte podle výše uvedených kroků a nahraďte spustitelný soubor evcc novou nebo předchozí verzí.
+Konfiguraci není nutné provádět znovu.
+
+## Služba na pozadí
+
+### Plánovač úloh
+
+:::note
+Tento návod předpokládá, že evcc je umístěný v `c:\evcc`.
+
+Návod byl vytvořen ve Windows 10.
+:::
+
+- Otevřete nabídku Start a vyhledejte „Plánovač úloh“, potom na něj klikněte pravým tlačítkem a zvolte „Spustit jako správce“:
+
+![Plánovač úloh ve Windows 10](../../en/installation/win10-srv/win10-srv-1.png)
+
+- Po spuštění Plánovače úloh zvolte, zda novou službu vytvoříte ve vlastní složce, nebo v obecné Knihovně Plánovače úloh.
+  V tomto příkladu vytvoříme samostatnou složku `evcc`.
+  Vyberte „Knihovna Plánovače úloh“, pravým tlačítkem otevřete místní nabídku a zvolte „Nová složka…“:
+
+![Knihovna Plánovače úloh](../../en/installation/win10-srv/win10-srv-2.png)
+
+- Nyní vyberte novou složku `evcc` a znovu otevřete místní nabídku.
+  Zvolte „Vytvořit úlohu“:
+
+![Okno nové úlohy](../../en/installation/win10-srv/win10-srv-3.png)
+
+- Zadejte název úlohy (např. „evcc“) a krátký popis.
+  Protože úloha musí běžet jako systémová služba, otevřete správu uživatelů přes „Změnit uživatele nebo skupinu“ a do pole zadejte `SYSTEM`.
+  Klikněte na „Kontrola názvů“ a slovo „SYSTEM“ by pak mělo být podtržené.
+  Kliknutím na OK zavřete dialogové okno:
+
+![Okno úlohy](../../en/installation/win10-srv/win10-srv-4.png) ![Výběr uživatele](../../en/installation/win10-srv/win10-srv-5.png)
+
+- Na kartě „Aktivační události“ klikněte na „Nová…“.
+  Nastavte aktivační událost na „Při spuštění“ a zkontrolujte, že je zaškrtnuté políčko „Povoleno“:
+
+![Aktivační událost](../../en/installation/win10-srv/win10-srv-6.png)
+
+- Na kartě „Akce“ klikněte na „Nová…“.
+  Ujistěte se, že je vybraná možnost „Spustit program“, a pomocí tlačítka Procházet najděte spustitelný soubor `evcc.exe`.
+  Doporučujeme vyplnit cestu také v poli „Spustit v“, aby se konfigurační soubor našel automaticky:
+
+![Akce](../../en/installation/win10-srv/win10-srv-7.png)
+
+- Na kartě „Podmínky“ můžete ponechat výchozí nastavení.
+
+  :::note
+  SMA Home Manager může mít při použití přes Wi-Fi občas potíže, proto zkuste zapnout podmínku „Síť“ a v rozbalovacím seznamu vybrat odpovídající síťové rozhraní.
+  :::
+
+![Podmínky](../../en/installation/win10-srv/win10-srv-8.png)
+
+- Na kartě „Nastavení“ nezapomeňte vybrat „Spustit úlohu co nejdříve po vynechání naplánovaného spuštění“.
+  Zkontrolujte také, že volba „Zastavit úlohu, pokud běží déle než:“ **není** vybraná, jinak se evcc bude náhodně zastavovat.
+
+![Nastavení](../../en/installation/win10-srv/win10-srv-9.png)
+
+Úlohu teď můžete spustit ručně nebo ji vyzkoušet restartem počítače.
+Funkčnost ověříte tak, že v prohlížeči otevřete `http://localhost:7070`.
+
+### NSSM \{#nssm\}
+
+:::note
+Tento návod předpokládá, že evcc je umístěný v `c:\Tools\evcc`.
+
+Návod byl vytvořen ve Windows 11.
+:::
+
+Jako alternativu k Plánovači úloh můžete evcc provozovat jako službu Windows.
+Služba běží i bez přihlášení uživatele a lépe se u ní dá nastavit chování při restartu a při chybách.
+
+Protože evcc nativně nepodporuje rozhraní služeb Windows, lze ke spuštění evcc jako služby použít [_nssm_](https://nssm.cc/download) (_Non-Sucking Service Manager_).
+
+- Stáhněte _nssm_ z [nssm.cc](https://nssm.cc/download) a rozbalte soubor ZIP do `C:\Tools\nssm\`.
+- Otevřete příkazový řádek (`cmd.exe`) a přejděte do složky `win64`:
+
+  ```sh
+  cd /D C:\Tools\nssm\nssm-2.24\win64
+  ```
+
+- Nainstalujte službu:
+
+  ```sh
+  nssm install evcc
+  ```
+
+- Projděte karty dialogového okna.
+  Následující nastavení doporučujeme.
+  - **Application**:
+
+    ![Karta Application](../../en/installation/win11-nssm/win11-nssm_01_Application.webp)
+    - _Path_: cesta k `evcc.exe`.
+    - _Start directory_: pracovní adresář pro evcc.
+    - _Arguments_: parametry pro evcc, např. `-c evcc.yaml`.
+      Volitelně: `--database evcc.db` pro výslovné nastavení cesty k databázi.
+      Bez této volby se databáze ukládá do uživatelského profilu účtu, pod kterým služba běží.
+      Pod účtem _System_ by to bylo `%SystemRoot%\system32\config\systemprofile\.evcc\evcc.db`, tedy jiné umístění než při interaktivním spuštění.
+      Pomocí `--database` zajistíte, že se vždy použije stejná databáze.
+      To je důležité při [resetování hesla](/cs/faq#password-reset).
+
+  - **Details**:
+
+    ![Karta Details](../../en/installation/win11-nssm/win11-nssm_02_Details.webp)
+    - _Display Name_: název služby ve Službách Windows (ideálně stejný jako _Service Name_).
+    - _Startup type_: _Automatic_ pro automatické spuštění při startu systému.
+
+  - **Log on**:
+
+    ![Karta Log on](../../en/installation/win11-nssm/win11-nssm_03_Log_on.webp)
+
+    Ve výchozím stavu služba běží pod účtem _System_.
+    Podrobnosti najdete v [dokumentaci nssm](https://nssm.cc/usage).
+
+    :::important
+    Zde zvolený účet určuje, kam evcc ukládá svou databázi `evcc.db` (viz _Arguments_ výše).
+    :::
+
+  - **Dependencies**:
+
+    ![Karta Dependencies](../../en/installation/win11-nssm/win11-nssm_04_Dependencies.webp)
+
+    Přidáním závislosti `NlaSvc` zajistíte, že síť je připravená dřív, než se evcc spustí.
+
+  - **Process**:
+
+    ![Karta Process](../../en/installation/win11-nssm/win11-nssm_05_Process.webp)
+
+    Ponechte výchozí nastavení.
+
+  - **Shutdown**:
+
+    ![Karta Shutdown](../../en/installation/win11-nssm/win11-nssm_06_Shutdown.webp)
+
+    Ponechte výchozí nastavení.
+    nssm nejprve zkusí `Ctrl`+`C`, potom `WM_CLOSE`/`WM_QUIT` a po vypršení časového limitu proces násilně ukončí.
+
+  - **Exit actions**:
+
+    ![Karta Exit actions](../../en/installation/win11-nssm/win11-nssm_07_Exit_actions.webp)
+
+    Doporučení: _Restart application_ se zpožděním 10 sekund, aby se evcc automaticky znovu spustil po pádu nebo po restartu z webového rozhraní.
+
+  - **I/O**:
+
+    ![Karta I/O](../../en/installation/win11-nssm/win11-nssm_08_IO.webp)
+
+    Volitelně: přesměrujte `stdout` a `stderr` do souborů s logy.
+    Nastavte v evcc nižší úroveň logování, aby soubory nerostly příliš rychle.
+
+  - **File rotation**:
+
+    ![Karta File rotation](../../en/installation/win11-nssm/win11-nssm_09_File_rotation.webp)
+
+    Volitelně: zapněte rotaci logů, abyste omezili velikost souborů s logy.
+
+  - **Environment**:
+
+    ![Karta Environment](../../en/installation/win11-nssm/win11-nssm_10_Environment.webp)
+
+    Ponechte výchozí nastavení.
+
+Kliknutím na _Install Service_ službu vytvoříte.
+Službu pak můžete spouštět a zastavovat v konzoli pro správu Služeb Windows.
+Pro ověření otevřete v prohlížeči `http://localhost:7070`.

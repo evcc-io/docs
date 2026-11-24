@@ -1,0 +1,152 @@
+---
+title: "Home Assistant"
+description: "Propojte evcc s Home Assistantem, ideálně integrací ha-evcc, nebo ručně přes REST API či MQTT, a vizualizujte data a automatizujte nabíjení."
+sidebar:
+  order: 3
+translatedFrom: "f358944d9fa2"
+---
+
+[Home Assistant](https://www.home-assistant.io) shromažďuje a vizualizuje data z vaší chytré domácnosti a nabízí rozsáhlé možnosti automatizace.
+evcc se specializuje na chytré nabíjení a vytápění.
+Oba systémy se navzájem doplňují a lze je propojit různými způsoby.
+
+:::note
+evcc lze nainstalovat také jako aplikaci Home Assistantu. Návod najdete [zde](/cs/installation/home-assistant).
+:::
+
+## Vizualizace a automatizace
+
+evcc nabízí mnoho ovládacích prvků pro chytré nabíjení a vytápění, ale nemůže pokrýt každý případ použití.
+Integrace s Home Assistantem vám dává větší flexibilitu.
+Několik příkladů:
+
+- vizualizace naměřených hodnot v dashboardech
+- vytváření plánů nabíjení podle událostí v kalendáři
+- přepínání režimů nabíjení podle přítomnosti
+- ...
+
+### Integrace evcc pro Home Assistant (doporučeno)
+
+Integrace [ha-evcc](https://github.com/marq24/ha-evcc) od [marq24](https://github.com/marq24) přináší data a funkce evcc přímo do Home Assistantu.
+Funguje bez ohledu na to, zda evcc provozujete jako aplikaci Home Assistantu, nebo ne.
+Jediným předpokladem je, že Home Assistant a evcc jsou dostupné ve stejné síti.
+
+Integrace poskytuje všechny relevantní entity evcc: naměřené hodnoty, nastavení, nabíjecí body a vozidla.
+Po instalaci získáte obsáhlý seznam entit, které můžete použít v dashboardech a automatizacích.
+
+**Instalace přes HACS:**
+
+1. Otevřete v Home Assistantu [HACS](https://hacs.xyz/) a vyhledejte „evcc“.
+2. Nainstalujte položku **evcc☀️🚘- Solar Charging** od marq24.
+3. Restartujte Home Assistant.
+4. Přejděte do **Nastavení → Zařízení a služby → Přidat integraci**, vyhledejte „evcc“ a zadejte URL vaší instance evcc.
+
+Další možnosti instalace a podrobnosti najdete v [repozitáři na GitHubu](https://github.com/marq24/ha-evcc).
+
+Pro dashboardy nabízí [hass-evcc-card](https://github.com/mkshb/hass-evcc-card) kartu Lovelace, která zobrazuje přehled evcc v Home Assistantu.
+
+### Ruční integrace
+
+Data z evcc můžete do Home Assistantu integrovat také ručně přes REST API nebo MQTT.
+
+#### REST API
+
+evcc nabízí [REST API](/integrations/rest-api).
+[Tento návod](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) od [marq24](https://github.com/marq24) podrobně popisuje integraci s Home Assistantem.
+
+#### MQTT
+
+Potřebujete MQTT broker (např. [Mosquitto](https://mosquitto.org/), který je k dispozici také jako aplikace Home Assistantu).
+
+Připojení k brokeru nastavte v evcc v části **Konfigurace → MQTT**.
+V Home Assistantu musí být nastavený stejný broker a stejné téma, aby si oba systémy mohly vyměňovat data.
+
+Pomocí nástroje jako [MQTT Explorer](http://mqtt-explorer.com) můžete ověřit, že zprávy v tématech přicházejí správně.
+Návod na nastavení senzorů MQTT v Home Assistantu najdete na [blogu Alkly (německy)](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
+
+Dostupná témata jsou popsána v [MQTT API](/cs/integrations/mqtt-api).
+
+## Použití entit Home Assistantu
+
+evcc se může připojit přímo k Home Assistantu a používat jeho entity (senzory, spínače, čísla) jako zdroje dat.
+Díky tomu můžete do evcc integrovat zařízení, která nejsou nativně podporovaná, např. chytré zásuvky Zigbee, senzory z jiných integrací nebo vlastní řešení.
+Pokud jsou data k dispozici jako entita Home Assistantu, evcc s nimi umí pracovat.
+
+### Podporované typy zařízení
+
+- **[Měřiče](/cs/meters#home-assistant)** (síť, solár, domácí baterie, ...) s výkonem, energií, proudy, napětími a stavem nabití
+- **[Nabíječky](/cs/chargers#home-assistant-charger)** se stavem, zapnutím/vypnutím a maximálním nabíjecím proudem
+- **[Chytré spínače](/cs/smartswitches#home-assistant-switch)** s jednoduchým zapínáním a vypínáním (pro chytré zásuvky a relé)
+- **[Vozidla](/cs/vehicles#home-assistant)** se stavem nabití, dojezdem, stavem a ujetými kilometry; volitelně se skripty pro start/stop
+- **[Oznámení](/cs/notifications)**: v části **Konfigurace → Oznámení** můžete zprávy z evcc posílat přes Home Assistant
+
+### Nastavení
+
+Zařízení z Home Assistantu se přidávají stejně jako jakékoli jiné zařízení v konfiguračním rozhraní.
+
+1. Přejděte do **Konfigurace** a přidejte zařízení, např. **Přidat další měřič**.
+2. Jako výrobce zvolte **Home Assistant**.
+3. Vyberte svou instanci. Instance v lokální síti se najdou automaticky.
+   Pokud seznam zůstane prázdný, např. protože Home Assistant běží v jiné podsíti, zadejte adresu ručně (`http://homeassistant.local:8123`).
+4. Autorizujte přístup.
+   Home Assistant se otevře na nové kartě, kde se přihlásíte a potvrdíte požadavek.
+   Token uloží vaše instance evcc a automaticky ho obnovuje.
+5. Ke každému poli, např. **Výkon**, přiřaďte entitu.
+   Pole automaticky doplňuje entity z vaší instance Home Assistantu a nabízí jen ty, které se k němu hodí.
+6. **Ověřit a uložit** zkontroluje, zda lze entity načíst.
+
+:::note
+Pokud evcc provozujete uvnitř Home Assistantu jako [aplikaci](/cs/installation/home-assistant), vyberte v kroku 3 instanci `http://supervisor/core`.
+Ta je už autorizovaná, takže krok 4 odpadá.
+:::
+
+<a id="entity-values"></a>
+
+### Hodnoty entit
+
+Každé pole očekává určitý druh hodnoty.
+Entita, která hlásí `unknown` nebo `unavailable`, se považuje za dočasně nedostupnou a při další aktualizaci se načte znovu.
+
+#### Čísla
+
+Pole pro výkon, energii, proud a stav nabití potřebují jako stav prosté číslo, např. `1234`.
+Stav jako `1234 W` nelze načíst, protože jednotka patří do atributu entity `unit_of_measurement`.
+`W`/`kW` a `Wh`/`kWh`/`MWh` se převádějí automaticky.
+Chcete-li obrátit znaménko, předřaďte názvu entity `-` (`-sensor.inverter_power`).
+
+#### Zapnuto/vypnuto
+
+Pole pro stav zapnutí nabíječky nebo chytrého spínače a podobná pole přijímají `on`, `true`, `1`, `active` a `yes` a také jejich protějšky `off`, `false`, `0`, `inactive` a `no`.
+
+<a id="charge-status"></a>
+
+#### Stav nabíjení
+
+Nabíječky a vozidla potřebují stavovou entitu, která hlásí, zda je vozidlo odpojené, připojené, nebo se nabíjí.
+Tyto stavy jsou rozpoznány bez dalšího nastavení:
+
+| Status | Význam    | Stavy                                                                                          |
+| ------ | --------- | ---------------------------------------------------------------------------------------------- |
+| **A**  | odpojeno  | `a`, `disconnected`, `not_plugged`                                                             |
+| **B**  | připojeno | `b`, `connected`, `plugged`, `starting`, `stopped`, `paused`, `complete`, `charging_completed` |
+| **C**  | nabíjí se | `c`, `charging`                                                                                |
+
+Mnoho integrací používá vlastní označení.
+Pokud entita hlásí stav, který v tabulce není, log zobrazí surovou hodnotu spolu s názvem entity.
+Přidejte tuto hodnotu do odpovídajícího pole **Stavy pro status A/B/C** v pokročilých nastaveních zařízení.
+Více hodnot se odděluje čárkami, na velikosti písmen nezáleží.
+
+```yaml
+statusB: charging_stopped, charging_error
+statusC: instant_charging
+```
+
+`binary_sensor` jako stavová entita potřebuje také explicitní mapování, např. `statusA: off` a `statusC: on`.
+
+## Další zdroje (videa)
+
+Videa jsou v němčině.
+
+- [smart home & more: Základní instalace a konfigurace evcc](https://youtu.be/aPq8k2MronY)
+- [smart home & more: Krok za krokem - nastavení senzoru MQTT pomocí MQTT Explorer](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: Efektivní energetický dashboard pro Home Assistant](https://youtu.be/V3p5-16U_oU)

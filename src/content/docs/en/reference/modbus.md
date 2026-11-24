@@ -92,9 +92,7 @@ The integrated predefined device models `model` are identical to [MBMD](https://
      SDM72     Eastron SDM72
      SEMTR     SolarEdge SE-MTR-3Y
 
-Any `model` that deviates from these is
-
-treated as a _SunSpec_ device type.
+Any `model` that deviates from these is treated as a _SunSpec_ device type.
 
 Use `value` to define the value to be read from the device. All supported values are predefined in [MBMD](https://github.com/volkszaehler/mbmd/blob/master/meters/measurements.go#L28).
 
@@ -217,7 +215,7 @@ scale: -1.0 # floating point factor applied to result, e.g. for kW to W conversi
 timeout: 2s # timeout, without unit in ns
 ```
 
-For the `int32s/uint32s` decodings, the byte order is swapped, which is useful for E3/DC devices.
+For the `int32s/uint32s` decodings, the word order is swapped (least significant word first), which is useful for E3/DC devices.
 
 ### Writing Registers
 

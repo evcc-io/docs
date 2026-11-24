@@ -22,7 +22,7 @@ See each sub-command's help for details on how to use the generated script.
 
 ## See also
 
-- [evcc](/en/reference/cli/evcc) - evcc - open source solar charging
+- [evcc](/en/reference/cli/evcc) - evcc - smart charging
 - [evcc completion bash](/en/reference/cli/evcc_completion_bash) - Generate the autocompletion script for bash
 - [evcc completion fish](/en/reference/cli/evcc_completion_fish) - Generate the autocompletion script for fish
 - [evcc completion powershell](/en/reference/cli/evcc_completion_powershell) - Generate the autocompletion script for powershell

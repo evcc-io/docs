@@ -8,17 +8,18 @@ prev: false
 next: false
 ---
 
-Heute gibt es zum Jahresende nochmals eine Aktualisierung mit einigen Neuerungen.
+Before the end of the year, here's one more update with a few new features.
 
 <!-- excerpt -->
 
-## Weitere Fahrzeuge und Wallbox
+## More Vehicles and a Charger
 
-Es werden nun die Dacia und Smart EQ EVs unterstützt, ebenso die Wallbox Innogy eBox.
+Dacia and Smart EQ EVs are now supported, as well as the Innogy eBox charger.
 
-## Fehlerkorrekturen
+## Bug Fixes
 
-Diese Version enthält eine Reihe von Fehlerkorrekturen und vielen kleinen Verbesserungen. Schaut euch gerne über den Changelog Link unten eine detaillierte Auflistung an.
+This version contains a number of bug fixes and many small improvements.
+Feel free to check out the detailed list via the changelog link below.
 
 ## Download & Installation
 
@@ -31,8 +32,8 @@ Diese Version enthält eine Reihe von Fehlerkorrekturen und vielen kleinen Verbe
 
 ### Version 0.76
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.76)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.76)
 
 ### Version 0.75
 
-- [Detaillierte Liste der Änderungen](https://github.com/evcc-io/evcc/releases/tag/0.75)
+- [Detailed list of changes](https://github.com/evcc-io/evcc/releases/tag/0.75)

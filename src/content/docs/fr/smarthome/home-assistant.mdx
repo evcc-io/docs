@@ -1,0 +1,152 @@
+---
+title: "Home Assistant"
+description: "Explique comment relier evcc à Home Assistant via l’intégration ha-evcc (recommandée), l’API REST ou MQTT, pour visualiser les données et automatiser la charge."
+sidebar:
+  order: 3
+translatedFrom: "f358944d9fa2"
+---
+
+[Home Assistant](https://www.home-assistant.io) collecte et visualise les données de votre maison connectée et offre de nombreuses possibilités d’automatisation.
+evcc est spécialisé dans la charge et le chauffage intelligents.
+Les deux systèmes se complètent et peuvent être reliés de différentes manières.
+
+:::note
+evcc peut aussi être installé comme application Home Assistant. Vous trouverez les instructions [ici](/fr/installation/home-assistant).
+:::
+
+## Visualiser et automatiser
+
+evcc offre de nombreux réglages pour la charge et le chauffage intelligents, mais ne peut pas couvrir tous les cas d’usage.
+L’intégration avec Home Assistant vous apporte plus de flexibilité.
+Voici quelques exemples :
+
+- visualiser les mesures dans des tableaux de bord
+- créer des plans de charge à partir d’événements du calendrier
+- changer de mode de charge selon la présence
+- …
+
+### Intégration evcc pour Home Assistant (recommandée)
+
+L’intégration [ha-evcc](https://github.com/marq24/ha-evcc) de [marq24](https://github.com/marq24) apporte les données et les fonctions d’evcc directement dans Home Assistant.
+Cela fonctionne que vous utilisiez evcc comme application Home Assistant ou non.
+La seule condition est que Home Assistant et evcc soient joignables sur le même réseau.
+
+L’intégration fournit toutes les entités evcc pertinentes : mesures, paramètres, points de charge et véhicules.
+Après l’installation, vous disposez d’une liste complète d’entités utilisables dans les tableaux de bord et les automatisations.
+
+**Installation via HACS :**
+
+1. Ouvrez [HACS](https://hacs.xyz/) dans Home Assistant et recherchez « evcc ».
+2. Installez l’entrée **evcc☀️🚘- Solar Charging** de marq24.
+3. Redémarrez Home Assistant.
+4. Allez dans **Paramètres → Appareils et services → Ajouter une intégration**, recherchez « evcc » et saisissez l’URL de votre instance evcc.
+
+Pour d’autres options d’installation et plus de détails, consultez le [dépôt GitHub](https://github.com/marq24/ha-evcc).
+
+Pour les tableaux de bord, la [hass-evcc-card](https://github.com/mkshb/hass-evcc-card) fournit une carte Lovelace qui affiche la vue d’ensemble d’evcc dans Home Assistant.
+
+### Intégration manuelle
+
+Vous pouvez aussi intégrer manuellement les données d’evcc dans Home Assistant via l’API REST ou MQTT.
+
+#### API REST
+
+evcc propose une [API REST](/integrations/rest-api).
+[Ce guide](https://github.com/marq24/ha-evcc/blob/main/HA_AS_EVCC_SOURCE.md) de [marq24](https://github.com/marq24) décrit en détail l’intégration avec Home Assistant.
+
+#### MQTT
+
+Vous avez besoin d’un broker MQTT (p. ex. [Mosquitto](https://mosquitto.org/), également disponible comme application Home Assistant).
+
+Configurez la connexion au broker dans evcc sous **Configuration → MQTT**.
+Le même broker et le même topic doivent être configurés dans Home Assistant pour que les deux systèmes puissent échanger des données.
+
+Vous pouvez utiliser un outil comme [MQTT Explorer](http://mqtt-explorer.com) pour vérifier que les messages sont bien publiés sur les topics.
+Un guide pour configurer des capteurs MQTT dans Home Assistant est disponible sur le [blog d’Alkly (en allemand)](https://alkly.de/mqtt-mit-home-assistant-fuer-anfaenger).
+
+Les topics disponibles sont documentés dans l’[API MQTT](/fr/integrations/mqtt-api).
+
+## Utiliser les entités Home Assistant
+
+evcc peut se connecter directement à Home Assistant et utiliser ses entités (capteurs, interrupteurs, nombres) comme sources de données.
+Cela vous permet d’intégrer dans evcc des appareils qui ne sont pas pris en charge nativement, p. ex. des prises connectées Zigbee, des capteurs d’autres intégrations ou des montages faits maison.
+Tant que les données sont disponibles sous forme d’entité Home Assistant, evcc peut les exploiter.
+
+### Types d’appareils pris en charge
+
+- **[Compteurs](/fr/meters#home-assistant)** (réseau, solaire, batterie domestique, etc.) avec puissance, énergie, courants, tensions, niveau de charge
+- **[Chargeurs](/fr/chargers#home-assistant-charger)** avec statut, activation/désactivation et courant de charge maximal
+- **[Prises commutables](/fr/smartswitches#home-assistant-switch)** avec simple commande marche/arrêt (pour prises connectées, relais)
+- **[Véhicules](/fr/vehicles#home-assistant)** avec niveau de charge, autonomie, statut, kilométrage ; en option, des scripts pour le démarrage et l’arrêt
+- **[Notifications](/fr/notifications)** : sous **Configuration → Notifications**, vous pouvez envoyer des messages evcc via Home Assistant
+
+### Mise en place
+
+Les appareils Home Assistant s’ajoutent comme n’importe quel autre appareil dans l’interface de configuration.
+
+1. Allez dans **Configuration** et ajoutez un appareil, p. ex. **Ajouter un compteur supplémentaire**.
+2. Sélectionnez « Home Assistant » comme fabricant.
+3. Choisissez votre instance. Les instances du réseau local sont détectées automatiquement.
+   Si la liste reste vide, p. ex. parce que Home Assistant tourne dans un autre sous-réseau, saisissez l’adresse manuellement (`http://homeassistant.local:8123`).
+4. Autorisez l’accès.
+   Home Assistant s’ouvre dans un nouvel onglet où vous vous connectez et confirmez la demande.
+   Votre instance evcc enregistre le jeton et le renouvelle automatiquement.
+5. Attribuez une entité à chaque champ, p. ex. « Puissance ».
+   L’autocomplétion ne vous propose que les entités de votre instance adaptées au champ.
+6. Cliquez sur **Valider & enregistrer** pour vérifier que les entités peuvent être lues.
+
+:::note
+Si vous utilisez evcc dans Home Assistant en tant qu’[application](/fr/installation/home-assistant), choisissez l’instance `http://supervisor/core` à l’étape 3.
+Elle est déjà autorisée : vous pouvez donc passer l’étape 4.
+:::
+
+<a id="entity-values"></a>
+
+### Valeurs des entités
+
+Chaque champ attend un certain type de valeur.
+Une entité qui renvoie `unknown` ou `unavailable` est considérée comme temporairement indisponible et sera relue lors de la prochaine mise à jour.
+
+#### Nombres
+
+Les champs de puissance, d’énergie, de courant et de niveau de charge exigent un simple nombre comme état, p. ex. `1234`.
+Un état tel que `1234 W` ne peut pas être lu : l’unité doit figurer dans l’attribut `unit_of_measurement` de l’entité.
+`W`/`kW` et `Wh`/`kWh`/`MWh` sont convertis automatiquement.
+Pour inverser le signe, ajoutez `-` devant le nom de l’entité (`-sensor.inverter_power`).
+
+#### Marche/arrêt
+
+Les champs d’activation (chargeur, prise commutable, etc.) acceptent `on`, `true`, `1`, `active` et `yes`, ainsi que leurs contraires `off`, `false`, `0`, `inactive` et `no`.
+
+<a id="charge-status"></a>
+
+#### Statut de charge
+
+Les chargeurs et les véhicules ont besoin d’une entité de statut qui indique si le véhicule est déconnecté, connecté ou en charge.
+Les états suivants sont reconnus d’office :
+
+| Statut | Signification | États                                                                                          |
+| ------ | ------------- | ---------------------------------------------------------------------------------------------- |
+| **A**  | déconnecté    | `a`, `disconnected`, `not_plugged`                                                             |
+| **B**  | connecté      | `b`, `connected`, `plugged`, `starting`, `stopped`, `paused`, `complete`, `charging_completed` |
+| **C**  | en charge     | `c`, `charging`                                                                                |
+
+De nombreuses intégrations utilisent leur propre terminologie.
+Si l’entité renvoie un état absent du tableau, le journal affiche la valeur brute avec le nom de l’entité.
+Ajoutez cette valeur au champ **États pour le statut A/B/C** correspondant dans les options avancées de l’appareil.
+Plusieurs valeurs sont séparées par des virgules ; la casse n’a pas d’importance.
+
+```yaml
+statusB: charging_stopped, charging_error
+statusC: instant_charging
+```
+
+Un `binary_sensor` utilisé comme entité de statut nécessite aussi une correspondance explicite, p. ex. `statusA: off` et `statusC: on`.
+
+## Ressources complémentaires (vidéos)
+
+Les vidéos sont en allemand.
+
+- [smart home & more: evcc Basic Installation and Configuration](https://youtu.be/aPq8k2MronY)
+- [smart home & more: Step by Step - Setting up MQTT Sensor using MQTT Explorer](https://youtu.be/0QQ3y8fgRVA)
+- [smart home & more: Efficient Energy Dashboard for Home Assistant](https://youtu.be/V3p5-16U_oU)

@@ -1,0 +1,108 @@
+---
+// Starlight's Header with Blog link, GitHub icon and language select visible on small screens too
+// (like the evcc.io header); only the theme toggle moves into the mobile menu footer.
+// our overrides directly (the virtual:starlight/components/* modules have no types for astro check)
+import LanguageSelect from "@components/LanguageSelect.astro";
+import Search from "@components/Search.astro";
+import SiteTitle from "@components/SiteTitle.astro";
+import SocialIcons from "@components/SocialIcons.astro";
+import ThemeSelect from "@components/ThemeSelect.astro";
+import MobileBreadcrumbs from "@components/MobileBreadcrumbs.astro";
+
+---
+
+<div class="header">
+  <div class="title-wrapper sl-flex">
+    <SiteTitle />
+  </div>
+  <div class="sl-flex print:hidden search">
+    <Search />
+  </div>
+  <div class="sl-flex print:hidden right-group">
+    <div class="sl-flex social-icons">
+      <SocialIcons />
+    </div>
+    <div class="sl-hidden md:sl-flex">
+      <ThemeSelect />
+    </div>
+    <LanguageSelect />
+  </div>
+</div>
+<MobileBreadcrumbs />
+
+<style>
+  @layer starlight.core {
+    .header {
+      display: flex;
+      gap: var(--sl-nav-gap);
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+    }
+
+    .title-wrapper {
+      overflow: clip;
+      padding: 0.25rem;
+      margin: -0.25rem;
+      min-width: 0;
+      /* small screens: logo left, everything else right, like evcc.io */
+      margin-inline-end: auto;
+    }
+
+    .right-group,
+    .social-icons {
+      gap: 1rem;
+      align-items: center;
+    }
+    .social-icons::after {
+      content: "";
+      height: 2rem;
+      border-inline-end: 1px solid var(--sl-color-gray-5);
+    }
+
+
+    @media (min-width: 50rem) {
+      .header {
+        display: grid;
+        /* logo and claim | search, centered | links and icons; the search
+           column is the one that gives way when space is tight */
+        grid-template-columns: 1fr minmax(0, 22rem) 1fr;
+        align-content: center;
+      }
+      .title-wrapper {
+        min-width: max-content;
+        overflow: visible;
+      }
+      .search {
+        justify-self: stretch;
+        min-width: 0;
+      }
+      .right-group {
+        justify-self: end;
+      }
+    }
+  }
+</style>
+
+<style>
+  /* Small screens: Blog/Docs, search, GitHub, language in one row (like evcc.io).
+     Unlayered on purpose: Starlight's sl-flex utility must not win over display: contents. */
+  @media (max-width: 50rem) {
+    .right-group,
+    .social-icons {
+      display: contents;
+    }
+    .social-icons :global(.nav-link) {
+      order: 1;
+    }
+    .search {
+      order: 2;
+    }
+    .social-icons :global(.social-link) {
+      order: 3;
+    }
+    .right-group > :global(.lang-select) {
+      order: 4;
+    }
+  }
+</style>
