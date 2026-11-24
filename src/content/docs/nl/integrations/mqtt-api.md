@@ -3,7 +3,7 @@ title: "MQTT-API"
 description: "Toont alle MQTT-topics die evcc over uw locatie, laadpunten, voertuigen en thuisbatterij publiceert, en de topics waarmee u modi, limieten of laadplannen wijzigt."
 sidebar:
   order: 2
-translatedFrom: "2c690ff491d7"
+translatedFrom: "b9e76bd617b8"
 ---
 
 De [API-status](/nl/reference/state) wordt ook via MQTT gepubliceerd.
@@ -85,7 +85,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: restvermogen op het net
 - `evcc/site/batteryGridChargeLimit`: prijslimiet voor het laden van de thuisbatterij met netstroom
 - `evcc/site/batteryDischargeControl`: ontladingsregeling van de batterij in- of uitschakelen (true/false)
-- `evcc/site/batteryMode`: externe batterijmodus (`normal`, `hold`, `charge`, `holdcharge`, `discharge`), stuurt alle regelbare batterijen direct aan, gaat voor op andere evcc-modi en wordt na 60 s gereset
+- `evcc/site/batteryMode`: externe batterijmodus (`normal`, `holddischarge`, `charge`, `holdcharge`, `discharge`), stuurt alle regelbare batterijen direct aan, gaat voor op andere evcc-modi en wordt na 60 s gereset
 - `evcc/site/smartCostLimit`: prijslimiet voor slim laden voor alle laadpunten
 - `evcc/site/smartFeedInPriorityLimit`: limiet voor terugleverprioriteit voor alle laadpunten
 

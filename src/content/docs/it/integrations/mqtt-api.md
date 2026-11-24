@@ -3,7 +3,7 @@ title: "API MQTT"
 description: "Elenca i topic MQTT che evcc pubblica per sito, punti di ricarica, veicoli e batteria domestica, e quelli scrivibili per cambiare modalità, limiti o piani di ricarica."
 sidebar:
   order: 2
-translatedFrom: "2c690ff491d7"
+translatedFrom: "b9e76bd617b8"
 ---
 
 Lo [stato dell’API](/it/reference/state) viene pubblicato anche via MQTT.
@@ -85,7 +85,7 @@ mosquitto_pub -t "evcc/site/batteryGridChargeLimit/set" -m "none"
 - `evcc/site/residualPower`: potenza residua di rete
 - `evcc/site/batteryGridChargeLimit`: limite di prezzo per la carica della batteria dalla rete
 - `evcc/site/batteryDischargeControl`: abilita/disabilita il controllo della scarica della batteria (true/false)
-- `evcc/site/batteryMode`: modalità esterna della batteria (`normal`, `hold`, `charge`, `holdcharge`, `discharge`), controlla direttamente tutte le batterie controllabili, ha la precedenza sulle altre modalità di evcc e si reimposta dopo 60 s
+- `evcc/site/batteryMode`: modalità esterna della batteria (`normal`, `holddischarge`, `charge`, `holdcharge`, `discharge`), controlla direttamente tutte le batterie controllabili, ha la precedenza sulle altre modalità di evcc e si reimposta dopo 60 s
 - `evcc/site/smartCostLimit`: limite per la ricarica intelligente con la rete per tutti i punti di ricarica
 - `evcc/site/smartFeedInPriorityLimit`: limite di priorità dell’immissione in rete per tutti i punti di ricarica
 

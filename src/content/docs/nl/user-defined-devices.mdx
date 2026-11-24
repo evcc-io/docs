@@ -3,7 +3,7 @@ title: Gebruikersgedefinieerde apparaten
 description: "Toont hoe u een lader, meter, voertuig of verwarmingstoestel zonder ingebouwde template koppelt door uitlezen en aansturen zelf via HTTP, MQTT of Modbus in te stellen."
 tableOfContents:
   maxHeadingLevel: 4
-translatedFrom: "161eb222a89c"
+translatedFrom: "4505fc9bb930"
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -144,19 +144,23 @@ Echte meterstanden geven nauwkeurigere statistieken op de lange termijn.
 
 #### Batterijmodi \{#battery-modes\}
 
-| Waarde | Modus        | Gedrag                                                       |
-| ------ | ------------ | ------------------------------------------------------------ |
-| `1`    | `normal`     | Normale werking: laden met overschot, ontladen voor verbruik |
-| `2`    | `hold`       | Ontladen blokkeren, laden met overschot blijft toegestaan    |
-| `3`    | `charge`     | Laden vanuit het net, niet ontladen                          |
-| `4`    | `holdcharge` | Laden blokkeren, ontladen voor verbruik blijft toegestaan    |
-| `5`    | `discharge`  | Ontladen naar het net                                        |
+| Waarde | Modus           | Gedrag                                                       |
+| ------ | --------------- | ------------------------------------------------------------ |
+| `1`    | `normal`        | Normale werking: laden met overschot, ontladen voor verbruik |
+| `2`    | `holddischarge` | Ontladen blokkeren, laden met overschot blijft toegestaan    |
+| `3`    | `charge`        | Laden vanuit het net, niet ontladen                          |
+| `4`    | `holdcharge`    | Laden blokkeren, ontladen voor verbruik blijft toegestaan    |
+| `5`    | `discharge`     | Ontladen naar het net                                        |
 
 Alleen de batterijmodi die het apparaat ondersteunt, worden gebruikt.
 Als `batterymode` een [`switch`](/nl/reference/plugins#switch) is, worden de ondersteunde modi uit de `case`-waarden afgeleid.
 Dat werkt ook wanneer de switch in een [`watchdog`](/nl/reference/plugins#watchdog) is verpakt.
-Elke andere plugin heeft `batterymodes` nodig met de ondersteunde modi, bijv. `batterymodes: ["normal", "hold", "charge"]`.
+Elke andere plugin heeft `batterymodes` nodig met de ondersteunde modi, bijv. `batterymodes: ["normal", "holddischarge", "charge"]`.
 [`evcc meter verifybatterymodes`](/nl/reference/cli/evcc_meter_verifybatterymodes) schakelt de geconfigureerde modi één voor één in op de echte batterij en laat zien of het batterijvermogen reageert zoals verwacht.
+
+:::note[Hernoemde modus]
+De modus `holddischarge` heette vóór versie [0.320.0](https://github.com/evcc-io/evcc/releases/tag/0.320.0) nog `hold`.
+:::
 
 ### Voorbeelden
 
@@ -173,7 +177,7 @@ meters:
 ```
 
 Lees vermogen en laadniveau van een thuisbatterij en stel de modus via HTTP in.
-De `switch` dekt de modi normal, hold en charge af, dus biedt evcc precies deze drie aan.
+De `switch` dekt de modi normal, holddischarge en charge af, dus biedt evcc precies deze drie aan.
 
 ```yaml
 meters:
@@ -195,12 +199,12 @@ meters:
             uri: http://battery.local/api/mode
             method: POST
             body: '{"mode": "auto"}'
-        - case: 2 # hold
+        - case: 2 # holddischarge
           set:
             source: http
             uri: http://battery.local/api/mode
             method: POST
-            body: '{"mode": "hold"}'
+            body: '{"mode": "holddischarge"}'
         - case: 3 # charge
           set:
             source: http
