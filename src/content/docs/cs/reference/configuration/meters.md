@@ -3,7 +3,7 @@ title: "meters"
 description: "Jak v evcc.yaml definovat měřiče pro síť, solár, domácí baterii a spotřebiče, jaká znaménková konvence platí a které typy měřičů jsou k dispozici."
 sidebar:
   order: 5
-translatedFrom: "469542e8d8c5"
+translatedFrom: "a65770242fcb"
 ---
 
 _Měřiče_ (elektroměry) jsou seznam zařízení v domě, která dokážou měřit výkon a spotřebu energie, výrobu ze soláru nebo využití domácí baterie. `meter` definuje bod měření energie. Může jít o fyzické zařízení (např. měřič v předávacím místě sítě), solární střídač (AC, nebo u hybridních střídačů DC) nebo bateriový střídač.
@@ -374,9 +374,11 @@ Standardní implementace, u které se jednotlivé hodnoty definují pomocí [pl
   returnenergy: # Energie v opačném směru (kWh)
     source: # Typ pluginu
     ...
-  soc: # Stav nabití baterie (%)
+  soc: # Stav nabití (%)
     source: # Typ pluginu
     ...
+  minsoc: 10 # Minimální stav nabití (%)
+  maxsoc: 90 # Maximální stav nabití (%)
   capacity: # Volitelná kapacita baterie (kWh)
   currents: # Proud (A) na fázi
     - source: # Typ pluginu pro fázi 1
@@ -457,8 +459,30 @@ Definice pluginu, který vrací stav nabití baterie v procentech (%).
 **Příklad**:
 
 ```yaml
-  soc: ... # Stav nabití baterie (%)
+  soc: ... # Stav nabití (%)
     source: # Typ pluginu
+    ...
+```
+
+---
+
+#### `minsoc` a `maxsoc`
+
+Dolní a horní mez stavu nabití baterie v procentech, jak je nastavena v bateriovém systému.
+Obě platí jen pro baterie, tj. společně se `soc`.
+[Optimalizátor](/cs/features/optimizer) udržuje plánovaný stav nabití v těchto mezích.
+Nabíjení baterie ze sítě se zastaví na hodnotě `maxsoc` a vybíjení do sítě na hodnotě `minsoc`.
+S [`limitsoc`](/cs/user-defined-devices#meter-write-attributes) se [režimy baterie](/cs/user-defined-devices#battery-modes) nastavují prostřednictvím těchto mezí: `normal` zapisuje `minsoc`, `charge` zapisuje `maxsoc` a `holddischarge` zapisuje aktuální stav nabití, nejméně však `minsoc`.
+Výchozí hodnoty jsou `0` a `100`.
+Místo pevné hodnoty může meze ze zařízení načíst libovolný [plugin, který vrací desetinné číslo](/cs/reference/plugins).
+Plugin se načítá v každém cyklu a při neúspěšném načtení zůstává poslední hodnota.
+
+**Příklad**:
+
+```yaml
+  minsoc: 10 # Minimální stav nabití (%)
+  maxsoc: # načtení ze zařízení místo pevné hodnoty
+    source: modbus
     ...
 ```
 

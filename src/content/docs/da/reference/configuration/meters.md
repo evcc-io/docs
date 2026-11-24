@@ -3,7 +3,7 @@ title: "meters"
 description: "Sådan definerer du målere i evcc.yaml til elnet, sol, hjemmebatteri og forbrugsenheder, hvilken fortegnskonvention der gælder, og hvilke målertyper der findes."
 sidebar:
   order: 5
-translatedFrom: "469542e8d8c5"
+translatedFrom: "a65770242fcb"
 ---
 
 Under _målere_ (elmålere) angiver du de enheder i huset, der kan måle effekt- og energiforbrug, solproduktion eller brugen af hjemmebatteriet. En `meter` definerer et målepunkt for energi og kan være en fysisk enhed (f.eks. en måler ved tilslutningspunktet til elnettet), en solcelleinverter (AC eller DC ved hybridinvertere) eller en batteriinverter.
@@ -374,9 +374,11 @@ Standardimplementering, hvor de enkelte værdier defineres via [plugins](/da/use
   returnenergy: # Energi i modsat retning (kWh)
     source: # Plugin-type
     ...
-  soc: # Batteriets opladningsniveau (%)
+  soc: # Opladningsniveau (%)
     source: # Plugin-type
     ...
+  minsoc: 10 # Minimalt opladningsniveau (%)
+  maxsoc: 90 # Maksimalt opladningsniveau (%)
   capacity: # Valgfri batterikapacitet (kWh)
   currents: # Strøm (A) pr. fase
     - source: # Fase 1: plugin-type
@@ -457,8 +459,30 @@ Plugin-definition, der leverer batteriets opladningsniveau i procent (%).
 **Eksempel**:
 
 ```yaml
-  soc: ... # Batteriets opladningsniveau (%)
+  soc: ... # Opladningsniveau (%)
     source: # Plugin-type
+    ...
+```
+
+---
+
+#### `minsoc` og `maxsoc`
+
+Batteriets nedre og øvre opladningsniveau i procent, som indstillet på batterisystemet.
+Begge gælder kun for batterier, dvs. sammen med `soc`.
+[Optimizeren](/da/features/optimizer) holder det planlagte opladningsniveau inden for disse grænser.
+Opladning af batteriet fra elnettet stopper ved `maxsoc`, og afladning til elnettet stopper ved `minsoc`.
+Med [`limitsoc`](/da/user-defined-devices#meter-write-attributes) indstilles [batteritilstandene](/da/user-defined-devices#battery-modes) via disse grænser: `normal` skriver `minsoc`, `charge` skriver `maxsoc`, og `holddischarge` skriver det aktuelle opladningsniveau, dog mindst `minsoc`.
+Standardværdierne er `0` og `100`.
+I stedet for en fast værdi kan et vilkårligt [float-plugin](/da/reference/plugins) læse grænserne fra enheden.
+Pluginet læses ved hver cyklus, og ved en mislykket læsning bevares den sidste værdi.
+
+**Eksempel**:
+
+```yaml
+  minsoc: 10 # Minimalt opladningsniveau (%)
+  maxsoc: # læses fra enheden i stedet for en fast værdi
+    source: modbus
     ...
 ```
 

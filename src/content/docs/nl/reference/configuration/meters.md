@@ -3,7 +3,7 @@ title: "meters"
 description: "Zo definieert u in evcc.yaml meters voor net, zonne-energie, thuisbatterij en verbruikers, en welke tekenconventie en metertypes daarbij gelden."
 sidebar:
   order: 5
-translatedFrom: "469542e8d8c5"
+translatedFrom: "a65770242fcb"
 ---
 
 De lijst _meters_ (meetapparaten) bevat de apparaten in huis die vermogen en energieverbruik, de productie van zonne-energie of het gebruik van de thuisbatterij kunnen meten. Een `meter` definieert een meetpunt voor energie en kan een fysiek apparaat zijn (bijv. een meter op het netaansluitpunt), een omvormer van het zonnepanelensysteem (AC of DC bij hybride omvormers) of een batterijomvormer.
@@ -374,9 +374,11 @@ Generieke implementatie waarbij de afzonderlijke waarden via [plugins](/nl/user-
   returnenergy: # Energie in omgekeerde richting (kWh)
     source: # Plugintype
     ...
-  soc: # Laadniveau batterij (%)
+  soc: # Laadniveau (%)
     source: # Plugintype
     ...
+  minsoc: 10 # Minimaal laadniveau (%)
+  maxsoc: 90 # Maximaal laadniveau (%)
   capacity: # Optionele batterijcapaciteit (kWh)
   currents: # Stroom (A) per fase
     - source: # Plugintype fase 1
@@ -457,8 +459,30 @@ Plugindefinitie die het laadniveau van de batterij in procent (%) levert.
 **Voorbeeld**:
 
 ```yaml
-  soc: ... # Laadniveau batterij (%)
+  soc: ... # Laadniveau (%)
     source: # Plugintype
+    ...
+```
+
+---
+
+#### `minsoc` en `maxsoc`
+
+Onder- en bovengrens van het laadniveau van de batterij in procent, zoals ingesteld op het batterijsysteem.
+Beide gelden alleen voor batterijen, d.w.z. samen met `soc`.
+De [optimizer](/nl/features/optimizer) houdt het geplande laadniveau binnen deze grenzen.
+Het laden van de batterij vanuit het net stopt bij `maxsoc`, en het ontladen naar het net stopt bij `minsoc`.
+Met [`limitsoc`](/nl/user-defined-devices#meter-write-attributes) worden de [batterijmodi](/nl/user-defined-devices#battery-modes) via deze grenzen ingesteld: `normal` schrijft `minsoc`, `charge` schrijft `maxsoc` en `holddischarge` schrijft het actuele laadniveau, minimaal `minsoc`.
+De standaardwaarden zijn `0` en `100`.
+In plaats van een vaste waarde kan elke [float-plugin](/nl/reference/plugins) de grenzen uit het apparaat uitlezen.
+De plugin wordt bij elke cyclus uitgelezen, en bij een mislukte uitlezing blijft de laatste waarde behouden.
+
+**Voorbeeld**:
+
+```yaml
+  minsoc: 10 # Minimaal laadniveau (%)
+  maxsoc: # uitlezen uit het apparaat in plaats van een vaste waarde
+    source: modbus
     ...
 ```
 

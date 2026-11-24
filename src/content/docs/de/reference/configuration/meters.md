@@ -3,7 +3,7 @@ title: "meters"
 description: "Hier steht, wie du Zähler für Netz, PV-Anlage, Hausbatterie und Verbraucher in der evcc.yaml definierst, welche Vorzeichen gelten und welche Zählertypen es gibt."
 sidebar:
   order: 5
-translatedFrom: "469542e8d8c5"
+translatedFrom: "a65770242fcb"
 ---
 
 Unter _meters_ (Zähler) steht eine Liste von Geräten im Haus, die Leistung und Energie messen können, etwa für den Verbrauch, die PV-Erzeugung oder die Hausbatterie. Ein `meter` definiert einen Messpunkt für Energie und kann ein physisches Gerät sein (z. B. ein Zähler am Netzanschlusspunkt), ein PV-Wechselrichter (AC oder bei Hybridwechselrichtern auch DC) oder ein Batteriewechselrichter.
@@ -374,9 +374,11 @@ Generische Implementierung, bei der die einzelnen Werte über [Plugins](/de/user
   returnenergy: # Energie in Gegenrichtung (kWh)
     source: # Plugin-Typ
     ...
-  soc: # Ladestand der Batterie (%)
+  soc: # Ladestand (%)
     source: # Plugin-Typ
     ...
+  minsoc: 10 # Minimaler Ladestand (%)
+  maxsoc: 90 # Maximaler Ladestand (%)
   capacity: # optional: Batteriekapazität (kWh)
   currents: # Strom (A) pro Phase
     - source: # Plugin-Typ Phase 1
@@ -457,8 +459,30 @@ Plugin-Definition, die den Ladestand der Batterie in Prozent (%) liefert.
 **Beispiel**:
 
 ```yaml
-  soc: ... # Ladestand der Batterie (%)
+  soc: ... # Ladestand (%)
     source: # Plugin-Typ
+    ...
+```
+
+---
+
+#### `minsoc` und `maxsoc`
+
+Unterer und oberer Ladestand der Batterie in Prozent, wie im Batteriesystem eingestellt.
+Beide gelten nur für Batterien, also zusammen mit `soc`.
+Der [Optimizer](/de/features/optimizer) hält den geplanten Ladestand innerhalb dieser Grenzen.
+Das Laden der Batterie aus dem Netz endet bei `maxsoc`, das Entladen ins Netz bei `minsoc`.
+Mit [`limitsoc`](/de/user-defined-devices#meter-write-attributes) werden die [Batteriemodi](/de/user-defined-devices#battery-modes) über diese Grenzen gesetzt: `normal` schreibt `minsoc`, `charge` schreibt `maxsoc` und `holddischarge` schreibt den aktuellen Ladestand, mindestens aber `minsoc`.
+Die Standardwerte sind `0` und `100`.
+Statt eines festen Werts kann jedes [Float-Plugin](/de/reference/plugins) die Grenzen aus dem Gerät auslesen.
+Das Plugin wird in jedem Zyklus ausgelesen, und bei einem fehlgeschlagenen Auslesen bleibt der letzte Wert erhalten.
+
+**Beispiel**:
+
+```yaml
+  minsoc: 10 # Minimaler Ladestand (%)
+  maxsoc: # aus dem Gerät gelesen statt eines festen Werts
+    source: modbus
     ...
 ```
 
@@ -475,7 +499,7 @@ Bis zum ersten erfolgreichen Auslesen gilt die Kapazität als unbekannt.
 **Beispiel**:
 
 ```yaml
-  capacity: # aus dem Gerät gelesen statt fester Wert
+  capacity: # aus dem Gerät gelesen statt eines festen Werts
     source: modbus
     ...
 ```

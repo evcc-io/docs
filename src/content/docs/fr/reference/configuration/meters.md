@@ -3,7 +3,7 @@ title: "meters"
 description: "Définissez dans evcc.yaml les compteurs du réseau, du solaire, de la batterie domestique et des consommateurs, avec la convention de signe et les types disponibles."
 sidebar:
   order: 5
-translatedFrom: "469542e8d8c5"
+translatedFrom: "a65770242fcb"
 ---
 
 Les _meters_ (compteurs) sont une liste d’appareils de la maison capables de mesurer la puissance et la consommation d’énergie, la production solaire ou l’utilisation de la batterie domestique. Un `meter` définit un point de mesure de l’énergie et peut être un appareil physique (p. ex. un compteur au point de raccordement au réseau), un onduleur solaire (AC ou DC dans le cas des onduleurs hybrides) ou un onduleur de batterie.
@@ -374,9 +374,11 @@ Implémentation générique dans laquelle chaque valeur est fournie par des [plu
   returnenergy: # Énergie dans le sens inverse (kWh)
     source: # Type de plugin
     ...
-  soc: # Niveau de charge de la batterie (%)
+  soc: # Niveau de charge (%)
     source: # Type de plugin
     ...
+  minsoc: 10 # Niveau de charge minimal (%)
+  maxsoc: 90 # Niveau de charge maximal (%)
   capacity: # Capacité de la batterie, facultative (kWh)
   currents: # Courant (A) par phase
     - source: # Type de plugin pour la phase 1
@@ -457,8 +459,30 @@ Définition de plugin qui renvoie le niveau de charge de la batterie en pourcent
 **Exemple** :
 
 ```yaml
-  soc: ... # Niveau de charge de la batterie (%)
+  soc: ... # Niveau de charge (%)
     source: # Type de plugin
+    ...
+```
+
+---
+
+#### `minsoc` et `maxsoc`
+
+Niveaux de charge inférieur et supérieur de la batterie en pourcentage, tels que réglés sur le système de batterie.
+Les deux ne s’appliquent qu’aux batteries, c.-à-d. en combinaison avec `soc`.
+L’[optimiseur](/fr/features/optimizer) maintient le niveau de charge planifié dans ces limites.
+La charge de la batterie depuis le réseau s’arrête à `maxsoc`, et sa décharge vers le réseau s’arrête à `minsoc`.
+Avec [`limitsoc`](/fr/user-defined-devices#meter-write-attributes), les [modes de batterie](/fr/user-defined-devices#battery-modes) sont appliqués via ces limites : `normal` écrit `minsoc`, `charge` écrit `maxsoc` et `holddischarge` écrit le niveau de charge actuel, au minimum `minsoc`.
+Les valeurs par défaut sont `0` et `100`.
+Au lieu d’une valeur fixe, n’importe quel [plugin de type float](/fr/reference/plugins) peut lire les limites depuis l’appareil.
+Le plugin est lu à chaque cycle, et en cas d’échec de lecture, la dernière valeur est conservée.
+
+**Exemple** :
+
+```yaml
+  minsoc: 10 # Niveau de charge minimal (%)
+  maxsoc: # lu depuis l’appareil au lieu d’une valeur fixe
+    source: modbus
     ...
 ```
 
