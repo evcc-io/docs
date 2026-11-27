@@ -14,3 +14,4 @@
 - Use the glossary terms (`../evcc/i18n/glossary/de.json`): Ladepunkt, Wallbox, Zähler, Hausbatterie, Ladestand (never SoC), benutzerdefinierte Geräte (not „eigene Geräte“).
 - Keep English only for UI strings that the UI itself leaves in English (**Smart**, **Boost**) and for protocol names; prefer the German word where it is established (Einstellungen, Benachrichtigungen, Ladeleistung).
 - Keep the docs' direct, friendly tone: complete sentences, no marketing words (bequem, nahtlos), no em or en dashes as sentence connectors.
+- Product names keep the vendor's article: „das Soluxion HEMS Plus“, „das HEMS Plus“ (neuter, never „der“).
