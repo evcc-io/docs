@@ -101,6 +101,13 @@ const englishCanonical =
       ]
     : [];
 
+// Template link to the integration provider, shown as the modal in the UI
+// does: label plus bare domain.
+const providerLink = entry.data.link as string | undefined;
+const providerDomain = providerLink
+  ? new URL(providerLink).hostname.replace(/^www\./, "")
+  : "";
+
 const frontmatter = {
   title,
   description: plainText(entry.data.description),
@@ -138,6 +145,17 @@ const frontmatter = {
           class="device-description"
           set:html={renderMarkdown(entry.data.description)}
         />
+      )
+    }
+
+    {
+      providerLink && (
+        <p class="device-link">
+          {t("detail.moreInfo")}:{" "}
+          <a href={providerLink} target="_blank" rel="noopener noreferrer">
+            {providerDomain}
+          </a>
+        </p>
       )
     }
 
@@ -213,6 +231,12 @@ const frontmatter = {
 </StarlightPage>
 
 <style>
+  /* Provider link line under the description: quiet, one line, domain only. */
+  .device-link {
+    margin: 1rem 0 0;
+    color: var(--sl-color-gray-3);
+  }
+
   /* Tighten spacing between individual caveats so it matches the
      title-to-content gap rather than the default paragraph margin. */
   .device-caveats :global(.starlight-aside__content p) {

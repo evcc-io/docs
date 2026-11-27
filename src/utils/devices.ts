@@ -111,6 +111,8 @@ export interface DeviceEntry {
     capabilities?: string[];
     requirements?: string[];
     caveats?: Array<{ description?: string; link?: string }>;
+    /** Provider / integration documentation link. */
+    link?: string;
     countries?: string[];
   };
 }
@@ -555,6 +557,8 @@ export function deviceMarkdown(
   const out: string[] = [`# ${deviceTitle(entry)}`, ""];
   out.push(`${t("md.source")}: ${url}`, "");
   if (entry.data.description) out.push(entry.data.description.trim(), "");
+  if (entry.data.link)
+    out.push(`${t("detail.moreInfo")}: ${entry.data.link}`, "");
   if (features.length) {
     out.push(`${t("feature.heading")}: ${features.join(", ")}`, "");
   }
