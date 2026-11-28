@@ -5,7 +5,7 @@ product:
   description: Storion SMILE
 capabilities: ["battery-control"]
 description: |
-  Um die aktive Ladesteuerung zu nutzen muss einmalig über das Webinterface oder App Zeiten für das Netzladen definiert werden. (Einstellungen->Funktionseinstellungen->Netzladen/Entladen) Hier sollte ein durchgehender Zeitraum (z.B: Ladezeit 1 00:00-23:00,   Ladezeit 2 23:00-00:00) eingetragen werden. Den Schalter "Netzladen" aber deaktivieren. Die eigentliche Steuerung erfolgt über evcc. Der Entladestopp wird über eine geplante Netzladung mit einem Ziel-SoC von 10% realisiert. Alternativ können die Zeiten auch über Modbus konfiguriert werden. Dafür die Register `2134,2142,2135,2136,2144,2137,2175` auf die Werte `0,0,23,0,23,0,0,0` setzen.
+  Die aktive Speichersteuerung nutzt die Dispatch-Register (0x0880–0x088A). Diese werden nicht im Flash gespeichert. In der App muss nichts konfiguriert werden; Netzlade-Zeitfenster, Entladereserve und Ladeschluss-SoC bleiben unverändert. Jeder Dispatch-Befehl läuft nach 120 s ab, falls evcc ihn nicht erneuert. Danach kehrt der Wechselrichter in den Normalbetrieb zurück.
 
 render:
   - usage: grid
@@ -156,8 +156,9 @@ render:
       capacity: 50 # Akkukapazität (kWh), optional
       minsoc: 0 # Minimaler Ladestand (%), Untere Grenze wie am Batteriesystem eingestellt. Wird vom Optimizer genutzt. (optional)
       maxsoc: 100 # Maximaler Ladestand (%), Obere Grenze wie am Batteriesystem eingestellt. Genutzt vom Optimizer und, bei manchen Geräten, für Netzladen. (optional)
-      maxchargepower: # Maximale Ladeleistung (W), Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen. (optional)
+      maxchargepower: 5000 # Maximale Ladeleistung (W), Höchste Leistung, mit der das Batteriesystem laden kann. Der Optimizer plant mit Laden bis zu dieser Leistung. Manche Geräte nutzen diesen Wert auch als Leistung für Netzladen. (optional)
       maxdischargepower: # Maximale Entladeleistung (W), Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert. (optional)
+      watchdog: 60s # Watchdog, optional
 params:
   - name: modbus
     example:
@@ -206,7 +207,7 @@ params:
     optional: true
   - name: maxchargepower
     example:
-    default:
+    default: 5000
     choice: []
     unit: W
     description: Maximale Ladeleistung
@@ -220,6 +221,15 @@ params:
     unit: W
     description: Maximale Entladeleistung
     help: Höchste Leistung, mit der das Batteriesystem entladen kann. Der Optimizer plant mit Entladen bis zu dieser Leistung. Der Smart-Modus geht davon aus, dass die Batterie höchstens diese Leistung zum Fahrzeugladen beisteuert.
+    advanced: true
+    optional: true
+  - name: watchdog
+    example:
+    default: 60s
+    choice: []
+    unit:
+    description: Watchdog
+    help:
     advanced: true
     optional: true
 modbus:
